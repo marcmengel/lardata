@@ -1,0 +1,174 @@
+////////////////////////////////////////////////////////////////////////
+///
+/// \file   SignalShaping.h
+///
+/// \brief  Generic class for shaping signals on wires.
+///
+/// \author H. Greenlee
+///
+/// This is a generic class for shaping signals on wires during simulation
+/// (convolution) and reconstruction (deconvolution).
+///
+/// This class acts as a repository for a consistent set of convolution
+/// and deconvolution kernels.  It also supplies an interface for
+/// convoluting either type of kernel with a time series signal.  All
+/// FFT type calculations are done using LArFFT service.
+///
+/// This class has only a default constructor.  Configuration must be done
+/// externally by calling configuration methods.  The proper method for
+/// configuring this class is as follows.
+///
+/// 1.  Add one or more response functions using method AddReponseFunction.
+/// 2.  Optionally call methods SetPeakResponseTime or ShiftResponseTime.
+/// 3.  Add one or more filter functions using method AddFilterFunction.
+/// 4.  Call method CalculateDeconvKernel once.
+///
+/// After the deconvolution kernel is calculated, the configuration is locked.
+///
+/// Notes on time and frequency series functions
+/// ---------------------------------------------
+///
+/// Times and frequencies are measured in units of ticks and cycles/tick.
+///
+/// Time series are represented as vector<double> of length N, representing 
+/// sampled times on interval [0,N) ticks.   (N = LArFFT::FFTSize().)
+///
+/// Frequency series are represented as vector<TComplex> of length (N/2+1),
+/// representing sampled frequencies on interval [0, 1/2] cycles/tick.
+/// Negative frequencies (not stored) are complex conjugate of
+/// corresponding postive frequency.
+///
+////////////////////////////////////////////////////////////////////////
+
+#ifndef SIGNALSHAPING_H
+#define SIGNALSHAPING_H
+
+#include <vector>
+#include "TComplex.h"
+
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "Utilities/LArFFT.h"
+
+namespace util {
+
+  class SignalShaping {
+  public:
+
+    // Constructor, destructor.
+    SignalShaping();
+    virtual ~SignalShaping();
+
+    // Accessors.
+    const std::vector<double>& Response() const {return fResponse;}
+    const std::vector<TComplex>& ConvKernel() const {return fConvKernel;}
+    const std::vector<TComplex>& Filter() const {return fFilter;}
+    const std::vector<TComplex>& DeconvKernel() const {return fDeconvKernel;}
+
+    // Signal shaping methods.
+
+    // Convolute a time series with convolution kernel.
+    template <class T> void Convolute(std::vector<T>& func) const;
+
+    // Convolute a time series with deconvolution kernel.
+    template <class T> void Deconvolute(std::vector<T>& func) const;
+
+    // Configuration methods.
+
+    // Reset this class to default-constructed state.
+    void Reset();
+
+    // Add a time domain response function.
+    // Updates overall response function and convolution kernel.
+    void AddResponseFunction(const std::vector<double>& resp);
+
+    // Shift response function in time.
+    // Updates overall response function and convolution kernel.
+    void ShiftResponseTime(double ticks);
+    void SetPeakResponseTime(double tick);
+
+    // Add a filter function.
+    void AddFilterFunction(const std::vector<TComplex>& filt);
+
+    // Test and lock the current response function.
+    // Does not lock filter configuration.
+    void LockResponse() const;
+
+    // Calculate deconvolution kernel using current convolution kernel 
+    // and filter function.
+    // Fully locks configuration.
+    void CalculateDeconvKernel() const;
+
+  private:
+
+    // Attributes.
+
+    // Lock flags.
+    mutable bool fResponseLocked;
+    mutable bool fFilterLocked;
+
+    // Overall response.
+    std::vector<double> fResponse;
+
+    // Convolution kernel (fourier transform of response function).
+    std::vector<TComplex> fConvKernel;
+
+    // Overall filter function.
+    std::vector<TComplex> fFilter;
+
+    // Deconvolution kernel (= fFilter / fConvKernel).
+    mutable std::vector<TComplex> fDeconvKernel;
+  };
+}
+
+//----------------------------------------------------------------------
+// Convolute a time series with current response.
+template <class T> inline void util::SignalShaping::Convolute(std::vector<T>& func) const
+{
+  // Make sure response configuration is locked.
+
+  if(!fResponseLocked)
+    LockResponse();
+
+  // Get FFT service.
+
+  art::ServiceHandle<util::LArFFT> fft;
+
+  // Make sure that time series has the correct size.
+
+  int n = func.size();
+  if(n != fft->FFTSize())
+    throw cet::exception("SignalShaping") << "Bad time series size = " << n << "\n";
+
+  // Do convolution.
+
+  fft->Convolute(func, const_cast<std::vector<TComplex>&>(fConvKernel));
+}
+
+//----------------------------------------------------------------------
+// Convolute a time series with deconvolution kernel.
+template <class T> inline void util::SignalShaping::Deconvolute(std::vector<T>& func) const
+{
+  // Make sure deconvolution kernel is configured.
+
+  if(!fFilterLocked)
+    CalculateDeconvKernel();
+
+  // Get FFT service.
+
+  art::ServiceHandle<util::LArFFT> fft;
+
+  // Make sure that time series has the correct size.
+
+  int n = func.size();
+  if(n != fft->FFTSize())
+    throw cet::exception("SignalShaping") << "Bad time series size = " << n << "\n";
+
+  // Do convolution.
+
+  fft->Convolute(func, fDeconvKernel);
+}
+
+
+
+
+#endif

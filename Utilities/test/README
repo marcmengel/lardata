@@ -1,0 +1,9 @@
+This directory contains a test of SignalShapingServiceMicroBooNE.
+
+Invoke as follows:
+
+lar -c sss.fcl
+
+or
+
+sss.sh

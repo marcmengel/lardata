@@ -1,0 +1,214 @@
+<!--                                                                                  -->
+<!--  $Id: classes_def.xml,v 1.10 2010/04/12 18:12:28  Exp $                          -->
+<!--  $Author:  $                                                                     -->
+<!--  $Date: 2010/04/12 18:12:28 $                                                    -->
+<!--                                                                                  -->
+<!--  Include art::Wrapper lines for objects that we would like to put into the event -->
+<!--  Include the non-wrapper lines for all objects on the art::Wrapper lines and     -->
+<!--  for all objects that are data members of those objects.                         -->
+
+
+<lcgdict>
+ <class name="std::vector< std::vector<double> >"                                             />
+ <class name="std::vector<TVector3>"                                           		      />
+ <class name="std::vector<TMatrixD>"                                           		      />
+ <class name="geo::WireID"             ClassVersion="11"                      		      >
+  <version ClassVersion="11" checksum="363582492"/>
+ </class>
+ <class name="recob::Cluster"          ClassVersion="12"                       		      >
+  <version ClassVersion="12" checksum="1302402512"/>
+ </class>
+ <class name="recob::Hit"              ClassVersion="13"	       	       		      >
+  <version ClassVersion="13" checksum="2260253886"/>
+ </class>
+ <class name="recob::Shower"           ClassVersion="11"	       	       		      >
+  <version ClassVersion="11" checksum="1998712487"/>
+ </class>
+ <class name="recob::Track"            ClassVersion="14"	       	       		      >
+  <version ClassVersion="14" checksum="2345363916"/>
+ </class>
+ <class name="recob::Seed"             ClassVersion="12"	       	       		      >
+  <version ClassVersion="12" checksum="435078304"/>
+ </class>
+ <class name="recob::EndPoint2D"       ClassVersion="13"	       	       		      >
+  <version ClassVersion="13" checksum="595254911"/>
+ </class>
+ <class name="recob::Wire"             ClassVersion="13"	       	       		      >
+  <version ClassVersion="13" checksum="486905015"/>
+ </class>
+ <class name="recob::SpacePoint"       ClassVersion="12"	       	       		      >
+  <version ClassVersion="12" checksum="4256037352"/>
+ </class>
+ <class name="recob::Vertex"           ClassVersion="12"	       	       		      >
+  <version ClassVersion="12" checksum="1317803878"/>
+ </class>
+ <class name="recob::Event"            ClassVersion="11"	       	       		      >
+  <version ClassVersion="11" checksum="4046040025"/>
+ </class>
+ <class name="recob::OpHit"            ClassVersion="14"	       	       		      >
+  <version ClassVersion="14" checksum="3730974187"/>
+ </class>
+ <class name="recob::OpFlash"          ClassVersion="18"	       	       		      >
+  <version ClassVersion="17" checksum="1882235791"/>
+ </class>
+ <class name="art::Ptr<raw::RawDigit>"             	       		       		      />
+ <class name="art::Ptr<recob::Wire>"   		   	       		       		      />
+ <class name="art::Ptr<recob::Hit>"   		   	       		       		      />
+ <class name="art::Ptr<recob::Cluster>"   		   	       	       		      />
+ <class name="art::Ptr<recob::Shower>"   		   	       	       		      />
+ <class name="art::Ptr<recob::SpacePoint>"   		   	       	       		      />
+ <class name="art::Ptr<recob::Track>"   		   	       	       		      />
+ <class name="art::Ptr<recob::Event>"   		   	               		      />
+ <class name="art::Ptr<recob::Vertex>"   	   	       		       		      />
+ <class name="art::Ptr<recob::OpHit>"   	   	       		       		      />
+ <class name="art::Ptr<recob::OpFlash>"   	   	       		       		      />
+ <class name="art::PtrVector<recob::Hit>"   	   	       		       		      />
+ <class name="art::PtrVector<recob::Event>"   	   	       		       		      />
+ <class name="art::PtrVector<recob::Cluster>"      	       		       		      />
+ <class name="art::PtrVector<recob::Shower>"   	   	       		       		      />
+ <class name="art::PtrVector<recob::SpacePoint>"   	   	       	       		      />
+ <class name="art::PtrVector<recob::Track>"   	   	       		       		      />
+ <class name="art::PtrVector<recob::Vertex>"   	   	       		       		      />
+ <class name="art::PtrVector<recob::OpHit>"   	   	       		       		      />
+ <class name="art::PtrVector<recob::OpFlash>"   	        		      	      />
+ <class name="std::vector< art::PtrVector<recob::SpacePoint> >"  	       		      />
+ <class name="std::vector< art::PtrVector<recob::Cluster> >"	  	       		      />
+ <class name="std::vector< art::PtrVector<recob::Track  > >"  	       		      />
+ <class name="std::pair< art::Ptr<recob::Cluster>,    art::Ptr<recob::Hit>        >"          />
+ <class name="std::pair< art::Ptr<recob::Cluster>,    art::Ptr<recob::Shower>     >" 	      />
+ <class name="std::pair< art::Ptr<recob::Cluster>,    art::Ptr<recob::SpacePoint> >"          />
+ <class name="std::pair< art::Ptr<recob::Cluster>,    art::Ptr<recob::Track>      >" 	      />
+ <class name="std::pair< art::Ptr<recob::EndPoint2D>, art::Ptr<recob::Hit>        >" 	      />
+ <class name="std::pair< art::Ptr<recob::Event>,      art::Ptr<recob::Hit>        >" 	      />
+ <class name="std::pair< art::Ptr<recob::Event>,      art::Ptr<recob::Vertex>     >" 	      />
+ <class name="std::pair< art::Ptr<recob::Hit>,        art::Ptr<recob::Cluster>    >" 	      />
+ <class name="std::pair< art::Ptr<recob::Hit>,        art::Ptr<recob::EndPoint2D> >" 	      />
+ <class name="std::pair< art::Ptr<recob::Hit>,        art::Ptr<recob::Event>      >" 	      />
+ <class name="std::pair< art::Ptr<recob::Hit>,        art::Ptr<recob::Shower>     >" 	      />
+ <class name="std::pair< art::Ptr<recob::Hit>,        art::Ptr<recob::SpacePoint> >" 	      />
+ <class name="std::pair< art::Ptr<recob::Hit>,        art::Ptr<recob::Track>      >" 	      />
+ <class name="std::pair< art::Ptr<recob::Hit>,        art::Ptr<recob::Vertex>     >" 	      />
+ <class name="std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::Cluster>    >" 	      />
+ <class name="std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::Hit>        >" 	      />
+ <class name="std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::SpacePoint> >" 	      />
+ <class name="std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::Vertex>     >" 	      />
+ <class name="std::pair< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Hit>        >" 	      />
+ <class name="std::pair< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Cluster>    >" 	      />
+ <class name="std::pair< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Track>      >" 	      />
+ <class name="std::pair< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Shower>     >" 	      />
+ <class name="std::pair< art::Ptr<recob::Track>,      art::Ptr<recob::Cluster>    >" 	      />
+ <class name="std::pair< art::Ptr<recob::Track>,      art::Ptr<recob::Hit>        >" 	      />
+ <class name="std::pair< art::Ptr<recob::Track>,      art::Ptr<recob::SpacePoint> >" 	      />
+ <class name="std::pair< art::Ptr<recob::Track>,      art::Ptr<recob::Vertex>     >" 	      />
+ <class name="std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::Event>      >" 	      />
+ <class name="std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::Hit>        >" 	      />
+ <class name="std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::Shower>     >" 	      />
+ <class name="std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::Track>      >" 	      />
+ <class name="art::Assns<recob::Cluster,    recob::Hit,        void>"		  	      />
+ <class name="art::Assns<recob::Cluster,    recob::Shower,     void>"		  	      />
+ <class name="art::Assns<recob::Cluster,    recob::SpacePoint, void>"		  	      />
+ <class name="art::Assns<recob::Cluster,    recob::Track,      void>"		  	      />
+ <class name="art::Assns<recob::EndPoint2D, recob::Hit,        void>"		              /> 
+ <class name="art::Assns<recob::Event,      recob::Hit,        void>"		              />
+ <class name="art::Assns<recob::Event,      recob::Vertex,     void>"		  	      />
+ <class name="art::Assns<recob::Hit,        recob::Cluster,    void>"		  	      />
+ <class name="art::Assns<recob::Hit,        recob::EndPoint2D, void>"		  	      />
+ <class name="art::Assns<recob::Hit,        recob::Event,      void>"		  	      />
+ <class name="art::Assns<recob::Hit,        recob::Shower,     void>"		  	      />
+ <class name="art::Assns<recob::Hit,        recob::SpacePoint, void>"	          	      />
+ <class name="art::Assns<recob::Hit,        recob::Track,      void>"	          	      />
+ <class name="art::Assns<recob::Hit,        recob::Vertex,     void>"		  	      />
+ <class name="art::Assns<recob::Shower,     recob::Cluster,    void>"		  	      />
+ <class name="art::Assns<recob::Shower,     recob::Hit,        void>"		  	      />
+ <class name="art::Assns<recob::Shower,     recob::SpacePoint, void>"	          	      />
+ <class name="art::Assns<recob::Shower,     recob::Vertex,     void>"		  	      />
+ <class name="art::Assns<recob::SpacePoint, recob::Hit,        void>"	          	      />
+ <class name="art::Assns<recob::SpacePoint, recob::Cluster,    void>"	          	      />
+ <class name="art::Assns<recob::SpacePoint, recob::Track,      void>"	          	      />
+ <class name="art::Assns<recob::SpacePoint, recob::Shower,     void>"	          	      />
+ <class name="art::Assns<recob::Track,      recob::Cluster,    void>"		  	      />
+ <class name="art::Assns<recob::Track,      recob::Hit,        void>"		  	      />
+ <class name="art::Assns<recob::Track,      recob::SpacePoint, void>"	          	      />
+ <class name="art::Assns<recob::Track,      recob::Vertex,     void>"		  	      />
+ <class name="art::Assns<recob::OpFlash,    recob::OpHit,      void>"		  	      />
+ <class name="art::Assns<recob::OpFlash,    recob::Track,      void>"		  	      />
+ <class name="art::Assns<recob::OpFlash,    recob::Cluster,    void>"		  	      />
+ <class name="art::Assns<recob::Vertex,     recob::Event,      void>"		  	      />
+ <class name="art::Assns<recob::Vertex,     recob::Hit,        void>"		  	      />
+ <class name="art::Assns<recob::Vertex,     recob::Shower,     void>"		  	      />
+ <class name="art::Assns<recob::Vertex,     recob::Track,      void>"		  	      />
+ <class name="std::vector<recob::Cluster>"	   	       		          	      />
+ <class name="std::vector<recob::Hit>"		   	       		          	      />
+ <class name="std::vector<recob::Shower>"	   	       		          	      />
+ <class name="std::vector<recob::Track>"	   	       		          	      />
+ <class name="std::vector<recob::Seed>"  	   	       		          	      />
+ <class name="std::vector<recob::EndPoint2D>"	   	       		          	      />
+ <class name="std::vector<recob::Wire>"		   	       		          	      />
+ <class name="std::vector<recob::SpacePoint>"	   	       		          	      />
+ <class name="std::vector<recob::Vertex>"	   	       		          	      />
+ <class name="std::vector<recob::Event>"	   	       		          	      />
+ <class name="std::vector<recob::OpHit>"	   	       		          	      />
+ <class name="std::vector<recob::OpFlash>"	   	       		          	      />
+ <class name="art::Wrapper< std::vector<recob::Cluster>      	     >"	          	      />
+ <class name="art::Wrapper< std::vector<recob::Hit>          	     >"	          	      />
+ <class name="art::Wrapper< std::vector<recob::Shower>       	     >"	          	      />
+ <class name="art::Wrapper< std::vector<recob::Track>        	     >"	          	      />
+ <class name="art::Wrapper< std::vector<recob::Seed>         	     >"	          	      />
+ <class name="art::Wrapper< std::vector<recob::EndPoint2D>   	     >"	          	      />
+ <class name="art::Wrapper< std::vector<recob::Wire>         	     >"	          	      />
+ <class name="art::Wrapper< std::vector<recob::SpacePoint>   	     >"	          	      />
+ <class name="art::Wrapper< std::vector<recob::Vertex>       	     >"	          	      />
+ <class name="art::Wrapper< std::vector<recob::Event>        	     >"	          	      />
+ <class name="art::Wrapper< std::vector<recob::OpHit>        	     >"	          	      />
+ <class name="art::Wrapper< std::vector<recob::OpFlash>        	     >"	          	      />
+ <class name="art::Wrapper< std::vector< art::PtrVector<recob::SpacePoint> > >" 	      />
+ <class name="art::Wrapper< std::vector< art::PtrVector<recob::Cluster>    > >" 	      	      />
+ <class name="art::Wrapper< std::vector< art::PtrVector<recob::Track>      > >" 	      />
+ <class name="art::Wrapper< art::Assns<recob::Cluster,    recob::Hit,        void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Cluster, 	  recob::Shower,     void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Cluster,    recob::SpacePoint, void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Cluster, 	  recob::Track,      void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::EndPoint2D, recob::Hit,        void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Event,   	  recob::Hit,        void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Event,   	  recob::Vertex,     void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Hit,     	  recob::Cluster,    void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Hit,     	  recob::EndPoint2D, void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Hit,     	  recob::Event,      void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Hit,     	  recob::Shower,     void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Hit,     	  recob::SpacePoint, void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Hit,     	  recob::Track,      void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Hit,     	  recob::Vertex,     void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Shower,  	  recob::Cluster,    void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Shower,  	  recob::Hit,        void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Shower,     recob::SpacePoint, void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Shower,  	  recob::Vertex,     void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::SpacePoint, recob::Hit,        void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::SpacePoint, recob::Cluster,    void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::SpacePoint, recob::Track,      void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::SpacePoint, recob::Shower,     void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Track,      recob::Cluster,    void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Track,      recob::Hit,        void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Track,      recob::SpacePoint, void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Track,      recob::Vertex,     void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::OpFlash,    recob::Track,      void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::OpFlash,    recob::OpHit,      void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::OpFlash,    recob::Cluster,    void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Vertex,     recob::Hit,        void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Vertex,     recob::Event,      void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Vertex,     recob::Shower,     void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Vertex,     recob::Track,      void>	    >"/>
+
+ <ioread 
+    version="[-11]" 
+    sourceClass="recob::Wire" 
+    source="std::vector<double> fSignal" 
+    targetClass="recob::Wire" 
+    target="fSignal" 
+    include="algorithm;vector;iterator;Wire.h">
+    <![CDATA[
+       fSignal.reserve(onfile.fSignal.size());
+       std::copy(onfile.fSignal.begin(), onfile.fSignal.end(), std::back_inserter(fSignal));]]>
+</ioread> 
+
+
+</lcgdict>

@@ -1,0 +1,61 @@
+<!--                                                                                  -->
+<!--  $Id: classes_def.xml,v 1.10 2010/04/12 18:12:28  Exp $                          -->
+<!--  $Author:  $                                                                     -->
+<!--  $Date: 2010/04/12 18:12:28 $                                                    -->
+<!--                                                                                  -->
+<!--  Include art::Wrapper lines for objects that we would like to put into the event -->
+<!--  Include the non-wrapper lines for all objects on the art::Wrapper lines and     -->
+<!--  for all objects that are data members of those objects.                         -->
+
+<lcgdict>
+ <class name="anab::Calorimetry"           ClassVersion="11"                           >
+  <version ClassVersion="11" checksum="495386863"/>
+ </class>
+ <class name="anab::ParticleID"            ClassVersion="12"                           >
+  <version ClassVersion="12" checksum="1769449101"/>
+ </class>
+ <class name="anab::FlashMatch"            ClassVersion="13"                           >
+  <version ClassVersion="12" checksum="2992884177"/>
+ </class>
+ <class name="std::vector<anab::Calorimetry>"                                          />
+ <class name="std::vector<anab::ParticleID>"                                           />
+ <class name="std::vector<anab::FlashMatch>"                                           />
+ <class name="art::Ptr<anab::Calorimetry>"                                   	       />
+ <class name="art::Ptr<anab::ParticleID>"                                   	       />
+ <class name="art::Ptr<anab::FlashMatch>"                                   	       />
+ <class name="std::pair< art::Ptr<recob::Track>,      art::Ptr<anab::Calorimetry> >"   />
+ <class name="std::pair< art::Ptr<anab::Calorimetry>, art::Ptr<recob::Track>      >"   />
+ <class name="std::pair< art::Ptr<recob::Shower>,      art::Ptr<anab::Calorimetry> >"   />
+ <class name="std::pair< art::Ptr<anab::Calorimetry>, art::Ptr<recob::Shower>      >"   /> 
+ <class name="std::pair< art::Ptr<recob::Track>,      art::Ptr<anab::ParticleID> >"    />
+ <class name="std::pair< art::Ptr<anab::ParticleID>, art::Ptr<recob::Track>      >"    /> 
+ <class name="std::pair< art::Ptr<anab::FlashMatch>, art::Ptr<recob::Track>      >"    />  
+ <class name="std::pair< art::Ptr<anab::FlashMatch>, art::Ptr<recob::OpFlash>      >"    />  
+ <class name="std::pair< art::Ptr<recob::OpFlash>, art::Ptr<anab::FlashMatch>      >"    />  
+ <class name="std::pair< art::Ptr<recob::Track>, art::Ptr<anab::FlashMatch>      >"    />  
+ <class name="art::Assns<recob::Track,      anab::Calorimetry,  void>"	               />
+ <class name="art::Assns<anab::Calorimetry, recob::Track,       void>"	               />
+ <class name="art::Assns<recob::Shower,      anab::Calorimetry,  void>"	               />
+ <class name="art::Assns<anab::Calorimetry, recob::Shower,       void>"	               />
+ <class name="art::Assns<recob::Track,      anab::ParticleID,  void>"	               />
+ <class name="art::Assns<anab::ParticleID, recob::Track,       void>"	               />
+ <class name="art::Assns<anab::FlashMatch, recob::Track,       void>"	               />
+ <class name="art::Assns<anab::FlashMatch, recob::OpFlash,       void>"	               />
+ <class name="art::Assns<recob::Track,     anab::FlashMatch,       void>"	               />
+ <class name="art::Assns<recob::OpFlash,   anab::FlashMatch,       void>"	               />
+ <class name="art::Wrapper< std::vector<anab::Calorimetry>      	>"	       />
+ <class name="art::Wrapper<art::Assns<recob::Track,      anab::Calorimetry,  void> >"  />
+ <class name="art::Wrapper<art::Assns<anab::Calorimetry, recob::Track,       void> >"  />
+ <class name="art::Wrapper<art::Assns<recob::Shower,      anab::Calorimetry,  void> >"  />
+ <class name="art::Wrapper<art::Assns<anab::Calorimetry, recob::Shower,       void> >"  />
+ <class name="art::Wrapper< std::vector<anab::ParticleID>      	>"	               />
+ <class name="art::Wrapper<art::Assns<recob::Track,      anab::ParticleID,  void> >"   />
+ <class name="art::Wrapper<art::Assns<anab::ParticleID,  recob::Track,       void> >"   />
+ <class name="art::Wrapper< std::vector<anab::FlashMatch>       	>"	       />
+ <class name="art::Wrapper<art::Assns<anab::FlashMatch, recob::OpFlash,  void> >"  />
+ <class name="art::Wrapper<art::Assns<anab::FlashMatch,  recob::Track,       void> >"  />
+ <class name="art::Wrapper<art::Assns<recob::Track, anab::FlashMatch,  void> >"  />
+ <class name="art::Wrapper<art::Assns<recob::OpFlash,  anab::FlashMatch,       void> >"  />
+
+
+</lcgdict>
