@@ -12,6 +12,7 @@ BEGIN_PROLOG
 
 argoneut_services:
 {
+ ExptGeoHelperInterface: @local::argoneut_geometry_helper
  Geometry:           @local::argoneut_geo 	       
  DetectorProperties: @local::argoneut_detproperties
  LArProperties:      @local::argoneut_properties	       
@@ -25,6 +26,7 @@ argoneut_simulation_services:
  LArG4Parameters:    @local::argoneut_largeantparameters
  LArVoxelCalculator: @local::argoneut_larvoxelcalculator
  MagneticField:      @local::no_mag
+ ExptGeoHelperInterface: @local::argoneut_geometry_helper
  Geometry:           @local::argoneut_geo          
  DetectorProperties: @local::argoneut_detproperties
  LArProperties:      @local::argoneut_properties            
