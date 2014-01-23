@@ -14,6 +14,7 @@ BEGIN_PROLOG
 
 jp250L_services:
 {
+ ExptGeoHelperInterface:         @local::jp250L_geometry_helper
  Geometry:                       @local::jp250L_geo 	       
  DetectorProperties:             @local::jp250L_detproperties
  LArProperties:                  @local::jp250L_properties	 
@@ -27,6 +28,7 @@ jp250L_simulation_services:
  LArG4Parameters:                @local::jp250L_largeantparameters 
  LArVoxelCalculator:             @local::jp250L_larvoxelcalculator 
  MagneticField:                  @local::no_mag                    
+ ExptGeoHelperInterface:         @local::jp250L_geometry_helper
  Geometry:                       @local::jp250L_geo                
  DetectorProperties:             @local::jp250L_detproperties      
  LArProperties:                  @local::jp250L_properties         
@@ -39,6 +41,7 @@ jp250L_simulation_services:
 
 csu40L_services:
 {
+ ExptGeoHelperInterface:         @local::csu40L_geometry_helper
  Geometry:                       @local::csu40L_geo 	       
  DetectorProperties:             @local::standard_detproperties
  LArProperties:                  @local::standard_properties	 
@@ -51,6 +54,7 @@ csu40L_simulation_services:
  LArG4Parameters:                @local::standard_largeantparameters 
  LArVoxelCalculator:             @local::standard_larvoxelcalculator 
  MagneticField:                  @local::no_mag                    
+ ExptGeoHelperInterface:         @local::csu40L_geometry_helper
  Geometry:                       @local::csu40L_geo                
  DetectorProperties:             @local::standard_detproperties      
  LArProperties:                  @local::standard_properties         
@@ -61,6 +65,7 @@ csu40L_simulation_services:
 
 argoneut_services:
 {
+ ExptGeoHelperInterface: @local::argoneut_geometry_helper
  Geometry:           @local::argoneut_geo 	       
  DetectorProperties: @local::argoneut_detproperties
  LArProperties:      @local::argoneut_properties	       
@@ -74,6 +79,7 @@ argoneut_simulation_services:
  LArG4Parameters:    @local::argoneut_largeantparameters
  LArVoxelCalculator: @local::argoneut_larvoxelcalculator
  MagneticField:      @local::no_mag
+ ExptGeoHelperInterface: @local::argoneut_geometry_helper
  Geometry:           @local::argoneut_geo          
  DetectorProperties: @local::argoneut_detproperties
  LArProperties:      @local::argoneut_properties            
@@ -84,6 +90,7 @@ argoneut_simulation_services:
 
 microboone_services:
 {
+ ExptGeoHelperInterface:         @local::microboone_geometry_helper
  Geometry:                       @local::microboone_geo 	       
  DetectorProperties:             @local::microboone_detproperties 
  LArProperties:                  @local::microboone_properties    
@@ -98,6 +105,7 @@ microboone_simulation_services:
 {
  LArG4Parameters:                @local::microboone_largeantparameters 
  LArVoxelCalculator:             @local::microboone_larvoxelcalculator 
+ ExptGeoHelperInterface:         @local::microboone_geometry_helper
  Geometry:                       @local::microboone_geo 	           
  DetectorProperties:             @local::microboone_detproperties      
  LArProperties:                  @local::microboone_properties	   

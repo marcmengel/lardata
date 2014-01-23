@@ -1,20 +1,21 @@
-#include "services_lbne10kt.fcl"
+#include "services_lbne35t.fcl"
 
-process_name: SignalShapingLBNE10ktTest
+process_name: SignalShapingLBNE35tTest
 
 services:
 {
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "ss_test_lbne10kt.root" }
+  TFileService: { fileName: "ss_test_lbne35t.root" }
   user: {}
 }
 
-services.user.Geometry:           @local::lbne10kt_geo
-services.user.DetectorProperties: @local::lbne10kt_detproperties
-services.user.LArProperties:      @local::lbne10kt_properties
-services.user.LArFFT:             @local::lbne10kt_larfft
-services.user.SignalShapingServiceLBNE10kt: @local::lbne10kt_signalshapingservice
-services.user.DatabaseUtil:       @local::lbne10kt_database
+services.user.ExptGeoHelperInterface: @local::lbne_geometry_helper
+services.user.Geometry:           @local::lbne35t_geo
+services.user.DetectorProperties: @local::lbne35t_detproperties
+services.user.LArProperties:      @local::lbne35t_properties
+services.user.LArFFT:             @local::lbne35t_larfft
+services.user.SignalShapingServiceLBNE35t: @local::lbne35t_signalshapingservice
+services.user.DatabaseUtil:       @local::lbne35t_database
 services.user.DatabaseUtil.ShouldConnect: false
 
 source:
@@ -32,7 +33,7 @@ physics:
 
  analyzers:
  {
-  sstest: { module_type: "SignalShapingLBNE10ktTest" }
+  sstest: { module_type: "SignalShapingLBNE35tTest" }
  }
 
  #define the path for analyzer modules, order does not matter.
@@ -50,5 +51,5 @@ physics:
 
 physics.analyzers.sstest:
 {
-  module_type: "SignalShapingLBNE10ktTest"
+  module_type: "SignalShapingLBNE35tTest"
 }

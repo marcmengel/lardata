@@ -14,6 +14,7 @@ BEGIN_PROLOG
 
 jp250L_services:
 {
+ ExptGeoHelperInterface:         @local::jp250L_geometry_helper
  Geometry:                       @local::jp250L_geo 	       
  DetectorProperties:             @local::jp250L_detproperties 
  LArProperties:                  @local::jp250L_properties	  
@@ -27,6 +28,7 @@ jp250L_simulation_services:
  LArG4Parameters:                @local::jp250L_largeantparameters 
  LArVoxelCalculator:             @local::jp250L_larvoxelcalculator 
  MagneticField:                  @local::no_mag                    
+ ExptGeoHelperInterface:         @local::jp250L_geometry_helper
  Geometry:                       @local::jp250L_geo                
  DetectorProperties:             @local::jp250L_detproperties      
  LArProperties:                  @local::jp250L_properties         

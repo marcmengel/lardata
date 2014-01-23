@@ -1,3 +1,4 @@
+cet_remove_compiler_flag( CXX -Werror )
 
 art_make( LIBRARY_NAME  RecoObjects
           LIB_LIBRARIES AnalysisAlg

@@ -1,20 +1,21 @@
-#include "services_microboone.fcl"
+#include "services_lbne10kt.fcl"
 
-process_name: SignalShapingMicroBooNETest
+process_name: SignalShapingLBNE10ktTest
 
 services:
 {
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "ss_test_uboone.root" }
+  TFileService: { fileName: "ss_test_lbne10kt.root" }
   user: {}
 }
 
-services.user.Geometry:           @local::microboone_geo
-services.user.DetectorProperties: @local::microboone_detproperties
-services.user.LArProperties:      @local::microboone_properties
-services.user.LArFFT:             @local::microboone_larfft
-services.user.SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
-services.user.DatabaseUtil:       @local::microboone_database
+services.user.ExptGeoHelperInterface: @local::lbne_geometry_helper
+services.user.Geometry:           @local::lbne10kt_geo
+services.user.DetectorProperties: @local::lbne10kt_detproperties
+services.user.LArProperties:      @local::lbne10kt_properties
+services.user.LArFFT:             @local::lbne10kt_larfft
+services.user.SignalShapingServiceLBNE10kt: @local::lbne10kt_signalshapingservice
+services.user.DatabaseUtil:       @local::lbne10kt_database
 services.user.DatabaseUtil.ShouldConnect: false
 
 source:
@@ -32,7 +33,7 @@ physics:
 
  analyzers:
  {
-  sstest: { module_type: "SignalShapingMicroBooNETest" }
+  sstest: { module_type: "SignalShapingLBNE10ktTest" }
  }
 
  #define the path for analyzer modules, order does not matter.
@@ -50,5 +51,5 @@ physics:
 
 physics.analyzers.sstest:
 {
-  module_type: "SignalShapingMicroBooNETest"
+  module_type: "SignalShapingLBNE10ktTest"
 }

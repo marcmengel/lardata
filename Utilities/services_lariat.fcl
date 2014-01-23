@@ -12,6 +12,7 @@ BEGIN_PROLOG
 
 lariat_services:
 {
+ ExptGeoHelperInterface: @local::lariat_geometry_helper
  Geometry:           @local::lariat_geo 	       
  DetectorProperties: @local::argoneut_detproperties
  LArProperties:      @local::argoneut_properties	       
@@ -25,6 +26,7 @@ lariat_simulation_services:
  LArG4Parameters:    @local::argoneut_largeantparameters
  LArVoxelCalculator: @local::argoneut_larvoxelcalculator
  MagneticField:      @local::no_mag
+ ExptGeoHelperInterface: @local::lariat_geometry_helper
  Geometry:           @local::lariat_geo          
  DetectorProperties: @local::argoneut_detproperties
  LArProperties:      @local::argoneut_properties            

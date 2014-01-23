@@ -12,6 +12,7 @@ BEGIN_PROLOG
 
 bo_services:
 {
+ ExptGeoHelperInterface: @local::bo_geometry_helper
  Geometry:           @local::bo_geo 	       
  DetectorProperties: @local::bo_detproperties
  LArProperties:      @local::bo_properties	       
@@ -24,6 +25,7 @@ bo_simulation_services:
  LArG4Parameters:    @local::bo_largeantparameters
  LArVoxelCalculator: @local::bo_larvoxelcalculator
  MagneticField:      @local::no_mag
+ ExptGeoHelperInterface: @local::bo_geometry_helper
  Geometry:           @local::bo_geo          
  DetectorProperties: @local::bo_detproperties
  LArProperties:      @local::bo_properties            

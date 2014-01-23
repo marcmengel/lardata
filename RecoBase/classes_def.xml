@@ -49,6 +49,7 @@
   <version ClassVersion="14" checksum="3730974187"/>
  </class>
  <class name="recob::OpFlash"          ClassVersion="18"	       	       		      >
+  <version ClassVersion="18" checksum="507533507"/>
   <version ClassVersion="17" checksum="1882235791"/>
  </class>
  <class name="art::Ptr<raw::RawDigit>"             	       		       		      />
