@@ -27,14 +27,14 @@ namespace util{
 
       // Accessors.
 
-      const double       SamplingRate()      const { return fSamplingRate;   }
-      const double       ElectronsToADC()    const { return fElectronsToADC; }
-      const unsigned int NumberTimeSamples() const { return fNumberTimeSamples; }
-      const unsigned int ReadOutWindowSize() const { return fReadOutWindowSize; }
-      const int  	 TriggerOffset()     const    ;
-      const double       TimeOffsetU()       const { return fTimeOffsetU; };
-      const double       TimeOffsetV()       const { return fTimeOffsetV; };
-      const double       TimeOffsetZ()       const { return fTimeOffsetZ; };
+      double       SamplingRate()      const { return fSamplingRate;   }
+      double       ElectronsToADC()    const { return fElectronsToADC; }
+      unsigned int NumberTimeSamples() const { return fNumberTimeSamples; }
+      unsigned int ReadOutWindowSize() const { return fReadOutWindowSize; }
+      int          TriggerOffset()     const;
+      double       TimeOffsetU()       const { return fTimeOffsetU; };
+      double       TimeOffsetV()       const { return fTimeOffsetV; };
+      double       TimeOffsetZ()       const { return fTimeOffsetZ; };
 
       double             ConvertXToTicks(double X,     int p, int t, int c) ;
       double             ConvertTicksToX(double ticks, int p, int t, int c) ;

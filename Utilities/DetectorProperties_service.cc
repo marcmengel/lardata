@@ -111,7 +111,7 @@ void DetectorProperties::checkDBstatus() const
 }
 
 //------------------------------------------------------------------------------------//
-const int  DetectorProperties::TriggerOffset()     const 
+int  DetectorProperties::TriggerOffset()     const 
 {
   this->checkDBstatus();
   return fTriggerOffset; 

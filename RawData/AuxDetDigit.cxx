@@ -40,7 +40,7 @@ namespace raw{
   //--------------------------------------------------
   short AuxDetDigit::ADC(size_t i) const
   {
-    if(i >= 0 && (i < fADC.size()) )
+    if(i >= fADC.size())
       throw cet::exception("AuxDetDigit") << "illegal index requested for ADC vector: "
 					  << i;
 

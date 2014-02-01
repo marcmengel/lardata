@@ -76,11 +76,11 @@ namespace recob {
 
     // A trajectory point is the combination of a position vector
     // and its corresponding direction vector
-    const size_t    NumberTrajectoryPoints()                    const;
-    const size_t    NumberCovariance()                          const;
-    const size_t    NumberFitMomentum()                         const;
-    const size_t    NumberdQdx(geo::View_t view=geo::kUnknown)  const;
-    const double    Length(size_t p=0)                          const;
+    size_t          NumberTrajectoryPoints()                    const;
+    size_t          NumberCovariance()                          const;
+    size_t          NumberFitMomentum()                         const;
+    size_t          NumberdQdx(geo::View_t view=geo::kUnknown)  const;
+    double          Length(size_t p=0)                          const;
     void            TrajectoryAtPoint(unsigned int  p,
 				      TVector3     &pos,
 				      TVector3     &dir)        const;
@@ -100,8 +100,8 @@ namespace recob {
     const double&   VertexMomentum()                          	const;
     const double&   EndMomentum()                             	const;
 
-    const double    Theta()                                     const;
-    const double    Phi()                                       const;
+    double          Theta()                                     const;
+    double          Phi()                                       const;
 
     // Calculate rotation matrices between global (x,y,z) and local (u,v,w)
     // coordinate systems based on track direction (fDir).
@@ -122,9 +122,9 @@ namespace recob {
 #ifndef __GCCXML__
 
 inline int             recob::Track::ID()                               const { return fID;                  }
-inline const size_t    recob::Track::NumberTrajectoryPoints()           const { return fDir.size();          }
-inline const size_t    recob::Track::NumberCovariance()                 const { return fCov.size();          }
-inline const size_t    recob::Track::NumberFitMomentum()                const { return fFitMomentum.size();  }
+inline size_t          recob::Track::NumberTrajectoryPoints()           const { return fDir.size();          }
+inline size_t          recob::Track::NumberCovariance()                 const { return fCov.size();          }
+inline size_t          recob::Track::NumberFitMomentum()                const { return fFitMomentum.size();  }
 inline const TVector3& recob::Track::DirectionAtPoint (unsigned int p)  const { return fDir.at(p);           }
 inline const TVector3& recob::Track::LocationAtPoint  (unsigned int p)  const { return fXYZ.at(p);           }
 inline const double&   recob::Track::MomentumAtPoint  (unsigned int p)  const { return fFitMomentum.at(p);   }
@@ -138,8 +138,8 @@ inline const TMatrixD& recob::Track::VertexCovariance()                 const { 
 inline const TMatrixD& recob::Track::EndCovariance()                    const { return fCov.back();          }
 inline const double&   recob::Track::VertexMomentum()                   const { return fFitMomentum.front(); }
 inline const double&   recob::Track::EndMomentum()                      const { return fFitMomentum.back();  }
-inline const double    recob::Track::Theta()                            const { return fXYZ.front().Theta(); }
-inline const double    recob::Track::Phi()                              const { return fXYZ.front().Phi();   }
+inline double          recob::Track::Theta()                            const { return fXYZ.front().Theta(); }
+inline double          recob::Track::Phi()                              const { return fXYZ.front().Phi();   }
 
 
 #endif
