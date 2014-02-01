@@ -159,8 +159,8 @@ template<class T, class U> inline bool util::CreateAssn(art::EDProducer const& p
 }
 
 //----------------------------------------------------------------------
-template<class T, class U> inline bool util::CreateAssn(art::EDProducer const& prod,
-							art::Event            &evt, 
+template<class T, class U> inline bool util::CreateAssn(art::EDProducer const& /*prod*/,
+							art::Event            &/*evt*/, 
 							art::Ptr<T>           &a,
 							art::Ptr<U>            b,
 							art::Assns<U,T>       &assn)
@@ -238,8 +238,8 @@ template<class T, class U> inline bool util::CreateAssn(art::EDProducer const&  
 }
 
 //----------------------------------------------------------------------
-template<class T, class U> inline bool util::CreateAssn(art::EDProducer const&     prod,
-							art::Event                &evt, 
+template<class T, class U> inline bool util::CreateAssn(art::EDProducer const&     /*prod*/,
+							art::Event                &/*evt*/, 
 							art::Ptr<T>               &a,
 							std::vector< art::Ptr<U> > b,
 							art::Assns<T,U>           &assn)
@@ -264,7 +264,7 @@ template<class T, class U> inline bool util::CreateAssn(art::EDProducer const&  
 template<class T, class U> inline bool util::CreateAssn(art::EDProducer const& prod,
 							art::Event            &evt, 
 							std::vector<T>        &a,
-							std::vector<U>        &b,
+							std::vector<U>        &/*b*/,
 							art::Assns<T,U>       &assn,
 							size_t                 startU,
 							size_t                 endU,
@@ -298,7 +298,7 @@ template<class T, class U> inline bool util::CreateAssn(art::EDProducer const& p
 template<class T> inline bool util::CreateSameAssn(art::EDProducer const& prod,
 						   art::Event            &evt, 
 						   std::vector<T>        &a,
-						   std::vector<T>        &b,
+						   std::vector<T>        &/*b*/,
 						   art::Assns<T,T>       &assn,
 						   size_t                 startU,
 						   size_t                 endU,
@@ -353,7 +353,7 @@ template<class T, class U> inline std::vector<const U*> util::FindUNotAssociated
       notAssociated.push_back(ptr.get());
     }
   }
-  
+//   
   return notAssociated;
 }
 
