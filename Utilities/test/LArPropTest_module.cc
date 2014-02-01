@@ -131,6 +131,6 @@ namespace util
   LArPropTest::~LArPropTest()
   {}
 
-  void LArPropTest::analyze(const art::Event& evt)
+  void LArPropTest::analyze(const art::Event& /* evt */)
   {}
 }

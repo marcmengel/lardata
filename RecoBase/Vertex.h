@@ -35,7 +35,7 @@ namespace recob {
     explicit  Vertex(double *xyz,
 		     int     id=util::kBogusI);
     void      XYZ(double *xyz) const;
-    const int ID()             const;
+    int ID()                   const;
 
     friend bool          operator <   (const Vertex & a, const Vertex & b);
     friend std::ostream& operator <<  (std::ostream& o,  const Vertex & a);
@@ -47,7 +47,7 @@ namespace recob {
 
 #ifndef __GCCXML__
 
-inline const int recob::Vertex::ID() const { return fID; }
+inline int recob::Vertex::ID() const { return fID; }
 
 #endif 
 #endif // RB_VERTEX_H

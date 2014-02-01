@@ -120,7 +120,7 @@ namespace trkf {
   // Get the track pitch at some s for a particular view
   //
 
-  double BezierTrack::GetTrackPitch(geo::View_t view, double s, double WirePitch, unsigned int c, unsigned int t)
+  double BezierTrack::GetTrackPitch(geo::View_t view, double s, double /* WirePitch */, unsigned int c, unsigned int t)
   {
     static std::map<geo::View_t, bool>          DoneCalc;
     static std::map<geo::View_t, TVector3>      PitchVecs;

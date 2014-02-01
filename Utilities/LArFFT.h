@@ -67,7 +67,7 @@ namespace util{
       template <class T> T           PeakCorrelation(std::vector<T> &shape1,
 						     std::vector<T> &shape2);       
       
-      const int   FFTSize() const { return fSize; }
+      int   FFTSize() const { return fSize; }
       
 	private:
       

@@ -56,7 +56,7 @@ namespace anab {
     const std::vector<double>& DeadWireResRC() const; 
     const double&              KineticEnergy() const; 
     const double&              Range()         const; 
-    const double               TrkPitchC()     const; 
+    double                     TrkPitchC()     const; 
     const std::vector<double>& TrkPitchVec()   const;
 
 #endif
@@ -74,7 +74,7 @@ inline const std::vector<double>& anab::Calorimetry::DeadWireResRC() const { ret
 inline const double&              anab::Calorimetry::KineticEnergy() const { return fKineticEnergy; } 
 inline const double&              anab::Calorimetry::Range()         const { return fRange;         }
 inline const std::vector<double>& anab::Calorimetry::TrkPitchVec()   const { return fTrkPitch;      }
-inline const double               anab::Calorimetry::TrkPitchC()     const 
+inline double                     anab::Calorimetry::TrkPitchC()     const 
 { 
   if (fTrkPitch.size()) 
     return fTrkPitch[0];

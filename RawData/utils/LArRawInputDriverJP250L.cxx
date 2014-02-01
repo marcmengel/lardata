@@ -81,8 +81,8 @@ namespace lris {
   }
 
   // ======================================================================
-  bool LArRawInputDriverJP250L::readNext(art::RunPrincipal* const &inR,
-					 art::SubRunPrincipal* const &inSR,
+  bool LArRawInputDriverJP250L::readNext(art::RunPrincipal* const & /* inR */,
+					 art::SubRunPrincipal* const & /* inSR */,
 					 art::RunPrincipal* &outR,
 					 art::SubRunPrincipal* &outSR,
 					 art::EventPrincipal* &outE)

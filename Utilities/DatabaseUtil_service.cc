@@ -16,7 +16,7 @@
 #include "cetlib/exception.h"
 
 //-----------------------------------------------
-util::DatabaseUtil::DatabaseUtil(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
+util::DatabaseUtil::DatabaseUtil(fhicl::ParameterSet const& pset, art::ActivityRegistry & /* reg */)
 {
   this->reconfigure(pset);
     

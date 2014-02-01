@@ -147,7 +147,7 @@ void util::FileCatalogMetadataExtras::postCloseFile()
 
 //--------------------------------------------------------------------
 // PreEvent callback.
-void util::FileCatalogMetadataExtras::preEvent(art::Event const& evt)
+void util::FileCatalogMetadataExtras::preEvent(art::Event const& /* evt */)
 {
   checkOutputFiles();
 }
