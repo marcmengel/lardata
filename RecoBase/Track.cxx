@@ -70,7 +70,7 @@ namespace recob{
   }
 
   //----------------------------------------------------------------------
-  const size_t Track::NumberdQdx(geo::View_t view) const
+  size_t Track::NumberdQdx(geo::View_t view) const
   {
     if(view == geo::kUnknown){
       mf::LogWarning("Track") << "asking for unknown view to get number of dQdX entries"
@@ -195,7 +195,7 @@ namespace recob{
   // reasonable measurement of the length
   // This method can be combined with a particle id hypothesis to
   // get an estimate of momentum from range.
-  const double Track::Length(size_t p) const
+  double Track::Length(size_t p) const
   {
     double length = 0.;
 

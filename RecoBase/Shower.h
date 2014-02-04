@@ -44,8 +44,8 @@ namespace recob {
 	   double  totalCharge,
 	   int     id=util::kBogusI);
 
-    double   const  TotalCharge()  const;
-    int      const  ID()           const;
+    double          TotalCharge()  const;
+    int             ID()           const;
     TVector3 const& Direction()    const;
     TVector3 const& DirectionErr() const;
 
@@ -60,8 +60,8 @@ namespace recob {
 
 #ifndef __GCCXML__
 
-inline double   const  recob::Shower::TotalCharge()  const { return fTotalCharge;    }
-inline int      const  recob::Shower::ID()           const { return fID;             }
+inline double          recob::Shower::TotalCharge()  const { return fTotalCharge;    }
+inline int             recob::Shower::ID()           const { return fID;             }
 inline TVector3 const& recob::Shower::Direction()    const { return fDCosStart;      }
 inline TVector3 const& recob::Shower::DirectionErr() const { return fSigmaDCosStart; }
 

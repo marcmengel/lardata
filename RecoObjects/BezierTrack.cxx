@@ -120,7 +120,7 @@ namespace trkf {
   // Get the track pitch at some s for a particular view
   //
 
-  double BezierTrack::GetTrackPitch(geo::View_t view, double s, double WirePitch, unsigned int c, unsigned int t)
+  double BezierTrack::GetTrackPitch(geo::View_t view, double s, double /* WirePitch */, unsigned int c, unsigned int t)
   {
     static std::map<geo::View_t, bool>          DoneCalc;
     static std::map<geo::View_t, TVector3>      PitchVecs;
@@ -1042,7 +1042,7 @@ namespace trkf {
 	  <<"Bezier track S value of " << s <<" is not in the range 0<S<1"
 	  <<std::endl;
       }
-    if((view<0)||view>(fdQdx.size()-1))
+    if( /* (view<0)|| */ view>(fdQdx.size()-1))
       {
 	throw cet::exception("Bezier dQdx: view out of range")
 	  <<"Bezier track view value of " << view <<" is not in the range "
@@ -1076,7 +1076,7 @@ namespace trkf {
   double BezierTrack::GetViewdQdx(unsigned int view) const
   {
     view++;
-    if((view<0)||view>fdQdx.size()-1)
+    if(/* (view<0)|| */ view>fdQdx.size()-1)
       {
 	throw cet::exception("view out of range")
 	  <<"Bezier track view value of " << view <<" is not in the range "

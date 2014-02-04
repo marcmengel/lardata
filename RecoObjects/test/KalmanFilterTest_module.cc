@@ -172,6 +172,6 @@ namespace trkf
   KalmanFilterTest::~KalmanFilterTest()
   {}
 
-  void KalmanFilterTest::analyze(const art::Event& evt)
+  void KalmanFilterTest::analyze(const art::Event& /* evt */)
   {}
 }

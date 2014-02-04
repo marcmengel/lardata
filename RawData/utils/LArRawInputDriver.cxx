@@ -246,8 +246,8 @@ namespace lris {
                             currentDir_);
   }
 
-  bool LArRawInputDriver::readNext(art::RunPrincipal* const &inR,
-                                   art::SubRunPrincipal* const &inSR,
+  bool LArRawInputDriver::readNext(art::RunPrincipal* const & /* inR */,
+                                   art::SubRunPrincipal* const & /* inSR */,
                                    art::RunPrincipal* &outR,
                                    art::SubRunPrincipal* &outSR,
                                    art::EventPrincipal* &outE)

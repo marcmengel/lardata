@@ -76,7 +76,7 @@ namespace trkf {
     virtual void getPosition(const TrackVector& vec, double xyz[3]) const = 0;
 
     /// Get direction of track (default UNKNOWN).
-    virtual TrackDirection getDirection(const TrackVector& vec,
+    virtual TrackDirection getDirection(const TrackVector& /* vec */,
 					TrackDirection dir=UNKNOWN) const {return dir;}
 
     /// Get momentum vector of track.

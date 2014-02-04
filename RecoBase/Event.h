@@ -38,7 +38,7 @@ namespace recob {
     double               Energy()        const;
     double               SigmaEnergy()   const;
     const recob::Vertex* PrimaryVertex(std::vector<const recob::Vertex*>& vtxs) const;
-    const int            ID()            const;
+    int                  ID()            const;
 
     friend std::ostream& operator << (std::ostream& o, const Event & a);
     friend bool          operator <  (const Event & a, const Event & b);
@@ -50,7 +50,7 @@ namespace recob {
 
 #ifndef __GCCXML__
 
-inline const int  recob::Event::ID() const { return fID; }
+inline int  recob::Event::ID() const { return fID; }
 
 #endif
 

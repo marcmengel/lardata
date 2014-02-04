@@ -620,6 +620,6 @@ namespace trkf
   PropTest::~PropTest()
   {}
 
-  void PropTest::analyze(const art::Event& evt)
+  void PropTest::analyze(const art::Event& /* evt */)
   {}
 }

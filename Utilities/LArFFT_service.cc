@@ -23,7 +23,7 @@ extern "C" {
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 
 //-----------------------------------------------
-util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg) 
+util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& /* reg */) 
   : fSize    (art::ServiceHandle<util::DetectorProperties>()->ReadOutWindowSize())    
   , fOption  (pset.get< std::string >("FFTOption"))
   , fFitBins (pset.get< int         >("FitBins"))
