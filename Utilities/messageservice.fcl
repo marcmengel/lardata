@@ -51,6 +51,11 @@ standard_info:
       limit: 5
       timespan: 1000
      }
+     # since the DB is not there yet, limit the noise of it
+     DatabaseUtil:
+     {
+      limit: 1
+     }
    } # end categories
   } # end infomsg
  } # end destinations
@@ -82,6 +87,11 @@ standard_warning:
      {
       limit: 5
       timespan: 1000
+     }
+     # since the DB is not there yet, limit the noise of it
+     DatabaseUtil:
+     {
+      limit: 1
      }
    } # end categories
   } # end warningmsg
