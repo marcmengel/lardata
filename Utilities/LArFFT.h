@@ -67,8 +67,12 @@ namespace util{
       template <class T> T           PeakCorrelation(std::vector<T> &shape1,
 						     std::vector<T> &shape2);       
       
-      int   FFTSize() const { return fSize; }
-      
+      int   FFTSize()          const { return fSize; }
+      std::string FFTOptions() const { return fOption; }
+      int FFTFitBins()         const { return fFitBins; }
+
+      void ReinitializeFFT(int, std::string, int);
+
 	private:
       
       int                    fSize;       //size of transform
@@ -82,6 +86,8 @@ namespace util{
        
       TFFTRealComplex       *fFFT;        ///< object to do FFT
       TFFTComplexReal       *fInverseFFT; ///< object to do Inverse FF   
+
+      void InitializeFFT();
       
     }; // class LArFFT
 

@@ -28,7 +28,12 @@ util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& /* 
   , fOption  (pset.get< std::string >("FFTOption"))
   , fFitBins (pset.get< int         >("FitBins"))
 {
-  
+  InitializeFFT();
+}
+
+//-----------------------------------------------
+void util::LArFFT::InitializeFFT(){
+
   int i;
   // the <= is to allow ArgoNeut to go from 2048 to 4096. 
   // This may have to be revisited if another detector comes 
@@ -61,6 +66,23 @@ util::LArFFT::~LArFFT()
   delete fFFT;
   delete fInverseFFT;
   delete fPeakFit;
+}
+
+//------------------------------------------------
+void util::LArFFT::ReinitializeFFT(int size, std::string option, int fitbins){
+
+  //delete these, which will be remade
+  delete fFFT;
+  delete fInverseFFT;
+  delete fPeakFit;
+
+  //set memebers
+  fSize = size;
+  fOption = option;
+  fFitBins = fitbins;
+
+  //now initialize
+  InitializeFFT();
 }
 
 //-------------------------------------------------
