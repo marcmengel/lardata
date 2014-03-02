@@ -66,6 +66,8 @@
  <class name="art::Wrapper< std::vector<anab::FlashMatch>       	>"	       />
  <class name="art::Wrapper<art::Assns<anab::FlashMatch, recob::OpFlash,  void> >"  />
  <class name="art::Wrapper<art::Assns<anab::FlashMatch,  recob::Track,       void> >"  />
+ <class name="art::Wrapper<art::Assns<recob::Track, anab::FlashMatch,  void> >"  />
+ <class name="art::Wrapper<art::Assns<recob::OpFlash,  anab::FlashMatch,       void> >"  />
  <class name="art::Wrapper< std::vector<anab::CosmicTag>       	>"	       />
  <class name="art::Wrapper<art::Assns<anab::CosmicTag,  recob::Track,       void> >"  />
  <class name="art::Wrapper<art::Assns<anab::CosmicTag,  recob::Cluster,     void> >"  />
