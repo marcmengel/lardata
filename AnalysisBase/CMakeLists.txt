@@ -7,6 +7,7 @@ art_make( LIBRARY_NAME  AnalysisBase
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 			${CETLIB}
+			${ROOT_BASIC_LIB_LIST}
         )
 
 install_headers()

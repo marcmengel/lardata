@@ -13,6 +13,7 @@
 #include <iosfwd>
 #include <iostream>
 #include <iomanip>
+#include <TVector3.h>
 
 namespace anab {
 
@@ -28,6 +29,7 @@ namespace anab {
     std::vector<double> fDeadWireResR;    ///< dead wire residual range, collection plane
     double              fRange;           ///< total range of track
     std::vector<double> fTrkPitch;        ///< track pitch on collection plane
+    std::vector<TVector3> fXYZ;           ///< coordinates of space points
 
 #ifndef __GCCXML__
   public:
@@ -48,6 +50,15 @@ namespace anab {
 		double Range,
 		std::vector<double> const& TrkPitch);
 
+    Calorimetry(double KineticEnergy,
+		std::vector<double> const& dEdx,
+		std::vector<double> const& dQdx,
+		std::vector<double> const& resRange,
+		std::vector<double> const& deadwire,
+		double Range,
+		std::vector<double> const& TrkPitch,
+		std::vector<TVector3> const& XYZ);
+
     friend std::ostream& operator << (std::ostream &o, Calorimetry const& a);
 
     const std::vector<double>& dEdx()          const; 
@@ -58,6 +69,7 @@ namespace anab {
     const double&              Range()         const; 
     double                     TrkPitchC()     const; 
     const std::vector<double>& TrkPitchVec()   const;
+    const std::vector<TVector3>& XYZ()         const;
 
 #endif
     
@@ -80,7 +92,7 @@ inline double                     anab::Calorimetry::TrkPitchC()     const
     return fTrkPitch[0];
   else return 0;
 }
-
+inline const std::vector<TVector3>& anab::Calorimetry::XYZ()         const { return fXYZ;      }
 #endif
 
 #endif //ANAB_CALORIMETRY_H
