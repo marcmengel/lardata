@@ -16,10 +16,6 @@ namespace anab{
     : fKineticEnergy(0.)
     , fRange(0.)
   {
-    mf::LogWarning("AnaBaseDefaultCtor") << "using default Calorimetry ctor - should only ever"
-					  << " be done when getting hits out of an event"
-					  << " not when trying to produce new hits to store"
-					  << " in the event";
     fdEdx.clear();
     fdQdx.clear();
     fResidualRange.clear();

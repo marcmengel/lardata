@@ -38,11 +38,7 @@ namespace recob{
     fWireID.Plane    = UINT_MAX;
     fWireID.Wire     = UINT_MAX;
     fWireID.isValid  = false;
-    
-    mf::LogWarning("RecoBaseDefaultCtor") << "using default Hit ctor - should only ever"
-					  << " be done when getting hits out of an event"
-					  << " not when trying to produce new hits to store"
-					  << " in the event";
+
     fHitSignal.clear();
   }
 

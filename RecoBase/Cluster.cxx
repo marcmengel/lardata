@@ -26,10 +26,7 @@ namespace recob{
     , fID(-1)
     , fView(geo::kUnknown)
   {
-    mf::LogWarning("RecoBaseDefaultCtor") << "using default Cluster ctor - should only ever"
-            << " be done when getting clusters out of an event"
-            << " not when trying to produce new clusters to store"
-            << " in the event";
+
   }
 
   //----------------------------------------------------------------------

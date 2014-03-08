@@ -17,10 +17,7 @@ namespace recob{
   //----------------------------------------------------------------------
   Vertex::Vertex()
   {
-    mf::LogWarning("RecoBaseDefaultCtor") << "using default Vertex ctor - should only ever"
-            << " be done when getting vertices out of an event"
-            << " not when trying to produce new vertices to store"
-            << " in the event";
+
   }
 
   //----------------------------------------------------------------------
