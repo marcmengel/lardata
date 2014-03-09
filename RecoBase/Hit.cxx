@@ -38,7 +38,37 @@ namespace recob{
     fWireID.Plane    = UINT_MAX;
     fWireID.Wire     = UINT_MAX;
     fWireID.isValid  = false;
+    
+    fHitSignal.clear();
+  }
 
+  //----------------------------------------------------------------------
+  Hit::Hit(geo::View_t view,
+	   geo::SigType_t sigt,
+	   geo::WireID wid,
+	   double startTime, double sigmaStartTime,
+	   double endTime,   double sigmaEndTime,
+	   double peakTime,  double sigmaPeakTime,
+	   double totcharge, double sigmaTotCharge,
+	   double maxcharge, double sigmaMaxCharge,
+	   int    multiplicity,
+	   double goodnessOfFit)
+    : fStartTime     (startTime         )
+    , fSigmaStartTime(sigmaStartTime    )
+    , fEndTime       (endTime          	)
+    , fSigmaEndTime  (sigmaEndTime     	)
+    , fPeakTime      (peakTime         	)
+    , fSigmaPeakTime (sigmaPeakTime    	)
+    , fCharge        (totcharge        	)
+    , fMaxCharge     (maxcharge        	)
+    , fSigmaCharge   (sigmaTotCharge   	)
+    , fSigmaMaxCharge(sigmaMaxCharge   	)
+    , fMultiplicity  (multiplicity     	)
+    , fGoodnessOfFit (goodnessOfFit    	)
+    , fView          (view              )
+    , fSignalType    (sigt              )
+    , fWireID        (wid               )
+  {
     fHitSignal.clear();
   }
 

@@ -48,6 +48,9 @@ namespace recob {
     int             ID()           const;
     TVector3 const& Direction()    const;
     TVector3 const& DirectionErr() const;
+    double          MaxTransverseX();
+    double          MaxTransverseY();
+    double          DistanceMaxWidth() const;
 
     friend std::ostream& operator << (std::ostream& stream, Shower const& a);
 
@@ -64,6 +67,9 @@ inline double          recob::Shower::TotalCharge()  const { return fTotalCharge
 inline int             recob::Shower::ID()           const { return fID;             }
 inline TVector3 const& recob::Shower::Direction()    const { return fDCosStart;      }
 inline TVector3 const& recob::Shower::DirectionErr() const { return fSigmaDCosStart; }
+inline double          recob::Shower::MaxTransverseX()     { return fMaxTransverseWidth[0]; }
+inline double          recob::Shower::MaxTransverseY()     { return fMaxTransverseWidth[1]; }
+inline double          recob::Shower::DistanceMaxWidth() const { return fDistanceMaxWidth;      }
 
 #endif
 
