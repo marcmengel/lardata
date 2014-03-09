@@ -54,17 +54,6 @@ namespace recob {
 #ifndef __GCCXML__
 
   public:
-      Hit(geo::View_t view,
-	  geo::SigType_t sigt,
-	  geo::WireID wid,
-	  double startTime, double sigmaStartTime,
-	  double endTime,   double sigmaEndTime,
-	  double peakTime,  double sigmaPeakTime,
-	  double totcharge, double sigmaTotCharge,
-	  double maxcharge, double sigmaMaxCharge,
-	  int    multiplicity,
-	  double goodnessOfFit);
-
       Hit(art::Ptr<recob::Wire> &wire,
 	  geo::WireID wid,
 	  double startTime, double sigmaStartTime,
