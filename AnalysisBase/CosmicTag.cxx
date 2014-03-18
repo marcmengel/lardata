@@ -15,23 +15,34 @@ namespace anab{
   CosmicTag::CosmicTag() 
       : endPt1(0)
       , endPt2(0)
-      , flashTime(0)
-      , cosmicScore(0)
-      , cosmicType(0)
+		      //      , flashTime(0) // this should go
+      , fCosmicScore(0)
+      , fCosmicType(0)
   {
+  }
+
+  //----------------------------------------------------------------------
+  CosmicTag::CosmicTag(float fCosmicScore) :
+    endPt1(0),
+    endPt2(0),
+    //    flashTime(flashTime), // should go
+    fCosmicScore(fCosmicScore),
+    fCosmicType(-1)
+  {
+    
   }
 
   //----------------------------------------------------------------------
   CosmicTag::CosmicTag(std::vector<float> endPt1,
 		       std::vector<float> endPt2,
-		       double flashTime,
-		       float cosmicScore,
-		       int cosmicType) :
+		       //		       double flashTime, // should go
+		       float fCosmicScore,
+		       int fCosmicType) :
     endPt1(endPt1),
     endPt2(endPt2),
-    flashTime(flashTime),
-    cosmicScore(cosmicScore),
-    cosmicType(cosmicType)
+    //    flashTime(-1), // should go
+    fCosmicScore(fCosmicScore),
+    fCosmicType(-1)
   {
     
   }
@@ -48,9 +59,9 @@ namespace anab{
   //
   std::ostream& operator<< (std::ostream & o, CosmicTag const& a)
   {
-     o << "Flash Time     : "     <<  a.flashTime     
-       << "\n Cosmic Score     : "  <<  a.cosmicScore     
-       << "\n Cosmic Type     : "  <<  a.cosmicType    
+    o //<< "Flash Time     : "     <<  a.flashTime     // should go
+       << "\n Cosmic Score     : "  <<  a.fCosmicScore     
+       << "\n Cosmic Type     : "  <<  a.fCosmicType    
        << "\n End Point 1: " <<std::endl;
      for(size_t i=0;i<a.endPt1.size(); i++)  
        o << a.endPt1[i] << ", ";
