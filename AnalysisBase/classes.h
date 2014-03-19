@@ -65,6 +65,12 @@ template class std::pair< art::Ptr<anab::FlashMatch>,  art::Ptr<recob::OpFlash> 
 template class std::pair< art::Ptr<recob::OpFlash>,    art::Ptr<anab::FlashMatch>    >;
 template class std::pair< art::Ptr<anab::FlashMatch>,  art::Ptr<recob::Track>        >;
 template class std::pair< art::Ptr<recob::Track>,      art::Ptr<anab::FlashMatch>    >;
+
+template class std::pair< art::Ptr<anab::FlashMatch>,  art::Ptr<recob::Cluster>      >;
+template class std::pair< art::Ptr<recob::Cluster>,    art::Ptr<anab::FlashMatch>    >;
+template class std::pair< art::Ptr<anab::FlashMatch>,  art::Ptr<anab::CosmicTag>    >;
+template class std::pair< art::Ptr<anab::CosmicTag>,  art::Ptr<anab::FlashMatch>    >;
+
 template class std::pair< art::Ptr<recob::Track>,      art::Ptr<anab::CosmicTag>    >;
 template class std::pair< art::Ptr<recob::Cluster>,    art::Ptr<anab::CosmicTag>    >;
 template class std::pair< art::Ptr<anab::CosmicTag>,   art::Ptr<recob::Track>     >;
@@ -85,6 +91,11 @@ template class art::Assns<recob::Cluster,    anab::CosmicTag,   void>;
 template class art::Assns<anab::CosmicTag,   recob::Track,      void>;
 template class art::Assns<anab::CosmicTag,   recob::Cluster,    void>;
 
+template class art::Assns<anab::CosmicTag,   anab::FlashMatch,  void>;
+template class art::Assns<anab::FlashMatch,  anab::CosmicTag,   void>;
+template class art::Assns<recob::Cluster,    anab::FlashMatch,  void>;
+template class art::Assns<anab::FlashMatch,  recob::Cluster,    void>;
+
 template class art::Wrapper< art::Assns<anab::Calorimetry, recob::Track,      void> >;
 template class art::Wrapper< art::Assns<recob::Track,      anab::Calorimetry, void> >;
 template class art::Wrapper< art::Assns<anab::Calorimetry, recob::Shower,     void> >;
@@ -99,6 +110,11 @@ template class art::Wrapper< art::Assns<anab::CosmicTag,   recob::Track,      vo
 template class art::Wrapper< art::Assns<anab::CosmicTag,   recob::Cluster,    void> >;
 template class art::Wrapper< art::Assns<recob::Track,      anab::CosmicTag,   void> >;
 template class art::Wrapper< art::Assns<recob::Cluster,    anab::CosmicTag,   void> >;
+
+template class art::Wrapper< art::Assns<anab::FlashMatch,  anab::CosmicTag,   void> >;
+template class art::Wrapper< art::Assns<anab::CosmicTag,   anab::FlashMatch,  void> >;
+template class art::Wrapper< art::Assns<anab::FlashMatch , recob::Cluster,    void> >;
+template class art::Wrapper< art::Assns<recob::Cluster,    anab::FlashMatch,  void> >;
 
 template class art::Wrapper< std::vector<anab::Calorimetry>    >;
 template class art::Wrapper< std::vector<anab::ParticleID>     >;
