@@ -22,7 +22,8 @@ namespace anab {
   public:
     
     CosmicTag();
-    virtual ~CosmicTag();
+    //virtual ~CosmicTag();
+    ~CosmicTag();
 
 
     std::vector<float> endPt1; // x,y,z assuming t_0 = t_beam
@@ -39,13 +40,13 @@ namespace anab {
   public:
 
     CosmicTag(
-	      std::vector<float> endPt1,
-	      std::vector<float> endPt2,
+	      std::vector<float> ePt1,
+	      std::vector<float> ePt2,
 	      //      double flashTime,
-	      float fCosmicScore,
-	      int fCosmicType);
+	      float cScore,
+	      int cType);
 
-    CosmicTag(float fCosmicScore);
+    CosmicTag(float cScore);
 
 
 

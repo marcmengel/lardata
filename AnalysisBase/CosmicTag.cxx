@@ -22,27 +22,27 @@ namespace anab{
   }
 
   //----------------------------------------------------------------------
-  CosmicTag::CosmicTag(float fCosmicScore) :
+  CosmicTag::CosmicTag(float f) :
     endPt1(0),
     endPt2(0),
     //    flashTime(flashTime), // should go
-    fCosmicScore(fCosmicScore),
+    fCosmicScore(f),
     fCosmicType(-1)
   {
     
   }
 
   //----------------------------------------------------------------------
-  CosmicTag::CosmicTag(std::vector<float> endPt1,
-		       std::vector<float> endPt2,
+  CosmicTag::CosmicTag(std::vector<float> ePt1,
+		       std::vector<float> ePt2,
 		       //		       double flashTime, // should go
-		       float fCosmicScore,
-		       int fCosmicType) :
-    endPt1(endPt1),
-    endPt2(endPt2),
+		       float cScore,
+		       int cType) :
+    endPt1(ePt1),
+    endPt2(ePt2),
     //    flashTime(-1), // should go
-    fCosmicScore(fCosmicScore),
-    fCosmicType(-1)
+    fCosmicScore(cScore),
+    fCosmicType(cType)
   {
     
   }
