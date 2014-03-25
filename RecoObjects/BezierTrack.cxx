@@ -20,7 +20,7 @@ namespace trkf {
   //----------------------------------------------------------------------
   // Constructor from Base object (for analysis)
   //
-  BezierTrack::BezierTrack(recob::Track btb)
+  BezierTrack::BezierTrack(const recob::Track& btb)
     : recob::Track(btb)
   {
     fID = btb.ID();

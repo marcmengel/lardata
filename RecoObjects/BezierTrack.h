@@ -25,7 +25,7 @@ namespace trkf {
   {
   public:
     BezierTrack();
-    BezierTrack(recob::Track btb);
+    BezierTrack(const recob::Track& btb);
     BezierTrack(std::vector<TVector3> Pos, 
 		std::vector<TVector3> Dir, 
 		std::vector<std::vector<double> > dQdx,
