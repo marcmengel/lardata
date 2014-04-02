@@ -23,9 +23,10 @@ namespace trkf {
   /// Arguments.
   ///
   /// tcut   - Delta ray energy cutoff for calculating dE/dx.
+  /// doDedx - dE/dx enable flag.
   ///
-  PropXYZPlane::PropXYZPlane(double tcut) :
-    Propagator(tcut, std::shared_ptr<const Interactor>(new InteractPlane(tcut)))
+  PropXYZPlane::PropXYZPlane(double tcut, bool doDedx) :
+    Propagator(tcut, doDedx, std::shared_ptr<const Interactor>(new InteractPlane(tcut)))
   {}
 
   /// Destructor.
@@ -247,7 +248,7 @@ namespace trkf {
 
     double deriv = 1.;
     boost::optional<double> pinv2(true, pinv);
-    if(doDedx && s != 0.) {
+    if(getDoDedx() && doDedx && s != 0.) {
       double* pderiv = (prop_matrix != 0 ? &deriv : 0);
       pinv2 = dedx_prop(pinv, trk.Mass(), s, pderiv);
     }

@@ -130,7 +130,7 @@ namespace trkf {
 
     // Make propagator for propating to standard track surface.
 
-    PropXYZPlane prop(0.);
+    PropXYZPlane prop(0., false);
 
     // Fill collections of trajectory points and direction vectors.
 

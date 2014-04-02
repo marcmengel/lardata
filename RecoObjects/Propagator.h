@@ -56,6 +56,11 @@
 /// flag indicating whether the contained value is initialized.  A
 /// non-initialized return value means that the propagation failed.
 ///
+/// Calculation of dE/dx can be enabled or disabled by a flag passed to
+/// the constructor, as well as by a flag passed to individual
+/// propagation methods.  Nonzero energy loss will take place only if
+/// both flags are true.
+///
 ////////////////////////////////////////////////////////////////////////
 
 #ifndef PROPAGATOR_H
@@ -77,7 +82,7 @@ namespace trkf {
     enum PropDirection {FORWARD, BACKWARD, UNKNOWN};
 
     /// Constructor.
-    Propagator(double tcut, const std::shared_ptr<const Interactor>& interactor);
+    Propagator(double tcut, bool doDedx, const std::shared_ptr<const Interactor>& interactor);
 
     /// Destructor.
     virtual ~Propagator();
@@ -85,6 +90,7 @@ namespace trkf {
     // Accessors.
 
     double getTcut() const {return fTcut;}
+    double getDoDedx() const {return fDoDedx;}
     const std::shared_ptr<const Interactor>& getInteractor() const {return fInteractor;}
 
     // Virtual methods.
@@ -140,6 +146,7 @@ namespace trkf {
     // Attributes.
 
     double fTcut;                                   ///< Maximum delta ray energy for dE/dx.
+    bool fDoDedx;                                   ///< Energy loss enable flag.
     std::shared_ptr<const Interactor> fInteractor;  ///< Interactor (for calculating noise).
   };
 }

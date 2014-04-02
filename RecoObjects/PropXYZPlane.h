@@ -24,7 +24,7 @@ namespace trkf {
   public:
 
     /// Constructor.
-    PropXYZPlane(double tcut);
+    PropXYZPlane(double tcut, bool doDedx);
 
     /// Destructor.
     virtual ~PropXYZPlane();

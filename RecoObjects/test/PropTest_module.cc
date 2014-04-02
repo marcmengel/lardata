@@ -58,7 +58,7 @@ namespace trkf
 
     // Make a PropYZPlane propagate to test.
 
-    const trkf::Propagator* prop = new trkf::PropYZPlane(10.);
+    const trkf::Propagator* prop = new trkf::PropYZPlane(10., true);
 
     // Make some random surfaces.
     // Also make initial tracks.
@@ -336,7 +336,7 @@ namespace trkf
     // Make a PropXYZPlane propagate to test.
 
     delete prop;
-    prop = new trkf::PropXYZPlane(10.);
+    prop = new trkf::PropXYZPlane(10., true);
 
     // Make some random surfaces.
     // Also make initial tracks.

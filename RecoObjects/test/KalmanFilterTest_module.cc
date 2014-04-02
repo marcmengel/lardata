@@ -73,7 +73,7 @@ namespace trkf
     err(4, 4) = 10.;
     KETrack tre(psurf, vec, err, trkf::Surface::FORWARD, 13);
 
-    PropYZPlane prop(100.);
+    PropYZPlane prop(100., true);
 
     // Make some test measurements.
 
