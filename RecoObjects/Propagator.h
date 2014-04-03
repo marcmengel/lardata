@@ -90,7 +90,7 @@ namespace trkf {
     // Accessors.
 
     double getTcut() const {return fTcut;}
-    double getDoDedx() const {return fDoDedx;}
+    bool getDoDedx() const {return fDoDedx;}
     const std::shared_ptr<const Interactor>& getInteractor() const {return fInteractor;}
 
     // Virtual methods.
