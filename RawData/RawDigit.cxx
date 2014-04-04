@@ -16,47 +16,6 @@
 
 namespace raw{
 
-  //----------------------------------------------------------------------
-  RawDigit::RawDigit()  
-    : fADC(0)
-    , fChannel(0) 
-    , fSamples(0) 
-    , fPedestal(0.) 
-    , fSigma(0.)
-    , fCompression(raw::kNone)
-  {
-
-  }
-
-  //----------------------------------------------------------------------
-  RawDigit::RawDigit(uint32_t           channel,
-		     unsigned short     samples,
-		     std::vector<short> adclist, 
-		     raw::Compress_t    compression) 
-    : fADC(adclist) 
-    , fChannel(channel) 
-    , fSamples(samples)
-    , fPedestal(0.) 
-    , fSigma(0.)
-    , fCompression(compression)
-  { 
-
-  }
-
-  //----------------------------------------------------------------------
-  RawDigit::RawDigit(uint32_t           channel,
-		     std::vector<short> adclist,
-		     raw::Compress_t    compression)
-    : fADC(adclist)
-    , fChannel(channel)
-    , fSamples(0)
-    , fPedestal(0.) 
-    , fSigma(0.)
-    , fCompression(compression)
-  {
-
-  }
-
   //--------------------------------------------------
   short RawDigit::ADC(int i) const
   {

@@ -44,12 +44,12 @@ namespace raw {
   public:
     
     RawDigit(uint32_t           channel, 
-	     unsigned short     samples,
-	     std::vector<short> adclist,
-	     raw::Compress_t    compression=raw::kNone);
+             unsigned short     samples,
+             const std::vector<short>& adclist,
+             raw::Compress_t    compression=raw::kNone);
     RawDigit(uint32_t           channel,
-	     std::vector<short> adclist,
-	     raw::Compress_t    compression=raw::kNone);
+             const std::vector<short>& adclist,
+             raw::Compress_t    compression=raw::kNone);
         
     // Set Methods
     void             SetPedestal(double ped);
@@ -69,6 +69,36 @@ namespace raw {
 
 #ifndef __GCCXML__
 
+inline raw::RawDigit::RawDigit()
+  : fADC(0)
+  , fChannel(0) 
+  , fSamples(0) 
+  , fPedestal(0.) 
+  , fSigma(0.)
+  , fCompression(raw::kNone)
+{}
+
+inline raw::RawDigit::RawDigit(
+  uint32_t                  channel,
+  unsigned short            samples,
+  const std::vector<short>& adclist,
+  raw::Compress_t           compression
+)
+  : fADC(adclist) 
+  , fChannel(channel) 
+  , fSamples(samples)
+  , fPedestal(0.) 
+  , fSigma(0.)
+  , fCompression(compression)
+{}
+
+inline raw::RawDigit::RawDigit(
+  uint32_t                  channel,
+  const std::vector<short>& adclist,
+  raw::Compress_t           compression
+): RawDigit(channel, 0, adclist, compression)
+{}
+
 inline unsigned int    raw::RawDigit::NADC()        const { return fADC.size();  }
 inline uint32_t        raw::RawDigit::Channel()     const { return fChannel;     }
 inline unsigned short  raw::RawDigit::Samples()     const { return fSamples;     }
@@ -76,7 +106,7 @@ inline double          raw::RawDigit::GetPedestal() const { return fPedestal;   
 inline double          raw::RawDigit::GetSigma()    const { return fSigma;       } 
 inline raw::Compress_t raw::RawDigit::Compression() const { return fCompression; }
 
-#endif
+#endif // __GCCXML__
 
 #endif // RAWDATA_RAWDIGIT_H
 
