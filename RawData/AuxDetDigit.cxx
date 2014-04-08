@@ -9,10 +9,6 @@
 
 #include "RawData/AuxDetDigit.h"
 
-#include <string>
-#include <iostream>
-#include <cassert>
-
 #include "cetlib/exception.h"
 
 namespace raw{

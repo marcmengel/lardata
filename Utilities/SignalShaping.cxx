@@ -8,7 +8,6 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
 #include <cmath>
 #include "cetlib/exception.h"
 #include "Utilities/SignalShaping.h"
@@ -84,7 +83,10 @@ void util::SignalShaping::AddResponseFunction(const std::vector<double>& resp)
 
     // Update overall convolution kernel.
 
-    assert(kern.size() == fConvKernel.size());
+    if (kern.size() != fConvKernel.size()) {
+      throw cet::exception("SignalShaping") << __func__ << ": inconsistent kernel size, "
+        << kern.size() << " vs. " << fConvKernel.size();
+    }
     for(unsigned int i=0; i<kern.size(); ++i)
       fConvKernel[i] *= kern[i];
 
@@ -199,8 +201,12 @@ void util::SignalShaping::LockResponse() const
     // size (should always be the case if we get here).
 
     unsigned int n = fft->FFTSize();
-    assert(fResponse.size() == n);
-    assert(2 * (fConvKernel.size() - 1) == n);
+    if (fResponse.size() != n)
+      throw cet::exception("SignalShaping") << __func__ << ": inconsistent kernel size, "
+        << fResponse.size() << " vs. " << n;
+    if (2 * (fConvKernel.size() - 1) != n)
+      throw cet::exception("SignalShaping") << __func__ << ": unexpected FFT size, "
+        << n << " vs. expected " << (2 * (fConvKernel.size() - 1));
 
     // Set the lock flag.
 
@@ -237,9 +243,12 @@ void util::SignalShaping::CalculateDeconvKernel() const
   // (Should always be the case if we get here.)
 
   unsigned int n = fft->FFTSize();
-  assert(2 * (fFilter.size() - 1) == n);
-  assert(fFilter.size() == fConvKernel.size());
-
+  if (2 * (fFilter.size() - 1) != n)
+  if (fFilter.size() != fConvKernel.size()) {
+    throw cet::exception("SignalShaping") << __func__ << ": inconsistent size, "
+      << fFilter.size() << " vs. " << fConvKernel.size();
+  }
+  
   // Calculate deconvolution kernel as the ratio of the 
   // filter function and the convolution kernel.
 
@@ -269,7 +278,10 @@ void util::SignalShaping::CalculateDeconvKernel() const
     if(fResponse[i] > peak_response)
       peak_response = fResponse[i];
   }
-  assert(peak_response > 0);  // Peak should always be positive.
+  if (peak_response <= 0.) {
+    throw cet::exception("SignalShaping") << __func__
+      << ": peak should always be positive (got " << peak_response << ")";
+  }
 
   // Find the peak value of the deconvoluted response
   // Should normally be at zero, but don't assume that.
@@ -279,7 +291,10 @@ void util::SignalShaping::CalculateDeconvKernel() const
     if(deconv[i] > peak_deconv)
       peak_deconv = deconv[i];
   }
-  assert(peak_deconv > 0);  // Peak should always be positive.
+  if (peak_deconv <= 0.) {
+    throw cet::exception("SignalShaping") << __func__
+      << ": deconvolution peak should always be positive (got " << peak_deconv << ")";
+  }
 
   // Multiply the deconvolution kernel by a factor such that
   // (Peak of response) = (Peak of deconvoluted response).

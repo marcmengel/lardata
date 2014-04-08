@@ -108,9 +108,8 @@ void util::FileCatalogMetadataExtras::postBeginJob()
 	  // If value doesn't match, throw an exception.
 
 	  if(nvp.second != value) {
-	    std::ostringstream ostr;
-	    ostr << "Found duplicate name " << name << " with non-matching value.";
-	    throw cet::exception("FileCatalogMetadataExtras") << ostr.str();
+	    throw cet::exception("FileCatalogMetadataExtras")
+	      << "Found duplicate name " << name << " with non-matching value.";
 	  }
 	}
       }
@@ -165,8 +164,12 @@ void util::FileCatalogMetadataExtras::postEvent(art::Event const& evt)
   art::EventNumber_t event = evt.event();
 
   for(auto const& fn : fOutputFiles) {
-    assert(fPerFileMetadataMap.count(fn) != 0);
-    PerFileMetadata& md = fPerFileMetadataMap[fn];
+    auto iMap = fPerFileMetadataMap.find(fn);
+    if (iMap == fPerFileMetadataMap.end()) {
+      throw cet::exception("FileCatalogMetadataExtras")
+        << "no metadata for output file '" << fn << "'";
+    }
+    PerFileMetadata& md = iMap->second;
 
     if(md.fRunNumbers.count(run) == 0)
       md.fRunNumbers.insert(run);

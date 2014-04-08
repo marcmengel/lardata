@@ -165,7 +165,8 @@ namespace trkf {
       double mom[3];
       trh.getMomentum(mom);
       double p = std::sqrt(mom[0]*mom[0] + mom[1]*mom[1] + mom[2]*mom[2]);
-      assert(p != 0.);
+      if (p == 0.)
+        throw cet::exception("KGTrack") << __func__ << ": null momentum";
       dxdydz.push_back(TVector3(mom[0]/p, mom[1]/p, mom[2]/p));
       momentum.push_back(p);
 
@@ -182,7 +183,8 @@ namespace trkf {
 								    mom[0], mom[1], mom[2]));
 	KETrack tre(trh);
 	boost::optional<double> dist = prop.err_prop(tre, psurf, Propagator::UNKNOWN, false);
-	assert(!!dist);
+	if (!!dist)
+	  throw cet::exception("KGTrack") << __func__ << ": error propagation failed";
 	for(int i=0; i<5; ++i) {
 	  for(int j=0; j<5; ++j)
 	    covar(i,j) = tre.getError()(i,j);
@@ -209,8 +211,7 @@ namespace trkf {
 	    double dvdw = trh.getVector()[3];
 	    double dist = pitch * std::sqrt(1. + dudw * dudw + dvdw * dvdw);
 	    double qdist = charge / dist;
-	    assert(view >= 0 && view < nview);
-	    dqdx[view].back() = qdist;
+	    dqdx.at(view).back() = qdist;
 	  }
 	}
       }

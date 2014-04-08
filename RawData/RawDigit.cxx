@@ -8,9 +8,6 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "RawData/RawDigit.h"
-#include <string>
-#include <iostream>
-#include <cassert>
 
 #include "cetlib/exception.h"
 

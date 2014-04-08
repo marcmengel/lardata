@@ -13,9 +13,6 @@
 
 #include "RawData/OpDetPulse.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include <string>
-#include <iostream>
-#include <cassert>
 
 
 namespace raw{
