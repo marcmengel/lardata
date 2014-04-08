@@ -183,7 +183,7 @@ namespace trkf {
 								    mom[0], mom[1], mom[2]));
 	KETrack tre(trh);
 	boost::optional<double> dist = prop.err_prop(tre, psurf, Propagator::UNKNOWN, false);
-	if (!!dist)
+	if (!dist.is_initialized())
 	  throw cet::exception("KGTrack") << __func__ << ": error propagation failed";
 	for(int i=0; i<5; ++i) {
 	  for(int j=0; j<5; ++j)
