@@ -8,8 +8,9 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
 #include "RecoObjects/KHitContainer.h"
+
+#include "cetlib/exception.h"
 
 namespace trkf {
 
@@ -49,7 +50,8 @@ namespace trkf {
 			   const Propagator* prop,
 			   Propagator::PropDirection dir)
   {
-    assert(prop != 0);
+    if(!prop)
+      throw cet::exception("KHitContainer") << __func__ << ": no propagator" << "\n";
 
     // Maybe transfer all objects in unsorted list to the sorted list.
 
@@ -115,8 +117,7 @@ namespace trkf {
       // Get plane of this KHitGroup.
 
       int plane = gr.getPlane();
-      assert(plane >= 0 && plane < int(planehits.size()));
-      ++planehits[plane];
+      ++planehits.at(plane);
     }
 
     // Figure out which plane has the most hits.

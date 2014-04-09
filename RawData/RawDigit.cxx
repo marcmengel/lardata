@@ -8,9 +8,6 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "RawData/RawDigit.h"
-#include <string>
-#include <iostream>
-#include <cassert>
 
 #include "cetlib/exception.h"
 
@@ -21,7 +18,7 @@ namespace raw{
   {
     unsigned int j = i;
     if(i < 0 || (j>fADC.size()) )
-      throw cet::exception("RawDigit") << "asked for illegal ADC index: " << i;
+      throw cet::exception("RawDigit") << "asked for illegal ADC index: " << i << "\n";
 
     return fADC[j];
   }

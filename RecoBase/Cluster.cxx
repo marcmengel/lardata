@@ -68,7 +68,7 @@ namespace recob{
     // throw exception if the clusters are not from the same view
     if( a.View() != this->View() )
       throw cet::exception("Cluster+operator") << "Attempting to sum clusters from "
-                 << "different views is not allowed";
+                 << "different views is not allowed\n";
 
     // check the start and end positions - for now the
     // smallest wire number means start position, largest means end position

@@ -9,10 +9,6 @@
 
 #include "RawData/AuxDetDigit.h"
 
-#include <string>
-#include <iostream>
-#include <cassert>
-
 #include "cetlib/exception.h"
 
 namespace raw{
@@ -42,7 +38,7 @@ namespace raw{
   {
     if(i >= fADC.size())
       throw cet::exception("AuxDetDigit") << "illegal index requested for ADC vector: "
-					  << i;
+					  << i << "\n";
 
     return fADC[i];
   }

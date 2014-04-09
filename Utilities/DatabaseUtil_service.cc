@@ -49,7 +49,7 @@ int util::DatabaseUtil::Connect(int conn_wait)
 	return this->Connect(conn_wait);
       }
    if(fToughErrorTreatment)
-       throw cet::exception("DataBaseUtil") << " DB connection failed ";       
+       throw cet::exception("DataBaseUtil") << " DB connection failed\n";
    
   } else {
     mf::LogDebug("DatabaseUtil")<<"Connected OK\n";

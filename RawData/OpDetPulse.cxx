@@ -13,9 +13,6 @@
 
 #include "RawData/OpDetPulse.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include <string>
-#include <iostream>
-#include <cassert>
 
 
 namespace raw{
@@ -57,10 +54,10 @@ namespace raw{
     // Some error trapping for stupid integration limits
     if(endbin < startbin) 
       throw cet::exception("OpDetPulse")
-	<<" Trying to integrate between illegal limits : " <<startbin<<" " <<endbin;
+	<<" Trying to integrate between illegal limits : " <<startbin<<" " <<endbin << "\n";
     if(endbin > Samples())
       throw cet::exception("OpDetPulse")
-	<<" Trying to integrate between illegal limits : "<< startbin<<" " <<endbin;
+	<<" Trying to integrate between illegal limits : "<< startbin<<" " <<endbin << "\n";
 
     unsigned int TotalIntegral = 0;
     // Loop over vector to return the integral

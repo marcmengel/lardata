@@ -822,7 +822,7 @@ double l(0),m(0),n(0);
     //   //std::cout << " ---- cosgamma: " << angleToVert*180/TMath::Pi() << " d's: " << dirs[1]
     //  << " " << dirs[2] << " ph,th " << phi << " " << theta << std::endl; 
     if(cosgamma < 1.e-5) 
-      throw cet::exception("Track") << "cosgamma is basically 0, that can't be right";
+      throw cet::exception("Track") << "cosgamma is basically 0, that can't be right\n";
     
     return wirePitch/cosgamma;
   }

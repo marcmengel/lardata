@@ -52,7 +52,7 @@ void pid::Chi2PIDAlg::reconfigure(fhicl::ParameterSet const& pset)
   if( !sp.find_file(fTemplateFile, fROOTfile) )
     throw cet::exception("Chi2ParticleID") << "cannot find the root template file: \n" 
 					   << fTemplateFile
-					   << "\n bail ungracefully.";
+					   << "\n bail ungracefully.\n";
   TFile *file = TFile::Open(fROOTfile.c_str());
   dedx_range_pro = (TProfile*)file->Get("dedx_range_pro");
   dedx_range_ka  = (TProfile*)file->Get("dedx_range_ka");

@@ -139,7 +139,8 @@ namespace trkf {
 	double t = p*p / (e + mass);
 	double dedx = 0.001 * larprop->Eloss(p, mass, fTcut);
 	double smax = 0.1 * t / dedx;
-	assert(smax > 0.);
+	if (smax <= 0.)
+	  throw cet::exception("Propagator") << __func__ << ": maximum step " << smax << "\n";
 
 	// Always allow a step of at least 0.3 cm (about one wire spacing).
 
@@ -305,7 +306,8 @@ namespace trkf {
 
 	trk.setVector(newvec);
 	trk.setSurface(psurf);
-	assert(trk.getSurface()->isEqual(*(ref->getSurface())));
+	if (!trk.getSurface()->isEqual(*(ref->getSurface())))
+	  throw cet::exception("Propagator") << __func__ << ": surface mismatch";
       }
       else {
 
