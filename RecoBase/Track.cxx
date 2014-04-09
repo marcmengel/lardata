@@ -44,7 +44,7 @@ namespace recob{
       throw cet::exception("Track Constructor") << "Position, direction vector "
 						<< " size problem:\n"
 						<< "\t position size = "    << fXYZ.size()
-						<< "\n\t direction size = " << fDir.size();
+						<< "\n\t direction size = " << fDir.size() << "\n";
   }
 
   //----------------------------------------------------------------------
@@ -65,7 +65,7 @@ namespace recob{
       throw cet::exception("Track Constructor") << "Position, direction vectors "
 						<< " size problem:\n"
 						<< "\t position size = "    << fXYZ.size()
-						<< "\n\t direction size = " << fDir.size();
+						<< "\n\t direction size = " << fDir.size() << "\n";
 
   }
 
@@ -134,7 +134,7 @@ namespace recob{
     ///\todo need to think more about this
     if(view == geo::kUnknown)
       throw cet::exception("Track") << "cannot provide projected length for "
-				    << "unknown view";
+				    << "unknown view\n";
 
     double length = 0.;
 
@@ -171,7 +171,7 @@ namespace recob{
   double Track::PitchInView(geo::View_t view) const
   {
     if(view == geo::kUnknown)
-      cet::exception("Track") << "Warning cannot obtain pitch for unknown view";
+      cet::exception("Track") << "Warning cannot obtain pitch for unknown view\n";
 
     art::ServiceHandle<geo::Geometry> geo;
     double wirePitch   = geo->WirePitch(view);
@@ -183,7 +183,7 @@ namespace recob{
 			       std::cos(angleToVert)*fDir.front().Z());
 
     if(cosgamma < 1.e-5)
-      throw cet::exception("Track") << "cosgamma is basically 0, that can't be right";
+      throw cet::exception("Track") << "cosgamma is basically 0, that can't be right\n";
 
     return wirePitch/cosgamma;
   }

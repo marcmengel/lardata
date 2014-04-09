@@ -343,8 +343,7 @@ namespace trkf {
 	      <<"CalculateSegments method of Bezier track called with no"
 	      <<" track information loaded.  You must fill track with "
 	      <<"poisition and direction data before calling this method."
-	      <<std::endl;
-	    return;
+	      <<"\n";
 	  }
       }
     if(NSegments()==0)
@@ -1040,14 +1039,14 @@ namespace trkf {
       {
 	throw cet::exception("Bezier dQdx: S out of range")
 	  <<"Bezier track S value of " << s <<" is not in the range 0<S<1"
-	  <<std::endl;
+	  <<"\n";
       }
     if( /* (view<0)|| */ view>(fdQdx.size()-1))
       {
 	throw cet::exception("Bezier dQdx: view out of range")
 	  <<"Bezier track view value of " << view <<" is not in the range "
 	  <<"of stored views, 0 < view < " << fdQdx.size()
-	  <<std::endl;
+	  <<"\n";
       }
     int Segment = WhichSegment(s);
     //    if((Segment>=fdQdx[view].size())||(Segment<0))
@@ -1055,7 +1054,7 @@ namespace trkf {
     //  throw cet::exception("Bezier dQdx: segment of range")
     //    <<"Bezier track segment value of " << Segment <<" is not in the range "
     //    <<"of stored segments, 0 < seg < " << fdQdx[view].size()
-    //    <<std::endl;
+    //    <<"\n";
     //     }
     if( ( Segment < (int)fdQdx[view].size() ) && (Segment>1))
       return fdQdx[view][Segment];
@@ -1081,7 +1080,7 @@ namespace trkf {
 	throw cet::exception("view out of range")
 	  <<"Bezier track view value of " << view <<" is not in the range "
 	  <<"of stored views, 0 < view < " << fdQdx.size()
-	  <<std::endl;
+	  <<"\n";
       }
 
     size_t NSeg = NSegments();

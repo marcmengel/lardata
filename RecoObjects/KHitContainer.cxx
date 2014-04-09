@@ -51,7 +51,7 @@ namespace trkf {
 			   Propagator::PropDirection dir)
   {
     if(!prop)
-      throw cet::exception("KHitContainer") << __func__ << ": no propagator";
+      throw cet::exception("KHitContainer") << __func__ << ": no propagator" << "\n";
 
     // Maybe transfer all objects in unsorted list to the sorted list.
 

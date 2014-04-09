@@ -44,7 +44,7 @@ namespace anab{
     }
     if(dEdx.size() != resRange.size())
       throw cet::exception("anab::Calorimetry") << "dE/dx and residual range vectors "
-						<< "have different sizes, this is a problem.";
+						<< "have different sizes, this is a problem.\n";
     fdEdx.resize(dEdx.size());
     fdQdx.resize(dQdx.size());
     fResidualRange.resize(resRange.size());
@@ -77,7 +77,7 @@ namespace anab{
     fTrkPitch = TrkPitch;
     if(dEdx.size() != resRange.size())
       throw cet::exception("anab::Calorimetry") << "dE/dx and residual range vectors "
-						<< "have different sizes, this is a problem.";
+						<< "have different sizes, this is a problem.\n";
     for(size_t i=0; i!=dQdx.size(); ++i){
       TVector3 v(-999,-999,-999);
       fXYZ.push_back(v);
@@ -114,7 +114,7 @@ namespace anab{
     fTrkPitch = TrkPitch;
     if(dEdx.size() != resRange.size())
       throw cet::exception("anab::Calorimetry") << "dE/dx and residual range vectors "
-						<< "have different sizes, this is a problem.";
+						<< "have different sizes, this is a problem.\n";
     for(size_t i=0; i!=dQdx.size(); ++i){
       fXYZ.push_back(TVector3(-999,-999,-999));
     }

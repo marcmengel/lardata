@@ -153,7 +153,7 @@ double util::LArProperties::Efield(unsigned int planegap) const
   this->checkDBstatus();
 
   if(planegap >= fEfield.size())
-    throw cet::exception("LArProperties") << "requesting Electric field in a plane gap that is not defined";
+    throw cet::exception("LArProperties") << "requesting Electric field in a plane gap that is not defined\n";
 
   return fEfield[planegap];
 }

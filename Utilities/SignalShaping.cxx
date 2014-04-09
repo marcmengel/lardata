@@ -203,10 +203,10 @@ void util::SignalShaping::LockResponse() const
     unsigned int n = fft->FFTSize();
     if (fResponse.size() != n)
       throw cet::exception("SignalShaping") << __func__ << ": inconsistent kernel size, "
-        << fResponse.size() << " vs. " << n;
+        << fResponse.size() << " vs. " << n << "\n";
     if (2 * (fConvKernel.size() - 1) != n)
       throw cet::exception("SignalShaping") << __func__ << ": unexpected FFT size, "
-        << n << " vs. expected " << (2 * (fConvKernel.size() - 1));
+        << n << " vs. expected " << (2 * (fConvKernel.size() - 1)) << "\n";
 
     // Set the lock flag.
 
@@ -246,7 +246,7 @@ void util::SignalShaping::CalculateDeconvKernel() const
   if (2 * (fFilter.size() - 1) != n)
   if (fFilter.size() != fConvKernel.size()) {
     throw cet::exception("SignalShaping") << __func__ << ": inconsistent size, "
-      << fFilter.size() << " vs. " << fConvKernel.size();
+      << fFilter.size() << " vs. " << fConvKernel.size() << "\n";
   }
   
   // Calculate deconvolution kernel as the ratio of the 
@@ -280,7 +280,7 @@ void util::SignalShaping::CalculateDeconvKernel() const
   }
   if (peak_response <= 0.) {
     throw cet::exception("SignalShaping") << __func__
-      << ": peak should always be positive (got " << peak_response << ")";
+      << ": peak should always be positive (got " << peak_response << ")\n";
   }
 
   // Find the peak value of the deconvoluted response
@@ -293,7 +293,7 @@ void util::SignalShaping::CalculateDeconvKernel() const
   }
   if (peak_deconv <= 0.) {
     throw cet::exception("SignalShaping") << __func__
-      << ": deconvolution peak should always be positive (got " << peak_deconv << ")";
+      << ": deconvolution peak should always be positive (got " << peak_deconv << ")\n";
   }
 
   // Multiply the deconvolution kernel by a factor such that

@@ -166,7 +166,7 @@ namespace trkf {
       trh.getMomentum(mom);
       double p = std::sqrt(mom[0]*mom[0] + mom[1]*mom[1] + mom[2]*mom[2]);
       if (p == 0.)
-        throw cet::exception("KGTrack") << __func__ << ": null momentum";
+        throw cet::exception("KGTrack") << __func__ << ": null momentum\n";
       dxdydz.push_back(TVector3(mom[0]/p, mom[1]/p, mom[2]/p));
       momentum.push_back(p);
 
@@ -184,7 +184,7 @@ namespace trkf {
 	KETrack tre(trh);
 	boost::optional<double> dist = prop.err_prop(tre, psurf, Propagator::UNKNOWN, false);
 	if (!dist.is_initialized())
-	  throw cet::exception("KGTrack") << __func__ << ": error propagation failed";
+	  throw cet::exception("KGTrack") << __func__ << ": error propagation failed\n";
 	for(int i=0; i<5; ++i) {
 	  for(int j=0; j<5; ++j)
 	    covar(i,j) = tre.getError()(i,j);

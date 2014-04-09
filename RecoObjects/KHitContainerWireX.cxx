@@ -83,7 +83,7 @@ namespace trkf {
         pgr = group_map[channel];
       if (!pgr) {
         throw cet::exception("KHitContainerWireX")
-          << __func__ << ": no group map for channel " << channel;
+          << __func__ << ": no group map for channel " << channel << "\n";
       }
 
       // Get surface from KHitGroup (might be null pointer).

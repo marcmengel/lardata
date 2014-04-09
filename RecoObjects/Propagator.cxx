@@ -140,7 +140,7 @@ namespace trkf {
 	double dedx = 0.001 * larprop->Eloss(p, mass, fTcut);
 	double smax = 0.1 * t / dedx;
 	if (smax <= 0.)
-	  throw cet::exception("Propagator") << __func__ << ": maximum step " << smax;
+	  throw cet::exception("Propagator") << __func__ << ": maximum step " << smax << "\n";
 
 	// Always allow a step of at least 0.3 cm (about one wire spacing).
 

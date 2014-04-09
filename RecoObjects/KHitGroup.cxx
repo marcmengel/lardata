@@ -50,7 +50,7 @@ namespace trkf {
     // Throw exception if the new surface doesn't match.
 
     if(hit->getMeasPlane() < 0)
-      throw cet::exception("KHitGroup") << __func__ << ": invalid hit plane " << hit->getMeasPlane();
+      throw cet::exception("KHitGroup") << __func__ << ": invalid hit plane " << hit->getMeasPlane() << "\n";
     
     if(fSurf.get() == 0) {
       fSurf = hit->getMeasSurface();
@@ -61,10 +61,10 @@ namespace trkf {
         throw cet::exception("KHitGroup") << "Attempt to add non-matching measurement.\n";
       if(hit->getMeasPlane() != fPlane) {
         throw cet::exception("KHitGroup") << __func__ << ": hit plane mismatch, "
-          << hit->getMeasPlane() << " vs. " << fPlane;
+          << hit->getMeasPlane() << " vs. " << fPlane << "\n";
       }
       if (fPlane < 0)
-        throw cet::exception("KHitGroup") << __func__ << ": invalid plane " << fPlane;
+        throw cet::exception("KHitGroup") << __func__ << ": invalid plane " << fPlane << "\n";
     }
 
     // Everything OK.  Add the measurement.

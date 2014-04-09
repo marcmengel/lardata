@@ -218,7 +218,7 @@ namespace trkf {
         break;
       default:
         throw cet::exception("PropXYZPlane") 
-          << __func__ << ": unexpected direction #" << ((int) dir1);
+          << __func__ << ": unexpected direction #" << ((int) dir1) << "\n";
     } // switch
 
     // Calculate the signed propagation distance.

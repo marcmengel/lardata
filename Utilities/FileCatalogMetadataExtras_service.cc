@@ -68,7 +68,7 @@ void util::FileCatalogMetadataExtras::reconfigure(fhicl::ParameterSet const& pse
 
   if(md.size() %2 != 0)
     throw cet::exception("FileCatalogMetadataExtras")
-      << "Metadata array has odd number of entries.";
+      << "Metadata array has odd number of entries.\n";
   for(unsigned int i=0; i<md.size(); i += 2)
     fPerJobMetadata.insert(std::pair<std::string, std::string>(md[i], md[i+1]));
 
@@ -109,7 +109,7 @@ void util::FileCatalogMetadataExtras::postBeginJob()
 
 	  if(nvp.second != value) {
 	    throw cet::exception("FileCatalogMetadataExtras")
-	      << "Found duplicate name " << name << " with non-matching value.";
+	      << "Found duplicate name " << name << " with non-matching value.\n";
 	  }
 	}
       }
@@ -167,7 +167,7 @@ void util::FileCatalogMetadataExtras::postEvent(art::Event const& evt)
     auto iMap = fPerFileMetadataMap.find(fn);
     if (iMap == fPerFileMetadataMap.end()) {
       throw cet::exception("FileCatalogMetadataExtras")
-        << "no metadata for output file '" << fn << "'";
+        << "no metadata for output file '" << fn << "'\n";
     }
     PerFileMetadata& md = iMap->second;
 
@@ -192,7 +192,7 @@ void util::FileCatalogMetadataExtras::postOpenOutputFile(std::string const& fn)
 
   if(fPerFileMetadataMap.count(fn) != 0)
     throw cet::exception("FileCatalogMetadataExtras")
-      << "Output file " << fn << " already has metadata.";
+      << "Output file " << fn << " already has metadata.\n";
   PerFileMetadata md;
   md.fStartTime = time(0);
   md.fEndTime = md.fStartTime;
@@ -400,7 +400,7 @@ void util::FileCatalogMetadataExtras::addPerFileMetadata(std::string const& fn)
       map_fn = renamed_files.front();
     else {
       throw cet::exception("FileCatalogMetadataExtras")
-	<< "Could not access metadata because there is more than one renamed output file.";
+	<< "Could not access metadata because there is more than one renamed output file.\n";
     }
   }
   if(map_fn != fn) {
@@ -411,7 +411,7 @@ void util::FileCatalogMetadataExtras::addPerFileMetadata(std::string const& fn)
 
   if(fPerFileMetadataMap.count(map_fn) == 0)
     throw cet::exception("FileCatalogMetadataExtras")
-      << "No metadata found for file " << map_fn << ".";
+      << "No metadata found for file " << map_fn << ".\n";
   PerFileMetadata& md = fPerFileMetadataMap[map_fn];
 
   // Update end time.
@@ -838,7 +838,7 @@ std::string util::FileCatalogMetadataExtras::expandTemplate() const
 
     if(expanded.find_first_of("${}") != std::string::npos)
       throw cet::exception("FileCatalogMetadataExtras")
-	<< "Problem parsing output file name template: " << filename << "\n.";
+	<< "Problem parsing output file name template: " << filename << ".\n";
 
     // Reassemble file name.
 
@@ -850,7 +850,7 @@ std::string util::FileCatalogMetadataExtras::expandTemplate() const
 
   if(filename.find_first_of("${}") != std::string::npos)
     throw cet::exception("FileCatalogMetadataExtras")
-      << "Problem parsing output file name template: "<< filename << "\n.";
+      << "Problem parsing output file name template: "<< filename << ".\n";
   return filename;
 }
 

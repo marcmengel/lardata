@@ -135,7 +135,7 @@ namespace recob{
       // to do so throw an exception
       if(wids.size() == 1) return wids[0];
       else
-	throw cet::exception("Hit") << "Cannot determine correct WireID for Hit.";
+	throw cet::exception("Hit") << "Cannot determine correct WireID for Hit.\n";
     }
 
     return fWireID;            
