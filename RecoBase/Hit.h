@@ -93,7 +93,7 @@ namespace recob {
       geo::View_t             View()                      const;
       art::Ptr<recob::Wire>   Wire()                      const;
       art::Ptr<raw::RawDigit> RawDigit()                  const;
-      geo::WireID	      WireID()		      	  const;
+      geo::WireID             WireID()                    const;
 
       friend std::ostream&  operator << (std::ostream & o, const Hit & a);
       friend bool           operator <  (const Hit & a, const Hit & b);

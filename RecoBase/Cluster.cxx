@@ -10,10 +10,9 @@
 #include "RecoBase/Cluster.h"
 
 #include <iomanip>
+#include <algorithm> // std::max
 
 #include "cetlib/exception.h"
-
-#include "TMath.h"
 
 namespace recob{
 
@@ -120,8 +119,8 @@ namespace recob{
     double dqdw = ((this->Charge()*dQdW()) + (a.Charge()*a.dQdW()))/(this->Charge() + a.Charge());
 
     //hits.sort();//sort the PtrVector to organize Hits of new Cluster
-    double sigdtdw = TMath::Max(SigmadTdW(), a.SigmadTdW());
-    double sigdqdw = TMath::Max(SigmadQdW(), a.SigmadQdW());
+    double sigdtdw = std::max(SigmadTdW(), a.SigmadTdW());
+    double sigdqdw = std::max(SigmadQdW(), a.SigmadQdW());
 
     return Cluster (//hits,
       start[0], sigstart[0],
