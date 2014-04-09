@@ -7,12 +7,11 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <iomanip>
-
 #include "RecoBase/Cluster.h"
 
-#include "messagefacility/MessageLogger/MessageLogger.h"
+#include <iomanip>
+
+#include "cetlib/exception.h"
 
 #include "TMath.h"
 
@@ -25,6 +24,7 @@ namespace recob{
     , fdQdW(0.)
     , fID(-1)
     , fView(geo::kUnknown)
+    , fPlaneID()
   {
 
   }
@@ -38,7 +38,8 @@ namespace recob{
        double dQdW, double sigmadQdW,
        double totalQ,
        geo::View_t view,
-       int id)
+       int id,
+       const geo::PlaneID& planeID)
     : fTotalCharge(totalQ)
     , fdTdW(dTdW)
     , fdQdW(dQdW)
@@ -46,6 +47,7 @@ namespace recob{
     , fSigmadQdW(sigmadQdW)
     , fID(id)
     , fView(view)
+    , fPlaneID(planeID)
   {
 
     fStartPos.push_back(startWire);
@@ -59,10 +61,29 @@ namespace recob{
     fSigmaEndPos.push_back(sigmaEndTime);
   }
 
+  // Version with default plane ID (legacy)
+  Cluster::Cluster(double startWire, double sigmaStartWire,
+       double startTime, double sigmaStartTime,
+       double endWire, double sigmaEndWire,
+       double endTime, double sigmaEndTime,
+       double dTdW, double sigmadTdW,
+       double dQdW, double sigmadQdW,
+       double totalQ,
+       geo::View_t view,
+       int id)
+    : Cluster(startWire, sigmaStartWire, startTime, sigmaStartTime,
+              endWire, sigmaEndWire, endTime, sigmaEndTime,
+              dTdW, sigmadTdW, dQdW, sigmadQdW, totalQ, view, id, geo::PlaneID())
+    {}
+
   //----------------------------------------------------------------------
   //  Addition operator.
   //
-  Cluster Cluster::operator +(Cluster a)
+  // The two clusters must have the same view and must lay on the same plane.
+  // If one of the clusters has an invalid plane, the sum will inherit the
+  // other's plane. If both are invalid, sum will also have an invalid plane.
+  //
+  Cluster Cluster::operator +(const Cluster& a)
   {
 
     // throw exception if the clusters are not from the same view
@@ -70,6 +91,10 @@ namespace recob{
       throw cet::exception("Cluster+operator") << "Attempting to sum clusters from "
                  << "different views is not allowed\n";
 
+    if ( a.hasPlane() && hasPlane() && (a.Plane() != Plane()))
+      throw cet::exception("Cluster+operator") << "Attempting to sum clusters from "
+                 << "different planes is not allowed\n";
+    
     // check the start and end positions - for now the
     // smallest wire number means start position, largest means end position
     std::vector<double> astart(a.StartPos());
@@ -98,20 +123,20 @@ namespace recob{
     double sigdtdw = TMath::Max(SigmadTdW(), a.SigmadTdW());
     double sigdqdw = TMath::Max(SigmadQdW(), a.SigmadQdW());
 
-    Cluster sum(//hits,
-    start[0], sigstart[0],
-    start[1], sigstart[1],
-    end[0],   sigend[0],
-    end[1],   sigend[1],
-    dtdw, sigdtdw,
-    dqdw, sigdqdw,
-    this->Charge() + a.Charge(),
-    this->View(),
-    ID());
+    return Cluster (//hits,
+      start[0], sigstart[0],
+      start[1], sigstart[1],
+      end[0],   sigend[0],
+      end[1],   sigend[1],
+      dtdw, sigdtdw,
+      dqdw, sigdqdw,
+      this->Charge() + a.Charge(),
+      this->View(),
+      ID(),
+      hasPlane()? Plane(): a.Plane()
+      );
 
-    return sum;
-
-  }
+  } // Cluster::operator+ ()
 
   //----------------------------------------------------------------------
   // ostream operator.
@@ -120,7 +145,10 @@ namespace recob{
   {
     o << std::setiosflags(std::ios::fixed) << std::setprecision(2);
     o << "Cluster ID "    << std::setw(5)  << std::right << c.ID()
-      << " : View = "     << std::setw(3)  << std::right << c.View()
+      << " : Cryo = "     << std::setw(3)  << std::right << c.Plane().Cryostat
+      << " TPC = "        << std::setw(3)  << std::right << c.Plane().TPC
+      << " Plane = "      << std::setw(3)  << std::right << c.Plane().Plane
+      << " View = "       << std::setw(3)  << std::right << c.View() 
       << " StartWire = "  << std::setw(7)  << std::right << c.StartPos()[0]
       << " EndWire = "    << std::setw(7)  << std::right << c.EndPos()[0]
       << " StartTime = "  << std::setw(9)  << std::right << c.StartPos()[1]
@@ -138,6 +166,8 @@ namespace recob{
   //
   bool operator < (const Cluster & a, const Cluster & b)
   {
+    if (a.hasPlane() && b.hasPlane() && a.Plane() != b.Plane())
+      return a.Plane() < b.Plane();
     if(a.View() != b.View())
       return a.View() < b.View();
     if(a.ID() != b. ID())
