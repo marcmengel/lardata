@@ -36,7 +36,7 @@ namespace recob {
     std::vector<double>        fSigmaEndPos;    ///< start of cluster in (wire, tdc) plane
     int                        fID;             ///< cluster's ID
     geo::View_t                fView;           ///< view for this cluster
-    geo::PlaneID               fPlaneID;        ///< location of the cluster (cryo, tdc, plane)
+    geo::PlaneID               fPlaneID;        ///< location of the start of the cluster (cryo, tdc, plane)
 
 #ifndef __GCCXML__
 
