@@ -8,7 +8,6 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include <cassert>
 #include <cmath>
 #include "RecoObjects/PropYZPlane.h"
 #include "RecoObjects/SurfYZPlane.h"
@@ -103,7 +102,6 @@ namespace trkf {
 
     if(dir1 == Surface::UNKNOWN)
       return result;
-    assert(dir1 == Surface::FORWARD || dir1 == Surface::BACKWARD);
 
     // Calculate initial position in the destination coordinate
     // system.
@@ -135,22 +133,19 @@ namespace trkf {
     // Direction will flip if dw2dw1 < 0.;
 
     Surface::TrackDirection dir2;
-    if(dir1 == Surface::FORWARD) {
-      if(dw2dw1 > 0.)
-	dir2 = Surface::FORWARD;
-      else
-	dir2 = Surface::BACKWARD;
-    }
-    else {
-      if(dw2dw1 > 0.)
-	dir2 = Surface::BACKWARD;
-      else
-	dir2 = Surface::FORWARD;
-    }
-    assert(dir2 == Surface::FORWARD || dir2 == Surface::BACKWARD);
+    switch (dir1) {
+      case Surface::FORWARD:
+        dir2 = (dw2dw1 > 0.)? Surface::FORWARD: Surface::BACKWARD;
+        break;
+      case Surface::BACKWARD:
+        dir2 = (dw2dw1 > 0.)? Surface::BACKWARD: Surface::FORWARD;
+        break;
+      default:
+        throw cet::exception("PropYZPlane")
+          << "unexpected direction #" << ((int) dir1) << "\n";
+    } // switch
 
     // Calculate the signed propagation distance.
-
     double s = -w2 * std::sqrt(1. + dudw2*dudw2 + dvdw2*dvdw2);
     if(dir2 == Surface::BACKWARD)
       s = -s;
