@@ -4,6 +4,7 @@ art_make( NO_PLUGINS
           LIB_LIBRARIES DetectorProperties_service
 	                LArProperties_service
                         LArFFT_service
+			TimeService_service
 	                RecoBase
 	                Geometry
 	                ${ART_FRAMEWORK_CORE}
@@ -17,6 +18,14 @@ art_make( NO_PLUGINS
 			${CETLIB}
 			${ROOT_BASIC_LIB_LIST}
         )
+
+simple_plugin(TimeService "service"
+	      ${ART_UTILITIES}
+	      ${MF_MESSAGELOGGER}
+	      ${MF_UTILITIES}
+	      ${CETLIB}
+              BASENAME_ONLY
+)
 
 simple_plugin(DatabaseUtil "service"
 	      ${MF_MESSAGELOGGER}
