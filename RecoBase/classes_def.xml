@@ -11,7 +11,10 @@
 <lcgdict>
  <class name="std::vector< std::vector<double> >"                                             />
  <class name="std::vector<TVector3>"                                           		      />
- <class name="std::vector<TMatrixD>"                                           		      />
+ <class name="std::vector&lt;TMatrixT&lt;double&gt; &gt;"                                           		      />
+ <class name="geo::PlaneID"             ClassVersion="2"                      		      >
+  <version ClassVersion="2" checksum="1305837428"/>
+ </class>
  <class name="geo::WireID"             ClassVersion="11"                      		      >
   <version ClassVersion="11" checksum="363582492"/>
  </class>
