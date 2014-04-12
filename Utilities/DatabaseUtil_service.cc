@@ -143,7 +143,7 @@ int util::DatabaseUtil::SelectSingleFieldByQuery(std::vector<std::string> &value
 	  {
 	  string_val=PQgetvalue(result,i,0);
 	  value.push_back(string_val);
-	  mf::LogDebug("DatabaseUtil")<<" extracted value: "<<value[i] << "\n";
+	  LOG_DEBUG("DatabaseUtil")<<" extracted value: "<<value[i] << "\n";
 	  }
 	PQclear(result);
 	this->DisConnect();
