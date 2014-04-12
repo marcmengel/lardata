@@ -21,7 +21,8 @@
 namespace util {
   /**
      \class SimpleTimeService
-     This class provides
+     This class provides electronics various electronics clocks. Currently supports
+     three types of clocks: TPC, Optical, and Trigger in order to support MicroBooNE experiments.
   */
   class SimpleTimeService{
     
