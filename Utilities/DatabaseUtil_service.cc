@@ -52,7 +52,7 @@ int util::DatabaseUtil::Connect(int conn_wait)
        throw cet::exception("DataBaseUtil") << " DB connection failed\n";
    
   } else {
-    mf::LogDebug("DatabaseUtil")<<"Connected OK\n";
+    LOG_DEBUG("DatabaseUtil")<<"Connected OK\n";
     return 1;
   }
   return -1;
@@ -64,7 +64,7 @@ int util::DatabaseUtil::DisConnect()
   if(!fShouldConnect)
     return -1;
   //close connection
-  mf::LogDebug("DatabaseUtil")<<"Closing Connection \n";
+  LOG_DEBUG("DatabaseUtil")<<"Closing Connection \n";
   PQfinish(conn);
   return 1;
 }
@@ -123,7 +123,7 @@ int util::DatabaseUtil::SelectSingleFieldByQuery(std::vector<std::string> &value
   } 
   else if(PQresultStatus(result)!=PGRES_TUPLES_OK) {
     if(PQresultStatus(result)==PGRES_COMMAND_OK) 
-  	mf::LogDebug("DatabaseUtil")<<"Command executed OK, "<< PQcmdTuples(result) <<" rows affected\n";
+  	LOG_DEBUG("DatabaseUtil")<<"Command executed OK, "<< PQcmdTuples(result) <<" rows affected\n";
     else
 	mf::LogWarning("DatabaseUtil")<<"Command failed with code "
 	  <<PQresStatus(PQresultStatus(result)) <<", error message "
