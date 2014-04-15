@@ -15,3 +15,10 @@ void util::TimeService::reconfigure(fhicl::ParameterSet const& pset)
   fClockSpeedOptical = pset.get<double>( "ClockSpeedOptical" );
   fClockSpeedTrigger = pset.get<double>( "ClockSpeedTrigger" );
 }
+
+namespace util{
+
+  DEFINE_ART_SERVICE(TimeService)
+
+} // namespace util  
+
