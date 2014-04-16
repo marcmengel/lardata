@@ -19,34 +19,44 @@ namespace recob{
 
   //----------------------------------------------------------------------
   Wire::Wire()
-    : fSignal(0)
+    : fSignalROI(0)
   {
 
   }
 
   //----------------------------------------------------------------------
-  Wire::Wire(std::vector<float> siglist,
-	     art::Ptr<raw::RawDigit> &rawdigit)
-    : fSignal(siglist)
+  Wire::Wire(
+    std::vector< std::pair< unsigned int, std::vector<float> > > sigROIlist,
+    art::Ptr<raw::RawDigit> &rawdigit)
+    : fSignalROI(sigROIlist)
     , fRawDigit(rawdigit)
   {
-
-    ///put the pedestal subtracted values of the raw adc's into siglist
-    ///if siglist from initializer is empty
-    if( fSignal.empty() ){
-      std::vector<short> uncompressed(rawdigit->Samples());
-      raw::Uncompress(rawdigit->fADC, uncompressed, rawdigit->Compression());
-      for(size_t i = 0; i < uncompressed.size(); ++i)
-	fSignal[i] = 1.*uncompressed[i] - rawdigit->GetPedestal();
-      uncompressed.clear();
-    }
 
     art::ServiceHandle<geo::Geometry> geo;
     
     fView       = geo->View(rawdigit->Channel());
     fSignalType = geo->SignalType(rawdigit->Channel());
+    fMaxSamples = rawdigit->NADC();
 
   }
+
+  std::vector<float> Wire::Signal() const
+  {
+    // Return ROI signals in a zero padded vector of size that contains
+    // all ROIs
+
+    std::vector<float> sigTemp(fMaxSamples, 0.);
+    if(fSignalROI.size() == 0) return sigTemp;
+    
+    for(unsigned int ir = 0; ir < fSignalROI.size(); ++ir) {
+      unsigned int tStart = fSignalROI[ir].first;
+      for(unsigned int ii = 0; ii < fSignalROI[ir].second.size(); ++ii) 
+        sigTemp[tStart + ii] = fSignalROI[ir].second[ii];
+    } // ir
+    
+    return sigTemp;
+    
+  } // Wire::Signal
 
   //----------------------------------------------------------------------
   Wire::~Wire()

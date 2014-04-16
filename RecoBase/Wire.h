@@ -27,21 +27,27 @@ namespace recob {
       Wire(); // Default constructor
       ~Wire();
 
+      
 private:
-
-      std::vector<float>      fSignal;     ///< the calibrated signal waveform
+      std::vector< std::pair< unsigned int, std::vector<float> > > fSignalROI;
       art::Ptr<raw::RawDigit> fRawDigit;   ///< vector to index of raw digit for this wire
       geo::View_t             fView;       ///< view corresponding to the plane of this wire
       geo::SigType_t          fSignalType; ///< signal type of the plane for this wire
+      unsigned int            fMaxSamples; ///< max number of ADC samples possible on the wire
 
 #ifndef __GCCXML__
 
   public:
-      Wire(std::vector<float> siglist,
+
+      // ROI constructor
+      Wire(std::vector< std::pair< unsigned int, std::vector<float> > > sigROIlist,
            art::Ptr<raw::RawDigit> &rawdigit);
 
       // Get Methods
-      const std::vector<float>&  Signal()     const;
+      // zero-padded full length vector filled with ROIs
+      std::vector<float>  Signal() const;
+
+      const std::vector< std::pair< unsigned int, std::vector<float> > >& SignalROI()  const;
       size_t                     NSignal()    const;
       art::Ptr<raw::RawDigit>    RawDigit()   const;
       geo::View_t                View()       const;
@@ -55,8 +61,9 @@ private:
 
 #ifndef __GCCXML__
 
-inline const std::vector<float>&  recob::Wire::Signal()     const { return fSignal;             }
-inline size_t                     recob::Wire::NSignal()    const { return fSignal.size(); 	}
+inline const std::vector< std::pair< unsigned int, std::vector<float> > >& recob::Wire::SignalROI()
+  const { return fSignalROI;}
+inline size_t                     recob::Wire::NSignal()    const { return fMaxSamples; 	}
 inline art::Ptr<raw::RawDigit>    recob::Wire::RawDigit()   const { return fRawDigit;      	}
 inline geo::View_t                recob::Wire::View()       const { return fView;          	}
 inline geo::SigType_t             recob::Wire::SignalType() const { return fSignalType;         }
