@@ -57,8 +57,8 @@ namespace trkf {
 					       TrackError* noise_matrix) const
   {
     // Default result.
-
-    boost::optional<double> result;
+    
+    auto result = boost::make_optional<double>(false, 0.);
 
     // Get the inverse momentum (assumed to be track parameter four).
 

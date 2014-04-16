@@ -300,8 +300,9 @@ namespace trkf {
 
 	// Calculate incremental chisquare.
 
-	typename KVector<N>::type rtemp = prod(fRinv, fRvec);
-	fChisq = inner_prod(fRvec, rtemp);
+	// (workaround: if we use the copy constructor, gcc emits a spurious warning)
+//	typename KVector<N>::type rtemp = prod(fRinv, fRvec);
+	fChisq = inner_prod(fRvec, prod(fRinv, fRvec));
       }
     }
 
