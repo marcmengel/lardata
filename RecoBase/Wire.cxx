@@ -26,9 +26,8 @@ namespace recob{
 
   //----------------------------------------------------------------------
   Wire::Wire(
-    std::vector< std::pair< unsigned int, std::vector<float> > > sigROIlist,
     art::Ptr<raw::RawDigit> &rawdigit)
-    : fSignalROI(sigROIlist)
+    : fSignalROI()
     , fRawDigit(rawdigit)
   {
 
@@ -38,6 +37,21 @@ namespace recob{
     fSignalType = geo->SignalType(rawdigit->Channel());
     fMaxSamples = rawdigit->NADC();
 
+  }
+
+  //----------------------------------------------------------------------
+  Wire::Wire
+    (const RegionsOfInterest_t& sigROIlist, art::Ptr<raw::RawDigit> &rawdigit)
+    : Wire(rawdigit)
+  {
+    fSignalROI = sigROIlist;
+  }
+
+  Wire::Wire
+    (RegionsOfInterest_t&& sigROIlist, art::Ptr<raw::RawDigit> &rawdigit)
+    : Wire(rawdigit)
+  {
+    fSignalROI = sigROIlist; // should use the move assignment
   }
 
   std::vector<float> Wire::Signal() const
