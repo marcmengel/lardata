@@ -14,6 +14,10 @@
  <class name="std::vector< std::vector<double> >"                                             />
  <class name="std::vector<TVector3>"                                           		      />
  <class name="std::vector<TMatrixD>"                                           		      />
+ <class name="lar::range_t<unsigned long>" />
+ <class name="lar::sparse_vector<float>::datarange_t" />
+ <class name="std::vector< lar::sparse_vector<float>::datarange_t >" />
+ <class name="lar::sparse_vector<float>" />
  <class name="geo::WireID"             ClassVersion="11"                      		      >
   <version ClassVersion="11" checksum="363582492"/>
  </class>
@@ -35,7 +39,8 @@
  <class name="recob::EndPoint2D"       ClassVersion="13"	       	       		      >
   <version ClassVersion="13" checksum="595254911"/>
  </class>
- <class name="recob::Wire"             ClassVersion="16"	       	       		      >
+ <class name="recob::Wire"             ClassVersion="17"	       	       		      >
+  <version ClassVersion="17" checksum="4245857386"/>
   <version ClassVersion="16" checksum="2920613755"/>
   <version ClassVersion="15" checksum="1996069203"/>
   <version ClassVersion="14" checksum="421277707"/>

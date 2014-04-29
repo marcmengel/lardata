@@ -13,6 +13,7 @@
 #include <vector>
 #include <stdint.h>
 
+#include "Utilities/sparse_vector.h"
 #include "RawData/RawDigit.h"
 #include "SimpleTypesAndConstants/geo_types.h"
 
@@ -24,9 +25,8 @@ namespace recob {
 
   class Wire {
     public:
-      typedef std::pair< unsigned int, std::vector<float> > InterestingRegion_t;
         ///< a region of interest is a pair (TDC offset, readings)
-      typedef std::vector<InterestingRegion_t> RegionsOfInterest_t;
+      typedef lar::sparse_vector<float> RegionsOfInterest_t;
       
       Wire(); // Default constructor
       ~Wire();

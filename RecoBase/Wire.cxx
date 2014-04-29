@@ -36,7 +36,7 @@ namespace recob{
     fView       = geo->View(rawdigit->Channel());
     fSignalType = geo->SignalType(rawdigit->Channel());
     fMaxSamples = rawdigit->NADC();
-
+    fSignalROI.resize(fMaxSamples); // "filled" with empty samples
   }
 
   //----------------------------------------------------------------------
@@ -45,6 +45,7 @@ namespace recob{
     : Wire(rawdigit)
   {
     fSignalROI = sigROIlist;
+    fSignalROI.resize(fMaxSamples); // "filled" with empty samples
   }
 
   Wire::Wire
@@ -52,10 +53,13 @@ namespace recob{
     : Wire(rawdigit)
   {
     fSignalROI = sigROIlist; // should use the move assignment
+    fSignalROI.resize(fMaxSamples); // "filled" with empty samples
   }
 
   std::vector<float> Wire::Signal() const
   {
+    return { fSignalROI.begin(), fSignalROI.end() };
+#if 0
     // Return ROI signals in a zero padded vector of size that contains
     // all ROIs
 
@@ -67,8 +71,8 @@ namespace recob{
       for(unsigned int ii = 0; ii < fSignalROI[ir].second.size(); ++ii) 
         sigTemp[tStart + ii] = fSignalROI[ir].second[ii];
     } // ir
-    
     return sigTemp;
+#endif // 0
     
   } // Wire::Signal
 
