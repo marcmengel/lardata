@@ -59,18 +59,14 @@ namespace recob{
   std::vector<float> Wire::Signal() const
   {
     return { fSignalROI.begin(), fSignalROI.end() };
-#if 0
+#if 0 
+    // *** untested code ***
     // Return ROI signals in a zero padded vector of size that contains
     // all ROIs
 
     std::vector<float> sigTemp(fMaxSamples, 0.);
-    if(fSignalROI.size() == 0) return sigTemp;
-    
-    for(unsigned int ir = 0; ir < fSignalROI.size(); ++ir) {
-      unsigned int tStart = fSignalROI[ir].first;
-      for(unsigned int ii = 0; ii < fSignalROI[ir].second.size(); ++ii) 
-        sigTemp[tStart + ii] = fSignalROI[ir].second[ii];
-    } // ir
+    for(const auto& RoI: fSignalROI.get_ranges())
+      std::copy(RoI.begin(), RoI.end(), sigTemp.begin() + RoI.begin_index());
     return sigTemp;
 #endif // 0
     
