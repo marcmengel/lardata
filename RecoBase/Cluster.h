@@ -10,9 +10,7 @@
 #ifndef CLUSTER_H
 #define CLUSTER_H
 
-#ifndef __GCCXML__
-#include <iosfwd>
-#endif
+#include <ostream>
 #include <vector>
 
 #include "SimpleTypesAndConstants/geo_types.h"
@@ -38,19 +36,33 @@ namespace recob {
     std::vector<double>        fSigmaEndPos;    ///< start of cluster in (wire, tdc) plane
     int                        fID;             ///< cluster's ID
     geo::View_t                fView;           ///< view for this cluster
+    geo::PlaneID               fPlaneID;        ///< location of the start of the cluster (cryo, tdc, plane)
 
 #ifndef __GCCXML__
 
   public:
     Cluster(double startWire, double sigmaStartWire,
-	    double startTime, double sigmaStartTime,
-	    double endWire, double sigmaEndWire,
-	    double endTime, double sigmaEndTime,
-	    double dTdW, double sigmadTdW,
-	    double dQdW, double sigmadQdW,
-	    double totalQ,
-	    geo::View_t view,
-	    int id);
+            double startTime, double sigmaStartTime,
+            double endWire, double sigmaEndWire,
+            double endTime, double sigmaEndTime,
+            double dTdW, double sigmadTdW,
+            double dQdW, double sigmadQdW,
+            double totalQ,
+            geo::View_t view,
+            int id);
+    Cluster(double startWire, double sigmaStartWire,
+            double startTime, double sigmaStartTime,
+            double endWire, double sigmaEndWire,
+            double endTime, double sigmaEndTime,
+            double dTdW, double sigmadTdW,
+            double dQdW, double sigmadQdW,
+            double totalQ,
+            geo::View_t view,
+            int id,
+            const geo::PlaneID& planeID);
+    
+    //@{
+    /// Accessors
     double                Charge()        const;
     geo::View_t           View()          const;
     double                dTdW()          const;
@@ -62,14 +74,25 @@ namespace recob {
     std::vector<double>   SigmaStartPos() const;
     std::vector<double>   SigmaEndPos()   const;
     int                   ID()            const;
+    const geo::PlaneID&   Plane()         const; ///< returns the geometry plane of the cluster
+    //@}
+    
+    /// Returns whether geometry plane is valid
+    bool                  hasPlane()      const;
 
-    Cluster              operator +  (Cluster);
+    /// Moves the cluster to the specified plane
+    Cluster& MoveToPlane(const geo::PlaneID& new_plane);
+    
+    /// Makes the plane of this cluster invalid
+    Cluster& InvalidatePlane();
+    
+    Cluster              operator +  (const Cluster&);
     friend std::ostream& operator << (std::ostream& o, const Cluster& c);
     friend bool          operator <  (const Cluster & a, const Cluster & b);
-
+    
 #endif
-  };
-}
+  }; // class Cluster
+} // namespace recob
 
 #ifndef __GCCXML__
 
@@ -84,6 +107,14 @@ inline std::vector<double>   recob::Cluster::EndPos()        const { return fEnd
 inline std::vector<double>   recob::Cluster::SigmaStartPos() const { return fSigmaStartPos; }
 inline std::vector<double>   recob::Cluster::SigmaEndPos()   const { return fSigmaEndPos;   }
 inline int                   recob::Cluster::ID()            const { return fID;            }
+inline bool                  recob::Cluster::hasPlane()      const { return fPlaneID.isValid; }
+inline const geo::PlaneID&   recob::Cluster::Plane()         const { return fPlaneID;       }
+
+inline recob::Cluster&       recob::Cluster::MoveToPlane(const geo::PlaneID& new_plane)
+  { fPlaneID = new_plane; return *this; }
+
+inline recob::Cluster&       recob::Cluster::InvalidatePlane()
+  { return MoveToPlane(geo::PlaneID()); }
 
 #endif
 

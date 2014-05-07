@@ -24,10 +24,16 @@ extern "C" {
 
 //-----------------------------------------------
 util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& /* reg */) 
-  : fSize    (art::ServiceHandle<util::DetectorProperties>()->ReadOutWindowSize())    
+  : fSize    (pset.get< int        > ("FFTSize", 0))    
   , fOption  (pset.get< std::string >("FFTOption"))
   , fFitBins (pset.get< int         >("FitBins"))
 {
+
+  // Default to the readout window size if the user didn't input
+  // a specific size
+  if(fSize <= 0) 
+    fSize = art::ServiceHandle<util::DetectorProperties>()->ReadOutWindowSize();
+
   InitializeFFT();
 }
 
@@ -35,11 +41,8 @@ util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& /* 
 void util::LArFFT::InitializeFFT(){
 
   int i;
-  // the <= is to allow ArgoNeut to go from 2048 to 4096. 
-  // This may have to be revisited if another detector comes 
-  // in with a timetick number that is equal to a power of two.
-  for(i = 1; i <= fSize; i *= 2){ }   
-  mf::LogInfo("LArFFt") << "calculated FFT size: " << i << " det time ticks: " << fSize ;
+  for(i = 1; i < fSize; i *= 2){ }   
+  mf::LogInfo("LArFFt") << "Requested size: " << fSize << " FFT size: " << i ;
    
   fSize=i;
   fFreqSize = fSize/2+1;  

@@ -88,40 +88,43 @@ argoneut_simulation_services:
  BackTracker:        @local::argoneut_backtracker  
 }
 
-microboone_services:
-{
- ExptGeoHelperInterface:         @local::microboone_geometry_helper
- Geometry:                       @local::microboone_geo 	       
- DetectorProperties:             @local::microboone_detproperties 
- LArProperties:                  @local::microboone_properties    
- LArFFT:                         @local::microboone_larfft        
- DatabaseUtil:	                 @local::microboone_database      
- SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
- BackTracker:                    @local::microboone_backtracker  
-}
-
-
-microboone_simulation_services:
-{
- LArG4Parameters:                @local::microboone_largeantparameters 
- LArVoxelCalculator:             @local::microboone_larvoxelcalculator 
- ExptGeoHelperInterface:         @local::microboone_geometry_helper
- Geometry:                       @local::microboone_geo 	           
- DetectorProperties:             @local::microboone_detproperties      
- LArProperties:                  @local::microboone_properties	   
- LArFFT:                         @local::microboone_larfft             
- DatabaseUtil:	                 @local::microboone_database           
- SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
- MagneticField:                  @local::no_mag 	       
- BackTracker:                    @local::microboone_backtracker  
-}
-
-
-
-microboone_services_3windows:                               @local::microboone_services
-microboone_services_3windows.DetectorProperties:            @local::microboone_detproperties_3windows
-microboone_simulation_services_3windows:                    @local::microboone_simulation_services
-microboone_simulation_services_3windows.DetectorProperties: @local::microboone_detproperties_3windows
+#comment out services for microboone
+#please #include "services_microboone.fcl" instead which is in uboonecode
+# T.Yang 4/17/14
+#microboone_services:
+#{
+# ExptGeoHelperInterface:         @local::microboone_geometry_helper
+# Geometry:                       @local::microboone_geo 	       
+# DetectorProperties:             @local::microboone_detproperties 
+# LArProperties:                  @local::microboone_properties    
+# LArFFT:                         @local::microboone_larfft        
+# DatabaseUtil:	                 @local::microboone_database      
+# SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
+# BackTracker:                    @local::microboone_backtracker  
+#}
+#
+#
+#microboone_simulation_services:
+#{
+# LArG4Parameters:                @local::microboone_largeantparameters 
+# LArVoxelCalculator:             @local::microboone_larvoxelcalculator 
+# ExptGeoHelperInterface:         @local::microboone_geometry_helper
+# Geometry:                       @local::microboone_geo 	           
+# DetectorProperties:             @local::microboone_detproperties      
+# LArProperties:                  @local::microboone_properties	   
+# LArFFT:                         @local::microboone_larfft             
+# DatabaseUtil:	                 @local::microboone_database           
+# SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
+# MagneticField:                  @local::no_mag 	       
+# BackTracker:                    @local::microboone_backtracker  
+#}
+#
+#
+#
+#microboone_services_3windows:                               @local::microboone_services
+#microboone_services_3windows.DetectorProperties:            @local::microboone_detproperties_3windows
+#microboone_simulation_services_3windows:                    @local::microboone_simulation_services
+#microboone_simulation_services_3windows.DetectorProperties: @local::microboone_detproperties_3windows
 
 
 END_PROLOG

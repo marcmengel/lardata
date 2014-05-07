@@ -44,7 +44,7 @@ lbne35t_database.DBUser:	"lbne_reader"
 lbne35t_database.Port:	        5438
 lbne35t_database.PassFileName:  ".lpswd"
 lbne35t_database.ShouldConnect: false # enable it when DB is available
-lbnefd_database.ToughErrorTreatment: false # enable it when DB is available too
+lbne35t_database.ToughErrorTreatment: false # enable it when DB is available too
 
 lbnefd_database:               @local::standard_database
 lbnefd_database.DBName:	       "lbne_dev"
