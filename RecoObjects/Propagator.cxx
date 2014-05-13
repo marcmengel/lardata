@@ -306,6 +306,7 @@ namespace trkf {
 
 	trk.setVector(newvec);
 	trk.setSurface(psurf);
+	trk.setDirection(ref->getDirection());
 	if (!trk.getSurface()->isEqual(*(ref->getSurface())))
 	  throw cet::exception("Propagator") << __func__ << ": surface mismatch";
       }
