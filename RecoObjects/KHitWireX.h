@@ -70,6 +70,7 @@ namespace trkf {
     // Attributes.
 
     art::Ptr<recob::Hit> fHit;
+    double fPitch;              // Wire pitch.
   };
 }
 
