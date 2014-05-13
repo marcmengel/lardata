@@ -179,6 +179,16 @@ namespace trkf {
   {
     if(doTitle)
       out << "KTrack:\n";
+    double xyz[3];
+    double dir[3];
+    getPosition(xyz);
+    getMomentum(dir);
+    double p = std::sqrt(dir[0]*dir[0] + dir[1]*dir[1] + dir[2]*dir[2]);
+    if(p != 0.) {
+      dir[0] /= p;
+      dir[1] /= p;
+      dir[2] /= p;
+    }
     out << "  Surface direction = " << (fDir == Surface::FORWARD ?
 					"FORWARD" : 
 					( fDir == Surface::BACKWARD ?
@@ -193,6 +203,8 @@ namespace trkf {
       out << fVec(i);
     }
     out << "]\n";
+    out << "  Position:  [" << xyz[0] <<  ", " << xyz[1] << ", " << xyz[2] << "]\n";
+    out << "  Direction: [" << dir[0] <<  ", " << dir[1] << ", " << dir[2] << "]\n";
     out << "  X-Latitude  = " << XLatitude() << "\n";
     out << "  X-Longitude = " << XLongitude() << "\n";
     return out;
