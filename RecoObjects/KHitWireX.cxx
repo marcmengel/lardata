@@ -80,6 +80,10 @@ namespace trkf {
     trkf::KSymMatrix<1>::type merr(1);
     merr(0,0) = xerr * xerr;
     setMeasError(merr);
+
+    // Set the unique id from a combination of the channel number and the time.
+
+    fID = (channel % 200000) * 10000 + (int(std::abs(t)) % 10000);
   }
 
   /// Constructor.
@@ -102,21 +106,21 @@ namespace trkf {
     //unsigned int cstat, tpc, plane, wire;
     //geom->ChannelToWire(channel, cstat, tpc, plane, wire);
 	  
-	std::vector<geo::WireID> channelWireIDs = geom->ChannelToWire(channel);
+    std::vector<geo::WireID> channelWireIDs = geom->ChannelToWire(channel);
 
-	  for (auto i=channelWireIDs.begin(), e=channelWireIDs.end(); i!=e; ++i ) {
-		setMeasPlane(i->Plane);
-		//setMeasPlane(plane);
+    for (auto i=channelWireIDs.begin(), e=channelWireIDs.end(); i!=e; ++i ) {
+      setMeasPlane(i->Plane);
+      //setMeasPlane(plane);
 
-		// Update measurement vector and error matrix.
+      // Update measurement vector and error matrix.
 
-		trkf::KVector<1>::type mvec(1, x);
-		setMeasVector(mvec);
+      trkf::KVector<1>::type mvec(1, x);
+      setMeasVector(mvec);
 
-		trkf::KSymMatrix<1>::type merr(1);
-		merr(0,0) = xerr * xerr;
-		setMeasError(merr);
-	}
+      trkf::KSymMatrix<1>::type merr(1);
+      merr(0,0) = xerr * xerr;
+      setMeasError(merr);
+    }
   }
 
   /// Destructor.
@@ -144,6 +148,14 @@ namespace trkf {
     perr.resize(1, /* preserve */ false);
     perr.clear();
     perr(0,0) = tre.getError()(0,0);
+
+    // Update prediction error to include contribution from track slope.
+
+    art::ServiceHandle<geo::Geometry> geom;
+    double pitch = geom->WirePitch();
+    double slope = tre.getVector()(2);
+    double slopevar = pitch*pitch * slope*slope / 12.;
+    perr(0,0) += slopevar;
 
     // Hmatrix - du/du = 1., all others are zero.
 
