@@ -74,7 +74,8 @@ private:
 
 #endif
 
-    };
+  };
+
 }
 
 #ifndef __GCCXML__
@@ -94,6 +95,11 @@ inline std::vector<double> recob::OpFlash::WireWidths()             const { retu
 inline bool  recob::OpFlash::InBeamFrame()          const { return fInBeamFrame;     }
 inline int  recob::OpFlash::OnBeamTime()          const { return fOnBeamTime;     }
 
+namespace recob{
+  struct OpFlashSortByTime {
+    bool operator() (recob::OpFlash i, recob::OpFlash j){ return i.Time() < j.Time(); }
+  };
+}
 
 #endif
 

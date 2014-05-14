@@ -149,6 +149,14 @@ namespace trkf {
     perr.clear();
     perr(0,0) = tre.getError()(0,0);
 
+    // Update prediction error to include contribution from track slope.
+
+    art::ServiceHandle<geo::Geometry> geom;
+    double pitch = geom->WirePitch();
+    double slope = tre.getVector()(2);
+    double slopevar = pitch*pitch * slope*slope / 12.;
+    perr(0,0) += slopevar;
+
     // Hmatrix - du/du = 1., all others are zero.
 
     hmatrix.resize(1, size, /* preserve */ false);
