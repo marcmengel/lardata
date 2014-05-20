@@ -2,9 +2,7 @@
 /// Kazuhiro Terao <kazuhiro@nevis.columbia.edu>
 ///
 /// Equivalent of raw::RawDigit (waveform for TPC) for Optical system
-/// except the code is a complete copy from FIFOChannel
-/// William Seligman:
-///
+/// except the code is a complete copy from FIFOChannel written by William Seligman.
 /// William Seligman <seligman@nevis.columbia.edu>
 ///
 

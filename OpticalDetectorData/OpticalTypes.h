@@ -25,10 +25,13 @@ namespace optdata {
     kUndefined,
     kHighGain,
     kLowGain,
+    kLogicPulse,
     kFEMCosmicHighGain,
     kFEMCosmicLowGain,
+    kFEMCosmicLogicPulse,
     kFEMBeamHighGain,
     kFEMBeamLowGain,
+    kFEMBeamLogicPulse,
     kBeamPMTTrigger,
     kCosmicPMTTrigger,
   } Optical_Category_t;
