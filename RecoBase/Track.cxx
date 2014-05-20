@@ -72,6 +72,7 @@ namespace recob{
   //----------------------------------------------------------------------
   size_t Track::NumberdQdx(geo::View_t view) const
   {
+    if (fdQdx.size() == 0) return 0;
     if(view == geo::kUnknown){
       mf::LogWarning("Track") << "asking for unknown view to get number of dQdX entries"
 			      << " return the size for the 0th view vector";
