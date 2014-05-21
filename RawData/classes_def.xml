@@ -27,7 +27,8 @@
  <class name="raw::ExternalTrigger" ClassVersion="10"           >
   <version ClassVersion="10" checksum="3590754331"/>
  </class>
- <class name="raw::Trigger" ClassVersion="10"                   >
+ <class name="raw::Trigger" ClassVersion="11"                   >
+  <version ClassVersion="11" checksum="2734695139"/>
   <version ClassVersion="10" checksum="3347706756"/>
  </class>
  <class name="std::vector<raw::BeamInfo>       "                />
