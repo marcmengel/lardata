@@ -39,6 +39,7 @@ simple_plugin(DatabaseUtil "service"
 )
 
 simple_plugin(DetectorProperties "service"
+              TimeService_service
               LArProperties_service
               DatabaseUtil_service
               Geometry_service

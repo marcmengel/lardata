@@ -45,7 +45,7 @@ namespace util{
   //--------------------------------------------------------------------
   void DetectorProperties::reconfigure(fhicl::ParameterSet const& p)
   {
-    fSamplingRate             = p.get< double        >("SamplingRate"     );
+    //fSamplingRate             = p.get< double        >("SamplingRate"     );
     fTriggerOffset     	      = p.get< int    	     >("TriggerOffset"    );
     fElectronsToADC    	      = p.get< double 	     >("ElectronsToADC"   );
     fNumberTimeSamples 	      = p.get< unsigned int >("NumberTimeSamples");
@@ -57,6 +57,8 @@ namespace util{
     fInheritNumberTimeSamples = p.get<bool           >("InheritNumberTimeSamples", false);
     fXTicksParamsLoaded = false;
 
+    art::ServiceHandle<util::TimeService> ts;
+    fTPCClock = ts->TPCClock();
     // Save the parameter set.
     fPS = p;
 

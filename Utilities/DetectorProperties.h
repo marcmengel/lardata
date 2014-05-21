@@ -13,7 +13,7 @@
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-
+#include "Utilities/TimeService.h"
 
 ///General LArSoft Utilities
 namespace util{
@@ -27,7 +27,7 @@ namespace util{
 
       // Accessors.
 
-      double       SamplingRate()      const { return fSamplingRate;   }
+      double       SamplingRate()      const { return fTPCClock.TickPeriod(); }
       double       ElectronsToADC()    const { return fElectronsToADC; }
       unsigned int NumberTimeSamples() const { return fNumberTimeSamples; }
       unsigned int ReadOutWindowSize() const { return fReadOutWindowSize; }
@@ -44,10 +44,10 @@ namespace util{
 
       // The following methods convert between TDC counts (SimChannel time) and
       // ticks (RawDigit/Wire time).
-      double             ConvertTDCToTicks(double tdc) const {
-	return fNumberTimeSamples == fReadOutWindowSize ? tdc : tdc - fReadOutWindowSize;}
-      double             ConvertTicksToTDC(double ticks) const {
-	return fNumberTimeSamples == fReadOutWindowSize ? ticks : ticks + fReadOutWindowSize;}
+      //double             ConvertTDCToTicks(double tdc) const {
+      //return fNumberTimeSamples == fReadOutWindowSize ? tdc : tdc - fReadOutWindowSize;}
+      //double             ConvertTicksToTDC(double ticks) const {
+      //return fNumberTimeSamples == fReadOutWindowSize ? ticks : ticks + fReadOutWindowSize;}
 
 
     private:
@@ -81,6 +81,8 @@ namespace util{
       fhicl::ParameterSet   fPS;       ///< Original parameter set.
 
       bool	   fAlreadyReadFromDB; ///< tests whether the values have alread been picked up from the Database
+
+      ::util::ElecClock fTPCClock;     ///< TPC electronics clock
     }; // class DetectorProperties
 } //namespace utils
 DECLARE_ART_SERVICE(util::DetectorProperties, LEGACY)
