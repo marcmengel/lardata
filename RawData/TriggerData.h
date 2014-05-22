@@ -48,9 +48,9 @@ namespace raw {
 
     /// Trigger number
     unsigned int TriggerNumber()          const { return fTriggerNumber;       }
-    /// Trigger time w.r.t. electronics clock T0 in ns
+    /// Trigger time w.r.t. electronics clock T0 in us
     double       TriggerTime  ()          const { return fTriggerTime;         }
-    /// BeamGate time w.r.t. electronics clock T0 in ns
+    /// BeamGate time w.r.t. electronics clock T0 in us
     double       BeamGateTime ()          const { return fBeamGateTime;        }
     /// Trigger Bits
     unsigned int TriggerBits  ()          const { return fTriggerBits;         }
