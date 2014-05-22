@@ -2,7 +2,10 @@ BEGIN_PROLOG
 
 standard_timeservice:
 {
-  G4RefTime:         0     # G4 time [ns] where electronics clock counting start 
+  TrigModuleName:     "triggersim"
+  InheritClockConfig: true
+  G4RefTime:         0     # G4 time [ns] where electronics clock counting start
+  TriggerOffsetTPC:  0     # Time offset for TPC readout start time w.r.t. trigger [us]
   FramePeriod:       0     # Frame period [ns]
   ClockSpeedTPC:     0     # TPC clock speed in GHz
   ClockSpeedOptical: 0     # Optical clock speed in GHz
