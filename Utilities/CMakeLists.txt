@@ -7,7 +7,7 @@ art_make( NO_PLUGINS
 			TimeService_service
 	                RecoBase
 	                Geometry
-	                ${ART_FRAMEWORK_CORE}
+                        ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
 			${ART_FRAMEWORK_SERVICES_REGISTRY}
 			${ART_PERSISTENCY_COMMON}
@@ -26,6 +26,9 @@ simple_plugin(TimeService "service"
               ${ART_FRAMEWORK_CORE}
 	      ${ART_FRAMEWORK_PRINCIPAL}
 	      ${ART_PERSISTENCY_ROOTDB}
+	      ${ART_PERSISTENCY_COMMON}
+	      ${ART_PERSISTENCY_PROVENANCE}
+	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
 	      ${FHICLCPP}
