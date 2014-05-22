@@ -27,7 +27,7 @@ namespace util{
 
       // Accessors.
 
-      double       SamplingRate()      const { return fTPCClock.TickPeriod(); }
+      double       SamplingRate()      const { return fTPCClock.TickPeriod() * 1.e3; }
       double       ElectronsToADC()    const { return fElectronsToADC; }
       unsigned int NumberTimeSamples() const { return fNumberTimeSamples; }
       unsigned int ReadOutWindowSize() const { return fReadOutWindowSize; }
