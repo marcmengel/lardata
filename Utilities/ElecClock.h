@@ -74,10 +74,10 @@ namespace util {
     /// Time (stored) in nano-second
     double Time() const { return fTime; }
 
-    /// Given sample & frame number in *this* clock, returns double precision time [ns]
+    /// Given sample & frame number in *this* clock, returns double precision time [us]
     double Time(int sample, int frame) const { return (sample / fFrequency + frame * fFramePeriod); }
 
-    /// Given time [ns] w.r.t. electronics clock counting, return discretized time in double precision
+    /// Given time [us] w.r.t. electronics clock counting, return discretized time in double precision
     double Time(double time) const { return Time(Sample(time),Frame(time)); }
 
     /// Given time in ticks w.r.t. electronics clock counting, return discretized time in double precision
@@ -92,13 +92,16 @@ namespace util {
     /// # of Ticks
     int Ticks() const { return Ticks(fTime); }
 
-    /// Given time [ns] w.r.t. electronics clock T0, return # of ticks
+    /// Given time [us] w.r.t. electronics clock T0, return # of ticks
     int Ticks(double time) const { return (int)(time * fFrequency); }
+
+    /// Given sample & frame returns # ticks
+    int Ticks(int sample, int frame) const { return sample + frame * FrameTicks(); }
 
     /// Sample number
     int Sample() const { return Sample(fTime); }
 
-    /// Given time [ns] w.r.t. electronics clock T0, return sample number
+    /// Given time [us] w.r.t. electronics clock T0, return sample number
     int Sample(double time) const { return (int)((time - Frame(time) * fFramePeriod) * fFrequency); }
 
     /// Given ticks w.r.t. electronics clock T0, return sample number
@@ -107,7 +110,7 @@ namespace util {
     /// Frame number
     int Frame() const { return Frame(fTime); }
 
-    /// Given time [ns] w.r.t. electronics clock T0, return frame number
+    /// Given time [us] w.r.t. electronics clock T0, return frame number
     int Frame(double time) const { return (int)(time / fFramePeriod); }
 
     /// Given ticks w.r.t. electronics clock T0, return frame number
