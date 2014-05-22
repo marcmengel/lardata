@@ -9,7 +9,7 @@ util::TimeService::TimeService(fhicl::ParameterSet const& pset, art::ActivityReg
     fTrigModuleName("")
 //----------------------------------------------------------------------------------------
 {
-  std::cout<<"\033[93m"<<"Constructor Start!!!"<<"\033[00m"<<std::endl;
+
   fConfigName.at(kG4RefTime)         = "G4RefTime";
   fConfigName.at(kTriggerOffsetTPC)  = "TriggerOffsetTPC";
   fConfigName.at(kFramePeriod)       = "FramePeriod";
@@ -24,14 +24,14 @@ util::TimeService::TimeService(fhicl::ParameterSet const& pset, art::ActivityReg
   reg.sPreProcessEvent.watch (this, &TimeService::preProcessEvent);
   reg.sPostOpenFile.watch    (this, &TimeService::postOpenFile );
   reg.sPreBeginRun.watch     (this, &TimeService::preBeginRun  );
-  std::cout<<"\033[93m"<<"Constructor End!!!"<<"\033[00m"<<std::endl;
+
 }
 
 //------------------------------------------------------------------
 void util::TimeService::reconfigure(fhicl::ParameterSet const& pset)
 //------------------------------------------------------------------
 {
-  std::cout<<"\033[93m"<<"reconfigure Start!!!"<<"\033[00m"<<std::endl;
+
   // Read fcl parameters
   fTrigModuleName                     = pset.get< std::string >( "TrigModuleName"                           );
   fInheritClockConfig                 = pset.get< bool        >( "InheritClockConfig"                       );
@@ -46,14 +46,14 @@ void util::TimeService::reconfigure(fhicl::ParameterSet const& pset)
   fBeamGateTime = fTriggerTime = 0;
 
   ApplyParams();
-  std::cout<<"\033[93m"<<"reconfigure End!!!"<<"\033[00m"<<std::endl;
+
 }
 
 //-----------------------------------
 void util::TimeService::ApplyParams()
 //-----------------------------------
 {
-  std::cout<<"\033[93m"<<"ApplyParams Start!!!"<<"\033[00m"<<std::endl;
+
   fG4RefTime   = fConfigValue.at(kG4RefTime);
   fFramePeriod = fConfigValue.at(kFramePeriod);
   fTriggerOffsetTPC = fConfigValue.at(kTriggerOffsetTPC);
@@ -61,14 +61,13 @@ void util::TimeService::ApplyParams()
   fTPCClock     = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedTPC     ) );
   fOpticalClock = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedOptical ) );
   fTriggerClock = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedTrigger ) );
-  std::cout<<"\033[93m"<<"ApplyParams End!!!"<<"\033[00m"<<std::endl;
+
 }
 
 //------------------------------------------------------------
 void util::TimeService::preProcessEvent(const art::Event& evt)
 //------------------------------------------------------------
 {
-  std::cout<<"\033[93m"<<"preProcessEvent Start!!!"<<"\033[00m"<<std::endl;
   art::Handle<std::vector<raw::Trigger> > trig_handle;
   evt.getByLabel(fTrigModuleName, trig_handle);
 
@@ -87,7 +86,6 @@ void util::TimeService::preProcessEvent(const art::Event& evt)
   SetTriggerTime(trig_ptr->TriggerTime(),
 		 trig_ptr->BeamGateTime() );
 
-  std::cout<<"\033[93m"<<"preProcessEvent End!!!"<<"\033[00m"<<std::endl;
   return;
 }
 
@@ -95,7 +93,7 @@ void util::TimeService::preProcessEvent(const art::Event& evt)
 void util::TimeService::preBeginRun(art::Run const& run)
 //------------------------------------------------------
 {
-  std::cout<<"\033[93m"<<"preBeginRun Start!!!"<<"\033[00m"<<std::endl;
+
   int nrun = run.id().run();
   art::ServiceHandle<util::DatabaseUtil> DButil;
   if (nrun != 0){
@@ -112,14 +110,14 @@ void util::TimeService::preBeginRun(art::Run const& run)
 
   ApplyParams();
   fAlreadyReadFromDB=true;
-  std::cout<<"\033[93m"<<"preBeginRun End!!!"<<"\033[00m"<<std::endl;
+
 }
 
 //--------------------------------------------
 void util::TimeService::CheckDBStatus() const
 //--------------------------------------------
 {
-  std::cout<<"\033[93m"<<"CheckDBStatus Start!!!"<<"\033[00m"<<std::endl;
+
   bool fToughErrorTreatment= art::ServiceHandle<util::DatabaseUtil>()->ToughErrorTreatment();
   bool fShouldConnect =  art::ServiceHandle<util::DatabaseUtil>()->ShouldConnect();
   //Have not read from DB, should read and requested tough treatment
@@ -140,14 +138,14 @@ void util::TimeService::CheckDBStatus() const
 	      << " You have been warned !!! \n ";
   
   //In other cases, either already read from DB, or should not connect so it doesn't matter
-  std::cout<<"\033[93m"<<"CheckDBStatus End!!!"<<"\033[00m"<<std::endl;
+
 }
 
 //---------------------------------------------------------------
 void util::TimeService::postOpenFile(const std::string& filename)
 //---------------------------------------------------------------
 {
-  std::cout<<"\033[93m"<<"postOpenFile Start!!!"<<"\033[00m"<<std::endl;
+
   // Method inheriting from DetectorProperties
 
   if(!fInheritClockConfig) return;
@@ -189,10 +187,11 @@ void util::TimeService::postOpenFile(const std::string& filename)
 
 	  else if(config_value.at(i) != value_from_file)
 
-	    throw cet::exception(__FUNCTION__) << Form("Found historical value disagreement for %s ... %g != %g",
+	    throw cet::exception(__FUNCTION__) << Form("\033[95mFound historical value disagreement for %s ... %g != %g",
 						       fConfigName.at(i).c_str(),
 						       config_value.at(i),
-						       value_from_file);
+						       value_from_file)
+					       << "\033[00m" << std::endl;
 	  config_count.at(i) +=1;
 
 	}
@@ -205,10 +204,13 @@ void util::TimeService::postOpenFile(const std::string& filename)
 
 	if(config_count.at(i) && fConfigValue.at(i) != config_value.at(i)) {
 
-	  std::cout  << Form("Overriding configuration parameter %s ... %g (fcl) => %g (data file)",
+	  std::cout  << Form("\033[93mOverriding configuration parameter %s ... %g (fcl) => %g (data file)\033[00m",
 			     fConfigName.at(i).c_str(),
 			     fConfigValue.at(i),
-			     config_value.at(i));
+			     config_value.at(i))
+		     << std::endl;
+	  
+	  fConfigValue.at(i) = config_value.at(i);
 	  
 	}
     }
@@ -223,14 +225,13 @@ void util::TimeService::postOpenFile(const std::string& filename)
 
   // Reset parameters
   ApplyParams();
-  std::cout<<"\033[93m"<<"postOpenFile End!!!"<<"\033[00m"<<std::endl;
+
 }
 
 //------------------------------------------------------------------------
 bool util::TimeService::IsRightConfig(const fhicl::ParameterSet& ps) const
 //------------------------------------------------------------------------
 {
-  std::cout<<"\033[93m"<<"IsRightConfig Start!!!"<<"\033[00m"<<std::endl;
   std::string s;
   double d;
 
@@ -239,7 +240,6 @@ bool util::TimeService::IsRightConfig(const fhicl::ParameterSet& ps) const
 
     result = result && ps.get_if_present(fConfigName.at(i).c_str(),d);
 
-  std::cout<<"\033[93m"<<"IsRightConfig End!!!"<<"\033[00m"<<std::endl;
   return result;
 }
 
