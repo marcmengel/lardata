@@ -113,7 +113,7 @@ void DetectorProperties::checkDBstatus() const
 int  DetectorProperties::TriggerOffset()     const 
 {
   art::ServiceHandle<util::TimeService> ts;
-  return fTPCClock.Ticks(ts->TriggerOffsetTPC());
+  return fTPCClock.Ticks(ts->TriggerOffsetTPC() * -1.);
 }
 
 

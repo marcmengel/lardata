@@ -63,6 +63,9 @@ namespace util{
     /// Function to be executed @ file open
     void postOpenFile(const std::string& filename);
 
+    /// Function to report variable contents for cout-debugging
+    void debugReport() const;
+
   protected:
 
     /// Internal function to apply loaded parameters to member attributes

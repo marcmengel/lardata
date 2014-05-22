@@ -68,7 +68,6 @@ namespace util{
       double       fTimeOffsetV;       ///< coordinates to hit times on each
       double       fTimeOffsetZ;       ///< view
             
-      bool         fInheritTriggerOffset;     ///< Flag saying whether to inherit TriggerOffset
       bool         fInheritNumberTimeSamples; ///< Flag saying whether to inherit NumberTimeSamples
 
       double       fXTicksCoefficient; ///< Parameters for x<-->ticks

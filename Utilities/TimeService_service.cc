@@ -9,7 +9,7 @@ util::TimeService::TimeService(fhicl::ParameterSet const& pset, art::ActivityReg
     fTrigModuleName("")
 //----------------------------------------------------------------------------------------
 {
-
+  std::cout<<"\033[93m"<<"Constructor Start!!!"<<"\033[00m"<<std::endl;
   fConfigName.at(kG4RefTime)         = "G4RefTime";
   fConfigName.at(kTriggerOffsetTPC)  = "TriggerOffsetTPC";
   fConfigName.at(kFramePeriod)       = "FramePeriod";
@@ -24,13 +24,14 @@ util::TimeService::TimeService(fhicl::ParameterSet const& pset, art::ActivityReg
   reg.sPreProcessEvent.watch (this, &TimeService::preProcessEvent);
   reg.sPostOpenFile.watch    (this, &TimeService::postOpenFile );
   reg.sPreBeginRun.watch     (this, &TimeService::preBeginRun  );
-
+  std::cout<<"\033[93m"<<"Constructor End!!!"<<"\033[00m"<<std::endl;
 }
 
 //------------------------------------------------------------------
 void util::TimeService::reconfigure(fhicl::ParameterSet const& pset)
 //------------------------------------------------------------------
 {
+  std::cout<<"\033[93m"<<"reconfigure Start!!!"<<"\033[00m"<<std::endl;
   // Read fcl parameters
   fTrigModuleName                     = pset.get< std::string >( "TrigModuleName"                           );
   fInheritClockConfig                 = pset.get< bool        >( "InheritClockConfig"                       );
@@ -45,12 +46,14 @@ void util::TimeService::reconfigure(fhicl::ParameterSet const& pset)
   fBeamGateTime = fTriggerTime = 0;
 
   ApplyParams();
+  std::cout<<"\033[93m"<<"reconfigure End!!!"<<"\033[00m"<<std::endl;
 }
 
 //-----------------------------------
 void util::TimeService::ApplyParams()
 //-----------------------------------
 {
+  std::cout<<"\033[93m"<<"ApplyParams Start!!!"<<"\033[00m"<<std::endl;
   fG4RefTime   = fConfigValue.at(kG4RefTime);
   fFramePeriod = fConfigValue.at(kFramePeriod);
   fTriggerOffsetTPC = fConfigValue.at(kTriggerOffsetTPC);
@@ -58,13 +61,14 @@ void util::TimeService::ApplyParams()
   fTPCClock     = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedTPC     ) );
   fOpticalClock = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedOptical ) );
   fTriggerClock = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedTrigger ) );
+  std::cout<<"\033[93m"<<"ApplyParams End!!!"<<"\033[00m"<<std::endl;
 }
 
 //------------------------------------------------------------
 void util::TimeService::preProcessEvent(const art::Event& evt)
 //------------------------------------------------------------
 {
-
+  std::cout<<"\033[93m"<<"preProcessEvent Start!!!"<<"\033[00m"<<std::endl;
   art::Handle<std::vector<raw::Trigger> > trig_handle;
   evt.getByLabel(fTrigModuleName, trig_handle);
 
@@ -83,6 +87,7 @@ void util::TimeService::preProcessEvent(const art::Event& evt)
   SetTriggerTime(trig_ptr->TriggerTime(),
 		 trig_ptr->BeamGateTime() );
 
+  std::cout<<"\033[93m"<<"preProcessEvent End!!!"<<"\033[00m"<<std::endl;
   return;
 }
 
@@ -90,6 +95,7 @@ void util::TimeService::preProcessEvent(const art::Event& evt)
 void util::TimeService::preBeginRun(art::Run const& run)
 //------------------------------------------------------
 {
+  std::cout<<"\033[93m"<<"preBeginRun Start!!!"<<"\033[00m"<<std::endl;
   int nrun = run.id().run();
   art::ServiceHandle<util::DatabaseUtil> DButil;
   if (nrun != 0){
@@ -106,12 +112,14 @@ void util::TimeService::preBeginRun(art::Run const& run)
 
   ApplyParams();
   fAlreadyReadFromDB=true;
+  std::cout<<"\033[93m"<<"preBeginRun End!!!"<<"\033[00m"<<std::endl;
 }
 
 //--------------------------------------------
 void util::TimeService::CheckDBStatus() const
 //--------------------------------------------
 {
+  std::cout<<"\033[93m"<<"CheckDBStatus Start!!!"<<"\033[00m"<<std::endl;
   bool fToughErrorTreatment= art::ServiceHandle<util::DatabaseUtil>()->ToughErrorTreatment();
   bool fShouldConnect =  art::ServiceHandle<util::DatabaseUtil>()->ShouldConnect();
   //Have not read from DB, should read and requested tough treatment
@@ -132,12 +140,14 @@ void util::TimeService::CheckDBStatus() const
 	      << " You have been warned !!! \n ";
   
   //In other cases, either already read from DB, or should not connect so it doesn't matter
+  std::cout<<"\033[93m"<<"CheckDBStatus End!!!"<<"\033[00m"<<std::endl;
 }
 
 //---------------------------------------------------------------
 void util::TimeService::postOpenFile(const std::string& filename)
 //---------------------------------------------------------------
 {
+  std::cout<<"\033[93m"<<"postOpenFile Start!!!"<<"\033[00m"<<std::endl;
   // Method inheriting from DetectorProperties
 
   if(!fInheritClockConfig) return;
@@ -213,13 +223,14 @@ void util::TimeService::postOpenFile(const std::string& filename)
 
   // Reset parameters
   ApplyParams();
-
+  std::cout<<"\033[93m"<<"postOpenFile End!!!"<<"\033[00m"<<std::endl;
 }
 
 //------------------------------------------------------------------------
 bool util::TimeService::IsRightConfig(const fhicl::ParameterSet& ps) const
 //------------------------------------------------------------------------
 {
+  std::cout<<"\033[93m"<<"IsRightConfig Start!!!"<<"\033[00m"<<std::endl;
   std::string s;
   double d;
 
@@ -228,7 +239,36 @@ bool util::TimeService::IsRightConfig(const fhicl::ParameterSet& ps) const
 
     result = result && ps.get_if_present(fConfigName.at(i).c_str(),d);
 
+  std::cout<<"\033[93m"<<"IsRightConfig End!!!"<<"\033[00m"<<std::endl;
   return result;
+}
+
+//-----------------------------------------
+void util::TimeService::debugReport() const
+//-----------------------------------------
+{
+  std::cout << "fConfigValues contents: "<<std::endl;
+  for(size_t i=0;i<kInheritConfigTypeMax; ++i)
+
+    std::cout<<"    "<<fConfigName.at(i).c_str()<<" ... "<<fConfigValue.at(i)<<std::endl;
+
+  std::cout<<std::endl;
+  
+  std::cout 
+    << "Trigger  time @ " << fTriggerTime       << std::endl
+    << "BeamGate time @ " << fBeamGateTime      << std::endl
+    << "TrigOffsetTPC @ " << TriggerOffsetTPC() << std::endl
+    << "G4RefTime     @ " << fG4RefTime         << std::endl
+    << "TPC     Freq. @ " << fTPCClock.Frequency() << std::endl
+    << "Optical Freq. @ " << fOpticalClock.Frequency() << std::endl
+    << "Trigger Freq. @ " << fTriggerClock.Frequency() << std::endl
+    << "TPC start tick [tdc]             : " << TPCTick2TDC(0) <<std::endl
+    << "TPC start tick from trigger [us] : " << TPCTick2TrigTime(0) <<std::endl
+    << "TPC start tick from beam    [us] : " << TPCTick2BeamTime(0) <<std::endl
+    << "TPC tdc=0 in tick     : " << TPCTDC2Tick(0) << std::endl
+    << "TPC G4 time 0 in tick : " << TPCG4Time2Tick(0) << std::endl
+    << std::endl;
+  
 }
 
 namespace util{
