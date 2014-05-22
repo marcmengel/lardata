@@ -44,26 +44,23 @@ namespace util{
 
       // The following methods convert between TDC counts (SimChannel time) and
       // ticks (RawDigit/Wire time).
-      //double             ConvertTDCToTicks(double tdc) const {
-      //return fNumberTimeSamples == fReadOutWindowSize ? tdc : tdc - fReadOutWindowSize;}
-      //double             ConvertTicksToTDC(double ticks) const {
-      //return fNumberTimeSamples == fReadOutWindowSize ? ticks : ticks + fReadOutWindowSize;}
-
+      double             ConvertTDCToTicks(double tdc) const;
+      double             ConvertTicksToTDC(double ticks) const;
 
     private:
 
       // Callbacks.
+      void         checkDBstatus() const;
+
+      void         preProcessEvent(const art::Event& evt);
 
       void         postOpenFile(std::string const& filename);
-      void 	   preBeginRun(art::Run const& run);
 
-      void 	   checkDBstatus() 	const;
       void         CalculateXTicksParams();
 
       static bool  isDetectorProperties(const fhicl::ParameterSet& ps);
 
       double       fSamplingRate;      ///< in ns
-      int    	   fTriggerOffset;     ///< in # of clock ticks					       	 
       double 	   fElectronsToADC;    ///< conversion factor for # of ionization electrons to 1 ADC count
       unsigned int fNumberTimeSamples; ///< number of clock ticks per event
       unsigned int fReadOutWindowSize; ///< number of clock ticks per readout window

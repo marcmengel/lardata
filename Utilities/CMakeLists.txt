@@ -20,11 +20,17 @@ art_make( NO_PLUGINS
         )
 
 simple_plugin(TimeService "service"
+	      RawData
+              DatabaseUtil_service
 	      ${ART_UTILITIES}
+              ${ART_FRAMEWORK_CORE}
+	      ${ART_FRAMEWORK_PRINCIPAL}
+	      ${ART_PERSISTENCY_ROOTDB}
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
 	      ${FHICLCPP}
 	      ${CETLIB}
+	      ${SQLITE3}
 	      ${ROOT_BASIC_LIB_LIST}
               BASENAME_ONLY
 )
