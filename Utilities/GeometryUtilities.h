@@ -9,144 +9,269 @@
 #ifndef UTIL_GEOMETRYUTILITIES_H
 #define UTIL_GEOMETRYUTILITIES_H
 
-#include "fhiclcpp/ParameterSet.h"
+#include <TMath.h>
+#include <TLorentzVector.h>
 
-#include "Utilities/LArProperties.h"
+#include "PxUtils.h"
 #include "Geometry/Geometry.h"
+#include "Utilities/LArProperties.h"
 #include "Utilities/DetectorProperties.h"
+#include "Utilities/UtilException.h"
+#include "time.h"
+
+#include "RecoBase/Hit.h"
+#include "Geometry/CryostatGeo.h"
+#include "Geometry/PlaneGeo.h"
+#include "Geometry/WireGeo.h"
+#include "Geometry/TPCGeo.h"
+#include "SimpleTypesAndConstants/geo_types.h"
+#include "art/Persistency/Common/Ptr.h" 
+
+#include <climits>
+#include <iostream>
 #include <vector>
-
-namespace recob { 
-  class Hit; 
-}
-
 
 ///General LArSoft Utilities
 namespace util{
-  
-    class pxpoint;
-    class pxline;
-  
-    class GeometryUtilities {
-    public:
 
-
+  const double kINVALID_DOUBLE = std::numeric_limits<Double_t>::max();
+  
+  //class GeometryUtilities : public larlight::larlight_base {
+  class GeometryUtilities {
+    
+    /*
+  private:
+    /// Default constructor = private for singleton
     GeometryUtilities();
-    
+
+    /// Default destructor
     ~GeometryUtilities();
-      
+
+    static GeometryUtilities* _me;
+
+  public:
+    const GeonetryUtilities& GetME() {
+      if(!_me) _me = new GeometryUtilities;
+      return _me;
+    }
+
+    */
+
+  public:
+    /// Default constructor = private for singleton
+    GeometryUtilities();
+
+    /// Default destructor
+    ~GeometryUtilities();
+
+  public:
     
-    int Get3DaxisN(int iplane0,
-		   int iplane1,
-		   double omega0, 
-		   double omega1,
-		   double &phi,
-		   double &theta) const;
+    void Reconfigure();
     
-    double CalculatePitch(unsigned int iplane0,
-			  double phi,
-			  double theta) const;
-    double CalculatePitchPolar(unsigned int iplane0,
-			       double phi,
-			       double theta) const;
+    Int_t Get3DaxisN(Int_t iplane0,
+		     Int_t iplane1,
+		     Double_t omega0, 
+		     Double_t omega1,
+		     Double_t &phi,
+		     Double_t &theta) const;
     
-    double Get3DSpecialCaseTheta(int iplane0,
-				 int iplane1,
-				 double dw0, 
-				 double dw1) const;
+    Double_t CalculatePitch(UInt_t iplane0,
+			    Double_t phi,
+			    Double_t theta) const;
+    
+    Double_t CalculatePitchPolar(UInt_t iplane0,
+				 Double_t phi,
+				 Double_t theta) const;
+    
+    Double_t Get3DSpecialCaseTheta(Int_t iplane0,
+				   Int_t iplane1,
+				   Double_t dw0, 
+				   Double_t dw1) const;
         
     
-    double Get2Dangle(double wire,
-		      double time) const;
-    double Get2Dangle(double wireend,
-		      double wirestart,
-		      double timeend,
-		      double timestart) const;
+    Double_t Get2Dangle(Double_t deltawire,
+			Double_t deltatime) const;
+
+		      
+		      
+    Double_t Get2Dangle(Double_t wireend,
+			Double_t wirestart,
+			Double_t timeend,
+			Double_t timestart) const;
     
-    double Get2Dslope(double wire,
-		      double time) const;
-    double Get2Dslope(double wireend,
-		      double wirestart,
-		      double timeend,
-		      double timestart) const;
+						
+    double Get2Dangle(const util::PxPoint *endpoint,
+		      const util::PxPoint *startpoint) const;
     
-    double Get2DDistance(double wire1,
-			 double time1,
-			 double wire2,
-			 double time2) const;
-  
-    double Get2DPitchDistance(double angle,
-			      double inwire,
-			      double wire) const;
+    double Get2DangleFrom3D(unsigned int plane,double phi, double theta) const;
+		      
+    double Get2DangleFrom3D(unsigned int plane,TVector3 dir_vector) const;
+		      
+		      
+    Double_t Get2Dslope(Double_t deltawire,
+			Double_t deltatime) const;
     
-    double Get2DPitchDistanceWSlope(double slope,
-				    double inwire,
-				    double wire) const;
+    Double_t Get2Dslope(Double_t wireend,
+			Double_t wirestart,
+			Double_t timeend,
+			Double_t timestart) const;
+    
+    double Get2Dslope(const util::PxPoint *endpoint,
+		      const util::PxPoint *startpoint) const;
+		      
+    Double_t Get2DDistance(Double_t wire1,
+			   Double_t time1,
+			   Double_t wire2,
+			   Double_t time2) const;
+    
+    double Get2DDistance(const util::PxPoint *point1,
+			 const util::PxPoint *point2) const;			 
+			 
+			 
+    Double_t Get2DPitchDistance(Double_t angle,
+				Double_t inwire,
+				Double_t wire) const;
+    
+    Double_t Get2DPitchDistanceWSlope(Double_t slope,
+				      Double_t inwire,
+				      Double_t wire) const;
+    
+    Int_t GetPointOnLine(Double_t slope,
+			 Double_t intercept,
+			 Double_t wire1,
+			 Double_t time1,
+			 Double_t &wireout,
+			 Double_t &timeout) const;
+    
+    Int_t GetPointOnLine(Double_t slope,
+			 Double_t wirestart,
+			 Double_t timestart,
+			 Double_t wire1,
+			 Double_t time1,
+			 Double_t &wireout,
+			 Double_t &timeout) const;
+    
+    int GetPointOnLine(Double_t slope,
+		       const util::PxPoint *startpoint,
+		       const util::PxPoint *point1,
+		       util::PxPoint &pointout) const;
     
     int GetPointOnLine(double slope,
-		       double intercept,
-		       double wire1,
-		       double time1,
-		       double &wireout,
-		       double &timeout) const;
+	               double intercept,
+		       const util::PxPoint *point1,
+		       util::PxPoint &pointout) const;
+		       
+    Int_t GetPointOnLineWSlopes(Double_t slope,
+				Double_t intercept,
+				Double_t ort_intercept,
+				Double_t &wireout,
+				Double_t &timeout) const;
     
-    int GetPointOnLine(double slope,
-		       double wirestart,
-		       double timestart,
-		       double wire1,
-		       double time1,
-		       double &wireout,
-		       double &timeout) const;
+    Int_t GetPointOnLineWSlopes(double slope,
+				double intercept,
+				double ort_intercept,
+				util::PxPoint &pointonline) const;
     
-    int GetPointOnLineWSlopes(double slope,
-			      double intercept,
-			      double ort_intercept,
-			      double &wireout,
-			      double &timeout) const;
+
+    /*
+    const larlight::hit* FindClosestHit(const std::vector<larlight::hit*> &hitlist,
+					UInt_t wire,
+					Double_t time) const;
+    
+    UInt_t FindClosestHitIndex(const std::vector<larlight::hit*> &hitlist,
+			       UInt_t wirein,
+			       Double_t timein) const;			       
+    */			 
     
     recob::Hit* FindClosestHit(std::vector<art::Ptr< recob::Hit > > hitlist,
 			       unsigned int wire,
 			       double time) const;
     
     art::Ptr< recob::Hit > FindClosestHitPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
-				 unsigned int wirein,
-				 double timein) const;			       
+					     unsigned int wirein,
+					     double timein) const;
+
+    art::Ptr< recob::Hit > FindClosestHitEvdPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
+								   UInt_t wirein,
+								   Double_t timein) const;
 			       
-			       
-    pxpoint Get2DPointProjection(double *xyz,int plane) const;			       
-	
-    double GetTimeTicks(double x, int plane) const;
+    PxPoint Get2DPointProjection(Double_t *xyz,Int_t plane) const;			       
+
+    PxPoint Get2DPointProjectionCM(std::vector< double > xyz, int plane) const;
+
+    PxPoint Get2DPointProjectionCM(double *xyz, int plane) const;
     
-			       
+    PxPoint Get2DPointProjectionCM(TLorentzVector *xyz, int plane) const;
+    
+    Double_t GetTimeTicks(Double_t x, Int_t plane) const;
+    
+    /*
+    Int_t GetPlaneAndTPC(const larlight::hit* h,
+			 UInt_t &p,
+			 UInt_t &w) const;
+    */
+
     int GetPlaneAndTPC(recob::Hit*  a,
 		       unsigned int &p,
 		       unsigned int &cs,
 		       unsigned int &t,
 		       unsigned int &w) const;
 
-     int GetPlaneAndTPC(art::Ptr<recob::Hit> a,
-			unsigned int &p,
-			unsigned int &cs,
-			unsigned int &t,
-			unsigned int &w)  const;
-		       
-		       
-    int GetProjectedPoint(pxpoint p0,
-			  pxpoint p1,
-			  pxpoint &pN) const;
+    int GetPlaneAndTPC(art::Ptr<recob::Hit> a,
+		       unsigned int &p,
+		       unsigned int &cs,
+		       unsigned int &t,
+		       unsigned int &w)  const;
+    
+    Int_t GetProjectedPoint(const PxPoint *p0,
+			    const PxPoint *p1,
+			    PxPoint &pN) const;
+    
+    Int_t GetYZ(const PxPoint *p0,
+		const PxPoint *p1, 
+		Double_t* yz) const;
+    
+    Double_t PitchInView(UInt_t plane,
+			 Double_t phi,
+			 Double_t theta) const;
+    
+    void GetDirectionCosines(Double_t phi,
+			     Double_t theta,
+			     Double_t *dirs) const;
+    /*
+    void SelectLocalHitlist(const std::vector<larlight::hit*>& hitlist, 
+			    std::vector <larlight::hit*> &hitlistlocal_index,
+			    Double_t wire_start,
+			    Double_t time_start, 
+			    Double_t linearlimit,   
+			    Double_t ortlimit, 
+			    Double_t lineslopetest);
 
-    int GetYZ(pxpoint p0,
-	      pxpoint p1, 
-	      double* yz) const;
-    
-    double PitchInView(unsigned int plane,
-		       double phi,
-		       double theta) const;
-    
-    void GetDirectionCosines(double phi,
-			     double theta,
-			     double *dirs) const;
-			     
+    void SelectLocalHitlist(const std::vector<larlight::hit*>& hitlist, 
+			    std::vector <UInt_t> &hitlistlocal_index,
+			    Double_t wire_start,
+			    Double_t time_start, 
+			    Double_t linearlimit,   
+			    Double_t ortlimit, 
+			    Double_t lineslopetest);
+    */	
+    void SelectLocalHitlist(const std::vector<util::PxHit> &hitlist, 
+			    std::vector <const util::PxHit*> &hitlistlocal,
+			    util::PxPoint &startHit,
+			    Double_t& linearlimit,   
+			    Double_t& ortlimit, 
+			    Double_t& lineslopetest,
+			    util::PxHit &averageHit);
+
+    void SelectPolygonHitList(const std::vector<util::PxHit> &hitlist,
+			      std::vector <const util::PxHit*> &hitlistlocal);
+
+    std::vector<size_t> PolyOverlap( std::vector<const util::PxHit*> ordered_hits,
+				  std::vector<size_t> candidate_polygon);
+
+    bool Clockwise(double Ax, double Ay, double Bx, double By,
+		   double Cx, double Cy);
+
     void SelectLocalHitlist(std::vector< art::Ptr < recob::Hit> > hitlist, 
 			    std::vector < art::Ptr<recob::Hit> > &hitlistlocal,
 			    double wire_start,
@@ -154,92 +279,33 @@ namespace util{
 			    double linearlimit,   
 			    double ortlimit, 
 			    double lineslopetest);			     
-	
-   double TimeToCm() {return fTimetoCm;};
-   double WireToCm() {return fWiretoCm;};			     
-    
+
+    Double_t TimeToCm() const {return fTimetoCm;}
+    Double_t WireToCm() const {return fWiretoCm;}
+    Double_t WireTimeToCmCm() const {return fWireTimetoCmCm;}
+
   private:
 
-    art::ServiceHandle<geo::Geometry> geom; 
-    art::ServiceHandle<util::DetectorProperties> detp; 
-    art::ServiceHandle<util::LArProperties> larp; 
+    /*
+      larutil::Geometry* geom;
+      larutil::DetectorProperties* detp;
+      larutil::LArProperties* larp;
+    */
 
-    std::vector< double > vertangle;  //angle wrt to vertical
-    double fWirePitch;
-    double fTimeTick;
-    double fDriftVelocity;
-    unsigned int fNPlanes;
-    double fWiretoCm;
-    double fTimetoCm;
-    double fWireTimetoCmCm;
-    
-    }; // class GeometryUtilities
+    art::ServiceHandle<geo::Geometry> geom;
+    art::ServiceHandle<util::DetectorProperties> detp;
+    art::ServiceHandle<util::LArProperties> larp;
 
+    std::vector< Double_t > vertangle;  //angle wrt to vertical
+    Double_t fWirePitch;
+    Double_t fTimeTick;
+    Double_t fDriftVelocity;
+    UInt_t fNPlanes;
+    Double_t fWiretoCm;
+    Double_t fTimetoCm;
+    Double_t fWireTimetoCmCm;
 
+  }; // class GeometryUtilities
 
-
-    //helper class needed for the endpoint finding
-    class pxpoint {
-    public:
-      double w;
-      double t;
-      unsigned int plane;
-   
-      pxpoint(){
-	plane=0;
-	w=0;
-	t=0;
-      }
-      
-      pxpoint(int pp,double ww,double tt){
-	plane=pp;
-	w=ww;
-	t=tt;
-      }
-    
-    };
-    
-    
-    //helper class needed for the seeding
-    class pxline {
-    public:
-      
-      pxpoint pt0() { return pxpoint(plane,w0,t0); }
-      pxpoint pt1() { return pxpoint(plane,w1,t1); }
-      
-      double w0; ///<defined to be the vertex w-position
-      double t0; ///<defined to be the vertex t-position
-      double w1; ///<defined to be the ending w-position (of line or seed depending)
-      double t1; ///<defined to be the ending t-position (of line or seed depending)
-      unsigned int plane;
-   
-      pxline(int pp,double ww0,double tt0, double ww1, double tt1){
-	plane=pp;
-	w0=ww0;
-	t0=tt0;
-	w1=ww1;
-	t1=tt1;
-      }
-    
-      pxline(){
-	plane=0;
-	w0=0;
-	t0=0;
-	w1=0;
-	t1=0;
-      }
-    
-    friend ostream &operator<<(ostream &out, pxline pline)     //output
-     {
-        out<<"pl:"<<pline.plane <<  " ("<<pline.w0<<","<<pline.t0<<")->("<<pline.w1<<","<<pline.t1<<")";
-        return out;
-     }
-    
-    };
-    
-
-     
-     
-     
-} //namespace utils
+} //namespace larutils
 #endif // UTIL_DETECTOR_PROPERTIES_H
