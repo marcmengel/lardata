@@ -2,8 +2,9 @@ BEGIN_PROLOG
 
 standard_larfft:
 {
- FFTOption: ""   #Add option "P" for planning.
- FitBins:   20   #number of bins of correlation used for peak fit
+ FFTSize:    0   # Default to the readout window size
+ FFTOption: ""   # Add option "P" for planning.
+ FitBins:   20   # Number of bins of correlation used for peak fit
 }
 
 bo_larfft:         @local::standard_larfft
@@ -14,7 +15,5 @@ lbnefd_larfft:     @local::standard_larfft
 
 microboone_larfft:         @local::standard_larfft
 microboone_larfft.FitBins: 5
-
-
 
 END_PROLOG

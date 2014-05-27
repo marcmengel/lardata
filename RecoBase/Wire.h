@@ -13,6 +13,7 @@
 #include <vector>
 #include <stdint.h>
 
+#include "Utilities/sparse_vector.h"
 #include "RawData/RawDigit.h"
 #include "SimpleTypesAndConstants/geo_types.h"
 
@@ -24,24 +25,37 @@ namespace recob {
 
   class Wire {
     public:
+        ///< a region of interest is a pair (TDC offset, readings)
+      typedef lar::sparse_vector<float> RegionsOfInterest_t;
+      
       Wire(); // Default constructor
       ~Wire();
-
-private:
-
-      std::vector<float>      fSignal;     ///< the calibrated signal waveform
+      
+    private:
+      RegionsOfInterest_t fSignalROI;
       art::Ptr<raw::RawDigit> fRawDigit;   ///< vector to index of raw digit for this wire
       geo::View_t             fView;       ///< view corresponding to the plane of this wire
       geo::SigType_t          fSignalType; ///< signal type of the plane for this wire
+      unsigned int            fMaxSamples; ///< max number of ADC samples possible on the wire
 
 #ifndef __GCCXML__
 
-  public:
-      Wire(std::vector<float> siglist,
+  // partial constructor, used only as common part by the other constructors
+      Wire(art::Ptr<raw::RawDigit> &rawdigit);
+  
+    public:
+      
+      // ROI constructor
+      Wire(const RegionsOfInterest_t& sigROIlist,
+           art::Ptr<raw::RawDigit> &rawdigit);
+      Wire(RegionsOfInterest_t&& sigROIlist,
            art::Ptr<raw::RawDigit> &rawdigit);
 
       // Get Methods
-      const std::vector<float>&  Signal()     const;
+      // zero-padded full length vector filled with ROIs
+      std::vector<float>  Signal() const;
+
+      const RegionsOfInterest_t& SignalROI()  const;
       size_t                     NSignal()    const;
       art::Ptr<raw::RawDigit>    RawDigit()   const;
       geo::View_t                View()       const;
@@ -55,10 +69,11 @@ private:
 
 #ifndef __GCCXML__
 
-inline const std::vector<float>&  recob::Wire::Signal()     const { return fSignal;             }
-inline size_t                     recob::Wire::NSignal()    const { return fSignal.size(); 	}
-inline art::Ptr<raw::RawDigit>    recob::Wire::RawDigit()   const { return fRawDigit;      	}
-inline geo::View_t                recob::Wire::View()       const { return fView;          	}
+inline const recob::Wire::RegionsOfInterest_t&
+                                  recob::Wire::SignalROI()  const { return fSignalROI;          }
+inline size_t                     recob::Wire::NSignal()    const { return fMaxSamples;         }
+inline art::Ptr<raw::RawDigit>    recob::Wire::RawDigit()   const { return fRawDigit;           }
+inline geo::View_t                recob::Wire::View()       const { return fView;               }
 inline geo::SigType_t             recob::Wire::SignalType() const { return fSignalType;         }
 inline uint32_t                   recob::Wire::Channel()    const { return fRawDigit->Channel();}
 

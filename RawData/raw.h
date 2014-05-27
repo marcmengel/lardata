@@ -13,7 +13,7 @@
 
 namespace raw{
 
-  void Uncompress(const std::vector<short> adc, 
+  void Uncompress(const std::vector<short>& adc, 
 		  std::vector<short>      &uncompressed, 
 		  raw::Compress_t          compress);
   void Compress(std::vector<short> &adc, 
@@ -29,14 +29,14 @@ namespace raw{
 		raw::Compress_t     compress, 
 		unsigned int       &zerothreshold);
   void CompressHuffman(std::vector<short> &adc);
-  void UncompressHuffman(const std::vector<short> adc, 
+  void UncompressHuffman(const std::vector<short>& adc, 
 			 std::vector<short>      &uncompressed);
   void ZeroSuppression(std::vector<short> &adc, 
 		       unsigned int       &zerothreshold, 
 		       int                &nearestneighbor);
   void ZeroSuppression(std::vector<short> &adc, 
 		       unsigned int       &zerothreshold);
-  void ZeroUnsuppression(const std::vector<short> adc, 
+  void ZeroUnsuppression(const std::vector<short>& adc, 
 			 std::vector<short>      &uncompressed);
 }
 
