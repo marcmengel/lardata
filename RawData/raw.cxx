@@ -255,7 +255,7 @@ namespace raw {
 
   //----------------------------------------------------------
   // Reverse zero suppression function
-  void ZeroUnsuppression(const std::vector<short> adc, 
+  void ZeroUnsuppression(const std::vector<short>& adc, 
 			 std::vector<short>      &uncompressed)
   {
     const int lengthofadc = adc[0];
@@ -284,7 +284,7 @@ namespace raw {
 
   //----------------------------------------------------------
   // if the compression type is kNone, copy the adc vector into the uncompressed vector
-  void Uncompress(const std::vector<short> adc, 
+  void Uncompress(const std::vector<short>& adc, 
 		  std::vector<short>      &uncompressed, 
 		  raw::Compress_t          compress)
   {
@@ -527,7 +527,7 @@ namespace raw {
   //--------------------------------------------------------
   // need to decrement the bit you are looking at to determine the deltas as that is how
   // the bits are set
-  void UncompressHuffman(const std::vector<short> adc, 
+  void UncompressHuffman(const std::vector<short>& adc, 
 			 std::vector<short>      &uncompressed)
   {
     

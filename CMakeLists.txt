@@ -69,6 +69,9 @@ add_subdirectory(RecoBase)
 add_subdirectory(RecoObjects)
 add_subdirectory(Utilities)
 
+# tests
+add_subdirectory(test)
+
 # ups - table and config files
 add_subdirectory(ups)
 
