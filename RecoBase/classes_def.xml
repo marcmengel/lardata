@@ -13,7 +13,10 @@
  <class name="std::vector<std::pair<unsigned int, std::vector<float> > >"    />
  <class name="std::vector< std::vector<double> >"                                             />
  <class name="std::vector<TVector3>"                                           		      />
- <class name="std::vector<TMatrixD>"                                           		      />
+ <class name="std::vector&lt;TMatrixT&lt;double&gt; &gt;" />
+ <class name="geo::PlaneID"             ClassVersion="2"                                     >
+  <version ClassVersion="2" checksum="1305837428"/>
+ </class>
  <class name="lar::range_t<unsigned long>" />
  <class name="lar::sparse_vector<float>::datarange_t" />
  <class name="std::vector< lar::sparse_vector<float>::datarange_t >" />
