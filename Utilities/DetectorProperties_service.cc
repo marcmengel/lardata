@@ -58,6 +58,16 @@ namespace util{
   void DetectorProperties::reconfigure(fhicl::ParameterSet const& p)
   {
     //fSamplingRate             = p.get< double        >("SamplingRate"     );
+    double d;
+    int    i;
+    bool   b;
+    if(p.get_if_present<double>("SamplingRate",d))
+      throw cet::exception(__FUNCTION__) << "SamplingRate is a deprecated fcl parameter for DetectorProperties!";
+    if(p.get_if_present<int>("TriggerOffset",i))
+      throw cet::exception(__FUNCTION__) << "TriggerOffset is a deprecated fcl parameter for DetectorProperties!";
+    if(p.get_if_present<bool>("InheritTriggerOffset",b))
+      throw cet::exception(__FUNCTION__) << "InheritTriggerOffset is a deprecated fcl parameter for DetectorProperties!";
+
     fElectronsToADC    	      = p.get< double 	     >("ElectronsToADC"   );
     fNumberTimeSamples 	      = p.get< unsigned int >("NumberTimeSamples");
     fReadOutWindowSize 	      = p.get< unsigned int >("ReadOutWindowSize");
