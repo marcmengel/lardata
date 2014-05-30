@@ -157,7 +157,7 @@ namespace util {
 
     /// Given TPC time-tick (waveform index), returns time [us] w.r.t. trigger time stamp
     double TPCTick2TrigTime(double tick) const
-    { return fTPCClock.TickPeriod() * tick + TriggerOffsetTPC() + TriggerTime(); }
+    { return fTPCClock.TickPeriod() * tick + TriggerOffsetTPC() + TriggerTime() - TriggerTime(); }
     /// Given TPC time-tick (waveform index), returns time [us] w.r.t. beam gate time
     double TPCTick2BeamTime(double tick) const
     { return fTPCClock.TickPeriod() * tick + TriggerOffsetTPC() + TriggerTime() - BeamGateTime(); }
