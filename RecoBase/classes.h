@@ -46,6 +46,7 @@ namespace {
   art::PtrVector<recob::Vertex>     vpv;
   art::PtrVector<recob::OpHit>      opv;
   art::PtrVector<recob::OpFlash>    fpv;
+  art::PtrVector<recob::Wire>       wpv;
 }
 
 //
@@ -59,6 +60,8 @@ template class std::vector<recob::Shower>;
 template class std::vector<recob::Track>;
 template class std::vector<recob::Seed>;
 template class std::vector<recob::EndPoint2D>;
+template class std::pair<unsigned int, std::vector<float> >;
+template class std::vector<std::pair<unsigned int, std::vector<float> > >;
 template class std::vector<recob::Wire>;
 template class std::vector<recob::SpacePoint>;
 template class std::vector<recob::Vertex>;

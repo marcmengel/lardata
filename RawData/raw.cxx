@@ -91,7 +91,7 @@ namespace raw {
   void ZeroSuppression(std::vector<short> &adc, 
 		       unsigned int       &zerothreshold)
   {
-    const unsigned int adcsize = adc.size();
+    const int adcsize = adc.size();
     const int zerothresholdsigned = zerothreshold;
     
     std::vector<short> zerosuppressed(adc.size());
@@ -104,7 +104,7 @@ namespace raw {
  
     int blockcheck = 0;
 
-    for(unsigned int i = 0; i < adcsize; ++i){
+    for(int i = 0; i < adcsize; ++i){
       const int adc_current_value = std::abs(adc[i]);
     
       if(adc_current_value > zerothresholdsigned){
@@ -158,7 +158,7 @@ namespace raw {
 		       int                &nearestneighbor)
   {
    
-    const unsigned int adcsize = adc.size();
+    const int adcsize = adc.size();
     const int zerothresholdsigned = zerothreshold;
     
     std::vector<short> zerosuppressed(adcsize);
@@ -172,14 +172,28 @@ namespace raw {
     int blockstartcheck = 0;
     int endofblockcheck = 0;
 
-    for(unsigned int i = 0; i < adcsize; ++i){
+    for(int i = 0; i < adcsize; ++i){
       const int adc_current_value = std::abs(adc[i]);
-           
+
       if(blockstartcheck==0){
 	if(adc_current_value>zerothresholdsigned){
-	  blockbegin[nblocks] = (i - nearestneighbor > 0) ? i - nearestneighbor : 0;
-	  blocksize[nblocks] = nearestneighbor+1;
-	  blockstartcheck = 1;
+	  if(nblocks>0){
+	    if(i-nearestneighbor<=blockbegin[nblocks-1]+blocksize[nblocks-1]+1){
+	      nblocks--;
+	      blocksize[nblocks] = i - blockbegin[nblocks] + 1;
+	      blockstartcheck = 1;
+	    }
+	    else{
+	      blockbegin[nblocks] = (i - nearestneighbor > 0) ? i - nearestneighbor : 0;
+	      blocksize[nblocks] = i - blockbegin[nblocks] + 1;
+	      blockstartcheck = 1;
+	    }
+	  }	
+	  else{
+	    blockbegin[nblocks] = (i - nearestneighbor > 0) ? i - nearestneighbor : 0;
+	    blocksize[nblocks] = i - blockbegin[nblocks] + 1;
+	    blockstartcheck = 1;	    
+	  }
 	}
       }
       else if(blockstartcheck==1){
@@ -206,12 +220,12 @@ namespace raw {
     
     for(int i = 0; i < nblocks; ++i)
       zerosuppressedsize += blocksize[i];
-
- 
-      adc.resize(2+nblocks+nblocks+zerosuppressedsize);
-      zerosuppressed.resize(2+nblocks+nblocks+zerosuppressedsize);
-   
-     
+    
+    
+    adc.resize(2+nblocks+nblocks+zerosuppressedsize);
+    zerosuppressed.resize(2+nblocks+nblocks+zerosuppressedsize);
+    
+    
     int zerosuppressedcount = 0;
     for(int i = 0; i < nblocks; ++i){
       //zerosuppressedsize += blocksize[i];
@@ -220,26 +234,28 @@ namespace raw {
 	zerosuppressedcount++;
       }
     }
-
+    
     adc[0] = adcsize; //fill first entry in adc with length of uncompressed vector
     adc[1] = nblocks;
     for(int i = 0; i < nblocks; ++i){
       adc[i+2] = blockbegin[i];
       adc[i+nblocks+2] = blocksize[i];
     }
-
+    
+    
+    
     for(int i = 0; i < zerosuppressedsize; ++i)
       adc[i+nblocks+nblocks+2] = zerosuppressed[i];
- 
     
+    
+    // for(int i = 0; i < 2 + 2*nblocks + zerosuppressedsize; ++i)
+    //   std::cout << adc[i] << std::endl;
     //adc.resize(2+nblocks+nblocks+zerosuppressedsize);
   }
 
-
-
   //----------------------------------------------------------
   // Reverse zero suppression function
-  void ZeroUnsuppression(const std::vector<short> adc, 
+  void ZeroUnsuppression(const std::vector<short>& adc, 
 			 std::vector<short>      &uncompressed)
   {
     const int lengthofadc = adc[0];
@@ -250,7 +266,7 @@ namespace raw {
       uncompressed[i] = 0;
     }
     
-    unsigned int zerosuppressedindex = nblocks*2 + 2;
+    int zerosuppressedindex = nblocks*2 + 2;
 
     for(int i = 0; i < nblocks; ++i){ //loop over each nonzero block of the compressed vector
       
@@ -268,7 +284,7 @@ namespace raw {
 
   //----------------------------------------------------------
   // if the compression type is kNone, copy the adc vector into the uncompressed vector
-  void Uncompress(const std::vector<short> adc, 
+  void Uncompress(const std::vector<short>& adc, 
 		  std::vector<short>      &uncompressed, 
 		  raw::Compress_t          compress)
   {
@@ -511,7 +527,7 @@ namespace raw {
   //--------------------------------------------------------
   // need to decrement the bit you are looking at to determine the deltas as that is how
   // the bits are set
-  void UncompressHuffman(const std::vector<short> adc, 
+  void UncompressHuffman(const std::vector<short>& adc, 
 			 std::vector<short>      &uncompressed)
   {
     
