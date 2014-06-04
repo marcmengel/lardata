@@ -29,4 +29,9 @@
  </class>
  <class name="std::vector<optdata::PMTTrigger>"                        /> 
  <class name="art::Wrapper< std::vector<optdata::PMTTrigger> >"        /> 
+ <class name="optdata::OpticalRawDigit"        ClassVersion="10"       > 
+  <version ClassVersion="10" checksum="3273854562"/>
+ </class>
+ <class name="std::vector<optdata::OpticalRawDigit>"                   /> 
+ <class name="art::Wrapper< std::vector<optdata::OpticalRawDigit> >"   /> 
 </lcgdict>

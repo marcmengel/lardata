@@ -7,6 +7,7 @@
 #include "OpticalDetectorData/ChannelDataGroup.h"
 #include "OpticalDetectorData/FIFOChannel.h"
 #include "OpticalDetectorData/PMTTrigger.h"
+#include "OpticalDetectorData/OpticalRawDigit.h"
 
 //
 // Only include objects that we would like to be able to put into the event.
@@ -19,3 +20,4 @@ template class art::Wrapper< std::vector<optdata::ChannelData>      >;
 template class art::Wrapper< std::vector<optdata::ChannelDataGroup> >;
 template class art::Wrapper< std::vector<optdata::FIFOChannel>      >;
 template class art::Wrapper< std::vector<optdata::PMTTrigger>       >;
+template class art::Wrapper< std::vector<optdata::OpticalRawDigit>  >;

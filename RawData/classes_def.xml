@@ -27,12 +27,17 @@
  <class name="raw::ExternalTrigger" ClassVersion="10"           >
   <version ClassVersion="10" checksum="3590754331"/>
  </class>
+ <class name="raw::Trigger" ClassVersion="11"                   >
+  <version ClassVersion="11" checksum="2734695139"/>
+  <version ClassVersion="10" checksum="3347706756"/>
+ </class>
  <class name="std::vector<raw::BeamInfo>       "                />
  <class name="std::vector<raw::DAQHeader>      "                />
  <class name="std::vector<raw::RawDigit>       "                />
  <class name="std::vector<raw::AuxDetDigit>    "                />
  <class name="std::vector<raw::OpDetPulse>     "                />
  <class name="std::vector<raw::ExternalTrigger>"                />
+ <class name="std::vector<raw::Trigger>        "                />
  <class name="std::pair<std::string,std::vector<double> >"      />
  <class name="std::map<std::string,std::vector<double> >"       />
  <class name="art::Wrapper< raw::BeamInfo                     >"/>
@@ -45,7 +50,7 @@
  <class name="art::Wrapper< std::vector<raw::OpDetPulse>      >"/>
  <class name="art::Wrapper< std::vector<raw::AuxDetDigit>     >"/>
  <class name="art::Wrapper< std::vector<raw::ExternalTrigger> >"/>
-
+ <class name="art::Wrapper< std::vector<raw::Trigger>         >"/>
 
  <ioread 
     version="[-11]" 
