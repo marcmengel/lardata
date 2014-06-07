@@ -31,6 +31,8 @@ namespace util{
     kClockSpeedTPC,
     kClockSpeedOptical,
     kClockSpeedTrigger,
+    kDefaultTrigTime,
+    kDefaultBeamTime,
     kInheritConfigTypeMax
   };
 

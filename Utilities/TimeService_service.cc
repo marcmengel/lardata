@@ -16,7 +16,9 @@ util::TimeService::TimeService(fhicl::ParameterSet const& pset, art::ActivityReg
   fConfigName.at(kClockSpeedTPC)     = "ClockSpeedTPC";
   fConfigName.at(kClockSpeedOptical) = "ClockSpeedOptical";
   fConfigName.at(kClockSpeedTrigger) = "ClockSpeedTrigger";
-
+  fConfigName.at(kDefaultTrigTime)   = "DefaultTrigTime";
+  fConfigName.at(kDefaultBeamTime)   = "DefaultBeamTime";
+  
   fInheritClockConfig = false;
   fAlreadyReadFromDB  = false;
   reconfigure(pset);
@@ -41,6 +43,8 @@ void util::TimeService::reconfigure(fhicl::ParameterSet const& pset)
   fConfigValue.at(kClockSpeedTPC)     = pset.get< double      >( fConfigName.at(kClockSpeedTPC).c_str()     );
   fConfigValue.at(kClockSpeedOptical) = pset.get< double      >( fConfigName.at(kClockSpeedOptical).c_str() );
   fConfigValue.at(kClockSpeedTrigger) = pset.get< double      >( fConfigName.at(kClockSpeedTrigger).c_str() );
+  fConfigValue.at(kDefaultTrigTime)   = pset.get< double      >( fConfigName.at(kDefaultTrigTime).c_str()   );
+  fConfigValue.at(kDefaultBeamTime)   = pset.get< double      >( fConfigName.at(kDefaultBeamTime).c_str()   );
 
   // Save fcl parameters in a container to check for inheritance
   fBeamGateTime = fTriggerTime = 0;
@@ -57,7 +61,7 @@ void util::TimeService::ApplyParams()
   fG4RefTime   = fConfigValue.at(kG4RefTime);
   fFramePeriod = fConfigValue.at(kFramePeriod);
   fTriggerOffsetTPC = fConfigValue.at(kTriggerOffsetTPC);
-  
+
   fTPCClock     = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedTPC     ) );
   fOpticalClock = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedOptical ) );
   fTriggerClock = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedTrigger ) );
@@ -73,7 +77,9 @@ void util::TimeService::preProcessEvent(const art::Event& evt)
 
   if(!trig_handle.isValid()) {
     // Trigger simulation has not run yet!
-    SetTriggerTime(0,0);
+    SetTriggerTime(fConfigValue.at(kDefaultTrigTime),
+		   fConfigValue.at(kDefaultBeamTime)
+		   );
     return;
   }
 
