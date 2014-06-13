@@ -38,31 +38,31 @@ namespace util{
   
   //class GeometryUtilities : public larlight::larlight_base {
   class GeometryUtilities {
-    
-    /*
-  private:
-    /// Default constructor = private for singleton
-    GeometryUtilities();
-
-    /// Default destructor
-    ~GeometryUtilities();
-
-    static GeometryUtilities* _me;
 
   public:
-    const GeonetryUtilities& GetME() {
+
+    static const GeometryUtilities* GetME() {
       if(!_me) _me = new GeometryUtilities;
       return _me;
     }
 
-    */
-
-  public:
     /// Default constructor = private for singleton
     GeometryUtilities();
 
     /// Default destructor
     ~GeometryUtilities();
+    
+  private:
+
+    static GeometryUtilities* _me;
+
+    /*
+    /// Default constructor = private for singleton
+    GeometryUtilities();
+
+    /// Default destructor
+    ~GeometryUtilities();
+    */
 
   public:
     

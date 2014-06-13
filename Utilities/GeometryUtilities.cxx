@@ -11,7 +11,7 @@
 
 namespace util{
   
-  //GeometryUtilities* GeometryUtilities::_me = 0;
+  ::util::GeometryUtilities* ::util::GeometryUtilities::_me = 0;
 
   //--------------------------------------------------------------------
   GeometryUtilities::GeometryUtilities() 
