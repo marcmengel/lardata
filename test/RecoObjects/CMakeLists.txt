@@ -21,6 +21,14 @@ simple_plugin(PropTest "module"
 cet_test( SurfaceTest LIBRARIES RecoObjects )
 cet_test( TrackTest LIBRARIES RecoObjects )
 cet_test( LATest LIBRARIES RecoObjects )
+cet_test( PropTest HANDBUILT 
+  	  TEST_EXEC lar
+	  TEST_ARGS -c PropTest.fcl
+	  DATAFILES PropTest.fcl )
+cet_test( KalmanFilterTest HANDBUILT 
+  	  TEST_EXEC lar
+	  TEST_ARGS -c KalmanFilterTest.fcl
+	  DATAFILES KalmanFilterTest.fcl )
 
 install_headers()
 install_fhicl()
