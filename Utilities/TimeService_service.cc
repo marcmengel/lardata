@@ -85,7 +85,8 @@ void util::TimeService::preProcessEvent(const art::Event& evt)
 
   if(trig_handle->size()>1)
 
-    throw cet::exception(Form("Found %zu triggers (only 1 trigger/event supported)",trig_handle->size()));
+    throw cet::exception("TimeService::preProcessEvent")
+      << "Found " << trig_handle->size() << " triggers (only 1 trigger/event supported)\n";
 
   const art::Ptr<raw::Trigger> trig_ptr(trig_handle,0);
 
