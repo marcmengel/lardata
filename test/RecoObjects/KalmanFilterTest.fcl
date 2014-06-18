@@ -1,11 +1,11 @@
-#include "services.fcl"
+#include "services_microboone.fcl"
 #include "trackfinderalgorithms.fcl"
 
 process_name: KalmanFilterTest
 
 services:
 {
-  user: {Geometry: @local::microboone_geo}
+  user: @local::microboone_services_3windows
 }
 
 source:
