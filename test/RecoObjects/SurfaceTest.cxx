@@ -160,7 +160,7 @@ int main()
 
   xyz1[0] = 1.;
   xyz1[1] = 2.;
-  xyz2[3] = 3.;
+  xyz2[2] = 3.;
   surf4x.toLocal(xyz1, uvw);
   surf4x.toGlobal(uvw, xyz2);
   for(int i=0; i<3; ++i)

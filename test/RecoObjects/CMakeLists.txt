@@ -1,5 +1,3 @@
-cet_enable_asserts()
-
 simple_plugin(KalmanFilterTest "module"
               RecoObjects
 	      ${MF_MESSAGELOGGER}
@@ -20,7 +18,8 @@ simple_plugin(PropTest "module"
               BASENAME_ONLY
              )
 
+cet_test( SurfaceTest SOURCES SurfaceTest.cxx LIBRARIES RecoObjects )
+
 install_headers()
 install_fhicl()
 install_source()
-

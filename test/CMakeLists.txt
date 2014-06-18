@@ -10,3 +10,5 @@ cet_enable_asserts()
 
 cet_test( sparse_vector_test )
 
+add_subdirectory( RecoObjects )
+
