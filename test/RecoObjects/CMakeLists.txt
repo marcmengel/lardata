@@ -18,7 +18,8 @@ simple_plugin(PropTest "module"
               BASENAME_ONLY
              )
 
-cet_test( SurfaceTest SOURCES SurfaceTest.cxx LIBRARIES RecoObjects )
+cet_test( SurfaceTest LIBRARIES RecoObjects )
+cet_test( TrackTest LIBRARIES RecoObjects )
 
 install_headers()
 install_fhicl()
