@@ -20,6 +20,7 @@ simple_plugin(PropTest "module"
 
 cet_test( SurfaceTest LIBRARIES RecoObjects )
 cet_test( TrackTest LIBRARIES RecoObjects )
+cet_test( LATest LIBRARIES RecoObjects )
 
 install_headers()
 install_fhicl()
