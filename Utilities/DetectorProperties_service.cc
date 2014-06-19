@@ -30,8 +30,8 @@ namespace util{
 
     // Register for callbacks.
 
-    reg.sPostOpenFile.watch(this, &DetectorProperties::postOpenFile);
-    reg.sPreBeginRun.watch(this, &DetectorProperties::preBeginRun);
+    reg.sPostOpenFile.watch    (this, &DetectorProperties::postOpenFile);
+    reg.sPreProcessEvent.watch (this, &DetectorProperties::preProcessEvent);
   }
 
   //--------------------------------------------------------------------
@@ -39,23 +39,46 @@ namespace util{
   {
     
   }
-  
 
+  //------------------------------------------------------------
+  double DetectorProperties::ConvertTDCToTicks(double tdc) const
+  {
+    art::ServiceHandle<util::TimeService> ts;
+    return ts->TPCTDC2Tick(tdc);
+  }
+  
+  //--------------------------------------------------------------
+  double DetectorProperties::ConvertTicksToTDC(double ticks) const
+  {
+    art::ServiceHandle<util::TimeService> ts;
+    return ts->TPCTick2TDC(ticks);
+  }
 
   //--------------------------------------------------------------------
   void DetectorProperties::reconfigure(fhicl::ParameterSet const& p)
   {
-    fSamplingRate             = p.get< double        >("SamplingRate"     );
-    fTriggerOffset     	      = p.get< int    	     >("TriggerOffset"    );
+    //fSamplingRate             = p.get< double        >("SamplingRate"     );
+    double d;
+    int    i;
+    bool   b;
+    if(p.get_if_present<double>("SamplingRate",d))
+      throw cet::exception(__FUNCTION__) << "SamplingRate is a deprecated fcl parameter for DetectorProperties!";
+    if(p.get_if_present<int>("TriggerOffset",i))
+      throw cet::exception(__FUNCTION__) << "TriggerOffset is a deprecated fcl parameter for DetectorProperties!";
+    if(p.get_if_present<bool>("InheritTriggerOffset",b))
+      throw cet::exception(__FUNCTION__) << "InheritTriggerOffset is a deprecated fcl parameter for DetectorProperties!";
+
     fElectronsToADC    	      = p.get< double 	     >("ElectronsToADC"   );
     fNumberTimeSamples 	      = p.get< unsigned int >("NumberTimeSamples");
     fReadOutWindowSize 	      = p.get< unsigned int >("ReadOutWindowSize");
     fTimeOffsetU       	      = p.get< double 	     >("TimeOffsetU"      );
     fTimeOffsetV       	      = p.get< double 	     >("TimeOffsetV"      );
     fTimeOffsetZ       	      = p.get< double 	     >("TimeOffsetZ"      );
-    fInheritTriggerOffset     = p.get<bool           >("InheritTriggerOffset",     false);
     fInheritNumberTimeSamples = p.get<bool           >("InheritNumberTimeSamples", false);
     fXTicksParamsLoaded = false;
+
+    art::ServiceHandle<util::TimeService> ts;
+    fTPCClock = ts->TPCClock();
 
     // Save the parameter set.
     fPS = p;
@@ -63,29 +86,15 @@ namespace util{
     return;
   }
 
+  //-------------------------------------------------------------
+  void DetectorProperties::preProcessEvent(const art::Event& evt)
+  {
+    // Make sure TPC Clock is updated with TimeService (though in principle it shouldn't change
+    art::ServiceHandle<util::TimeService> ts;
+    fTPCClock = ts->TPCClock();
+  }
 
-  
-  //----------------------------------------------
-void DetectorProperties::preBeginRun(art::Run const& run)
-{
-    int nrun = run.id().run();
-    art::ServiceHandle<util::DatabaseUtil> DButil;
-    if (nrun != 0){
-
-    double inpvalue = 0.;
-
-    //get T0 for a given run. If it doesn't work return to default value.
-    if(DButil->GetTriggerOffsetFromDB(nrun,inpvalue)!=-1)
-      fTriggerOffset=inpvalue;
-    
-    }
-  else
-    mf::LogWarning("DetectorProperties") << "run number == 0, not extracting info from DB\n" ;
-
-  fAlreadyReadFromDB=true;
-}
-
-  //---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
 void DetectorProperties::checkDBstatus() const
 {
   bool fToughErrorTreatment= art::ServiceHandle<util::DatabaseUtil>()->ToughErrorTreatment();
@@ -113,8 +122,8 @@ void DetectorProperties::checkDBstatus() const
 //------------------------------------------------------------------------------------//
 int  DetectorProperties::TriggerOffset()     const 
 {
-  this->checkDBstatus();
-  return fTriggerOffset; 
+  art::ServiceHandle<util::TimeService> ts;
+  return fTPCClock.Ticks(ts->TriggerOffsetTPC() * -1.);
 }
 
 
@@ -299,7 +308,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 
     // Don't do anything if no parameters are supposed to be inherited.
 
-    if(!fInheritTriggerOffset && !fInheritNumberTimeSamples)
+    if(!fInheritNumberTimeSamples)
       return;
 
     // The only way to access art service metadata from the input file
@@ -316,8 +325,6 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 
 	// Loop over all stored ParameterSets.
 
-	int iTriggerOffset = 0;               // Combined value of TriggerOffset.
-	unsigned int nTriggerOffset = 0;      // Number of TriggerOffset parameters seen.
 	unsigned int iNumberTimeSamples = 0;  // Combined value of NumberTimeSamples.
 	unsigned int nNumberTimeSamples = 0;  // Number of NumberTimeSamples parameters seen.
 
@@ -330,25 +337,6 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 
 	  bool psok = isDetectorProperties(ps);
 	  if(psok) {
-
-	    // Check TriggerOffset
-
-	    if(fInheritTriggerOffset) {
-	      int newTriggerOffset = ps.get<int>("TriggerOffset");
-
-	      // Ignore parameter values that match the current configuration.
-
-	      if(newTriggerOffset != fPS.get<int>("TriggerOffset")) {
-		if(nTriggerOffset == 0)
-		  iTriggerOffset = newTriggerOffset;
-		else if(newTriggerOffset != iTriggerOffset) {
-		  throw cet::exception("DetectorProperties")
-		    << "Historical values of TriggerOffset do not agree: "
-		    << iTriggerOffset << " " << newTriggerOffset << "\n" ;
-		}
-		++nTriggerOffset;
-	      }
-	    }
 
 	    // Check NumberTimeSamples
 
@@ -374,16 +362,6 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 	// Done looping over parameter sets.
 	// Now decide which parameters we will actually override.
 
-	if(fInheritTriggerOffset && 
-	   nTriggerOffset != 0 &&
-	   iTriggerOffset != fTriggerOffset) {
-	  mf::LogInfo("DetectorProperties")
-	    << "Overriding configuration parameter TriggerOffset using historical value.\n"
-	    << "  Configured value:        " << fTriggerOffset << "\n"
-	    << "  Historical (used) value: " << iTriggerOffset << "\n";
-	  fTriggerOffset = iTriggerOffset;
-	}
-	
 	if(fInheritNumberTimeSamples && 
 	   nNumberTimeSamples != 0 && 
 	   iNumberTimeSamples != fNumberTimeSamples) {
@@ -396,7 +374,6 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
       }
 
       // Close file.
-
       if(file != 0) {
 	if(file->IsOpen())
 	  file->Close();
