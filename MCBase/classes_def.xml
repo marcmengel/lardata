@@ -1,0 +1,27 @@
+<lcgdict>
+
+<class name="sim::MCHit" ClassVersion="10" >
+ <version ClassVersion="10" checksum="2619511005"/>
+</class>
+<class name="sim::MCWire" ClassVersion="10" >
+ <version ClassVersion="10" checksum="929171689"/>
+</class>
+<class name="sim::MCHitCollection" ClassVersion="10" >
+ <version ClassVersion="10" checksum="4044179492"/>
+</class>
+<class name="sim::MCWireCollection" ClassVersion="10" >
+ <version ClassVersion="10" checksum="3609210914"/>
+</class>
+
+<class name="std::vector<sim::MCHit>" />
+<class name="art::Wrapper< std::vector<sim::MCHit> >" />
+
+<class name="std::vector<sim::MCWire>" />
+<class name="art::Wrapper< std::vector<sim::MCWire> >" />
+
+<class name="std::vector<sim::MCHitCollection>" />
+<class name="art::Wrapper< std::vector<sim::MCHitCollection> >" />
+
+<class name="std::vector<sim::MCWireCollection>" />
+<class name="art::Wrapper< std::vector<sim::MCWireCollection> >" />
+</lcgdict>
