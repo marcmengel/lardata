@@ -187,6 +187,16 @@ namespace util {
     { return G4ToElecTime(g4time) / fOpticalClock.TickPeriod(); }
 
     //
+    // Getters for time [us] (electronics clock counting ... in double precision)
+    //
+    /// Given TPC time-tick (waveform index), returns electronics clock [us]
+    double TPCTick2Time(double tick) const
+    { return TriggerTime() + TriggerOffsetTPC() + tick * fTPCClock.TickPeriod(); }
+    /// Given Optical time-tick (waveform index), sample and frame number, returns electronics clock [us]
+    double OpticalTick2Time(double tick, size_t sample, size_t frame) const
+    { return fOpticalClock.Time(sample,frame) + tick * fOpticalClock.TickPeriod(); }
+
+    //
     // Getters for time [ticks] (waveform index number)
     //
 
