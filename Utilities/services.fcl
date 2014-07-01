@@ -21,7 +21,7 @@ jp250L_services:
  LArFFT:                         @local::jp250L_larfft
  DatabaseUtil:                   @local::jp250L_database
  SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
- TimeService:                    @local::standard_timeservice
+ TimeService:                    @local::jp250L_timeservice
 }
 
 jp250L_simulation_services:
@@ -37,7 +37,7 @@ jp250L_simulation_services:
  DatabaseUtil:                   @local::jp250L_database
  BackTracker:                    @local::jp250L_backtracker
  SignalShapingServiceMicroBooNE: @local::microboone_signalshapingservice
- TimeService:                    @local::standard_timeservice
+ TimeService:                    @local::jp250L_timeservice
 }
 
 
@@ -49,7 +49,7 @@ csu40L_services:
  LArProperties:                  @local::standard_properties
  LArFFT:                         @local::standard_larfft
  DatabaseUtil:                   @local::standard_database
- TimeService:                    @local::standard_timeservice
+ TimeService:                    @local::csu40L_timeservice
 }
 
 csu40L_simulation_services:
@@ -64,7 +64,7 @@ csu40L_simulation_services:
  LArFFT:                         @local::standard_larfft
  DatabaseUtil:                   @local::standard_database
  BackTracker:                    @local::standard_backtracker
- TimeService:                    @local::standard_timeservice
+ TimeService:                    @local::csu40L_timeservice
 }
 
 argoneut_services:
@@ -76,7 +76,7 @@ argoneut_services:
  LArFFT:             @local::argoneut_larfft
  DatabaseUtil:       @local::argoneut_database
  BackTracker:        @local::argoneut_backtracker
- TimeService:        @local::standard_timeservice
+ TimeService:        @local::argoneut_timeservice
 }
 
 argoneut_simulation_services:
@@ -91,7 +91,7 @@ argoneut_simulation_services:
  LArFFT:             @local::argoneut_larfft
  DatabaseUtil:       @local::argoneut_database
  BackTracker:        @local::argoneut_backtracker
- TimeService:        @local::standard_timeservice
+ TimeService:        @local::argoneut_timeservice
 }
 
 #comment out services for microboone

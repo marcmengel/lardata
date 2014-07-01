@@ -14,4 +14,13 @@ standard_timeservice:
   DefaultBeamTime:   0     # Default beam gate time in electronics clock [us]
 }
 
+jp250L_timeservice: @local::standard_timeservice
+
+csu40L_timeservice: @local::standard_timeservice
+
+argoneut_timeservice: @local::standard_timeservice
+
+bo_timeservice: @local::standard_timeservice
+
+
 END_PROLOG
