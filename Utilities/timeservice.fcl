@@ -1,5 +1,6 @@
 BEGIN_PROLOG
 
+# the "standard" values are supposed to be good for ArgoNeuT
 standard_timeservice:
 {
   TrigModuleName:    ""
@@ -7,20 +8,25 @@ standard_timeservice:
   G4RefTime:         0     # G4 time [us] where electronics clock counting start
   TriggerOffsetTPC:  0     # Time offset for TPC readout start time w.r.t. trigger [us]
   FramePeriod:       1600  # Frame period [us]
-  ClockSpeedTPC:     2     # TPC clock speed in MHz
+  ClockSpeedTPC:     5.05  # TPC clock speed in MHz; 1 / 198.0 ns
   ClockSpeedOptical: 64    # Optical clock speed in MHz
   ClockSpeedTrigger: 16    # Trigger clock speed in MHz
   DefaultTrigTime:   0     # Default trigger time in electronics clock [us]
   DefaultBeamTime:   0     # Default beam gate time in electronics clock [us]
 }
 
+
 jp250L_timeservice: @local::standard_timeservice
+
 
 csu40L_timeservice: @local::standard_timeservice
 
+
 argoneut_timeservice: @local::standard_timeservice
 
+
 bo_timeservice: @local::standard_timeservice
+bo_timeservice.ClockSpeedTPC: 2.528445 # 1 / 395.5 ns
 
 
 END_PROLOG
