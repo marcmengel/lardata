@@ -45,7 +45,7 @@ void util::SignalShaping::Reset()
 
 //----------------------------------------------------------------------
 // Add a time domain response function.
-void util::SignalShaping::AddResponseFunction(const std::vector<double>& resp)
+void util::SignalShaping::AddResponseFunction(const std::vector<double>& resp, bool ResetResponse )
 {
   // Make sure configuration is not locked.
 
@@ -65,7 +65,7 @@ void util::SignalShaping::AddResponseFunction(const std::vector<double>& resp)
 
   // Is this the first response function?
 
-  if(fConvKernel.size() == 0) {
+  if ( fConvKernel.size() == 0 || ResetResponse ) {
 
     // This is the first response function.
     // Just calculate the fourier transform.

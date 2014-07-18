@@ -38,6 +38,17 @@
 /// Negative frequencies (not stored) are complex conjugate of
 /// corresponding postive frequency.
 ///
+/// \update notes:  Yun-Tse Tsai (yuntse@slac.stanford.edu), July 17th, 2014
+///                 Modify
+///                 void AddResponseFunction(const std::vector<double>& resp);
+///                 to 
+///                 void AddResponseFunction(const std::vector<double>& resp, bool ResetResponse = false );
+///                 If you want to reset your response, fResponse in this
+///                 object, you can do 
+///                 AddResponseFunction( yourResponse, true )
+///                 The other part involving AddResponseFunction shouldn't
+///                 be affected.
+///
 ////////////////////////////////////////////////////////////////////////
 
 #ifndef SIGNALSHAPING_H
@@ -79,7 +90,7 @@ namespace util {
 
     // Add a time domain response function.
     // Updates overall response function and convolution kernel.
-    void AddResponseFunction(const std::vector<double>& resp);
+    void AddResponseFunction(const std::vector<double>& resp, bool ResetResponse = false );
 
     // Shift response function in time.
     // Updates overall response function and convolution kernel.
