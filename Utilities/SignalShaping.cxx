@@ -1,4 +1,4 @@
-///////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 ///
 /// \file   SignalShaping.cxx
 ///
@@ -45,7 +45,7 @@ void util::SignalShaping::Reset()
 
 //----------------------------------------------------------------------
 // Add a time domain response function.
-void util::SignalShaping::AddResponseFunction(const std::vector<double>& resp)
+void util::SignalShaping::AddResponseFunction(const std::vector<double>& resp, bool ResetResponse )
 {
   // Make sure configuration is not locked.
 
@@ -65,7 +65,7 @@ void util::SignalShaping::AddResponseFunction(const std::vector<double>& resp)
 
   // Is this the first response function?
 
-  if(fConvKernel.size() == 0) {
+  if ( fConvKernel.size() == 0 || ResetResponse ) {
 
     // This is the first response function.
     // Just calculate the fourier transform.
@@ -270,6 +270,8 @@ void util::SignalShaping::CalculateDeconvKernel() const
   std::vector<double> deconv(n, 0.);
   fft->DoInvFFT(const_cast<std::vector<TComplex>&>(fFilter), deconv);
 
+  /*
+  //David Caratelli
   // Find the peak value of the response
   // Should normally be at zero, but don't assume that.
 
@@ -304,6 +306,7 @@ void util::SignalShaping::CalculateDeconvKernel() const
     fDeconvKernel[i] *= ratio;
 
   // Set the lock flag.
-
+  */
+  //David Caratelli
   fFilterLocked = true;
 }
