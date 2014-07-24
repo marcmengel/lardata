@@ -270,6 +270,8 @@ void util::SignalShaping::CalculateDeconvKernel() const
   std::vector<double> deconv(n, 0.);
   fft->DoInvFFT(const_cast<std::vector<TComplex>&>(fFilter), deconv);
 
+  /*
+
   // Find the peak value of the response
   // Should normally be at zero, but don't assume that.
 
@@ -302,6 +304,8 @@ void util::SignalShaping::CalculateDeconvKernel() const
   double ratio = peak_response / peak_deconv;
   for(unsigned int i = 0; i < fDeconvKernel.size(); ++i)
     fDeconvKernel[i] *= ratio;
+
+  */
 
   // Set the lock flag.
 
