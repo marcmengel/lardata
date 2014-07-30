@@ -100,6 +100,11 @@ namespace util {
     // Add a filter function.
     void AddFilterFunction(const std::vector<TComplex>& filt);
 
+    //Add DeconvKernel Polarity switch to decide how to normalize
+    //deconvoluted signal w.r.t. RawDigits. If +1 then normalize
+    //to Max ADC, if -1 to Min ADC
+    void SetDeconvKernelPolarity(int pol);
+
     // Test and lock the current response function.
     // Does not lock filter configuration.
     void LockResponse() const;
@@ -128,6 +133,11 @@ namespace util {
 
     // Deconvolution kernel (= fFilter / fConvKernel).
     mutable std::vector<TComplex> fDeconvKernel;
+
+    // Deconvolution Kernel Polarity Flag
+    // Set to +1 if deconv signal should be deconv to + ADC count
+    // Set to -1 if one wants to normalize to - ADC count
+    int fDeconvKernelPolarity;
   };
 }
 

@@ -40,6 +40,8 @@ void util::SignalShaping::Reset()
   fConvKernel.clear();
   fFilter.clear();
   fDeconvKernel.clear();
+  //Set deconvolution polarity to + as default
+  fDeconvKernelPolarity = +1;
 }
 
 
@@ -178,6 +180,22 @@ void util::SignalShaping::AddFilterFunction(const std::vector<TComplex>& filt)
   }
 }
 
+//----------------------------------------------------------------------
+// Add a DeconvKernel Polarity Flag to decide how to normalize
+void util::SignalShaping::SetDeconvKernelPolarity(int pol)
+{
+
+  if ( (pol != 1) and (pol != -1) ) {
+    throw cet::exception("SignalShaping") << __func__
+      << ": DeconvKernelPolarity should be +1 or -1 (got " << pol << "). Setting to +1\n";
+    fDeconvKernelPolarity = +1;
+  }
+
+  else
+    fDeconvKernelPolarity = pol;
+
+}
+
 
 //----------------------------------------------------------------------
 // Test and lock the response and convolution kernel.
@@ -270,16 +288,23 @@ void util::SignalShaping::CalculateDeconvKernel() const
   std::vector<double> deconv(n, 0.);
   fft->DoInvFFT(const_cast<std::vector<TComplex>&>(fFilter), deconv);
 
-  /*
 
   // Find the peak value of the response
   // Should normally be at zero, but don't assume that.
-
-  double peak_response = 0.;
+  // Use DeconvKernelPolairty to find what to normalize to
+  double peak_response = 0;
+  if ( fDeconvKernelPolarity == -1 )
+    peak_response = 4096;
   for(unsigned int i = 0; i < fResponse.size(); ++i) {
-    if(fResponse[i] > peak_response)
+    if( (fResponse[i] > peak_response) 
+	and (fDeconvKernelPolarity == 1))
+      peak_response = fResponse[i];
+    else if ( (fResponse[i] < peak_response)
+	      and ( fDeconvKernelPolarity == -1) )
       peak_response = fResponse[i];
   }
+  if ( fDeconvKernelPolarity == -1 )
+    peak_response *= -1;
   if (peak_response <= 0.) {
     throw cet::exception("SignalShaping") << __func__
       << ": peak should always be positive (got " << peak_response << ")\n";
@@ -304,8 +329,6 @@ void util::SignalShaping::CalculateDeconvKernel() const
   double ratio = peak_response / peak_deconv;
   for(unsigned int i = 0; i < fDeconvKernel.size(); ++i)
     fDeconvKernel[i] *= ratio;
-
-  */
 
   // Set the lock flag.
 
