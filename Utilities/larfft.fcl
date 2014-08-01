@@ -7,9 +7,9 @@ standard_larfft:
  FitBins:   20   # Number of bins of correlation used for peak fit
 }
 
-bo_larfft:         @local::standard_larfft
+#bo_larfft:         @local::standard_larfft
 jp250L_larfft:     @local::standard_larfft
-argoneut_larfft:   @local::standard_larfft
+#argoneut_larfft:   @local::standard_larfft
 lbne35t_larfft:    @local::standard_larfft
 lbnefd_larfft:     @local::standard_larfft
 
