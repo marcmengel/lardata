@@ -33,6 +33,7 @@
 #include "RecoBase/OpHit.h"
 #include "RecoBase/OpFlash.h"
 #include "RecoBase/Wire.h"
+#include "RecoBase/PFParticle.h"
 
 // make dummy variables of the PtrVector types so that we are
 // sure to generate the dictionaries for them
@@ -47,6 +48,7 @@ namespace {
   art::PtrVector<recob::OpHit>      opv;
   art::PtrVector<recob::OpFlash>    fpv;
   art::PtrVector<recob::Wire>       wpv;
+  art::PtrVector<recob::PFParticle>   partpv;
 }
 
 //
@@ -68,6 +70,7 @@ template class std::vector<recob::Vertex>;
 template class std::vector<recob::Event>;
 template class std::vector<recob::OpHit>;
 template class std::vector<recob::OpFlash>;
+template class std::vector<recob::PFParticle>;
 
 template class art::Ptr<recob::SpacePoint>;
 template class art::PtrVector<recob::SpacePoint>;
@@ -84,8 +87,12 @@ template class art::PtrVector<recob::OpHit>;
 template class art::Ptr<recob::OpFlash>;
 template class art::PtrVector<recob::OpFlash>;
 
+template class art::Ptr<recob::PFParticle>;
+template class art::PtrVector<recob::PFParticle>;
+
 template class std::pair< art::Ptr<recob::Cluster>,    art::Ptr<recob::Hit>        >;
 template class std::pair< art::Ptr<recob::Cluster>,    art::Ptr<recob::Shower>     >;
+template class std::pair< art::Ptr<recob::Cluster>,    art::Ptr<recob::PFParticle>   >;
 template class std::pair< art::Ptr<recob::Cluster>,    art::Ptr<recob::SpacePoint> >;
 template class std::pair< art::Ptr<recob::Cluster>,    art::Ptr<recob::Track>      >;
 template class std::pair< art::Ptr<recob::EndPoint2D>, art::Ptr<recob::Hit>        >;
@@ -98,22 +105,31 @@ template class std::pair< art::Ptr<recob::Hit>,        art::Ptr<recob::Track>   
 template class std::pair< art::Ptr<recob::Hit>,        art::Ptr<recob::Shower>     >;
 template class std::pair< art::Ptr<recob::Hit>,        art::Ptr<recob::SpacePoint> >;
 template class std::pair< art::Ptr<recob::Hit>,        art::Ptr<recob::Vertex>     >;
+template class std::pair< art::Ptr<recob::PFParticle>,   art::Ptr<recob::Cluster>    >;
+template class std::pair< art::Ptr<recob::PFParticle>,   art::Ptr<recob::Shower>     >;
+template class std::pair< art::Ptr<recob::PFParticle>,   art::Ptr<recob::SpacePoint> >;
+template class std::pair< art::Ptr<recob::PFParticle>,   art::Ptr<recob::Track>      >;
+template class std::pair< art::Ptr<recob::PFParticle>,   art::Ptr<recob::Vertex>     >;
 template class std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::Cluster>    >;
 template class std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::Hit>        >;
+template class std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::PFParticle>   >;
 template class std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::SpacePoint> >;
 template class std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::Vertex>     >;
 template class std::pair< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Hit>        >;
 template class std::pair< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Cluster>    >;
+template class std::pair< art::Ptr<recob::SpacePoint>, art::Ptr<recob::PFParticle>   >;
 template class std::pair< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Track>      >;
 template class std::pair< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Shower>     >;
 template class std::pair< art::Ptr<recob::Track>,      art::Ptr<recob::Cluster>    >;
 template class std::pair< art::Ptr<recob::Track>,      art::Ptr<recob::Hit>        >;
+template class std::pair< art::Ptr<recob::Track>,      art::Ptr<recob::PFParticle>   >;
 template class std::pair< art::Ptr<recob::Track>,      art::Ptr<recob::SpacePoint> >;
 template class std::pair< art::Ptr<recob::Track>,      art::Ptr<recob::Vertex>     >;
 template class std::pair< art::Ptr<recob::OpFlash>,    art::Ptr<recob::OpHit>      >;
 template class std::pair< art::Ptr<recob::OpFlash>,    art::Ptr<recob::Cluster>    >;
 template class std::pair< art::Ptr<recob::OpFlash>,    art::Ptr<recob::Track>      >;
 template class std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::Hit>        >;
+template class std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::PFParticle>   >;
 template class std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::Shower>     >;
 template class std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::Track>      >;
 template class std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::Event>      >;
@@ -122,6 +138,7 @@ template class art::Assns<recob::Cluster,    recob::Hit,        void>;
 template class art::Assns<recob::Cluster,    recob::Shower,     void>;
 template class art::Assns<recob::Cluster,    recob::SpacePoint, void>;
 template class art::Assns<recob::Cluster,    recob::Track,      void>;
+template class art::Assns<recob::Cluster,    recob::PFParticle,   void>;
 template class art::Assns<recob::EndPoint2D, recob::Hit,        void>;
 template class art::Assns<recob::Event,      recob::Hit,        void>;
 template class art::Assns<recob::Event,      recob::Vertex,     void>;
@@ -131,17 +148,25 @@ template class art::Assns<recob::Hit,        recob::Event,      void>;
 template class art::Assns<recob::Hit,        recob::Shower,     void>;
 template class art::Assns<recob::Hit,        recob::SpacePoint, void>;
 template class art::Assns<recob::Hit,        recob::Track,      void>;
+template class art::Assns<recob::PFParticle,   recob::Cluster,    void>;
+template class art::Assns<recob::PFParticle,   recob::Shower,     void>;
+template class art::Assns<recob::PFParticle,   recob::SpacePoint, void>;
+template class art::Assns<recob::PFParticle,   recob::Track,      void>;
+template class art::Assns<recob::PFParticle,   recob::Vertex,     void>;
 template class art::Assns<recob::Hit,        recob::Vertex,     void>;
 template class art::Assns<recob::Shower,     recob::Cluster,    void>;
 template class art::Assns<recob::Shower,     recob::Hit,        void>;
+template class art::Assns<recob::Shower,     recob::PFParticle,   void>;
 template class art::Assns<recob::Shower,     recob::SpacePoint, void>;
 template class art::Assns<recob::Shower,     recob::Vertex,     void>;
 template class art::Assns<recob::SpacePoint, recob::Hit,        void>;
 template class art::Assns<recob::SpacePoint, recob::Cluster,    void>;
+template class art::Assns<recob::SpacePoint, recob::PFParticle,   void>;
 template class art::Assns<recob::SpacePoint, recob::Track,      void>;
 template class art::Assns<recob::SpacePoint, recob::Shower,     void>;
 template class art::Assns<recob::Track,      recob::Cluster,    void>;
 template class art::Assns<recob::Track,      recob::Hit,        void>;
+template class art::Assns<recob::Track,      recob::PFParticle  , void>;
 template class art::Assns<recob::Track,      recob::SpacePoint, void>;
 template class art::Assns<recob::Track,      recob::Vertex,     void>;
 template class art::Assns<recob::OpFlash,    recob::OpHit,      void>;
@@ -149,10 +174,12 @@ template class art::Assns<recob::OpFlash,    recob::Track,      void>;
 template class art::Assns<recob::OpFlash,    recob::Cluster,    void>;
 template class art::Assns<recob::Vertex,     recob::Event,      void>;
 template class art::Assns<recob::Vertex,     recob::Hit,        void>;
+template class art::Assns<recob::Vertex,     recob::PFParticle,   void>;
 template class art::Assns<recob::Vertex,     recob::Shower,     void>;
 template class art::Assns<recob::Vertex,     recob::Track,      void>;
 
 template class art::Wrapper< art::Assns<recob::Cluster,    recob::Hit,        void> >;
+template class art::Wrapper< art::Assns<recob::Cluster,    recob::PFParticle,   void> >;
 template class art::Wrapper< art::Assns<recob::Cluster,    recob::Shower,     void> >;
 template class art::Wrapper< art::Assns<recob::Cluster,    recob::SpacePoint, void> >;
 template class art::Wrapper< art::Assns<recob::Cluster,    recob::Track,      void> >;
@@ -165,17 +192,25 @@ template class art::Wrapper< art::Assns<recob::Hit,        recob::Event,      vo
 template class art::Wrapper< art::Assns<recob::Hit,        recob::Shower,     void> >;
 template class art::Wrapper< art::Assns<recob::Hit,        recob::SpacePoint, void> >;
 template class art::Wrapper< art::Assns<recob::Hit,        recob::Track,      void> >;
+template class art::Wrapper< art::Assns<recob::PFParticle,   recob::Cluster,    void> >;
+template class art::Wrapper< art::Assns<recob::PFParticle,   recob::Shower,     void> >;
+template class art::Wrapper< art::Assns<recob::PFParticle,   recob::SpacePoint, void> >;
+template class art::Wrapper< art::Assns<recob::PFParticle,   recob::Track,      void> >;
+template class art::Wrapper< art::Assns<recob::PFParticle,   recob::Vertex,     void> >;
 template class art::Wrapper< art::Assns<recob::Hit,        recob::Vertex,     void> >;
 template class art::Wrapper< art::Assns<recob::Shower,     recob::Cluster,    void> >;
 template class art::Wrapper< art::Assns<recob::Shower,     recob::Hit,        void> >;
+template class art::Wrapper< art::Assns<recob::Shower,     recob::PFParticle,   void> >;
 template class art::Wrapper< art::Assns<recob::Shower,     recob::SpacePoint, void> >;
 template class art::Wrapper< art::Assns<recob::Shower,     recob::Vertex,     void> >;
 template class art::Wrapper< art::Assns<recob::SpacePoint, recob::Hit,        void> >;
 template class art::Wrapper< art::Assns<recob::SpacePoint, recob::Cluster,    void> >;
 template class art::Wrapper< art::Assns<recob::SpacePoint, recob::Track,      void> >;
+template class art::Wrapper< art::Assns<recob::SpacePoint, recob::PFParticle,   void> >;
 template class art::Wrapper< art::Assns<recob::SpacePoint, recob::Shower,     void> >;
 template class art::Wrapper< art::Assns<recob::Track,      recob::Cluster,    void> >;
 template class art::Wrapper< art::Assns<recob::Track,      recob::Hit,        void> >;
+template class art::Wrapper< art::Assns<recob::Track,      recob::PFParticle,   void> >;
 template class art::Wrapper< art::Assns<recob::Track,      recob::SpacePoint, void> >;
 template class art::Wrapper< art::Assns<recob::Track,      recob::Vertex,     void> >;
 template class art::Wrapper< art::Assns<recob::OpFlash,    recob::OpHit,      void> >;
@@ -183,11 +218,13 @@ template class art::Wrapper< art::Assns<recob::OpFlash,    recob::Track,      vo
 template class art::Wrapper< art::Assns<recob::OpFlash,    recob::Cluster,    void> >;
 template class art::Wrapper< art::Assns<recob::Vertex,     recob::Hit,        void> >;
 template class art::Wrapper< art::Assns<recob::Vertex,     recob::Event,      void> >;
+template class art::Wrapper< art::Assns<recob::Vertex,     recob::PFParticle,   void> >;
 template class art::Wrapper< art::Assns<recob::Vertex,     recob::Shower,     void> >;
 template class art::Wrapper< art::Assns<recob::Vertex,     recob::Track,      void> >;
 
 template class art::Wrapper< std::vector<recob::Cluster>                     >;
 template class art::Wrapper< std::vector<recob::Hit>                         >;
+template class art::Wrapper< std::vector<recob::PFParticle>             	     >;
 template class art::Wrapper< std::vector<recob::Shower>             	     >;
 template class art::Wrapper< std::vector<recob::Track>              	     >;
 template class art::Wrapper< std::vector<recob::Seed>               	     >;
