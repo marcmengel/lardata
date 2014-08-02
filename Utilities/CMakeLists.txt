@@ -96,6 +96,18 @@ simple_plugin(LArProperties "service"
               BASENAME_ONLY
 )
 
+simple_plugin(MemoryPeakReporter "service"
+              ${ART_UTILITIES}
+              ${ART_FRAMEWORK_SERVICES_REGISTRY}
+              ${ART_FRAMEWORK_PRINCIPAL}
+              ${ART_PERSISTENCY_PROVENANCE}
+              ${MF_MESSAGELOGGER}
+              ${MF_UTILITIES}
+              ${FHICLCPP}
+              ${CETLIB}
+              BASENAME_ONLY
+)
+
 install_headers()
 install_fhicl()
 install_source()
