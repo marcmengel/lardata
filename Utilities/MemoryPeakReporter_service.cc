@@ -19,6 +19,8 @@
 #include <string> // std::getline(), std::string
 #include <sstream>
 #include <fstream>
+#include <ios> // std::fixed
+#include <iomanip> // std::setprecision()
 
 // POSIX libraries
 #include <unistd.h> // getpid()
@@ -50,11 +52,11 @@ namespace lar {
    * <b>Configuration parameters</b>
    * - <b>OnEventIncrease</b> (boolean, default: true) reports an increase at
    *   the end of each event
-   * - <b>OnEveryEvent</b> (boolean, default: true) reports the peak at
+   * - <b>OnEveryEvent</b> (boolean, default: false) reports the peak at
    *   the end of each event
    * - <b>OnModuleIncrease</b> (boolean, default: true) reports an increase at
    *   the end of each module
-   * - <b>OnEveryModule</b> (boolean, default: true) reports the peak at
+   * - <b>OnEveryModule</b> (boolean, default: false) reports the peak at
    *   the end of each module
    * - <b>OutputCategory</b> (string, default: "MemoryPeak"): output category
    *   of mf::LogInfo used for the messages
@@ -102,11 +104,11 @@ namespace lar {
 
     
     /// Executed after a source has been created
-    void postSource() { Report("source"); }
+    void postSource() { UpdatePeak(); Report("source"); }
 
     
     /// Executed at the end of the job
-    void postEndJob() { Report("end"); }
+    void postEndJob() { UpdatePeak(); Report("end"); }
 
     
     /// Read the peak memory from the operating system
@@ -121,7 +123,7 @@ namespace lar {
     MemSize_t PeakSoFar = 0; ///< largest peak observed so far (bytes)
     
     /// Updates the peak and returns whether configuration prescribes reporting
-    bool shouldReport(ReportMode_t mode);
+    bool shouldReport(ReportMode_t mode = rmAlways);
   }; // class MemoryPeakReporter
   
 } // namespace lar
@@ -174,6 +176,7 @@ lar::MemoryPeakReporter::MemoryPeakReporter
   }
   
   // let's start: always report at the creation of this service
+  UpdatePeak();
   Report("startup");
   
 } // lar::MemoryPeakReporter::MemoryPeakReporter()
@@ -195,11 +198,12 @@ void lar::MemoryPeakReporter::Report(
   info << "MemoryPeak: " << type;
   if (!modLabel.empty() || !modName.empty())
     info << " " << modLabel << ":" << modName;
-  info << " VMPEAK " << (PeakSoFar / 1048576) << " MiB";
+  info << " VMPEAK " << std::fixed << std::setprecision(1)
+    << (PeakSoFar / 1048576.) << " MiB";
 } // lar::MemoryPeakReporter::Report()
 
 
-bool lar::MemoryPeakReporter::shouldReport(ReportMode_t mode) {
+bool lar::MemoryPeakReporter::shouldReport(ReportMode_t mode /* = rmAlways */) {
   bool bIncreased = UpdatePeak();
   return ((mode == rmAlways) || ((mode == rmOnIncrease) && bIncreased));
 } // lar::MemoryPeakReporter::shouldReport()
