@@ -316,7 +316,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 
     if(filename.size() != 0) {
 
-      TFile* file = new TFile(filename.c_str(), "READ");
+      TFile* file = TFile::Open(filename.c_str(), "READ");
       if(file != 0 && !file->IsZombie() && file->IsOpen()) {
 
 	// Open the sqlite datatabase.

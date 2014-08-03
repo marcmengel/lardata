@@ -3,5 +3,6 @@
 BEGIN_PROLOG
 
 bo_larfft:         @local::standard_larfft
+bo_larfft.FFTSize: 8192
 
 END_PROLOG

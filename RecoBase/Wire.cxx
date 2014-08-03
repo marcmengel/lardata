@@ -35,7 +35,7 @@ namespace recob{
     
     fView       = geo->View(rawdigit->Channel());
     fSignalType = geo->SignalType(rawdigit->Channel());
-    fMaxSamples = rawdigit->NADC();
+    fMaxSamples = rawdigit->Samples();
     fSignalROI.resize(fMaxSamples); // "filled" with empty samples
   }
 

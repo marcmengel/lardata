@@ -7,8 +7,8 @@ standard_timeservice:
   InheritClockConfig: true
   G4RefTime:         0     # G4 time [us] where electronics clock counting start
   TriggerOffsetTPC:  0     # Time offset for TPC readout start time w.r.t. trigger [us]
-  FramePeriod:       1600  # Frame period [us]
-  ClockSpeedTPC:     5.05  # TPC clock speed in MHz; 1 / 198.0 ns
+  FramePeriod:       405.504 # Frame period [us]; 2048 * 198 ns
+  ClockSpeedTPC:     5.0505  # TPC clock speed in MHz; 1 / 198.0 ns
   ClockSpeedOptical: 64    # Optical clock speed in MHz
   ClockSpeedTrigger: 16    # Trigger clock speed in MHz
   DefaultTrigTime:   0     # Default trigger time in electronics clock [us]
@@ -23,10 +23,15 @@ csu40L_timeservice: @local::standard_timeservice
 
 
 argoneut_timeservice: @local::standard_timeservice
-
+argoneut_timeservice.TriggerOffsetTPC: -11.88 #60 ticks * 198 ns
+argoneut_timeservice.DefaultTrigTime:  11.88
+argoneut_timeservice.DefaultBeamTime:  11.88
 
 bo_timeservice: @local::standard_timeservice
 bo_timeservice.ClockSpeedTPC: 2.528445 # 1 / 395.5 ns
-
+bo_timeservice.TriggerOffsetTPC: -40.  # us
+bo_timeservice.DefaultTrigTime:   40.
+bo_timeservice.DefaultBeamTime:   40.
+bo_timeservice.FramePeriod: 1619.968   # 4096 * 395.5 ns
 
 END_PROLOG

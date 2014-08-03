@@ -78,9 +78,13 @@ void pid::Chi2PIDAlg::DoParticleID(art::Ptr<anab::Calorimetry> calo,
   std::vector<double> trkres = calo->ResidualRange();
   std::vector<double> deadwireresrc = calo->DeadWireResRC();
 
+  int used_trkres = 0;
   for (unsigned i = 0; i<trkdedx.size(); ++i){//hits
     avgdedx += trkdedx[i];
-    PIDA += trkdedx[i]*pow(trkres[i],0.42);
+    if(trkres[i] < 30) {
+      PIDA += trkdedx[i]*pow(trkres[i],0.42);
+      used_trkres++;
+    }
     if (trkdedx[i]>1000) continue; //protect against large pulse height
     int bin = dedx_range_pro->FindBin(trkres[i]);
     if (bin>=1&&bin<=dedx_range_pro->GetNbinsX()){
@@ -159,7 +163,8 @@ void pid::Chi2PIDAlg::DoParticleID(art::Ptr<anab::Calorimetry> calo,
       pidOut.fDeltaChi2 = chi2min2 - chi2min;
     }
   }
-  if (trkdedx.size()) pidOut.fPIDA = PIDA/trkdedx.size();
+  //if (trkdedx.size()) pidOut.fPIDA = PIDA/trkdedx.size();
+  if(used_trkres > 0) pidOut.fPIDA = PIDA/used_trkres;
   double missinge = 0;
   double missingeavg = 0;
   for (unsigned i = 0; i<deadwireresrc.size(); ++i){

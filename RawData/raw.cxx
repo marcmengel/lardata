@@ -5,11 +5,12 @@
 /// \version $Id: raw.cxx,v 2.0 2013/01/16  jti3 Exp $
 
 #include "RawData/raw.h"
+
 #include <iostream>
 #include <string>
 #include <bitset>
-#include <cstdlib>
 
+#include "cetlib/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 namespace raw {
@@ -299,7 +300,11 @@ namespace raw {
     else if(compress == raw::kNone){
       for(unsigned int i = 0; i < adc.size(); ++i) uncompressed[i] = adc[i];
     }
-
+    else {
+      throw cet::exception("raw")
+        << "raw::Uncompress() does not support compression #"
+        << ((int) compress);
+    }
     return;
   }
   
