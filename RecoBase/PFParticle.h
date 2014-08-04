@@ -33,26 +33,26 @@ namespace recob {
 
   public:
       
-    ///< Define index to signify primary particle
+    /// Define index to signify primary particle
     static constexpr size_t kPFParticlePrimary = std::numeric_limits<size_t>::max();
       
-    ///< Primary constructor
+    /// Primary constructor
     PFParticle(int pdgCode, size_t self, size_t parent, const std::vector<size_t>& daughters);
     
     PFParticle(int pdgCode, size_t self, size_t parent, std::vector<size_t>&& daughters);
       
-    ///< Destructor definition
+    /// Destructor definition
      ~PFParticle() = default;
       
-    ///< Copy constructor (using defaults)
+    /// Copy constructor (using defaults)
     PFParticle(const PFParticle& other) = default;
     PFParticle(PFParticle&& other)      = default;
       
-    ///< Copy assignment operator (using defaults)
+    /// Copy assignment operator (using defaults)
     PFParticle& operator= (const PFParticle& other) = default;
     PFParticle& operator= (PFParticle&& other)      = default;
     
-    ///< Accessors
+    /// Accessors
     int                        PdgCode()            const {return fPdgCode;}
     bool                       IsPrimary()          const {return fParent == PFParticle::kPFParticlePrimary;}
     int                        NumDaughters()       const {return fDaughters.size();}
