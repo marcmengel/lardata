@@ -12,7 +12,7 @@
 
 #include <vector>
 #include <ostream>
-#include <climits>
+#include <limits>
 
 namespace recob {
 
@@ -20,37 +20,39 @@ namespace recob {
 
   public:
 
-      PFParticle();  /// Default constructor necessary for gccxml - not really for public use
+      PFParticle();  ///< Default constructor necessary for gccxml - not really for public use
 
   private:
 
-      int                 fPdgCode;   // A preliminary estimate of the PFParticle type using the PDG code
-      size_t              fSelf;      // Self reference
-      size_t              fParent;    // Index into PFParticle collection for parent
-      std::vector<size_t> fDaughters; // Vector of indices into PFParticle Collection for daughters
+      int                 fPdgCode;   ///< A preliminary estimate of the PFParticle type using the PDG code
+      size_t              fSelf;      ///< Self reference
+      size_t              fParent;    ///< Index into PFParticle collection for parent
+      std::vector<size_t> fDaughters; ///< Vector of indices into PFParticle Collection for daughters
 
 #ifndef __GCCXML__
 
   public:
       
-    // Define index to signify primary particle
-    enum {kPFParticlePrimary = UINT_MAX};
+    ///< Define index to signify primary particle
+    static constexpr size_t kPFParticlePrimary = std::numeric_limits<size_t>::max();
       
-    /// Primary constructor
+    ///< Primary constructor
     PFParticle(int pdgCode, size_t self, size_t parent, const std::vector<size_t>& daughters);
+    
+    PFParticle(int pdgCode, size_t self, size_t parent, std::vector<size_t>&& daughters);
       
-    /// Destructor definition
+    ///< Destructor definition
      ~PFParticle() = default;
       
-    /// Copy constructor
+    ///< Copy constructor (using defaults)
     PFParticle(const PFParticle& other) = default;
     PFParticle(PFParticle&& other)      = default;
       
-    /// Copy assignment operator
+    ///< Copy assignment operator (using defaults)
     PFParticle& operator= (const PFParticle& other) = default;
     PFParticle& operator= (PFParticle&& other)      = default;
     
-    /// Accessors
+    ///< Accessors
     int                        PdgCode()            const {return fPdgCode;}
     bool                       IsPrimary()          const {return fParent == PFParticle::kPFParticlePrimary;}
     int                        NumDaughters()       const {return fDaughters.size();}
@@ -60,7 +62,7 @@ namespace recob {
     const std::vector<size_t>& Daughters()          const {return fDaughters;}
 
     friend std::ostream& operator << (std::ostream& o, const PFParticle& c);
-    friend bool          operator <  (const PFParticle& a, const PFParticle& b); // This is needed for art?
+    friend bool          operator <  (const PFParticle& a, const PFParticle& b);
     
 #endif
   }; // class PFParticle
