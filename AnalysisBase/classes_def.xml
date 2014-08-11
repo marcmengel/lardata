@@ -8,7 +8,9 @@
 <!--  for all objects that are data members of those objects.                         -->
 
 <lcgdict>
- <class name="anab::Calorimetry"           ClassVersion="12"                           >
+ <class name="anab::Calorimetry"           ClassVersion="14"                           >
+  <version ClassVersion="14" checksum="1421274164"/>
+  <version ClassVersion="13" checksum="2889632995"/>
   <version ClassVersion="12" checksum="1421274164"/>
   <version ClassVersion="11" checksum="495386863"/>
  </class>

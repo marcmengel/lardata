@@ -19,34 +19,58 @@ namespace recob{
 
   //----------------------------------------------------------------------
   Wire::Wire()
-    : fSignal(0)
+    : fSignalROI(0)
   {
 
   }
 
   //----------------------------------------------------------------------
-  Wire::Wire(std::vector<float> siglist,
-	     art::Ptr<raw::RawDigit> &rawdigit)
-    : fSignal(siglist)
+  Wire::Wire(
+    art::Ptr<raw::RawDigit> &rawdigit)
+    : fSignalROI()
     , fRawDigit(rawdigit)
   {
-
-    ///put the pedestal subtracted values of the raw adc's into siglist
-    ///if siglist from initializer is empty
-    if( fSignal.empty() ){
-      std::vector<short> uncompressed(rawdigit->Samples());
-      raw::Uncompress(rawdigit->fADC, uncompressed, rawdigit->Compression());
-      for(size_t i = 0; i < uncompressed.size(); ++i)
-	fSignal[i] = 1.*uncompressed[i] - rawdigit->GetPedestal();
-      uncompressed.clear();
-    }
 
     art::ServiceHandle<geo::Geometry> geo;
     
     fView       = geo->View(rawdigit->Channel());
     fSignalType = geo->SignalType(rawdigit->Channel());
-
+    fMaxSamples = rawdigit->Samples();
+    fSignalROI.resize(fMaxSamples); // "filled" with empty samples
   }
+
+  //----------------------------------------------------------------------
+  Wire::Wire
+    (const RegionsOfInterest_t& sigROIlist, art::Ptr<raw::RawDigit> &rawdigit)
+    : Wire(rawdigit)
+  {
+    fSignalROI = sigROIlist;
+    fSignalROI.resize(fMaxSamples); // "filled" with empty samples
+  }
+
+  Wire::Wire
+    (RegionsOfInterest_t&& sigROIlist, art::Ptr<raw::RawDigit> &rawdigit)
+    : Wire(rawdigit)
+  {
+    fSignalROI = sigROIlist; // should use the move assignment
+    fSignalROI.resize(fMaxSamples); // "filled" with empty samples
+  }
+
+  std::vector<float> Wire::Signal() const
+  {
+    return { fSignalROI.begin(), fSignalROI.end() };
+#if 0 
+    // *** untested code ***
+    // Return ROI signals in a zero padded vector of size that contains
+    // all ROIs
+
+    std::vector<float> sigTemp(fMaxSamples, 0.);
+    for(const auto& RoI: fSignalROI.get_ranges())
+      std::copy(RoI.begin(), RoI.end(), sigTemp.begin() + RoI.begin_index());
+    return sigTemp;
+#endif // 0
+    
+  } // Wire::Signal
 
   //----------------------------------------------------------------------
   Wire::~Wire()

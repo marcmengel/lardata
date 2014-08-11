@@ -69,6 +69,7 @@ util::LArFFT::~LArFFT()
   delete fFFT;
   delete fInverseFFT;
   delete fPeakFit;
+  delete fConvHist;
 }
 
 //------------------------------------------------
@@ -78,8 +79,9 @@ void util::LArFFT::ReinitializeFFT(int size, std::string option, int fitbins){
   delete fFFT;
   delete fInverseFFT;
   delete fPeakFit;
+  delete fConvHist;
 
-  //set memebers
+  //set members
   fSize = size;
   fOption = option;
   fFitBins = fitbins;

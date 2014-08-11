@@ -43,8 +43,8 @@ cet_set_compiler_flags(DIAGS CAUTIOUS
 cet_report_compiler_flags()
 
 # these are minimum required versions, not the actual product versions
-find_ups_product( larcore v0_00_01 )
-find_ups_product( nutools v0_00_00 )
+find_ups_product( larcore v1_00_00 )
+find_ups_product( nutools v1_00_00 )
 find_ups_product( postgresql v9_1_5 )
 
 #  Find all the libraries needed by our dependent CMakeList.txt files
@@ -68,6 +68,10 @@ add_subdirectory(RawData)
 add_subdirectory(RecoBase)
 add_subdirectory(RecoObjects)
 add_subdirectory(Utilities)
+add_subdirectory(MCBase)
+
+# tests
+add_subdirectory(test)
 
 # ups - table and config files
 add_subdirectory(ups)

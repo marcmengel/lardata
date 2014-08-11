@@ -5,11 +5,12 @@
 /// \version $Id: raw.cxx,v 2.0 2013/01/16  jti3 Exp $
 
 #include "RawData/raw.h"
+
 #include <iostream>
 #include <string>
 #include <bitset>
-#include <cstdlib>
 
+#include "cetlib/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 namespace raw {
@@ -255,7 +256,7 @@ namespace raw {
 
   //----------------------------------------------------------
   // Reverse zero suppression function
-  void ZeroUnsuppression(const std::vector<short> adc, 
+  void ZeroUnsuppression(const std::vector<short>& adc, 
 			 std::vector<short>      &uncompressed)
   {
     const int lengthofadc = adc[0];
@@ -284,7 +285,7 @@ namespace raw {
 
   //----------------------------------------------------------
   // if the compression type is kNone, copy the adc vector into the uncompressed vector
-  void Uncompress(const std::vector<short> adc, 
+  void Uncompress(const std::vector<short>& adc, 
 		  std::vector<short>      &uncompressed, 
 		  raw::Compress_t          compress)
   {
@@ -299,7 +300,11 @@ namespace raw {
     else if(compress == raw::kNone){
       for(unsigned int i = 0; i < adc.size(); ++i) uncompressed[i] = adc[i];
     }
-
+    else {
+      throw cet::exception("raw")
+        << "raw::Uncompress() does not support compression #"
+        << ((int) compress);
+    }
     return;
   }
   
@@ -527,7 +532,7 @@ namespace raw {
   //--------------------------------------------------------
   // need to decrement the bit you are looking at to determine the deltas as that is how
   // the bits are set
-  void UncompressHuffman(const std::vector<short> adc, 
+  void UncompressHuffman(const std::vector<short>& adc, 
 			 std::vector<short>      &uncompressed)
   {
     

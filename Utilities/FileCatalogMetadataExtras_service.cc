@@ -206,7 +206,7 @@ void util::FileCatalogMetadataExtras::postOpenOutputFile(std::string const& fn)
 
       // Open sqlite database from input file.
 
-      TFile* file = new TFile(fLastInputFile.c_str(), "READ");
+      TFile* file = TFile::Open(fLastInputFile.c_str(), "READ");
       if(file != 0 && !file->IsZombie() && file->IsOpen()) {
 
 	// Open the sqlite datatabase.
@@ -285,7 +285,7 @@ bool util::FileCatalogMetadataExtras::isArtFile(std::string const& fn)
 
     TFile* file = 0;
     try {
-      file = new TFile(fn.c_str(), "READ");
+      file = TFile::Open(fn.c_str(), "READ");
     }
     catch (...) {
       file = 0;
@@ -421,7 +421,7 @@ void util::FileCatalogMetadataExtras::addPerFileMetadata(std::string const& fn)
   // Update sam metadata in root file.  
   // Open exsiting root file for update.
 
-  TFile* file = new TFile(fn.c_str(), "UPDATE");
+  TFile* file = TFile::Open(fn.c_str(), "UPDATE");
   if(file != 0 && !file->IsZombie() && file->IsOpen()) {
 
     // Open the sqlite datatabase.

@@ -13,7 +13,7 @@
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-
+#include "Utilities/TimeService.h"
 
 ///General LArSoft Utilities
 namespace util{
@@ -27,7 +27,7 @@ namespace util{
 
       // Accessors.
 
-      double       SamplingRate()      const { return fSamplingRate;   }
+      double       SamplingRate()      const { return fTPCClock.TickPeriod() * 1.e3; }
       double       ElectronsToADC()    const { return fElectronsToADC; }
       unsigned int NumberTimeSamples() const { return fNumberTimeSamples; }
       unsigned int ReadOutWindowSize() const { return fReadOutWindowSize; }
@@ -44,26 +44,23 @@ namespace util{
 
       // The following methods convert between TDC counts (SimChannel time) and
       // ticks (RawDigit/Wire time).
-      double             ConvertTDCToTicks(double tdc) const {
-	return fNumberTimeSamples == fReadOutWindowSize ? tdc : tdc - fReadOutWindowSize;}
-      double             ConvertTicksToTDC(double ticks) const {
-	return fNumberTimeSamples == fReadOutWindowSize ? ticks : ticks + fReadOutWindowSize;}
-
+      double             ConvertTDCToTicks(double tdc) const;
+      double             ConvertTicksToTDC(double ticks) const;
 
     private:
 
       // Callbacks.
+      void         checkDBstatus() const;
+
+      void         preProcessEvent(const art::Event& evt);
 
       void         postOpenFile(std::string const& filename);
-      void 	   preBeginRun(art::Run const& run);
 
-      void 	   checkDBstatus() 	const;
       void         CalculateXTicksParams();
 
       static bool  isDetectorProperties(const fhicl::ParameterSet& ps);
 
       double       fSamplingRate;      ///< in ns
-      int    	   fTriggerOffset;     ///< in # of clock ticks					       	 
       double 	   fElectronsToADC;    ///< conversion factor for # of ionization electrons to 1 ADC count
       unsigned int fNumberTimeSamples; ///< number of clock ticks per event
       unsigned int fReadOutWindowSize; ///< number of clock ticks per readout window
@@ -71,7 +68,6 @@ namespace util{
       double       fTimeOffsetV;       ///< coordinates to hit times on each
       double       fTimeOffsetZ;       ///< view
             
-      bool         fInheritTriggerOffset;     ///< Flag saying whether to inherit TriggerOffset
       bool         fInheritNumberTimeSamples; ///< Flag saying whether to inherit NumberTimeSamples
 
       double       fXTicksCoefficient; ///< Parameters for x<-->ticks
@@ -81,6 +77,8 @@ namespace util{
       fhicl::ParameterSet   fPS;       ///< Original parameter set.
 
       bool	   fAlreadyReadFromDB; ///< tests whether the values have alread been picked up from the Database
+
+      ::util::ElecClock fTPCClock;     ///< TPC electronics clock
     }; // class DetectorProperties
 } //namespace utils
 DECLARE_ART_SERVICE(util::DetectorProperties, LEGACY)

@@ -17,8 +17,9 @@ argoneut_services:
  DetectorProperties: @local::argoneut_detproperties
  LArProperties:      @local::argoneut_properties	       
  LArFFT:             @local::argoneut_larfft  	     
- DatabaseUtil:	     @local::argoneut_database    
+ DatabaseUtil:       @local::argoneut_database    
  BackTracker:        @local::argoneut_backtracker  
+ TimeService:        @local::argoneut_timeservice
 }
 
 argoneut_simulation_services:
@@ -31,8 +32,9 @@ argoneut_simulation_services:
  DetectorProperties: @local::argoneut_detproperties
  LArProperties:      @local::argoneut_properties            
  LArFFT:             @local::argoneut_larfft         
- DatabaseUtil:	     @local::argoneut_database    
+ DatabaseUtil:       @local::argoneut_database    
  BackTracker:        @local::argoneut_backtracker  
+ TimeService:        @local::argoneut_timeservice
 }
 
 
