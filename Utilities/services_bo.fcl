@@ -7,6 +7,7 @@
 #include "magfield.fcl"
 #include "databaseutil_bo.fcl"
 #include "backtracker.fcl"
+#include "timeservice.fcl"
 
 BEGIN_PROLOG
 
@@ -18,6 +19,7 @@ bo_services:
  LArProperties:      @local::bo_properties	       
  LArFFT:             @local::bo_larfft  	       
  DatabaseUtil:	     @local::bo_database    
+ TimeService:        @local::bo_timeservice
 }
 
 bo_simulation_services:
@@ -32,6 +34,7 @@ bo_simulation_services:
  LArFFT:             @local::bo_larfft      
  DatabaseUtil:	     @local::bo_database    
  BackTracker:        @local::bo_backtracker  
+ TimeService:        @local::bo_timeservice
 }
 
 
