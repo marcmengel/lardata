@@ -1,13 +1,13 @@
 #include "geometry_bo.fcl"
 #include "detectorproperties_bo.fcl"
-#include "larproperties.fcl"
+#include "larproperties_bo.fcl"
 #include "larfft_bo.fcl"
 #include "messageservice.fcl"
 #include "simulationservices_bo.fcl"
 #include "magfield.fcl"
 #include "databaseutil_bo.fcl"
 #include "backtracker.fcl"
-#include "timeservice.fcl"
+#include "timeservice_bo.fcl"
 
 BEGIN_PROLOG
 
