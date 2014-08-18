@@ -15,6 +15,7 @@ cet_test(raw_test USE_BOOST_UNIT
   )
 
 add_subdirectory( RecoObjects )
+add_subdirectory( Utilities )
 
 # various integration tests
 
