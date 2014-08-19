@@ -30,8 +30,9 @@ namespace lar {
    * The same number of cycles is used regardless the result.
    * We use a simple pseudo-random generator
    * (<tt>std::linear_congruential_engine</tt>) with a constant extraction time
-   * (and poor randomness quality). The fluctuations of the result don't reflect
-   * a fluctuation in time.
+   * (and poor randomness quality, and a period so small that in about 20 events
+   * the sequence might repeat itself). The fluctuations of the result don't
+   * reflect a fluctuation in time.
    * 
    * A test performed on uboonegpvm06,fnal.gov on August 19th, 2014 on 1000
    * events with Ksamples=50000 (i.e., 50M samples per event), default seed
@@ -113,7 +114,7 @@ void lar::ComputePi::analyze(const art::Event&) {
   
   // prepare our personal pseudo-random engine;
   // we'll use always the same sequence!
-  std::uniform_real_distribution<float> flat(-1.0, 1.0);
+  std::uniform_real_distribution<float> flat(0.0, 1.0);
   
   // if we want to fix the random sequence, we reseed the generator
   // with the same value over and over again

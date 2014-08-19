@@ -15,7 +15,7 @@
 namespace lar {
   /// Namespace hiding implementation details
   namespace details {
-    /// Namespace spacific to bulk allocator
+    /// Namespace specific to bulk allocator
     namespace bulk_allocator {
       template <typename T>
       class BulkAllocatorBase;
@@ -37,15 +37,38 @@ namespace lar {
   
   /**
    * @brief Aggressive allocator reserving a lot of memory in advance
+   * @param T type being allocated
    * 
-   * Since there are potential issues with copying allocators, that I don't know
-   * if C++11 has solved, this allocator is formally stateless: every
-   * newly-created allocator is equivalent.
+   * This allocator appropriates memory in large chunks of GetChunkSize()
+   * elements of type T. The memory will never be deleted! (but read further)
    * 
-   * This is implemented hiding a singleton in the allocator.
-   * Each allocator type has its own singleton, i.e., a BulkAllocator<int> does
-   * not share memory with a BulkAllocator<double>, but all BulkAllocator<int>
-   * share.
+   * <h3>Deletion policy</h3>
+   * 
+   * This allocator does not release not reuse deallocated memory. This design
+   * choice is meant to reflect a specific use case where a large amount of
+   * elements is created and then used, and the created object is fairly static.
+   * Tracking freed memory fragments takes time and more memory, and reusing
+   * them too.
+   * Nevertheless, the allocator has a user count; when no user is present,
+   * all the memory is deallocated. This can be convenient, or disastrous:
+   * remember that the elements of a container can (or just might) not survive
+   * after the container is destroyed. Clearing the container will not trigger
+   * this self-distruction; if you are completely sure that no other container
+   * is currently using the same allocator, you can explicitly Free() its
+   * memory.
+   * 
+   * <h3>One allocator for them all</h3>
+   *
+   * Since STL containers do not necessarely store their allocator but they
+   * may create it with a default constructor, allocators should be formally
+   * stateless, and every newly-created allocator should be equivalent
+   * (or else a copy of an allocator will not know what the original has
+   * allocated already).
+   * 
+   * This is implemented hiding a singleton in the allocator (as a static
+   * member). Each allocator type has its own singleton, i.e., a
+   * BulkAllocator<int> does not share memory with a BulkAllocator<double>,
+   * but all BulkAllocator<int> share.
    */
   template <typename T>
   class BulkAllocator: public std::allocator<T> {
@@ -102,7 +125,13 @@ namespace lar {
     /// Frees n elements at p
     void deallocate(pointer p, size_type n);
     
+    /// Releases all the allocated memory: dangerous!
+    static void Free() { GlobalAllocator.Free(); }
+    
+    /// Returns the chunk size of the underlying global allocator
     static size_type GetChunkSize() { return GlobalAllocator.GetChunkSize(); }
+    
+    /// Sets chunk size of global allocator; only affects future allocations!
     static void SetChunkSize(size_type ChunkSize)
       { GlobalAllocator.SetChunkSize(ChunkSize); }
     
