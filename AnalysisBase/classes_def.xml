@@ -21,7 +21,8 @@
   <version ClassVersion="13" checksum="4254447866"/>
   <version ClassVersion="12" checksum="2992884177"/>
  </class>
- <class name="anab::CosmicTag"            ClassVersion="-1"                           >
+ <class name="anab::CosmicTag"            ClassVersion="2"                           >
+  <version ClassVersion="2" checksum="1434160808"/>
   <version ClassVersion="-1" checksum="1434160808"/>
  </class>
  <class name="std::vector<anab::Calorimetry>"                                          />

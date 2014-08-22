@@ -20,16 +20,20 @@ namespace anab {
 
   typedef enum cosmic_tag_id{
     kUnknown=-1,
+    kNotTagged=0,
     kGeometry_YY=1,
     kGeometry_YZ,
     kGeometry_ZZ,
     kGeometry_XX,
     kGeometry_XY,
     kGeometry_XZ,
+    kGeometry_Y=21,
+    kGeometry_Z,
+    kGeometry_X,
     kOutsideDrift_Partial=100,
     kOutsideDrift_Complete,
     kFlash_BeamIncompatible=200,
-    kFlash_Match
+    kFlash_Match=300
   } CosmicTagID_t;
 
   class CosmicTag{
@@ -39,7 +43,9 @@ namespace anab {
 
     std::vector<float> endPt1; // x,y,z assuming t_0 = t_beam
     std::vector<float> endPt2; // x,y,z assuming t_0 = t_beam
-    float fCosmicScore; // 0 means not a cosmic, 1 means cosmic
+    float fCosmicScore; // -1 means very likely neutrino, 
+                        // 0 means probably not a cosmic (or unknown), 
+                        // 1 means cosmic
     CosmicTagID_t fCosmicType; 
 
 #ifndef __GCCXML__
@@ -47,7 +53,6 @@ namespace anab {
 
     CosmicTag(std::vector<float> ePt1,
 	      std::vector<float> ePt2,
-	      //      double flashTime,
 	      float cScore,
 	      CosmicTagID_t cTypes);
 
@@ -71,7 +76,7 @@ namespace anab {
 #ifndef __GCCXML__
 
 inline const float& anab::CosmicTag::CosmicScore() const {return fCosmicScore; }
-inline const CosmicTagID_t& anab::CosmicTag::CosmicType() const {return fCosmicType; }
+inline const anab::CosmicTagID_t& anab::CosmicTag::CosmicType() const {return fCosmicType; }
 
 
 #endif
