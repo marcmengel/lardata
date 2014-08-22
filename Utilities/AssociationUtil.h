@@ -129,6 +129,31 @@ namespace util {
 										      art::Event  const& evt,
 										      std::string const& label);
 
+  // Methods make getting simple ART-independent association information.
+  // --- GetAssociatedVectorOneI takes in a handle to an association, and a handle to a product on the event.
+  //     The ouput is a vector of with the same number of entries as the handle to the product, containing an index
+  //     to the location of one associated product in that product's collection.
+  // --- GetAssociatedVectorOneP takes in a handle to an association, and a handle to a product on the event.
+  //     The ouput is a vector of with the same number of entries as the handle to the product, containing a pointer
+  //     to one associated product.
+  // --- GetAssociatedVectorManyI takes in a handle to an association, and a handle to a product on the event.
+  //     The ouput is a vector of with the same number of entries as the handle to the product, containing a vector 
+  //     of indices that give the locations of all associated products in those products' collection.
+  // --- GetAssociatedVectorManyP takes in a handle to an association, and a handle to a product on the event.
+  //     The ouput is a vector of with the same number of entries as the handle to the product, containing a vector 
+  //     of pointers to all associated products.
+
+  template<class T,class U> static std::vector<size_t> GetAssociatedVectorOneI(art::Handle< art::Assns<T,U> > h,
+									      art::Handle< std::vector<T> > index_p);
+  template<class T,class U> static std::vector<const U*> GetAssociatedVectorOneP(art::Handle< art::Assns<T,U> > h,
+										 art::Handle< std::vector<T> > index_p);
+
+  template<class T,class U> static std::vector< std::vector<size_t> > GetAssociatedVectorManyI(art::Handle< art::Assns<T,U> > h,
+											       art::Handle< std::vector<T> > index_p);
+  template<class T,class U> static std::vector< std::vector<const U*> > GetAssociatedVectorManyP(art::Handle< art::Assns<T,U> > h,
+												 art::Handle< std::vector<T> > index_p);
+
+
 }// end namespace
 
 //----------------------------------------------------------------------
@@ -381,5 +406,44 @@ template<class T, class U> inline std::vector< art::Ptr<U> > util::FindUNotAssoc
   
   return notAssociated;
 }
+
+
+
+template<class T,class U> inline std::vector<size_t> util::GetAssociatedVectorOneI(art::Handle< art::Assns<T,U> > h,
+										   art::Handle< std::vector<T> > index_p)
+{
+  std::vector<size_t> associated_index(index_p->size());
+  for(auto const& pair : *h)
+    associated_index.at(pair.first.key()) = pair.second.key();
+  return associated_index;
+}
+
+template<class T,class U> inline std::vector<const U*> util::GetAssociatedVectorOneP(art::Handle< art::Assns<T,U> > h,
+										     art::Handle< std::vector<T> > index_p)
+{
+  std::vector<const U*> associated_pointer(index_p->size());
+  for(auto const& pair : *h)
+    associated_pointer.at(pair.first.key()) = &(*(pair.second));
+  return associated_pointer;
+}
+
+template<class T,class U> inline std::vector< std::vector<size_t> > util::GetAssociatedVectorManyI(art::Handle< art::Assns<T,U> > h,
+												   art::Handle< std::vector<T> > index_p)
+{
+  std::vector< std::vector<size_t> > associated_indices(index_p->size());
+  for(auto const& pair : *h)
+    associated_indices.at(pair.first.key()).push_back(pair.second.key());
+  return associated_indices;
+}
+
+template<class T,class U> inline std::vector< std::vector<const U*> > util::GetAssociatedVectorManyP(art::Handle< art::Assns<T,U> > h,
+												     art::Handle< std::vector<T> > index_p)
+{
+  std::vector< std::vector<const U*> > associated_pointers(index_p->size());
+  for(auto const& pair : *h)
+    associated_pointers.at(pair.first.key()).push_back( &(*(pair.second)) );
+  return associated_pointers;
+}
+
 
 #endif  //ASSOCIATIONUTIL_H
