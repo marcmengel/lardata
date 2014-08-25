@@ -45,8 +45,10 @@
  <class name="std::pair< art::Ptr<recob::Track>, art::Ptr<anab::FlashMatch>      >"    /> 
  <class name="std::pair< art::Ptr<recob::Track>,      art::Ptr<anab::CosmicTag>  >"    />    
  <class name="std::pair< art::Ptr<recob::Cluster>,    art::Ptr<anab::CosmicTag>  >"    />    
+ <class name="std::pair< art::Ptr<recob::Hit>,        art::Ptr<anab::CosmicTag>  >"    />    
  <class name="std::pair< art::Ptr<anab::CosmicTag>, art::Ptr<recob::Track>    >"    />    
  <class name="std::pair< art::Ptr<anab::CosmicTag>, art::Ptr<recob::Cluster>  >"    />     
+ <class name="std::pair< art::Ptr<anab::CosmicTag>, art::Ptr<recob::Hit>      >"    />     
  <class name="std::pair< art::Ptr<anab::CosmicTag>,  art::Ptr<anab::FlashMatch> >"    />    
  <class name="std::pair< art::Ptr<anab::FlashMatch>, art::Ptr<anab::CosmicTag>  >"    />    
  <class name="std::pair< art::Ptr<recob::Cluster>,   art::Ptr<anab::FlashMatch> >"    />    
@@ -63,9 +65,11 @@
  <class name="art::Assns<recob::OpFlash,     anab::FlashMatch,   void>"	               />
  <class name="art::Assns<recob::Track,      anab::CosmicTag,   void>"	               />
  <class name="art::Assns<recob::Cluster,    anab::CosmicTag,   void>"	               />
+ <class name="art::Assns<recob::Hit,        anab::CosmicTag,   void>"	               />
  <class name="art::Assns<anab::CosmicTag,   recob::Track,      void>"	               />
  <class name="art::Assns<anab::CosmicTag,   recob::Cluster,    void>"	               />
  <class name="art::Assns<anab::CosmicTag,   anab::FlashMatch,  void>"	               />
+ <class name="art::Assns<anab::CosmicTag,   recob::Hit,        void>"	               />
  <class name="art::Assns<anab::FlashMatch,  anab::CosmicTag,   void>"	               />
  <class name="art::Assns<anab::FlashMatch,  recob::Cluster,    void>"	               />
  <class name="art::Assns<recob::Cluster,    anab::FlashMatch,  void>"	               />
@@ -85,6 +89,8 @@
  <class name="art::Wrapper< std::vector<anab::CosmicTag>       	>"	       />
  <class name="art::Wrapper<art::Assns<anab::CosmicTag,  recob::Track,       void> >"  />
  <class name="art::Wrapper<art::Assns<anab::CosmicTag,  recob::Cluster,     void> >"  />
+ <class name="art::Wrapper<art::Assns<anab::CosmicTag,  recob::Hit,         void> >"  />
+ <class name="art::Wrapper<art::Assns<recob::Hit,  anab::CosmicTag,         void> >"  />
  <class name="art::Wrapper<art::Assns<recob::Track,   anab::CosmicTag,     void> >"  />
  <class name="art::Wrapper<art::Assns<recob::Cluster, anab::CosmicTag,     void> >"  />
  <class name="art::Wrapper<art::Assns<anab::FlashMatch, anab::CosmicTag,     void> >"  />
