@@ -1,0 +1,9 @@
+#include "larproperties.fcl"
+
+BEGIN_PROLOG
+
+argoneut_properties:             @local::standard_properties
+argoneut_properties.Temperature: 88.4  #(measured in ArgoNeut)
+argoneut_properties.Efield:      [0.481,0.700,0.890]  #(measured in ArgoNeut)
+
+END_PROLOG

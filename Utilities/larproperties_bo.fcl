@@ -1,0 +1,10 @@
+#include "larproperties.fcl"
+
+BEGIN_PROLOG
+
+bo_properties:                  @local::standard_properties
+bo_properties.Temperature:    88.3 #estimated by Alan Hahn
+bo_properties.Electronlifetime: 3.0e3
+bo_properties.Efield:      [0.375,0.538,0.692]  #for HV=75kV, V_A=0, V_B=+350 V, V_C=+800 V, spacing between wire planes is 6.5+-0.3 mm
+
+END_PROLOG
