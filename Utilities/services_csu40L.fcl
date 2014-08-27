@@ -4,7 +4,6 @@
 #include "larfft.fcl"
 #include "messageservice.fcl"
 #include "simulationservices.fcl"
-#include "signalservices.fcl"
 #include "magfield.fcl"
 #include "databaseutil.fcl"
 #include "backtracker.fcl"
