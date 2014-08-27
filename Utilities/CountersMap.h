@@ -9,10 +9,15 @@
 #define COUNTERSMAP_H
 
 // interface include
+#include <cstddef> // std::ptrdiff_t
 #include <map>
 #include <array>
+#include <functional> // std::less<>
 #include <memory> // std::allocator<>
-#include <iterator> // std::forward_terator_tag
+#include <utility> // std::pair<>
+#include <iterator> // std::bidirectional_iterator_tag
+#include <type_traits> // std::make_unsigned
+
 
 namespace lar {
   
@@ -80,14 +85,18 @@ namespace lar {
     /// This class
     using CounterMap_t = CountersMap<KEY, COUNTER, SIZE, ALLOC, SUBCOUNTERS>;
     
+    
     /// Number of counters in one counter block
     static constexpr size_t NCounters = SIZE;
+    
+    /// Number of subcounters in one counter block
+    static constexpr size_t NSubcounters = NCounters * SUBCOUNTERS;
     
     /// Type of the subcounter (that is, the actual counter)
     using SubCounter_t = Counter_t;
     
-    /// type of block of counters (just a STL array until SUBCOUNTERS are in)
-    class CounterBlock_t: std::array<Counter_t, NCounters> {
+    /// Type of block of counters (just a STL array until SUBCOUNTERS are in)
+    class CounterBlock_t: public std::array<Counter_t, NCounters> {
         public:
       using Array_t = std::array<Counter_t, NCounters>; ///< type of base class
       
@@ -97,18 +106,31 @@ namespace lar {
       /// Convenience constructor: initializes all counters to 0, except one
       CounterBlock_t(size_t index, Counter_t value): CounterBlock_t()
         { Array_t::operator[](index) = value; }
+      
     }; // CounterBlock_t
     
-    /// type of the map used in the implementation
-    using BaseMap_t = std::map<Key_t, CounterBlock_t, Allocator_t>;
+    /// Type of the map used in the implementation
+    using BaseMap_t
+       = std::map<Key_t, CounterBlock_t, std::less<Key_t>, Allocator_t>;
     
+    /*
+    /// Iterator through the allocated elements
+    using const_iterator = double_fwd_const_iterator<
+      typename BaseMap_t::const_iterator,
+      PairSecond<typename BaseMap_t::value_type>
+      >;
+    */
     
     ///@{
     /// @name STL type definitions
-    using value_type = typename BaseMap_t::value_type;
-    using mapped_type = typename BaseMap_t::mapped_type;
+    using mapped_type = SubCounter_t;
     // TODO others are missing
     ///@}
+    
+    using value_type = std::pair<const Key_t, SubCounter_t>;
+    
+    /// Iterator through the counters (shown as value_type)
+    class const_iterator;
     
     
     /// Default constructor (empty map)
@@ -137,16 +159,26 @@ namespace lar {
     // this stuff needs serious work to be completed
     
     /// Returns an iterator to the begin of the counters
-    NestedForwardIterator<CounterMap_t> begin();
+    const_iterator begin() const;
     
     /// Returns an iterator past-the-end of the counters
-    NestedForwardIterator<CounterMap_t> end();
+    const_iterator end() const;
     ///@}
+    
+    
+    /// Returns whether the map has no counters
+    bool empty() const { return counter_map.empty(); }
+    
+    
+    /// Returns the number of allocated counters
+    typename std::make_unsigned<Key_t>::type n_counters() const
+      { return counter_map.size() * NSubcounters; }
     
       private:
     
     using BlockKey_t = Key_t; ///< type of block key
-    using CounterIndex_t = Key_t; ///< type of index in the block
+    using CounterIndex_t = typename std::make_unsigned<Key_t>::type;
+                                                 ///< type of index in the block
     
     
     /// Structure with the index of the counter, split as needed
@@ -163,14 +195,22 @@ namespace lar {
       
       /// Initialize from a mangled key
       CounterKey_t(Key_t key):
-        CounterKey_t(key >> MinorKeyBits, key & MinorKeyMask) {}
+    //    CounterKey_t(key >> MinorKeyBits, key & MinorKeyMask) {}
+        CounterKey_t(key & ~MinorKeyMask, key & MinorKeyMask) {}
+      
+      /// Returns the full key
+    //  Key_t Key() const { return (block << MinorKeyBits) + counter; }
+      Key_t Key() const { return block + counter; }
       
       /// Number of bits for the minor key
-      static constexpr Key_t MinorKeyBits = LowestSetBit(NCounters) + 1;
+      static constexpr Key_t MinorKeyBits = LowestSetBit(NCounters);
       
       /// Bit mask for the minor key
-      static constexpr Key_t MinorKeyMask = Key_t(1) << MinorKeyBits - 1;
-    
+      static constexpr Key_t MinorKeyMask = (Key_t(1) << MinorKeyBits) - 1;
+      
+      static_assert
+        (MinorKeyBits > 0, "Wrong COUNTER value for lar::CountersMap");
+      
     }; // struct CounterKey_t
     
     
@@ -209,10 +249,6 @@ namespace lar {
 
 
 //------------------------------------------------------------------------------
-#include <algorithm> // std::max()
-#include <vector>
-#include <iostream>
-#include <array>
 
 namespace lar {
   
@@ -230,8 +266,91 @@ namespace lar {
   
   
   inline constexpr int LowestSetBit(unsigned long long int v)
-    { return v == 0? -1: details::LowestSetBitScaler(v, 0); }
+    { return (v == 0)? -1: details::LowestSetBitScaler(v, 0); }
   
+  
+  // CountersMap<>::const_iterator does not fully implement the STL iterator
+  // interface, since it does not implement operator-> () (for technical reason:
+  // the value does not actually exist and it does not have an address),
+  // in addition to std::swap().
+  template <typename K, typename C, size_t S, typename A, unsigned int SUB>
+  class CountersMap<K, C, S, A, SUB>::const_iterator:
+    public std::bidirectional_iterator_tag
+  {
+    friend CountersMap<K, C, S, A, SUB>;
+    
+      public:
+    using value_type = typename CounterMap_t::value_type; ///< value type: pair
+    using difference_type = std::ptrdiff_t;
+    using pointer = const value_type*;
+    using reference = const value_type&;
+    using iterator_category = std::bidirectional_iterator_tag;
+    
+    using iterator_type = CounterMap_t::const_iterator; ///< this type
+    
+    /// Default constructor
+    const_iterator() = default;
+    
+    /// Access to the pointed pair
+    value_type operator*() const { return { key(), iter->second[index] }; }
+    
+    iterator_type& operator++()
+      {
+        if (++index >= NSubcounters) { ++iter; index = 0; }
+        return *this;
+      } // operator++
+    iterator_type operator++(int)
+      { iterator_type old(*this); this->operator++(); return old; }
+    
+    iterator_type& operator--()
+      {
+        if (index == 0) { --iter; index = NSubcounters - 1; }
+        else --index;
+        return *this;
+      } // operator--()
+    iterator_type operator--(int)
+      { iterator_type old(*this); this->operator--(); return old; }
+    
+    bool operator== (const iterator_type& as) const
+      { return (iter == as.iter) && (index == as.index); }
+    bool operator!= (const iterator_type& as) const
+      { return (iter != as.iter) || (index != as.index); }
+    
+      protected:
+    typename BaseMap_t::const_iterator iter;
+                                          ///< iterator to the block of counters
+    size_t index; ///< index of the counted in the subblock
+    
+    /// Private constructor (from a map iterator and a block index)
+    const_iterator(typename BaseMap_t::const_iterator it, size_t ix):
+      iter(it), index(ix) {}
+    
+    /// Returns the current key
+    Key_t key() const { return CounterKey_t(iter->first, index).Key(); }
+    
+  }; // CountersMap<>::const_iterator
+  
+  
+  template <typename K, typename C, size_t S, typename A, unsigned int SUB>
+  inline typename CountersMap<K, C, S, A, SUB>::SubCounter_t
+    CountersMap<K, C, S, A, SUB>::increment(Key_t key)
+    { return unchecked_add(CounterKey_t(key), +1); }
+  
+  template <typename K, typename C, size_t S, typename A, unsigned int SUB>
+  inline typename CountersMap<K, C, S, A, SUB>::SubCounter_t
+    CountersMap<K, C, S, A, SUB>::decrement(Key_t key)
+    { return unchecked_add(CounterKey_t(key), -1); }
+  
+  
+  template <typename K, typename C, size_t S, typename A, unsigned int SUB>
+  inline typename CountersMap<K, C, S, A, SUB>::const_iterator
+    CountersMap<K, C, S, A, SUB>::begin() const
+    { return const_iterator{ counter_map.begin(), 0 }; }
+  
+  template <typename K, typename C, size_t S, typename A, unsigned int SUB>
+  inline typename CountersMap<K, C, S, A, SUB>::const_iterator
+    CountersMap<K, C, S, A, SUB>::end() const
+    { return const_iterator{ counter_map.end(), 0 }; }
   
   
   template <typename K, typename C, size_t S, typename A, unsigned int SUB>
@@ -251,19 +370,18 @@ namespace lar {
   {
     // take it low level here
     // first get the iterator to the block
-    typename CounterBlock_t::iterator iBlock
-      = counter_map.lower_limit(key.block);
-    if (iBlock->first == key.block) { // sweet, we have that counter already
-      return iBlock->second[key.counter] += delta;
+    typename BaseMap_t::iterator iBlock = counter_map.lower_bound(key.block);
+    if (iBlock != counter_map.end()) {
+      if (iBlock->first == key.block) { // sweet, we have that counter already
+        return iBlock->second[key.counter] += delta;
+      }
     }
-    
     // no counter there yet: create one;
-    // hint to insert before the block just after what we found
+    // hint to insert before the block in the position we jave already found
     // (this is optimal in STL map for C++11);
-    // unless we are at the end already
-    if (iBlock != counter_map.end()) ++iBlock;
-    // create a block using the special constructor
-    counter_map.emplace_hint(iBlock, { key.counter, delta });
+    // create a block using the special constructor;
+    // the temporary value created here is moved to the map
+    counter_map.insert(iBlock, { key.block, { key.counter, delta } } );
     return delta;
   } // CountersMap<>::unchecked_add() const
   

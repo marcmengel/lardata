@@ -42,8 +42,20 @@ namespace lar {
       <T, details::type_traits::has_const_iterator_helper((T*)(nullptr))>
     {};
   
+  
+  /// Functor returning the object specified as argument
+  template <typename T>
+  class Identity;
+  
+  
+  template <typename T>
+  class PairSecond;
+  
   /// Internal helper class: actual implementation of nested iterator
-  template <typename ITER>
+  template <
+    typename ITER, 
+    typename INNERCONTEXTRACT = Identity<typename ITER::value_type>
+    >
   class deep_const_fwd_iterator_nested;
   
   
@@ -57,16 +69,20 @@ namespace lar {
     >;
 */
   
-  template <typename CITER>
-  using double_fwd_const_iterator = deep_const_fwd_iterator_nested<CITER>;
-
+  template <
+    typename CITER,
+    typename INNERCONTEXTRACT = Identity<typename CITER::value_type>
+    >
+  using double_fwd_const_iterator
+    = deep_const_fwd_iterator_nested<CITER, INNERCONTEXTRACT>;
+  
 } // namespace lar
 
 
 namespace std {
-  template <typename CITER>
-  void swap(lar::deep_const_fwd_iterator_nested<CITER>& a,
-    lar::deep_const_fwd_iterator_nested<CITER>& b);
+  template <typename CITER, typename INNERCONTEXTRACT>
+  void swap(lar::deep_const_fwd_iterator_nested<CITER, INNERCONTEXTRACT>& a,
+    lar::deep_const_fwd_iterator_nested<CITER, INNERCONTEXTRACT>& b);
   
 } // namespace std
 
@@ -74,10 +90,10 @@ namespace std {
 //------------------------------------------------------------------------------
 
 namespace lar {
-
+  
   namespace details {
     namespace type_traits {
-    
+      
       //------------------------------------------------------------------------
       // helpers for has_const_iterator() function
       template <typename T, bool>
@@ -100,20 +116,52 @@ namespace lar {
     } // namespace type_traits
   } // namespace details
   
+  //---
+  //--- Identity declaration
+  //---
+  template <class T>
+  class Identity {
+      public:
+    typedef T argument_type;
+    typedef T result_type;
+    
+    result_type& operator() (argument_type& x) const { return x; }
+    const result_type& operator() (const argument_type& x) const { return x; }
+  }; // class Identity<>
+  
+  
+  //---
+  //--- PairSecond declaration
+  //---
+  template <class T>
+  class PairSecond {
+      public:
+    typedef T argument_type;
+    typedef typename T::second_type result_type;
+    
+    result_type& operator() (argument_type& p) const
+      { return p.second; }
+    const result_type& operator() (const argument_type& p) const
+      { return p.second; }
+  }; // class PairSecond<>
+  
   
   //---
   //--- deep_const_fwd_iterator_nested declaration
   //---
-  template <typename ITER>
+  template <typename ITER, typename INNERCONTEXTRACT>
   class deep_const_fwd_iterator_nested: public std::forward_iterator_tag {
       public:
     using OuterIterator_t = ITER;
+    using InnerContainerExtractor_t = INNERCONTEXTRACT;
+    using InnerContainer_t = typename InnerContainerExtractor_t::result_type;
     using InnerIterator_t
   //    = deep_fwd_const_iterator<typename ITER::value_type::const_iterator>;
-      = typename ITER::value_type::const_iterator;
+      = typename InnerContainer_t::const_iterator;
     
   //  using iterator_type = deep_fwd_const_iterator<OuterIterator_t>;
-    using iterator_type = deep_const_fwd_iterator_nested<OuterIterator_t>;
+    using iterator_type = deep_const_fwd_iterator_nested
+      <OuterIterator_t, InnerContainerExtractor_t>;
     
     /// Type of the value pointed by the iterator
     using value_type = typename InnerIterator_t::value_type;
@@ -125,28 +173,67 @@ namespace lar {
     static constexpr BeginPositionTag begin = {};
     static constexpr EndPositionTag end = {};
     
-    /// Default constructor (invalid iterator)
+    /**
+     * @brief Default constructor: invalid iterator
+     *
+     * This constructor sets the iterator in an invalid, end-of-container state.
+     */
     deep_const_fwd_iterator_nested() = default;
     
-    /// Copy constructor (default behaviour)
-    deep_const_fwd_iterator_nested(const iterator_type&) = default;
+    /**
+     * @brief Constructor: starts from the container at the specified iterator
+     * @param src the starting point of the iterator
+     *
+     * This constructor does not set and end. Due to how the class works,
+     * if the outer container has an "end", reaching it with this iterator has
+     * a undefined behaviour. You most likely want to use the constructor where
+     * you can also specify the end of the container.
+     */
+    deep_const_fwd_iterator_nested(OuterIterator_t src, OuterIterator_t end);
     
-    /// Constructor, starts from the container at the specified iterator
-    deep_const_fwd_iterator_nested(OuterIterator_t src);
-    
-    /// Constructor, starts from the beginning of the specified container
+    ///@{
+    /**
+     * @brief Constructor: starts from the beginning of the specified container
+     * @param cont the container
+     * @param [anonymous] tag to select the begin- or end-of-container behaviour
+     *
+     * The second parameter is used just to choose which constructor to use.
+     * Two constants are provided, begin and end, defined in the iterator itself
+     * (no explicit namespace is required).
+     * Example:
+     * @code
+     * using Data_t = std::vector<std::vector<float>>;
+     * Data_t data(5, { 1., 3., 5. });
+     * deep_const_fwd_iterator_nested<Data_t::const_iterator> iData(data, begin),
+     *   data_end(data, end);
+     * @endcode
+     */
     template <class CONT>
-    deep_const_fwd_iterator_nested(CONT src, BeginPositionTag);
+    deep_const_fwd_iterator_nested(const CONT& cont, BeginPositionTag):
+      deep_const_fwd_iterator_nested(std::begin(cont), std::end(cont))
+      { skip_empty(); }
     
-    /// Constructor, initializes with past-to-end of the specified container
     template <class CONT>
-    deep_const_fwd_iterator_nested(CONT src, EndPositionTag);
+    deep_const_fwd_iterator_nested(const CONT& cont, EndPositionTag):
+      deep_const_fwd_iterator_nested(std::end(cont)) {}
+    ///@}
     
-    
-    /// Prefix increment operator: returns this operator, incremented
+    /**
+     * @brief Prefix increment operator: points to the next element
+     * @return this iterator, already incremented
+     *
+     * The behaviour of this method on a past-the-end iterator is undefined
+     * (currently, chances are it will access invalid memory).
+     */
     iterator_type& operator++();
     
-    /// Postfix increment operator: returns this operator, then increments it
+    /**
+     * @brief Postfix increment operator: points to the next element
+     * @return a copy of this iterator before the increment
+     *
+     * The behaviour of this method on a past-the-end iterator is undefined
+     * (currently, chances are it will access invalid memory).
+     */
     iterator_type operator++(int)
       { iterator_type old(*this); this->operator++(); return old; }
     
@@ -156,33 +243,58 @@ namespace lar {
     const value_type& operator->() const { return *inner_iter; }
     ///@}
     
-    
-    /// Assignment operator (default behaviour)
-    iterator_type& operator= (const iterator_type&) = default;
-    
     ///@{
     /// @name Comparison operators
     /// Returns true if the two iterators are equivalent
     bool operator== (const iterator_type& as) const 
-      { return (as.outer_iter == outer_iter) && (as.inner_iter == inner_iter); }
+      {
+        return (as.outer_iter == outer_iter)
+          && ((as.inner_iter == inner_iter) || (is_end() && as.is_end()));
+      }
     /// Returns true if the two iterators are not equivalent
     bool operator!= (const iterator_type& as) const 
-      { return (as.outer_iter != outer_iter) || (as.inner_iter != inner_iter); }
+      {
+        return (as.outer_iter != outer_iter)
+          || ((as.inner_iter != inner_iter) && (!is_end() || !as.is_end()));
+      }
     ///@}
     
+    
+    ///@{
+    /**
+     * @brief Bonus: convert to bool to find out if we are at the end
+     * @return whether this operator is past-the-end
+     */
+    operator bool() const { return !is_end(); }
+    bool operator! () const { return is_end(); }
+    ///@}
     
     /// Swaps this with the specified iterator
     void swap(iterator_type& with);
     
       protected:
     OuterIterator_t outer_iter; ///< points to current inner container
+    OuterIterator_t outer_end; ///< points to past-the-end inner container
     
     InnerIterator_t inner_iter; ///< points to the current element
     InnerIterator_t inner_end; ///< stores the end of current inner container
     
+    /// Internal constructor: past-the-end iterator pointing to specified place
+    deep_const_fwd_iterator_nested(OuterIterator_t end):
+      deep_const_fwd_iterator_nested(end, end) {}
     
       private:
     void init_inner();
+    void reset_inner();
+    void skip_empty(); ///< points to the next item
+    
+    bool is_end() const { return outer_iter == outer_end; }
+    
+    /// Extracts the value out of the inner iterator
+    const typename InnerContainerExtractor_t::result_type&
+      extract_container(const typename OuterIterator_t::value_type& v)
+      { return InnerContainerExtractor_t()(v); }
+    
   }; // class deep_const_fwd_iterator_nested<>
   
   
@@ -190,60 +302,71 @@ namespace lar {
   //--- deep_const_fwd_iterator_nested implementation
   //---
   
-  template <typename ITER>
-  deep_const_fwd_iterator_nested<ITER>::deep_const_fwd_iterator_nested
-    (OuterIterator_t src):
-    outer_iter(src)
-    { init_inner(); }
+  template <typename ITER, typename INNERCONTEXTRACT>
+  deep_const_fwd_iterator_nested<ITER, INNERCONTEXTRACT>
+    ::deep_const_fwd_iterator_nested
+    (OuterIterator_t src, OuterIterator_t end):
+    outer_iter(src), outer_end(end)
+  {
+    if (is_end()) return;
+    init_inner();
+    skip_empty();
+  } // deep_const_fwd_iterator_nested(OuterIterator_t, OuterIterator_t)
   
   
-  template <typename ITER> template <class CONT>
-  deep_const_fwd_iterator_nested<ITER>::deep_const_fwd_iterator_nested
-    (CONT cont, BeginPositionTag):
-    outer_iter(std::begin(cont))
-    { if (outer_iter != std::end(cont)) init_inner(); }
-  
-  
-  template <typename ITER> template <class CONT>
-  deep_const_fwd_iterator_nested<ITER>::deep_const_fwd_iterator_nested
-    (CONT cont, EndPositionTag):
-    outer_iter(std::end(cont))
-    {}
-  
-  
-  template <typename ITER>
-  void deep_const_fwd_iterator_nested<ITER>::init_inner() {
-    inner_iter = std::begin(*outer_iter);
-    inner_end = std::end(*outer_iter);
-  } // deep_const_fwd_iterator_nested<>::init_inner()
-  
-  
-  template <typename ITER>
-  deep_const_fwd_iterator_nested<ITER>&
-  deep_const_fwd_iterator_nested<ITER>::operator++() {
-    while(++inner_iter == inner_end) {
-      ++outer_iter;
-      init_inner();
-    } // while inner iterator ended
+  template <typename ITER, typename INNERCONTEXTRACT>
+  deep_const_fwd_iterator_nested<ITER, INNERCONTEXTRACT>&
+  deep_const_fwd_iterator_nested<ITER, INNERCONTEXTRACT>::operator++() {
+    ++inner_iter;
+    skip_empty();
     return *this;
   } // deep_const_fwd_iterator_nested<>::operator++()
   
   
-  template <typename ITER>
-  void deep_const_fwd_iterator_nested<ITER>::swap(iterator_type& with) {
+  template <typename ITER, typename INNERCONTEXTRACT>
+  void deep_const_fwd_iterator_nested<ITER, INNERCONTEXTRACT>
+    ::swap(iterator_type& with)
+  {
     std::swap(outer_iter, with.outer_iter);
+    std::swap(outer_end, with.outer_end);
     std::swap(inner_iter, with.inner_iter);
     std::swap(inner_end, with.inner_end);
   } // deep_const_fwd_iterator_nested<>::swap()
+  
+  
+  template <typename ITER, typename INNERCONTEXTRACT>
+  void deep_const_fwd_iterator_nested<ITER, INNERCONTEXTRACT>::init_inner() {
+    inner_iter = std::begin(extract_container(*outer_iter));
+    inner_end = std::end(extract_container(*outer_iter));
+  } // deep_const_fwd_iterator_nested<>::init_inner()
+  
+  
+  template <typename ITER, typename INNERCONTEXTRACT>
+  void deep_const_fwd_iterator_nested<ITER, INNERCONTEXTRACT>::reset_inner()
+    { inner_end = inner_iter = {}; }
+  
+  template <typename ITER, typename INNERCONTEXTRACT>
+  void deep_const_fwd_iterator_nested<ITER, INNERCONTEXTRACT>::skip_empty() {
+    while(inner_iter == inner_end) {
+      ++outer_iter;
+      if (is_end()) {
+        reset_inner();
+        return;
+      } // if
+      init_inner();
+    } // while inner iterator ended
+  } // skip_empty()
   
   
 } // namespace lar
 
 
 namespace std {
-  template <typename CITER>
-  inline void swap(lar::deep_const_fwd_iterator_nested<CITER>& a,
-    lar::deep_const_fwd_iterator_nested<CITER>& b)
+  template <typename CITER, typename INNERCONTEXTRACT>
+  inline void swap(
+    lar::deep_const_fwd_iterator_nested<CITER, INNERCONTEXTRACT>& a,
+    lar::deep_const_fwd_iterator_nested<CITER, INNERCONTEXTRACT>& b
+    )
     { a.swap(b); }
 } // namespace std
 

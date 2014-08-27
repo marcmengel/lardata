@@ -8,7 +8,7 @@
  * See http://www.boost.org/libs/test for the Boost test library home page.
  * 
  * Timing:
- * version 1.0 takes less than 3" on a 3 GHz machine FIXME
+ * version 1.0 takes about 30" on a 3 GHz machine.
  */
 
 // C/C++ standard libraries
@@ -63,11 +63,9 @@ void RunHoughTransformTreeTest() {
   
   typedef std::map<int, int> BaseMap_t;
   
-  // STL allocator
-  std::vector<std::map<
-    int, int, BaseMap_t::key_compare,
-    std::allocator<BaseMap_t::value_type>
-    >> stl_image(NAngles);
+  // STL container
+  typedef std::vector<std::map<int, int>> MapVectorI_t;
+  MapVectorI_t stl_image(NAngles);
   
   // CountersMap; uses chunks of 8 counters per block
   std::vector<lar::CountersMap<int, int, 8>> cm_image(NAngles);
@@ -94,19 +92,80 @@ void RunHoughTransformTreeTest() {
     } // for iAngle
   } // for iPoint
   
+  std::cout << "Filling complete, now checking." << std::endl;
+  
   // we have to provide a comparison between two "different" structures
   // (having different allocators is enough to make them unrelated)
-  bool bSame = true;
+  unsigned int nExtraKeys = 0, nMismatchValue = 0, nMissingKeys = 0;
   auto stl_begin = stl_image.cbegin();
+  unsigned int iMap = 0;
   for (const auto& cm_map: cm_image) {
-    // the std::equal() call compares pairs (int, int) of each map
-    if (std::equal(cm_map.begin(), cm_map.end(), (stl_begin++)->begin()))
-      continue;
-    bSame = false;
-    break;
-  } // for
+    auto cm_map_begin = cm_map.begin();
+    decltype(cm_map_begin)::value_type p;
+    
+    const MapVectorI_t::value_type& stl_map = *(stl_begin++);
+    
+    std::cout << "Map #" << iMap << " (" << cm_map.n_counters()
+      << " counters, " << stl_map.size() << " real)"
+      << std::endl;
+    
+    // compare the two maps; the CountersMap one has more elements,
+    // since the counters are allocated in blocks;
+    // if a key is in STL map, it must be also in the CountersMap;
+    // if a key is not in STL map, counter in CountersMap must be missing or 0
+    MapVectorI_t::value_type::const_iterator stl_iter = stl_map.begin(),
+      stl_end = stl_map.end();
+    for (auto p: cm_map) { // this should be a pair (index, counter)
+      
+      if (stl_iter != stl_end) { // we have still counters to find
+        // if counter is already beyond the next non-empty one froml STL map,
+        // then we are missing some
+        while (p.first > stl_iter->first) {
+          ++nMissingKeys;
+          std::cout << "ERROR missing key " << stl_iter->first << std::endl;
+          if (++stl_iter == stl_end) break;
+        }
+      } // if
+      
+      if (stl_iter != stl_end) { // we have still counters to find
+        if (p.first == stl_iter->first) {
+          // if the counter is in SLT map, the two counts must match
+        //  std::cout << "  " << p.first << " " << p.second << std::endl;
+          if (stl_iter->second != p.second) {
+            std::cout << "ERROR wrong counter value " << p.second
+              << ", expected " << stl_iter->second << std::endl;
+            ++nMismatchValue;
+          }
+          ++stl_iter; // done with it
+        }
+        else if (p.first < stl_iter->first) {
+          // if the counter is not in STL map, then it must be 0
+          if (p.second != 0) {
+            ++nExtraKeys;
+            std::cout << "ERROR extra key " << p.first << " (" << p.second << ")"
+              << std::endl;
+          }
+        //  else {
+        //    std::cout << "  " << p.first << " " << p.second << " (not in STL)"
+        //      << std::endl;
+        //  }
+        }
+      }
+      else {
+        // no more keys in STL map
+        if (p.second != 0) {
+          ++nExtraKeys;
+          std::cout << "ERROR extra key " << p.first << " (" << p.second << ")"
+            << std::endl;
+        }
+      }
+    } // for element in map
+    ++iMap;
+  } // for map
   
-  BOOST_CHECK(bSame);
+  BOOST_CHECK_EQUAL(nMismatchValue, 0);
+  BOOST_CHECK_EQUAL(nMissingKeys, 0);
+  BOOST_CHECK_EQUAL(nExtraKeys, 0);
   
 } // RunHoughTransformTreeTest()
 
