@@ -267,13 +267,10 @@ namespace lar {
       
       
       CounterKey_t& operator++()
-        {
-          if (++counter == MinorKeyRange) { ++block; counter = 0; }
-          return *this;
-        } // operator++()
+        { if (++counter == MinorKeyRange) next_block(); return *this; }
       CounterKey_t& operator--()
         {
-          if (counter-- == 0) { --block; counter = MinorKeyRange - 1; }
+          if (counter-- == 0) { prev_block(); counter = MinorKeyRange - 1; }
           return *this;
         } // operator--()
       CounterKey_t& operator++(int)
@@ -285,14 +282,16 @@ namespace lar {
       CounterKey_t& start_block() { counter = 0; return *this; }
       
       /// Skips to the beginning of the previous block
-      CounterKey_t& prev_block() { --block; return start_block(); }
+      CounterKey_t& prev_block()
+        { block -= MinorKeyRange; return start_block(); }
       
       /// Skips to the beginning of the next block
-      CounterKey_t& next_block() { ++block; return start_block(); }
+      CounterKey_t& next_block()
+        { block += MinorKeyRange; return start_block(); }
       
       
       /// Number of values of the minor key
-      static constexpr Key_t MinorKeyRange = NCounters;
+      static constexpr Key_t MinorKeyRange = NSubcounters;
       
       /// Number of bits for the minor key
       static constexpr Key_t MinorKeyBits = LowestSetBit(MinorKeyRange);
@@ -362,6 +361,19 @@ namespace lar {
   
   inline constexpr int LowestSetBit(unsigned long long int v)
     { return (v == 0)? -1: details::LowestSetBitScaler(v, 0); }
+  
+  // providing "definitions" of the static constants;
+  // these are required if the code is going to take the address of these
+  // constants, which is most often due to the use of "const size_t&" in some
+  // function, where "size_t" is a template argument type
+  // (or else the reference would not be needed).
+  // I am not providing the same for the protected and private members
+  // (just because of laziness).
+  template <typename K, typename C, size_t S, typename A, unsigned int SUB>
+  constexpr size_t CountersMap<K, C, S, A, SUB>::NCounters;
+  
+  template <typename K, typename C, size_t S, typename A, unsigned int SUB>
+  constexpr size_t CountersMap<K, C, S, A, SUB>::NSubcounters;
   
   
   // CountersMap<>::const_iterator does not fully implement the STL iterator
