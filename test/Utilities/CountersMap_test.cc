@@ -100,8 +100,6 @@ void RunHoughTransformTreeTest() {
   auto stl_begin = stl_image.cbegin();
   unsigned int iMap = 0;
   for (const auto& cm_map: cm_image) {
-    auto cm_map_begin = cm_map.begin();
-    decltype(cm_map_begin)::value_type p;
     
     const MapVectorI_t::value_type& stl_map = *(stl_begin++);
     
@@ -160,12 +158,20 @@ void RunHoughTransformTreeTest() {
         }
       }
     } // for element in map
+    
+    BOOST_CHECK(cm_map.is_equal(stl_map));
+    
+    // if they were the same, make sure that now they differ
+    const_cast<MapVectorI_t::value_type&>(stl_map)[NDist / 2]++;
+    BOOST_CHECK(!cm_map.is_equal(stl_map));
+    
     ++iMap;
   } // for map
   
   BOOST_CHECK_EQUAL(nMismatchValue, 0);
   BOOST_CHECK_EQUAL(nMissingKeys, 0);
   BOOST_CHECK_EQUAL(nExtraKeys, 0);
+  
   
 } // RunHoughTransformTreeTest()
 
