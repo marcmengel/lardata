@@ -132,6 +132,7 @@ namespace lar {
     ///@{
     /// @name STL type definitions
     using mapped_type = SubCounter_t;
+    using allocator_type = Allocator_t; ///< type of the single counter
     // TODO others are missing
     ///@}
     

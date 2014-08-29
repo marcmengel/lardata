@@ -1,4 +1,3 @@
-
 # BulkAllocator_test, NestedIterator_test and CountersMap_test test pure header
 # libraries (they are templates)
 cet_test(BulkAllocator_test USE_BOOST_UNIT)

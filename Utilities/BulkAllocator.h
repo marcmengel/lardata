@@ -9,8 +9,9 @@
 #define BULKALLOCATOR_H
 
 // interface include
-#include <memory> // std::allocator<>
+#include <memory> // std::allocator<>, std::unique_ptr<>
 #include <stdexcept> // std::logic_error
+#include <cstdlib> // std::free
 
 namespace lar {
   /// Namespace hiding implementation details
@@ -156,11 +157,52 @@ namespace lar {
 #include <vector>
 #include <iostream>
 #include <array>
+#include <typeinfo>
+#include <string>
+#ifdef __GNUG__
+# include <cxxabi.h>
+#endif // __GNUG__
 
 namespace lar {
   namespace details {
+    ///@{
+    /**
+     * @brief Demangles the name of a type
+     * @param T type to be demangled
+     * @param [anonymous] parameter to determine the type
+     * @return a string with the demangled name
+     *
+     * This function relies on GCC ABI; if there is no GCC, no demangling
+     * happens.
+     * One version of this function takes no parameters, and the type must be
+     * specified explicitly in the call. The other takes one parameter, that
+     * is not actually used but allows the compiler to understand which type
+     * to use. The following usese are equivalent:
+     * @code
+     * std::vector<int> v;
+     * std::cout << demangle<std::vector<int>>() << std::endl;
+     * std::cout << demangle(v) << std::endl;
+     * @endcode
+     */
+    template <typename T>
+    std::string demangle() {
+      std::string name = typeid(T).name();
+      #ifdef __GNUG__
+        int status; // some arbitrary value to eliminate the compiler warning
+        std::unique_ptr<char, void(*)(void*)> res
+          { abi::__cxa_demangle(name.c_str(), NULL, NULL, &status), std::free };
+        return (status==0) ? res.get() : name ;
+      #else // !__GNUG__
+        return name;
+      #endif // ?__GNUG__
+    } // demangle()
+    
+    template <typename T>
+    inline std::string demangle(const T&) { return demangle<T>(); }
+    ///@}
+    
     namespace bulk_allocator {
-      constexpr bool bDebug = true;
+      constexpr bool bDebug = false;
 
       /// A simple reference counter, keep track of a number of users.
       class ReferenceCounter {
@@ -246,7 +288,7 @@ namespace lar {
         std::array<size_type, 2> GetCounts() const;
         
         /// Sets the chunk size for the future allocations
-        void SetChunkSize(size_type NewChunkSize) { ChunkSize = NewChunkSize; }
+        void SetChunkSize(size_type NewChunkSize, bool force = false);
         
         /// Returns the current chunk size
         size_type GetChunkSize() const { return ChunkSize; }
@@ -358,7 +400,17 @@ namespace lar {
       BulkAllocatorBase<T>::BulkAllocatorBase
         (size_type NewChunkSize, bool bPreallocate /* = false */):
         ChunkSize(NewChunkSize), MemoryPool()
-        { Preallocate(bPreallocate? ChunkSize: 0); }
+      {
+        Preallocate(bPreallocate? ChunkSize: 0);
+        if (bDebug) {
+          std::cout << "BulkAllocatorBase[" << ((void*) this)
+            << "] created for type " << demangle<value_type>()
+            << " with chunk size " << GetChunkSize()
+            << " x" << sizeof(value_type) << " byte => "
+            << (GetChunkSize()*sizeof(value_type)) << " bytes/chunk"
+            << std::endl;
+        } // if debug
+      } // BulkAllocatorBase<T>::BulkAllocatorBase()
       
       
       template <typename T>
@@ -432,6 +484,22 @@ namespace lar {
       
       
       template <typename T>
+      void BulkAllocatorBase<T>::SetChunkSize
+        (size_type NewChunkSize, bool force /* = false */)
+      {
+        if ((GetChunkSize() == NewChunkSize) && !force) return;
+        if (bDebug) {
+          std::cout << "BulkAllocatorBase[" << ((void*) this) << "]"
+            << " changing chunk size: " << GetChunkSize() << " => "
+            << NewChunkSize << ": x" << sizeof(value_type) << " byte => "
+            << (NewChunkSize*sizeof(value_type)) << " bytes/chunk"
+            << std::endl;
+        }
+        ChunkSize = NewChunkSize;
+      } // BulkAllocatorBase<T>::SetChunkSize()
+      
+      
+      template <typename T>
       inline typename BulkAllocatorBase<T>::pointer BulkAllocatorBase<T>::Get
         (size_type n)
       {
@@ -483,3 +551,4 @@ namespace lar {
 
 
 #endif // BULKALLOCATOR_H
+
