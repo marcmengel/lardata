@@ -1,0 +1,54 @@
+#
+# File:    timingreference_test.fcl
+# Purpose: Test ComputePi module, meant to assess a timing reference
+# Author:  Gianluca Petrillo (petrillo@fnal.gov)
+# Date:    August 19th, 2014
+# 
+# Services:
+# - art standard services (including Timing)
+#
+
+process_name: TimingReference
+
+services: {
+  Timing: {}
+}
+
+source: {
+  module_type: EmptyEvent
+  maxEvents:   10          # Number of events to create
+  firstRun:    1           # Run number to use for this file
+  firstEvent:  1           # number of first event in the file
+} # source
+
+physics: {
+
+  producers: {}
+
+  analyzers: {
+    timingref: {
+      module_type:  "ComputePi"
+      module_label: "timingref"
+      
+      # number of thousand samples to be taken (default 10000, i.e. 10M samples)
+      # 
+      # virtual machine uboonegpvm06 (on August 19, 2014) with 4600 BogoMIPS
+      # ran with 50000k samples/event and it took 0.932" with a RMS of ~4%
+      # 
+      Ksamples:     50000
+      
+      # the seed of the random number generator;
+    #  Seed: 314159
+      
+      # verbosity will print the value of pi on every event (always the same!)
+      # this is meant to be false for normal operations
+      Verbose:      true
+      
+    } # timingref
+  } # analyzers
+  
+  analyze:  [ timingref ]
+  
+  trigger_paths: []
+  end_paths:     [ analyze ]
+} # physics
