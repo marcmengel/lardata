@@ -12,7 +12,7 @@
 #include <algorithm>
 #include "Utilities/FileCatalogMetadataExtras.h"
 #include "art/Framework/Services/System/FileCatalogMetadata.h"
-#include "art/Framework/Core/OutputFileInfo.h"
+#include "art/Utilities/OutputFileInfo.h"
 #include "art/Persistency/RootDB/SQLite3Wrapper.h"
 #include "art/Persistency/RootDB/SQLErrMsg.h"
 #include "cetlib/exception.h"
