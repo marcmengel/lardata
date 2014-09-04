@@ -8,7 +8,7 @@
 
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Core/ProductRegistryHelper.h"
-#include "art/Framework/Core/PrincipalMaker.h"
+#include "art/Framework/IO/Sources/SourceHelper.h"
 #include "art/Framework/Core/FileBlock.h"
 #include "art/Framework/Principal/RunPrincipal.h"
 #include "art/Framework/Principal/SubRunPrincipal.h"
@@ -31,7 +31,7 @@ class lris::LArRawInputDriver {
   // Required constructor
   LArRawInputDriver(fhicl::ParameterSet const &pset,
                     art::ProductRegistryHelper &helper,
-                    art::PrincipalMaker const &pm);
+                    art::SourceHelper const &pm);
 
   // Required by FileReaderSource:
   void closeCurrentFile();
@@ -47,7 +47,7 @@ class lris::LArRawInputDriver {
   // --- data members:
   typedef  std::vector<std::string>  stringvec_t;
 
-  art::PrincipalMaker            principalMaker_;
+  art::SourceHelper            principalMaker_;
   std::string                    currentDir_;
   stringvec_t                    inputfiles_;
   stringvec_t::const_iterator    nextfile_;

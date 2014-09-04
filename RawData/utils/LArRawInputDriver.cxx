@@ -212,7 +212,7 @@ namespace lris {
   // class c'tor/d'tor:
   LArRawInputDriver::LArRawInputDriver(fhicl::ParameterSet const &, // Not used
                                        art::ProductRegistryHelper &helper,
-                                       art::PrincipalMaker const &pm)
+                                       art::SourceHelper const &pm)
     :
     principalMaker_(pm)
     , currentDir_        ()
