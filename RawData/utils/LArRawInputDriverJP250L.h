@@ -7,7 +7,7 @@
 
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Core/ProductRegistryHelper.h"
-#include "art/Framework/Core/PrincipalMaker.h"
+#include "art/Framework/IO/Sources/SourceHelper.h"
 #include "art/Framework/Core/FileBlock.h"
 #include "art/Framework/Principal/RunPrincipal.h"
 #include "art/Framework/Principal/SubRunPrincipal.h"
@@ -33,7 +33,7 @@ class lris::LArRawInputDriverJP250L {
   // Required constructor
   LArRawInputDriverJP250L(fhicl::ParameterSet const &pset,
 			  art::ProductRegistryHelper &helper,
-			  art::PrincipalMaker const &pm);
+			  art::SourceHelper const &pm);
 
   // Required by FileReaderSource:
   void closeCurrentFile();
@@ -48,7 +48,7 @@ class lris::LArRawInputDriverJP250L {
  private:
 
   // --- data members:
-  art::PrincipalMaker            principalMaker_;
+  art::SourceHelper            principalMaker_;
   
   // added by E.Iwai
   TTree*          m_eventTree;   ///< TTree containing information from each trigger
