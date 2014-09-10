@@ -6,7 +6,7 @@ defaultqual	e5
 fcldir product_dir job
 #
 product         version
-larcore		v02_06_01
+larcore		v02_06_00
 nutools		v1_04_00
 gcc		v4_8_2
 
