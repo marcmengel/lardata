@@ -133,8 +133,12 @@ namespace raw {
       } 
     }
 
+    adc.resize(2+nblocks+nblocks+zerosuppressedsize);
+
     adc[0] = adcsize; //fill first entry in adc with length of uncompressed vector
     adc[1] = nblocks;
+
+
     
     for(unsigned int i = 0; i < nblocks; ++i)
       adc[i+2] = blockbegin[i];
@@ -145,8 +149,7 @@ namespace raw {
     for(unsigned int i = 0; i < zerosuppressedsize; ++i)
       adc[i+nblocks+nblocks+2] = zerosuppressed[i];
  
-    
-    adc.resize(2+nblocks+nblocks+zerosuppressedsize);
+
   }
 
 
