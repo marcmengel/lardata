@@ -1101,8 +1101,10 @@ class lar::sparse_vector<T>::reference: public const_reference {
 #ifndef __GCCXML__
 	explicit
 #endif // __GCCXML__
-	operator value_type&() const
+	operator value_type&()
 		{ return const_cast<value_type&>(*const_reference::ptr); }
+	
+	operator const value_type&() const { return *const_reference::ptr; }
 	
 		protected:
 	explicit reference(const const_reference& from): const_reference(from) {}
