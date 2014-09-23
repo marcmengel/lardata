@@ -169,9 +169,9 @@ void RunHoughTransformTreeTest() {
     ++iMap;
   } // for map
   
-  BOOST_CHECK_EQUAL(nMismatchValue, 0);
-  BOOST_CHECK_EQUAL(nMissingKeys, 0);
-  BOOST_CHECK_EQUAL(nExtraKeys, 0);
+  BOOST_CHECK_EQUAL(nMismatchValue, 0U);
+  BOOST_CHECK_EQUAL(nMissingKeys, 0U);
+  BOOST_CHECK_EQUAL(nExtraKeys, 0U);
   
   
 } // RunHoughTransformTreeTest()
