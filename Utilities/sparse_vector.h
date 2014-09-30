@@ -919,6 +919,8 @@ class sparse_vector {
 }; // class sparse_vector<>
 
 
+} // namespace lar
+
 /**
  * @brief Prints a sparse vector into a stream
  * @param T template type of the sparse vector
@@ -935,7 +937,7 @@ class sparse_vector {
  * </pre>
  */
 template <typename T>
-std::ostream& operator<< (std::ostream& out, const sparse_vector<T>& v);
+std::ostream& operator<< (std::ostream& out, const lar::sparse_vector<T>& v);
 
 
 
@@ -1812,16 +1814,16 @@ inline bool lar::sparse_vector<T>::should_merge(
 
 // --- non-member functions
 template <typename T>
-std::ostream& operator<< (std::ostream& out, const sparse_vector<T>& v) {
+std::ostream& operator<< (std::ostream& out, const lar::sparse_vector<T>& v) {
 	
 	out << "Sparse vector of size " << v.size() << " with "
 		<< v.get_ranges().size() << " ranges:";
-	typename sparse_vector<T>::range_const_iterator iRange = v.begin_range(),
-		rend = v.end_range();
+	typename lar::sparse_vector<T>::range_const_iterator
+		iRange = v.begin_range(), rend = v.end_range();
 	while (iRange != rend) {
 		out << "\n  [" << iRange->begin_index() << " - " << iRange->end_index()
 			<< "] (" << iRange->size() << "):";
-		typename sparse_vector<T>::datarange_t::const_iterator
+		typename lar::sparse_vector<T>::datarange_t::const_iterator
 			iValue = iRange->begin(), vend = iRange->end();
 		while (iValue != vend) out << " " << (*(iValue++));
 		++iRange;
@@ -1987,7 +1989,5 @@ void lar::sparse_vector<T>::const_iterator::refresh_state() {
 
 #endif // __GCCXML__
 
-
-} // namespace lar
 
 #endif // LARCORE_SPARSE_VECTOR_H
