@@ -1,8 +1,9 @@
-# BulkAllocator_test, NestedIterator_test and CountersMap_test test pure header
-# libraries (they are templates)
+# BulkAllocator_test, NestedIterator_test, CountersMap_test 
+# and sparse_vector_test test pure header libraries (they are templates)
 cet_test(BulkAllocator_test USE_BOOST_UNIT)
 cet_test(NestedIterator_test USE_BOOST_UNIT)
 cet_test(CountersMap_test USE_BOOST_UNIT)
+cet_test(sparse_vector_test)
 
 # run a FHiCL file with only ComputePi inside
 cet_test(timingreference_test HANDBUILT

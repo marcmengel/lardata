@@ -8,12 +8,7 @@ include(CetTest)
 cet_enable_asserts()
 
 
-cet_test( sparse_vector_test )
-
-cet_test(raw_test USE_BOOST_UNIT
-  LIBRARIES RawData
-  )
-
+add_subdirectory( RawData )
 add_subdirectory( RecoObjects )
 add_subdirectory( Utilities )
 
