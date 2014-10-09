@@ -15,6 +15,7 @@
 #include <vector>
 #include <map>
 #include <random>
+#include <iostream>
 
 // Boost libraries
 /*
@@ -87,8 +88,8 @@ void RunVectorVectorTest() {
     ++iElem;
   } // while
   
-  BOOST_CHECK_EQUAL(expected, NElements);
-  BOOST_CHECK_EQUAL(nMismatches, 0);
+  BOOST_CHECK_EQUAL((unsigned int) expected, NElements);
+  BOOST_CHECK_EQUAL(nMismatches, 0U);
 } // RunVectorVectorTest()
 
 
@@ -139,8 +140,8 @@ void RunVectorMapTest() {
     ++iElem;
   } // while
   
-  BOOST_CHECK_EQUAL(expected, NElements);
-  BOOST_CHECK_EQUAL(nMismatches, 0);
+  BOOST_CHECK_EQUAL((unsigned int) expected, NElements);
+  BOOST_CHECK_EQUAL(nMismatches, 0U);
 } // RunVectorMapTest()
 
 
