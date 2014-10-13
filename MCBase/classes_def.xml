@@ -12,6 +12,9 @@
 <class name="sim::MCWireCollection" ClassVersion="10" >
  <version ClassVersion="10" checksum="3609210914"/>
 </class>
+<class name="sim::MCShower" ClassVersion="10" >
+ <version ClassVersion="10" checksum="1368296938"/>
+</class>
 
 <class name="std::vector<sim::MCHit>" />
 <class name="art::Wrapper< std::vector<sim::MCHit> >" />
@@ -24,4 +27,8 @@
 
 <class name="std::vector<sim::MCWireCollection>" />
 <class name="art::Wrapper< std::vector<sim::MCWireCollection> >" />
+
+<class name="std::vector<sim::MCShower>" />
+<class name="art::Wrapper< std::vector<sim::MCShower> >" />
+
 </lcgdict>
