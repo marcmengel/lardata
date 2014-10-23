@@ -141,7 +141,7 @@ int  DetectorProperties::TriggerOffset()     const
   // Take an X coordinate, and convert to a number of ticks, the
   // charge deposit occured at t=0
  
-  double DetectorProperties::ConvertXToTicks(double X, int p, int t, int c)
+  double DetectorProperties::ConvertXToTicks(double X, int p, int t, int c) const
   {
     if(!fXTicksParamsLoaded) CalculateXTicksParams();
     return (X / fXTicksCoefficient +  fXTicksOffsets.at(c).at(t).at(p) );
@@ -153,7 +153,7 @@ int  DetectorProperties::TriggerOffset()     const
   // Take a cooridnate in ticks, and convert to an x position
   // assuming event deposit occured at t=0
  
-  double  DetectorProperties::ConvertTicksToX(double ticks, int p, int t, int c)
+  double  DetectorProperties::ConvertTicksToX(double ticks, int p, int t, int c) const
   {
     if(!fXTicksParamsLoaded) CalculateXTicksParams();
     return (ticks - fXTicksOffsets.at(c).at(t).at(p) ) * fXTicksCoefficient;  
