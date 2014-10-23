@@ -36,8 +36,8 @@ namespace util{
       double       TimeOffsetV()       const { return fTimeOffsetV; };
       double       TimeOffsetZ()       const { return fTimeOffsetZ; };
 
-      double             ConvertXToTicks(double X,     int p, int t, int c) const;
-      double             ConvertTicksToX(double ticks, int p, int t, int c) const;
+      double             ConvertXToTicks(double X,     int p, int t, int c) ;
+      double             ConvertTicksToX(double ticks, int p, int t, int c) ;
 
       double             GetXTicksOffset(int p, int t, int c) ;
       double             GetXTicksCoefficient() ;      
