@@ -70,7 +70,8 @@ namespace recob {
     void            Direction(double *dcosStart,
 			      double *dcosEnd)                 const;
     double          ProjectedLength(geo::View_t view)          const;
-    double          PitchInView(geo::View_t view)              const;
+    double          PitchInView(geo::View_t view,
+				size_t trajectory_point=0)     const;
     int             ID()                                       const;
 
 

@@ -169,19 +169,26 @@ namespace recob{
 
   //----------------------------------------------------------------------
   // provide projected wire pitch for the view
-  double Track::PitchInView(geo::View_t view) const
+  // by default, gives pitch at the beginning of the trajectory
+  double Track::PitchInView(geo::View_t view,
+			    size_t trajectory_point) const
   {
     if(view == geo::kUnknown)
       cet::exception("Track") << "Warning cannot obtain pitch for unknown view\n";
-
+    
+    if(trajectory_point > fDir.size())
+      cet::exception("Track") << "ERROR: Asking for trajectory point " 
+			      << trajectory_point
+			      << " when direction vector size is " 
+			      << fDir.size() << ".\n";
+    
     art::ServiceHandle<geo::Geometry> geo;
     double wirePitch   = geo->WirePitch(view);
     double angleToVert = geo->WireAngleToVertical(view) - 0.5*TMath::Pi();
 
     //(sin(angleToVert),cos(angleToVert)) is the direction perpendicular to wire
-    //fDir.front() is the direction of the track at the beginning of its trajectory
-    double cosgamma = std::abs(std::sin(angleToVert)*fDir.front().Y() +
-			       std::cos(angleToVert)*fDir.front().Z());
+    double cosgamma = std::abs(std::sin(angleToVert)*fDir[trajectory_point].Y() +
+			       std::cos(angleToVert)*fDir[trajectory_point].Z());
 
     if(cosgamma < 1.e-5)
       throw cet::exception("Track") << "cosgamma is basically 0, that can't be right\n";
