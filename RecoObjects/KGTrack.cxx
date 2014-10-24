@@ -9,6 +9,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
+#include <iomanip>
 #include "RecoObjects/KGTrack.h"
 #include "RecoObjects/KHitWireX.h"
 #include "RecoObjects/SurfXYZPlane.h"
@@ -248,6 +249,67 @@ namespace trkf {
 	  hits.push_back(prhit);
       }
     }
+  }
+
+  ///
+  /// Printout
+  ///
+  std::ostream& KGTrack::Print(std::ostream& out) const {
+
+    int n = 0;
+
+    double oldxyz[3] = {0., 0., 0.};
+    double len = 0.;
+    bool first = true;
+    for(auto const& ele : fTrackMap) {
+      double s = ele.first;
+      const KHitTrack& trh = ele.second;
+      double xyz[3];
+      double mom[3];
+      trh.getPosition(xyz);
+      trh.getMomentum(mom);
+      double tmom = std::sqrt(mom[0]*mom[0] + mom[1]*mom[1] + mom[2]*mom[2]);
+      if(tmom != 0.) {
+	mom[0] /= tmom;
+	mom[1] /= tmom;
+	mom[2] /= tmom;
+      }
+      if(!first) {
+	double dx = xyz[0] - oldxyz[0];
+	double dy = xyz[1] - oldxyz[1];
+	double dz = xyz[2] - oldxyz[2];
+	len += std::sqrt(dx*dx + dy*dy + dz*dz);
+      }
+      const KHitBase& hit = *(trh.getHit());
+      int plane = hit.getMeasPlane();
+      std::ios_base::fmtflags f = out.flags();
+      out << "State " << std::setw(4) << n 
+	  << ", path=" << std::setw(8) << std::fixed << std::setprecision(2) << s 
+	  << ", length=" << std::setw(8) << len 
+	  << ", x=" << std::setw(8) << xyz[0] 
+	  << ", y=" << std::setw(8) << xyz[1] 
+	  << ", z=" << std::setw(8) << xyz[2]
+	  << ", dx=" << std::setw(8) << mom[0] 
+	  << ", dy=" << std::setw(8) << mom[1] 
+	  << ", dz=" << std::setw(8) << mom[2] 
+	  << ", plane=" << std::setw(1) << plane
+	  << "\n";
+      out.flags(f);
+
+      oldxyz[0] = xyz[0];
+      oldxyz[1] = xyz[1];
+      oldxyz[2] = xyz[2];
+      
+      ++n;
+      first = false;
+    }
+    return out;
+  }
+
+  /// Output operator.
+  std::ostream& operator<<(std::ostream& out, const KGTrack& trg)
+  {
+    return trg.Print(out);
   }
 
 } // end namespace trkf

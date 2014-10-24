@@ -94,6 +94,9 @@ namespace trkf {
 
     const std::multimap<double, KHitTrack> TrackMap() const { return fTrackMap; }
 
+    /// Printout
+    std::ostream& Print(std::ostream& out) const;
+
   private:
 
     // Attributes.
@@ -101,6 +104,10 @@ namespace trkf {
     /// KHitTrack collection, indexed by path distance.
     std::multimap<double, KHitTrack> fTrackMap;
   };
+
+  /// Output operator.
+  std::ostream& operator<<(std::ostream& out, const KGTrack& trg);
+
 }
 
 #endif
