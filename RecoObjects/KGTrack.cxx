@@ -20,7 +20,8 @@
 namespace trkf {
 
   /// Default constructor.
-  KGTrack::KGTrack()
+  KGTrack::KGTrack(int prefplane) :
+    fPrefPlane(prefplane)
   {}
 
   /// Destructor.
@@ -122,7 +123,8 @@ namespace trkf {
   /// track - Track to fill.
   ///
   void KGTrack::fillTrack(recob::Track& track, 
-			  int id) const
+			  int id,
+			  bool store_np_plane) const
   {
     // Get geometry service.
 
@@ -154,6 +156,11 @@ namespace trkf {
 	itr != fTrackMap.end(); ++itr, ++n) {
       const KHitTrack& trh = (*itr).second;
 
+      // Skip nonpreferred plane hits?
+
+      if(!store_np_plane && trh.getHit()->getMeasPlane() != fPrefPlane)
+	continue;
+
       // Get position.
 
       double pos[3];
@@ -173,25 +180,28 @@ namespace trkf {
 
       // Fill error matrix.
 
-      if(n == 0 || n == fTrackMap.size() - 1) {
+      TMatrixD covar(5,5);
 
-	TMatrixD covar(5,5);
+      // Construct surface perpendicular to track momentun, and
+      // propagate track to that surface (zero distance).
 
-	// Construct surface perpendicular to track momentun, and
-	// propagate track to that surface (zero distance).
-
-	const std::shared_ptr<const Surface> psurf(new SurfXYZPlane(pos[0], pos[1], pos[2],
-								    mom[0], mom[1], mom[2]));
-	KETrack tre(trh);
-	boost::optional<double> dist = prop.err_prop(tre, psurf, Propagator::UNKNOWN, false);
-	if (!dist.is_initialized())
-	  throw cet::exception("KGTrack") << __func__ << ": error propagation failed\n";
-	for(int i=0; i<5; ++i) {
-	  for(int j=0; j<5; ++j)
-	    covar(i,j) = tre.getError()(i,j);
-	}
-	cov.push_back(covar);
+      const std::shared_ptr<const Surface> psurf(new SurfXYZPlane(pos[0], pos[1], pos[2],
+								  mom[0], mom[1], mom[2]));
+      KETrack tre(trh);
+      boost::optional<double> dist = prop.err_prop(tre, psurf, Propagator::UNKNOWN, false);
+      if (!dist.is_initialized())
+	throw cet::exception("KGTrack") << __func__ << ": error propagation failed\n";
+      for(int i=0; i<5; ++i) {
+	for(int j=0; j<5; ++j)
+	  covar(i,j) = tre.getError()(i,j);
       }
+
+      // Only save first and last error matrix.
+
+      if(cov.size() < 2)
+	cov.push_back(covar);
+      else
+	cov.back() = covar;
 
       // Get charge.
       // Only implemented for KHitWireX type measurements.
