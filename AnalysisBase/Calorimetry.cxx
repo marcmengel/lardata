@@ -145,8 +145,12 @@ namespace anab{
       << "\n Range: "         << a.fRange << std::endl;
     
     for(size_t n = 0; n < a.fdEdx.size(); ++n)
-      o << "dE/dx: "           << a.fdEdx[n]
-	<< " Residual range: " << a.fResidualRange[n] << std::endl;
+      o << "dE/dx="           << a.fdEdx[n]
+	<< " Residual range=" << a.fResidualRange[n] 
+	<< " dQ/dx=" << a.fdQdx[n]
+	<< " (x,y,z)=(" << a.fXYZ[n].X() << "," << a.fXYZ[n].Y() << "," << a.fXYZ[n].Z() << ")"
+	<< " pitch=" << a.fTrkPitch[n]
+	<< std::endl;
 
     return o;
   }
