@@ -8,6 +8,7 @@
 #include "RecoBase/Hit.h"
 #include "RecoBase/SpacePoint.h"
 #include "SimpleTypesAndConstants/PhysicalConstants.h"
+#include "SimpleTypesAndConstants/geo_types.h"
 #include "RecoObjects/BezierCurveHelper.h"
 #include "Utilities/DetectorProperties.h"
 
@@ -192,6 +193,9 @@ namespace trkf {
 
     double s, d;
 
+    bool do_now=true;
+    geo::PlaneID planeID;
+
     if(Hits.size()>0)
       {
 	for(size_t i=0; i!=Hits.size(); ++i)
@@ -206,6 +210,11 @@ namespace trkf {
 		resRange.push_back(Range - s*Range);
 		dQdx.push_back(Hits.at(i)->Charge()/ThisPitch);
 		dEdx.push_back( calalg.dEdx_AMP(Hits.at(i), ThisPitch) );
+
+		if(do_now) {
+		  planeID = geo::PlaneID(Hits.at(i)->WireID().Cryostat,Hits.at(i)->WireID().TPC,Hits.at(i)->WireID().Plane);
+		  do_now=false;
+		}
 	      }
 	    
 	  }
@@ -217,7 +226,7 @@ namespace trkf {
     for(size_t i=0; i!=dEdx.size(); ++i)
       KineticEnergy+=dEdx.at(i)*TrkPitch.at(i);
 
-    return anab::Calorimetry(KineticEnergy, dEdx, dQdx, resRange, deadwire, Range, TrkPitch);
+    return anab::Calorimetry(KineticEnergy, dEdx, dQdx, resRange, deadwire, Range, TrkPitch,planeID);
 
 
   }
@@ -245,6 +254,9 @@ namespace trkf {
  
     double s, d;
 
+    bool do_now=true;
+    geo::PlaneID planeID;
+
     if(Hits.size()>0)
       {
 	for(size_t i=0; i!=Hits.size(); ++i)
@@ -260,13 +272,18 @@ namespace trkf {
 		dEdx.push_back( ThisdEdx);
 		KineticEnergy+=ThisdEdx*ThisPitch;
 				
+		if(do_now) {
+		  planeID = geo::PlaneID(Hits.at(i)->WireID().Cryostat,Hits.at(i)->WireID().TPC,Hits.at(i)->WireID().Plane);
+		  do_now=false;
+		}
+
 	      }
 	    
 	  }
       }
 
 
-    return anab::Calorimetry(KineticEnergy, dEdx, dQdx, resRange, deadwire, Range, TrkPitch);
+    return anab::Calorimetry(KineticEnergy, dEdx, dQdx, resRange, deadwire, Range, TrkPitch, planeID);
 
   }
 

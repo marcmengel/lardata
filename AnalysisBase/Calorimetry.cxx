@@ -32,7 +32,8 @@ namespace anab{
 			   std::vector<double> const& resRange,
 			   std::vector<double> const& deadwire,
 			   double Range,
-			   double TrkPitch) 
+			   double TrkPitch,
+			   geo::PlaneID planeID) 
   {
  
     fKineticEnergy = KineticEnergy;
@@ -59,6 +60,7 @@ namespace anab{
       fDeadWireResR[i] = deadwire[i];
     }
 
+    fPlaneID = planeID;
   }
 
 
@@ -69,9 +71,11 @@ namespace anab{
 			   std::vector<double> const& resRange,
 			   std::vector<double> const& deadwire,
 			   double Range,
-			   std::vector<double> const& TrkPitch) 
+			   std::vector<double> const& TrkPitch,
+			   geo::PlaneID planeID) 
   {
     
+    fPlaneID = planeID;
     fKineticEnergy = KineticEnergy;
     fRange = Range;
     fTrkPitch = TrkPitch;
@@ -106,9 +110,11 @@ namespace anab{
 			   std::vector<double> const& deadwire,
 			   double Range,
 			   std::vector<double> const& TrkPitch,
-			   std::vector<TVector3> const& XYZ) 
+			   std::vector<TVector3> const& XYZ,
+			   geo::PlaneID planeID) 
   {
     
+    fPlaneID = planeID;
     fKineticEnergy = KineticEnergy;
     fRange = Range;
     fTrkPitch = TrkPitch;
@@ -150,6 +156,7 @@ namespace anab{
 	<< " dQ/dx=" << a.fdQdx[n]
 	<< " (x,y,z)=(" << a.fXYZ[n].X() << "," << a.fXYZ[n].Y() << "," << a.fXYZ[n].Z() << ")"
 	<< " pitch=" << a.fTrkPitch[n]
+	<< " planeID=(" << a.fPlaneID.Cryostat << "," << a.fPlaneID.TPC << "," << a.fPlaneID.Plane << ")"
 	<< std::endl;
 
     return o;
