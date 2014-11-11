@@ -230,7 +230,8 @@ namespace trkf {
 
     // Fill track.
 
-    track = recob::Track(xyz, dxdydz, cov, dqdx, momentum, id);
+    if(xyz.size() >= 2)
+      track = recob::Track(xyz, dxdydz, cov, dqdx, momentum, id);
   }
 
   /// Fill a PtrVector of Hits.
