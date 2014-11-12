@@ -56,8 +56,8 @@ namespace sim{
 
   protected:
     
-    TLorentzVector _position;
-    TLorentzVector _momentum;
+    TLorentzVector _position; // Position 4-vector (x,y,z,t) in [cm,cm,cm,ns]
+    TLorentzVector _momentum; // Momentum 4-vector (px,py,pz,E) in [MeV/c,MeV/c,Mev/c,MeV]
     
   };
 }

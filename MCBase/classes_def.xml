@@ -12,14 +12,16 @@
 <class name="sim::MCWireCollection" ClassVersion="10" >
  <version ClassVersion="10" checksum="3609210914"/>
 </class>
-<class name="sim::MCShower" ClassVersion="11" >
+<class name="sim::MCShower" ClassVersion="12" >
+ <version ClassVersion="12" checksum="3396084260"/>
  <version ClassVersion="11" checksum="3729664791"/>
  <version ClassVersion="10" checksum="1368296938"/>
 </class>
 <class name="sim::MCStep" ClassVersion="10" >
  <version ClassVersion="10" checksum="3401526256"/>
 </class>
-<class name="sim::MCTrack" ClassVersion="11" >
+<class name="sim::MCTrack" ClassVersion="12" >
+ <version ClassVersion="12" checksum="4188912619"/>
  <version ClassVersion="11" checksum="1998549158"/>
  <version ClassVersion="10" checksum="1862388136"/>
 </class>

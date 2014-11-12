@@ -11,16 +11,16 @@ namespace sim {
 
     fOrigin  = simb::kUnknown;
     fProcess = "";
-    fPDGCode         = kINVALID_INT;
-    fG4TrackID       = kINVALID_UINT;
+    fPDGCode = kINVALID_INT;
+    fTrackID = kINVALID_UINT;
 
-    fMotherPDGCode   = kINVALID_INT;
-    fMotherG4TrackID = kINVALID_UINT;
-    fMotherProcess   = "";
+    fMotherPDGCode = kINVALID_INT;
+    fMotherTrackID = kINVALID_UINT;
+    fMotherProcess = "";
 
-    fAncestorPDGCode   = kINVALID_INT;
-    fAncestorG4TrackID = kINVALID_UINT;
-    fAncestorProcess   = "";
+    fAncestorPDGCode = kINVALID_INT;
+    fAncestorTrackID = kINVALID_UINT;
+    fAncestorProcess = "";
 
     TLorentzVector invalid(kINVALID_DOUBLE,
 			   kINVALID_DOUBLE,
@@ -29,14 +29,14 @@ namespace sim {
 
     MCStep invalid_step(invalid,invalid);
 
-    fG4Start = invalid_step;
-    fG4End   = invalid_step;
+    fStart = invalid_step;
+    fEnd   = invalid_step;
 
-    fMotherG4Start = invalid_step;
-    fMotherG4End   = invalid_step;
+    fMotherStart = invalid_step;
+    fMotherEnd   = invalid_step;
     
-    fAncestorG4Start = invalid_step;
-    fAncestorG4End   = invalid_step;
+    fAncestorStart = invalid_step;
+    fAncestorEnd   = invalid_step;
 
   }
 }

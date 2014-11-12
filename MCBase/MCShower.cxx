@@ -15,25 +15,25 @@ namespace sim {
 			   kINVALID_DOUBLE);
     MCStep invalid_step(invalid,invalid);
 
-    fOrigin    = simb::kUnknown;
+    fOrigin  = simb::kUnknown;
 
-    fPDGCode   = kINVALID_INT;
-    fG4TrackID = kINVALID_UINT;
-    fProcess   = "";
-    fG4Start   = invalid_step;
-    fG4End     = invalid_step;
+    fPDGCode = kINVALID_INT;
+    fTrackID = kINVALID_UINT;
+    fProcess = "";
+    fStart   = invalid_step;
+    fEnd     = invalid_step;
 
-    fMotherPDGCode   = kINVALID_INT;
-    fMotherG4TrackID = kINVALID_UINT;
-    fMotherProcess   = "";
-    fMotherG4Start   = invalid_step;
-    fMotherG4End     = invalid_step;
+    fMotherPDGCode = kINVALID_INT;
+    fMotherTrackID = kINVALID_UINT;
+    fMotherProcess = "";
+    fMotherStart   = invalid_step;
+    fMotherEnd     = invalid_step;
 
-    fAncestorPDGCode   = kINVALID_INT;
-    fAncestorG4TrackID = kINVALID_UINT;
-    fAncestorProcess   = "";
-    fAncestorG4Start   = invalid_step;
-    fAncestorG4End     = invalid_step;
+    fAncestorPDGCode = kINVALID_INT;
+    fAncestorTrackID = kINVALID_UINT;
+    fAncestorProcess = "";
+    fAncestorStart   = invalid_step;
+    fAncestorEnd     = invalid_step;
 
     fDetProfile = invalid_step;
     

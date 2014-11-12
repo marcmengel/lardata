@@ -37,25 +37,25 @@ namespace sim {
 
     //--- Getters ---//
 
-    simb::Origin_t     Origin    () const { return fOrigin;    }
+    simb::Origin_t     Origin  () const { return fOrigin;  }
 
-    int                PdgCode   () const { return fPDGCode;   }
-    unsigned int       G4TrackID () const { return fG4TrackID; } 
-    const std::string& Process   () const { return fProcess;   }
-    const MCStep&      G4Start   () const { return fG4Start;   }
-    const MCStep&      G4End     () const { return fG4End;     }
+    int                PdgCode () const { return fPDGCode; }
+    unsigned int       TrackID () const { return fTrackID; } 
+    const std::string& Process () const { return fProcess; }
+    const MCStep&      Start   () const { return fStart;   }
+    const MCStep&      End     () const { return fEnd;     }
 
-    int                MotherPdgCode   () const { return fMotherPDGCode;   }
-    unsigned int       MotherG4TrackID () const { return fMotherG4TrackID; }
-    const std::string& MotherProcess   () const { return fMotherProcess;   }
-    const MCStep&      MotherG4Start   () const { return fMotherG4Start;   }
-    const MCStep&      MotherG4End     () const { return fMotherG4End;     }
+    int                MotherPdgCode () const { return fMotherPDGCode; }
+    unsigned int       MotherTrackID () const { return fMotherTrackID; }
+    const std::string& MotherProcess () const { return fMotherProcess; }
+    const MCStep&      MotherStart   () const { return fMotherStart;   }
+    const MCStep&      MotherEnd     () const { return fMotherEnd;     }
 
-    int                AncestorPdgCode   () const { return fAncestorPDGCode;   }
-    unsigned int       AncestorG4TrackID () const { return fAncestorG4TrackID; }
-    const std::string& AncestorProcess   () const { return fAncestorProcess;   }
-    const MCStep&      AncestorG4Start   () const { return fAncestorG4Start;   }
-    const MCStep&      AncestorG4End     () const { return fAncestorG4End;     }
+    int                AncestorPdgCode () const { return fAncestorPDGCode; }
+    unsigned int       AncestorTrackID () const { return fAncestorTrackID; }
+    const std::string& AncestorProcess () const { return fAncestorProcess; }
+    const MCStep&      AncestorStart   () const { return fAncestorStart;   }
+    const MCStep&      AncestorEnd     () const { return fAncestorEnd;     }
 
     const MCStep& DetProfile () const { return fDetProfile; }
     
@@ -66,23 +66,23 @@ namespace sim {
     //--- Setters ---//
     void Origin    ( simb::Origin_t o ) { fOrigin    = o;    }
 
-    void PdgCode   ( int id                  ) { fPDGCode   = id;   }
-    void G4TrackID ( unsigned int id         ) { fG4TrackID = id;   }
-    void Process   ( const std::string &name ) { fProcess   = name; }
-    void G4Start   ( const MCStep &s         ) { fG4Start   = s;    }
-    void G4End     ( const MCStep &s         ) { fG4End     = s;    }
+    void PdgCode ( int id                  ) { fPDGCode = id;   }
+    void TrackID ( unsigned int id         ) { fTrackID = id;   }
+    void Process ( const std::string &name ) { fProcess = name; }
+    void Start   ( const MCStep &s         ) { fStart   = s;    }
+    void End     ( const MCStep &s         ) { fEnd     = s;    }
 
-    void MotherPdgCode   ( int id                  ) { fMotherPDGCode   = id;   }
-    void MotherG4TrackID ( unsigned int id         ) { fMotherG4TrackID = id;   }
-    void MotherProcess   ( const std::string& name ) { fMotherProcess   = name; }
-    void MotherG4Start   ( const MCStep& s         ) { fMotherG4Start   = s;    }
-    void MotherG4End     ( const MCStep& s         ) { fMotherG4End     = s;    }
+    void MotherPdgCode ( int id                  ) { fMotherPDGCode = id;   }
+    void MotherTrackID ( unsigned int id         ) { fMotherTrackID = id;   }
+    void MotherProcess ( const std::string& name ) { fMotherProcess = name; }
+    void MotherStart   ( const MCStep& s         ) { fMotherStart   = s;    }
+    void MotherEnd     ( const MCStep& s         ) { fMotherEnd     = s;    }
 
-    void AncestorPdgCode   ( int id                  ) { fAncestorPDGCode   = id;   }
-    void AncestorG4TrackID ( unsigned int id         ) { fAncestorG4TrackID = id;   }
-    void AncestorProcess   ( const std::string& name ) { fAncestorProcess   = name; }
-    void AncestorG4Start   ( const MCStep& s         ) { fAncestorG4Start   = s;    }
-    void AncestorG4End     ( const MCStep& s         ) { fAncestorG4End     = s;    }
+    void AncestorPdgCode ( int id                  ) { fAncestorPDGCode   = id;   }
+    void AncestorTrackID ( unsigned int id         ) { fAncestorTrackID = id;     }
+    void AncestorProcess ( const std::string& name ) { fAncestorProcess   = name; }
+    void AncestorStart   ( const MCStep& s         ) { fAncestorStart   = s;      }
+    void AncestorEnd     ( const MCStep& s         ) { fAncestorEnd     = s;      }
 
     void DetProfile ( const MCStep& s) { fDetProfile = s; }
 
@@ -98,25 +98,25 @@ namespace sim {
     simb::Origin_t fOrigin;    ///< Origin information
 
     //---- Shower particle info ----//
-    int          fPDGCode;     ///< Shower particle PDG code
-    unsigned int fG4TrackID;   ///< Shower particle G4 track ID
-    std::string  fProcess;     ///< Shower particle's creation process
-    MCStep       fG4Start;     ///< Shower particle's G4 start point
-    MCStep       fG4End;       ///< Shower particle's G4 end point
+    int          fPDGCode;   ///< Shower particle PDG code
+    unsigned int fTrackID;   ///< Shower particle G4 track ID
+    std::string  fProcess;   ///< Shower particle's creation process
+    MCStep       fStart;     ///< Shower particle's G4 start point
+    MCStep       fEnd;       ///< Shower particle's G4 end point
 
     //---- Mother's particle info ---//
-    int          fMotherPDGCode;   ///< Shower's mother PDG code   
-    unsigned int fMotherG4TrackID; ///< Shower's mother G4 track ID
-    std::string  fMotherProcess;   ///< Shower's mother creation process
-    MCStep       fMotherG4Start;   ///< Shower's mother G4 start point
-    MCStep       fMotherG4End;     ///< Shower's mother G4 end point
+    int          fMotherPDGCode; ///< Shower's mother PDG code   
+    unsigned int fMotherTrackID; ///< Shower's mother G4 track ID
+    std::string  fMotherProcess; ///< Shower's mother creation process
+    MCStep       fMotherStart;   ///< Shower's mother G4 start point
+    MCStep       fMotherEnd;     ///< Shower's mother G4 end point
 
     //---- Ancestor's particle info ---//
-    int          fAncestorPDGCode;   ///< Shower's ancestor PDG code   
-    unsigned int fAncestorG4TrackID; ///< Shower's ancestor G4 track ID
-    std::string  fAncestorProcess;   ///< Shower's ancestor creation process
-    MCStep       fAncestorG4Start;   ///< Shower's ancestor G4 start point
-    MCStep       fAncestorG4End;     ///< Shower's ancestor G4 end point
+    int          fAncestorPDGCode; ///< Shower's ancestor PDG code   
+    unsigned int fAncestorTrackID; ///< Shower's ancestor G4 track ID
+    std::string  fAncestorProcess; ///< Shower's ancestor creation process
+    MCStep       fAncestorStart;   ///< Shower's ancestor G4 start point
+    MCStep       fAncestorEnd;     ///< Shower's ancestor G4 end point
 
     //---- Energy deposition info ----//
     std::vector<unsigned int>  fDaughterTrackID; ///< Daughters' track ID
