@@ -116,6 +116,8 @@
  <class name="std::pair< art::Ptr<recob::PFParticle>,   art::Ptr<recob::SpacePoint> >" 	      />
  <class name="std::pair< art::Ptr<recob::PFParticle>,   art::Ptr<recob::Track>      >" 	      />
  <class name="std::pair< art::Ptr<recob::PFParticle>,   art::Ptr<recob::Vertex>     >" 	      />
+ <class name="std::pair< art::Ptr<recob::PFParticle>,   art::Ptr<recob::Seed>     >" 	      />
+ <class name="std::pair< art::Ptr<recob::Seed>,       art::Ptr<recob::PFParticle> >" 	      />
  <class name="std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::Cluster>    >" 	      />
  <class name="std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::Hit>        >" 	      />
  <class name="std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::PFParticle>   >" 	      />
@@ -156,6 +158,8 @@
  <class name="art::Assns<recob::PFParticle,   recob::SpacePoint, void>"	          	      />
  <class name="art::Assns<recob::PFParticle,   recob::Track,      void>"		  	      />
  <class name="art::Assns<recob::PFParticle,   recob::Vertex,     void>"		  	      />
+ <class name="art::Assns<recob::PFParticle,   recob::Seed,     void>"		  	      />
+ <class name="art::Assns<recob::Seed,       recob::PFParticle,   void>"		  	      />
  <class name="art::Assns<recob::Shower,     recob::Cluster,    void>"		  	      />
  <class name="art::Assns<recob::Shower,     recob::Hit,        void>"		  	      />
  <class name="art::Assns<recob::Shower,     recob::PFParticle,   void>"	          	      />
@@ -228,6 +232,8 @@
  <class name="art::Wrapper< art::Assns<recob::PFParticle,   recob::SpacePoint, void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::PFParticle,   recob::Track,      void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::PFParticle,   recob::Vertex,     void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::PFParticle,   recob::Seed,     void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Seed,       recob::PFParticle,   void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::Shower,  	  recob::Cluster,    void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::Shower,  	  recob::Hit,        void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::Shower,     recob::PFParticle,   void>	    >"/>
