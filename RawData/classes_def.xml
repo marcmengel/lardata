@@ -1,11 +1,8 @@
 <!--                                                                                  -->
-<!--  $Id: classes_def.xml,v 1.10 2010/04/12 18:12:28  Exp $                          -->
-<!--  $Author:  $                                                                     -->
-<!--  $Date: 2010/04/12 18:12:28 $                                                    -->
-<!--                                                                                  -->
 <!--  Include art::Wrapper lines for objects that we would like to put into the event -->
 <!--  Include the non-wrapper lines for all objects on the art::Wrapper lines and     -->
 <!--  for all objects that are data members of those objects.                         -->
+<!--                                                                                  -->
 
 
 <lcgdict>
@@ -16,8 +13,9 @@
  <class name="raw::DAQHeader  	  " ClassVersion="12"           >
   <version ClassVersion="12" checksum="4132299299"/>
  </class>
- <class name="raw::RawDigit   	  " ClassVersion="12"           >
+ <class name="raw::RawDigit   	  " ClassVersion="13"           >
   <version ClassVersion="12" checksum="160151695"/>
+  <version ClassVersion="13" checksum="2630650582"/>
  </class>
  <class name="raw::AuxDetDigit	  " ClassVersion="11"           >
   <version ClassVersion="11" checksum="2699414988"/>
@@ -40,6 +38,7 @@
  <class name="std::vector<raw::OpDetPulse>     "                />
  <class name="std::vector<raw::ExternalTrigger>"                />
  <class name="std::vector<raw::Trigger>        "                />
+ <class name="std::bitset<16>"                                  />
  <class name="std::pair<std::string,std::vector<double> >"      />
  <class name="std::map<std::string,std::vector<double> >"       />
  <class name="art::Wrapper< raw::BeamInfo                     >"/>

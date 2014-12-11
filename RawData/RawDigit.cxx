@@ -1,11 +1,12 @@
-////////////////////////////////////////////////////////////////////////
-// $Id: RawDigit.cxx,v 1.13 2010/03/26 19:36:42 brebel Exp $
-//
-// RawDigit class
-//
-// brebel@fnal.gov
-//
-////////////////////////////////////////////////////////////////////////
+/** ****************************************************************************
+ * @file RawDigit.cxx
+ * @brief Definition of basic raw digits
+ * @author brebel@fnal.gov
+ * @see  RawDigit.h raw.h
+ * 
+ * Compression/uncompression utilities are declared in lardata/RawData/raw.h .
+ * 
+ * ****************************************************************************/
 
 #include "RawData/RawDigit.h"
 
@@ -25,13 +26,15 @@ namespace raw{
 
 
   //----------------------------------------------------------------------
-  void RawDigit::SetPedestal(double ped)
+  void RawDigit::SetPedestal(float ped, float sigma /* = 1. */ )
   {
 
     fPedestal = ped;
-    fSigma = 1.;
+    fSigma = sigma;
 
-  }
-}
+  } // RawDigit::SetPedestal()
+
+
+} // namespace raw
 ////////////////////////////////////////////////////////////////////////
 
