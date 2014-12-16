@@ -19,7 +19,8 @@
  <class name="raw::RawDigit   	  " ClassVersion="12"           >
   <version ClassVersion="12" checksum="160151695"/>
  </class>
- <class name="raw::AuxDetDigit	  " ClassVersion="10"           >
+ <class name="raw::AuxDetDigit	  " ClassVersion="11"           >
+  <version ClassVersion="11" checksum="2699414988"/>
   <version ClassVersion="10" checksum="1690717253"/>
  </class>
  <class name="raw::OpDetPulse 	  " ClassVersion="14"           >
