@@ -15,7 +15,7 @@
  </class>
  <class name="raw::RawDigit   	  " ClassVersion="13"           >
   <version ClassVersion="12" checksum="160151695"/>
-  <version ClassVersion="13" checksum="2630650582"/>
+  <version ClassVersion="13" checksum="412021819"/>
  </class>
  <class name="raw::AuxDetDigit	  " ClassVersion="11"           >
   <version ClassVersion="11" checksum="2699414988"/>
@@ -38,7 +38,7 @@
  <class name="std::vector<raw::OpDetPulse>     "                />
  <class name="std::vector<raw::ExternalTrigger>"                />
  <class name="std::vector<raw::Trigger>        "                />
- <class name="std::bitset<16>"                                  />
+ <!-- class name="std::bitset<16>"                                  / -->
  <class name="std::pair<std::string,std::vector<double> >"      />
  <class name="std::map<std::string,std::vector<double> >"       />
  <class name="art::Wrapper< raw::BeamInfo                     >"/>

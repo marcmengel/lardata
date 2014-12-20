@@ -14,17 +14,6 @@
 
 namespace raw{
 
-  //--------------------------------------------------
-  short RawDigit::ADC(int i) const
-  {
-    unsigned int j = i;
-    if(i < 0 || (j>fADC.size()) )
-      throw cet::exception("RawDigit") << "asked for illegal ADC index: " << i << "\n";
-
-    return fADC[j];
-  }
-
-
   //----------------------------------------------------------------------
   void RawDigit::SetPedestal(float ped, float sigma /* = 1. */ )
   {

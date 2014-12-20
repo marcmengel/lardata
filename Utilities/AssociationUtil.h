@@ -27,15 +27,83 @@ namespace util {
   // see https://cdcvs.fnal.gov/redmine/projects/art/wiki/Inter-Product_References
   // for information about using art::Assns
 
+  /**
+   * @brief Creates a single one-to-one association
+   * @tparam T type of the new object to associate
+   * @tparam U type of the object already in the data product or art::Ptr
+   * @param prod reference to the producer that will write the vector a
+   * @param evt reference to the current event
+   * @param a vector of data products that are in, or will be put into, evt
+   * @param b art::Ptr to the (new) object to be associated to the one in a
+   * @param assn reference to association object where the new one will be put
+   * @param a_instance name of the instance that will be used for a in evt
+   * @param indx index of the element in a to be associated with b (default: the last element)
+   * @return whether the operation was successful (can it ever fail??)
+   *
+   * As example of usage: create a wire/raw digit association.
+   * This code should live in the art::EDProduce::produce() method.
+   * The raw::RawDigit product was created already by a DigitModuleLabel module.
+   * The code is supposed to produce one recob::Wire for each existing
+   * raw::RawDigit, and contextually associate the new wire to the source digit.
+   * We are also assuming that there might be different RawDigit sets produced
+   * by the same producer: we identify the one we care of by the string
+   * spill_name and we create wires and associations with the same label
+   * for convenience.
+   *     
+   *     // this is the original list of digits, thawed from the event
+   *     art::Handle< std::vector<raw::RawDigit>> digitVecHandle;
+   *     evt.getByLabel(DigitModuleLabel, spill_name, digitVecHandle);
+   *     
+   *     // the collection of wires that will be written as data product
+   *     std::unique_ptr<std::vector<recob::Wire>> wirecol(new std::vector<recob::Wire>);
+   *     // ... and an association set
+   *     std::unique_ptr<art::Assns<raw::RawDigit,recob::Wire>> WireDigitAssn
+   *       (new art::Assns<raw::RawDigit,recob::Wire>);
+   *     
+   *     for(size_t iDigit = 0; iDigit < digitVecHandle->size(); ++iDigit) {
+   *       // turn the digit into a art::Ptr:
+   *       art::Ptr<raw::RawDigit> digit_ptr(digitVecHandle, iDigit);
+   *       
+   *       // store the wire in its final position in the data product;
+   *       // the new wire is currently the last of the list
+   *       wirecol->push_back(std::move(wire));
+   *       
+   *       // add an association between the last object in wirecol
+   *       // (that we just inserted) and digit_ptr
+   *       if (!util::CreateAssn(*this, evt, *wirecol, digit_ptr, *WireDigitAssn, spill_name)) {
+   *         throw art::Exception(art::errors::InsertFailure)
+   *           << "Can't associate wire #" << (wirecol->size() - 1)
+   *           << " with raw digit #" << digit_ptr.key();
+   *       } // if failed to add association
+   *     
+   *     } // for digits
+   *     
+   *     evt.put(std::move(wirecol), spill_name);
+   *     evt.put(std::move(WireDigitAssn), spill_name);
+   *     
+   */
+  template<class T, class U>
+  bool CreateAssn(art::EDProducer const& prod,
+                  art::Event            &evt,
+                  std::vector<T>        &a,
+                  art::Ptr<U>            b,
+                  art::Assns<U,T>       &assn,
+                  std::string           a_instance,
+                  size_t                indx=UINT_MAX
+                  );
+
   // method to create a 1 to 1 association
   // indx is the location in the input std::vector<T> of the object you wish to 
   // associate with the art::Ptr<U>
-  template<class T, class U> static bool CreateAssn(art::EDProducer const& prod,
+  template<class T, class U> 
+  inline bool CreateAssn(art::EDProducer const& prod,
 						    art::Event            &evt, 
 						    std::vector<T>        &a,
 						    art::Ptr<U>            b,
 						    art::Assns<U,T>       &assn,
-						    size_t                indx=UINT_MAX);
+						    size_t                indx=UINT_MAX)
+    { return CreateAssn(prod, evt, a, b, assn, std::string(), indx); }
+	
 
   // method to create a 1 to 1 association
   // indx is the location in the input std::vector<T> of the object you wish to 
@@ -157,31 +225,33 @@ namespace util {
 }// end namespace
 
 //----------------------------------------------------------------------
-template<class T, class U> inline bool util::CreateAssn(art::EDProducer const& prod,
-							art::Event            &evt, 
-							std::vector<T>        &a,
-							art::Ptr<U>            b,
-							art::Assns<U,T>       &assn,
-							size_t                 indx)
+template<class T, class U>
+inline bool util::CreateAssn(
+  art::EDProducer const& prod,
+  art::Event            &evt,
+  std::vector<T>        &a,
+  art::Ptr<U>            b,
+  art::Assns<U,T>       &assn,
+  std::string            a_instance,
+  size_t                 indx /* = UINT_MAX */
+  )
 {
-  bool ret = true;
-  
-  if(indx == UINT_MAX) indx = a.size()-1;
+  if (indx == UINT_MAX) indx = a.size()-1;
   
   try{
-    art::ProductID aid = prod.getProductID< std::vector<T> >(evt);
+    art::ProductID aid = prod.getProductID< std::vector<T>>(evt, a_instance);
     art::Ptr<T> aptr(aid, indx, evt.productGetter(aid));
     assn.addSingle(b, aptr);
+    return true;
   }
   catch(cet::exception &e){
-    mf::LogWarning("AssociationUtil") << "unable to create requested "
-				      << "art:Assns, exception thrown: "
-				      << e;
-    ret = false;
+    mf::LogWarning("AssociationUtil")
+      << "unable to create requested art:Assns, exception thrown: " << e;
+    return false;
   }
   
-  return ret;
 }
+
 
 //----------------------------------------------------------------------
 template<class T, class U> inline bool util::CreateAssn(art::EDProducer const& /*prod*/,

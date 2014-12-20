@@ -22,15 +22,14 @@
 #ifndef RAWDATA_RAWDIGIT_H
 #define RAWDATA_RAWDIGIT_H
 
+// C/C++ standard libraries
 #include <stdint.h> // uint32_t
 #include <cstdlib> // size_t
 #include <vector>
-#include <bitset>
-#ifndef __GCCXML__
-#	include <limits> // std::numeric_limits<>
-#endif // __GCCXML__
+// #include <bitset>
 
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::Compress_t
+// LArSoft libraries
+#include "SimpleTypesAndConstants/RawTypes.h" // raw::Compress_t, raw::Channel_t
 
 
 /// Raw data description and utilities
@@ -69,14 +68,14 @@ namespace raw {
   class RawDigit {
 
   public:
-    /// Type representing the ID of a readout channel
-    typedef uint32_t ChannelID_t;
-    
     /// Type representing a (compressed) vector of ADC counts
     typedef std::vector<short> ADCvector_t;
     
+/*
+// removed waiting for a real use for flags
     /// Type for the digit flags
     typedef std::bitset<16> Flags_t;
+*/
     
     /// Default constructor: an empty raw digit
     RawDigit();
@@ -84,11 +83,14 @@ namespace raw {
 #ifndef __GCCXML__
   public:
     
+  /*
+    // removed waiting for a real use for flags
     typedef enum {
       fiSaturation,       ///< saturation flag: set if saturated at any time
       NLArSoftFlags = 8,  ///< LArSoft reserves flags up to here (this excluded)
       NFlagIndices = NLArSoftFlags ///< number of flags
     } FlagIndices_t; ///< type of index of flags
+  */
     
     /**
      * @brief Constructor: sets all the fields
@@ -102,8 +104,9 @@ namespace raw {
     RawDigit(ChannelID_t        channel,
              unsigned short     samples,
              const ADCvector_t& adclist,
-             raw::Compress_t    compression = raw::kNone,
-             const Flags_t&     flags = DefaultFlags);
+             raw::Compress_t    compression = raw::kNone /*,
+             const Flags_t&     flags = DefaultFlags */
+             );
     
     /// Set pedestal and its RMS (the latter is 0 by default)
     void            SetPedestal(float ped, float sigma = 1.);
@@ -137,6 +140,8 @@ namespace raw {
     raw::Compress_t Compression() const;
     ///@}
     
+  /*
+    // removed waiting for a real use for flags
     ///@{
     ///@name Raw digit flag interface
     /// Flag set
@@ -153,10 +158,8 @@ namespace raw {
     static const unsigned long long DefaultFlags  = 0ULL;
     
     ///@}
+  */
     
-    
-    static constexpr ChannelID_t InvalidChannelID
-      = std::numeric_limits<ChannelID_t>::max();
     
 #endif // !__GCCXML__
   private:
@@ -168,9 +171,11 @@ namespace raw {
     float           fPedestal;    ///< pedestal for this channel
     float           fSigma;       ///< sigma of the pedestal counts for this channel
     
-    raw::Compress_t fCompression; ///< compression scheme used for the ADC vector
+    Compress_t      fCompression; ///< compression scheme used for the ADC vector
     
-    Flags_t         fFlags;       ///< set of digit flags
+
+    // removed waiting for a real use for flags
+    // Flags_t         fFlags;       ///< set of digit flags
     
   }; // class RawDigit
   
@@ -190,15 +195,15 @@ inline raw::RawDigit::RawDigit()
   , fPedestal(0.) 
   , fSigma(0.)
   , fCompression(raw::kNone)
-  , fFlags(DefaultFlags)
+//  , fFlags(DefaultFlags)
 {}
 
 inline raw::RawDigit::RawDigit(
   ChannelID_t               channel,
   unsigned short            samples,
   const std::vector<short>& adclist,
-  raw::Compress_t           compression /* = raw::kNone */,
-  const Flags_t&            flags /* = DefaultFlags */
+  Compress_t                compression /* = raw::kNone */ /*,
+  const Flags_t&            flags / * = DefaultFlags * / */
 )
   : fADC(adclist) 
   , fChannel(channel) 
@@ -206,22 +211,26 @@ inline raw::RawDigit::RawDigit(
   , fPedestal(0.) 
   , fSigma(0.)
   , fCompression(compression)
-  , fFlags(flags)
+//  , fFlags(flags)
 {}
 
 
 inline size_t          raw::RawDigit::NADC()        const { return fADC.size();  }
+inline short           raw::RawDigit::ADC(int i)    const { return fADC.at(i);   }
 inline const raw::RawDigit::ADCvector_t&
                        raw::RawDigit::ADCs()        const { return fADC;         }
-inline raw::RawDigit::ChannelID_t
+inline raw::ChannelID_t
                        raw::RawDigit::Channel()     const { return fChannel;     }
 inline unsigned short  raw::RawDigit::Samples()     const { return fSamples;     }
 inline float           raw::RawDigit::GetPedestal() const { return fPedestal;    }
 inline float           raw::RawDigit::GetSigma()    const { return fSigma;       }
 inline raw::Compress_t raw::RawDigit::Compression() const { return fCompression; }
+/*
+// removed waiting for a real use for flags
 inline const raw::RawDigit::Flags_t&
                        raw::RawDigit::Flags()       const { return fFlags;       }
 inline bool            raw::RawDigit::isSaturated() const { return fFlags.test(fiSaturation); }
+*/
 
 #endif // !__GCCXML__
 

@@ -48,13 +48,13 @@ namespace calo{
   // ----------------------------------------------------------------------------------//
   double CalorimetryAlg::dEdx_AMP(art::Ptr< recob::Hit >  hit, double pitch) const
   {
-    return dEdx_AMP(hit->Charge(true)/pitch, hit->PeakTime(), hit->WireID().Plane);
+    return dEdx_AMP(hit->PeakAmplitude()/pitch, hit->PeakTime(), hit->WireID().Plane);
   }
   
   // ----------------------------------------------------------------------------------//
   double CalorimetryAlg::dEdx_AMP(recob::Hit const&  hit, double pitch) const
   {
-    return dEdx_AMP(hit.Charge(true)/pitch, hit.PeakTime(), hit.WireID().Plane);
+    return dEdx_AMP(hit.PeakAmplitude()/pitch, hit.PeakTime(), hit.WireID().Plane);
   }
 
   ///\todo The plane argument should really be for a view instead
@@ -81,13 +81,13 @@ namespace calo{
   // ----------------------------------------------------------------------------------//
   double CalorimetryAlg::dEdx_AREA(art::Ptr< recob::Hit >  hit, double pitch) const
   {
-    return dEdx_AREA(hit->Charge()/pitch, hit->PeakTime(), hit->WireID().Plane);
+    return dEdx_AREA(hit->Integral()/pitch, hit->PeakTime(), hit->WireID().Plane);
   }
 
   // ----------------------------------------------------------------------------------//
   double CalorimetryAlg::dEdx_AREA(recob::Hit const&  hit, double pitch) const
   {
-    return dEdx_AREA(hit.Charge()/pitch, hit.PeakTime(), hit.WireID().Plane);
+    return dEdx_AREA(hit.Integral()/pitch, hit.PeakTime(), hit.WireID().Plane);
   }
     
   // ----------------------------------------------------------------------------------//
