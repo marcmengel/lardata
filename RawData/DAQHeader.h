@@ -31,6 +31,7 @@ namespace raw {
       unsigned short fFormat;
       unsigned short fSoftware;
       unsigned short fRun;
+      unsigned short fSubRun;  //-> Added by D. Caratelli (dcaratelli@nevis.columbia.edu) after E. Church got approval @ Dec. 1st LArSoft mtg.
       unsigned short fEvent;
       time_t         fTime;
       short          fSpare;
@@ -41,7 +42,17 @@ namespace raw {
   public:
 
       DAQHeader(unsigned int status); // Ascii DAQ constructor
-      DAQHeader(unsigned int status,  // Binary DAQ constructor
+      DAQHeader(unsigned int status,  // Binary DAQ constructor - SubRun Specified
+		int fixed,
+		unsigned short format,
+		unsigned short software,
+		unsigned short run,
+		unsigned short subrun,
+		unsigned short event,
+		time_t time,
+		short spare,
+		uint32_t nchan);
+      DAQHeader(unsigned int status,  // Binary DAQ constructor - SubRun Not Specified
 		int fixed,
 		unsigned short format,
 		unsigned short software,
@@ -57,6 +68,7 @@ namespace raw {
       void             SetFileFormat(unsigned short i);
       void             SetSoftwareVersion(unsigned short i);
       void             SetRun(unsigned short i);
+      void             SetSubRun(unsigned short i);
       void             SetEvent(unsigned short i);
       void             SetTimeStamp(time_t t);
       void             SetSpareWord(short s);
@@ -68,6 +80,7 @@ namespace raw {
       unsigned short   GetFileFormat()      const;
       unsigned short   GetSoftwareVersion() const;
       unsigned short   GetRun()             const;
+      unsigned short   GetSubRun()          const;
       unsigned short   GetEvent()           const;
       time_t           GetTimeStamp()       const;
       short            GetSpareWord()       const;
@@ -84,6 +97,7 @@ inline void           raw::DAQHeader::SetFixedWord(int i)                   { fF
 inline void           raw::DAQHeader::SetFileFormat(unsigned short i)       { fFormat = i;      }
 inline void           raw::DAQHeader::SetSoftwareVersion(unsigned short i)  { fSoftware = i;    }
 inline void           raw::DAQHeader::SetRun(unsigned short i)              { fRun = i;         }
+inline void           raw::DAQHeader::SetSubRun(unsigned short i)           { fSubRun = i;      }
 inline void           raw::DAQHeader::SetEvent(unsigned short i)            { fEvent = i;       }
 inline void           raw::DAQHeader::SetTimeStamp(time_t t)                { fTime = t;        }
 inline void           raw::DAQHeader::SetSpareWord(short s)                 { fSpare = s;       }
@@ -93,6 +107,7 @@ inline int            raw::DAQHeader::GetFixedWord()       const 	    { return f
 inline unsigned short raw::DAQHeader::GetFileFormat()      const 	    { return fFormat;   }  
 inline unsigned short raw::DAQHeader::GetSoftwareVersion() const 	    { return fSoftware; }
 inline unsigned short raw::DAQHeader::GetRun()             const 	    { return fRun;      }     
+inline unsigned short raw::DAQHeader::GetSubRun()          const 	    { return fSubRun;   }     
 inline unsigned short raw::DAQHeader::GetEvent()           const 	    { return fEvent;    }   
 inline time_t         raw::DAQHeader::GetTimeStamp()       const 	    { return fTime;     }    
 inline short          raw::DAQHeader::GetSpareWord()       const 	    { return fSpare;    }   
