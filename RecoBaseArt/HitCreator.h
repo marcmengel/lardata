@@ -112,6 +112,7 @@ namespace recob {
         float                goodness_of_fit,
         int                  dof,
         std::vector<float>&& signal
+
         );
       
       
@@ -251,6 +252,21 @@ namespace recob {
       
       
       /**
+       * @brief Constructor: copies from an existing hit
+       * @param from the original hit
+       */
+      HitCreator(recob::Hit const& from);
+      
+      
+      /**
+       * @brief Constructor: copies from an existing hit, changing wire ID
+       * @param from the original hit
+       * @param wireID ID of the new wire the hit is on
+       */
+      HitCreator(recob::Hit const& from, geo::WireID const& wireID);
+      
+      
+      /**
        * @brief Prepares the constructed hit to be moved away
        * @return a right-value reference to the constructed hit
        *
@@ -359,6 +375,21 @@ namespace recob {
     
     /**
      * @brief Adds the specified hit to the data collection
+     * @param hit the hit that will be copied into the collection
+     * @param wire art pointer to the wire to be associated to this hit
+     * @param digits art pointer to the raw digits to be associated to this hit
+     * 
+     * If a art pointer is not valid, that association will not be stored.
+     */
+    void emplace_back(
+      recob::Hit const& hit,
+      art::Ptr<recob::Wire> const& wire = art::Ptr<recob::Wire>(),
+      art::Ptr<raw::RawDigit> const& digits = art::Ptr<raw::RawDigit>()
+      );
+    
+    
+    /**
+     * @brief Adds the specified hit to the data collection
      * @param hit the HitCreator object containing the hit
      * @param wire art pointer to the wire to be associated to this hit
      * @param digits art pointer to the raw digits to be associated to this hit
@@ -396,6 +427,18 @@ namespace recob {
      */
     void emplace_back(HitCreator&& hit, art::Ptr<raw::RawDigit> const& digits)
       { emplace_back(std::move(hit), art::Ptr<recob::Wire>(), digits); }
+    
+    
+    /**
+     * @brief Adds the specified hit to the data collection
+     * @param hit the HitCreator object containing the hit
+     * @param digits art pointer to the raw digits to be associated to this hit
+     * 
+     * If the digit pointer is not valid, its association will not be stored.
+     */
+    void emplace_back
+      (HitCreator const& hit, art::Ptr<raw::RawDigit> const& digits)
+      { emplace_back(std::move(hit.copy()), art::Ptr<recob::Wire>(), digits); }
     //@}
     
     
@@ -412,6 +455,10 @@ namespace recob {
      * After the move, the collections in this object are empty.
      */
     void put_into(art::Event& event);
+    
+    
+    /// Returns a read-only reference to the current list of hits
+    std::vector<recob::Hit> const& peek() const { return *hits; }
     
     
     /**
@@ -450,8 +497,14 @@ namespace recob {
     HitPtr_t CreatePtrToLastHit() const
       { return hits->empty()? HitPtr_t(): CreatePtr(hits->size() - 1); }
     
+    /// Creates associations bethween the last hit and the specified pointers
+    void CreateAssociationsToLastHit(
+      art::Ptr<recob::Wire> const& wire, art::Ptr<raw::RawDigit> const& digits
+      );
+    
       private:
     art::ProductID hit_prodId; ///< stuff for creating art::Ptr
+    art::EDProductGetter const* hit_getter; ///< stuff for creating art::Ptr
     
     /// Creates an art pointer to the hit with the specified index
     HitPtr_t CreatePtr(size_t index) const;

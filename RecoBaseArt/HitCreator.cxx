@@ -164,6 +164,16 @@ namespace recob {
   {} // HitCreator::HitCreator(RoI; no summedADC; RoI index)
   
   
+  HitCreator::HitCreator(recob::Hit const& from): hit(from) {}
+  
+  
+  HitCreator::HitCreator(recob::Hit const& from, geo::WireID const& wireID):
+    hit(from)
+  {
+    hit.fWireID = wireID;
+  } // HitCreator::HitCreator(new wire ID)
+  
+  
   
   //****************************************************************************
   //***  HitCollectionCreator
@@ -183,6 +193,7 @@ namespace recob {
     // get the product ID
     hit_prodId
       = producer.getProductID<std::vector<recob::Hit>>(event, prod_instance);
+    hit_getter = event.productGetter(hit_prodId);
     
     // this must be run in the producer constructor...
   //  declare_products(producer, doWireAssns, doRawDigitAssns);
@@ -210,7 +221,7 @@ namespace recob {
   inline HitCollectionCreator::HitPtr_t HitCollectionCreator::CreatePtr
     (size_t index) const
   {
-    return { hit_prodId, &((*hits)[index]), index };
+    return { hit_prodId, index, hit_getter };
   } // HitCollectionCreator::CreatePtr()
   
   
@@ -223,6 +234,35 @@ namespace recob {
     // add the hit to the collection
     hits->emplace_back(std::move(hit));
     
+    CreateAssociationsToLastHit(wire, digits);
+  } // HitCollectionCreator::emplace_back(Hit&&)
+  
+  
+  //----------------------------------------------------------------------
+  void HitCollectionCreator::emplace_back(
+    recob::Hit const& hit,
+    art::Ptr<recob::Wire> const& wire, art::Ptr<raw::RawDigit> const& digits
+  ) {
+    
+    // add the hit to the collection
+    hits->push_back(hit);
+    
+    CreateAssociationsToLastHit(wire, digits);
+  } // HitCollectionCreator::emplace_back(Hit)
+  
+  
+  //----------------------------------------------------------------------
+  void HitCollectionCreator::put_into(art::Event& event) {
+    event.put(std::move(hits));
+    if (WireAssns) event.put(std::move(WireAssns));
+    if (RawDigitAssns) event.put(std::move(RawDigitAssns));
+  } // HitCollectionCreator::put_into()
+  
+  
+  //----------------------------------------------------------------------
+  void HitCollectionCreator::CreateAssociationsToLastHit(
+    art::Ptr<recob::Wire> const& wire, art::Ptr<raw::RawDigit> const& digits
+  ) {
     // if no association is required, we are done
     if (!WireAssns && !RawDigitAssns) return;
     
@@ -237,15 +277,7 @@ namespace recob {
     if (RawDigitAssns && digits.isNonnull())
       RawDigitAssns->addSingle(digits, hit_ptr); // if it fails, it throws
     
-  } // HitCollectionCreator::emplace_back(HitCreator)
-  
-  
-  //----------------------------------------------------------------------
-  void HitCollectionCreator::put_into(art::Event& event) {
-    event.put(std::move(hits));
-    if (WireAssns) event.put(std::move(WireAssns));
-    if (RawDigitAssns) event.put(std::move(RawDigitAssns));
-  } // HitCollectionCreator::put_into()
+  } // HitCollectionCreator::CreateAssociationsToLastHit()
   
   
   //----------------------------------------------------------------------

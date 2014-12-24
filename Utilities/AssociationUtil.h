@@ -85,8 +85,8 @@ namespace util {
   template<class T, class U>
   bool CreateAssn(art::EDProducer const& prod,
                   art::Event            &evt,
-                  std::vector<T>        &a,
-                  art::Ptr<U>            b,
+                  std::vector<T>   const&a,
+                  art::Ptr<U>      const&b,
                   art::Assns<U,T>       &assn,
                   std::string           a_instance,
                   size_t                indx=UINT_MAX
@@ -98,8 +98,8 @@ namespace util {
   template<class T, class U> 
   inline bool CreateAssn(art::EDProducer const& prod,
 						    art::Event            &evt, 
-						    std::vector<T>        &a,
-						    art::Ptr<U>            b,
+						    std::vector<T>   const&a,
+						    art::Ptr<U>      const&b,
 						    art::Assns<U,T>       &assn,
 						    size_t                indx=UINT_MAX)
     { return CreateAssn(prod, evt, a, b, assn, std::string(), indx); }
@@ -119,8 +119,8 @@ namespace util {
   // associate with the art::PtrVector<U>
   template<class T, class U> static bool CreateAssn(art::EDProducer const& prod,
 						    art::Event            &evt, 
-						    std::vector<T>        &a,
-						    art::PtrVector<U>      b,
+						    std::vector<T>   const&a,
+						    art::PtrVector<U> const&b,
 						    art::Assns<T,U>       &assn,
 						    size_t                 indx=UINT_MAX);
 
@@ -129,8 +129,8 @@ namespace util {
   // associate with the art::PtrVector<U>
   template<class T, class U> static bool CreateAssn(art::EDProducer const&     prod,
 						    art::Event                &evt, 
-						    art::Ptr<T>               &a,
-						    std::vector< art::Ptr<U> > b,
+						    art::Ptr<T>          const&a,
+						    std::vector<art::Ptr<U>> const& b,
 						    art::Assns<T,U>           &assn);
 
   // method to create a 1 to many association, with the many being of type U
@@ -138,8 +138,8 @@ namespace util {
   // associate with the art::PtrVector<U>
   template<class T, class U> static bool CreateAssn(art::EDProducer const&     prod,
 						    art::Event                &evt, 
-						    std::vector<T>            &a,
-						    std::vector< art::Ptr<U> > b,
+						    std::vector<T>       const&a,
+						    std::vector<art::Ptr<U>> const& b,
 						    art::Assns<T,U>           &assn,
 						    size_t                     indx=UINT_MAX);
 
@@ -152,8 +152,8 @@ namespace util {
   // associate with the objects in the std::vector<U>
   template<class T, class U> static bool CreateAssn(art::EDProducer const& prod,
 						    art::Event            &evt, 
-						    std::vector<T>        &a,
-						    std::vector<U>        &b,
+						    std::vector<T>   const&a,
+						    std::vector<U>   const&b,
 						    art::Assns<T,U>       &assn,
 						    size_t                 startU,
 						    size_t                 endU,
@@ -166,10 +166,11 @@ namespace util {
   // std::vector collection of T objects
   // indx is the location in the input std::vector<T> of the object you wish to 
   // associate with the objects in the std::vector<T>
+  // NOTE (petrillo@fnal.gov) this concept is broken: there is no art::Assns<T,T>
   template<class T> static bool CreateSameAssn(art::EDProducer const& prod,
 					       art::Event            &evt, 
-					       std::vector<T>        &a,
-					       std::vector<T>        &b,
+					       std::vector<T>   const&a,
+					       std::vector<T>   const&b,
 					       art::Assns<T,T>       &assn,
 					       size_t                 startU,
 					       size_t                 endU,
@@ -229,8 +230,8 @@ template<class T, class U>
 inline bool util::CreateAssn(
   art::EDProducer const& prod,
   art::Event            &evt,
-  std::vector<T>        &a,
-  art::Ptr<U>            b,
+  std::vector<T>   const&a,
+  art::Ptr<U>      const&b,
   art::Assns<U,T>       &assn,
   std::string            a_instance,
   size_t                 indx /* = UINT_MAX */
@@ -256,8 +257,8 @@ inline bool util::CreateAssn(
 //----------------------------------------------------------------------
 template<class T, class U> inline bool util::CreateAssn(art::EDProducer const& /*prod*/,
 							art::Event            &/*evt*/, 
-							art::Ptr<T>           &a,
-							art::Ptr<U>            b,
+							art::Ptr<T>      const&a,
+							art::Ptr<U>      const&b,
 							art::Assns<U,T>       &assn)
 {
   bool ret = true;
@@ -279,8 +280,8 @@ template<class T, class U> inline bool util::CreateAssn(art::EDProducer const& /
 //----------------------------------------------------------------------
 template<class T, class U> inline bool util::CreateAssn(art::EDProducer const& prod,
 							art::Event            &evt, 
-							std::vector<T>        &a,
-							art::PtrVector<U>      b,
+							std::vector<T>   const&a,
+							art::PtrVector<U> const& b,
 							art::Assns<T,U>       &assn,
 							size_t                 indx)
 {
@@ -307,8 +308,8 @@ template<class T, class U> inline bool util::CreateAssn(art::EDProducer const& p
 //----------------------------------------------------------------------
 template<class T, class U> inline bool util::CreateAssn(art::EDProducer const&     prod,
 							art::Event                &evt, 
-							std::vector<T>            &a,
-							std::vector< art::Ptr<U> > b,
+							std::vector<T>       const&a,
+							std::vector<art::Ptr<U>> const& b,
 							art::Assns<T,U>           &assn,
 							size_t                     indx)
 {
@@ -335,8 +336,8 @@ template<class T, class U> inline bool util::CreateAssn(art::EDProducer const&  
 //----------------------------------------------------------------------
 template<class T, class U> inline bool util::CreateAssn(art::EDProducer const&     /*prod*/,
 							art::Event                &/*evt*/, 
-							art::Ptr<T>               &a,
-							std::vector< art::Ptr<U> > b,
+							art::Ptr<T>          const&a,
+							std::vector<art::Ptr<U>> const& b,
 							art::Assns<T,U>           &assn)
 {
   
@@ -358,8 +359,8 @@ template<class T, class U> inline bool util::CreateAssn(art::EDProducer const&  
 //----------------------------------------------------------------------
 template<class T, class U> inline bool util::CreateAssn(art::EDProducer const& prod,
 							art::Event            &evt, 
-							std::vector<T>        &a,
-							std::vector<U>        &/*b*/,
+							std::vector<T>   const&a,
+							std::vector<U>   const&/*b*/,
 							art::Assns<T,U>       &assn,
 							size_t                 startU,
 							size_t                 endU,
@@ -392,8 +393,8 @@ template<class T, class U> inline bool util::CreateAssn(art::EDProducer const& p
 //----------------------------------------------------------------------
 template<class T> inline bool util::CreateSameAssn(art::EDProducer const& prod,
 						   art::Event            &evt, 
-						   std::vector<T>        &a,
-						   std::vector<T>        &/*b*/,
+						   std::vector<T>   const&a,
+						   std::vector<T>   const&/*b*/,
 						   art::Assns<T,T>       &assn,
 						   size_t                 startU,
 						   size_t                 endU,
