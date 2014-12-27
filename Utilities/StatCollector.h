@@ -12,6 +12,9 @@
 
 // C/C++ standard libraries
 #include <cmath> // std::sqrt()
+#include <limits> // std::numeric_limits<>
+#include <algorithm> // std::for_each()
+#include <initializer_list>
 
 
 namespace lar {
@@ -22,7 +25,7 @@ namespace lar {
     inline T sqr(T const& v) { return v*v; }
     
     
-    /**
+    /** ************************************************************************
      * @brief Collects statistics on a single quantity (weighted)
      * @tparam T type of the quantity (and of weight)
      * 
@@ -88,6 +91,88 @@ namespace lar {
     
     
     
+    /**
+     * @brief Keeps track of the minimum and maximum value we observed
+     * @tparam T type of datum
+     * 
+     * Implementation note: a similar class with an arbitrary comparison rule
+     * would require a careful choice of initial values for minimum and maximum,
+     * or a entry count that should be checked at each insertion.
+     * We save that slight overhead here.
+     */
+    template <typename T>
+    class MinMaxCollector {
+        public:
+      using Data_t = T; ///< type of data we collect
+      using This_t = MinMaxCollector<T>; ///< this type
+      
+      //@{
+      /// Default constructor: no data collected so far.
+      MinMaxCollector() = default;
+      
+      /// Constructor: starts with parsing the specified data
+      MinMaxCollector(std::initializer_list<Data_t> init)
+        { add(init); }
+      
+      /**
+       * @brief Include a sequence of values in the statistics
+       * @tparam Iter type of an iterator on values
+       * @param begin iterator pointing to the first value to be included
+       * @param end iterator pointing to the last value to be included
+       */
+      template <typename Iter>
+      MinMaxCollector(Iter begin, Iter end)
+        { add(begin, end); }
+      //@}
+      
+      
+      // default copy and move constructor and assignment, and destructor
+      
+      /// @{
+      /// @name Inserters
+      /**
+       * @brief Include a single value in the statistics
+       * @param value the value to be added
+       * @return this object
+       */
+      This_t& add(Data_t value);
+      
+      /**
+       * @brief Include a sequence of values in the statistics
+       * @param values the values to be added
+       * @return this object
+       */
+      This_t& add(std::initializer_list<Data_t> values);
+      
+      /**
+       * @brief Include a sequence of values in the statistics
+       * @tparam Iter type of an iterator on values
+       * @param begin iterator pointing to the first value to be included
+       * @param end iterator pointing to the last value to be included
+       * @return this object
+       */
+      template <typename Iter>
+      This_t& add(Iter begin, Iter end);
+      /// @}
+      
+      
+      /// Returns the accumulated minimum, or a very large number if no values
+      Data_t min() const { return minimum; }
+      
+      /// Returns the accumulated maximum, or a very small number if no values
+      Data_t max() const { return maximum; }
+      
+      
+        protected:
+      /// the accumulated minimum
+      Data_t minimum = std::numeric_limits<Data_t>::max();
+      
+      /// the accumulated maximum
+      Data_t maximum = std::numeric_limits<Data_t>::min();
+      
+    }; // class MinMaxCollector
+    
+    
   } // namespace util
 } // namespace lar
 
@@ -119,6 +204,36 @@ void lar::util::StatCollector<T>::clear() {
   x2 = 0.;
 } // StatCollector<T>::add()
 
+
+
 //******************************************************************************
+//*** MinMaxCollector
+//***
+
+template <typename T>
+lar::util::MinMaxCollector<T>& lar::util::MinMaxCollector<T>::add(Data_t value)
+{
+  if (value < minimum) minimum = value;
+  if (value > maximum) maximum = value;
+  return *this;
+} // lar::util::MinMaxCollector<T>::add
+
+
+template <typename T>
+inline lar::util::MinMaxCollector<T>& lar::util::MinMaxCollector<T>::add
+  (std::initializer_list<Data_t> values)
+  { add(values.begin(), values.end()); }
+
+
+template <typename T> template <typename Iter>
+inline lar::util::MinMaxCollector<T>& lar::util::MinMaxCollector<T>::add
+  (Iter begin, Iter end)
+{
+  std::for_each(begin, end, [this](Data_t value) { this->add(value); });
+  return *this;
+} // lar::util::MinMaxCollector<T>::add(Iter)
+
+//******************************************************************************
+
 
 #endif // STATCOLLECTOR_H
