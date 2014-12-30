@@ -110,7 +110,7 @@ namespace recob {
         raw::TDCtick_t          end_tick,
         float                   peak_time,
         float                   sigma_peak_time,
-        float                   rMS,
+        float                   rms,
         float                   peak_amplitude,
         float                   sigma_peak_amplitude,
         float                   summedADC,
