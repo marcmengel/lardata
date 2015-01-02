@@ -45,7 +45,7 @@ namespace util {
     Range(const T& start,
 	  const T& end)
       : _window(start,end)
-    { if(start>=end) throw std::runtime_error("Inserted invalid range: end before start."); }
+    { if(start>end) throw std::runtime_error("Inserted invalid range: end before start."); }
 
     /// Default dtor
     ~Range(){}
