@@ -138,6 +138,8 @@
  <class name="std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::PFParticle>   >" 	      />
  <class name="std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::Shower>     >" 	      />
  <class name="std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::Track>      >" 	      />
+ <class name="art::Assns<raw::RawDigit,     recob::Hit,        void>"		  	      />
+ <class name="art::Assns<raw::RawDigit,     recob::Wire,       void>"		  	      />
  <class name="art::Assns<recob::Cluster,    recob::Hit,        void>"		  	      />
  <class name="art::Assns<recob::Cluster,    recob::PFParticle,   void>"		  	      />
  <class name="art::Assns<recob::Cluster,    recob::Shower,     void>"		  	      />
@@ -146,6 +148,7 @@
  <class name="art::Assns<recob::EndPoint2D, recob::Hit,        void>"		              /> 
  <class name="art::Assns<recob::Event,      recob::Hit,        void>"		              />
  <class name="art::Assns<recob::Event,      recob::Vertex,     void>"		  	      />
+ <class name="art::Assns<recob::Hit,        raw::RawDigit,     void>"		  	      />
  <class name="art::Assns<recob::Hit,        recob::Cluster,    void>"		  	      />
  <class name="art::Assns<recob::Hit,        recob::EndPoint2D, void>"		  	      />
  <class name="art::Assns<recob::Hit,        recob::Event,      void>"		  	      />
@@ -153,6 +156,7 @@
  <class name="art::Assns<recob::Hit,        recob::SpacePoint, void>"	          	      />
  <class name="art::Assns<recob::Hit,        recob::Track,      void>"	          	      />
  <class name="art::Assns<recob::Hit,        recob::Vertex,     void>"		  	      />
+ <class name="art::Assns<recob::Hit,        recob::Wire,       void>"		  	      />
  <class name="art::Assns<recob::PFParticle,   recob::Cluster,    void>"		  	      />
  <class name="art::Assns<recob::PFParticle,   recob::Shower,     void>"	          	      />
  <class name="art::Assns<recob::PFParticle,   recob::SpacePoint, void>"	          	      />
@@ -183,6 +187,8 @@
  <class name="art::Assns<recob::Vertex,     recob::PFParticle,   void>"		  	      />
  <class name="art::Assns<recob::Vertex,     recob::Shower,     void>"		  	      />
  <class name="art::Assns<recob::Vertex,     recob::Track,      void>"		  	      />
+ <class name="art::Assns<recob::Wire,       raw::RawDigit,     void>"		  	      />
+ <class name="art::Assns<recob::Wire,       recob::Hit,        void>"		  	      />
  <class name="std::vector<recob::Cluster>"	   	       		          	      />
  <class name="std::vector<recob::Hit>"		   	       		          	      />
  <class name="std::vector<recob::PFParticle>"	   	       		          	      />
@@ -212,6 +218,8 @@
  <class name="art::Wrapper< std::vector< art::PtrVector<recob::SpacePoint> > >" 	      />
  <class name="art::Wrapper< std::vector< art::PtrVector<recob::Cluster>    > >" 	      	      />
  <class name="art::Wrapper< std::vector< art::PtrVector<recob::Track>      > >" 	      />
+ <class name="art::Wrapper< art::Assns<raw::RawDigit,     recob::Hit,        void> >" />
+ <class name="art::Wrapper< art::Assns<raw::RawDigit,     recob::Wire,       void> >" />
  <class name="art::Wrapper< art::Assns<recob::Cluster,    recob::Hit,        void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::Cluster, 	  recob::PFParticle,   void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::Cluster, 	  recob::Shower,     void>	    >"/>
@@ -220,6 +228,7 @@
  <class name="art::Wrapper< art::Assns<recob::EndPoint2D, recob::Hit,        void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::Event,   	  recob::Hit,        void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::Event,   	  recob::Vertex,     void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Hit,        raw::RawDigit,     void> >" />
  <class name="art::Wrapper< art::Assns<recob::Hit,     	  recob::Cluster,    void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::Hit,     	  recob::EndPoint2D, void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::Hit,     	  recob::Event,      void>	    >"/>
@@ -227,6 +236,7 @@
  <class name="art::Wrapper< art::Assns<recob::Hit,     	  recob::SpacePoint, void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::Hit,     	  recob::Track,      void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::Hit,     	  recob::Vertex,     void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Hit,        recob::Wire,       void> >" />
  <class name="art::Wrapper< art::Assns<recob::PFParticle,   recob::Cluster,    void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::PFParticle,   recob::Shower,     void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::PFParticle,   recob::SpacePoint, void>	    >"/>
@@ -257,6 +267,8 @@
  <class name="art::Wrapper< art::Assns<recob::Vertex,     recob::PFParticle,   void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::Vertex,     recob::Shower,     void>	    >"/>
  <class name="art::Wrapper< art::Assns<recob::Vertex,     recob::Track,      void>	    >"/>
+ <class name="art::Wrapper< art::Assns<recob::Wire,       raw::RawDigit,     void> >" />
+ <class name="art::Wrapper< art::Assns<recob::Wire,       recob::Hit,        void> >" />
 
 <!-- <ioread 
     version="[-11]" 

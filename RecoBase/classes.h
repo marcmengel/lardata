@@ -21,6 +21,7 @@
 #include "art/Persistency/Common/Assns.h"
 
 #include "SimpleTypesAndConstants/geo_types.h"
+#include "RawData/RawDigit.h"
 #include "RecoBase/Cluster.h"
 #include "RecoBase/Hit.h"
 #include "RecoBase/Shower.h"
@@ -136,6 +137,10 @@ template class std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::Shower>  
 template class std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::Track>      >;
 template class std::pair< art::Ptr<recob::Vertex>,     art::Ptr<recob::Event>      >;
 
+template class art::Assns<raw::RawDigit,     recob::Wire,       void>;
+template class art::Assns<raw::RawDigit,     recob::Hit,        void>;
+template class art::Assns<recob::Wire,       raw::RawDigit,     void>;
+template class art::Assns<recob::Wire,       recob::Hit,        void>;
 template class art::Assns<recob::Cluster,    recob::Hit,        void>;
 template class art::Assns<recob::Cluster,    recob::Shower,     void>;
 template class art::Assns<recob::Cluster,    recob::SpacePoint, void>;
@@ -144,6 +149,8 @@ template class art::Assns<recob::Cluster,    recob::PFParticle,   void>;
 template class art::Assns<recob::EndPoint2D, recob::Hit,        void>;
 template class art::Assns<recob::Event,      recob::Hit,        void>;
 template class art::Assns<recob::Event,      recob::Vertex,     void>;
+template class art::Assns<recob::Hit,        raw::RawDigit,     void>;
+template class art::Assns<recob::Hit,        recob::Wire,       void>;
 template class art::Assns<recob::Hit,        recob::Cluster,    void>;
 template class art::Assns<recob::Hit,        recob::EndPoint2D, void>;
 template class art::Assns<recob::Hit,        recob::Event,      void>;
@@ -181,6 +188,10 @@ template class art::Assns<recob::Vertex,     recob::PFParticle,   void>;
 template class art::Assns<recob::Vertex,     recob::Shower,     void>;
 template class art::Assns<recob::Vertex,     recob::Track,      void>;
 
+template class art::Wrapper< art::Assns<raw::RawDigit,     recob::Wire,       void> >;
+template class art::Wrapper< art::Assns<raw::RawDigit,     recob::Hit,        void> >;
+template class art::Wrapper< art::Assns<recob::Wire,       raw::RawDigit,     void> >;
+template class art::Wrapper< art::Assns<recob::Wire,       recob::Hit,        void> >;
 template class art::Wrapper< art::Assns<recob::Cluster,    recob::Hit,        void> >;
 template class art::Wrapper< art::Assns<recob::Cluster,    recob::PFParticle,   void> >;
 template class art::Wrapper< art::Assns<recob::Cluster,    recob::Shower,     void> >;
@@ -189,6 +200,8 @@ template class art::Wrapper< art::Assns<recob::Cluster,    recob::Track,      vo
 template class art::Wrapper< art::Assns<recob::EndPoint2D, recob::Hit,        void> >;
 template class art::Wrapper< art::Assns<recob::Event,      recob::Hit,        void> >;
 template class art::Wrapper< art::Assns<recob::Event,      recob::Vertex,     void> >;
+template class art::Wrapper< art::Assns<recob::Hit,        raw::RawDigit,     void> >;
+template class art::Wrapper< art::Assns<recob::Hit,        recob::Wire,       void> >;
 template class art::Wrapper< art::Assns<recob::Hit,        recob::Cluster,    void> >;
 template class art::Wrapper< art::Assns<recob::Hit,        recob::EndPoint2D, void> >;
 template class art::Wrapper< art::Assns<recob::Hit,        recob::Event,      void> >;
