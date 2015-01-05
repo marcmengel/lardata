@@ -8,7 +8,8 @@
 <!--  for all objects that are data members of those objects.                         -->
 
 <lcgdict>
- <class name="anab::Calorimetry"           ClassVersion="14"                           >
+ <class name="anab::Calorimetry"           ClassVersion="15"                           >
+  <version ClassVersion="15" checksum="2095251371"/>
   <version ClassVersion="14" checksum="1421274164"/>
   <version ClassVersion="13" checksum="2889632995"/>
   <version ClassVersion="12" checksum="1421274164"/>
@@ -21,7 +22,8 @@
   <version ClassVersion="13" checksum="4254447866"/>
   <version ClassVersion="12" checksum="2992884177"/>
  </class>
- <class name="anab::CosmicTag"            ClassVersion="-1"                           >
+ <class name="anab::CosmicTag"            ClassVersion="2"                           >
+  <version ClassVersion="2" checksum="1434160808"/>
   <version ClassVersion="-1" checksum="1434160808"/>
  </class>
  <class name="std::vector<anab::Calorimetry>"                                          />
@@ -44,8 +46,10 @@
  <class name="std::pair< art::Ptr<recob::Track>, art::Ptr<anab::FlashMatch>      >"    /> 
  <class name="std::pair< art::Ptr<recob::Track>,      art::Ptr<anab::CosmicTag>  >"    />    
  <class name="std::pair< art::Ptr<recob::Cluster>,    art::Ptr<anab::CosmicTag>  >"    />    
+ <class name="std::pair< art::Ptr<recob::Hit>,        art::Ptr<anab::CosmicTag>  >"    />    
  <class name="std::pair< art::Ptr<anab::CosmicTag>, art::Ptr<recob::Track>    >"    />    
  <class name="std::pair< art::Ptr<anab::CosmicTag>, art::Ptr<recob::Cluster>  >"    />     
+ <class name="std::pair< art::Ptr<anab::CosmicTag>, art::Ptr<recob::Hit>      >"    />     
  <class name="std::pair< art::Ptr<anab::CosmicTag>,  art::Ptr<anab::FlashMatch> >"    />    
  <class name="std::pair< art::Ptr<anab::FlashMatch>, art::Ptr<anab::CosmicTag>  >"    />    
  <class name="std::pair< art::Ptr<recob::Cluster>,   art::Ptr<anab::FlashMatch> >"    />    
@@ -62,9 +66,11 @@
  <class name="art::Assns<recob::OpFlash,     anab::FlashMatch,   void>"	               />
  <class name="art::Assns<recob::Track,      anab::CosmicTag,   void>"	               />
  <class name="art::Assns<recob::Cluster,    anab::CosmicTag,   void>"	               />
+ <class name="art::Assns<recob::Hit,        anab::CosmicTag,   void>"	               />
  <class name="art::Assns<anab::CosmicTag,   recob::Track,      void>"	               />
  <class name="art::Assns<anab::CosmicTag,   recob::Cluster,    void>"	               />
  <class name="art::Assns<anab::CosmicTag,   anab::FlashMatch,  void>"	               />
+ <class name="art::Assns<anab::CosmicTag,   recob::Hit,        void>"	               />
  <class name="art::Assns<anab::FlashMatch,  anab::CosmicTag,   void>"	               />
  <class name="art::Assns<anab::FlashMatch,  recob::Cluster,    void>"	               />
  <class name="art::Assns<recob::Cluster,    anab::FlashMatch,  void>"	               />
@@ -84,6 +90,8 @@
  <class name="art::Wrapper< std::vector<anab::CosmicTag>       	>"	       />
  <class name="art::Wrapper<art::Assns<anab::CosmicTag,  recob::Track,       void> >"  />
  <class name="art::Wrapper<art::Assns<anab::CosmicTag,  recob::Cluster,     void> >"  />
+ <class name="art::Wrapper<art::Assns<anab::CosmicTag,  recob::Hit,         void> >"  />
+ <class name="art::Wrapper<art::Assns<recob::Hit,  anab::CosmicTag,         void> >"  />
  <class name="art::Wrapper<art::Assns<recob::Track,   anab::CosmicTag,     void> >"  />
  <class name="art::Wrapper<art::Assns<recob::Cluster, anab::CosmicTag,     void> >"  />
  <class name="art::Wrapper<art::Assns<anab::FlashMatch, anab::CosmicTag,     void> >"  />

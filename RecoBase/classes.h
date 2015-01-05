@@ -110,6 +110,8 @@ template class std::pair< art::Ptr<recob::PFParticle>,   art::Ptr<recob::Shower>
 template class std::pair< art::Ptr<recob::PFParticle>,   art::Ptr<recob::SpacePoint> >;
 template class std::pair< art::Ptr<recob::PFParticle>,   art::Ptr<recob::Track>      >;
 template class std::pair< art::Ptr<recob::PFParticle>,   art::Ptr<recob::Vertex>     >;
+template class std::pair< art::Ptr<recob::PFParticle>,   art::Ptr<recob::Seed>     >;
+template class std::pair< art::Ptr<recob::Seed>,       art::Ptr<recob::PFParticle>   >;
 template class std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::Cluster>    >;
 template class std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::Hit>        >;
 template class std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::PFParticle>   >;
@@ -153,6 +155,7 @@ template class art::Assns<recob::PFParticle,   recob::Shower,     void>;
 template class art::Assns<recob::PFParticle,   recob::SpacePoint, void>;
 template class art::Assns<recob::PFParticle,   recob::Track,      void>;
 template class art::Assns<recob::PFParticle,   recob::Vertex,     void>;
+template class art::Assns<recob::PFParticle,   recob::Seed,     void>;
 template class art::Assns<recob::Hit,        recob::Vertex,     void>;
 template class art::Assns<recob::Shower,     recob::Cluster,    void>;
 template class art::Assns<recob::Shower,     recob::Hit,        void>;
@@ -197,6 +200,8 @@ template class art::Wrapper< art::Assns<recob::PFParticle,   recob::Shower,     
 template class art::Wrapper< art::Assns<recob::PFParticle,   recob::SpacePoint, void> >;
 template class art::Wrapper< art::Assns<recob::PFParticle,   recob::Track,      void> >;
 template class art::Wrapper< art::Assns<recob::PFParticle,   recob::Vertex,     void> >;
+template class art::Wrapper< art::Assns<recob::PFParticle,   recob::Seed,     void> >;
+template class art::Wrapper< art::Assns<recob::Seed,       recob::PFParticle,   void> >;
 template class art::Wrapper< art::Assns<recob::Hit,        recob::Vertex,     void> >;
 template class art::Wrapper< art::Assns<recob::Shower,     recob::Cluster,    void> >;
 template class art::Wrapper< art::Assns<recob::Shower,     recob::Hit,        void> >;

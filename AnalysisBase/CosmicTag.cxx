@@ -15,9 +15,8 @@ namespace anab{
   CosmicTag::CosmicTag() 
       : endPt1(0)
       , endPt2(0)
-		      //      , flashTime(0) // this should go
       , fCosmicScore(0)
-      , fCosmicType(0)
+      , fCosmicType(CosmicTagID_t::kUnknown)
   {
   }
 
@@ -25,9 +24,8 @@ namespace anab{
   CosmicTag::CosmicTag(float f) :
     endPt1(0),
     endPt2(0),
-    //    flashTime(flashTime), // should go
     fCosmicScore(f),
-    fCosmicType(-1)
+    fCosmicType(CosmicTagID_t::kUnknown)
   {
     
   }
@@ -37,23 +35,16 @@ namespace anab{
 		       std::vector<float> ePt2,
 		       //		       double flashTime, // should go
 		       float cScore,
-		       int cType) :
+		       CosmicTagID_t cType) :
     endPt1(ePt1),
     endPt2(ePt2),
-    //    flashTime(-1), // should go
     fCosmicScore(cScore),
     fCosmicType(cType)
   {
-    
   }
   
 
   
-  CosmicTag::~CosmicTag() {
-    endPt1.clear();
-    endPt2.clear();
-    
-  }
   //----------------------------------------------------------------------
   // ostream operator.  
   //

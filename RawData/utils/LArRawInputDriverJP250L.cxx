@@ -29,7 +29,7 @@ namespace lris {
   // class c'tor/d'tor:
   LArRawInputDriverJP250L::LArRawInputDriverJP250L(fhicl::ParameterSet const &, // Not used
 						   art::ProductRegistryHelper &helper,
-						   art::PrincipalMaker const &pm)
+						   art::SourceHelper const &pm)
     : principalMaker_(pm)
     , m_current(0)
     , m_data(0)

@@ -18,6 +18,10 @@ art_make( LIBRARY_NAME  RecoBase
 			${ROOT_BASIC_LIB_LIST}
         )
 
+# temporary workaround until art v1_12_01 is available
+set_target_properties(RecoBase_dict RecoBase_map
+                      PROPERTIES COMPILE_FLAGS -fno-var-tracking)
+
 install_headers()
 install_fhicl()
 install_source()

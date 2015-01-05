@@ -1,7 +1,0 @@
-#include "larfft.fcl"
-
-BEGIN_PROLOG
-
-jp250L_larfft:     @local::standard_larfft
-
-END_PROLOG

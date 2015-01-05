@@ -108,6 +108,15 @@ simple_plugin(MemoryPeakReporter "service"
               BASENAME_ONLY
 )
 
+simple_plugin(ComputePi "module"
+              ${ART_FRAMEWORK_CORE}
+              ${MF_MESSAGELOGGER}
+              ${MF_UTILITIES}
+              ${FHICLCPP}
+              ${CETLIB}
+              BASENAME_ONLY
+)
+
 install_headers()
 install_fhicl()
 install_source()

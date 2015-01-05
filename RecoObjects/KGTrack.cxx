@@ -9,6 +9,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
+#include <iomanip>
 #include "RecoObjects/KGTrack.h"
 #include "RecoObjects/KHitWireX.h"
 #include "RecoObjects/SurfXYZPlane.h"
@@ -19,7 +20,8 @@
 namespace trkf {
 
   /// Default constructor.
-  KGTrack::KGTrack()
+  KGTrack::KGTrack(int prefplane) :
+    fPrefPlane(prefplane)
   {}
 
   /// Destructor.
@@ -121,7 +123,8 @@ namespace trkf {
   /// track - Track to fill.
   ///
   void KGTrack::fillTrack(recob::Track& track, 
-			  int id) const
+			  int id,
+			  bool store_np_plane) const
   {
     // Get geometry service.
 
@@ -153,6 +156,11 @@ namespace trkf {
 	itr != fTrackMap.end(); ++itr, ++n) {
       const KHitTrack& trh = (*itr).second;
 
+      // Skip nonpreferred plane hits?
+
+      if(!store_np_plane && trh.getHit()->getMeasPlane() != fPrefPlane)
+	continue;
+
       // Get position.
 
       double pos[3];
@@ -172,25 +180,28 @@ namespace trkf {
 
       // Fill error matrix.
 
-      if(n == 0 || n == fTrackMap.size() - 1) {
+      TMatrixD covar(5,5);
 
-	TMatrixD covar(5,5);
+      // Construct surface perpendicular to track momentun, and
+      // propagate track to that surface (zero distance).
 
-	// Construct surface perpendicular to track momentun, and
-	// propagate track to that surface (zero distance).
-
-	const std::shared_ptr<const Surface> psurf(new SurfXYZPlane(pos[0], pos[1], pos[2],
-								    mom[0], mom[1], mom[2]));
-	KETrack tre(trh);
-	boost::optional<double> dist = prop.err_prop(tre, psurf, Propagator::UNKNOWN, false);
-	if (!dist.is_initialized())
-	  throw cet::exception("KGTrack") << __func__ << ": error propagation failed\n";
-	for(int i=0; i<5; ++i) {
-	  for(int j=0; j<5; ++j)
-	    covar(i,j) = tre.getError()(i,j);
-	}
-	cov.push_back(covar);
+      const std::shared_ptr<const Surface> psurf(new SurfXYZPlane(pos[0], pos[1], pos[2],
+								  mom[0], mom[1], mom[2]));
+      KETrack tre(trh);
+      boost::optional<double> dist = prop.err_prop(tre, psurf, Propagator::UNKNOWN, false);
+      if (!dist.is_initialized())
+	throw cet::exception("KGTrack") << __func__ << ": error propagation failed\n";
+      for(int i=0; i<5; ++i) {
+	for(int j=0; j<5; ++j)
+	  covar(i,j) = tre.getError()(i,j);
       }
+
+      // Only save first and last error matrix.
+
+      if(cov.size() < 2)
+	cov.push_back(covar);
+      else
+	cov.back() = covar;
 
       // Get charge.
       // Only implemented for KHitWireX type measurements.
@@ -219,7 +230,8 @@ namespace trkf {
 
     // Fill track.
 
-    track = recob::Track(xyz, dxdydz, cov, dqdx, momentum, id);
+    if(xyz.size() >= 2)
+      track = recob::Track(xyz, dxdydz, cov, dqdx, momentum, id);
   }
 
   /// Fill a PtrVector of Hits.
@@ -248,6 +260,67 @@ namespace trkf {
 	  hits.push_back(prhit);
       }
     }
+  }
+
+  ///
+  /// Printout
+  ///
+  std::ostream& KGTrack::Print(std::ostream& out) const {
+
+    int n = 0;
+
+    double oldxyz[3] = {0., 0., 0.};
+    double len = 0.;
+    bool first = true;
+    for(auto const& ele : fTrackMap) {
+      double s = ele.first;
+      const KHitTrack& trh = ele.second;
+      double xyz[3];
+      double mom[3];
+      trh.getPosition(xyz);
+      trh.getMomentum(mom);
+      double tmom = std::sqrt(mom[0]*mom[0] + mom[1]*mom[1] + mom[2]*mom[2]);
+      if(tmom != 0.) {
+	mom[0] /= tmom;
+	mom[1] /= tmom;
+	mom[2] /= tmom;
+      }
+      if(!first) {
+	double dx = xyz[0] - oldxyz[0];
+	double dy = xyz[1] - oldxyz[1];
+	double dz = xyz[2] - oldxyz[2];
+	len += std::sqrt(dx*dx + dy*dy + dz*dz);
+      }
+      const KHitBase& hit = *(trh.getHit());
+      int plane = hit.getMeasPlane();
+      std::ios_base::fmtflags f = out.flags();
+      out << "State " << std::setw(4) << n 
+	  << ", path=" << std::setw(8) << std::fixed << std::setprecision(2) << s 
+	  << ", length=" << std::setw(8) << len 
+	  << ", x=" << std::setw(8) << xyz[0] 
+	  << ", y=" << std::setw(8) << xyz[1] 
+	  << ", z=" << std::setw(8) << xyz[2]
+	  << ", dx=" << std::setw(8) << mom[0] 
+	  << ", dy=" << std::setw(8) << mom[1] 
+	  << ", dz=" << std::setw(8) << mom[2] 
+	  << ", plane=" << std::setw(1) << plane
+	  << "\n";
+      out.flags(f);
+
+      oldxyz[0] = xyz[0];
+      oldxyz[1] = xyz[1];
+      oldxyz[2] = xyz[2];
+      
+      ++n;
+      first = false;
+    }
+    return out;
+  }
+
+  /// Output operator.
+  std::ostream& operator<<(std::ostream& out, const KGTrack& trg)
+  {
+    return trg.Print(out);
   }
 
 } // end namespace trkf

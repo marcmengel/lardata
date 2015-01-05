@@ -40,13 +40,15 @@ namespace trkf {
   {
   public:
 
-    /// Default constructor.
-    KGTrack();
+    /// Constructor.
+    KGTrack(int prefplane);
 
     /// Destructor.
     ~KGTrack();
 
     // Accessors.
+
+    int getPrefPlane() const {return fPrefPlane;}
 
     /// KHitTrack collection, indexed by path distance.
     const std::multimap<double, KHitTrack>& getTrackMap() const {return fTrackMap;}
@@ -87,20 +89,31 @@ namespace trkf {
 
     /// Fill a recob::Track.
     void fillTrack(recob::Track& track,
-		   int id) const;
+		   int id,
+		   bool store_np_plane) const;
 
     /// Fill a PtrVector of Hits.
     void fillHits(art::PtrVector<recob::Hit>& hits) const;
 
     const std::multimap<double, KHitTrack> TrackMap() const { return fTrackMap; }
 
+    /// Printout
+    std::ostream& Print(std::ostream& out) const;
+
   private:
 
     // Attributes.
 
+    /// Preferred plane.
+    int fPrefPlane;
+
     /// KHitTrack collection, indexed by path distance.
     std::multimap<double, KHitTrack> fTrackMap;
   };
+
+  /// Output operator.
+  std::ostream& operator<<(std::ostream& out, const KGTrack& trg);
+
 }
 
 #endif

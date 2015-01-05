@@ -52,30 +52,30 @@ namespace util{
       /// Energy loss fluctuation (sigma_E^2 / length in MeV^2/cm).
       double ElossVar(double mom, double mass) const;
 
-      double ScintResolutionScale() { return fScintResolutionScale; }
-      double ScintFastTimeConst()   { return fScintFastTimeConst;   } 
-      double ScintSlowTimeConst()   { return fScintSlowTimeConst;   }
-      double ScintBirksConstant()   { return fScintBirksConstant;   }
+      double ScintResolutionScale() const { return fScintResolutionScale; }
+      double ScintFastTimeConst()   const { return fScintFastTimeConst;   } 
+      double ScintSlowTimeConst()   const { return fScintSlowTimeConst;   }
+      double ScintBirksConstant()   const { return fScintBirksConstant;   }
 
-      bool ScintByParticleType()    { return fScintByParticleType;  }
+      bool ScintByParticleType()    const { return fScintByParticleType;  }
 
-      double ScintYield()           { return fScintYield;           }
-      double ScintYieldRatio()      { return fScintYieldRatio;      }
+      double ScintYield()           const { return fScintYield;           }
+      double ScintYieldRatio()      const { return fScintYieldRatio;      }
 
-      double ProtonScintYield()       { return fProtonScintYield;         }
-      double ProtonScintYieldRatio()  { return fProtonScintYieldRatio;    }
-      double MuonScintYield()         { return fMuonScintYield;           }
-      double MuonScintYieldRatio()    { return fMuonScintYieldRatio;      }
-      double KaonScintYield()         { return fKaonScintYield;           }
-      double KaonScintYieldRatio()    { return fKaonScintYieldRatio;      }
-      double PionScintYield()         { return fPionScintYield;           }
-      double PionScintYieldRatio()    { return fPionScintYieldRatio;      }
-      double ElectronScintYield()     { return fElectronScintYield;       }
-      double ElectronScintYieldRatio(){ return fElectronScintYieldRatio;  }
-      double AlphaScintYield()        { return fAlphaScintYield;          }
-      double AlphaScintYieldRatio()   { return fAlphaScintYieldRatio;     }
+      double ProtonScintYield()       const { return fProtonScintYield;         }
+      double ProtonScintYieldRatio()  const { return fProtonScintYieldRatio;    }
+      double MuonScintYield()         const { return fMuonScintYield;           }
+      double MuonScintYieldRatio()    const { return fMuonScintYieldRatio;      }
+      double KaonScintYield()         const { return fKaonScintYield;           }
+      double KaonScintYieldRatio()    const { return fKaonScintYieldRatio;      }
+      double PionScintYield()         const { return fPionScintYield;           }
+      double PionScintYieldRatio()    const { return fPionScintYieldRatio;      }
+      double ElectronScintYield()     const { return fElectronScintYield;       }
+      double ElectronScintYieldRatio() const { return fElectronScintYieldRatio;  }
+      double AlphaScintYield()        const { return fAlphaScintYield;          }
+      double AlphaScintYieldRatio()   const { return fAlphaScintYieldRatio;     }
 
-      bool CerenkovLightEnabled()     { return fEnableCerenkovLight;      }
+      bool CerenkovLightEnabled()     const { return fEnableCerenkovLight;      }
 
       
       std::map<double, double>  SlowScintSpectrum();   

@@ -18,33 +18,43 @@
 
 namespace anab {
 
+  typedef enum cosmic_tag_id{
+    kUnknown=-1,
+    kNotTagged=0,
+    kGeometry_YY=1,
+    kGeometry_YZ,
+    kGeometry_ZZ,
+    kGeometry_XX,
+    kGeometry_XY,
+    kGeometry_XZ,
+    kGeometry_Y=21,
+    kGeometry_Z,
+    kGeometry_X,
+    kOutsideDrift_Partial=100,
+    kOutsideDrift_Complete,
+    kFlash_BeamIncompatible=200,
+    kFlash_Match=300
+  } CosmicTagID_t;
+
   class CosmicTag{
   public:
     
     CosmicTag();
-    //virtual ~CosmicTag();
-    ~CosmicTag();
-
 
     std::vector<float> endPt1; // x,y,z assuming t_0 = t_beam
     std::vector<float> endPt2; // x,y,z assuming t_0 = t_beam
-    //    double flashTime; // this should go away -- it's sloppy
-    float fCosmicScore; // 0 means not a cosmic, 1 means cosmic
-    int fCosmicType; // 0 --> not a cosmic 
-                    // 1 --> some part of the track/cluster is outside of the beam readout window
-                    // 2 --> passes two Y or Z boundaries
-                    // 3 --> passes an X boundary + another boundary
-                    // add one for something that hits only one boundary
+    float fCosmicScore; // -1 means very likely neutrino, 
+                        // 0 means probably not a cosmic (or unknown), 
+                        // 1 means cosmic
+    CosmicTagID_t fCosmicType; 
 
 #ifndef __GCCXML__
   public:
 
-    CosmicTag(
-	      std::vector<float> ePt1,
+    CosmicTag(std::vector<float> ePt1,
 	      std::vector<float> ePt2,
-	      //      double flashTime,
 	      float cScore,
-	      int cType);
+	      CosmicTagID_t cTypes);
 
     CosmicTag(float cScore);
 
@@ -52,24 +62,21 @@ namespace anab {
 
     friend std::ostream& operator << (std::ostream &o, CosmicTag const& a);
 
-    //const float& DTwindow() const;
     float getXInteraction(float oldX, float xDrift, int tSample,  
 			  float realTime, int tick ); 
 
     const float& CosmicScore() const;
-    const int& CosmicType() const;
+    const CosmicTagID_t& CosmicType() const;
     
 #endif
-    //    ClassDef(CosmicTag, 1);
   };
 
 }
 
 #ifndef __GCCXML__
 
-//inline const float& anab::CosmicTag::DTwindow()      const { return fDTwindow;      }
 inline const float& anab::CosmicTag::CosmicScore() const {return fCosmicScore; }
-inline const int& anab::CosmicTag::CosmicType() const {return fCosmicType; }
+inline const anab::CosmicTagID_t& anab::CosmicTag::CosmicType() const {return fCosmicType; }
 
 
 #endif

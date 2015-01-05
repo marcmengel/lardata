@@ -204,7 +204,7 @@ class TestManagerClass {
 				out << "  (" << action.expected_errors << " error(s) expected)"
 					<< std::endl;
 			}
-			if (errors != action.expected_errors) {
+			if ((int)errors != action.expected_errors) {
 				int actual_errors = abs(errors - action.expected_errors);
 				nErrors += actual_errors;
 				failures.emplace_back(*this, action, actual_errors);

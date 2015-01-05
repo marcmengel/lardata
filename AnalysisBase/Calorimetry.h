@@ -15,6 +15,8 @@
 #include <iomanip>
 #include <TVector3.h>
 
+#include "SimpleTypesAndConstants/geo_types.h"
+
 namespace anab {
 
   class Calorimetry{
@@ -31,6 +33,9 @@ namespace anab {
     std::vector<double> fTrkPitch;        ///< track pitch on collection plane
     std::vector<TVector3> fXYZ;           ///< coordinates of space points
 
+  private:
+    geo::PlaneID        fPlaneID;
+
 #ifndef __GCCXML__
   public:
 
@@ -40,15 +45,8 @@ namespace anab {
 		std::vector<double> const& resRange,
 		std::vector<double> const& deadwire,
 		double Range,
-		double TrkPitch);
-
-    Calorimetry(double KineticEnergy,
-		std::vector<double> const& dEdx,
-		std::vector<double> const& dQdx,
-		std::vector<double> const& resRange,
-		std::vector<double> const& deadwire,
-		double Range,
-		std::vector<double> const& TrkPitch);
+		double TrkPitch,
+		geo::PlaneID planeID);
 
     Calorimetry(double KineticEnergy,
 		std::vector<double> const& dEdx,
@@ -57,7 +55,17 @@ namespace anab {
 		std::vector<double> const& deadwire,
 		double Range,
 		std::vector<double> const& TrkPitch,
-		std::vector<TVector3> const& XYZ);
+		geo::PlaneID planeID);
+
+    Calorimetry(double KineticEnergy,
+		std::vector<double> const& dEdx,
+		std::vector<double> const& dQdx,
+		std::vector<double> const& resRange,
+		std::vector<double> const& deadwire,
+		double Range,
+		std::vector<double> const& TrkPitch,
+		std::vector<TVector3> const& XYZ,
+		geo::PlaneID planeID);
 
     friend std::ostream& operator << (std::ostream &o, Calorimetry const& a);
 
@@ -70,6 +78,7 @@ namespace anab {
     double                     TrkPitchC()     const; 
     const std::vector<double>& TrkPitchVec()   const;
     const std::vector<TVector3>& XYZ()         const;
+    const geo::PlaneID&        PlaneID()       const;
 
 #endif
     
@@ -93,6 +102,7 @@ inline double                     anab::Calorimetry::TrkPitchC()     const
   else return 0;
 }
 inline const std::vector<TVector3>& anab::Calorimetry::XYZ()         const { return fXYZ;      }
+inline const geo::PlaneID& anab::Calorimetry::PlaneID()              const { return fPlaneID; }
 #endif
 
 #endif //ANAB_CALORIMETRY_H

@@ -1,0 +1,10 @@
+#include "timeservice.fcl"
+
+BEGIN_PROLOG
+
+argoneut_timeservice: @local::standard_timeservice
+argoneut_timeservice.TriggerOffsetTPC: -11.88 #60 ticks * 198 ns
+argoneut_timeservice.DefaultTrigTime:  11.88
+argoneut_timeservice.DefaultBeamTime:  11.88
+
+END_PROLOG
