@@ -76,7 +76,7 @@ namespace util {
     const std::vector<TComplex>& ConvKernel() const {return fConvKernel;}
     const std::vector<TComplex>& Filter() const {return fFilter;}
     const std::vector<TComplex>& DeconvKernel() const {return fDeconvKernel;}
-    const int GetTimeOffset() const {return fTimeOffset;}
+    /* const int GetTimeOffset() const {return fTimeOffset;} */
 
     // Signal shaping methods.
 
@@ -95,8 +95,8 @@ namespace util {
     // Updates overall response function and convolution kernel.
     void AddResponseFunction(const std::vector<double>& resp, bool ResetResponse = false );
 
-    //X. Qian, set time offset
-    void SetTimeOffset(const int time){fTimeOffset = time;}
+    /* //X. Qian, set time offset */
+    /* void SetTimeOffset(const int time){fTimeOffset = time;} */
 
     // Shift response function in time.
     // Updates overall response function and convolution kernel.
@@ -145,8 +145,8 @@ namespace util {
     // Set to -1 if one wants to normalize to - ADC count
     int fDeconvKernelPolarity;
 
-    // Xin added
-    int fTimeOffset;
+    /* // Xin added */
+    /* int fTimeOffset; */
   };
 }
 
