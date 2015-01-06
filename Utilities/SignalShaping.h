@@ -48,7 +48,9 @@
 ///                 AddResponseFunction( yourResponse, true )
 ///                 The other part involving AddResponseFunction shouldn't
 ///                 be affected.
-///
+///                 X. Qian 2015/01/06
+///                 Add the time offset variable
+///                 Need to add the set and extraction code 
 ////////////////////////////////////////////////////////////////////////
 
 #ifndef SIGNALSHAPING_H
@@ -74,6 +76,7 @@ namespace util {
     const std::vector<TComplex>& ConvKernel() const {return fConvKernel;}
     const std::vector<TComplex>& Filter() const {return fFilter;}
     const std::vector<TComplex>& DeconvKernel() const {return fDeconvKernel;}
+    const int GetTimeOffset() const {return fTimeOffset;}
 
     // Signal shaping methods.
 
@@ -91,6 +94,9 @@ namespace util {
     // Add a time domain response function.
     // Updates overall response function and convolution kernel.
     void AddResponseFunction(const std::vector<double>& resp, bool ResetResponse = false );
+
+    //X. Qian, set time offset
+    void SetTimeOffset(const int time){fTimeOffset = time;}
 
     // Shift response function in time.
     // Updates overall response function and convolution kernel.
@@ -138,6 +144,9 @@ namespace util {
     // Set to +1 if deconv signal should be deconv to + ADC count
     // Set to -1 if one wants to normalize to - ADC count
     int fDeconvKernelPolarity;
+
+    // Xin added
+    int fTimeOffset;
   };
 }
 
