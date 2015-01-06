@@ -31,6 +31,7 @@
 #include <iostream>
 #include <vector>
 
+
 ///General LArSoft Utilities
 namespace util{
 
@@ -65,7 +66,7 @@ namespace util{
     */
 
   public:
-    
+   
     void Reconfigure();
     
     Int_t Get3DaxisN(Int_t iplane0,
@@ -172,29 +173,6 @@ namespace util{
 				double ort_intercept,
 				util::PxPoint &pointonline) const;
     
-
-    /*
-    const larlight::hit* FindClosestHit(const std::vector<larlight::hit*> &hitlist,
-					UInt_t wire,
-					Double_t time) const;
-    
-    UInt_t FindClosestHitIndex(const std::vector<larlight::hit*> &hitlist,
-			       UInt_t wirein,
-			       Double_t timein) const;			       
-    */			 
-    
-    recob::Hit* FindClosestHit(std::vector<art::Ptr< recob::Hit > > hitlist,
-			       unsigned int wire,
-			       double time) const;
-    
-    art::Ptr< recob::Hit > FindClosestHitPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
-					     unsigned int wirein,
-					     double timein) const;
-
-    art::Ptr< recob::Hit > FindClosestHitEvdPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
-								   UInt_t wirein,
-								   Double_t timein) const;
-			       
     PxPoint Get2DPointProjection(Double_t *xyz,Int_t plane) const;			       
 
     PxPoint Get2DPointProjectionCM(std::vector< double > xyz, int plane) const;
@@ -205,24 +183,6 @@ namespace util{
     
     Double_t GetTimeTicks(Double_t x, Int_t plane) const;
     
-    /*
-    Int_t GetPlaneAndTPC(const larlight::hit* h,
-			 UInt_t &p,
-			 UInt_t &w) const;
-    */
-
-    int GetPlaneAndTPC(recob::Hit*  a,
-		       unsigned int &p,
-		       unsigned int &cs,
-		       unsigned int &t,
-		       unsigned int &w) const;
-
-    int GetPlaneAndTPC(art::Ptr<recob::Hit> a,
-		       unsigned int &p,
-		       unsigned int &cs,
-		       unsigned int &t,
-		       unsigned int &w)  const;
-    
     Int_t GetProjectedPoint(const PxPoint *p0,
 			    const PxPoint *p1,
 			    PxPoint &pN) const;
@@ -231,6 +191,11 @@ namespace util{
 		const PxPoint *p1, 
 		Double_t* yz) const;
     
+
+    Int_t GetXYZ(const PxPoint *p0,
+		const PxPoint *p1, 
+		Double_t* xyz) const;		
+		
     Double_t PitchInView(UInt_t plane,
 			 Double_t phi,
 			 Double_t theta) const;
@@ -238,23 +203,7 @@ namespace util{
     void GetDirectionCosines(Double_t phi,
 			     Double_t theta,
 			     Double_t *dirs) const;
-    /*
-    void SelectLocalHitlist(const std::vector<larlight::hit*>& hitlist, 
-			    std::vector <larlight::hit*> &hitlistlocal_index,
-			    Double_t wire_start,
-			    Double_t time_start, 
-			    Double_t linearlimit,   
-			    Double_t ortlimit, 
-			    Double_t lineslopetest);
-
-    void SelectLocalHitlist(const std::vector<larlight::hit*>& hitlist, 
-			    std::vector <UInt_t> &hitlistlocal_index,
-			    Double_t wire_start,
-			    Double_t time_start, 
-			    Double_t linearlimit,   
-			    Double_t ortlimit, 
-			    Double_t lineslopetest);
-    */	
+    
     void SelectLocalHitlist(const std::vector<util::PxHit> &hitlist, 
 			    std::vector <const util::PxHit*> &hitlistlocal,
 			    util::PxPoint &startHit,
@@ -272,14 +221,6 @@ namespace util{
     bool Clockwise(double Ax, double Ay, double Bx, double By,
 		   double Cx, double Cy);
 
-    void SelectLocalHitlist(std::vector< art::Ptr < recob::Hit> > hitlist, 
-			    std::vector < art::Ptr<recob::Hit> > &hitlistlocal,
-			    double wire_start,
-			    double time_start, 
-			    double linearlimit,   
-			    double ortlimit, 
-			    double lineslopetest);			     
-
     Double_t TimeToCm() const {return fTimetoCm;}
     Double_t WireToCm() const {return fWiretoCm;}
     Double_t WireTimeToCmCm() const {return fWireTimetoCmCm;}
@@ -287,15 +228,15 @@ namespace util{
   private:
 
     /*
-      larutil::Geometry* geom;
-      larutil::DetectorProperties* detp;
-      larutil::LArProperties* larp;
+     larutil::Geometry* geom;
+     larutil::DetectorProperties* detp;
+     larutil::LArProperties* larp;
     */
-
+ 
     art::ServiceHandle<geo::Geometry> geom;
     art::ServiceHandle<util::DetectorProperties> detp;
     art::ServiceHandle<util::LArProperties> larp;
-
+    
     std::vector< Double_t > vertangle;  //angle wrt to vertical
     Double_t fWirePitch;
     Double_t fTimeTick;
@@ -304,8 +245,8 @@ namespace util{
     Double_t fWiretoCm;
     Double_t fTimetoCm;
     Double_t fWireTimetoCmCm;
+    
+    }; // class GeometryUtilities
 
-  }; // class GeometryUtilities
-
-} //namespace larutils
-#endif // UTIL_DETECTOR_PROPERTIES_H
+} //namespace utils
+#endif // UTIL_GEOMETRYUTILITIES_H

@@ -7,7 +7,11 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
+
 #include "GeometryUtilities.h"
+#include "messagefacility/MessageLogger/MessageLogger.h" 
+
+
 
 namespace util{
   
@@ -24,9 +28,9 @@ namespace util{
   void GeometryUtilities::Reconfigure()
   {
     /*
-    geom = (larutil::Geometry*)(larutil::Geometry::GetME());
-    detp = (larutil::DetectorProperties*)(larutil::DetectorProperties::GetME());
-    larp = (larutil::LArProperties*)(larutil::LArProperties::GetME());
+    geom = (util::Geometry*)(util::Geometry::GetME());
+    detp = (util::DetectorProperties*)(util::DetectorProperties::GetME());
+    larp = (util::LArProperties*)(util::LArProperties::GetME());
     */
 
     fNPlanes = geom->Nplanes();
@@ -44,6 +48,7 @@ namespace util{
     fWireTimetoCmCm=fTimetoCm/fWirePitch;
   }
 
+
   //--------------------------------------------------------------------
   GeometryUtilities::~GeometryUtilities() 
   {
@@ -52,8 +57,8 @@ namespace util{
   
 
   //-----------------------------------------------------------------------------
-  // omega0 and omega1 are calculated as:
-  //  angle based on distances in wires and time - rescaled to cm.
+  // omega0 and omega1 (calculated by CPAN in degrees):
+  // angle based on distances in wires and time - rescaled to cm.
   // tan(angle)*fMean_wire_pitch/(fTimeTick*fDriftVelocity);
   // as those calculated with Get2Dangle
   // writes phi and theta in degrees.
@@ -65,192 +70,191 @@ namespace util{
 				      Double_t &phi,
 				      Double_t &theta) const
   {
- 
-    Double_t l(0),m(0),n(0);
+
+  	//Double_t l(0),m(0),n(0);
+    //Double_t phin(0);//,phis(0),thetan(0);
+
+	// y, z, x coordinates
     Double_t ln(0),mn(0),nn(0);
     Double_t phis(0),thetan(0);
-    //Double_t phin(0);//,phis(0),thetan(0);
-    // pretend collection and induction planes. 
+
+    // Pretend collection and induction planes. 
     // "Collection" is the plane with the vertical angle equal to zero. 
-    // If both are non zero collection is the one with the negative angle. 
+    // If both are non-zero, collection is the one with the negative angle. 
     UInt_t Cplane=0,Iplane=1;   
-    //then angleC and angleI are the respective angles to vertical in these planes and slopeC, slopeI are the tangents of the track.
+
+    // angleC and angleI are the respective angles to vertical in C/I 
+	// planes and slopeC, slopeI are the tangents of the track.
     Double_t angleC,angleI,slopeC,slopeI,omegaC,omegaI;
     omegaC = kINVALID_DOUBLE;
     omegaI = kINVALID_DOUBLE;
-    // don't know how to reconstruct these yet, so exit with error.
-    
+
+    // Don't know how to reconstruct these yet, so exit with error.
+	// In     
     if(omega0==0 || omega1==0){
       phi=0;
       theta=-999;
       return -1;
     }
     
-    
-    //////////insert check for existence of planes.
-    
+    //////insert check for existence of planes.
+ 
     //check if backwards going track
-    Double_t backwards=0;
-    
+    //Double_t backwards=0;
     Double_t alt_backwards=0;
     
     ///// or?
+    /*
     if(fabs(omega0)>(TMath::Pi()/2.0) && fabs(omega1)>(TMath::Pi()/2.0) ) {
       backwards=1;
     }
+    */
     
     if(fabs(omega0)>(TMath::Pi()/2.0) || fabs(omega1)>(TMath::Pi()/2.0) ) {
       alt_backwards=1;
     }
     
-    
-    
-    
+   
+	 
     if(vertangle[iplane0] == 0){   
       // first plane is at 0 degrees
       Cplane=iplane0;
       Iplane=iplane1;
       omegaC=omega0;
       omegaI=omega1;
-    }
+      }
     else if(vertangle[iplane1] == 0){  
       // second plane is at 0 degrees
       Cplane = iplane1;
       Iplane = iplane0;
       omegaC=omega1;
       omegaI=omega0;
-    }
+      }
     else if(vertangle[iplane0] != 0 && vertangle[iplane1] != 0){
       //both planes are at non zero degree - find the one with deg<0
       if(vertangle[iplane1] < vertangle[iplane0]){
-	Cplane = iplane1;
-	Iplane = iplane0;
-	omegaC=omega1;
-	omegaI=omega0;
-      }
+		Cplane = iplane1;
+		Iplane = iplane0;
+		omegaC=omega1;
+		omegaI=omega0;
+       }
       else if(vertangle[iplane1] > vertangle[iplane0]){
-	Cplane = iplane0;
-	Iplane = iplane1;
-	omegaC=omega0;
-	omegaI=omega1;
-      }
+		Cplane = iplane0;
+		Iplane = iplane1;
+		omegaC=omega0;
+		omegaI=omega1;
+        }
       else{
-	//throw error - same plane.
-	return -1;
-      }	
+		//throw error - same plane.
+		return -1;
+        }	
       
-    }
+      }
+    
     slopeC=tan(omegaC);
     slopeI=tan(omegaI);
-    //omega0=tan(omega0);
-    //omega1=tan(omega1);
     angleC=vertangle[Cplane];
     angleI=vertangle[Iplane];
-    
+
+
+	//    l = 1;
+	//    m = (1/(2*sin(angleI)))*((cos(angleI)/(slopeC*cos(angleC)))-(1/slopeI) 
+	//			     +nfact*(  cos(angleI)/slopeC-1/slopeI  )     );
+	//    n = (1/(2*cos(angleC)))*((1/slopeC)+(1/slopeI) +nfact*((1/slopeC)-(1/slopeI)));
+
+
     //0 -1 factor depending on if one of the planes is vertical.
     bool nfact = !(vertangle[Cplane]);
-    
-    
-    
+
+	//ln represents y, omega is 2d angle -- in first 2 quadrants y is positive.
     if(omegaC < TMath::Pi() && omegaC > 0 )
       ln=1;
     else
       ln=-1;
-    
-    //std::cout << " slopes, C:"<< slopeC << " " << (omegaC) << " I:" << slopeI << " " << omegaI <<std::endl;
-    slopeI=tan(omegaI);
-    
-    //std::cout << "omegaC, angleC " << omegaC << " " << angleC << "cond: " << omegaC-angleC << " ln: " << ln << std::endl;
-    
-    l = 1;
-    
-    
-    m = (1/(2*sin(angleI)))*((cos(angleI)/(slopeC*cos(angleC)))-(1/slopeI) 
-			     +nfact*(  cos(angleI)/slopeC-1/slopeI  )     );
-    
-    n = (1/(2*cos(angleC)))*((1/slopeC)+(1/slopeI) +nfact*((1/slopeC)-(1/slopeI)));
-    
+   
+	//calculate x and z using y ( ln )
     mn = (ln/(2*sin(angleI)))*((cos(angleI)/(slopeC*cos(angleC)))-(1/slopeI) 
 			       +nfact*(  cos(angleI)/(cos(angleC)*slopeC)-1/slopeI  )     );
     
     nn = (ln/(2*cos(angleC)))*((1/slopeC)+(1/slopeI) +nfact*((1/slopeC)-(1/slopeI)));
+
+	// std::cout << " slopes, C:"<< slopeC << " " << (omegaC) << " I:" << slopeI << " " << omegaI <<std::endl;
+	// std::cout << "omegaC, angleC " << omegaC << " " << angleC << "cond: " << omegaC-angleC << " ln: " << ln << std::endl;
+	// std::cout << " inverse slopes: " << (cos(angleI)/(slopeC*cos(angleC))) << " " << 1/slopeC << " 2: "<< 1/slopeI << std::endl;
     
-    
-    float Phi;
-    float alt_Phi;
+	// float Phi;
+	// float alt_Phi;
+
+
     // Direction angles
-    if(fabs(angleC)>0.01)  // catch numeric error values 
+    if(fabs(omegaC)>0.01)  // catch numeric error values 
       {
-	phi=atan(n/l);
-	//phin=atan(ln/nn);
+	//phi=atan(ln/nn);
 	phis=asin(ln/TMath::Sqrt(ln*ln+nn*nn));
         
 	if(fabs(slopeC+slopeI) < 0.001)
 	  phis=0;
-	else if(fabs(omegaI)>0.01 && (omegaI/fabs(omegaI) == -omegaC/fabs(omegaC) ) && ( fabs(omegaC) < 20*TMath::Pi()/180 || fabs(omegaC) > 160*TMath::Pi()/180   ) ) // angles have 
-	  {phis = (fabs(omegaC) > TMath::Pi()/2) ? TMath::Pi() : 0;    //angles are 
-	    
-	  }
-	
-	
+	else if( fabs(omegaI)>0.01 && (omegaI/fabs(omegaI) == -omegaC/fabs(omegaC) ) 
+			 && ( fabs(omegaC) < 1*TMath::Pi()/180 || fabs(omegaC) > 179*TMath::Pi()/180 ) ) // angles have 
+	  phis = (fabs(omegaC) > TMath::Pi()/2) ? TMath::Pi() : 0;    //angles are 
+	  
 	
 	if(nn<0 && phis>0 && !(!alt_backwards && fabs(phis)<TMath::Pi()/4 ) )   // do not go back if track looks forward and phi is forward
 	  phis=(TMath::Pi())-phis;
 	else if(nn<0 && phis<0 && !(!alt_backwards && fabs(phis)<TMath::Pi()/4 ) )
 	  phis=(-TMath::Pi())-phis;
 	
+    
+	phi=phis*180/TMath::Pi();
 	
 	// solve the ambiguities due to tangent periodicity
-	Phi = phi > 0. ? (TMath::Pi()/2)-phi : fabs(phi)-(TMath::Pi()/2) ; 
-	alt_Phi = phi > 0. ? (TMath::Pi()/2)-phi : fabs(phi)-(TMath::Pi()/2) ; 
-	
-	if(backwards==1){
-	  if(Phi<0){ Phi=Phi+TMath::Pi();}
-	  else if(Phi>0){Phi=Phi-TMath::Pi();}
-	}
-	
-	bool alt_condition=( ( fabs(omegaC)>0.75*TMath::Pi() && fabs(omegaI)>0.166*TMath::Pi() )|| ( fabs(omegaI)>0.75*TMath::Pi() && fabs(omegaC)>0.166*TMath::Pi() ) );
-	
-	
-	if((alt_backwards==1 && alt_condition)   || backwards==1 ){
-	  if(alt_Phi<0){alt_Phi=alt_Phi+TMath::Pi();}
-	  else if(alt_Phi>0){alt_Phi=alt_Phi-TMath::Pi();}
-	}
-	
+// 	Phi = phi > 0. ? (TMath::Pi()/2)-phi : fabs(phi)-(TMath::Pi()/2) ; 
+// 	alt_Phi = phi > 0. ? (TMath::Pi()/2)-phi : fabs(phi)-(TMath::Pi()/2) ; 
+// 	
+// 	if(backwards==1){
+// 	  if(Phi<0){ Phi=Phi+TMath::Pi();}
+// 	  else if(Phi>0){Phi=Phi-TMath::Pi();}
+// 	}
+// 	
+// 	bool alt_condition=( ( fabs(omegaC)>0.75*TMath::Pi() && fabs(omegaI)>0.166*TMath::Pi() )|| ( fabs(omegaI)>0.75*TMath::Pi() && fabs(omegaC)>0.166*TMath::Pi() ) );
+// 	
+// 	
+// 	if((alt_backwards==1 && alt_condition)   || backwards==1 ){
+// 	  if(alt_Phi<0){alt_Phi=alt_Phi+TMath::Pi();}
+// 	  else if(alt_Phi>0){alt_Phi=alt_Phi-TMath::Pi();}
+// 	}
+
       }
-    else  // if plane is collection than Phi = omega
-      {phi=omegaC;
-	Phi=omegaC;
-	phis=omegaC;
-	alt_Phi=omegaC;
+	//If plane2 (collection), phi = 2d angle (omegaC in this case) 
+    else  
+      {
+		phis = omegaC;
+		phi = omegaC; 
       }
     
-    
-    theta = acos( m / (sqrt(pow(l,2)+pow(m,2)+pow(n,2)) ) ) ;
-    thetan = -asin ( mn / (sqrt(pow(l,2)+pow(mn,2)+pow(nn,2)) ) ) ;
-    //Double_t thetah = acos( mn / (sqrt(pow(l,2)+pow(mn,2)+pow(nn,2)) ) ) ;
-    //float Theta;
-    //float alt_Theta = 0.;
-    
-    
-    
-    
-    //if(Phi < 0)Theta = (TMath::Pi()/2)-theta;
-    //if(Phi > 0)Theta = theta-(TMath::Pi()/2);
-    
-    //if(alt_Phi < 0)alt_Theta = (TMath::Pi()/2)-theta;
-    //if(alt_Phi > 0)alt_Theta = theta-(TMath::Pi()/2);
-    
-    ////std::cout << "++++++++ GeomUtil " << Phi*180/TMath::Pi() << " " << Theta*180/TMath::Pi() << std::endl;
-    //std::cout << "++++++++ GeomUtil_angles: Phi: " << alt_Phi*180/TMath::Pi() << " Theta: " << alt_Theta*180/TMath::Pi() << std::endl;
-    
-    //std::cout << "++++++++ GeomUtil_new_angles: Phi: " << phis*180/TMath::Pi() << " Theta: " << thetan*180/TMath::Pi() << std::endl;
-    
-    phi=phis*180/TMath::Pi();
+	thetan = -asin ( mn / (sqrt(pow(ln,2)+pow(mn,2)+pow(nn,2)) ) ) ;
     theta=thetan*180/TMath::Pi();
     
+//     theta = acos( mn / (sqrt(pow(ln,2)+pow(mn,2)+pow(nn,2)) ) ) ;
+//     Double_t thetah = acos( mn / (sqrt(pow(l,2)+pow(mn,2)+pow(nn,2)) ) ) ;
+//     float Theta;
+//     float alt_Theta = 0.;
     
-    return 0;   }
+//     std::cout << " thetan " << mn << " " <<  (sqrt(pow(ln,2)+pow(mn,2)+pow(nn,2)) ) << " " << mn / (sqrt(pow(ln,2)+pow(mn,2)+pow(nn,2)) ) << std::endl;
+//     if(Phi < 0)Theta = (TMath::Pi()/2)-theta;
+//     if(Phi > 0)Theta = theta-(TMath::Pi()/2);
+//     if(alt_Phi < 0)alt_Theta = (TMath::Pi()/2)-theta;
+//     if(alt_Phi > 0)alt_Theta = theta-(TMath::Pi()/2);
+    
+  /*
+	std::cout << "++++++++ GeomUtil old " << Phi*180/TMath::Pi() << " " << Theta*180/TMath::Pi() << std::endl;
+    std::cout << "++++++++ GeomUtil_angles ALT: Phi: " << alt_Phi*180/TMath::Pi() << " Theta: " << alt_Theta*180/TMath::Pi() << std::endl;
+    std::cout << "++++++++ GeomUtil_new_angles Sine: Phi: " << phis*180/TMath::Pi() << " Theta: " << thetan*180/TMath::Pi() << std::endl;
+  */  
+    
+    return 0;   
+
+}
   
   //////////////////////////////
   //Calculate theta in case phi~0
@@ -300,20 +304,11 @@ namespace util{
   {
     
     Double_t pitch = -1.;
-
-    /*
-    if(geom->PlaneToView(iplane) == ::geo::kUnknown || 
-       geom->PlaneToView(iplane) == ::geo::k3D){
-      
-      print(larlight::MSG::ERROR,__FUNCTION__,
-	    Form("Warning :  no Pitch foreseen for view %d", geom->PlaneToView(iplane)));
-      */
+    
     if(geom->Plane(iplane).View() == geo::kUnknown || 
        geom->Plane(iplane).View() == geo::k3D){
-      std::cerr 
-	<< "\033[93m" 
-	<< Form("Warning :  no Pitch foreseen for view %d", geom->Plane(iplane).View())
-	<< "\033[00m" << std::endl;
+      mf::LogError(
+	    Form("Warning :  no Pitch foreseen for view %d", geom->Plane(iplane).View()));
       return pitch;
     }
     else{
@@ -330,11 +325,11 @@ namespace util{
       //fTheta=TMath::Pi()/2;
  
      
-      /*
+     
       for(UInt_t i = 0; i < geom->Nplanes(); ++i) {
 	if(i == iplane){
 	  Double_t wirePitch = geom->WirePitch(0,1,i);
-	  Double_t angleToVert =0.5*TMath::Pi() - geom->WireAngleToVertical(geom->PlaneToView(i));
+	  Double_t angleToVert =0.5*TMath::Pi() - geom->WireAngleToVertical(geom->Plane(i).View());
 	  
 	      // 	//    //std::cout <<" %%%%%%%%%%  " << i << " angle " 
 	      // 				       << angleToVert*180/pi << " " 
@@ -349,31 +344,6 @@ namespace util{
 	  if (cosgamma>0) pitch = wirePitch/cosgamma;     
 	} // end if the correct view
       } // end loop over planes
-      */
-
-      for(unsigned int cs = 0; cs < geom->Ncryostats(); ++cs){
-	for(unsigned int t = 0; t < geom->Cryostat(cs).NTPC(); ++t){
-	  for(unsigned int i = 0; i < geom->Cryostat(cs).TPC(t).Nplanes(); ++i){
-	    if(i == iplane){
-	      double wirePitch = geom->Cryostat(cs).TPC(t).WirePitch(0,1,i);
-	      double angleToVert =0.5*TMath::Pi() - geom->Cryostat(cs).TPC(t).Plane(i).Wire(0).ThetaZ(false) ;
-
-	      // 	//    //std::cout <<" %%%%%%%%%%  " << i << " angle " 
-	      // 				       << angleToVert*180/pi << " " 
-	      // 				       << geom->Plane(i).Wire(0).ThetaZ(false)*180/pi 
-	      // 				       <<" wirePitch " << wirePitch
-	      // 				       <<"\n %%%%%%%%%%  " << fTheta << " " << fPhi<< std::endl;
-	      // 	   
-	    
-	      double cosgamma = TMath::Abs(TMath::Sin(angleToVert)*TMath::Cos(fTheta)
-					   +TMath::Cos(angleToVert)*TMath::Sin(fTheta)*TMath::Sin(fPhi));
-	     
-	      if (cosgamma>0) pitch = wirePitch/cosgamma;     
-	    } // end if the correct view
-	  } // end loop over planes
-	} // end loop over TPCs
-      } // end loop over cryostats
-
     } // end if a reasonable view
    
     return pitch;
@@ -391,20 +361,11 @@ namespace util{
   {
 
     Double_t pitch = -1.;
-
-    /*
-    if(geom->PlaneToView(iplane) == ::geo::kUnknown || 
-       geom->PlaneToView(iplane) == ::geo::k3D){
-
-      print(larlight::MSG::ERROR,__FUNCTION__,
-	    Form("Warning :  no Pitch foreseen for view %d", geom->PlaneToView(iplane)));
-    */
-    if(geom->Plane(iplane).View() == ::geo::kUnknown || 
-       geom->Plane(iplane).View() == ::geo::k3D){
-      std::cerr 
-	<< "\033[93m" 
-	<< Form("Warning :  no Pitch foreseen for view %d", geom->Plane(iplane).View())
-	<< "\033[00m" << std::endl;
+  
+    if(geom->Plane(iplane).View() == geo::kUnknown || 
+       geom->Plane(iplane).View() == geo::k3D){
+      mf::LogError(
+	    Form("Warning :  no Pitch foreseen for view %d", geom->Plane(iplane).View()));
       return pitch;
     }
     else{
@@ -416,11 +377,11 @@ namespace util{
       //fTheta=TMath::Pi()/2;
      
      
-      /*
+     
       for(UInt_t i = 0; i < geom->Nplanes(); ++i){
 	if(i == iplane){
 	  Double_t wirePitch = geom->WirePitch(0,1,i);
-	  Double_t angleToVert =0.5*TMath::Pi() - geom->WireAngleToVertical(geom->PlaneToView(i));
+	  Double_t angleToVert =0.5*TMath::Pi() - geom->WireAngleToVertical(geom->Plane(i).View());
 	  
 	  // 	    //std::cout <<" %%%%%%%%%%  " << i << " angle " 
 	  // 				       << angleToVert*180/pi << " " 
@@ -435,36 +396,13 @@ namespace util{
 	  if (cosgamma>0) pitch = wirePitch/cosgamma;     
 	} // end if the correct view
       } // end loop over planes
-      */
-
-      for(unsigned int cs = 0; cs < geom->Ncryostats(); ++cs){
-	for(unsigned int t = 0; t < geom->Cryostat(cs).NTPC(); ++t){
-	  for(unsigned int i = 0; i < geom->Cryostat(cs).TPC(t).Nplanes(); ++i){
-	    if(i == iplane){
-	      double wirePitch = geom->Cryostat(cs).TPC(t).WirePitch(0,1,i);
-	      double angleToVert =0.5*TMath::Pi() - geom->Cryostat(cs).TPC(t).Plane(i).Wire(0).ThetaZ(false) ;
-
-	      // 	    //std::cout <<" %%%%%%%%%%  " << i << " angle " 
-	      // 				       << angleToVert*180/pi << " " 
-	      // 				       << geom->Plane(i).Wire(0).ThetaZ(false)*180/pi 
-	      // 				       <<" wirePitch " << wirePitch
-	      // 				       <<"\n %%%%%%%%%%  " << fTheta << " " << fPhi<< std::endl;
-	   
-	    
-	      double cosgamma = TMath::Abs(TMath::Sin(angleToVert)*TMath::Cos(fTheta)
-					   +TMath::Cos(angleToVert)*TMath::Sin(fTheta)*TMath::Sin(fPhi));
-	     
-	      if (cosgamma>0) pitch = wirePitch/cosgamma;     
-	    } // end if the correct view
-	  } // end loop over planes
-	} // end loop over TPCs
-      } // end loop over cryostats
-
-
     } // end if a reasonable view
    
     return pitch;
   }
+
+
+
 
   /////////////////////////////////////////////////////////
   //Calculate 2D slope 
@@ -581,8 +519,7 @@ namespace util{
    
    double  GeometryUtilities::Get2DangleFrom3D(unsigned int plane,TVector3 dir_vector) const
   {
-    //double alpha= 0.5*TMath::Pi()-geom->WireAngleToVertical(geom->PlaneToView(plane)); 
-    double alpha= 0.5*TMath::Pi()-geom->WireAngleToVertical(geom->Plane(plane).View());
+   double alpha= 0.5*TMath::Pi()-geom->WireAngleToVertical(geom->Plane(plane).View()); 
    // create dummy  xyz point in middle of detector and another one in unit length.
    // calculate correspoding points in wire-time space and use the differnces between those to return 2D a
    // angle
@@ -803,142 +740,41 @@ namespace util{
     return 0;  
   }    
   
-  
-  
-  ///////////////////////////////////
-  //Find hit closest to wire,time coordinates
-  // 
-  ////////////////////////////////////////////////
-  /*
-  const larlight::hit* GeometryUtilities::FindClosestHit(const std::vector<larlight::hit*> &hitlist,
-							 UInt_t wirein,
-							 Double_t timein) const
-  {
-    return hitlist.at(FindClosestHitIndex(hitlist,wirein,timein));
-  }
-  */
-  
-  //Find hit closest to wire,time coordinates
-  // 
-  ////////////////////////////////////////////////
-  /*
-  UInt_t GeometryUtilities::FindClosestHitIndex(const std::vector<larlight::hit*> &hitlist,
-						UInt_t wirein,
-						Double_t timein) const
-  {
-  
-    Double_t min_length_from_start=larlight::DATA::INVALID_DOUBLE;
-    UInt_t index=larlight::DATA::INVALID_UINT;
-   
-    UInt_t plane,wire;
-   
-   
-    for(UInt_t ii=0; ii<hitlist.size();ii++){
-
-      Double_t time = hitlist.at(ii)->PeakTime();  
-      GetPlaneAndTPC(hitlist.at(ii),plane,wire);
-      
-      Double_t dist_mod=Get2DDistance(wirein,timein,wire,time);
-
-      if(dist_mod<min_length_from_start){
-	//wire_start[plane]=wire;
-	//time_start[plane]=time;
-	index = ii;
-	min_length_from_start=dist_mod;
-      }	
-      
-    } 
-  
-    return index;
-  }
-  */    
-
-  ///////////////////////////////////
-  //Find hit closest to wire,time coordinates
-  // 
-  ////////////////////////////////////////////////
-  recob::Hit * GeometryUtilities::FindClosestHit(std::vector<art::Ptr< recob::Hit > > hitlist,
-						 unsigned int wirein,
-						 double timein) const
-  {
-  
-   
-    art::Ptr<recob::Hit> nearHit=FindClosestHitPtr(hitlist,wirein,timein);
-//	min_length_from_start=dist_mod;
-  
-    return const_cast<recob::Hit *> (nearHit.get());    
-  }
-  
-  
-  //Find hit closest to wire,time coordinates
-  // 
-  ////////////////////////////////////////////////
-  art::Ptr< recob::Hit > GeometryUtilities::FindClosestHitPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
-						 unsigned int wirein,
-						 double timein) const
-  {
-  
-    double min_length_from_start=99999;
-    art::Ptr< recob::Hit > nearHit;
-   
-    unsigned int plane,tpc,wire,cstat;
-   
-   
-    for(unsigned int ii=0; ii<hitlist.size();ii++){
-      recob::Hit * theHit = const_cast<recob::Hit *>(hitlist[ii].get());
-      double time = theHit->PeakTime() ;  
-      GetPlaneAndTPC(theHit,plane,cstat,tpc,wire);
-    
-      double dist_mod=Get2DDistance(wirein,timein,wire,time);
-
-      if(dist_mod<min_length_from_start){
-	//wire_start[plane]=wire;
-	//time_start[plane]=time;
-	nearHit=(hitlist[ii]);
-	min_length_from_start=dist_mod;
-      }	
-
-    } 
-  
-    return nearHit;    
-  }
-
-  
-  //Find hit closest to wire,time coordinates
-  // 
-  ////////////////////////////////////////////////
-  art::Ptr< recob::Hit > GeometryUtilities::FindClosestHitEvdPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
-								 UInt_t wirein,
-								 Double_t timein) const
-  {
-    
-    Double_t min_length_from_start=99999;
-    art::Ptr< recob::Hit > nearHit;
-    
-    UInt_t plane,tpc,wire,cstat;
-    
-    
-    for(UInt_t ii=0; ii<hitlist.size();ii++){
-      recob::Hit * theHit = const_cast<recob::Hit *>(hitlist[ii].get());
-      Double_t time = theHit->PeakTime() ;  
-      GetPlaneAndTPC(theHit,plane,cstat,tpc,wire);
-      
-      Double_t dist_mod=Get2DDistance(wirein,timein,wire,time);
-      
-      if(dist_mod<min_length_from_start){
- 	//wire_start[plane]=wire;
- 	//time_start[plane]=time;
- 	nearHit=(hitlist[ii]);
- 	min_length_from_start=dist_mod;
-      }	
-      
-    } 
-    
-    return nearHit;    
-  }
-  //   
-  //   
-  //   
+//     //Find hit closest to wire,time coordinates
+//   // 
+//   ////////////////////////////////////////////////
+//   art::Ptr< recob::Hit > GeometryUtilities::FindClosestHitEvdPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
+// 						 UInt_t wirein,
+// 						 Double_t timein) const
+//   {
+//   
+//     Double_t min_length_from_start=99999;
+//     art::Ptr< recob::Hit > nearHit;
+//    
+//     UInt_t plane,tpc,wire,cstat;
+//    
+//    
+//     for(UInt_t ii=0; ii<hitlist.size();ii++){
+//       recob::Hit * theHit = const_cast<recob::Hit *>(hitlist[ii].get());
+//       Double_t time = theHit->PeakTime() ;  
+//       GetPlaneAndTPC(theHit,plane,cstat,tpc,wire);
+//     
+//       Double_t dist_mod=Get2DDistance(wirein,timein,wire,time);
+// 
+//       if(dist_mod<min_length_from_start){
+// 	//wire_start[plane]=wire;
+// 	//time_start[plane]=time;
+// 	nearHit=(hitlist[ii]);
+// 	min_length_from_start=dist_mod;
+//       }	
+// 
+//     } 
+//   
+//     return nearHit;    
+//   }
+//   
+//   
+//   
   
   
   
@@ -959,12 +795,10 @@ namespace util{
     // we try to get the Y and Z coordinates for the start of the shower. 
     UInt_t chan1 = geom->PlaneWireToChannel(p0->plane,p0->w);
     UInt_t chan2 = geom->PlaneWireToChannel(p1->plane,p1->w);
-
     const double origin[3] = {0.}; 
     Double_t pos[3]={0.};
-    geom->Plane(p0->plane).LocalToWorld(origin, pos);
     //geom->PlaneOriginVtx(p0->plane, pos);
- 
+    geom->Plane(p0->plane).LocalToWorld(origin, pos);
     Double_t x=(p0->t - detp->TriggerOffset())*fTimetoCm+pos[0];
  
     Double_t y,z;
@@ -989,28 +823,84 @@ namespace util{
   {
     Double_t y,z;
   
-    UInt_t chan1 = geom->PlaneWireToChannel(p0->plane, p0->w);
-    UInt_t chan2 = geom->PlaneWireToChannel(p1->plane, p1->w);
+    // Force to the closest wires if not in the range
+    int z0 = p0->w / fWiretoCm;
+    int z1 = p1-> w/ fWiretoCm;
+    if(z0 < 0) {
+      std::cout << "\033[93mWarning\033[00m \033[95m<<GeometryUtilities::GetYZ>>\033[00m" << std::endl
+		<< " 2D wire position " << p0->w << " [cm] corresponds to negative wire number." << std::endl
+		<< " Forcing it to wire=0..." << std::endl
+		<< "\033[93mWarning ends...\033[00m"<<std::endl;
+      z0 = 0;
+    }
+    else if(z0 >= (int)(geom->Nwires(p0->plane))){
+      std::cout << "\033[93mWarning\033[00m \033[95m<<GeometryUtilities::GetYZ>>\033[00m" << std::endl
+		<< " 2D wire position " << p0->w << " [cm] exceeds max wire number " << (geom->Nwires(p0->plane)-1) <<std::endl
+		<< " Forcing it to the max wire number..." << std::endl
+		<< "\033[93mWarning ends...\033[00m"<<std::endl;
+      z0 = geom->Nwires(p0->plane) - 1;
+    }
+    if(z1 < 0) {
+      std::cout << "\033[93mWarning\033[00m \033[95m<<GeometryUtilities::GetYZ>>\033[00m" << std::endl
+		<< " 2D wire position " << p1->w << " [cm] corresponds to negative wire number." << std::endl
+		<< " Forcing it to wire=0..." << std::endl
+		<< "\033[93mWarning ends...\033[00m"<<std::endl;
+      z1 = 0;
+    }
+    if(z1 >= (int)(geom->Nwires(p1->plane))){
+      std::cout << "\033[93mWarning\033[00m \033[95m<<GeometryUtilities::GetYZ>>\033[00m" << std::endl
+		<< " 2D wire position " << p1->w << " [cm] exceeds max wire number " << (geom->Nwires(p0->plane)-1) <<std::endl
+		<< " Forcing it to the max wire number..." << std::endl
+		<< "\033[93mWarning ends...\033[00m"<<std::endl;
+      z1 = geom->Nwires(p1->plane) - 1;
+    }
+
+    UInt_t chan1 = geom->PlaneWireToChannel(p0->plane, z0);
+    UInt_t chan2 = geom->PlaneWireToChannel(p1->plane, z1);
 
     if(! geom->ChannelsIntersect(chan1,chan2,y,z) )
       return -1;
   
+    
     yz[0]=y;
     yz[1]=z;
   
     return 0;
   }
 
+  
+  
+    //////////////////////////////////////////////////////////
+  Int_t GeometryUtilities::GetXYZ(const PxPoint *p0,
+				  const PxPoint *p1,
+				  Double_t* xyz) const
+  {
+    const double origin[3] = {0.};
+    Double_t pos[3]={0.};
+    //geom->PlaneOriginVtx(p0->plane, pos);
+    geom->Plane(p0->plane).LocalToWorld(origin, pos);
+    Double_t x=(p0->t) - detp->TriggerOffset()*fTimetoCm+pos[0];
+    double yz[2];
+    
+    GetYZ(p0,p1,yz);
+    
+    
+    xyz[0]=x;
+    xyz[1]=yz[0];
+    xyz[2]=yz[1];
+  
+    return 0;
+  }
+  
+  
   //////////////////////////////////////////////////////////////
   
   PxPoint GeometryUtilities::Get2DPointProjection(Double_t *xyz, Int_t plane) const{
   
     PxPoint pN(0,0,0);
-    
-    //Double_t pos[3];
-    //geom->PlaneOriginVtx(plane,pos);
     const double origin[3] = {0.}; 
-    Double_t pos[3]={0.};
+    Double_t pos[3];
+    //geom->PlaneOriginVtx(plane,pos);
     geom->Plane(plane).LocalToWorld(origin, pos);
     Double_t drifttick=(xyz[0]/fDriftVelocity)*(1./fTimeTick);
       
@@ -1088,11 +978,9 @@ namespace util{
   Double_t GeometryUtilities::GetTimeTicks(Double_t x, Int_t plane) const{
   
    
-    
-    //Double_t pos[3];
-    //geom->PlaneOriginVtx(plane,pos);
     const double origin[3] = {0.}; 
-    Double_t pos[3]={0.};
+    Double_t pos[3];
+    //geom->PlaneOriginVtx(plane,pos);
     geom->Plane(plane).LocalToWorld(origin, pos);
     Double_t drifttick=(x/fDriftVelocity)*(1./fTimeTick);
     
@@ -1119,20 +1007,26 @@ namespace util{
     Double_t angleToVert = 0.;
    
     wirePitch = geom->WirePitch(0,1,plane);
-    //angleToVert = geom->WireAngleToVertical(geom->PlaneToView(plane)) - 0.5*TMath::Pi();
-    angleToVert = geom->Plane(plane).Wire(0).ThetaZ(false) - 0.5*TMath::Pi();
+    angleToVert = geom->WireAngleToVertical(geom->Plane(plane).View()) - 0.5*TMath::Pi();
          
     //(sin(angleToVert),std::cos(angleToVert)) is the direction perpendicular to wire
     //fDir.front() is the direction of the track at the beginning of its trajectory
     Double_t cosgamma = TMath::Abs(TMath::Sin(angleToVert)*dirs[1] + 
 				      TMath::Cos(angleToVert)*dirs[2]);
    
-    //   //std::cout << " ---- cosgamma: " << angleToVert*180/TMath::Pi() << " d's: " << dirs[1]
-    //  << " " << dirs[2] << " ph,th " << phi << " " << theta << std::endl; 
+//      std::cout << " ---- cosgamma: " << angleToVert*180/TMath::Pi() << " d's: " << dirs[1]
+//       << " " << dirs[2] << " ph,th " << phi << " " << theta << std::endl; 
+      
+    //  std::cout << TMath::Sin(angleToVert)*dirs[1]  << " " << TMath::Cos(angleToVert)*dirs[2] << " CGAMM: " << cosgamma << std::endl;
     if(cosgamma < 1.e-5) 
-      throw UtilException("cosgamma is basically 0, that can't be right");
+      //throw UtilException("cosgamma is basically 0, that can't be right");
+    {std::cout << " returning 100" << std::endl;
+       return 100;
     
-    return wirePitch/cosgamma;
+    }
+    
+ //   std::cout << " returning " << wirePitch/cosgamma << std::endl;
+   return wirePitch/cosgamma;
   }
 
   
@@ -1149,159 +1043,6 @@ namespace util{
    
   }
 
-
-  //////////////////////////////////////////
-  int GeometryUtilities::GetPlaneAndTPC(art::Ptr<recob::Hit> a,
-					unsigned int &p,
-					unsigned int &cs,
-					unsigned int &t,
-					unsigned int &w) const
-  {
-    p  = a->WireID().Plane;
-    cs = a->WireID().Cryostat;
-    t  = a->WireID().TPC;
-    w  = a->WireID().Wire;
-    
-    return 0;
-  }
-
-  
-  //////////////////////////////////////////
-  int GeometryUtilities::GetPlaneAndTPC(recob::Hit*  a,
-					unsigned int &p,
-					unsigned int &cs,
-					unsigned int &t,
-					unsigned int &w) const
-  {
-    p  = a->WireID().Plane;
-    cs = a->WireID().Cryostat;
-    t  = a->WireID().TPC;
-    w  = a->WireID().Wire;
-    
-    return 0;
-  } 
-  
-  
-  
-  
-  
-  
-  void GeometryUtilities::SelectLocalHitlist(std::vector< art::Ptr < recob::Hit> > hitlist, 
-					     std::vector < art::Ptr<recob::Hit> > &hitlistlocal, 
-					     double  wire_start,
-					     double time_start, 
-					     double linearlimit,   
-					     double ortlimit, 
-					     double lineslopetest)
-  {
-    
-    double locintercept=time_start-wire_start*lineslopetest;
-    
-    
-    for(std::vector < art::Ptr < recob::Hit > >::const_iterator hitIter = hitlist.begin(); hitIter != hitlist.end();  hitIter++){
-      art::Ptr<recob::Hit> theHit = (*hitIter);
-      double time = theHit->PeakTime() ;  
-      unsigned int plane,cstat,tpc,wire;
-      GetPlaneAndTPC(theHit,plane,cstat,tpc,wire);
-      
-      double wonline=wire,tonline=time;
-      //gser.GetPointOnLine(lineslopetest,lineinterctest,wire,time,wonline,tonline);
-      GetPointOnLine(lineslopetest,locintercept,wire,time,wonline,tonline);
-      
-      //calculate linear distance from start point and orthogonal distance from axis
-      double lindist=Get2DDistance(wonline,tonline,wire_start,time_start);
-      double ortdist=Get2DDistance(wire,time,wonline,tonline);
-      
-      ////////std::cout << " w,t: " << wire << " " << time << " ws,ts " << wonline << " "<< tonline <<" "<< lindist << " " << ortdist << std::endl;
-      
-      if(lindist<linearlimit && ortdist<ortlimit)
-	{ hitlistlocal.push_back(theHit);
-	  //std::cout << " w,t: " << wire << " " << time << " calc time: " << wire*lineslopetest + locintercept  << " ws,ts " << wonline << " "<< tonline <<" "<< lindist << " " << ortdist  << " plane: " << plane << std::endl;
-	}
-      
-      
-    }
-    
-  } 
-  
-  //////////////////////////////////////////
-  /*
-  Int_t GeometryUtilities::GetPlaneAndTPC(const larlight::hit* h,
-					  UInt_t &p,
-					  UInt_t &w) const
-  {
-    p  = geom->ChannelToPlane(h->Channel());
-    w  = geom->ChannelToWire(h->Channel());
-    return 0;
-  }
-  */
-  /*
-  void GeometryUtilities::SelectLocalHitlist(const std::vector< larlight::hit*> &hitlist, 
-					     std::vector<UInt_t> &hitlistlocal_index,
-					     Double_t  wire_start,Double_t time_start, 
-					     Double_t linearlimit,   Double_t ortlimit, 
-					     Double_t lineslopetest)
-  {
-    hitlistlocal_index.clear();
-    Double_t locintercept=time_start-wire_start*lineslopetest;
-    
-    for(size_t i=0; i<hitlist.size(); ++i) {
-
-      Double_t time = hitlist.at(i)->PeakTime();
-      UInt_t plane,wire;
-      GetPlaneAndTPC(hitlist.at(i),plane,wire);
-      
-      Double_t wonline=wire,tonline=time;
-      //gser.GetPointOnLine(lineslopetest,lineinterctest,wire,time,wonline,tonline);
-      GetPointOnLine(lineslopetest,locintercept,wire,time,wonline,tonline);
-      
-      //calculate linear distance from start point and orthogonal distance from axis
-      Double_t lindist=Get2DDistance(wonline,tonline,wire_start,time_start);
-      Double_t ortdist=Get2DDistance(wire,time,wonline,tonline);
-      
-      ////////std::cout << " w,t: " << wire << " " << time << " ws,ts " << wonline << " "<< tonline <<" "<< lindist << " " << ortdist << std::endl;
-      
-      if(lindist<linearlimit && ortdist<ortlimit){ 
-        hitlistlocal_index.push_back((UInt_t)i);      
-        //std::cout << " w,t: " << wire << " " << time << " calc time: " << wire*lineslopetest + locintercept  << " ws,ts " << wonline << " "<< tonline <<" "<< lindist << " " << ortdist  << " plane: " << plane << std::endl;     
-      }
-      
-    }
-  }
-  */
-  /*
-  void GeometryUtilities::SelectLocalHitlist(const std::vector< larlight::hit*> &hitlist, 
-					     std::vector<larlight::hit*> &hitlistlocal,
-					     Double_t  wire_start,Double_t time_start, 
-					     Double_t linearlimit,   Double_t ortlimit, 
-					     Double_t lineslopetest)
-  {
-    hitlistlocal.clear();
-    Double_t locintercept=time_start-wire_start*lineslopetest;
-    
-    for(size_t i=0; i<hitlist.size(); ++i) {
-
-      Double_t time = hitlist.at(i)->PeakTime();
-      UInt_t plane,wire;
-      GetPlaneAndTPC(hitlist.at(i),plane,wire);
-      
-      Double_t wonline=wire,tonline=time;
-      //gser.GetPointOnLine(lineslopetest,lineinterctest,wire,time,wonline,tonline);
-      GetPointOnLine(lineslopetest,locintercept,wire,time,wonline,tonline);
-      
-      //calculate linear distance from start point and orthogonal distance from axis
-      Double_t lindist=Get2DDistance(wonline,tonline,wire_start,time_start);
-      Double_t ortdist=Get2DDistance(wire,time,wonline,tonline);
-      
-      ////////std::cout << " w,t: " << wire << " " << time << " ws,ts " << wonline << " "<< tonline <<" "<< lindist << " " << ortdist << std::endl;
-      
-      if(lindist<linearlimit && ortdist<ortlimit){
-        hitlistlocal.push_back(hitlist.at(i));
-	      //std::cout << " w,t: " << wire << " " << time << " calc time: " << wire*lineslopetest + locintercept  << " ws,ts " << wonline << " "<< tonline <<" "<< lindist << " " << ortdist  << " plane: " << plane << std::endl;
-	    }
-    }
-  }
-  */
   void GeometryUtilities::SelectLocalHitlist(const std::vector<util::PxHit> &hitlist, 
 					     std::vector <const util::PxHit*> &hitlistlocal,
 					     util::PxPoint &startHit,
@@ -1343,7 +1084,7 @@ namespace util{
     }
   }
   
-  
+
   void GeometryUtilities::SelectPolygonHitList(const std::vector<util::PxHit>   &hitlist,
 					       std::vector <const util::PxHit*> &hitlistlocal)
   {
@@ -1368,7 +1109,7 @@ namespace util{
     std::vector<const util::PxHit*> ordered_hits;
     ordered_hits.reserve(hitlist.size());
     for(auto hiter = hitmap.rbegin();
-	qintegral < qtotal*0.95;
+	qintegral < qtotal*0.95 && hiter != hitmap.rend();
 	++hiter) {
 
       qintegral += (*hiter).first;
@@ -1558,3 +1299,4 @@ namespace util{
   }
   
 } // namespace
+
