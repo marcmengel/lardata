@@ -187,6 +187,41 @@ namespace util{
 			    const PxPoint *p1,
 			    PxPoint &pN) const;
     
+    art::Ptr< recob::Hit > FindClosestHitPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
+                                                 unsigned int wirein,
+                                                 double timein) const;			    
+
+						 
+    recob::Hit * FindClosestHit(std::vector<art::Ptr< recob::Hit > > hitlist,
+                                                 unsigned int wirein,
+                                                 double timein) const;                                              
+	
+    util::PxHit  FindClosestHit(std::vector<util::PxHit >  hitlist,
+                                                 unsigned int wirein,
+                                                 double timein) const;		
+	
+    unsigned int FindClosestHitIndex(std::vector<util::PxHit >  hitlist,
+                                                 unsigned int wirein,
+                                                 double timein) const;						 
+						 
+						 
+    void SelectLocalHitlist(std::vector< art::Ptr < recob::Hit> > hitlist, 
+                                             std::vector < art::Ptr<recob::Hit> > &hitlistlocal, 
+                                             double  wire_start,
+                                             double time_start, 
+                                             double linearlimit,   
+                                             double ortlimit, 
+                                             double lineslopetest);
+					 
+/*    void SelectLocalHitlist(std::vector< util::PxHit > hitlist, 
+                                             std::vector < util::PxHit > &hitlistlocal, 
+                                             double  wire_start,
+                                             double time_start, 
+                                             double linearlimit,   
+                                             double ortlimit, 
+                                             double lineslopetest);	*/					 
+						 
+			    
     Int_t GetYZ(const PxPoint *p0,
 		const PxPoint *p1, 
 		Double_t* yz) const;
@@ -204,6 +239,14 @@ namespace util{
 			     Double_t theta,
 			     Double_t *dirs) const;
     
+   //interface without average Hit			     
+    void SelectLocalHitlist(const std::vector<util::PxHit> &hitlist, 
+			    std::vector <const util::PxHit*> &hitlistlocal,
+			    util::PxPoint &startHit,
+			    Double_t& linearlimit,   
+			    Double_t& ortlimit, 
+			    Double_t& lineslopetest);			     
+			     
     void SelectLocalHitlist(const std::vector<util::PxHit> &hitlist, 
 			    std::vector <const util::PxHit*> &hitlistlocal,
 			    util::PxPoint &startHit,
@@ -212,6 +255,14 @@ namespace util{
 			    Double_t& lineslopetest,
 			    util::PxHit &averageHit);
 
+   void SelectLocalHitlistIndex(const std::vector<util::PxHit> &hitlist, 
+			    std::vector <unsigned int> &hitlistlocal_index,
+			    util::PxPoint &startHit,
+			    Double_t& linearlimit,   
+			    Double_t& ortlimit, 
+			    Double_t& lineslopetest);
+    
+    
     void SelectPolygonHitList(const std::vector<util::PxHit> &hitlist,
 			      std::vector <const util::PxHit*> &hitlistlocal);
 

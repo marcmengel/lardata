@@ -10,7 +10,7 @@
 
 #include "GeometryUtilities.h"
 #include "messagefacility/MessageLogger/MessageLogger.h" 
-
+#include "PxHitConverter.h"
 
 
 namespace util{
@@ -1043,6 +1043,24 @@ namespace util{
    
   }
 
+  
+   void GeometryUtilities::SelectLocalHitlist(const std::vector<util::PxHit> &hitlist, 
+			    std::vector <const util::PxHit*> &hitlistlocal,
+			    util::PxPoint &startHit,
+			    Double_t& linearlimit,   
+			    Double_t& ortlimit, 
+			    Double_t& lineslopetest)
+   {
+     util::PxHit testHit;
+     SelectLocalHitlist(hitlist, hitlistlocal, startHit, linearlimit, ortlimit, lineslopetest, testHit);
+          
+   }
+  
+  
+//////////////////////////////////////////////////////////////////////////////////
+////
+///////////////////////////////////////////////////////////////////////////////////
+  
   void GeometryUtilities::SelectLocalHitlist(const std::vector<util::PxHit> &hitlist, 
 					     std::vector <const util::PxHit*> &hitlistlocal,
 					     util::PxPoint &startHit,
@@ -1053,9 +1071,43 @@ namespace util{
   {
 
     hitlistlocal.clear();
-    double locintercept=startHit.t - startHit.w * lineslopetest;
+    std::vector< unsigned int > hitlistlocal_index;
+    
+    hitlistlocal_index.clear();
+    
+    SelectLocalHitlistIndex(hitlist,hitlistlocal_index,startHit,linearlimit,ortlimit,lineslopetest);
+    
     double timesum = 0;
     double wiresum = 0;
+    for(size_t i=0; i<hitlistlocal_index.size(); ++i) {
+
+        hitlistlocal.push_back((const util::PxHit*)(&(hitlist.at(hitlistlocal_index.at(i)))));
+        timesum += hitlist.at(hitlistlocal_index.at(i)).t;
+        wiresum += hitlist.at(hitlistlocal_index.at(i)).w;
+      
+      
+      
+    }
+
+    averageHit.plane = startHit.plane;
+    if(hitlistlocal.size())
+    {
+      averageHit.w = wiresum/(double)hitlistlocal.size();
+      averageHit.t = timesum/((double) hitlistlocal.size());
+    }
+  }
+  
+  
+  void GeometryUtilities::SelectLocalHitlistIndex(const std::vector<util::PxHit> &hitlist, 
+					     std::vector <unsigned int> &hitlistlocal_index,
+					     util::PxPoint &startHit,
+					     Double_t& linearlimit,   
+					     Double_t& ortlimit, 
+					     Double_t& lineslopetest) 
+  {
+
+    hitlistlocal_index.clear();
+    double locintercept=startHit.t - startHit.w * lineslopetest;
     for(size_t i=0; i<hitlist.size(); ++i) {
 
       util::PxPoint hitonline;
@@ -1068,21 +1120,22 @@ namespace util{
       
       
       if(lindist<linearlimit && ortdist<ortlimit){
-        hitlistlocal.push_back((const util::PxHit*)(&(hitlist.at(i))));
-        timesum += hitlist.at(i).t;
-        wiresum += hitlist.at(i).w;
+        hitlistlocal_index.push_back(i);
       }
       
       
     }
 
-    averageHit.plane = startHit.plane;
-    if(hitlistlocal.size())
-    {
-      averageHit.w = wiresum/(double)hitlistlocal.size();
-      averageHit.t = timesum/((double) hitlistlocal.size());
-    }
+    
   }
+  
+  
+  
+  
+  
+///////////////////////////////////////////////////////////////
+////
+//////////////////////////////////////////////////////////////////
   
 
   void GeometryUtilities::SelectPolygonHitList(const std::vector<util::PxHit>   &hitlist,
@@ -1297,6 +1350,129 @@ namespace util{
   bool GeometryUtilities::Clockwise(double Ax,double Ay,double Bx,double By,double Cx,double Cy){
     return (Cy-Ay)*(Bx-Ax) > (By-Ay)*(Cx-Ax);
   }
+  
+  ///////////////////////////////////
+  //Find hit closest to wire,time coordinates
+  // 
+  ////////////////////////////////////////////////
+
+  recob::Hit * GeometryUtilities::FindClosestHit(std::vector<art::Ptr< recob::Hit > > hitlist,
+                                                 unsigned int wirein,
+                                                 double timein) const
+  {
+    art::Ptr<recob::Hit> nearHit=FindClosestHitPtr(hitlist,wirein,timein);
+//   min_length_from_start=dist_mod;
+    return const_cast<recob::Hit *> (nearHit.get());    
+
+  }
+
+  
+  
+  //Find hit closest to wire,time coordinates
+  // 
+  ////////////////////////////////////////////////
+
+  art::Ptr< recob::Hit > GeometryUtilities::FindClosestHitPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
+                                                 unsigned int wirein,
+                                                 double timein) const
+
+  {
+
+    PxHitConverter PxC;
+    std::vector <util::PxHit> pxhits;
+    PxC.GeneratePxHit(hitlist,pxhits);
+
+    
+    
+    return hitlist[FindClosestHitIndex(pxhits,wirein,timein)];    
+
+  }
+
+  
+   util::PxHit GeometryUtilities::FindClosestHit(std::vector<util::PxHit >  hitlist,
+                                                 unsigned int wirein,
+                                                 double timein) const
+     {
+	    						   						   
+   return hitlist[FindClosestHitIndex(hitlist, wirein,timein)];						   
+       
+  }
+  
+
+  
+   unsigned int GeometryUtilities::FindClosestHitIndex(std::vector<util::PxHit >  hitlist,
+                                                 unsigned int wirein,
+                                                 double timein) const
+     {
+	
+     double min_length_from_start=99999;
+     util::PxHit  nearHit;
+
+     unsigned int wire;
+
+     unsigned int ii=0;
+
+     for(ii=0; ii<hitlist.size();ii++){
+
+      util::PxHit * theHit = &(hitlist[ii]);
+      double time = theHit->t ;  
+      wire=theHit->w;
+     // plane=theHit->WireID().Plane;
+
+      double dist_mod=Get2DDistance(wirein,timein,wire,time);
+      if(dist_mod<min_length_from_start){
+        //wire_start[plane]=wire;
+        //time_start[plane]=time;
+        nearHit=(hitlist[ii]);
+        min_length_from_start=dist_mod;
+      }        
+    } 
+						   
+						   
+   return ii;						   
+       
+  }
+
+  
+  
+  
+  
+  
+  
+  
+  void GeometryUtilities::SelectLocalHitlist(std::vector< art::Ptr < recob::Hit> > hitlist, 
+                                             std::vector < art::Ptr<recob::Hit> > &hitlistlocal, 
+                                             double  wire_start,
+                                             double time_start, 
+                                             double linearlimit,   
+                                             double ortlimit, 
+                                             double lineslopetest)
+  {
+     PxHitConverter PxC;
+     std::vector <util::PxHit> pxhitlist;
+     PxC.GeneratePxHit(hitlist,pxhitlist);
+     std::vector< unsigned int > pxhitlist_local_index;
+     
+    util::PxHit startHit;
+    startHit.plane=pxhitlist.at(0).plane;
+    startHit.w=wire_start;
+    startHit.t=time_start;
+     
+    SelectLocalHitlistIndex(pxhitlist, pxhitlist_local_index, startHit, linearlimit, ortlimit, lineslopetest);
+    
+
+    for(unsigned int idx=0;idx<pxhitlist_local_index.size();idx++)
+    {
+     hitlistlocal.push_back(hitlist.at(pxhitlist_local_index.at(idx)));
+          //std::cout << " w,t: " << wire << " " << time << " calc time: " << wire*lineslopetest + locintercept  << " ws,ts " << wonline << " "<< tonline <<" "<< lindist << " " << ortdist  << " plane: " << plane << std::endl;
+      
+    }
+  }
+  
+  
+  
+  
+  
   
 } // namespace
 

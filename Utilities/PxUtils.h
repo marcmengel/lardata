@@ -36,7 +36,8 @@ namespace util{
     
   public:
     
-    double charge; //charge
+     double charge; ///< area charge
+    double peak;   ///< peak amplitude
     
     PxHit(){
       Clear();
@@ -47,6 +48,7 @@ namespace util{
     {
       PxPoint::Clear();
       charge = 0;
+      peak   = 0;
     }
 
   };
