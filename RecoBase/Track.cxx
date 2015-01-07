@@ -32,35 +32,12 @@ namespace recob{
 	       std::vector<std::vector <double> >        dQdx,
 	       std::vector<double>                       fitMomentum,
                int                                       ID)
-  //    : fXYZ (xyz)
-  //    , fDir (dxdydz)
-  //    , fdQdx(dQdx)
-  //    , fFitMomentum(fitMomentum)
-  //    , fID  (ID)
+      : fXYZ (xyz)
+      , fDir (dxdydz)
+      , fdQdx(dQdx)
+      , fFitMomentum(fitMomentum)
+      , fID  (ID)
   {
-    std::cout << "done nothing yet" << std::endl;
-    std::cout << "xyz size is " << xyz.size() << std::endl;
-    std::cout << "fXYZ size is " << fXYZ.size() << std::endl;
-    fXYZ.resize( 100 );
-    std::cout << "fXYZ size is " << fXYZ.size() << std::endl;
-    fXYZ.resize( xyz.size() );
-    std::cout << "fXYZ size is " << fXYZ.size() << std::endl;
-
-    for(size_t i=0; i<xyz.size(); i++)
-      fXYZ[i] = xyz[i];
-    
-    std::cout << "fXYZ is now copied " << fXYZ.at(0).X() << " " << xyz.at(0).X() << std::endl;
-
-    fXYZ = xyz;
-    std::cout << "xyz vector copied" << std::endl;
-    fDir = dxdydz;
-    std::cout << "dxdydz vector copied" << std::endl;
-    fdQdx = dQdx;
-    std::cout << "dqdx vector copied" << std::endl;
-    fFitMomentum = fitMomentum;
-    std::cout << "fitmometum vector copied" << std::endl;
-    fID = ID;
-    
     fCov.resize(0);
 
     if(fXYZ.size() != fDir.size() || fXYZ.size() < 1)
