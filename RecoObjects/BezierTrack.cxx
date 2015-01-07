@@ -1200,18 +1200,14 @@ namespace trkf {
     const double s = ds / GetLength();
     const size_t n_traj_pts = (size_t)(GetLength()/ds);
 
-    std::cout << "length is " << GetLength() << " s is " << s << " ds is " << ds << " and n=" << n_traj_pts << std::endl;
-    
-    xyzVector.resize(n_traj_pts);
-    dirVector.resize(n_traj_pts);
+    xyzVector.resize(n_traj_pts+1);
+    dirVector.resize(n_traj_pts+1);
     
     for(size_t i_traj=0; i_traj<=n_traj_pts; i_traj++){
       xyzVector[i_traj] = this->GetTrackPointV(i_traj*s);
       dirVector[i_traj] = this->GetTrackDirectionV(i_traj*s);
     }
 
-    std::cout << "Made all the vectors " << xyzVector.size() << " " << dirVector.size() << std::endl;
-    
   }
   
 } 
