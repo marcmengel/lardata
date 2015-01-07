@@ -29,6 +29,15 @@ util::SignalShaping::~SignalShaping()
 {}
 
 
+void util::SignalShaping::ResetDecon()
+{
+  fResponseLocked = false;
+  fFilterLocked = false;
+  fFilter.clear();
+  fDeconvKernel.clear();
+  //Set deconvolution polarity to + as default
+  fDeconvKernelPolarity = +1;
+}
 
 //----------------------------------------------------------------------
 // Reset this class to its default-constructed state.
