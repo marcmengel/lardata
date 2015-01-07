@@ -73,6 +73,7 @@ namespace util {
 
     // Accessors.
     const std::vector<double>& Response() const {return fResponse;}
+    const std::vector<double>& Response_save() const {return fResponse_save;}
     const std::vector<TComplex>& ConvKernel() const {return fConvKernel;}
     const std::vector<TComplex>& Filter() const {return fFilter;}
     const std::vector<TComplex>& DeconvKernel() const {return fDeconvKernel;}
@@ -92,6 +93,8 @@ namespace util {
     void ResetDecon();
     // Reset this class to default-constructed state.
     void Reset();
+
+    void save_response(){ fResponse_save.clear(); fResponse_save=fResponse;}
 
     // Add a time domain response function.
     // Updates overall response function and convolution kernel.
@@ -132,6 +135,7 @@ namespace util {
 
     // Overall response.
     std::vector<double> fResponse;
+    std::vector<double> fResponse_save;
 
     // Convolution kernel (fourier transform of response function).
     std::vector<TComplex> fConvKernel;
