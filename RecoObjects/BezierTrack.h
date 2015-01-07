@@ -47,7 +47,9 @@ namespace trkf {
     void   GetTrackPoint    (  double s, double* xyz )  const;
     void   GetTrackDirection(  double s, double* xyz )  const;  
 
-    recob::Track  GetTrack( double const ds=0.001 ) const;
+    void   FillTrackVectors( std::vector<TVector3>& xyzVector,
+			     std::vector<TVector3>& dirVector,
+			     double const ds=0.1 ) const;
     
     double GetCurvature(double s)                       const;
     double GetdQdx(double s, unsigned int View)         const ;

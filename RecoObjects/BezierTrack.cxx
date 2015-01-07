@@ -1193,20 +1193,24 @@ namespace trkf {
   }
 
   //-----------------------------------------
-  recob::Track BezierTrack::GetTrack(double const ds) const
+  void BezierTrack::FillTrackVectors(std::vector<TVector3>& xyzVector,
+				     std::vector<TVector3>& dirVector,
+				     double const ds) const
   {
     const double s = ds / GetLength();
     const size_t n_traj_pts = (size_t)(GetLength()/ds);
 
-    std::vector<TVector3> xyzVector(n_traj_pts);
-    std::vector<TVector3> dirVector(n_traj_pts);
+    std::cout << "length is " << GetLength() << " s is " << s << " ds is " << ds << " and n=" << n_traj_pts << std::endl;
+    
+    xyzVector.resize(n_traj_pts);
+    dirVector.resize(n_traj_pts);
     
     for(size_t i_traj=0; i_traj<=n_traj_pts; i_traj++){
       xyzVector[i_traj] = this->GetTrackPointV(i_traj*s);
       dirVector[i_traj] = this->GetTrackDirectionV(i_traj*s);
     }
 
-    return recob::Track(xyzVector,dirVector);
+    std::cout << "Made all the vectors " << xyzVector.size() << " " << dirVector.size() << std::endl;
     
   }
   
