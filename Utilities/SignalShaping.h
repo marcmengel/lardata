@@ -90,7 +90,7 @@ namespace util {
     // Configuration methods.
 
     // Only reset deconvolution
-    void ResetDecon();
+    //void ResetDecon();
     // Reset this class to default-constructed state.
     void Reset();
 
