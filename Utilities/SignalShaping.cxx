@@ -32,6 +32,8 @@ void util::SignalShaping::ResetDecon()
 {
   fResponseLocked = false;
   fFilterLocked = false;
+  fResponse.clear();
+  fConvKernel.clear();
   fFilter.clear();
   fDeconvKernel.clear();
   //Set deconvolution polarity to + as default
