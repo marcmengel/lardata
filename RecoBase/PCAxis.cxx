@@ -55,9 +55,9 @@ std::ostream& operator<< (std::ostream & o, const PCAxis & a)
         o << "   - eigen values: " << std::setw(8) << std::right << a.fEigenValues[0] << ", "
             << a.fEigenValues[1] << ", " << a.fEigenValues[2] << std::endl;
         o << "   - average doca: " << a.fAveHitDoca << std::endl;
-        o << "   - Principle axis: " << std::setw(7) << std::setprecision(4) << a.fEigenVectors[0][0] << ", " << a.fEigenVectors[0][0] << ", " << a.fEigenVectors[0][2] << std::endl;
-        o << "   - second axis:    " << std::setw(7) << std::setprecision(4) << a.fEigenVectors[1][0] << ", " << a.fEigenVectors[1][0] << ", " << a.fEigenVectors[1][2] << std::endl;
-        o << "   - third axis:     " << std::setw(7) << std::setprecision(4) << a.fEigenVectors[2][0] << ", " << a.fEigenVectors[2][0] << ", " << a.fEigenVectors[2][2] << std::endl;
+        o << "   - Principle axis: " << std::setw(7) << std::setprecision(4) << a.fEigenVectors[0][0] << ", " << a.fEigenVectors[0][1] << ", " << a.fEigenVectors[0][2] << std::endl;
+        o << "   - second axis:    " << std::setw(7) << std::setprecision(4) << a.fEigenVectors[1][0] << ", " << a.fEigenVectors[1][1] << ", " << a.fEigenVectors[1][2] << std::endl;
+        o << "   - third axis:     " << std::setw(7) << std::setprecision(4) << a.fEigenVectors[2][0] << ", " << a.fEigenVectors[2][1] << ", " << a.fEigenVectors[2][2] << std::endl;
     }
     else
         o << " Principal Components Axis is not valid" << std::endl;
