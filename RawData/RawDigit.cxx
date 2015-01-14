@@ -13,17 +13,65 @@
 #include "cetlib/exception.h"
 
 namespace raw{
-
+  
+  //----------------------------------------------------------------------
+  RawDigit::RawDigit()
+    : fADC(0)
+    , fChannel(InvalidChannelID) 
+    , fSamples(0) 
+    , fPedestal(0.) 
+    , fSigma(0.)
+    , fCompression(kNone)
+  //  , fFlags(DefaultFlags)
+  {}
+  
+  
+  //----------------------------------------------------------------------
+  RawDigit::RawDigit(
+    ChannelID_t                  channel,
+    unsigned short               samples,
+    RawDigit::ADCvector_t const& adclist,
+    Compress_t                   compression /* = kNone */ /*,
+    const Flags_t&               flags / * = DefaultFlags * / */
+  )
+    : fADC(adclist) 
+    , fChannel(channel) 
+    , fSamples(samples)
+    , fPedestal(0.) 
+    , fSigma(0.)
+    , fCompression(compression)
+  //  , fFlags(flags)
+  {}
+  
+  
+  //----------------------------------------------------------------------
+  RawDigit::RawDigit(
+    ChannelID_t             channel,
+    unsigned short          samples,
+    RawDigit::ADCvector_t&& adclist,
+    Compress_t              compression /* = kNone */ /*,
+    const Flags_t&          flags / * = DefaultFlags * / */
+  )
+    : fADC(adclist) 
+  , fChannel(channel) 
+  , fSamples(samples)
+  , fPedestal(0.) 
+  , fSigma(0.)
+  , fCompression(compression)
+  //  , fFlags(flags)
+  {}
+  
+  
   //----------------------------------------------------------------------
   void RawDigit::SetPedestal(float ped, float sigma /* = 1. */ )
   {
-
+    
     fPedestal = ped;
     fSigma = sigma;
-
+    
   } // RawDigit::SetPedestal()
-
-
+  
+  
 } // namespace raw
 ////////////////////////////////////////////////////////////////////////
 

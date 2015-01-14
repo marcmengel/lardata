@@ -99,11 +99,29 @@ namespace raw {
      * @param adclist list of ADC counts vs. time, compressed
      * @param compression compression algorithm used in adclist
      * 
+     * Data from the adclist is copied into the raw digits.
      * Pedestal is set to 0 by default.
      */
     RawDigit(ChannelID_t        channel,
              unsigned short     samples,
-             const ADCvector_t& adclist,
+             ADCvector_t const& adclist,
+             raw::Compress_t    compression = raw::kNone /*,
+             const Flags_t&     flags = DefaultFlags */
+             );
+    
+    /**
+     * @brief Constructor: sets all the fields
+     * @param channel ID of the channel the digits were acquired from
+     * @param samples number of ADC samples in the uncompressed collection
+     * @param adclist list of ADC counts vs. time, compressed
+     * @param compression compression algorithm used in adclist
+     * 
+     * Data from the adclist is moved into the raw digits.
+     * Pedestal is set to 0 by default.
+     */
+    RawDigit(ChannelID_t        channel,
+             unsigned short     samples,
+             ADCvector_t&&      adclist,
              raw::Compress_t    compression = raw::kNone /*,
              const Flags_t&     flags = DefaultFlags */
              );
@@ -187,33 +205,6 @@ namespace raw {
 //--- inline implementation
 //---
 #ifndef __GCCXML__
-
-inline raw::RawDigit::RawDigit()
-  : fADC(0)
-  , fChannel(InvalidChannelID) 
-  , fSamples(0) 
-  , fPedestal(0.) 
-  , fSigma(0.)
-  , fCompression(raw::kNone)
-//  , fFlags(DefaultFlags)
-{}
-
-inline raw::RawDigit::RawDigit(
-  ChannelID_t               channel,
-  unsigned short            samples,
-  const std::vector<short>& adclist,
-  Compress_t                compression /* = raw::kNone */ /*,
-  const Flags_t&            flags / * = DefaultFlags * / */
-)
-  : fADC(adclist) 
-  , fChannel(channel) 
-  , fSamples(samples)
-  , fPedestal(0.) 
-  , fSigma(0.)
-  , fCompression(compression)
-//  , fFlags(flags)
-{}
-
 
 inline size_t          raw::RawDigit::NADC()        const { return fADC.size();  }
 inline short           raw::RawDigit::ADC(int i)    const { return fADC.at(i);   }
