@@ -14,11 +14,6 @@
  * version 1.0: ~1.5" (debug mode)
  */
 
-// C/C++ standard library
-#include <vector>
-#include <algorithm> // std::equal()
-#include <iostream>
-
 
 // Boost libraries
 /*
@@ -35,10 +30,8 @@
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // LArSoft libraries
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "SimpleTypesAndConstants/geo_types.h" // geo::View_t
-#include "Utilities/sparse_vector.h"
-#include "RecoBase/Wire.h"
+#include "RecoBase/Cluster.h"
 
 
 
@@ -47,110 +40,323 @@
 //
 
 
-void CheckWire(
-  recob::Wire const& wire,
-  recob::Wire::RegionsOfInterest_t const& sigROIlist,
-  raw::ChannelID_t channel,
-  geo::View_t view
+void CheckCluster(
+  recob::Cluster const& cluster,
+  float start_wire,
+  float start_tick,
+  float start_charge,
+  float start_angle,
+  float start_opening,
+  float end_wire,
+  float end_tick,
+  float end_charge,
+  float end_angle,
+  float end_opening,
+  float integral,
+  float integral_stddev,
+  float summedADC,
+  float summedADC_stddev,
+  unsigned int n_hits,
+  float wires_over_hits,
+  float width,
+  recob::Cluster::ID_t ID,
+  geo::View_t view,
+  geo::PlaneID const& plane
 ) {
   
   // verify that the values are as expected
-  // - channel ID
-  BOOST_CHECK_EQUAL(wire.Channel(), channel);
+  // - NHits
+  BOOST_CHECK_EQUAL(cluster.NHits(), n_hits);
   
-  // - III.2.1 view
-  BOOST_CHECK_EQUAL(wire.View(), view);
+  // - start wire
+  BOOST_CHECK_EQUAL(cluster.StartWire(), start_wire);
   
-  // - III.2.2 region of interest
-  BOOST_CHECK_EQUAL(wire.NSignal(), sigROIlist.size());
+  // - start tick
+  BOOST_CHECK_EQUAL(cluster.StartTick(), start_tick);
   
-  recob::Wire::RegionsOfInterest_t const& wireROI = wire.SignalROI();
-  BOOST_CHECK_EQUAL(wireROI.n_ranges(), sigROIlist.n_ranges());
+  // - end wire
+  BOOST_CHECK_EQUAL(cluster.EndWire(), end_wire);
   
-  unsigned int index = 0;
-  for (auto sample: wireROI) {
-    BOOST_CHECK_EQUAL(sample, sigROIlist[index++]);
-  }
+  // - end tick
+  BOOST_CHECK_EQUAL(cluster.EndTick(), end_tick);
   
-  // - III.2.3 other elements of interface
-  index = 0;
-  auto wire_signal = wire.Signal();
-  BOOST_CHECK
-    (std::equal(wire_signal.begin(), wire_signal.end(), sigROIlist.cbegin()));
+  // - wire coordinates
+  BOOST_CHECK_EQUAL
+    (cluster.WireCoord(recob::Cluster::clStart), start_wire);
+  BOOST_CHECK_EQUAL
+    (cluster.WireCoord((unsigned int) recob::Cluster::clStart), start_wire);
+  BOOST_CHECK_EQUAL
+    (cluster.WireCoord(recob::Cluster::clEnd), end_wire);
+  BOOST_CHECK_EQUAL
+    (cluster.WireCoord((unsigned int) recob::Cluster::clEnd), end_wire);
   
-} // CheckWire()
+  // - tick coordinates
+  BOOST_CHECK_EQUAL
+    (cluster.TickCoord(recob::Cluster::clStart), start_tick);
+  BOOST_CHECK_EQUAL
+    (cluster.TickCoord((unsigned int) recob::Cluster::clStart), start_tick);
+  BOOST_CHECK_EQUAL
+    (cluster.TickCoord(recob::Cluster::clEnd), end_tick);
+  BOOST_CHECK_EQUAL
+    (cluster.TickCoord((unsigned int) recob::Cluster::clEnd), end_tick);
+  
+  // - start charge
+  BOOST_CHECK_EQUAL(cluster.StartCharge(), start_charge);
+  
+  // - start angle
+  BOOST_CHECK_EQUAL(cluster.StartAngle(), start_angle);
+  
+  // - start opening angle
+  BOOST_CHECK_EQUAL(cluster.StartOpeningAngle(), start_opening);
+  
+  // - end charge
+  BOOST_CHECK_EQUAL(cluster.EndCharge(), end_charge);
+  
+  // - end angle
+  BOOST_CHECK_EQUAL(cluster.EndAngle(), end_angle);
+  
+  // - end opening angle
+  BOOST_CHECK_EQUAL(cluster.EndOpeningAngle(), end_opening);
+  
+  // - edge charge
+  BOOST_CHECK_EQUAL
+    (cluster.EdgeCharge(recob::Cluster::clStart), start_charge);
+  BOOST_CHECK_EQUAL
+    (cluster.EdgeCharge((unsigned int) recob::Cluster::clStart), start_charge);
+  BOOST_CHECK_EQUAL
+    (cluster.EdgeCharge(recob::Cluster::clEnd), end_charge);
+  BOOST_CHECK_EQUAL
+    (cluster.EdgeCharge((unsigned int) recob::Cluster::clEnd), end_charge);
+  
+  // - angle
+  BOOST_CHECK_EQUAL
+    (cluster.Angle(recob::Cluster::clStart), start_angle);
+  BOOST_CHECK_EQUAL
+    (cluster.Angle((unsigned int) recob::Cluster::clStart), start_angle);
+  BOOST_CHECK_EQUAL
+    (cluster.Angle(recob::Cluster::clEnd), end_angle);
+  BOOST_CHECK_EQUAL
+    (cluster.Angle((unsigned int) recob::Cluster::clEnd), end_angle);
+  
+  // - edge opening angle
+  BOOST_CHECK_EQUAL
+    (cluster.OpeningAngle(recob::Cluster::clStart), start_opening);
+  BOOST_CHECK_EQUAL
+    (cluster.OpeningAngle((unsigned int) recob::Cluster::clStart), start_opening);
+  BOOST_CHECK_EQUAL
+    (cluster.OpeningAngle(recob::Cluster::clEnd), end_opening);
+  BOOST_CHECK_EQUAL
+    (cluster.OpeningAngle((unsigned int) recob::Cluster::clEnd), end_opening);
+  
+  // - integral
+  BOOST_CHECK_EQUAL(cluster.Integral(), integral);
+  
+  // - integral standard deviation
+  BOOST_CHECK_EQUAL(cluster.IntegralStdDev(), integral_stddev);
+  
+  // - integral average
+  const float integral_average = (n_hits != 0)? integral / n_hits: 0.;
+  BOOST_CHECK_EQUAL(cluster.IntegralAverage(), integral_average);
+  
+  // - summed ADC
+  BOOST_CHECK_EQUAL(cluster.SummedADC(), summedADC);
+  
+  // - summed ADC standard deviation
+  BOOST_CHECK_EQUAL(cluster.SummedADCstdDev(), summedADC_stddev);
+  
+  // - summed ADC average
+  const float summedADC_average = (n_hits != 0)? summedADC / n_hits: 0.;
+  BOOST_CHECK_EQUAL(cluster.SummedADCaverage(), summedADC_average);
+  
+  // - charge
+  BOOST_CHECK_EQUAL(cluster.Charge(recob::Cluster::cmFit), integral);
+  BOOST_CHECK_EQUAL
+    (cluster.Charge((unsigned int) recob::Cluster::cmFit), integral);
+  BOOST_CHECK_EQUAL
+    (cluster.Charge(recob::Cluster::cmADC), summedADC);
+  BOOST_CHECK_EQUAL
+    (cluster.Charge((unsigned int) recob::Cluster::cmADC), summedADC);
+  
+  // - charge standard deviation
+  BOOST_CHECK_EQUAL
+    (cluster.ChargeStdDev(recob::Cluster::cmFit), integral_stddev);
+  BOOST_CHECK_EQUAL
+    (cluster.ChargeStdDev((unsigned int) recob::Cluster::cmFit), integral_stddev);
+  BOOST_CHECK_EQUAL
+    (cluster.ChargeStdDev(recob::Cluster::cmADC), summedADC_stddev);
+  BOOST_CHECK_EQUAL
+    (cluster.ChargeStdDev((unsigned int) recob::Cluster::cmADC), summedADC_stddev);
+  
+  // - charge standard deviation
+  BOOST_CHECK_EQUAL
+    (cluster.ChargeAverage(recob::Cluster::cmFit), integral_average);
+  BOOST_CHECK_EQUAL
+    (cluster.ChargeAverage((unsigned int) recob::Cluster::cmFit), integral_average);
+  BOOST_CHECK_EQUAL
+    (cluster.ChargeAverage(recob::Cluster::cmADC), summedADC_average);
+  BOOST_CHECK_EQUAL
+    (cluster.ChargeAverage((unsigned int) recob::Cluster::cmADC), summedADC_average);
+  
+  // - wires over hits
+  BOOST_CHECK_EQUAL(cluster.WiresOverHits(), wires_over_hits);
+  
+  // - width
+  BOOST_CHECK_EQUAL(cluster.Width(), width);
+  
+  // - ID
+  BOOST_CHECK_EQUAL(cluster.ID(), ID);
+  
+  // - view
+  BOOST_CHECK_EQUAL(cluster.View(), view);
+  
+  // - plane
+  BOOST_CHECK_EQUAL(cluster.Plane(), plane);
+  BOOST_CHECK_EQUAL(cluster.hasPlane(), plane.isValid);
+  
+} // CheckCluster()
 
 
-void WireTestDefaultConstructor() {
+void ClusterTestDefaultConstructor() {
   
   //
   // Part I: initialization of wire inputs
   //
   // these are the values expected for a default-constructed wire
-  raw::ChannelID_t channel = raw::InvalidChannelID;
-  geo::View_t view = geo::kUnknown;
-  recob::Wire::RegionsOfInterest_t sigROIlist;
+  const float start_wire         =    0.0;
+  const float start_tick         =    0.0;
+  const float start_charge       =    0.0;
+  const float start_angle        =    0.0;
+  const float start_opening      =    0.0;
+  const float end_wire           =    0.0;
+  const float end_tick           =    0.0;
+  const float end_charge         =    0.0;
+  const float end_angle          =    0.0;
+  const float end_opening        =    0.0;
+  const float integral           =    0.0;
+  const float integral_stddev    =    0.0;
+  const float summedADC          =    0.0;
+  const float summedADC_stddev   =    0.0;
+  const unsigned int n_hits      =    0;
+  const float wires_over_hits    =    0.0;
+  const float width              =    0.0;
+  const recob::Cluster::ID_t ID  = recob::Cluster::InvalidID;
+  const geo::View_t view         = geo::kUnknown;
+  const geo::PlaneID plane;
   
   //
   // Part II: default constructor
   //
   // step II.1: create a wire with the signal-copying constructor
-  recob::Wire wire;
+  recob::Cluster cluster;
   
   
   // step II.2: verify that the values are as expected
-  CheckWire(wire, sigROIlist, channel, view);
+  CheckCluster(cluster,
+    start_wire,
+    start_tick,
+    start_charge,
+    start_angle,
+    start_opening,
+    end_wire,
+    end_tick,
+    end_charge,
+    end_angle,
+    end_opening,
+    integral,
+    integral_stddev,
+    summedADC,
+    summedADC_stddev,
+    n_hits,
+    wires_over_hits,
+    width,
+    ID,
+    view,
+    plane
+    );
   
 } // WireTestDefaultConstructor()
 
 
-void WireTestCustomConstructors() {
+void ClusterTestCustomConstructor() {
   
   //
   // Part I: initialization of wire inputs
   //
-  raw::ChannelID_t channel = 12;
-  geo::View_t view = geo::kV;
-  
-  recob::Wire::RegionsOfInterest_t sigROIlist(20);
-  sigROIlist.add_range
-    (5, recob::Wire::RegionsOfInterest_t::vector_t({ 5., 6., 7. }));
-  sigROIlist.add_range
-    (11, recob::Wire::RegionsOfInterest_t::vector_t({ 11., 12., 13., 14. }));
-  
-  // this is not a recob::Wire test, but I want to make sure anyway...
-  BOOST_CHECK_EQUAL(sigROIlist.size(), 20U);
-  BOOST_CHECK_EQUAL(sigROIlist.n_ranges(), 2U);
-  size_t index = 0;
-  for (auto sample: sigROIlist) {
-    BOOST_CHECK((sample == (float) index) || (sample == 0.));
-    ++index;
-  } // for
-  
+  const float start_wire         =   12.5;
+  const float start_tick         =  141.3;
+  const float start_charge       =   45.2;
+  const float start_angle        =    1.5;
+  const float start_opening      =    0.7;
+  const float end_wire           =  223.4;
+  const float end_tick           =  563.2;
+  const float end_charge         =  152.1;
+  const float end_angle          =    0.6;
+  const float end_opening        =    0.1;
+  const float integral           = 4856.7;
+  const float integral_stddev    =    4.3;
+  const float summedADC          = 4702.4;
+  const float summedADC_stddev   =    6.2;
+  const unsigned int n_hits      =  210;
+  const float wires_over_hits    =    1.0;
+  const float width              =   75.2;
+  const recob::Cluster::ID_t ID  = 1234;
+  const geo::View_t view         = geo::kV;
+  const geo::PlaneID plane(0, 1, 2);
   
   //
   // Part II: constructor with signal copy
   //
   // step II.1: create a wire with the signal-copying constructor
-  recob::Wire wire1(sigROIlist, channel, view);
+  recob::Cluster cluster(
+    start_wire,
+    start_tick,
+    start_charge,
+    start_angle,
+    start_opening,
+    end_wire,
+    end_tick,
+    end_charge,
+    end_angle,
+    end_opening,
+    integral,
+    integral_stddev,
+    summedADC,
+    summedADC_stddev,
+    n_hits,
+    wires_over_hits,
+    width,
+    ID,
+    view,
+    plane
+    );
   
   
   // step II.2: verify that the values are as expected
-  CheckWire(wire1, sigROIlist, channel, view);
+  CheckCluster(cluster,
+    start_wire,
+    start_tick,
+    start_charge,
+    start_angle,
+    start_opening,
+    end_wire,
+    end_tick,
+    end_charge,
+    end_angle,
+    end_opening,
+    integral,
+    integral_stddev,
+    summedADC,
+    summedADC_stddev,
+    n_hits,
+    wires_over_hits,
+    width,
+    ID,
+    view,
+    plane
+    );
   
   
-  //
-  // Part III: constructor with signal move
-  //
-  // step III.1: create a wire with the signal-copying constructor
-  recob::Wire::RegionsOfInterest_t sigROIlistCopy(sigROIlist); // need a copy for check
-  recob::Wire wire2(std::move(sigROIlistCopy), channel, view);
-  
-  // step III.2: verify that the values are as expected
-  CheckWire(wire2, sigROIlist, channel, view);
-  
-  
-} // WireTestCustomConstructors()
+} // ClusterTestCustomConstructor()
 
 
 //------------------------------------------------------------------------------
@@ -162,10 +368,10 @@ void WireTestCustomConstructors() {
 // number of checks and it will fail if any of them does.
 //
 
-BOOST_AUTO_TEST_CASE(WireDefaultConstructor) {
-  WireTestDefaultConstructor();
+BOOST_AUTO_TEST_CASE(ClusterDefaultConstructor) {
+  ClusterTestDefaultConstructor();
 }
 
-BOOST_AUTO_TEST_CASE(WireCustomConstructors) {
-  WireTestCustomConstructors();
+BOOST_AUTO_TEST_CASE(ClusterCustomConstructors) {
+  ClusterTestCustomConstructor();
 }

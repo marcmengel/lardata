@@ -24,7 +24,8 @@
  <class name="geo::WireID"             ClassVersion="11"                      		      >
   <version ClassVersion="11" checksum="363582492"/>
  </class>
- <class name="recob::Cluster"          ClassVersion="13"                       		      >
+ <class name="recob::Cluster"          ClassVersion="14"                       		      >
+  <version ClassVersion="14" checksum="3719096586"/>
   <version ClassVersion="13" checksum="3306685703"/>
   <version ClassVersion="12" checksum="1302402512"/>
  </class>
