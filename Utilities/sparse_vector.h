@@ -576,8 +576,8 @@ class sparse_vector {
 	iterator end();
 	const_iterator begin() const;
 	const_iterator end() const;
-	const_iterator cbegin();
-	const_iterator cend();
+	const_iterator cbegin() const { return begin(); }
+	const_iterator cend() const { return begin(); }
 	//@}
 	
 	/// Access to an element (read only)
@@ -1018,8 +1018,8 @@ class lar::sparse_vector<T>::datarange_t: public range_t<size_type> {
 	iterator end() { return values.end(); }
 	const_iterator begin() const { return values.begin(); }
 	const_iterator end() const { return values.end(); }
-	const_iterator cbegin() { return values.begin(); }
-	const_iterator cend() { return values.end(); }
+	const_iterator cbegin() const { return values.cbegin(); }
+	const_iterator cend() const { return values.cend(); }
 	//@}
 	
 	//@{
@@ -1427,17 +1427,6 @@ template <typename T>
 inline typename lar::sparse_vector<T>::const_iterator
 	lar::sparse_vector<T>::end() const
 	{ return const_iterator(*this, typename const_iterator::special::end()); }
-
-template <typename T>
-inline typename lar::sparse_vector<T>::const_iterator
-	lar::sparse_vector<T>::cbegin()
-	{ return const_iterator(*this, typename const_iterator::special::begin()); }
-
-template <typename T>
-inline typename lar::sparse_vector<T>::const_iterator
-	lar::sparse_vector<T>::cend()
-	{ return const_iterator(*this, typename const_iterator::special::end()); }
-
 
 template <typename T>
 typename lar::sparse_vector<T>::value_type lar::sparse_vector<T>::operator[]
