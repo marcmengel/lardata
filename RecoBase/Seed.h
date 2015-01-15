@@ -71,6 +71,10 @@ namespace recob {
     bool IsValid() const;
     void SetValidity(bool Validity);
 
+    friend std::ostream& operator << (std::ostream& stream, Seed const& a);
+
+    friend bool          operator <   (const Seed & a, const Seed & b);
+
 #endif
   };
 

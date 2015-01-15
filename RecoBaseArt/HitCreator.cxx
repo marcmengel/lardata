@@ -35,6 +35,50 @@ namespace recob {
   //***  HitCreator
   //----------------------------------------------------------------------
   HitCreator::HitCreator(
+    raw::RawDigit const& digits,
+    geo::WireID const&   wireID,
+    raw::TDCtick_t       start_tick,
+    raw::TDCtick_t       end_tick,
+    float                rms,
+    float                peak_time,
+    float                sigma_peak_time,
+    float                peak_amplitude,
+    float                sigma_peak_amplitude,
+    float                hit_integral,
+    float                hit_sigma_integral,
+    float                summedADC,
+    short int            multiplicity,
+    short int            local_index,
+    float                goodness_of_fit,
+    int                  dof,
+    std::vector<float>&& signal
+    ):
+    hit(
+      digits.Channel(),
+      start_tick,
+      end_tick,
+      peak_time,
+      sigma_peak_time,
+      rms,
+      peak_amplitude,
+      sigma_peak_amplitude,
+      summedADC,
+      hit_integral,
+      hit_sigma_integral,
+      multiplicity,
+      local_index,
+      goodness_of_fit,
+      dof,
+      art::ServiceHandle<geo::Geometry>()->View(digits.Channel()),
+      art::ServiceHandle<geo::Geometry>()->SignalType(digits.Channel()),
+      wireID,
+      std::move(signal)
+      )
+  {} // HitCreator::HitCreator(RawDigit)
+  
+  
+  //----------------------------------------------------------------------
+  HitCreator::HitCreator(
     recob::Wire const&   wire,
     geo::WireID const&   wireID,
     raw::TDCtick_t       start_tick,

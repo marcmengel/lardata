@@ -40,7 +40,8 @@ namespace util{
       double             ConvertTicksToX(double ticks, int p, int t, int c) ;
 
       double             GetXTicksOffset(int p, int t, int c) ;
-      double             GetXTicksCoefficient() ;      
+      double             GetXTicksCoefficient(int t, int c) ;
+      double             GetXTicksCoefficient() ;
 
       // The following methods convert between TDC counts (SimChannel time) and
       // ticks (RawDigit/Wire time).
@@ -69,10 +70,12 @@ namespace util{
       double       fTimeOffsetZ;       ///< view
             
       bool         fInheritNumberTimeSamples; ///< Flag saying whether to inherit NumberTimeSamples
+      bool         fXTicksParamsLoaded;///<  calculations
 
       double       fXTicksCoefficient; ///< Parameters for x<-->ticks
-      bool         fXTicksParamsLoaded;///<  calculations
+
       std::vector<std::vector<std::vector<double> > > fXTicksOffsets;
+      std::vector<std::vector<double> >               fDriftDirection;
 
       fhicl::ParameterSet   fPS;       ///< Original parameter set.
 

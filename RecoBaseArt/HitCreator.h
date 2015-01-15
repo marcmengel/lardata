@@ -70,6 +70,52 @@ namespace recob {
       // destructor, copy and move constructor and assignment as default
       
       /**
+       * @brief Constructor: extracts some information from raw digit
+       * @param digits a pointer to a raw::RawDigit (for channel, view, signal type)
+       * @param wireID ID of the wire the hit is on
+       * @param start_tick first tick in the region the hit was extracted from
+       * @param end_tick first tick after the region the hit was extracted from
+       * @param rms RMS of the signal hit, in TDC time units
+       * @param peak_time time at peak of the signal, in TDC time units
+       * @param sigma_peak_time uncertainty on time at peak, in TDC time units
+       * @param peak_amplitude amplitude of the signal at peak, in ADC units
+       * @param sigma_peak_amplitude uncertainty on amplitude at peak
+       * @param hit_integral total charge integrated under the hit signal
+       * @param hit_sigma_integral uncertainty on the total hit charge
+       * @param summedADC total ADC count in the region assigned to the hit
+       * @param multiplicity number of hits in the region it was extracted from
+       * @param local_index index of this hit in the region it was extracted from
+       * @param goodness_of_fit quality parameter for the hit
+       * @param dof degrees of freedom in the definition of the hit shape
+       * @param signal signal region the hit was extracted from
+       *
+       * The information used from the raw digit is the channel ID; view and
+       * signal type are obtained from geometry.
+       * 
+       * Signal information is moved from signal, that becomes empty.
+       */
+      HitCreator(
+        raw::RawDigit const& digits,
+        geo::WireID const&   wireID,
+        raw::TDCtick_t       start_tick,
+        raw::TDCtick_t       end_tick,
+        float                rms,
+        float                peak_time,
+        float                sigma_peak_time,
+        float                peak_amplitude,
+        float                sigma_peak_amplitude,
+        float                hit_integral,
+        float                hit_sigma_integral,
+        float                summedADC,
+        short int            multiplicity,
+        short int            local_index,
+        float                goodness_of_fit,
+        int                  dof,
+        std::vector<float>&& signal
+        );
+      
+      
+      /**
        * @brief Constructor: extracts some information from wire
        * @param wire a pointer to a recob::Wire (for channel, view, signal type)
        * @param wireID ID of the wire the hit is on
@@ -89,8 +135,8 @@ namespace recob {
        * @param dof degrees of freedom in the definition of the hit shape
        * @param signal signal region the hit was extracted from
        *
-       * The information used from the wire are the channel ID, view and wire
-       * ID; the signal type is obtained from geometry.
+       * The information used from the wire are the channel ID and view;
+       * the signal type is obtained from geometry.
        * 
        * Signal information is moved from signal, that becomes empty.
        */
@@ -112,7 +158,6 @@ namespace recob {
         float                goodness_of_fit,
         int                  dof,
         std::vector<float>&& signal
-
         );
       
       
@@ -135,8 +180,8 @@ namespace recob {
        * @param dof degrees of freedom in the definition of the hit shape
        * @param signal signal region the hit was extracted from
        *
-       * The information used from the wire are the channel ID, view and wire
-       * ID; the signal type is obtained from geometry.
+       * The information used from the wire are the channel ID, view;
+       * the signal type is obtained from geometry.
        * 
        * The sum of ADC counts is automatically computed over the whole range
        * of the wire signal between start_tick and end_tick
@@ -182,8 +227,8 @@ namespace recob {
        * @param dof degrees of freedom in the definition of the hit shape
        * @param signal region of interest the hit was extracted from
        *
-       * The information used from the raw digit are the channel ID and the
-       * length in samples (TDC ticks) of the original readout window.
+       * The information used from the wire are the channel ID and view;
+       * the signal type is obtained from geometry.
        * 
        * Signal region, start and end ticks are extracted from the region of
        * interest.
@@ -225,8 +270,8 @@ namespace recob {
        * @param dof degrees of freedom in the definition of the hit shape
        * @param iSignalRoI index in the wire of the signal region the hit was extracted from
        *
-       * The information used from the wire are the channel ID, view, wire
-       * ID and the region of interest; the signal type is obtained from
+       * The information used from the wire are the channel ID, view
+       * and the region of interest; the signal type is obtained from
        * geometry.
        * 
        * Signal region, start and end ticks are extracted from the region of
@@ -444,6 +489,10 @@ namespace recob {
     
     /// Returns the number of hits currently in the collection
     size_t size() const { return hits->size(); }
+    
+    
+    /// Prepares the collection to host at least new_size hits
+    void reserve(size_t new_size) { if (hits) hits->reserve(new_size); }
     
     
     /**
