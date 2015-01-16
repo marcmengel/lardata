@@ -16,8 +16,7 @@
 
 // C/C++ standard library
 #include <vector>
-#include <algorithm> // std::equal()
-#include <iostream>
+#include <algorithm> // std::equal(), std::accumulate()
 
 
 // Boost libraries
@@ -33,12 +32,12 @@
 #define BOOST_TEST_MODULE ( hit_test )
 #include "boost/test/auto_unit_test.hpp" // BOOST_AUTO_TEST_CASE()
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
+#include <boost/test/floating_point_comparison.hpp> // BOOST_CHECK_CLOSE()
 
 // LArSoft libraries
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t, raw::TDCtick_t
 #include "SimpleTypesAndConstants/geo_types.h" // geo::View_t
-#include "Utilities/sparse_vector.h"
-#include "RecoBase/Wire.h"
+#include "RecoBase/Hit.h"
 
 
 
@@ -47,110 +46,314 @@
 //
 
 
-void CheckWire(
-  recob::Wire const& wire,
-  recob::Wire::RegionsOfInterest_t const& sigROIlist,
-  raw::ChannelID_t channel,
-  geo::View_t view
+void CheckHit(
+  recob::Hit const& hit,
+  raw::ChannelID_t          channel,
+  raw::TDCtick_t            start_tick,
+  raw::TDCtick_t            end_tick,
+  float                     peak_time,
+  float                     sigma_peak_time,
+  float                     rms,
+  float                     peak_amplitude,
+  float                     sigma_peak_amplitude,
+  float                     summedADC,
+  float                     hit_integral,
+  float                     hit_sigma_integral,
+  short int                 multiplicity,
+  short int                 local_index,
+  float                     goodness_of_fit,
+  int                       dof,
+  geo::View_t               view,
+  geo::SigType_t            signal_type,
+  geo::WireID               wireID,
+  std::vector<float> const& signal
 ) {
   
   // verify that the values are as expected
   // - channel ID
-  BOOST_CHECK_EQUAL(wire.Channel(), channel);
+  BOOST_CHECK_EQUAL(hit.Channel(), channel);
   
-  // - III.2.1 view
-  BOOST_CHECK_EQUAL(wire.View(), view);
+  // - view
+  BOOST_CHECK_EQUAL(hit.View(), view);
   
-  // - III.2.2 region of interest
-  BOOST_CHECK_EQUAL(wire.NSignal(), sigROIlist.size());
+  // - signal type
+  BOOST_CHECK_EQUAL(hit.SignalType(), signal_type);
   
-  recob::Wire::RegionsOfInterest_t const& wireROI = wire.SignalROI();
-  BOOST_CHECK_EQUAL(wireROI.n_ranges(), sigROIlist.n_ranges());
+  // - signal
+  BOOST_CHECK_EQUAL(hit.Signal().size(), signal.size());
   
-  unsigned int index = 0;
-  for (auto sample: wireROI) {
-    BOOST_CHECK_EQUAL(sample, sigROIlist[index++]);
-  }
+  auto const& hit_signal = hit.Signal(); // should be a vector of floats
+  BOOST_CHECK(std::equal(hit_signal.begin(), hit_signal.end(), signal.begin()));
   
-  // - III.2.3 other elements of interface
-  index = 0;
-  auto wire_signal = wire.Signal();
+  // - start and end tick
+  BOOST_CHECK_EQUAL(hit.StartTick(), start_tick);
+  BOOST_CHECK_EQUAL(hit.EndTick(), end_tick);
+  
+  // - peak
+  BOOST_CHECK_EQUAL(hit.PeakTime(), peak_time);
+  BOOST_CHECK_EQUAL(hit.SigmaPeakTime(), sigma_peak_time);
+  BOOST_CHECK_EQUAL(hit.PeakAmplitude(), peak_amplitude);
+  BOOST_CHECK_EQUAL(hit.SigmaPeakAmplitude(), sigma_peak_amplitude);
+  
+  // the following comparisons are at 0.01%
+  BOOST_CHECK_CLOSE(hit.PeakTimePlusRMS(), peak_time + rms, 0.01);
+  BOOST_CHECK_CLOSE(hit.PeakTimeMinusRMS(), peak_time - rms, 0.01);
+  
+  for (float shift: { 0.0, 0.5, 1.0, 1.5, 2.0, 2.2 }) {
+    
+    const float time_up   = peak_time + shift*rms;
+    const float time_down = peak_time - shift*rms;
+    
+    if (time_up == 0.) {
+      BOOST_CHECK_SMALL(hit.PeakTimePlusRMS(shift), 0.01F);
+      BOOST_CHECK_SMALL(hit.PeakTimeMinusRMS(-shift), 0.01F);
+    }
+    else {
+      BOOST_CHECK_CLOSE(hit.PeakTimePlusRMS(shift), time_up, 0.01F);
+      BOOST_CHECK_CLOSE(hit.PeakTimeMinusRMS(-shift), time_up, 0.01F);
+    }
+    
+    if (time_down == 0.) {
+      BOOST_CHECK_SMALL(hit.PeakTimePlusRMS(shift), 0.01F);
+      BOOST_CHECK_SMALL(hit.PeakTimeMinusRMS(-shift), 0.01F);
+    }
+    else {
+      BOOST_CHECK_CLOSE(hit.PeakTimeMinusRMS(shift), time_down, 0.01F);
+      BOOST_CHECK_CLOSE(hit.PeakTimePlusRMS(-shift), time_down, 0.01F);
+    }
+    
+    if (rms > 0.) {
+      if (shift == 0.) {
+        BOOST_CHECK_SMALL(hit.TimeDistanceAsRMS(time_up), 0.01F);
+        BOOST_CHECK_SMALL(hit.TimeDistanceAsRMS(time_down), 0.01F);
+      }
+      else {
+        BOOST_CHECK_CLOSE(hit.TimeDistanceAsRMS(time_up), shift, 0.01F);
+        BOOST_CHECK_CLOSE(hit.TimeDistanceAsRMS(time_down), -shift, 0.01F);
+      }
+    } // if rms is not 0
+    
+  } // for
+  
+  // - width
+  BOOST_CHECK_EQUAL(hit.RMS(), rms);
+  
+  // - charge
+  BOOST_CHECK_EQUAL(hit.SummedADC(), summedADC);
+  BOOST_CHECK_EQUAL(hit.Integral(), hit_integral);
+  BOOST_CHECK_EQUAL(hit.SigmaIntegral(), hit_sigma_integral);
+  
+  // - multiplicity
+  BOOST_CHECK_EQUAL(hit.Multiplicity(), multiplicity);
+  BOOST_CHECK_EQUAL(hit.LocalIndex(), local_index);
   BOOST_CHECK
-    (std::equal(wire_signal.begin(), wire_signal.end(), sigROIlist.cbegin()));
+    ((hit.LocalIndex() < hit.Multiplicity()) || (hit.LocalIndex() == -1));
   
-} // CheckWire()
+  // - fit quality
+  BOOST_CHECK_EQUAL(hit.GoodnessOfFit(), goodness_of_fit);
+  BOOST_CHECK_EQUAL(hit.DegreesOfFreedom(), dof);
+  
+  // - wire ID
+  BOOST_CHECK_EQUAL(hit.WireID(), wireID);
+  
+} // CheckHit()
 
 
-void WireTestDefaultConstructor() {
+void HitTestDefaultConstructor() {
   
   //
   // Part I: initialization of wire inputs
   //
   // these are the values expected for a default-constructed wire
-  raw::ChannelID_t channel = raw::InvalidChannelID;
-  geo::View_t view = geo::kUnknown;
-  recob::Wire::RegionsOfInterest_t sigROIlist;
+  raw::ChannelID_t   channel               =    raw::InvalidChannelID;
+  raw::TDCtick_t     start_tick            =    0;
+  raw::TDCtick_t     end_tick              =    0;
+  float              peak_time             =    0.0;
+  float              sigma_peak_time       =   -1.0;
+  float              rms                   =    0.0;
+  float              peak_amplitude        =    0.0;
+  float              sigma_peak_amplitude  =   -1.0;
+  float              summedADC             =    0.0;
+  float              hit_integral          =    0.0;
+  float              hit_sigma_integral    =   -1.0;
+  short int          multiplicity          =    0;
+  short int          local_index           =   -1;
+  float              goodness_of_fit       =    0.0;
+  int                dof                   =   -1;
+  geo::View_t        view                  =    geo::kUnknown;
+  geo::SigType_t     signal_type           =    geo::kMysteryType;
+  geo::WireID        wireID;
+  std::vector<float> signal;
   
   //
   // Part II: default constructor
   //
-  // step II.1: create a wire with the signal-copying constructor
-  recob::Wire wire;
-  
+  // step II.1: create a hit with the default constructor
+  recob::Hit hit;
   
   // step II.2: verify that the values are as expected
-  CheckWire(wire, sigROIlist, channel, view);
+  CheckHit(hit,
+    channel,
+    start_tick,
+    end_tick,
+    peak_time,
+    sigma_peak_time,
+    rms,
+    peak_amplitude,
+    sigma_peak_amplitude,
+    summedADC,
+    hit_integral,
+    hit_sigma_integral,
+    multiplicity,
+    local_index,
+    goodness_of_fit,
+    dof,
+    view,
+    signal_type,
+    wireID,
+    signal
+    );
   
-} // WireTestDefaultConstructor()
+} // HitTestDefaultConstructor()
 
 
-void WireTestCustomConstructors() {
+void HitTestCustomConstructors() {
   
   //
   // Part I: initialization of wire inputs
   //
-  raw::ChannelID_t channel = 12;
-  geo::View_t view = geo::kV;
-  
-  recob::Wire::RegionsOfInterest_t sigROIlist(20);
-  sigROIlist.add_range
-    (5, recob::Wire::RegionsOfInterest_t::vector_t({ 5., 6., 7. }));
-  sigROIlist.add_range
-    (11, recob::Wire::RegionsOfInterest_t::vector_t({ 11., 12., 13., 14. }));
-  
-  // this is not a recob::Wire test, but I want to make sure anyway...
-  BOOST_CHECK_EQUAL(sigROIlist.size(), 20U);
-  BOOST_CHECK_EQUAL(sigROIlist.n_ranges(), 2U);
-  size_t index = 0;
-  for (auto sample: sigROIlist) {
-    BOOST_CHECK((sample == (float) index) || (sample == 0.));
-    ++index;
-  } // for
+  // these are the values expected for a default-constructed wire
+  raw::ChannelID_t   channel               =    raw::InvalidChannelID;
+  std::vector<float> signal({
+      0.2,   1.2,   1.5,   2.0,   4.7,
+     12.8,  30.7,  85.2, 132.1, 154.7,
+    147.4, 127.0,  86.7,  29.3,  11.8,
+      4.5,   2.2,   1.5,   1.0,   0.3,
+    });
+  raw::TDCtick_t     start_tick            =  730;
+  raw::TDCtick_t     end_tick              = start_tick + signal.size();
+  float              peak_time             = start_tick + signal.size()/2 + 0.7;
+  float              sigma_peak_time       =    1.3;
+  float              rms                   = signal.size() / 2.7;
+  float              peak_amplitude        = signal[signal.size()/2] - 0.3;
+  float              sigma_peak_amplitude  =    2.3;
+  float              summedADC
+    = std::accumulate(signal.begin(), signal.end(), 0.0);
+  float              hit_integral          = summedADC * 0.97;
+  float              hit_sigma_integral    = peak_amplitude / 10.;
+  short int          multiplicity          =    2;
+  short int          local_index           =    1;
+  float              goodness_of_fit       =    0.95;
+  int                dof                   = signal.size() - 3;
+  geo::View_t        view                  =    geo::kU;
+  geo::SigType_t     signal_type           =    geo::kCollection;
+  geo::WireID        wireID(0, 1, 2, 546);
   
   
   //
-  // Part II: constructor with signal copy
+  // Part II: signal-copying constructor
   //
-  // step II.1: create a wire with the signal-copying constructor
-  recob::Wire wire1(sigROIlist, channel, view);
-  
+  // step II.1: create a hit with the signal-copying constructor
+  recob::Hit hit1(
+    channel,
+    start_tick,
+    end_tick,
+    peak_time,
+    sigma_peak_time,
+    rms,
+    peak_amplitude,
+    sigma_peak_amplitude,
+    summedADC,
+    hit_integral,
+    hit_sigma_integral,
+    multiplicity,
+    local_index,
+    goodness_of_fit,
+    dof,
+    view,
+    signal_type,
+    wireID,
+    signal
+    );
   
   // step II.2: verify that the values are as expected
-  CheckWire(wire1, sigROIlist, channel, view);
+  CheckHit(hit1,
+    channel,
+    start_tick,
+    end_tick,
+    peak_time,
+    sigma_peak_time,
+    rms,
+    peak_amplitude,
+    sigma_peak_amplitude,
+    summedADC,
+    hit_integral,
+    hit_sigma_integral,
+    multiplicity,
+    local_index,
+    goodness_of_fit,
+    dof,
+    view,
+    signal_type,
+    wireID,
+    signal
+    );
   
   
   //
-  // Part III: constructor with signal move
+  // Part III: signal-moving constructor
   //
-  // step III.1: create a wire with the signal-copying constructor
-  recob::Wire::RegionsOfInterest_t sigROIlistCopy(sigROIlist); // need a copy for check
-  recob::Wire wire2(std::move(sigROIlistCopy), channel, view);
+  // step III.1: create a hit with the signal-moving constructor
+  std::vector<float> signal_copy(signal);
+  recob::Hit hit2(
+    channel,
+    start_tick,
+    end_tick,
+    peak_time,
+    sigma_peak_time,
+    rms,
+    peak_amplitude,
+    sigma_peak_amplitude,
+    summedADC,
+    hit_integral,
+    hit_sigma_integral,
+    multiplicity,
+    local_index,
+    goodness_of_fit,
+    dof,
+    view,
+    signal_type,
+    wireID,
+    std::move(signal_copy)
+    );
   
   // step III.2: verify that the values are as expected
-  CheckWire(wire2, sigROIlist, channel, view);
+  CheckHit(hit2,
+    channel,
+    start_tick,
+    end_tick,
+    peak_time,
+    sigma_peak_time,
+    rms,
+    peak_amplitude,
+    sigma_peak_amplitude,
+    summedADC,
+    hit_integral,
+    hit_sigma_integral,
+    multiplicity,
+    local_index,
+    goodness_of_fit,
+    dof,
+    view,
+    signal_type,
+    wireID,
+    signal
+    );
   
+  // step III.3: verify that the values were actually moved
+  BOOST_CHECK(signal_copy.empty());
   
-} // WireTestCustomConstructors()
+} // HitTestCustomConstructors()
 
 
 //------------------------------------------------------------------------------
@@ -162,10 +365,10 @@ void WireTestCustomConstructors() {
 // number of checks and it will fail if any of them does.
 //
 
-BOOST_AUTO_TEST_CASE(WireDefaultConstructor) {
-  WireTestDefaultConstructor();
+BOOST_AUTO_TEST_CASE(HitDefaultConstructor) {
+  HitTestDefaultConstructor();
 }
 
-BOOST_AUTO_TEST_CASE(WireCustomConstructors) {
-  WireTestCustomConstructors();
+BOOST_AUTO_TEST_CASE(HitCustomConstructors) {
+  HitTestCustomConstructors();
 }

@@ -139,15 +139,18 @@ void RawDigitTestCustomConstructors() {
   
   
   //
-  // Part II: constructor with signal copy
+  // Part III: constructor with signal move
   //
-  // step II.1: create a wire with the signal-copying constructor
+  // step III.1: create a wire with the signal-moving constructor
   std::vector<short> buffer_copy(buffer);
   raw::RawDigit digits2
     (channel, samples, std::move(buffer_copy), compression /*, flags */);
   
-  // step II.2: verify that the values are as expected
+  // step III.2: verify that the values are as expected
   CheckRawDigit(digits2, channel, samples, adclist, compression);
+  
+  // step III.3: verify that the data was actually moved
+  BOOST_CHECK(buffer_copy.empty());
   
 } // RawDigitTestCustomConstructors()
 

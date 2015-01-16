@@ -57,10 +57,10 @@ void CheckWire(
   // - channel ID
   BOOST_CHECK_EQUAL(wire.Channel(), channel);
   
-  // - III.2.1 view
+  // - view
   BOOST_CHECK_EQUAL(wire.View(), view);
   
-  // - III.2.2 region of interest
+  // - region of interest
   BOOST_CHECK_EQUAL(wire.NSignal(), sigROIlist.size());
   
   recob::Wire::RegionsOfInterest_t const& wireROI = wire.SignalROI();
@@ -71,9 +71,8 @@ void CheckWire(
     BOOST_CHECK_EQUAL(sample, sigROIlist[index++]);
   }
   
-  // - III.2.3 other elements of interface
-  index = 0;
-  auto wire_signal = wire.Signal();
+  // - other elements of interface
+  auto const& wire_signal = wire.Signal();
   BOOST_CHECK
     (std::equal(wire_signal.begin(), wire_signal.end(), sigROIlist.cbegin()));
   
@@ -93,7 +92,7 @@ void WireTestDefaultConstructor() {
   //
   // Part II: default constructor
   //
-  // step II.1: create a wire with the signal-copying constructor
+  // step II.1: create a wire with the default constructor
   recob::Wire wire;
   
   
@@ -148,6 +147,8 @@ void WireTestCustomConstructors() {
   // step III.2: verify that the values are as expected
   CheckWire(wire2, sigROIlist, channel, view);
   
+  // step III.3: verify that the values were actually moved
+  BOOST_CHECK(sigROIlistCopy.empty());
   
 } // WireTestCustomConstructors()
 
