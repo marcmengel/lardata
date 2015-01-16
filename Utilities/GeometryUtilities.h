@@ -187,14 +187,14 @@ namespace util{
 			    const PxPoint *p1,
 			    PxPoint &pN) const;
     
-    art::Ptr< recob::Hit > FindClosestHitPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
+  /*  art::Ptr< recob::Hit > FindClosestHitPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
                                                  unsigned int wirein,
                                                  double timein) const;			    
 
 						 
     recob::Hit * FindClosestHit(std::vector<art::Ptr< recob::Hit > > hitlist,
                                                  unsigned int wirein,
-                                                 double timein) const;                                              
+                                                 double timein) const;             */                                 
 	
     util::PxHit  FindClosestHit(std::vector<util::PxHit >  hitlist,
                                                  unsigned int wirein,
@@ -205,13 +205,13 @@ namespace util{
                                                  double timein) const;						 
 						 
 						 
-    void SelectLocalHitlist(std::vector< art::Ptr < recob::Hit> > hitlist, 
-                                             std::vector < art::Ptr<recob::Hit> > &hitlistlocal, 
-                                             double  wire_start,
-                                             double time_start, 
-                                             double linearlimit,   
-                                             double ortlimit, 
-                                             double lineslopetest);
+//     void SelectLocalHitlist(std::vector< art::Ptr < recob::Hit> > hitlist, 
+//                                              std::vector < art::Ptr<recob::Hit> > &hitlistlocal, 
+//                                              double  wire_start,
+//                                              double time_start, 
+//                                              double linearlimit,   
+//                                              double ortlimit, 
+//                                              double lineslopetest);
 					 
 /*    void SelectLocalHitlist(std::vector< util::PxHit > hitlist, 
                                              std::vector < util::PxHit > &hitlistlocal, 

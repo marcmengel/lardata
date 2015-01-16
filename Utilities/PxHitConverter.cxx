@@ -41,22 +41,17 @@ namespace util {
 		             util::PxHit &pxhit) const
 	{
 	
-    art::ServiceHandle<geo::Geometry>  geo;
-    art::ServiceHandle<util::DetectorProperties> detp;
-    art::ServiceHandle<util::LArProperties> larp;
-    //util::GeometryUtilities  gser;
-    double fWirePitch = geo->WirePitch(0,1,0);
-    double fTimeTick=detp->SamplingRate()/1000.; 
-    double fDriftVelocity=larp->DriftVelocity(larp->Efield(),larp->Temperature());
+   
+  
+  
+    util::GeometryUtilities  gser;
     
-    double fWireToCm=fWirePitch;
-    double fTimeToCm=fTimeTick*fDriftVelocity;
      
      
     UChar_t plane = hit->WireID().Plane;
 	 
-    pxhit.t = hit->PeakTime() * fTimeToCm;
-    pxhit.w = hit->WireID().Wire     * fWireToCm;
+    pxhit.t = hit->PeakTime() * gser.TimeToCm();
+    pxhit.w = hit->WireID().Wire     * gser.WireToCm();
 
     pxhit.charge = hit->Charge();
     pxhit.peak   = hit->Charge(true);

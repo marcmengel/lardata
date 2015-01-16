@@ -15,8 +15,8 @@
 
 #include "PxUtils.h"
 #include "Geometry/Geometry.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/DetectorProperties.h"
+//#include "Utilities/LArProperties.h"
+#include "Utilities/GeometryUtilities.h"
 #include "Utilities/UtilException.h"
 //#include "time.h"
 

@@ -10,7 +10,7 @@
 
 #include "GeometryUtilities.h"
 #include "messagefacility/MessageLogger/MessageLogger.h" 
-#include "PxHitConverter.h"
+//#include "PxHitConverter.h"
 
 
 namespace util{
@@ -1356,15 +1356,15 @@ namespace util{
   // 
   ////////////////////////////////////////////////
 
-  recob::Hit * GeometryUtilities::FindClosestHit(std::vector<art::Ptr< recob::Hit > > hitlist,
-                                                 unsigned int wirein,
-                                                 double timein) const
-  {
-    art::Ptr<recob::Hit> nearHit=FindClosestHitPtr(hitlist,wirein,timein);
-//   min_length_from_start=dist_mod;
-    return const_cast<recob::Hit *> (nearHit.get());    
-
-  }
+//   recob::Hit * GeometryUtilities::FindClosestHit(std::vector<art::Ptr< recob::Hit > > hitlist,
+//                                                  unsigned int wirein,
+//                                                  double timein) const
+//   {
+//     art::Ptr<recob::Hit> nearHit=FindClosestHitPtr(hitlist,wirein,timein);
+// //   min_length_from_start=dist_mod;
+//     return const_cast<recob::Hit *> (nearHit.get());    
+// 
+//   }
 
   
   
@@ -1372,21 +1372,21 @@ namespace util{
   // 
   ////////////////////////////////////////////////
 
-  art::Ptr< recob::Hit > GeometryUtilities::FindClosestHitPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
-                                                 unsigned int wirein,
-                                                 double timein) const
-
-  {
-
-    PxHitConverter PxC;
-    std::vector <util::PxHit> pxhits;
-    PxC.GeneratePxHit(hitlist,pxhits);
-
-    
-    
-    return hitlist[FindClosestHitIndex(pxhits,wirein,timein)];    
-
-  }
+//   art::Ptr< recob::Hit > GeometryUtilities::FindClosestHitPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
+//                                                  unsigned int wirein,
+//                                                  double timein) const
+// 
+//   {
+// 
+//     PxHitConverter PxC;
+//     std::vector <util::PxHit> pxhits;
+//     PxC.GeneratePxHit(hitlist,pxhits);
+// 
+//     
+//     
+//     return hitlist[FindClosestHitIndex(pxhits,wirein,timein)];    
+// 
+//   }
 
   
    util::PxHit GeometryUtilities::FindClosestHit(std::vector<util::PxHit >  hitlist,
@@ -1439,7 +1439,7 @@ namespace util{
   
   
   
-  
+/*  
   void GeometryUtilities::SelectLocalHitlist(std::vector< art::Ptr < recob::Hit> > hitlist, 
                                              std::vector < art::Ptr<recob::Hit> > &hitlistlocal, 
                                              double  wire_start,
@@ -1468,7 +1468,7 @@ namespace util{
       
     }
   }
-  
+  */
   
   
   
