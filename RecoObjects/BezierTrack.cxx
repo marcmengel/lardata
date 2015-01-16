@@ -1200,24 +1200,17 @@ namespace trkf {
     const double s = ds / GetLength();
     const size_t n_traj_pts = (size_t)(GetLength()/ds);
 
-    xyzVector.resize(n_traj_pts+1);
-    dirVector.resize(n_traj_pts+1);
+    //+2: evenly space points, plus one for start and one for end
+    xyzVector.resize(n_traj_pts+2);
+    dirVector.resize(n_traj_pts+2);
 
-    std::cout << "ds = " << ds << " len = " << GetLength() << " n_traj_pts = " << n_traj_pts << " s=" << s << std::endl;
-    
-    xyzVector[0] = this->GetTrackPointV(0.);
-    xyzVector[0] = this->GetTrackDirectionV(0.);
-
-    for(size_t i_traj=1; i_traj<=n_traj_pts; i_traj++){
+    for(size_t i_traj=0; i_traj<=n_traj_pts; i_traj++){
       xyzVector[i_traj] = this->GetTrackPointV(i_traj*s);
       dirVector[i_traj] = this->GetTrackDirectionV(i_traj*s);
-      
-      if(i_traj>=(n_traj_pts-1)) std::cout << "\t" << i_traj << " " << i_traj*s << std::endl;
-      
     }
 
     xyzVector[n_traj_pts+1] = this->GetTrackPointV(1.);
-    xyzVector[n_traj_pts+1] = this->GetTrackDirectionV(1.);
+    dirVector[n_traj_pts+1] = this->GetTrackDirectionV(1.);
 
 
   }
