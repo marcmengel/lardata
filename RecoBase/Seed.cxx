@@ -341,4 +341,34 @@ namespace recob{
     out2 = (x3*y1-x1*y3);
     out3 = (x1*y2-x2*y1);
   }
+
+  //----------------------------------------------------------------------
+  std::ostream& operator<< (std::ostream& o, Seed const& a)
+  {
+    o << "Printing seed contents : " 
+      << a.fSeedPoint[0] << " " 
+      << a.fSeedPoint[1] << " " 
+      << a.fSeedPoint[2] << ", " 
+      << a.fSeedDirection[0] << " "
+      << a.fSeedDirection[1] << " "
+      << a.fSeedDirection[2];
+
+    return o;
+  }
+
+  //----------------------------------------------------------------------
+  // < operator.
+  //
+  bool operator < (const Seed & a, const Seed & b)
+  {
+    if      (a.fSeedPoint[2] != b.fSeedPoint[2])
+      return a.fSeedPoint[2] < b.fSeedPoint[2];
+    else if (a.fSeedPoint[1] != b.fSeedPoint[1])
+      return a.fSeedPoint[1] < b.fSeedPoint[1];
+
+      return a.fSeedPoint[0] < b.fSeedPoint[0];
+
+  }
+
+
 }
