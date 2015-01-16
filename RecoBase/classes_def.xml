@@ -36,8 +36,8 @@
   <version ClassVersion="12" checksum="1065754987"/>
   <version ClassVersion="11" checksum="1332843380"/>
  </class>
- <class name="recob::Shower"           ClassVersion="11"	       	       		      >
-     <version ClassVersion="11" checksum="1998712487"/>
+ <class name="recob::Shower"           ClassVersion="12"	       	       		      >
+  <version ClassVersion="12" checksum="652922075"/>
  </class>
  <class name="recob::Track"            ClassVersion="14"	       	       		      >
   <version ClassVersion="14" checksum="2345363916"/>
