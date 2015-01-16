@@ -43,7 +43,7 @@ namespace recob {
   WireCreator::WireCreator
     (RegionsOfInterest_t&& sigROIlist, const raw::RawDigit& rawdigit):
     wire(
-      sigROIlist,
+      std::move(sigROIlist),
       rawdigit.Channel(),
       art::ServiceHandle<geo::Geometry>()->View(rawdigit.Channel())
     )
@@ -68,7 +68,7 @@ namespace recob {
     raw::ChannelID_t channel,
     geo::View_t view
     ):
-    wire(sigROIlist, channel, view)
+    wire(std::move(sigROIlist), channel, view)
     {}
 
 } // namespace recob

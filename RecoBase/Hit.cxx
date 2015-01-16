@@ -1,10 +1,10 @@
-////////////////////////////////////////////////////////////////////////
-// \version $Id: Hit.cxx,v 1.7 2010/02/15 20:32:46 brebel Exp $
-//
-// \brief Definition of Hit reconstruction object
-//
-// \author mitchell.soderberg@yale.edu
-////////////////////////////////////////////////////////////////////////
+/** ****************************************************************************
+ * @file Hit.cxx
+ * @brief Definition of signal hit object.
+ * @author mitchell.soderberg@yale.edu
+ * @see  Hit.h
+ * 
+ * ****************************************************************************/
 
 // Hit header
 #include "RecoBase/Hit.h"
@@ -12,10 +12,11 @@
 // C/C++ standard library
 #include <iomanip>
 #include <ostream>
+#include <utility> // std::move()
 
 
 namespace recob {
-
+  
   //----------------------------------------------------------------------
   Hit::Hit()
     : fHitSignal() // empty
@@ -36,7 +37,7 @@ namespace recob {
     , fNDF(-1)
     , fView(geo::kUnknown)
     , fSignalType(geo::kMysteryType)
-    , fWireID() // uinvalid
+    , fWireID() // invalid
     {}
   
   //----------------------------------------------------------------------
@@ -104,7 +105,7 @@ namespace recob {
     geo::WireID             wireID,
     std::vector<float>&&    signal
     )
-    : fHitSignal(signal)
+    : fHitSignal(std::move(signal))
     , fChannel(channel)
     , fStartTick(start_tick)
     , fEndTick(end_tick)
