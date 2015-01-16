@@ -8,6 +8,9 @@
 
 #include "RecoBase/Wire.h"
 
+// C/C++ standard libraries
+#include <utility> // std::move()
+
 namespace recob{
 
   //----------------------------------------------------------------------
@@ -36,7 +39,7 @@ namespace recob{
     )
     : fChannel(channel)
     , fView(view)
-    , fSignalROI(sigROIlist)
+    , fSignalROI(std::move(sigROIlist))
     {}
 
 

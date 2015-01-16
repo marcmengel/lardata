@@ -560,6 +560,9 @@ class sparse_vector {
 	/// Returns the size of the vector
 	size_type size() const { return nominal_size; }
 	
+	/// Returns whether the vector is empty
+	bool empty() const { return size() == 0; }
+	
 	/// Returns the capacity of the vector (compatibility only)
 	size_type capacity() const { return nominal_size; }
 	
