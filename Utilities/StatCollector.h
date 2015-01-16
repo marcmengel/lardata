@@ -3,8 +3,11 @@
  * @brief   Clasess gathering simple statistics
  * @author  Gianluca Petrillo (petrillo@fnal.gov)
  * @date    December 23rd, 2014
+ *
+ * Currently includes:
+ *  - MinMaxCollector to extract data range
+ *  - StatCollector to extract simple statistics (average, RMS etc.)
  * 
- * @todo Need a unit test!
  */
 
 #ifndef STATCOLLECTOR_H
@@ -13,17 +16,31 @@
 // C/C++ standard libraries
 #include <cmath> // std::sqrt()
 #include <limits> // std::numeric_limits<>
-#include <algorithm> // std::for_each()
 #include <initializer_list>
+#include <iterator> // std::begin(), std::end()
+#include <utility> // std::forward()
+#include <algorithm> // std::for_each()
 #include <stdexcept> // std::range_error
 
 
 namespace lar {
   namespace util {
     
+    
     /// Returns the square of the specified value
     template <typename T>
     inline T sqr(T const& v) { return v*v; }
+    
+    
+    /// A unary functor returning its own argument (any type)
+    struct identity {
+      template<typename T>
+      constexpr auto operator()(T&& v) const noexcept
+        -> decltype(std::forward<T>(v))
+      {
+        return std::forward<T>(v);
+      } // operator()
+    }; // class identity
     
     
     /** ************************************************************************
@@ -40,7 +57,22 @@ namespace lar {
      *     std::cout << "Statistics from " << stat.N() << " entries: "
      *       << stat.Average() << std::endl;
      *     
-     * that should print: "Statistics from 3 entries: 3.8".
+     * or also
+     *     std::vector<std::pair<double, double>> values({
+     *       { 3.0, 2.0 },
+     *       { 4.0, 2.0 },
+     *       { 5.0, 1.0 },
+     *       });
+     *     lar::util::StatCollector<double> stat;
+     *     stat.add_weighted(values.begin(), values.end());
+     *     std::cout << "Statistics from " << stat.N() << " entries: "
+     *       << stat.Average() << std::endl;
+     *     
+     * that should both print: "Statistics from 3 entries: 3.8".
+     * 
+     * Other functions are available allowing addition of weighted and
+     * unweighted data from collections.
+     * For additional examples, see the unit test StatCollector_test.cc .
      */
     template <typename T, typename W = T>
     class StatCollector {
@@ -51,8 +83,137 @@ namespace lar {
       
       // default constructor, destructor and all the rest
       
+      /// @{
+      /// @name Add elements
+      
       /// Adds one entry with specified value and weight
       void add(Data_t value, Weight_t weight = Weight_t(1.0));
+      
+      /**
+       * @brief Adds entries from a sequence with weight 1
+       * @tparam Iter forward iterator to the elements to be added
+       * @param begin iterator pointing to the first element to be added
+       * @param end iterator pointing after the last element to be added
+       * 
+       * The value pointed by the iterator must be convertible to the Data_t
+       * type.
+       */
+      template <typename Iter>
+      void add_unweighted(Iter begin, Iter end)
+        {  add_unweighted(begin, end, identity()); }
+      
+      /**
+       * @brief Adds entries from a sequence with weight 1
+       * @tparam Iter forward iterator to the elements to be added
+       * @tparam Pred a predicate to extract the element from iterator value
+       * @param begin iterator pointing to the first element to be added
+       * @param end iterator pointing after the last element to be added
+       * @param extractor the predicate extracting the value to be inserted
+       *
+       * The predicate is required to react to a call like with:
+       *     
+       *     Data_t Pred::operator() (typename Iter::value_type);
+       *     
+       */
+      template <typename Iter, typename Pred>
+      void add_unweighted(Iter begin, Iter end, Pred extractor);
+      
+      /**
+       * @brief Adds all entries from a container, with weight 1
+       * @tparam Cont type of container of the elements to be added
+       * @tparam Pred a predicate to extract the element from iterator value
+       * @param cont container of the elements to be added
+       * @param extractor the predicate extracting the value to be inserted
+       * 
+       * The predicate is required to react to a call like with:
+       *     
+       *     Data_t Pred::operator() (typename Cont::value_type);
+       *     
+       * The container must support the range-based for loop syntax, that is
+       * is must have std::begin<Cont>() and std::end<Cont>() defined.
+       */
+      template <typename Cont, typename Pred>
+      void add_unweighted(Cont cont, Pred extractor)
+        { add_unweighted(std::begin(cont), std::end(cont), extractor); }
+      
+      /**
+       * @brief Adds all entries from a container, with weight 1
+       * @tparam Cont type of container of the elements to be added
+       * @param cont container of the elements to be added
+       * 
+       * The container must support the range-based for loop syntax, that is
+       * is must have std::begin<Cont>() and std::end<Cont>() defined.
+       * The value in the container must be convertible to the Data_t type.
+       */
+      template <typename Cont>
+      void add_unweighted(Cont cont)
+        { add_unweighted(std::begin(cont), std::end(cont)); }
+      
+      
+      /**
+       * @brief Adds entries from a sequence with individually specified weights
+       * @tparam VIter forward iterator to the elements to be added
+       * @tparam WIter forward iterator to the weights
+       * @tparam VPred a predicate to extract the element from iterator value
+       * @tparam WPred a predicate to extract the weight from iterator value
+       * @param begin_value iterator pointing to the first element to be added
+       * @param end_value iterator pointing after the last element to be added
+       * @param begin_weight iterator pointing to the weight of first element
+       * @param value_extractor predicate extracting the value to be inserted
+       * @param weight_extractor predicate extracting the value to be inserted
+       * 
+       * Each value is added with the weight pointed by the matching element in
+       * the list pointed by begin_weight: the element `*(begin_value)` will
+       * have weight `*(begin_weight)`, the next element `*(begin_value + 1)`
+       * will have weight `*(begin_weight + 1)`, etc.
+       * 
+       * The predicates are required to react to a call like with:
+       *     
+       *     Data_t VPred::operator() (typename VIter::value_type);
+       *     Weight_t WPred::operator() (typename WIter::value_type);
+       *     
+       */
+      template <
+        typename VIter, typename WIter,
+        typename VPred, typename WPred = identity
+        >
+      void add_weighted(
+        VIter begin_value, VIter end_value,
+        WIter begin_weight,
+        VPred value_extractor,
+        WPred weight_extractor = WPred()
+        );
+      
+      
+      /**
+       * @brief Adds entries from a sequence with individually specified weights
+       * @tparam Iter forward iterator to (value, weight) pairs to be added
+       * @param begin iterator pointing to the first element to be added
+       * @param end iterator pointing after the last element to be added
+       * 
+       * The value pointed by the iterator must be a pair with first element
+       * convertible to the Data_t and the second element convertible to
+       * Weight_t.
+       * For more complicate structures, use the version with two predicates
+       * (using the weight iterator the same as the value iterator).
+       */
+      template <typename Iter>
+      void add_weighted(Iter begin, Iter end);
+      
+      /**
+       * @brief Adds entries from a sequence with individually specified weights
+       * @tparam Cont type of container of (value, weight) pairs to be added
+       * @param cont container of (value, weight) pairs to be added
+       * 
+       * The values in the container must be pairs with first element
+       * convertible to the Data_t and the second element convertible to
+       * Weight_t.
+       */
+      template <typename Cont>
+      void add_weighted(Cont cont)
+        { add_weighted(std::begin(cont), std::end(cont)); }
+      
+      ///@}
       
       /// Clears all the statistics
       void clear();
@@ -93,6 +254,14 @@ namespace lar {
        * @throws std::range_error if RMS2() is negative (due to rounding errors)
        */
       Weight_t RMS() const;
+      
+      
+      /**
+       * @brief Returns the arithmetic average of the weights
+       * @return the weight average
+       * @throws std::range_error if no entry was added
+       */
+      Weight_t AverageWeight() const;
       
       /// @}
       
@@ -218,6 +387,42 @@ void lar::util::StatCollector<T, W>::add
 
 
 template <typename T, typename W>
+template <typename Iter, typename Pred>
+void lar::util::StatCollector<T, W>::add_unweighted
+  (Iter begin, Iter end, Pred extractor)
+{
+  std::for_each
+    (begin, end, [this, extractor](auto item) { this->add(extractor(item)); });
+} // StatCollector<T, W>::add_unweighted(Iter, Iter, Pred)
+
+
+template <typename T, typename W>
+template <typename VIter, typename WIter, typename VPred, typename WPred>
+void lar::util::StatCollector<T, W>::add_weighted(
+  VIter begin_value, VIter end_value,
+  WIter begin_weight,
+  VPred value_extractor,
+  WPred weight_extractor /* = WPred() */
+) {
+  while (begin_value != end_value) {
+    add(value_extractor(*begin_value), weight_extractor(*begin_weight));
+    ++begin_value;
+    ++begin_weight;
+  } // while
+} // StatCollector<T, W>::add_weighted(VIter, VIter, WIter, VPred, WPred)
+
+
+template <typename T, typename W>
+template <typename Iter>
+void lar::util::StatCollector<T, W>::add_weighted(Iter begin, Iter end) {
+  
+  std::for_each(begin, end, [this](auto p) { this->add(p.first, p.second); });
+  
+} // StatCollector<T, W>::add_weighted(Iter, Iter)
+
+
+
+template <typename T, typename W>
 void lar::util::StatCollector<T, W>::clear() {
   n = 0;
   w = 0.;
@@ -256,6 +461,16 @@ typename lar::util::StatCollector<T, W>::Weight_t
     throw std::range_error("StatCollector<>::RMS(): negative RMS^2");
   return std::sqrt(rms2);
 } // StatCollector<T, W>::RMS()
+
+
+template <typename T, typename W>
+typename lar::util::StatCollector<T, W>::Weight_t
+  lar::util::StatCollector<T, W>::AverageWeight() const
+{
+  if (N() == 0)
+    throw std::range_error("StatCollector<>::AverageWeight(): divide by 0");
+  return Weights() / N();
+} // StatCollector<T, W>::AverageWeight()
 
 
 
