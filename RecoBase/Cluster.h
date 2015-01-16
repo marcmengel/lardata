@@ -48,16 +48,25 @@ namespace recob {
    * In the extreme case the "end" should be considered just as an alternative
    * cluster start.
    * 
-   * @note Some quantities are expressed in "homogenized" units.
-   * A cluster lives in a plane of inhomogeneous coordinates: wire number and
-   * tick number. Different ways to make them homogeneous are available.
+   * @note A cluster lives in a plane of inhomogeneous coordinates: wire number
+   * and tick number. Different ways to make them homogeneous are available.
    * For example, knowing the drift velocity (assuming it constant) and the wire
    * pitch, it is possible to convert both coordinates in a measure of distance.
-   * The simpler approach used here is to equalize one wire spacing with one
-   * tick. This approach does not reflect the physical dimensions of the cluster
-   * in standard metrics (e.g. centimetres), but it is simple, immediate and
-   * requires much less restrictive hypotheses (uniformity of spacing in both
-   * wire and tick, as opposed to uniformity of drift velocity).
+   * Where the wire and time coordinates need to be compared, they are
+   * converted into physical distances. Wire coordinate includes the wire pitch
+   * information and it can be defined as the distance (in centimetres) from the
+   * wire #0 (and negative if it lies on the opposite side than wire #0 with
+   * respect to wire #0) of the point. The tick coordinate is converted into
+   * a distance from the wire plane (in centimetres) by including the drift
+   * velocity. The absolute time for which this coordinate is 0 is defined to
+   * be as an "absolute trigger time". This is still ambiguous enough, but
+   * matter of fact there should be no need of absolute wire or tick coordinates
+   * but only of their difference; for example, to define angles, dT/dW (or some
+   * similar quantity) is used.
+   * More advanced knowledge of the geometry or status of the detector may lead
+   * to different wire pitch or drift velocity: in that case, these quantities
+   * need to be recomputed, although it is conceivable that the ones with simple
+   * constant pitch and drift are often an approximation close enough.
    */
   class Cluster {
       
@@ -102,13 +111,19 @@ namespace recob {
       float fEndCharges[NEnds];
       
       /// Angle of the start and end of the cluster, defined in [-pi,pi]
-      /// and so that tan(angle) = dT/dW (or, more precisely, angle = atan2(dT, dW).
-      /// The elements are expressed in homogenized units.
+      /// and so that tan(angle) = dT/dW (or, more precisely, `angle = atan2(dT, dW)`).
+      /// The elements are expressed in physical distances and therefore this
+      /// represents a physical angle on the plane orthogonal to the wires in
+      /// the view and containing the drift direction ("x"); the angle is 0 or
+      /// @f$ \pi @f$ when lying on the wire plane, @f$ \pm\pi/2 @f$ when
+      /// pointing into/from the wire plane.
       /// Index is intended to be of type ClusterEnds_t.
       float fAngles[NEnds];
       
       /// Opening angle of the cluster shape at the start and end of the cluster.
-      /// The opening is expressed in "homogenized" coordinates.
+      /// The coordinates are expressed in physical distances and therefore this
+      /// represents a physical opening angle on the plane orthogonal to the
+      /// wires in the view and containing the drift direction ("x").
       /// Index is intended to be of type ClusterEnds_t.
       float fOpeningAngles[NEnds];
       //@}
@@ -333,12 +348,18 @@ namespace recob {
        * @see EndAngle(), Angle()
        * 
        * The angle of the group of hits at the start position of the cluster is
-       * returned. This is from homogenized coordinates and in the range
-       * @f$ \alpha \in [ -\pi, \pi ]@f$, and so that
+       * returned, defined @f$ \alpha \in [ -\pi, \pi ]@f$ and so that
        * @f$ \tan(\alpha) = dT/dW @f$ (or, more precisely,
-       * `alpha = atan2(dT, dW)`).
+       * `angle = atan2(dT, dW)`).
+       * The elements are expressed in physical distances and therefore this
+       * represents a physical angle on the plane orthogonal to the wires in
+       * the view and containing the drift direction ("x"); the angle is 0 or
+       * @f$ \pi @f$ when lying on the wire plane, @f$ \pm\pi/2 @f$ when
+       * pointing into/from the wire plane.
        * The angle is pointing toward the inside of the cluster (that is,
        * @f$ dW @f$ is positive going from the first wire on).
+       * This value can be result of extrapolation or average from a range of
+       * hits.
        */
       float StartAngle() const { return fAngles[clStart]; }
       
@@ -347,10 +368,8 @@ namespace recob {
        * @return opening angle in radians
        * @see EndOpeningAngle(), OpeningAngle()
        * 
-       * The returned value is from homogenized coordinates and in the range
+       * The returned value is from physical coordinates and in the range
        * @f$[ 0, \pi ]@f$.
-       * This value can be result of extrapolation or average from a range of
-       * hits.
        */
       float StartOpeningAngle() const { return fOpeningAngles[clStart]; }
       
@@ -373,12 +392,18 @@ namespace recob {
        * @see StartAngle(), Angle()
        * 
        * The angle of the group of hits at the end position of the cluster is
-       * returned. This is from homogenized coordinates and in the range
-       * @f$ \alpha \in [ -\pi, \pi ]@f$, and so that
+       * returned, defined @f$ \alpha \in [ -\pi, \pi ]@f$ and so that
        * @f$ \tan(\alpha) = dT/dW @f$ (or, more precisely,
-       * `alpha = atan2(dT, dW)`).
+       * `angle = atan2(dT, dW)`).
+       * The elements are expressed in physical distances and therefore this
+       * represents a physical angle on the plane orthogonal to the wires in
+       * the view and containing the drift direction ("x"); the angle is 0 or
+       * @f$ \pi @f$ when lying on the wire plane, @f$ \pm\pi/2 @f$ when
+       * pointing into/from the wire plane.
        * The angle is pointing toward the outside of the cluster (that is,
        * @f$ dW @f$ is positive going toward the last wire).
+       * This value can be result of extrapolation or average from a range of
+       * hits.
        */
       float EndAngle() const { return fAngles[clEnd]; }
       
@@ -389,8 +414,6 @@ namespace recob {
        * 
        * The returned value is from homogenized coordinates and in the range
        * @f$[ 0, \pi ]@f$.
-       * This value can be result of extrapolation or average from a range of
-       * hits.
        */
       float EndOpeningAngle() const { return fOpeningAngles[clEnd]; }
       
@@ -419,12 +442,18 @@ namespace recob {
        * @see StartAngle(), EndAngle()
        * 
        * The angle of the group of hits at the specified position of the cluster
-       * is returned. This is from homogenized coordinates and in the range
-       * @f$ \alpha \in [ -\pi, \pi ]@f$, and so that
+       * is returned, defined @f$ \alpha \in [ -\pi, \pi ]@f$ and so that
        * @f$ \tan(\alpha) = dT/dW @f$ (or, more precisely,
-       * `alpha = atan2(dT, dW)`).
+       * `angle = atan2(dT, dW)`).
+       * The elements are expressed in physical distances and therefore this
+       * represents a physical angle on the plane orthogonal to the wires in
+       * the view and containing the drift direction ("x"); the angle is 0 or
+       * @f$ \pi @f$ when lying on the wire plane, @f$ \pm\pi/2 @f$ when
+       * pointing into/from the wire plane.
        * The angle is pointing so that increasing wire number yields positive
        * @f$ dW @f$.
+       * This value can be result of extrapolation or average from a range of
+       * hits.
        */
       float Angle(ClusterEnds_t side) const { return fAngles[side]; }
       float Angle(unsigned int side) const { return fAngles[side]; }
