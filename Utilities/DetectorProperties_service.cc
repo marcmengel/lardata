@@ -144,7 +144,7 @@ int  DetectorProperties::TriggerOffset()     const
   double DetectorProperties::ConvertXToTicks(double X, int p, int t, int c)
   {
     if(!fXTicksParamsLoaded) CalculateXTicksParams();
-    return (X / fXTicksCoefficient +  fXTicksOffsets.at(c).at(t).at(p) );
+    return (X / (fXTicksCoefficient * fDriftDirection.at(c).at(t)) +  fXTicksOffsets.at(c).at(t).at(p) );
   }
 
 
@@ -156,7 +156,7 @@ int  DetectorProperties::TriggerOffset()     const
   double  DetectorProperties::ConvertTicksToX(double ticks, int p, int t, int c)
   {
     if(!fXTicksParamsLoaded) CalculateXTicksParams();
-    return (ticks - fXTicksOffsets.at(c).at(t).at(p) ) * fXTicksCoefficient;  
+    return (ticks - fXTicksOffsets.at(c).at(t).at(p)) * fXTicksCoefficient * fDriftDirection.at(c).at(t);  
   }
 
 
@@ -180,12 +180,19 @@ int  DetectorProperties::TriggerOffset()     const
     fXTicksOffsets.clear();
     fXTicksOffsets.resize(geo->Ncryostats());
 
+    fDriftDirection.clear();
+    fDriftDirection.resize(geo->Ncryostats());
+
     for(size_t cstat = 0; cstat < geo->Ncryostats(); ++cstat){
       fXTicksOffsets[cstat].resize(geo->Cryostat(cstat).NTPC());
-      
+      fDriftDirection[cstat].resize(geo->Cryostat(cstat).NTPC());
+
       for(size_t tpc = 0; tpc < geo->Cryostat(cstat).NTPC(); ++tpc) {
 	const geo::TPCGeo& tpcgeom = geo->Cryostat(cstat).TPC(tpc);
-	
+
+        const double dir((tpcgeom.DriftDirection() == geo::kNegX) ? +1.0 :-1.0);
+        fDriftDirection[cstat][tpc] = dir;
+
 	int nplane = tpcgeom.Nplanes();
 	fXTicksOffsets[cstat][tpc].resize(nplane, 0.);
 	for(int plane = 0; plane < nplane; ++plane) {
@@ -206,7 +213,7 @@ int  DetectorProperties::TriggerOffset()     const
 	  // only works if xyz[0]<=0
 	  const double* xyz = tpcgeom.PlaneLocation(0);
 	  
-	  fXTicksOffsets[cstat][tpc][plane] = -xyz[0]/fXTicksCoefficient + triggerOffset;
+	  fXTicksOffsets[cstat][tpc][plane] = -xyz[0]/(dir * fXTicksCoefficient) + triggerOffset;
 
 	  if (nplane==3){
 	    /*
@@ -258,6 +265,14 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
     fXTicksParamsLoaded=true;
   }
 
+  //--------------------------------------------------------------------
+  // Get scale factor for x<-->ticks
+
+  double DetectorProperties::GetXTicksCoefficient(int t, int c)
+  {
+    if(!fXTicksParamsLoaded) CalculateXTicksParams();
+    return fXTicksCoefficient * fDriftDirection.at(c).at(t);
+  }
 
   //--------------------------------------------------------------------
   // Get scale factor for x<-->ticks
@@ -267,8 +282,6 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
     if(!fXTicksParamsLoaded) CalculateXTicksParams();
     return fXTicksCoefficient;
   }
-
-
 
   //--------------------------------------------------------------------
   //  Get offset for x<-->ticks
