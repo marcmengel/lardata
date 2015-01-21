@@ -10,7 +10,9 @@
 
 #include "RawData/RawDigit.h"
 
-#include "cetlib/exception.h"
+// C/C++ standard libraries
+#include <utility> // std::move()
+
 
 namespace raw{
   
@@ -34,10 +36,10 @@ namespace raw{
     Compress_t                   compression /* = kNone */ /*,
     const Flags_t&               flags / * = DefaultFlags * / */
   )
-    : fADC(adclist) 
-    , fChannel(channel) 
+    : fADC(adclist)
+    , fChannel(channel)
     , fSamples(samples)
-    , fPedestal(0.) 
+    , fPedestal(0.)
     , fSigma(0.)
     , fCompression(compression)
   //  , fFlags(flags)
@@ -52,12 +54,12 @@ namespace raw{
     Compress_t              compression /* = kNone */ /*,
     const Flags_t&          flags / * = DefaultFlags * / */
   )
-    : fADC(adclist) 
-  , fChannel(channel) 
-  , fSamples(samples)
-  , fPedestal(0.) 
-  , fSigma(0.)
-  , fCompression(compression)
+    : fADC(std::move(adclist))
+    , fChannel(channel)
+    , fSamples(samples)
+    , fPedestal(0.)
+    , fSigma(0.)
+    , fCompression(compression)
   //  , fFlags(flags)
   {}
   
