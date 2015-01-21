@@ -43,12 +43,16 @@
 void CheckCluster(
   recob::Cluster const& cluster,
   float start_wire,
+  float sigma_start_wire,
   float start_tick,
+  float sigma_start_tick,
   float start_charge,
   float start_angle,
   float start_opening,
   float end_wire,
+  float sigma_end_wire,
   float end_tick,
+  float sigma_end_tick,
   float end_charge,
   float end_angle,
   float end_opening,
@@ -223,12 +227,16 @@ void ClusterTestDefaultConstructor() {
   //
   // these are the values expected for a default-constructed wire
   const float start_wire         =    0.0;
+  const float sigma_start_wire   =    0.0;
   const float start_tick         =    0.0;
+  const float sigma_start_tick   =    0.0;
   const float start_charge       =    0.0;
   const float start_angle        =    0.0;
   const float start_opening      =    0.0;
   const float end_wire           =    0.0;
+  const float sigma_end_wire     =    0.0;
   const float end_tick           =    0.0;
+  const float sigma_end_tick     =    0.0;
   const float end_charge         =    0.0;
   const float end_angle          =    0.0;
   const float end_opening        =    0.0;
@@ -253,12 +261,16 @@ void ClusterTestDefaultConstructor() {
   // step II.2: verify that the values are as expected
   CheckCluster(cluster,
     start_wire,
+    sigma_start_wire,
     start_tick,
+    sigma_start_tick,
     start_charge,
     start_angle,
     start_opening,
     end_wire,
+    sigma_end_wire,
     end_tick,
+    sigma_end_tick,
     end_charge,
     end_angle,
     end_opening,
@@ -283,12 +295,16 @@ void ClusterTestCustomConstructor() {
   // Part I: initialization of wire inputs
   //
   const float start_wire         =   12.5;
+  const float sigma_start_wire   =    1.0;
   const float start_tick         =  141.3;
+  const float sigma_start_tick   =    0.2;
   const float start_charge       =   45.2;
   const float start_angle        =    1.5;
   const float start_opening      =    0.7;
   const float end_wire           =  223.4;
+  const float sigma_end_wire     =    1.0;
   const float end_tick           =  563.2;
+  const float sigma_end_tick     =    0.3;
   const float end_charge         =  152.1;
   const float end_angle          =    0.6;
   const float end_opening        =    0.1;
@@ -309,12 +325,16 @@ void ClusterTestCustomConstructor() {
   // step II.1: create a wire with the signal-copying constructor
   recob::Cluster cluster(
     start_wire,
+    sigma_start_wire,
     start_tick,
+    sigma_start_tick,
     start_charge,
     start_angle,
     start_opening,
     end_wire,
+    sigma_end_wire,
     end_tick,
+    sigma_end_tick,
     end_charge,
     end_angle,
     end_opening,
@@ -327,19 +347,24 @@ void ClusterTestCustomConstructor() {
     width,
     ID,
     view,
-    plane
+    plane,
+    recob::Cluster::Sentry
     );
   
   
   // step II.2: verify that the values are as expected
   CheckCluster(cluster,
     start_wire,
+    sigma_start_wire,
     start_tick,
+    sigma_start_tick,
     start_charge,
     start_angle,
     start_opening,
     end_wire,
+    sigma_end_wire,
     end_tick,
+    sigma_end_tick,
     end_charge,
     end_angle,
     end_opening,

@@ -96,14 +96,23 @@ namespace recob {
       
       unsigned int fNHits; ///< Number of hits in the cluster
       
-      //@{
+      /// @name Data referring to start and end of the cluster
+      /// @{
       /// Wire coordinate of the start and end of the cluster (may lie between wires);
       /// index is intended to be of type ClusterEnds_t.
       float fEndWires[NEnds];
       
+      /// Uncertainty on wire coordinate of the start and end of the cluster;
+      /// index is intended to be of type ClusterEnds_t.
+      float fSigmaEndWires[NEnds];
+      
       /// Tick coordinate of the start and end of the cluster (may be set between ticks);
       /// index is intended to be of type ClusterEnds_t.
       float fEndTicks[NEnds];
+      
+      /// Uncertainty on tick coordinate of the start and end of the cluster;
+      /// index is intended to be of type ClusterEnds_t.
+      float fSigmaEndTicks[NEnds];
       
       /// Charge on the start and end wire of the cluster.
       /// This value can be result of extrapolation or average from a range of hits.
@@ -126,10 +135,11 @@ namespace recob {
       /// wires in the view and containing the drift direction ("x").
       /// Index is intended to be of type ClusterEnds_t.
       float fOpeningAngles[NEnds];
-      //@}
+      /// @}
       
       
-      //@{
+      /// @name Data derived from hit charge
+      /// @{
       /// Sum of the charge of all hits in the cluster.
       /// Index is intended to be of type ChargeMode_t
       float fChargeSum[NChargeModes];
@@ -141,7 +151,7 @@ namespace recob {
       ///< Average of the charge of all hits in the cluster (fChargeSum/NHits()).
       /// Index is intended to be of type ChargeMode_t
       float fChargeAverage[NChargeModes];
-      //@}
+      /// @}
       
       /// Number of wires covered by the cluster, divided by the number of hits
       /// in the cluster.
@@ -164,19 +174,29 @@ namespace recob {
       
     public:
       
+      /// Type of sentry argument
+      typedef struct {} SentryArgument_t;
+      
       /// Value for an invalid cluster ID
       static constexpr ID_t InvalidID = -1;
+      
+      /// An instance of the sentry object
+      static const SentryArgument_t Sentry;
       
       
       /**
        * @brief Constructor: assigns all the fields
        * @param start_wire wire coordinate of the start of the cluster
+       * @param sigma_start_wire uncertainty on start_wire
        * @param start_tick tick coordinate of the start of the cluster
+       * @param sigma_start_tick uncertainty on start_tick
        * @param start_charge charge on the start wire
        * @param start_angle angle of the start of the cluster, in [-pi,pi]
        * @param start_opening opening angle at the start of the cluster
        * @param end_wire wire coordinate of the end of the cluster
+       * @param sigma_end_wire uncertainty on end_wire
        * @param end_tick tick coordinate of the end of the cluster
+       * @param sigma_end_tick uncertainty on end_tick
        * @param end_charge charge on the end wire
        * @param end_angle angle of the end of the cluster, in [-pi,pi]
        * @param end_opening opening angle at the end of the cluster
@@ -190,20 +210,29 @@ namespace recob {
        * @param ID cluster ID
        * @param view view for this cluster
        * @param plane location of the start of the cluster
+       * @param sentry a sentry instance
        *
        * Coordinates are in homogenized units.
        * 
        * See the documentation of the relative data members for more details on
        * the definition and constraints of the various constructor arguments.
+       * 
+       * @note The sentry parameter can be optionally specified so that the
+       * compiler will realize if the number of parameters in the constructor
+       * has varied.
        */
       Cluster(
         float start_wire,
+        float sigma_start_wire,
         float start_tick,
+        float sigma_start_tick,
         float start_charge,
         float start_angle,
         float start_opening,
         float end_wire,
+        float sigma_end_wire,
         float end_tick,
+        float sigma_end_tick,
         float end_charge,
         float end_angle,
         float end_opening,
@@ -216,7 +245,8 @@ namespace recob {
         float width,
         ID_t ID,
         geo::View_t view,
-        geo::PlaneID const& plane
+        geo::PlaneID const& plane,
+        SentryArgument_t sentry = Sentry
         );
       
       
@@ -248,6 +278,24 @@ namespace recob {
        */
       float StartTick() const { return fEndTicks[clStart]; }
       
+      /**
+       * @brief Returns the uncertainty on wire coordinate of the start of the cluster
+       * @return uncertainty on wire coordinate of the start of the cluster
+       * @see StartWire()
+       *
+       * The wire uncertainty is in wire units (as for StartWire()).
+       */
+      float SigmaStartWire() const { return fSigmaEndWires[clStart]; }
+      
+      /**
+       * @brief Returns the uncertainty on tick coordinate of the start of the cluster
+       * @return uncertainty on tick coordinate of the start of the cluster
+       * @see StartTick()
+       *
+       * The tick uncertainty is in tick units (as for StartTick()).
+       */
+      float SigmaStartTick() const { return fSigmaEndTicks[clStart]; }
+      
       
       /** **********************************************************************
        * @brief Returns the wire coordinate of the end of the cluster
@@ -274,6 +322,24 @@ namespace recob {
        * the previous tick.
        */
       float EndTick() const { return fEndTicks[clEnd]; }
+      
+      /**
+       * @brief Returns the uncertainty on wire coordinate of the end of the cluster
+       * @return uncertainty on wire coordinate of the end of the cluster
+       * @see EndWire()
+       *
+       * The wire uncertainty is in wire units (as for EndWire()).
+       */
+      float SigmaEndWire() const { return fSigmaEndWires[clEnd]; }
+      
+      /**
+       * @brief Returns the uncertainty on tick coordinate of the end of the cluster
+       * @return uncertainty on tick coordinate of the end of the cluster
+       * @see EndTick()
+       *
+       * The tick uncertainty is in tick units (as for EndTick()).
+       */
+      float SigmaEndTick() const { return fSigmaEndTicks[clEnd]; }
       
       
       //@{
@@ -328,6 +394,33 @@ namespace recob {
        */
       float TickCoord(ClusterEnds_t side) const { return fEndTicks[side]; }
       float TickCoord(unsigned int side) const { return fEndTicks[side]; }
+      //@}
+      
+      
+      //@{
+      /**
+       * @brief Returns the uncertainty on wire coordinate of one of the end sides of the cluster
+       * @param side clStart for start, clEnd for end of the cluster
+       * @return uncertainty on wire coordinate of the requested end of the cluster
+       * @see SigmaStartWire(), SigmaEndWire(), SigmaTickCoord(), TimeCoord()
+       *
+       * Usage of this method is similar to WireCoord().
+       */
+      float SigmaWireCoord(ClusterEnds_t side) const { return fSigmaEndWires[side]; }
+      float SigmaWireCoord(unsigned int side) const { return fSigmaEndWires[side]; }
+      //@}
+      
+      //@{
+      /**
+       * @brief Returns the uncertainty on tick coordinate of one of the end sides of the cluster
+       * @param side clStart for start, clEnd for end of the cluster
+       * @return uncertainty on tick coordinate of the requested end of the cluster
+       * @see SigmaStartTick(), SigmaEndTick(), SigmaWireCoord(), TimeCoord()
+       *
+       * Usage of this method is similar to TimeCoord().
+       */
+      float SigmaTickCoord(ClusterEnds_t side) const { return fSigmaEndTicks[side]; }
+      float SigmaTickCoord(unsigned int side) const { return fSigmaEndTicks[side]; }
       //@}
       
       

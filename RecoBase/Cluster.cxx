@@ -27,12 +27,17 @@ namespace {
 
 
 namespace recob{
-
+  
+  const Cluster::SentryArgument_t Cluster::Sentry;
+  
+  
   //----------------------------------------------------------------------
   Cluster::Cluster()
     : fNHits(0)
     , fEndWires{ 0., 0. }
+    , fSigmaEndWires{ 0., 0. }
     , fEndTicks{ 0., 0. }
+    , fSigmaEndTicks{ 0., 0. }
     , fEndCharges{ 0., 0. }
     , fAngles{ 0., 0. }
     , fOpeningAngles{ 0., 0. }
@@ -50,12 +55,16 @@ namespace recob{
   //----------------------------------------------------------------------
   Cluster::Cluster(
     float start_wire,
+    float sigma_start_wire,
     float start_tick,
+    float sigma_start_tick,
     float start_charge,
     float start_angle,
     float start_opening,
     float end_wire,
+    float sigma_end_wire,
     float end_tick,
+    float sigma_end_tick,
     float end_charge,
     float end_angle,
     float end_opening,
@@ -68,11 +77,14 @@ namespace recob{
     float width,
     ID_t ID,
     geo::View_t view,
-    geo::PlaneID const& plane
+    geo::PlaneID const& plane,
+    SentryArgument_t /* sentry = Sentry */
     )
     : fNHits(n_hits)
     , fEndWires{ start_wire, end_wire }
+    , fSigmaEndWires{ sigma_start_wire, sigma_end_wire }
     , fEndTicks{ start_tick, end_tick }
+    , fSigmaEndTicks{ sigma_start_tick, sigma_end_tick }
     , fEndCharges{ start_charge, end_charge }
     , fAngles{ start_angle, end_angle }
     , fOpeningAngles{ start_opening, end_opening }
