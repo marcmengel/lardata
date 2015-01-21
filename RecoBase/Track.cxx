@@ -32,11 +32,11 @@ namespace recob{
 	       std::vector<std::vector <double> >        dQdx,
 	       std::vector<double>                       fitMomentum,
                int                                       ID)
-    : fXYZ (xyz)
-    , fDir (dxdydz)
-    , fdQdx(dQdx)
-    , fFitMomentum(fitMomentum)
-    , fID  (ID)
+      : fXYZ (xyz)
+      , fDir (dxdydz)
+      , fdQdx(dQdx)
+      , fFitMomentum(fitMomentum)
+      , fID  (ID)
   {
     fCov.resize(0);
 
