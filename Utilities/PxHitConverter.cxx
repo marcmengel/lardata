@@ -41,8 +41,8 @@ namespace util {
     pxhit.t = hit->PeakTime() * gser.TimeToCm();
     pxhit.w = hit->WireID().Wire     * gser.WireToCm();
     
-    pxhit.charge = hit->Charge();
-    pxhit.peak   = hit->Charge(true);
+    pxhit.charge = hit->Integral();
+    pxhit.peak   = hit->PeakAmplitude();
     pxhit.plane  = plane;  
     
   }
