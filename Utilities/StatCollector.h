@@ -1019,7 +1019,7 @@ namespace lar {
        * The return value may be 0 or negative if insufficient points have been
        * added.
        */
-      int NDF() const { return N() - Degree - 2; }
+      int NDF() const { return N() - NParams - 1; }
       
       
       /**
@@ -1038,11 +1038,12 @@ namespace lar {
       
         protected:
       
-      details::WeightTracker<Data_t> s2; ///< accumulator for uncertainty
-      details::DataTracker<2, Data_t> x; ///< accumulator for variable x and x2
-      details::WeightTracker<Data_t> y; ///< accumulator for y
-      details::DataTracker<1, Data_t> y2; ///< accumulator for y2
-      details::DataTracker<1, Data_t> xy; ///< accumulator for variable xy
+      details::WeightTracker<Data_t> s2;       ///< accumulator for uncertainty
+      details::DataTracker<Degree*2, Data_t> x;
+                                          ///< accumulator for variable x and x2
+      details::WeightTracker<Data_t> y;        ///< accumulator for y
+      details::DataTracker<1, Data_t> y2;      ///< accumulator for y2
+      details::DataTracker<Degree, Data_t> xy; ///< accumulator for variable xy
       
       //@{
       /// Aliases
