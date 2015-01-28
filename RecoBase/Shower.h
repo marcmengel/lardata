@@ -39,7 +39,7 @@ namespace recob {
     std::vector< double > fTotalMIPEnergy;           ///< Calculated Energy per each plane
     std::vector< double > fSigmaTotalMIPEnergy;           ///< Calculated Energy per each plane
     int fBestPlane;
-
+    double fLength;
 #ifndef __GCCXML__
 
   public:
@@ -71,7 +71,7 @@ namespace recob {
     void set_start_point_err (const TVector3& xyz_e)      { fSigmaXYZstart = xyz_e; }
     void set_dedx      (const std::vector< double >& q) { fdEdx = q;        }
     void set_dedx_err  (const std::vector< double >& q) { fSigmadEdx = q;        }
-    
+    void set_length(const double& l) { fLength = l; }    
     
     
     
@@ -89,7 +89,7 @@ namespace recob {
     const std::vector< double >& MIPEnergy()    const;
     const std::vector< double >& MIPEnergyErr() const;
     int    best_plane()               const;
-    
+    inline double Length() const;
     const std::vector< double >& dEdx()    const; 
     const std::vector< double >& dEdxErr() const;
     
@@ -119,7 +119,7 @@ namespace recob {
    inline const std::vector< double >& recob::Shower::MIPEnergy()    const { return fTotalMIPEnergy;          }
    inline const std::vector< double >& recob::Shower::MIPEnergyErr() const { return fSigmaTotalMIPEnergy;     }
    inline int    recob::Shower::best_plane()               const { return fBestPlane;               }
-    
+   inline double recob::Shower::Length() const { return fLength; }    
    inline const std::vector< double >& recob::Shower::dEdx()    const { return fdEdx;          }
    inline const std::vector< double >& recob::Shower::dEdxErr() const { return fSigmadEdx;     }
 
