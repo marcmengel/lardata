@@ -250,6 +250,26 @@ namespace recob {
         );
       
       
+      /// Copy constructor: automatically generated
+      Cluster(Cluster const&) = default;
+      
+      /// Move constructor: as copy, but source cluster gets an invalid ID
+      Cluster(Cluster&& from): Cluster(from) { from.fID = InvalidID; }
+      
+      /// Copy assignment: automatically generated
+      Cluster& operator= (Cluster const&) = default;
+      
+      /// Move assignment: as copy, but source cluster gets an invalid ID
+      Cluster& operator= (Cluster&& from)
+        {
+          if (&from != this) { operator=(from); from.fID = InvalidID; }
+          return *this;
+        }
+      
+      /// Destructor: automatically generated
+      ~Cluster() = default;
+      
+      
       /// @{
       /// @name Accessors
       
@@ -649,6 +669,11 @@ namespace recob {
        * The charge of a single hit comes from the fitted hit shape
        * (recob::Hit::Integral()) for cmFit, and signal ADC counts
        * (recob::Hit::SummedADC()) for cmADC.
+       * 
+       * @note Cluster class older than version 14 had a Charge() method too;
+       * the new one is not strictly equivalent, although in practice replacing
+       * the old `Charge()` with `Charge(cmFit)` should do the trick.
+       * The recommended update is to use `Integral()` instead.
        */
       float Charge(ChargeMode_t mode) const { return fChargeSum[mode]; }
       float Charge(unsigned int mode) const { return fChargeSum[mode]; }

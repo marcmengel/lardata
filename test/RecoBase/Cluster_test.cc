@@ -14,6 +14,9 @@
  * version 1.0: ~1.5" (debug mode)
  */
 
+// C/C++ standard libraries
+#include <utility> // std::move()
+
 
 // Boost libraries
 /*
@@ -223,9 +226,9 @@ void CheckCluster(
 void ClusterTestDefaultConstructor() {
   
   //
-  // Part I: initialization of wire inputs
+  // Part I: initialization of cluster inputs
   //
-  // these are the values expected for a default-constructed wire
+  // these are the values expected for a default-constructed cluster
   const float start_wire         =    0.0;
   const float sigma_start_wire   =    0.0;
   const float start_tick         =    0.0;
@@ -254,7 +257,7 @@ void ClusterTestDefaultConstructor() {
   //
   // Part II: default constructor
   //
-  // step II.1: create a wire with the signal-copying constructor
+  // step II.1: create a cluster with default constructor
   recob::Cluster cluster;
   
   
@@ -292,7 +295,7 @@ void ClusterTestDefaultConstructor() {
 void ClusterTestCustomConstructor() {
   
   //
-  // Part I: initialization of wire inputs
+  // Part I: initialization of cluster inputs
   //
   const float start_wire         =   12.5;
   const float sigma_start_wire   =    1.0;
@@ -320,9 +323,9 @@ void ClusterTestCustomConstructor() {
   const geo::PlaneID plane(0, 1, 2);
   
   //
-  // Part II: constructor with signal copy
+  // Part II: constructor
   //
-  // step II.1: create a wire with the signal-copying constructor
+  // step II.1: create a cluster
   recob::Cluster cluster(
     start_wire,
     sigma_start_wire,
@@ -384,6 +387,359 @@ void ClusterTestCustomConstructor() {
 } // ClusterTestCustomConstructor()
 
 
+
+void ClusterTestCopyMoveOperations() {
+  
+  //
+  // Part I: initialization of wire inputs
+  //
+  const float start_wire         =   12.5;
+  const float sigma_start_wire   =    1.0;
+  const float start_tick         =  141.3;
+  const float sigma_start_tick   =    0.2;
+  const float start_charge       =   45.2;
+  const float start_angle        =    1.5;
+  const float start_opening      =    0.7;
+  const float end_wire           =  223.4;
+  const float sigma_end_wire     =    1.0;
+  const float end_tick           =  563.2;
+  const float sigma_end_tick     =    0.3;
+  const float end_charge         =  152.1;
+  const float end_angle          =    0.6;
+  const float end_opening        =    0.1;
+  const float integral           = 4856.7;
+  const float integral_stddev    =    4.3;
+  const float summedADC          = 4702.4;
+  const float summedADC_stddev   =    6.2;
+  const unsigned int n_hits      =  210;
+  const float wires_over_hits    =    1.0;
+  const float width              =   75.2;
+  const recob::Cluster::ID_t ID  = 1234;
+  const geo::View_t view         = geo::kV;
+  const geo::PlaneID plane(0, 1, 2);
+  
+  //
+  // Part II: full constructor (tested elsewhere)
+  //
+  const recob::Cluster cluster(
+    start_wire,
+    sigma_start_wire,
+    start_tick,
+    sigma_start_tick,
+    start_charge,
+    start_angle,
+    start_opening,
+    end_wire,
+    sigma_end_wire,
+    end_tick,
+    sigma_end_tick,
+    end_charge,
+    end_angle,
+    end_opening,
+    integral,
+    integral_stddev,
+    summedADC,
+    summedADC_stddev,
+    n_hits,
+    wires_over_hits,
+    width,
+    ID,
+    view,
+    plane,
+    recob::Cluster::Sentry
+    );
+  
+  
+  //
+  // Part III: copy constructor
+  //
+  // step III.1: copy the cluster
+  recob::Cluster cluster_copy(cluster);
+  
+  // step III.2: verify that the original cluster has not changed
+  CheckCluster(cluster,
+    start_wire,
+    sigma_start_wire,
+    start_tick,
+    sigma_start_tick,
+    start_charge,
+    start_angle,
+    start_opening,
+    end_wire,
+    sigma_end_wire,
+    end_tick,
+    sigma_end_tick,
+    end_charge,
+    end_angle,
+    end_opening,
+    integral,
+    integral_stddev,
+    summedADC,
+    summedADC_stddev,
+    n_hits,
+    wires_over_hits,
+    width,
+    ID,
+    view,
+    plane
+    );
+  
+  // step III.3: verify that the copy cluster is as the original one
+  CheckCluster(cluster_copy,
+    start_wire,
+    sigma_start_wire,
+    start_tick,
+    sigma_start_tick,
+    start_charge,
+    start_angle,
+    start_opening,
+    end_wire,
+    sigma_end_wire,
+    end_tick,
+    sigma_end_tick,
+    end_charge,
+    end_angle,
+    end_opening,
+    integral,
+    integral_stddev,
+    summedADC,
+    summedADC_stddev,
+    n_hits,
+    wires_over_hits,
+    width,
+    ID,
+    view,
+    plane
+    );
+  
+  
+  //
+  // Part IV: move constructor
+  //
+  // step IV.1: move the cluster
+  recob::Cluster cluster_move(std::move(cluster_copy));
+  
+  // step IV.2: verify that the original cluster differ only by the invalid ID
+  CheckCluster(cluster_copy,
+    start_wire,
+    sigma_start_wire,
+    start_tick,
+    sigma_start_tick,
+    start_charge,
+    start_angle,
+    start_opening,
+    end_wire,
+    sigma_end_wire,
+    end_tick,
+    sigma_end_tick,
+    end_charge,
+    end_angle,
+    end_opening,
+    integral,
+    integral_stddev,
+    summedADC,
+    summedADC_stddev,
+    n_hits,
+    wires_over_hits,
+    width,
+    recob::Cluster::InvalidID,
+    view,
+    plane
+    );
+  
+  // step IV.3: verify that the new cluster is as the original was
+  CheckCluster(cluster_move,
+    start_wire,
+    sigma_start_wire,
+    start_tick,
+    sigma_start_tick,
+    start_charge,
+    start_angle,
+    start_opening,
+    end_wire,
+    sigma_end_wire,
+    end_tick,
+    sigma_end_tick,
+    end_charge,
+    end_angle,
+    end_opening,
+    integral,
+    integral_stddev,
+    summedADC,
+    summedADC_stddev,
+    n_hits,
+    wires_over_hits,
+    width,
+    ID,
+    view,
+    plane
+    );
+  
+  
+  //
+  // Part V: copy assignment
+  //
+  // step V.1: copy over the cluster
+  cluster_copy = cluster;
+  
+  // step V.2: verify that the original cluster is unchanged
+  CheckCluster(cluster,
+    start_wire,
+    sigma_start_wire,
+    start_tick,
+    sigma_start_tick,
+    start_charge,
+    start_angle,
+    start_opening,
+    end_wire,
+    sigma_end_wire,
+    end_tick,
+    sigma_end_tick,
+    end_charge,
+    end_angle,
+    end_opening,
+    integral,
+    integral_stddev,
+    summedADC,
+    summedADC_stddev,
+    n_hits,
+    wires_over_hits,
+    width,
+    ID,
+    view,
+    plane
+    );
+  
+  // step V.3: verify that the new cluster is as the original
+  CheckCluster(cluster_copy,
+    start_wire,
+    sigma_start_wire,
+    start_tick,
+    sigma_start_tick,
+    start_charge,
+    start_angle,
+    start_opening,
+    end_wire,
+    sigma_end_wire,
+    end_tick,
+    sigma_end_tick,
+    end_charge,
+    end_angle,
+    end_opening,
+    integral,
+    integral_stddev,
+    summedADC,
+    summedADC_stddev,
+    n_hits,
+    wires_over_hits,
+    width,
+    ID,
+    view,
+    plane
+    );
+  
+  
+  //
+  // Part VI: move assignment (regular)
+  //
+  // step VI.1: move the cluster
+  cluster_move = std::move(cluster_copy);
+  
+  // step IV.2: verify that the original cluster differ only by the invalid ID
+  CheckCluster(cluster_copy,
+    start_wire,
+    sigma_start_wire,
+    start_tick,
+    sigma_start_tick,
+    start_charge,
+    start_angle,
+    start_opening,
+    end_wire,
+    sigma_end_wire,
+    end_tick,
+    sigma_end_tick,
+    end_charge,
+    end_angle,
+    end_opening,
+    integral,
+    integral_stddev,
+    summedADC,
+    summedADC_stddev,
+    n_hits,
+    wires_over_hits,
+    width,
+    recob::Cluster::InvalidID,
+    view,
+    plane
+    );
+  
+  // step VI.3: verify that the new cluster is as the original was
+  CheckCluster(cluster_move,
+    start_wire,
+    sigma_start_wire,
+    start_tick,
+    sigma_start_tick,
+    start_charge,
+    start_angle,
+    start_opening,
+    end_wire,
+    sigma_end_wire,
+    end_tick,
+    sigma_end_tick,
+    end_charge,
+    end_angle,
+    end_opening,
+    integral,
+    integral_stddev,
+    summedADC,
+    summedADC_stddev,
+    n_hits,
+    wires_over_hits,
+    width,
+    ID,
+    view,
+    plane
+    );
+  
+  //
+  // Part VII: move assignment (self)
+  //
+  // step VII.1: move the cluster into itself
+  cluster_move = std::move(cluster_move);
+  
+  // step VII.3: verify that the cluster is unchanged
+  CheckCluster(cluster_move,
+    start_wire,
+    sigma_start_wire,
+    start_tick,
+    sigma_start_tick,
+    start_charge,
+    start_angle,
+    start_opening,
+    end_wire,
+    sigma_end_wire,
+    end_tick,
+    sigma_end_tick,
+    end_charge,
+    end_angle,
+    end_opening,
+    integral,
+    integral_stddev,
+    summedADC,
+    summedADC_stddev,
+    n_hits,
+    wires_over_hits,
+    width,
+    ID,
+    view,
+    plane
+    );
+  
+  
+} // ClusterTestCopyMoveOperations()
+
+
+
 //------------------------------------------------------------------------------
 //--- registration of tests
 //
@@ -399,4 +755,8 @@ BOOST_AUTO_TEST_CASE(ClusterDefaultConstructor) {
 
 BOOST_AUTO_TEST_CASE(ClusterCustomConstructors) {
   ClusterTestCustomConstructor();
+}
+
+BOOST_AUTO_TEST_CASE(ClusterCopyMoveOperations) {
+  ClusterTestCopyMoveOperations();
 }
