@@ -65,8 +65,7 @@ void CheckHit(
   int                       dof,
   geo::View_t               view,
   geo::SigType_t            signal_type,
-  geo::WireID               wireID,
-  std::vector<float> const& signal
+  geo::WireID               wireID
 ) {
   
   // verify that the values are as expected
@@ -78,12 +77,6 @@ void CheckHit(
   
   // - signal type
   BOOST_CHECK_EQUAL(hit.SignalType(), signal_type);
-  
-  // - signal
-  BOOST_CHECK_EQUAL(hit.Signal().size(), signal.size());
-  
-  auto const& hit_signal = hit.Signal(); // should be a vector of floats
-  BOOST_CHECK(std::equal(hit_signal.begin(), hit_signal.end(), signal.begin()));
   
   // - start and end tick
   BOOST_CHECK_EQUAL(hit.StartTick(), start_tick);
@@ -183,7 +176,6 @@ void HitTestDefaultConstructor() {
   geo::View_t        view                  =    geo::kUnknown;
   geo::SigType_t     signal_type           =    geo::kMysteryType;
   geo::WireID        wireID;
-  std::vector<float> signal;
   
   //
   // Part II: default constructor
@@ -210,8 +202,7 @@ void HitTestDefaultConstructor() {
     dof,
     view,
     signal_type,
-    wireID,
-    signal
+    wireID
     );
   
 } // HitTestDefaultConstructor()
@@ -251,7 +242,7 @@ void HitTestCustomConstructors() {
   
   
   //
-  // Part II: signal-copying constructor
+  // Part II: complete constructor
   //
   // step II.1: create a hit with the signal-copying constructor
   recob::Hit hit1(
@@ -272,8 +263,7 @@ void HitTestCustomConstructors() {
     dof,
     view,
     signal_type,
-    wireID,
-    signal
+    wireID
     );
   
   // step II.2: verify that the values are as expected
@@ -295,63 +285,8 @@ void HitTestCustomConstructors() {
     dof,
     view,
     signal_type,
-    wireID,
-    signal
+    wireID
     );
-  
-  
-  //
-  // Part III: signal-moving constructor
-  //
-  // step III.1: create a hit with the signal-moving constructor
-  std::vector<float> signal_copy(signal);
-  recob::Hit hit2(
-    channel,
-    start_tick,
-    end_tick,
-    peak_time,
-    sigma_peak_time,
-    rms,
-    peak_amplitude,
-    sigma_peak_amplitude,
-    summedADC,
-    hit_integral,
-    hit_sigma_integral,
-    multiplicity,
-    local_index,
-    goodness_of_fit,
-    dof,
-    view,
-    signal_type,
-    wireID,
-    std::move(signal_copy)
-    );
-  
-  // step III.2: verify that the values are as expected
-  CheckHit(hit2,
-    channel,
-    start_tick,
-    end_tick,
-    peak_time,
-    sigma_peak_time,
-    rms,
-    peak_amplitude,
-    sigma_peak_amplitude,
-    summedADC,
-    hit_integral,
-    hit_sigma_integral,
-    multiplicity,
-    local_index,
-    goodness_of_fit,
-    dof,
-    view,
-    signal_type,
-    wireID,
-    signal
-    );
-  
-  // step III.3: verify that the values were actually moved
-  BOOST_CHECK(signal_copy.empty());
   
 } // HitTestCustomConstructors()
 
