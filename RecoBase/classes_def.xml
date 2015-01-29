@@ -28,7 +28,8 @@
   <version ClassVersion="13" checksum="3306685703"/>
   <version ClassVersion="12" checksum="1302402512"/>
  </class>
- <class name="recob::Hit"              ClassVersion="14"	       	       		      >
+ <class name="recob::Hit"              ClassVersion="15"	       	       		      >
+  <version ClassVersion="15" checksum="3889929631"/>
   <version ClassVersion="14" checksum="1206393973"/>
   <version ClassVersion="13" checksum="2260253886"/>
  </class>
