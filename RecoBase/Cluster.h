@@ -725,7 +725,8 @@ namespace recob {
       /**
        * @brief Identifier of this cluster
        * @return the identifier of this cluster
-       * 
+       * @see isValid()
+       *
        * The identifier should be unique per event and per algorithm.
        * An invalid cluster can be defined by having an ID Cluster::InvalidID.
        */
@@ -742,6 +743,9 @@ namespace recob {
       /// Returns whether geometry plane is valid
       bool hasPlane() const;
       
+      
+      /// Returns if the cluster is valid (that is, if its ID is not invalid)
+      bool isValid() const { return ID() != InvalidID; }
       
 #if 0
       // FIXME DELME
