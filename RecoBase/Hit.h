@@ -6,12 +6,15 @@
  * 
  * Changes:
  * 20141212 Gianluca Petrillo (petrillo@fnal.gov)
- *   data architecture revision changes:
+ *   data architecture revision changes (v13 -> v14):
  *   - fRawDigit and RawDigit() removed
  *   - fWire and Wire() removed
  *   - fSignalType and SignalType() removed
  *   - fChannel and Channel() added
  *   - constructors now take directly a RawDigit, not its art::Ptr
+ * 20150129 Gianluca Petrillo (petrillo@fnal.gov)
+ *   data architecture revision changes (v14 -> v15):
+ *   - removed fHitSignal
  * 
  * ****************************************************************************/
 
@@ -52,7 +55,6 @@ namespace recob {
       
     private:
       
-      std::vector<float>      fHitSignal;      ///< vector of valibrated ADC values within the hit window
       raw::ChannelID_t        fChannel;        ///< ID of the readout channel the hit was extracted from
       raw::TDCtick_t          fStartTick;      ///< initial tdc tick for hit
       raw::TDCtick_t          fEndTick;        ///< final tdc tick for hit
@@ -96,13 +98,9 @@ namespace recob {
        * @param view            view for the plane of the hit
        * @param signal_type     signal type for the plane of the hit
        * @param wireID          WireID for the hit (Cryostat  TPC  Plane  Wire)
-       * @param signal          vector of valibrated ADC values within the hit window
        *
        * The tick parameters are real numbers, since they can in principle come
        * from some processing.
-       * 
-       * The data is copied from the signal parameter into the hit.
-       * If possible, use the move version instead.
        */
       Hit(
         raw::ChannelID_t        channel,
@@ -122,58 +120,7 @@ namespace recob {
         int                     dof,
         geo::View_t             view,
         geo::SigType_t          signal_type,
-        geo::WireID             wireID,
-        std::vector<float> const& signal
-        );
-      
-      /**
-       * @brief Constructor: directly sets all the fields
-       * @param channel         ID of the readout channel the hit was extracted from
-       * @param start_tick      initial tdc tick for hit
-       * @param end_tick        final tdc tick for hit
-       * @param peak_time       tdc for the peak charge deposition
-       * @param sigma_peak_time uncertainty for tdc of the peak
-       * @param rms             RMS of the hit shape
-       * @param peak_amplitude  the estimated amplitude of the hit at its peak
-       * @param sigma_peak_amplitude  the uncertainty on the estimated amplitude of the hit at its peak
-       * @param summedADC       the sum of calibrated ADC counts of the hit
-       * @param hit_integral    the integral under the calibrated signal waveform of the hit
-       * @param hit_sigma_integral uncertainty on the integral under the calibrated signal waveform of the hit
-       * @param multiplicity    how many hits could this one be shared with
-       * @param local_index     index of this hit among the Multiplicity() hits in the signal window
-       * @param goodness_of_fit how well do we believe we know this hit?
-       * @param dof             number of degrees of freedom in the determination of hit shape
-       * @param view            view for the plane of the hit
-       * @param signal_type     signal type for the plane of the hit
-       * @param wireID          WireID for the hit (Cryostat  TPC  Plane  Wire)
-       * @param signal          vector of valibrated ADC values within the hit window
-       *
-       * The tick parameters are real numbers, since they can in principle come
-       * from some processing.
-       * 
-       * The data is moved from the signal parameter into the hit; the signal
-       * variable will be kleft empty.
-       */
-      Hit(
-        raw::ChannelID_t        channel,
-        raw::TDCtick_t          start_tick,
-        raw::TDCtick_t          end_tick,
-        float                   peak_time,
-        float                   sigma_peak_time,
-        float                   rms,
-        float                   peak_amplitude,
-        float                   sigma_peak_amplitude,
-        float                   summedADC,
-        float                   hit_integral,
-        float                   hit_sigma_integral,
-        short int               multiplicity,
-        short int               local_index,
-        float                   goodness_of_fit,
-        int                     dof,
-        geo::View_t             view,
-        geo::SigType_t          signal_type,
-        geo::WireID             wireID,
-        std::vector<float>&&    signal
+        geo::WireID             wireID
         );
       
       /// @{
@@ -233,9 +180,6 @@ namespace recob {
       ///< ID of the wire the hit is on (Cryostat, TPC, Plane, Wire)
       geo::WireID             WireID()                    const;
       
-      /// Returns the calibrated signal under the hit time window
-      std::vector<float> const& Signal()                  const;
-      
       /// @}
       
       //@{
@@ -293,7 +237,6 @@ inline raw::ChannelID_t        recob::Hit::Channel()        const { return fChan
 inline geo::SigType_t          recob::Hit::SignalType()     const { return fSignalType;    }
 inline geo::View_t             recob::Hit::View()           const { return fView;          }
 inline geo::WireID             recob::Hit::WireID()         const { return fWireID;        }
-inline std::vector<float> const& recob::Hit::Signal()       const { return fHitSignal;     }
 
 
 inline float recob::Hit::PeakTimePlusRMS(float sigmas /* = +1. */) const

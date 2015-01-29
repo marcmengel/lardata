@@ -61,6 +61,14 @@ namespace recob {
    * This is a one-step creation object: the hit is constructed at the same
    * time the HitCreator is, and no facility is offered to modify the
    * constructed hit, or to create another one.
+   * 
+   * The constructors currently provided are:
+   * 1. from RawDigit (extracts channel, view and signal type [CVS] thanks to
+   *    geometry)
+   * 2. from Wire, [CVS]
+   * 3. from Wire, [CVS], summedADC is automatically computed from wire
+   * 4. from Wire, [CVS], start and stop time from a region of interest
+   * 5. from Wire, [CVS], start and stop time from index of region of interest
    */
   class HitCreator {
     public:
@@ -87,12 +95,9 @@ namespace recob {
        * @param local_index index of this hit in the region it was extracted from
        * @param goodness_of_fit quality parameter for the hit
        * @param dof degrees of freedom in the definition of the hit shape
-       * @param signal signal region the hit was extracted from
        *
        * The information used from the raw digit is the channel ID; view and
        * signal type are obtained from geometry.
-       * 
-       * Signal information is moved from signal, that becomes empty.
        */
       HitCreator(
         raw::RawDigit const& digits,
@@ -110,8 +115,7 @@ namespace recob {
         short int            multiplicity,
         short int            local_index,
         float                goodness_of_fit,
-        int                  dof,
-        std::vector<float>&& signal
+        int                  dof
         );
       
       
@@ -133,12 +137,9 @@ namespace recob {
        * @param local_index index of this hit in the region it was extracted from
        * @param goodness_of_fit quality parameter for the hit
        * @param dof degrees of freedom in the definition of the hit shape
-       * @param signal signal region the hit was extracted from
        *
        * The information used from the wire are the channel ID and view;
        * the signal type is obtained from geometry.
-       * 
-       * Signal information is moved from signal, that becomes empty.
        */
       HitCreator(
         recob::Wire const&   wire,
@@ -156,8 +157,7 @@ namespace recob {
         short int            multiplicity,
         short int            local_index,
         float                goodness_of_fit,
-        int                  dof,
-        std::vector<float>&& signal
+        int                  dof
         );
       
       
@@ -178,7 +178,6 @@ namespace recob {
        * @param local_index index of this hit in the region it was extracted from
        * @param goodness_of_fit quality parameter for the hit
        * @param dof degrees of freedom in the definition of the hit shape
-       * @param signal signal region the hit was extracted from
        *
        * The information used from the wire are the channel ID, view;
        * the signal type is obtained from geometry.
@@ -186,8 +185,6 @@ namespace recob {
        * The sum of ADC counts is automatically computed over the whole range
        * of the wire signal between start_tick and end_tick
        * (the latter excluded).
-       * 
-       * Signal information is moved from signal, that becomes empty.
        */
       HitCreator(
         recob::Wire const&   wire,
@@ -204,13 +201,12 @@ namespace recob {
         short int            multiplicity,
         short int            local_index,
         float                goodness_of_fit,
-        int                  dof,
-        std::vector<float>&& signal
+        int                  dof
         );
       
       
       /**
-       * @brief Constructor: uses specified region of interest
+       * @brief Constructor: uses region of interest specified by index
        * @param wire a pointer to a recob::Wire (for channel, view, signal type)
        * @param wireID ID of the wire the hit is on
        * @param rms RMS of the signal hit, in TDC time units
@@ -225,13 +221,13 @@ namespace recob {
        * @param local_index index of this hit in the region it was extracted from
        * @param goodness_of_fit quality parameter for the hit
        * @param dof degrees of freedom in the definition of the hit shape
-       * @param signal region of interest the hit was extracted from
+       * @param SignalRoI the signal region the hit was extracted from
        *
-       * The information used from the wire are the channel ID and view;
-       * the signal type is obtained from geometry.
+       * The information used from the wire are the channel ID, view
+       * and the region of interest; the signal type is obtained from
+       * geometry.
        * 
-       * Signal region, start and end ticks are extracted from the region of
-       * interest.
+       * Signal start and end ticks are extracted from the region of interest.
        */
       HitCreator(
         recob::Wire const&        wire,
@@ -274,8 +270,7 @@ namespace recob {
        * and the region of interest; the signal type is obtained from
        * geometry.
        * 
-       * Signal region, start and end ticks are extracted from the region of
-       * interest.
+       * Signal start and end ticks are extracted from the region of interest.
        */
       HitCreator(
         recob::Wire const& wire,
