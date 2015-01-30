@@ -8,7 +8,7 @@
 
 // LArSoft includes
 #include "OpticalDetectorData/OpticalTypes.h"
-#include "OpticalDetectorData/ChannelData.h"
+#include "OpticalDetectorData/OpticalRawDigit.h"
 
 // C++ includes
 #include <vector>
@@ -17,7 +17,7 @@
 
 namespace optdata {
 
-  class FIFOChannel : public ChannelData
+  class FIFOChannel : public OpticalRawDigit
   {
   public:
 
@@ -27,13 +27,12 @@ namespace optdata {
 		  Frame_t frame = 0,
 		  Channel_t channel = std::numeric_limits<Channel_t>::max(),
 		  size_type len = 0 ) 
-      : ChannelData(channel,len)
-      , fm_category(category)
-      , fm_timeSlice(time)
-      , fm_frame(frame)
+        : OpticalRawDigit(time, channel, len)
+        , fm_category(category)
+        , fm_frame(frame)
     {};
 
-    ~FIFOChannel() {};
+    virtual ~FIFOChannel() {};
 
     // Here we have getters and setters for the time information.
 
@@ -41,21 +40,14 @@ namespace optdata {
 
     Optical_Category_t Category() const { return fm_category; }
 
-    // A time slice associated with the first bin in the channel
-    // data. For example, the first bin of the ADC channel may refer
-    // to clock value 8595824 (in some arbitrary units).
-    TimeSlice_t TimeSlice() const { return fm_timeSlice; }
-    void SetTimeSlice( TimeSlice_t t ) { fm_timeSlice = t; }
-
     // The frame number associated with the first frame in the channel.
-    Frame_t Frame() const { return fm_frame; }
+    virtual Frame_t Frame() const { return fm_frame; }
     void SetFrame( Frame_t f ) { fm_frame = f; }
 
 #endif
 
   private:
     Optical_Category_t fm_category; // A channel category from Types.h
-    TimeSlice_t fm_timeSlice;       // The time of the first slice in the channel data
     Frame_t fm_frame;               // The frame number corresponding to the above time
   };
 
