@@ -17,9 +17,10 @@ namespace optdata {
 
   // Other types, in case something changes later on:
   typedef unsigned int Channel_t;
-  typedef unsigned int TimeSlice_t;
+  typedef unsigned long TimeSlice_t;
   typedef unsigned int Frame_t;
 
+    //  uboone specific - move away
   // Use an enum for categories of ADC channels, triggers, etc.
   typedef enum _optical_category_t {
     kUndefined,
