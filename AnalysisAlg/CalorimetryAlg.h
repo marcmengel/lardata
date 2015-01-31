@@ -42,6 +42,12 @@ namespace calo{
     double dEdx_AREA(recob::Hit const&  hit, double pitch) const;
     double dEdx_AREA(double dQ,double time, double pitch, unsigned int plane) const;
     double dEdx_AREA(double dQdx,double time, unsigned int plane) const;
+      
+    double ElectronsFromADCPeak(double adc, unsigned short plane) const
+    { return adc / fCalAmpConstants[plane]; }
+      
+    double ElectronsFromADCArea(double area, unsigned short plane) const
+    { return area / fCalAreaConstants[plane]; }
     
     double LifetimeCorrection(double time) const;
     

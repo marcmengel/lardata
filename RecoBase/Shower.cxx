@@ -20,19 +20,28 @@ namespace recob{
   }
 
   //----------------------------------------------------------------------
-  Shower::Shower(double *dcosVtx,
-     double *dcosVtxErr,
-     double *maxTransverseWidth,
-     double  distanceMaxWidth,
-     double  totalCharge,
-     int     id)
+  Shower::Shower(TVector3& dcosVtx,
+	   TVector3& dcosVtxErr,
+	   TVector3& xyz,
+	   TVector3& xyzErr,
+	   std::vector< double >  TotalEnergy,
+	   std::vector< double >  TotalEnergyErr,
+	   std::vector< double >  dEdx,
+ 	   std::vector< double >  dEdxErr,
+	   int bestplane,
+	   int     id)
     : fID(id)
-    , fDCosStart(TVector3(dcosVtx[0], dcosVtx[1], dcosVtx[2]))
-    , fSigmaDCosStart(TVector3(dcosVtxErr[0], dcosVtxErr[1], dcosVtxErr[2]))
-    , fDistanceMaxWidth(distanceMaxWidth)
-    , fTotalCharge(totalCharge)
+    , fDCosStart(dcosVtx)
+    , fSigmaDCosStart(dcosVtxErr)
+    , fXYZstart(xyz)
+    , fSigmaXYZstart(xyzErr)
+    , fTotalEnergy(TotalEnergy)
+    , fSigmaTotalEnergy(TotalEnergyErr)
+    , fdEdx(dEdx)
+    , fSigmadEdx(dEdxErr)
+    , fBestPlane(bestplane)
   {
-    for(int i = 0; i < 2; ++i) fMaxTransverseWidth[i] = maxTransverseWidth[i];
+   
   }
 
   //----------------------------------------------------------------------
@@ -40,8 +49,8 @@ namespace recob{
   {
     o << std::setiosflags(std::ios::fixed) << std::setprecision(3);
     o << " Shower ID "        << std::setw(4)  << std::right << a.ID();
-    o << " Charge    "        << std::setw(4)  << std::right << a.TotalCharge();
-
+    o << " Energy    "        << std::setw(4)  << std::right << a.Energy()[a.best_plane()];
+    o << " dEdx    "         << std::setw(4)  << std::right << a.dEdx()[a.best_plane()];
     return o;
   }
 

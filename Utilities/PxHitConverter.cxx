@@ -53,14 +53,15 @@ namespace util {
     
     util::GeometryUtilities  gser;
     
-    return {
-      /* pp */     hit.WireID().Plane,
-      /* ww */     hit.WireID().Wire * gser.WireToCm(),
-      /* tt */     hit.PeakTime() * gser.TimeToCm(),
-      /* chrg */   hit.Integral(),
-      /* sumadc */ hit.SummedADC(),
-      /* pk */     hit.PeakAmplitude()
-      };
+    PxHit pxhit;
+    pxhit.t      = hit.PeakTime() * gser.TimeToCm();
+    pxhit.w      = hit.WireID().Wire * gser.WireToCm();
+    pxhit.charge = hit.Integral();
+    pxhit.sumADC = hit.SummedADC();
+    pxhit.peak   = hit.PeakAmplitude();
+    pxhit.plane  = hit.WireID().Plane;
+    
+    return pxhit;
   } // PxHitConverter::HitToPxHit(recob::Hit)
   
   
