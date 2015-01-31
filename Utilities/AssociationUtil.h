@@ -594,7 +594,7 @@ bool util::CreateAssn(
 //----------------------------------------------------------------------
 // MARK CreateAssn_08
 template <typename T, typename U, typename Iter>
-bool CreateAssn(
+bool util::CreateAssn(
   art::EDProducer const& prod,
   art::Event           & evt,
   art::Assns<T,U>      & assn,

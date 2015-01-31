@@ -25,7 +25,7 @@
   <version ClassVersion="11" checksum="363582492"/>
  </class>
  <class name="recob::Cluster"          ClassVersion="14"                       		      >
-  <version ClassVersion="14" checksum="2093432706"/>
+  <version ClassVersion="14" checksum="2461492145"/>
   <version ClassVersion="13" checksum="3306685703"/>
   <version ClassVersion="12" checksum="1302402512"/>
  </class>

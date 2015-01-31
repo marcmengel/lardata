@@ -64,7 +64,7 @@ void CheckCluster(
   float summedADC,
   float summedADC_stddev,
   unsigned int n_hits,
-  float wires_over_hits,
+  float multiple_hit_wires,
   float width,
   recob::Cluster::ID_t ID,
   geo::View_t view,
@@ -205,7 +205,7 @@ void CheckCluster(
     (cluster.ChargeAverage((unsigned int) recob::Cluster::cmADC), summedADC_average);
   
   // - wires over hits
-  BOOST_CHECK_EQUAL(cluster.WiresOverHits(), wires_over_hits);
+  BOOST_CHECK_EQUAL(cluster.MultipleHitWires(), multiple_hit_wires);
   
   // - width
   BOOST_CHECK_EQUAL(cluster.Width(), width);
@@ -248,7 +248,7 @@ void ClusterTestDefaultConstructor() {
   const float summedADC          =    0.0;
   const float summedADC_stddev   =    0.0;
   const unsigned int n_hits      =    0;
-  const float wires_over_hits    =    0.0;
+  const float multiple_hit_wires =    0.0;
   const float width              =    0.0;
   const recob::Cluster::ID_t ID  = recob::Cluster::InvalidID;
   const geo::View_t view         = geo::kUnknown;
@@ -282,7 +282,7 @@ void ClusterTestDefaultConstructor() {
     summedADC,
     summedADC_stddev,
     n_hits,
-    wires_over_hits,
+    multiple_hit_wires,
     width,
     ID,
     view,
@@ -316,7 +316,7 @@ void ClusterTestCustomConstructor() {
   const float summedADC          = 4702.4;
   const float summedADC_stddev   =    6.2;
   const unsigned int n_hits      =  210;
-  const float wires_over_hits    =    1.0;
+  const float multiple_hit_wires =    1.0;
   const float width              =   75.2;
   const recob::Cluster::ID_t ID  = 1234;
   const geo::View_t view         = geo::kV;
@@ -346,7 +346,7 @@ void ClusterTestCustomConstructor() {
     summedADC,
     summedADC_stddev,
     n_hits,
-    wires_over_hits,
+    multiple_hit_wires,
     width,
     ID,
     view,
@@ -376,7 +376,7 @@ void ClusterTestCustomConstructor() {
     summedADC,
     summedADC_stddev,
     n_hits,
-    wires_over_hits,
+    multiple_hit_wires,
     width,
     ID,
     view,
@@ -412,7 +412,7 @@ void ClusterTestCopyMoveOperations() {
   const float summedADC          = 4702.4;
   const float summedADC_stddev   =    6.2;
   const unsigned int n_hits      =  210;
-  const float wires_over_hits    =    1.0;
+  const float multiple_hit_wires =    1.0;
   const float width              =   75.2;
   const recob::Cluster::ID_t ID  = 1234;
   const geo::View_t view         = geo::kV;
@@ -441,7 +441,7 @@ void ClusterTestCopyMoveOperations() {
     summedADC,
     summedADC_stddev,
     n_hits,
-    wires_over_hits,
+    multiple_hit_wires,
     width,
     ID,
     view,
@@ -477,7 +477,7 @@ void ClusterTestCopyMoveOperations() {
     summedADC,
     summedADC_stddev,
     n_hits,
-    wires_over_hits,
+    multiple_hit_wires,
     width,
     ID,
     view,
@@ -505,7 +505,7 @@ void ClusterTestCopyMoveOperations() {
     summedADC,
     summedADC_stddev,
     n_hits,
-    wires_over_hits,
+    multiple_hit_wires,
     width,
     ID,
     view,
@@ -540,7 +540,7 @@ void ClusterTestCopyMoveOperations() {
     summedADC,
     summedADC_stddev,
     n_hits,
-    wires_over_hits,
+    multiple_hit_wires,
     width,
     recob::Cluster::InvalidID,
     view,
@@ -568,7 +568,7 @@ void ClusterTestCopyMoveOperations() {
     summedADC,
     summedADC_stddev,
     n_hits,
-    wires_over_hits,
+    multiple_hit_wires,
     width,
     ID,
     view,
@@ -603,7 +603,7 @@ void ClusterTestCopyMoveOperations() {
     summedADC,
     summedADC_stddev,
     n_hits,
-    wires_over_hits,
+    multiple_hit_wires,
     width,
     ID,
     view,
@@ -631,7 +631,7 @@ void ClusterTestCopyMoveOperations() {
     summedADC,
     summedADC_stddev,
     n_hits,
-    wires_over_hits,
+    multiple_hit_wires,
     width,
     ID,
     view,
@@ -666,7 +666,7 @@ void ClusterTestCopyMoveOperations() {
     summedADC,
     summedADC_stddev,
     n_hits,
-    wires_over_hits,
+    multiple_hit_wires,
     width,
     recob::Cluster::InvalidID,
     view,
@@ -694,7 +694,7 @@ void ClusterTestCopyMoveOperations() {
     summedADC,
     summedADC_stddev,
     n_hits,
-    wires_over_hits,
+    multiple_hit_wires,
     width,
     ID,
     view,
@@ -728,7 +728,7 @@ void ClusterTestCopyMoveOperations() {
     summedADC,
     summedADC_stddev,
     n_hits,
-    wires_over_hits,
+    multiple_hit_wires,
     width,
     ID,
     view,

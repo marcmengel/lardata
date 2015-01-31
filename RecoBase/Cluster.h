@@ -153,9 +153,8 @@ namespace recob {
       float fChargeAverage[NChargeModes];
       /// @}
       
-      /// Number of wires covered by the cluster, divided by the number of hits
-      /// in the cluster.
-      float fNWiresOverNHits;
+      /// Fraction of wires in the cluster with more than one hit.
+      float fMultipleHitWires;
       
       /// A measure of the cluster width, in homogenized units.
       float fWidth;
@@ -205,7 +204,7 @@ namespace recob {
        * @param summedADC total charge from signal ADC of hits
        * @param summedADC_stddev standard deviation of signal ADC of hits
        * @param n_hits number of hits in the cluster
-       * @param wires_over_hits wires covered by cluster, divided by number of hits
+       * @param multiple_hit_wires fraction of wires with more than one hit
        * @param width a measure of the cluster width
        * @param ID cluster ID
        * @param view view for this cluster
@@ -241,7 +240,7 @@ namespace recob {
         float summedADC,
         float summedADC_stddev,
         unsigned int n_hits,
-        float wires_over_hits,
+        float multiple_hit_wires,
         float width,
         ID_t ID,
         geo::View_t view,
@@ -713,9 +712,16 @@ namespace recob {
         { return fChargeAverage[mode]; }
       //@}
       
-      /// Number of wires covered by the cluster, divided by the number of hits
-      /// in the cluster.
-      float WiresOverHits() const { return fNWiresOverNHits; }
+      /**
+       * @brief Fraction of wires in the cluster with more than one hit
+       * @return fraction of wires with more than one hit, or 0 if no wires
+       *
+       * Returns a quantity defined as NMultiHitWires / NWires,
+       * where NWires is the number of wires hosting at least one hit of this
+       * cluster, and NMultiHitWires is the number of wires which have more
+       * than just one hit.
+       */
+      float MultipleHitWires() const { return fMultipleHitWires; }
       
       
       /// A measure of the cluster width, in homogenized units.
