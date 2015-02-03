@@ -1,11 +1,69 @@
-////////////////////////////////////////////////////////////////////////////
-// \version $ $
-//
-// \brief Utility object to perform functions of association 
-//
-// \author brebel@fnal.gov
-//
-////////////////////////////////////////////////////////////////////////////
+/**
+ * @file   AssociationUtil.h
+ * @author brebel@fnal.gov
+ * @brief  Utility object to perform functions of association 
+ * 
+ * This library provides a number of util::CreateAssn() functions;
+ * for convenience, the ones supported as of January 2015 are listed here
+ * together with their tag:
+ * 
+ * # CreateAssn(art::EDProducer const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, std::string, size_t)
+ *   one-to-one association, between a element of a vector (future data product)
+ *   and a art-pointed object; allows for a instance name for the vector
+ * # CreateAssn(art::EDProducer const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, size_t)
+ *   one-to-one association, between a element of a vector (future data product)
+ *   and a art-pointed object
+ * # CreateAssn(art::EDProducer const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T>&)
+ *   one-to-one association, between two art-pointed objects
+ * # CreateAssn(art::EDProducer const&, art::Event&, std::vector<T> const&, art::PtrVector<U> const&, art::Assns<T,U>&, size_t)
+ *   one-to-many association, between a element of a vector (future data
+ *   product) and a list of art-pointed objects in a art::PtrVector list
+ * # CreateAssn(art::EDProducer const&, art::Event&, art::Ptr<T> const&, std::vector<art::Ptr<U>> const&, art::Assns<T,U>&)
+ *   one-to-many association, between an art-pointed object and all the elements
+ *   in a std::vector of art-pointed objects
+ * # CreateAssn(art::EDProducer const&, art::Event&, std::vector<T> const&, std::vector<art::Ptr<U>>&, art::Assns<T,U>&, size_t)
+ *   one-to-many association, between an element of a vector (future data
+ *   product) and all the elements in a std::vector of art-pointed objects
+ * # CreateAssn(art::EDProducer const&, art::Event&, std::vector<T> const&, std::vector<U> const&, art::Assns<T,U>&, size_t, size_t, size_t)
+ *   one-to-many association, between an element of a vector (future data
+ *   product) and the elements in a subrange of a std::vector (also future data
+ *   product)
+ * # CreateAssn(art::EDProducer const&, art::Event&, art::Assns<T,U>&, size_t, Iter, Iter)
+ *   one-to-many association, between an element of a collection and the
+ *   elements of another collection, whose indices are specified by the values
+ *   in a subrange of a third collection (of indices)
+ * # CreateAssn(art::EDProducer const&, art::Event&, art::Assns<T,U>&, size_t, size_t, D&&)
+ *   one-to-one association, between an element of a collection and the element
+ *   of another collection, both specified by index, with additional data
+ * 
+ * For all the associated objects, either side, that are not specified by
+ * art::Ptr, the index of the object in its collection must be (or stay) the
+ * same as the index in the final data product collection.
+ * 
+ * Let's see if Doxygen is able to render the table:
+ * 
+ * One-to-one associations
+ * ------------------------
+ * 
+ * the one (T)            | the other one (U) | special notes              | function
+ * :--------------------: | :---------------: | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------
+ * element of std::vector | art pointer       | allows instance name for T | CreateAssn(art::EDProducer const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, std::string, size_t)
+ * element of std::vector | art pointer       |                            | CreateAssn(art::EDProducer const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, size_t)
+ * art pointer            | art pointer       |                            | CreateAssn(art::EDProducer const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T>&)
+ * element by index       | element by index  | associates data too        | CreateAssn(art::EDProducer const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T,D>&, size_t, size_t, D&&)
+ * 
+ * One-to-many associations
+ * -------------------------
+ * 
+ * the one (T)            | the many (U)             | special notes              | function
+ * :--------------------: | :----------------------: | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------
+ * element of std::vector | art::PtrVector           |                            | CreateAssn(art::EDProducer const&, art::Event&, std::vector<T> const&, art::PtrVector<U> const&, art::Assns<T,U>&, size_t)
+ * art pointer            | std::vector<art::Ptr<U>> |                            | CreateAssn(art::EDProducer const&, art::Event&, art::Ptr<T> const&, std::vector<art::Ptr<U>> const&, art::Assns<T,U>&)
+ * element of std::vector | std::vector<art::Ptr<U>> |                            | CreateAssn(art::EDProducer const&, art::Event&, std::vector<T> const&, std::vector<art::Ptr<U>>&, art::Assns<T,U>&, size_t)
+ * element of std::vector | std::vector<U>           |                            | CreateAssn(art::EDProducer const&, art::Event&, std::vector<T> const&, std::vector<U> const&, art::Assns<T,U>&, size_t, size_t, size_t)
+ * element by index       | range of indices         | does not need object lists | CreateAssn(art::EDProducer const&, art::Event&, art::Assns<T,U>&, size_t, Iter, Iter)
+ * 
+ */
 
 #ifndef ASSOCIATIONUTIL_H
 #define ASSOCIATIONUTIL_H
@@ -13,6 +71,7 @@
 // C/C++ standard libraries
 #include <vector>
 #include <string>
+#include <utility> // std::move()
 
 // framework libraries
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -356,6 +415,46 @@ namespace util {
     Iter                   to_second_index
     );
 
+  /**
+   * @brief Creates a single one-to-one association with associated data
+   * @tparam T type of the new object to associate
+   * @tparam U type of the many objects already in the data product or art::Ptr
+   * @tparam D type of the data coupled to this pair association
+   * @param prod reference to the producer that will write the vector a
+   * @param evt reference to the current event
+   * @param assn reference to association object where the new one will be put
+   * @param first_index index of the object of type T to be associated
+   * @param second_index index of the object of type U to be associated
+   * @param data data to be store in this association; /data is moved/
+   * @return whether the operation was successful (can it ever fail??)
+   * 
+   * Use this if you want some data to travel together with the association.
+   * An example may be the order of the second element within a list:
+   *     
+   *     size_t a_index = 2;
+   *     std::vector<size_t> b_indices{ 6, 9, 18, 12 };
+   *     for (size_t i = 0; i < b_indices.size(); ++i)
+   *       CreateAssn(prod, evt, assn, a_index, b_index[i], i);
+   *     
+   * In this way, the association between the element #2 of "a" (a vector that
+   * is not specified -- nor needed -- in this snippet of code) and the element
+   * #18 will be remembered as being the third (data value of 2).
+   * 
+   * Note that the data object is supposed to have been created specifically for
+   * the association and it is therefore moved into it; afterward, the value
+   * of data (in the caller) is undefined.
+   */
+  // MARK CreateAssn_09
+  template <typename T, typename U, typename D>
+  bool CreateAssn(
+    art::EDProducer const& prod,
+    art::Event           & evt,
+    art::Assns<T,U, D>   & assn,
+    size_t                 first_index,
+    size_t                 second_index,
+    D                   && data
+    );
+
 #if 0
   // method to create a 1 to many association, with the many being of type T
   // in this case the T objects are not yet stored in the event and are in a 
@@ -611,8 +710,8 @@ bool util::CreateAssn(
     art::ProductID first_id = prod.getProductID< std::vector<T> >(evt);
     art::ProductID second_id = prod.getProductID< std::vector<U> >(evt);
     
-    // we declare here that we want to associate the element indx of the (only)
-    // data product of type std::vector<T> with other objects.
+    // we declare here that we want to associate the element first_index of the
+    // (only) data product of type std::vector<T> with other objects.
     // This is the pointer to that element:
     art::Ptr<T> first_ptr(first_id, first_index, evt.productGetter(first_id));
     
@@ -633,6 +732,47 @@ bool util::CreateAssn(
   
   return true;
 } // util::CreateAssn() [08]
+
+
+//----------------------------------------------------------------------
+// MARK CreateAssn_09
+template <typename T, typename U, typename D>
+bool util::CreateAssn(
+  art::EDProducer const& prod,
+  art::Event           & evt,
+  art::Assns<T,U,D>    & assn,
+  size_t                 first_index,
+  size_t                 second_index,
+  D                   && data
+) {
+  
+  try{
+    // We need the "product ID" of what is going to become a data product.
+    // The data product ID is unique for the combination of process, producer,
+    // data type and product (instance) label.
+    // 
+    // we declare here that we want to associate the element first_index of the
+    // (only) data product of type std::vector<T> with the other object
+    art::ProductID first_id = prod.getProductID< std::vector<T> >(evt);
+    art::Ptr<T> first_ptr(first_id, first_index, evt.productGetter(first_id));
+    
+    // the same to associate the element second_index of the (only)
+    // data product of type std::vector<U> with the first object.
+    art::ProductID second_id = prod.getProductID< std::vector<U> >(evt);
+    art::Ptr<U> second_ptr
+      (second_id, second_index, evt.productGetter(second_id));
+    
+    assn.addSingle(first_ptr, second_ptr, std::move(data));
+  }
+  catch(cet::exception &e){
+    mf::LogWarning("AssociationUtil")
+      << "unable to create requested art:Assns, exception thrown: " << e;
+    return false;
+  }
+  
+  return true;
+} // util::CreateAssn() [09]
+
 
 #if 0
 //----------------------------------------------------------------------
