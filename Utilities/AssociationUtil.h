@@ -777,7 +777,7 @@ bool util::CreateAssn(
 //----------------------------------------------------------------------
 // MARK CreateAssnD_01a
 template <typename T, typename U, typename D>
-bool util::CreateAssn(
+bool util::CreateAssnD(
   art::EDProducer               const& prod,
   art::Event                         & evt,
   art::Assns<T,U,D>                  & assn,
@@ -814,7 +814,7 @@ bool util::CreateAssn(
 } // util::CreateAssnD() [01a]
 
 template <typename T, typename U, typename D>
-bool util::CreateAssn(
+bool util::CreateAssnD(
   art::EDProducer                    const& prod,
   art::Event                              & evt,
   art::Assns<T,U,D>                       & assn,
