@@ -32,7 +32,8 @@
  *   one-to-many association, between an element of a collection and the
  *   elements of another collection, whose indices are specified by the values
  *   in a subrange of a third collection (of indices)
- * # CreateAssn(art::EDProducer const&, art::Event&, art::Assns<T,U>&, size_t, size_t, D&&)
+ * # CreateAssnD(art::EDProducer const&, art::Event&, art::Assns<T,U>&, size_t, size_t, typename art::Assns<T,U,D>::data_t const&),
+ *   CreateAssnD(art::EDProducer const&, art::Event&, art::Assns<T,U>&, size_t, size_t, typename art::Assns<T,U,D>::data_t&&)
  *   one-to-one association, between an element of a collection and the element
  *   of another collection, both specified by index, with additional data
  * 
@@ -45,12 +46,13 @@
  * One-to-one associations
  * ------------------------
  * 
- * the one (T)            | the other one (U) | special notes              | function
- * :--------------------: | :---------------: | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------
- * element of std::vector | art pointer       | allows instance name for T | CreateAssn(art::EDProducer const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, std::string, size_t)
- * element of std::vector | art pointer       |                            | CreateAssn(art::EDProducer const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, size_t)
- * art pointer            | art pointer       |                            | CreateAssn(art::EDProducer const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T>&)
- * element by index       | element by index  | associates data too        | CreateAssn(art::EDProducer const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T,D>&, size_t, size_t, D&&)
+ * the one (T)            | the other one (U) | special notes               | function
+ * :--------------------: | :---------------: | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------
+ * element of std::vector | art pointer       | allows instance name for T  | CreateAssn(art::EDProducer const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, std::string, size_t)
+ * element of std::vector | art pointer       |                             | CreateAssn(art::EDProducer const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, size_t)
+ * art pointer            | art pointer       |                             | CreateAssn(art::EDProducer const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T>&)
+ * element by index       | element by index  | associates data too         | CreateAssnD(art::EDProducer const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T,D>&, size_t, size_t, typename art::Assns<T,U,D>::data_t const&)
+ * element by index       | element by index  | associates data too (moved) | CreateAssnD(art::EDProducer const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T,D>&, size_t, size_t, typename art::Assns<T,U,D>::data_t&&)
  * 
  * One-to-many associations
  * -------------------------
@@ -415,20 +417,21 @@ namespace util {
     Iter                   to_second_index
     );
 
+  //@{
   /**
    * @brief Creates a single one-to-one association with associated data
    * @tparam T type of the new object to associate
    * @tparam U type of the many objects already in the data product or art::Ptr
-   * @tparam D type of the data coupled to this pair association
+   * @tparam D type of the "metadata" coupled to this pair association
    * @param prod reference to the producer that will write the vector a
    * @param evt reference to the current event
    * @param assn reference to association object where the new one will be put
    * @param first_index index of the object of type T to be associated
    * @param second_index index of the object of type U to be associated
-   * @param data data to be store in this association; /data is moved/
+   * @param data "metadata" to be store in this association
    * @return whether the operation was successful (can it ever fail??)
    * 
-   * Use this if you want some data to travel together with the association.
+   * Use this if you want some metadata to travel together with the association.
    * An example may be the order of the second element within a list:
    *     
    *     size_t a_index = 2;
@@ -438,22 +441,59 @@ namespace util {
    *     
    * In this way, the association between the element #2 of "a" (a vector that
    * is not specified -- nor needed -- in this snippet of code) and the element
-   * #18 will be remembered as being the third (data value of 2).
-   * 
-   * Note that the data object is supposed to have been created specifically for
-   * the association and it is therefore moved into it; afterward, the value
-   * of data (in the caller) is undefined.
+   * #18 will be remembered as being the third (metadata value of 2).
+   * In this example metadata is of type `size_t` the association would be
+   * declared as `art::Assn<A, B, size_t>`.
+   * A FindMany query of that association might look like:
+   *     
+   *     art::Handle<std::vector<A>> a_list; // read this from the event
+   *     
+   *     art::FindMany<B, size_t> Query(a_list, event, ModuleLabel);
+   *     
+   *     // search for the last of the objects associated to the third element:
+   *     size_t a_index = 2; // this means third element
+   *     
+   *     std::vector<size_t const*> const& metadata = Query.data(a_index);
+   *     size_t largest_index = 0, last_item = 0;
+   *     for (size_t iB = 0; iB < metadata.size(); ++iB) {
+   *       if (largest_index >= *(metadata[iB])) continue;
+   *       largest_index = *(metadata[iB]);
+   *       last_item = iB;
+   *     } // for iB
+   *     B const& lastB = Query.at(last_item);
+   *     
+   * In alternative, the elements and their metadata can be fetched
+   * simultaneously with:
+   *     
+   *     std::vector<art::Ptr<B>> const& Bs;
+   *     std::vector<size_t const*> const& metadata;
+   *     
+   *     size_t a_index = 2; // this means third element
+   *     size_t nMatches = Query.get(a_index, Bs, metadata);
+   *     
    */
-  // MARK CreateAssn_09
+  // MARK CreateAssnD_01
+  // MARK CreateAssnD_01a
   template <typename T, typename U, typename D>
-  bool CreateAssn(
-    art::EDProducer const& prod,
-    art::Event           & evt,
-    art::Assns<T,U, D>   & assn,
-    size_t                 first_index,
-    size_t                 second_index,
-    D                   && data
+  bool CreateAssnD(
+    art::EDProducer               const& prod,
+    art::Event                         & evt,
+    art::Assns<T,U,D>                  & assn,
+    size_t                               first_index,
+    size_t                               second_index,
+    typename art::Assns<T,U,D>::data_t&& data
     );
+  // MARK CreateAssnD_01b
+  template <typename T, typename U, typename D>
+  bool CreateAssnD(
+    art::EDProducer                    const& prod,
+    art::Event                              & evt,
+    art::Assns<T,U,D>                       & assn,
+    size_t                                    first_index,
+    size_t                                    second_index,
+    typename art::Assns<T,U,D>::data_t const& data
+    );
+  //@}
 
 #if 0
   // method to create a 1 to many association, with the many being of type T
@@ -735,15 +775,15 @@ bool util::CreateAssn(
 
 
 //----------------------------------------------------------------------
-// MARK CreateAssn_09
+// MARK CreateAssnD_01a
 template <typename T, typename U, typename D>
 bool util::CreateAssn(
-  art::EDProducer const& prod,
-  art::Event           & evt,
-  art::Assns<T,U,D>    & assn,
-  size_t                 first_index,
-  size_t                 second_index,
-  D                   && data
+  art::EDProducer               const& prod,
+  art::Event                         & evt,
+  art::Assns<T,U,D>                  & assn,
+  size_t                               first_index,
+  size_t                               second_index,
+  typename art::Assns<T,U,D>::data_t&& data
 ) {
   
   try{
@@ -771,7 +811,44 @@ bool util::CreateAssn(
   }
   
   return true;
-} // util::CreateAssn() [09]
+} // util::CreateAssnD() [01a]
+
+template <typename T, typename U, typename D>
+bool util::CreateAssn(
+  art::EDProducer                    const& prod,
+  art::Event                              & evt,
+  art::Assns<T,U,D>                       & assn,
+  size_t                                    first_index,
+  size_t                                    second_index,
+  typename art::Assns<T,U,D>::data_t const& data
+) {
+  
+  try{
+    // We need the "product ID" of what is going to become a data product.
+    // The data product ID is unique for the combination of process, producer,
+    // data type and product (instance) label.
+    // 
+    // we declare here that we want to associate the element first_index of the
+    // (only) data product of type std::vector<T> with the other object
+    art::ProductID first_id = prod.getProductID< std::vector<T> >(evt);
+    art::Ptr<T> first_ptr(first_id, first_index, evt.productGetter(first_id));
+    
+    // the same to associate the element second_index of the (only)
+    // data product of type std::vector<U> with the first object.
+    art::ProductID second_id = prod.getProductID< std::vector<U> >(evt);
+    art::Ptr<U> second_ptr
+      (second_id, second_index, evt.productGetter(second_id));
+    
+    assn.addSingle(first_ptr, second_ptr, data);
+  }
+  catch(cet::exception &e){
+    mf::LogWarning("AssociationUtil")
+      << "unable to create requested art:Assns, exception thrown: " << e;
+    return false;
+  }
+  
+  return true;
+} // util::CreateAssnD() [01b]
 
 
 #if 0
