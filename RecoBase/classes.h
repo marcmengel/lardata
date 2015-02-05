@@ -1,20 +1,16 @@
-//
-// Build a dictionary.
-//
-// $Id: classes.h,v 1.8 2010/04/12 18:12:28  Exp $
-// $Author:  $
-// $Date: 2010/04/12 18:12:28 $
-//
-// Original author Rob Kutschke, modified by klg
-//
-// Notes:
-// 1) The system is not able to deal with
-//    art::Wrapper<std::vector<std::string> >;
-//    The problem is somewhere inside root's reflex mechanism
-//    and Philippe Canal says that it is ( as of March 2010) a
-//    known problem.  He also says that they do not have any
-//    plans to fix it soon.  We can always work around it
-//    by putting the string inside another object.
+/**
+ * @file classes.h
+ * @brief Dictionary selection for RecoBase
+ * 
+ * Original author Rob Kutschke, modified by klg
+ * 
+ * @note The system is not able to deal with
+ * `art::Wrapper<std::vector<std::string>>`.
+ * The problem is somewhere inside ROOT's REFLEX mechanism
+ * and Philippe Canal says that it is (as of March 2010) a known problem.
+ * He also says that they do not have any plans to fix it soon.
+ * We can always work around it by putting the string inside another object.
+ */
 
 #include "art/Persistency/Common/PtrVector.h" 
 #include "art/Persistency/Common/Wrapper.h"
@@ -101,11 +97,14 @@ template class art::PtrVector<recob::OpHit>;
 template class art::Ptr<recob::OpFlash>;
 template class art::PtrVector<recob::OpFlash>;
 
+template class std::pair< art::Ptr<recob::Cluster>,      art::Ptr<recob::EndPoint2D> >;
 template class std::pair< art::Ptr<recob::Cluster>,      art::Ptr<recob::Hit>        >;
 template class std::pair< art::Ptr<recob::Cluster>,      art::Ptr<recob::Shower>     >;
 template class std::pair< art::Ptr<recob::Cluster>,      art::Ptr<recob::PFParticle> >;
 template class std::pair< art::Ptr<recob::Cluster>,      art::Ptr<recob::SpacePoint> >;
 template class std::pair< art::Ptr<recob::Cluster>,      art::Ptr<recob::Track>      >;
+template class std::pair< art::Ptr<recob::Cluster>,      art::Ptr<recob::Vertex>     >;
+template class std::pair< art::Ptr<recob::EndPoint2D>,   art::Ptr<recob::Cluster>    >;
 template class std::pair< art::Ptr<recob::EndPoint2D>,   art::Ptr<recob::Hit>        >;
 template class std::pair< art::Ptr<recob::Event>,        art::Ptr<recob::Hit>        >;
 template class std::pair< art::Ptr<recob::Event>,        art::Ptr<recob::Vertex>     >;
@@ -145,6 +144,7 @@ template class std::pair< art::Ptr<recob::Track>,        art::Ptr<recob::Vertex>
 template class std::pair< art::Ptr<recob::OpFlash>,      art::Ptr<recob::OpHit>      >;
 template class std::pair< art::Ptr<recob::OpFlash>,      art::Ptr<recob::Cluster>    >;
 template class std::pair< art::Ptr<recob::OpFlash>,      art::Ptr<recob::Track>      >;
+template class std::pair< art::Ptr<recob::Vertex>,       art::Ptr<recob::Cluster>    >;
 template class std::pair< art::Ptr<recob::Vertex>,       art::Ptr<recob::Hit>        >;
 template class std::pair< art::Ptr<recob::Vertex>,       art::Ptr<recob::PFParticle> >;
 template class std::pair< art::Ptr<recob::Vertex>,       art::Ptr<recob::Shower>     >;
@@ -155,11 +155,17 @@ template class art::Assns<raw::RawDigit,     recob::Wire,       void>;
 template class art::Assns<raw::RawDigit,     recob::Hit,        void>;
 template class art::Assns<recob::Wire,       raw::RawDigit,     void>;
 template class art::Assns<recob::Wire,       recob::Hit,        void>;
+template class art::Assns<recob::Cluster,    recob::EndPoint2D, void>;
+template class art::Assns<recob::Cluster,    recob::EndPoint2D, unsigned short>;
 template class art::Assns<recob::Cluster,    recob::Hit,        void>;
 template class art::Assns<recob::Cluster,    recob::Shower,     void>;
 template class art::Assns<recob::Cluster,    recob::SpacePoint, void>;
 template class art::Assns<recob::Cluster,    recob::Track,      void>;
 template class art::Assns<recob::Cluster,    recob::PFParticle, void>;
+template class art::Assns<recob::Cluster,    recob::Vertex,     void>;
+template class art::Assns<recob::Cluster,    recob::Vertex,     unsigned short>;
+template class art::Assns<recob::EndPoint2D, recob::Cluster,    void>;
+template class art::Assns<recob::EndPoint2D, recob::Cluster,    unsigned short>;
 template class art::Assns<recob::EndPoint2D, recob::Hit,        void>;
 template class art::Assns<recob::Event,      recob::Hit,        void>;
 template class art::Assns<recob::Event,      recob::Vertex,     void>;
@@ -201,6 +207,8 @@ template class art::Assns<recob::Track,      recob::Vertex,     void>;
 template class art::Assns<recob::OpFlash,    recob::OpHit,      void>;
 template class art::Assns<recob::OpFlash,    recob::Track,      void>;
 template class art::Assns<recob::OpFlash,    recob::Cluster,    void>;
+template class art::Assns<recob::Vertex,     recob::Cluster,    void>;
+template class art::Assns<recob::Vertex,     recob::Cluster,    unsigned short>;
 template class art::Assns<recob::Vertex,     recob::Event,      void>;
 template class art::Assns<recob::Vertex,     recob::Hit,        void>;
 template class art::Assns<recob::Vertex,     recob::PFParticle, void>;
@@ -211,11 +219,17 @@ template class art::Wrapper< art::Assns<raw::RawDigit,     recob::Wire,       vo
 template class art::Wrapper< art::Assns<raw::RawDigit,     recob::Hit,        void> >;
 template class art::Wrapper< art::Assns<recob::Wire,       raw::RawDigit,     void> >;
 template class art::Wrapper< art::Assns<recob::Wire,       recob::Hit,        void> >;
+template class art::Wrapper< art::Assns<recob::Cluster,    recob::EndPoint2D, void> >;
+template class art::Wrapper< art::Assns<recob::Cluster,    recob::EndPoint2D, unsigned short> >;
 template class art::Wrapper< art::Assns<recob::Cluster,    recob::Hit,        void> >;
 template class art::Wrapper< art::Assns<recob::Cluster,    recob::PFParticle, void> >;
 template class art::Wrapper< art::Assns<recob::Cluster,    recob::Shower,     void> >;
 template class art::Wrapper< art::Assns<recob::Cluster,    recob::SpacePoint, void> >;
 template class art::Wrapper< art::Assns<recob::Cluster,    recob::Track,      void> >;
+template class art::Wrapper< art::Assns<recob::Cluster,    recob::Vertex,     void> >;
+template class art::Wrapper< art::Assns<recob::Cluster,    recob::Vertex,     unsigned short> >;
+template class art::Wrapper< art::Assns<recob::EndPoint2D, recob::Cluster,    void> >;
+template class art::Wrapper< art::Assns<recob::EndPoint2D, recob::Cluster,    unsigned short> >;
 template class art::Wrapper< art::Assns<recob::EndPoint2D, recob::Hit,        void> >;
 template class art::Wrapper< art::Assns<recob::Event,      recob::Hit,        void> >;
 template class art::Wrapper< art::Assns<recob::Event,      recob::Vertex,     void> >;
@@ -257,6 +271,8 @@ template class art::Wrapper< art::Assns<recob::Track,      recob::Vertex,     vo
 template class art::Wrapper< art::Assns<recob::OpFlash,    recob::OpHit,      void> >;
 template class art::Wrapper< art::Assns<recob::OpFlash,    recob::Track,      void> >;
 template class art::Wrapper< art::Assns<recob::OpFlash,    recob::Cluster,    void> >;
+template class art::Wrapper< art::Assns<recob::Vertex,     recob::Cluster,    void> >;
+template class art::Wrapper< art::Assns<recob::Vertex,     recob::Cluster,    unsigned short> >;
 template class art::Wrapper< art::Assns<recob::Vertex,     recob::Hit,        void> >;
 template class art::Wrapper< art::Assns<recob::Vertex,     recob::Event,      void> >;
 template class art::Wrapper< art::Assns<recob::Vertex,     recob::PFParticle, void> >;
