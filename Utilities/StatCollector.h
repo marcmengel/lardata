@@ -201,6 +201,35 @@ namespace lar {
      * Other functions are available allowing addition of weighted and
      * unweighted data from collections.
      * For additional examples, see the unit test StatCollector_test.cc .
+     * 
+     * @bug StatCollector::Variance() is known to be very sensitive to rounding
+     * errors, since it uses the formula E[x^2] - E^2[x] and if the variance
+     * is effectively small it can become negative.
+     * No logic is currently implemented to mitigate this effect.
+     * As a workaround, if you know roughly the average of the items you are
+     * add()ing, you can subtract it from the input value; you'll have to
+     * shift the average back, while the variance will not be affected;
+     * also the sums will be shifted. Example:
+     *     
+     *     // fill the values, shifted
+     *     for (auto element: elements)
+     *       sc.add(element - elements[0], (*weight)++);
+     *     
+     *     auto sum_weights = sc.Weights();
+     *     auto sum_values = sc.Sum() - elements[0] * sc.Weights();
+     *     auto sum_values2 = sc.SumSq() + sqr(elements[0]) * sc.Weights()
+     *       + 2. * elements[0] * sc.Sum();
+     *     auto average = sc.Average() + elements[0];
+     *     auto variance = sc.Variance();
+     *     
+     * A small variance implies values of similar magnitude, and therefore
+     * subtracting any sinhle one of them (in the example, the first one) is
+     * more effective than it seems.
+     * As a rule of thumb, if you are collecting statistics for elements with
+     * N significant bits, a 2N significant bits is recommended for statistics
+     * collection. That means `double` for `float`, and `long double` for
+     * `double` (although usually `long double` is only marginally more precise
+     * than `double`, typically 25 or 50% more).
      */
     template <typename T, typename W = T>
     class StatCollector: public details::WeightTracker<W> {
