@@ -7,6 +7,7 @@
 #include "magfield.fcl"
 #include "databaseutil_argoneut.fcl"
 #include "backtracker.fcl"
+#include "seedservice.fcl"
 #include "timeservice_argoneut.fcl"
 
 BEGIN_PROLOG
@@ -19,7 +20,8 @@ argoneut_services:
  LArProperties:      @local::argoneut_properties	       
  LArFFT:             @local::argoneut_larfft  	     
  DatabaseUtil:       @local::argoneut_database    
- BackTracker:        @local::argoneut_backtracker  
+ BackTracker:        @local::argoneut_backtracker
+ SeedService:        @local::linearmapping_seedservice
  TimeService:        @local::argoneut_timeservice
 }
 
@@ -35,6 +37,7 @@ argoneut_simulation_services:
  LArFFT:             @local::argoneut_larfft         
  DatabaseUtil:       @local::argoneut_database    
  BackTracker:        @local::argoneut_backtracker  
+ SeedService:        @local::linearmapping_seedservice
  TimeService:        @local::argoneut_timeservice
 }
 
