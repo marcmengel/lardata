@@ -208,11 +208,11 @@ namespace trkf {
 		double ThisPitch = GetTrackPitch( view, s, WirePitch );
 		TrkPitch.push_back(ThisPitch);
 		resRange.push_back(Range - s*Range);
-		dQdx.push_back(Hits.at(i)->Charge()/ThisPitch);
+		dQdx.push_back(Hits.at(i)->Integral()/ThisPitch);
 		dEdx.push_back( calalg.dEdx_AMP(Hits.at(i), ThisPitch) );
 
 		if(do_now) {
-		  planeID = geo::PlaneID(Hits.at(i)->WireID().Cryostat,Hits.at(i)->WireID().TPC,Hits.at(i)->WireID().Plane);
+		  planeID = Hits.at(i)->WireID().planeID();
 		  do_now=false;
 		}
 	      }
@@ -267,13 +267,13 @@ namespace trkf {
 		double ThisPitch = GetTrackPitch( view, s, WirePitch );
 		TrkPitch.push_back(ThisPitch);
 		resRange.push_back( (1.-s) * Range);
-		dQdx.push_back(Hits.at(i)->Charge()/ThisPitch);
+		dQdx.push_back(Hits.at(i)->Integral()/ThisPitch);
 		double ThisdEdx = calalg.dEdx_AMP(Hits.at(i), ThisPitch);
 		dEdx.push_back( ThisdEdx);
 		KineticEnergy+=ThisdEdx*ThisPitch;
 				
 		if(do_now) {
-		  planeID = geo::PlaneID(Hits.at(i)->WireID().Cryostat,Hits.at(i)->WireID().TPC,Hits.at(i)->WireID().Plane);
+		  planeID = Hits.at(i)->WireID().planeID();
 		  do_now=false;
 		}
 
@@ -975,7 +975,7 @@ namespace trkf {
 	double Distance, S;
 	GetClosestApproach(Hits.at(i), S, Distance);
 
-	(hitmap[Hits.at(i)->View()])[WhichSegment(S)] += Hits.at(i)->Charge();
+	(hitmap[Hits.at(i)->View()])[WhichSegment(S)] += Hits.at(i)->Integral();
       }
 
     int NSeg = NSegments();
@@ -1017,7 +1017,7 @@ namespace trkf {
     for(size_t i=0; i!=Hits.size(); ++i)
       {
 
-	(hitmap[Hits.at(i)->View()])[WhichSegment(SValues.at(i))] += Hits.at(i)->Charge();
+	(hitmap[Hits.at(i)->View()])[WhichSegment(SValues.at(i))] += Hits.at(i)->Integral();
       }
 
     int NSeg = NSegments();

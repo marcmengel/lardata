@@ -13,6 +13,16 @@
 //#include "PxHitConverter.h"
 
 
+namespace {
+  template <typename T>
+  inline T sqr(T v) { return v*v; }
+  
+  template <typename T>
+  inline T sum_sqr(T a, T b) { return sqr(a) + sqr(b); }
+  
+} // local namespace
+
+
 namespace util{
   
   ::util::GeometryUtilities* ::util::GeometryUtilities::_me = 0;
@@ -563,7 +573,7 @@ namespace util{
    double GeometryUtilities::Get2DDistance(const util::PxPoint *point1,
 					   const util::PxPoint *point2) const	
   {
-    return TMath::Sqrt( pow((point1->w - point2->w),2)+pow((point1->t - point2->t),2) );	
+    return TMath::Sqrt(sum_sqr(point1->w - point2->w, point1->t - point2->t));
   }
 
   

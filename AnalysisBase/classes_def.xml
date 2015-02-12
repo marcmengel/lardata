@@ -15,7 +15,8 @@
   <version ClassVersion="12" checksum="1421274164"/>
   <version ClassVersion="11" checksum="495386863"/>
  </class>
- <class name="anab::ParticleID"            ClassVersion="12"                           >
+ <class name="anab::ParticleID"            ClassVersion="13"                           >
+  <version ClassVersion="13" checksum="3664244500"/>
   <version ClassVersion="12" checksum="1769449101"/>
  </class>
  <class name="anab::FlashMatch"            ClassVersion="13"                           >
