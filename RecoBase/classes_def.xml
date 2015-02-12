@@ -32,7 +32,8 @@
  <class name="lar::sparse_vector<float>"                                  />
  
  <!-- data product classes -->
- <class name="recob::Cluster"          ClassVersion="14"                   >
+ <class name="recob::Cluster"          ClassVersion="15"                   >
+  <version ClassVersion="15" checksum="3137006571"/>
   <version ClassVersion="14" checksum="2461492145"/>
   <version ClassVersion="13" checksum="3306685703"/>
   <version ClassVersion="12" checksum="1302402512"/>

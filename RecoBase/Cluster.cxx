@@ -44,7 +44,7 @@ namespace recob{
     , fChargeSum{ 0., 0. }
     , fChargeStdDev{ 0., 0. }
     , fChargeAverage{ 0., 0. }
-    , fMultipleHitWires(0.)
+    , fMultipleHitDensity(0.)
     , fWidth(0.)
     , fID(InvalidID)
     , fView(geo::kUnknown)
@@ -73,7 +73,7 @@ namespace recob{
     float summedADC,
     float summedADC_stddev,
     unsigned int n_hits,
-    float multiple_hit_wires,
+    float multiple_hit_density,
     float width,
     ID_t ID,
     geo::View_t view,
@@ -91,7 +91,7 @@ namespace recob{
     , fChargeSum{ integral, summedADC }
     , fChargeStdDev{ integral_stddev, summedADC_stddev }
     , fChargeAverage{}
-    , fMultipleHitWires(multiple_hit_wires)
+    , fMultipleHitDensity(multiple_hit_density)
     , fWidth(width)
     , fID(ID)
     , fView(view)
@@ -155,7 +155,7 @@ namespace recob{
       SummedADC() + other.SummedADC(),          // summedADC
       charge_stddev[cmADC],                     // summedADC_stddev
       n_hits,                                   // n_hits
-      0.,                                       // multiple_hit_wires
+      0.,                                       // multiple_hit_density
       0.,                                       // width
       InvalidID,                                // ID
       View(),                                   // view

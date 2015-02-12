@@ -6,7 +6,9 @@
  * 
  * Changes:
  * 20141212 Gianluca Petrillo (petrillo@fnal.gov)
- *   data architecture revision changes
+ *   data architecture revision changes (v14)
+ * 20150211 Gianluca Petrillo (petrillo@fnal.gov)
+ *   moved from MultipleHitWires() to MultipleHitDensity() (v15)
  * 
  * ****************************************************************************/
 
@@ -153,8 +155,8 @@ namespace recob {
       float fChargeAverage[NChargeModes];
       /// @}
       
-      /// Fraction of wires in the cluster with more than one hit.
-      float fMultipleHitWires;
+      /// Density of wires in the cluster with more than one hit.
+      float fMultipleHitDensity;
       
       /// A measure of the cluster width, in homogenized units.
       float fWidth;
@@ -204,7 +206,7 @@ namespace recob {
        * @param summedADC total charge from signal ADC of hits
        * @param summedADC_stddev standard deviation of signal ADC of hits
        * @param n_hits number of hits in the cluster
-       * @param multiple_hit_wires fraction of wires with more than one hit
+       * @param multiple_hit_density density of wires with more than one hit
        * @param width a measure of the cluster width
        * @param ID cluster ID
        * @param view view for this cluster
@@ -240,7 +242,7 @@ namespace recob {
         float summedADC,
         float summedADC_stddev,
         unsigned int n_hits,
-        float multiple_hit_wires,
+        float multiple_hit_density,
         float width,
         ID_t ID,
         geo::View_t view,
@@ -713,15 +715,15 @@ namespace recob {
       //@}
       
       /**
-       * @brief Fraction of wires in the cluster with more than one hit
-       * @return fraction of wires with more than one hit, or 0 if no wires
+       * @brief Density of wires in the cluster with more than one hit
+       * @return density of wires in the cluster with more than one hit
        *
-       * Returns a quantity defined as NMultiHitWires / NWires,
-       * where NWires is the number of wires hosting at least one hit of this
-       * cluster, and NMultiHitWires is the number of wires which have more
-       * than just one hit.
+       * Returns a quantity defined as NMultiHitWires / Length,
+       * where NMultiHitWires is the number of wires which have more than just
+       * one hit amd Length is an estimation of the length of the cluster, in
+       * centimetres.
        */
-      float MultipleHitWires() const { return fMultipleHitWires; }
+      float MultipleHitDensity() const { return fMultipleHitDensity; }
       
       
       /// A measure of the cluster width, in homogenized units.
@@ -747,35 +749,12 @@ namespace recob {
       /// @}
       
       /// Returns whether geometry plane is valid
-      bool hasPlane() const;
+      bool hasPlane() const { return fPlaneID.isValid; }
       
       
       /// Returns if the cluster is valid (that is, if its ID is not invalid)
       bool isValid() const { return ID() != InvalidID; }
       
-#if 0
-      // FIXME DELME
-      /// Moves the cluster to the specified plane
-      Cluster& MoveToPlane(const geo::PlaneID& new_plane);
-      
-      /// Makes the plane of this cluster invalid
-      Cluster& InvalidatePlane();
-      
-      /**
-       * @brief Merges two clusters
-       * @param other another cluster to add to this one
-       * @return a new, temporary cluster with hits from this and other
-       * @todo needs details to be defined
-       * 
-       * The two clusters must have the same view and must lay on the same
-       * plane. Otherwise, an invalid cluster is returned.
-       * If instead only one of the two locations is valid, the resulting
-       * cluster inherits it.
-       *
-       */
-      Cluster operator + (Cluster const& other) const;
-      
-#endif // 0
       
       friend std::ostream& operator << (std::ostream& o, Cluster const& c);
       friend bool          operator <  (Cluster const& a, Cluster const& b);
@@ -786,18 +765,5 @@ namespace recob {
   
 } // namespace recob
 
-#ifndef __GCCXML__
-
-inline bool recob::Cluster::hasPlane() const { return fPlaneID.isValid; }
-
-#if 0 // FIXME DELME
-inline recob::Cluster&       recob::Cluster::MoveToPlane(const geo::PlaneID& new_plane)
-  { fPlaneID = new_plane; return *this; }
-
-inline recob::Cluster&       recob::Cluster::InvalidatePlane()
-  { return MoveToPlane(geo::PlaneID()); }
-#endif // 0
-
-#endif // __GCCXML__
 
 #endif //CLUSTER_H
