@@ -38,7 +38,8 @@ namespace anab{
 			 double Chi2Muon,
 			 double MissingE,
 			 double MissingEavg,
-			 double PIDA)
+			 double PIDA,
+			 geo::PlaneID planeID)
     : fPdg(Pdg)
     , fNdf(Ndf)
     , fMinChi2(MinChi2)
@@ -51,7 +52,7 @@ namespace anab{
     , fMissingEavg(MissingEavg)
     , fPIDA(PIDA)
   {
-
+    fPlaneID = planeID;
   }
 
   //----------------------------------------------------------------------
@@ -68,6 +69,7 @@ namespace anab{
       << "\n chi2 with pion template: "   << a.fChi2Pion
       << "\n chi2 with muon template: "   << a.fChi2Muon
       << "\n PIDA:                    "   << a.fPIDA
+      << "\n planeID=(" << a.fPlaneID.Cryostat << "," << a.fPlaneID.TPC << "," << a.fPlaneID.Plane << ")"
       <<std::endl;
     
 

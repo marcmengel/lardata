@@ -13,6 +13,7 @@
 #include <iosfwd>
 #include <iostream>
 #include <iomanip>
+#include "SimpleTypesAndConstants/geo_types.h"
 
 namespace anab {
 
@@ -32,6 +33,7 @@ namespace anab {
     double fMissingE;        ///< missing energy from dead wires for contained particle
     double fMissingEavg;     ///< missing energy from dead wires using average dEdx
     double fPIDA;            ///< PID developed by Bruce Baller
+    geo::PlaneID fPlaneID;
 
 #ifndef __GCCXML__
   public:
@@ -46,7 +48,8 @@ namespace anab {
 	       double Chi2Muon,
 	       double MissingE,
 	       double MissingEavg,
-	       double PIDA);
+	       double PIDA,
+	       geo::PlaneID planeID);
 
     friend std::ostream& operator << (std::ostream &o, ParticleID const& a);
 
@@ -61,7 +64,7 @@ namespace anab {
     const double& MissingE()    const;
     const double& MissingEavg() const;
     const double& PIDA()        const;
-    
+    const geo::PlaneID& PlaneID() const;
 #endif
   };
 
@@ -80,6 +83,7 @@ inline const double& anab::ParticleID::Chi2Muon()    const { return fChi2Muon;  
 inline const double& anab::ParticleID::MissingE()    const { return fMissingE;    }
 inline const double& anab::ParticleID::MissingEavg() const { return fMissingEavg; }
 inline const double& anab::ParticleID::PIDA()        const { return fPIDA; }
+inline const geo::PlaneID& anab::ParticleID::PlaneID() const { return fPlaneID; }
 #endif
 
 #endif //ANAB_PARTICLEID_H
