@@ -56,7 +56,7 @@ linearmapping_seedservice: {
   maxUniqueEngines: 20
   
   # make sure that we don't try to use more engines than we are allowed;
-  # that would mean to overlab random seeds with the next job
+  # that would mean overlapping random seeds with the next job
   checkRange      :  true
   
   # print into the log all seeds at the end of the job
