@@ -6,7 +6,6 @@ art_make( LIBRARY_NAME  RecoBase
           LIB_LIBRARIES RawData
                         Geometry
                         Geometry_service
-                        ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
 			${ART_FRAMEWORK_SERVICES_REGISTRY}
 			${ART_PERSISTENCY_COMMON}

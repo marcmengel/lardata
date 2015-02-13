@@ -36,13 +36,18 @@ namespace util{
     
   public:
     
-     double charge; ///< area charge
+    double charge; ///< area charge
+    double sumADC; ///< sum of ADCs
     double peak;   ///< peak amplitude
     
     PxHit(){
       Clear();
     }
-    ~PxHit(){}
+    
+    PxHit(unsigned int pp,double ww,double tt,
+      double chrg, double sumadc, double pk):
+      PxPoint(pp, ww, tt), charge(chrg), sumADC(sumadc), peak(pk)
+      {}
 
     void Clear()
     {
@@ -77,8 +82,6 @@ namespace util{
     }   
 
     PxLine(){Clear();}
-
-    ~PxLine(){}
 
     void Clear()
     {

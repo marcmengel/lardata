@@ -87,6 +87,7 @@ namespace util {
     // Convolute a time series with deconvolution kernel.
     template <class T> void Deconvolute(std::vector<T>& func) const;
 
+
     // Configuration methods.
 
     // Only reset deconvolution
@@ -95,6 +96,7 @@ namespace util {
     void Reset();
 
     void save_response(){ fResponse_save.clear(); fResponse_save=fResponse;}
+    void set_normflag(bool flag){fNorm = flag;}
 
     // Add a time domain response function.
     // Updates overall response function and convolution kernel.
@@ -151,8 +153,8 @@ namespace util {
     // Set to -1 if one wants to normalize to - ADC count
     int fDeconvKernelPolarity;
 
-    /* // Xin added */
-    /* int fTimeOffset; */
+    // Xin added */
+    bool fNorm; 
   };
 }
 

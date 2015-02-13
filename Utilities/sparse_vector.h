@@ -36,7 +36,7 @@ namespace lar {
 
 /**
  * @brief Little class storing a value.
- * @param T type of the stored value
+ * @tparam T type of the stored value
  * 
  * This class stores a constant value and returns it as conversion to type T.
  * It also acts as a left-value of type T, except that the assigned value
@@ -70,7 +70,7 @@ class const_value_box {
 
 #ifndef __GCCXML__
 /// @brief A constant iterator returning always the same value
-/// @param T type of the value returned by dereferenciation
+/// @tparam T type of the value returned by dereferenciation
 template <typename T>
 class value_const_iterator:
 	public std::iterator<std::random_access_iterator_tag, T>
@@ -184,7 +184,7 @@ class value_iterator: public value_const_iterator<T> {
 //---
 /**
  * @brief A range (interval) of integers
- * @param SIZE type of the indices (expected integral)
+ * @tparam SIZE type of the indices (expected integral)
  * 
  * Includes a first and an after-the-last value, and some relation metods.
  */
@@ -295,7 +295,7 @@ class range_t {
 
 /** ****************************************************************************
  * @brief A sparse vector
- * @param T type of data stored in the vector
+ * @tparam T type of data stored in the vector
  * @todo backward iteration; reverse iterators; iterator on non-void elements
  * only; iterator on non-void elements only, returning a pair (index;value)
  * 
@@ -501,6 +501,7 @@ class sparse_vector {
 	/// Default constructor: an empty vector
 	sparse_vector(): nominal_size(0), ranges() {}
 	
+	
 	/// Constructor: a vector with new_size elements in the void
 	sparse_vector(size_type new_size): nominal_size(0), ranges()
 		{ resize(new_size); }
@@ -515,6 +516,27 @@ class sparse_vector {
 		{ add_range(offset, from.begin(), from.end()); }
 	
 #ifndef __GCCXML__
+	/// Copy constructor: default
+	sparse_vector(sparse_vector const&) = default;
+	
+	/// Move constructor
+	sparse_vector(sparse_vector&& from)
+		: nominal_size(from.nominal_size)
+		, ranges(std::move(from.ranges))
+		{ from.nominal_size = 0; }
+	
+	/// Copy assignment: default
+	sparse_vector& operator=(sparse_vector const&) = default;
+	
+	/// Move assignment
+	sparse_vector& operator=(sparse_vector&& from)
+		{
+			ranges = std::move(from.ranges);
+			nominal_size = from.nominal_size;
+			from.nominal_size = 0;
+			return *this;
+		} // operator= (sparse_vector&&)
+	
 	/**
 	 * @brief Constructor: a solid vector from an existing STL vector
 	 * @param from vector to move data from
@@ -523,8 +545,12 @@ class sparse_vector {
 	sparse_vector(vector_t&& from, size_type offset = 0):
 		nominal_size(0), ranges()
 		{ add_range(offset, std::move(from)); }
-#endif // __GCCXML__
 	
+	
+	/// Destructor: default
+	~sparse_vector() = default;
+	
+#endif // __GCCXML__
 	
 	//  - - - STL-like interface
 	/// Removes all the data, making the vector empty
@@ -533,6 +559,9 @@ class sparse_vector {
 	
 	/// Returns the size of the vector
 	size_type size() const { return nominal_size; }
+	
+	/// Returns whether the vector is empty
+	bool empty() const { return size() == 0; }
 	
 	/// Returns the capacity of the vector (compatibility only)
 	size_type capacity() const { return nominal_size; }
@@ -550,8 +579,8 @@ class sparse_vector {
 	iterator end();
 	const_iterator begin() const;
 	const_iterator end() const;
-	const_iterator cbegin();
-	const_iterator cend();
+	const_iterator cbegin() const { return begin(); }
+	const_iterator cend() const { return begin(); }
 	//@}
 	
 	/// Access to an element (read only)
@@ -629,7 +658,7 @@ class sparse_vector {
 	//@{
 	/**
 	 * @brief Copies data from a sequence between two iterators
-	 * @param ITER type of iterator
+	 * @tparam ITER type of iterator
 	 * @param first iterator pointing to the first element to be copied
 	 * @param last iterator pointing after the last element to be copied
 	 *
@@ -640,7 +669,7 @@ class sparse_vector {
 	
 	/**
 	 * @brief Copies data from a container
-	 * @param CONT type of container supporting the standard begin/end interface
+	 * @tparam CONT type of container supporting the standard begin/end interface
 	 * @param new_data container with the data to be copied
 	 *
 	 * The previous content of the sparse vector is lost.
@@ -673,6 +702,9 @@ class sparse_vector {
 	
 	/// Returns the internal list of non-void ranges
 	size_type n_ranges() const { return ranges.size(); }
+	
+	/// Returns the i-th non-void range (zero-based)
+	const datarange_t& range(size_t i) const { return ranges[i]; }
 	
 	/// Returns a constant iterator to the first data range
 	range_const_iterator begin_range() const { return ranges.begin(); }
@@ -716,7 +748,7 @@ class sparse_vector {
 	//@{
 	/**
 	 * @brief Adds a sequence of elements as a range with specified offset
-	 * @param ITER type of iterator
+	 * @tparam ITER type of iterator
 	 * @param offset where to add the elements
 	 * @param first iterator to the first element to be added
 	 * @param last iterator after the last element to be added
@@ -732,7 +764,7 @@ class sparse_vector {
 	
 	/**
 	 * @brief Copies the elements in container to a range with specified offset
-	 * @param CONT type of container supporting the standard begin/end interface
+	 * @tparam CONT type of container supporting the standard begin/end interface
 	 * @param offset where to add the elements
 	 * @param new_data container holding the data to be copied
 	 * @return the range where the new data was added
@@ -923,7 +955,7 @@ class sparse_vector {
 
 /**
  * @brief Prints a sparse vector into a stream
- * @param T template type of the sparse vector
+ * @tparam T template type of the sparse vector
  * @param out output stream
  * @param v the sparse vector to be written
  * @return the output stream (out)
@@ -989,8 +1021,8 @@ class lar::sparse_vector<T>::datarange_t: public range_t<size_type> {
 	iterator end() { return values.end(); }
 	const_iterator begin() const { return values.begin(); }
 	const_iterator end() const { return values.end(); }
-	const_iterator cbegin() { return values.begin(); }
-	const_iterator cend() { return values.end(); }
+	const_iterator cbegin() const { return values.cbegin(); }
+	const_iterator cend() const { return values.cend(); }
 	//@}
 	
 	//@{
@@ -1105,8 +1137,6 @@ class lar::sparse_vector<T>::reference: public const_reference {
 #endif // __GCCXML__
 	operator value_type&()
 		{ return const_cast<value_type&>(*const_reference::ptr); }
-	
-	operator const value_type&() const { return *const_reference::ptr; }
 	
 		protected:
 	explicit reference(const const_reference& from): const_reference(from) {}
@@ -1400,17 +1430,6 @@ template <typename T>
 inline typename lar::sparse_vector<T>::const_iterator
 	lar::sparse_vector<T>::end() const
 	{ return const_iterator(*this, typename const_iterator::special::end()); }
-
-template <typename T>
-inline typename lar::sparse_vector<T>::const_iterator
-	lar::sparse_vector<T>::cbegin()
-	{ return const_iterator(*this, typename const_iterator::special::begin()); }
-
-template <typename T>
-inline typename lar::sparse_vector<T>::const_iterator
-	lar::sparse_vector<T>::cend()
-	{ return const_iterator(*this, typename const_iterator::special::end()); }
-
 
 template <typename T>
 typename lar::sparse_vector<T>::value_type lar::sparse_vector<T>::operator[]
