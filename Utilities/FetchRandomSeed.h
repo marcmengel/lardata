@@ -14,10 +14,43 @@
 // framework libraries
 #include "fhiclcpp/ParameterSet.h"
 #include "artextensions/SeedService/SeedService.hh"
+#include "art/Framework/Principal/Event.h"
 
 
 namespace lar {
   namespace util {
+    
+    
+    /// Class storing a seed in the valid range
+    class ValidSeed {
+        public:
+      using seed_t = artext::SeedService::seed_t; ///< type of random seed
+      
+      static constexpr seed_t Min =         1; ///< Smallest allowed seed
+      static constexpr seed_t Max = 900000000; ///< Largest allowed seed
+      
+      /// Forces the specified value into the allowed seed range
+      template <typename T>
+      static constexpr seed_t MakeValid(T s)
+        { return Min + seed_t(s) % (Max - Min + 1); }
+      
+      /// Constructor: converts from a value
+      template <typename T>
+      ValidSeed(T s): seed(MakeValid(s)) {}
+      
+      ValidSeed(const ValidSeed&) = delete;
+      ValidSeed(ValidSeed&&) = default;
+      ValidSeed& operator= (const ValidSeed&) = delete;
+      ValidSeed& operator= (ValidSeed&&) = default;
+      
+      /// Return the converted seeda
+      operator seed_t() const { return seed; }
+      
+        protected:
+      seed_t seed; ///< the converted seed
+    }; // class ValidSeed
+    
+    
     
     //@{
     /** ************************************************************************
@@ -81,6 +114,30 @@ namespace lar {
       (std::string instance = "")
       { return FetchRandomSeed(instance, nullptr); }
     //@}
+    
+    
+    /**
+     * @brief Creates a seed specific to the specified event and current module
+     * @param event the event to extract the seed from
+     * @param instance instance name of the random engine
+     * @return a valid seed
+     * 
+     * The seed is a hash value, constrained in the valid seed range
+     * (ValidSeed::Min to ValidSeed::Max).
+     * The value includes information from the event: run, subrun and event
+     * number, and time stamp. It also includes the label of the current module
+     * and the optional instance name.
+     * 
+     * @note Two different processes with the same module label will yield to
+     * the same seed for each event.
+     * 
+     * @note The seed itself is not a good random number, since the lowest seeds
+     * have larger probability than the highest, due to the simple method to
+     * constraint the hash value into the valid seed range.
+     */
+    artext::SeedService::seed_t FetchEventRandomSeed
+      (art::Event const& event, std::string instance = "");
+    
     
   } // namespace util
 } // namespace lar
