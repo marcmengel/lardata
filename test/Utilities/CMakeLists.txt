@@ -4,6 +4,8 @@ cet_test(BulkAllocator_test USE_BOOST_UNIT)
 cet_test(NestedIterator_test USE_BOOST_UNIT)
 cet_test(CountersMap_test USE_BOOST_UNIT)
 cet_test(sparse_vector_test)
+cet_test(StatCollector_test USE_BOOST_UNIT)
+cet_test(Dereference_test USE_BOOST_UNIT)
 
 # run a FHiCL file with only ComputePi inside
 cet_test(timingreference_test HANDBUILT

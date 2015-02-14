@@ -9,11 +9,20 @@
 ////////////////////////////////////////////////////////////////////////
 #include "PxHitConverter.h"
 
+
+// C/C++ standard libraries
+#include <algorithm> // std::transform(), std::iota()
+#include <iterator> // std::back_inserter()
+#include <functional> // std::mem_fun()
+
+
 namespace util {
 
   
    /// Generate: from 1 set of hits => 1 set of PxHits using indexes (association)
-  void PxHitConverter::GeneratePxHit(const std::vector<art::Ptr<recob::Hit>> hits,
+  
+  
+  void PxHitConverter::GeneratePxHit(std::vector<art::Ptr<recob::Hit>> const& hits,
 				     std::vector<util::PxHit> &pxhits) const
   {
 
@@ -31,22 +40,32 @@ namespace util {
     
   }
   
-  void PxHitConverter::GenerateSinglePxHit(const art::Ptr<recob::Hit> hit,
-					   util::PxHit &pxhit) const
+  
+  void PxHitConverter::GenerateSinglePxHit(art::Ptr<recob::Hit> const& hit,
+                                           util::PxHit &pxhit) const
+  {
+    pxhit = ToPxHit(hit);
+  }
+  
+  
+  PxHit PxHitConverter::HitToPxHit(recob::Hit const& hit) const
   {
     
     util::GeometryUtilities  gser;
-    UChar_t plane = hit->WireID().Plane;
     
-    pxhit.t = hit->PeakTime() * gser.TimeToCm();
-    pxhit.w = hit->WireID().Wire     * gser.WireToCm();
+    PxHit pxhit;
+    pxhit.t      = hit.PeakTime() * gser.TimeToCm();
+    pxhit.w      = hit.WireID().Wire * gser.WireToCm();
+    pxhit.charge = hit.Integral();
+    pxhit.sumADC = hit.SummedADC();
+    pxhit.peak   = hit.PeakAmplitude();
+    pxhit.plane  = hit.WireID().Plane;
     
-    pxhit.charge = hit->Charge();
-    pxhit.peak   = hit->Charge(true);
-    pxhit.plane  = plane;  
-    
-  }
-    
+    return pxhit;
+  } // PxHitConverter::HitToPxHit(recob::Hit)
+  
+  
+  
   /// Generate: from 1 set of hits => 1 set of PxHits using indexes (association)
   void PxHitConverter::GeneratePxHit(const std::vector<unsigned int>& hit_index,
 				     const std::vector<art::Ptr<recob::Hit>> hits,
