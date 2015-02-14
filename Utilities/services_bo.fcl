@@ -7,6 +7,7 @@
 #include "magfield.fcl"
 #include "databaseutil_bo.fcl"
 #include "backtracker.fcl"
+#include "seedservice_bo.fcl"
 #include "timeservice_bo.fcl"
 
 BEGIN_PROLOG
@@ -14,27 +15,29 @@ BEGIN_PROLOG
 bo_services:
 {
  ExptGeoHelperInterface: @local::bo_geometry_helper
- Geometry:           @local::bo_geo 	       
- DetectorProperties: @local::bo_detproperties
- LArProperties:      @local::bo_properties	       
- LArFFT:             @local::bo_larfft  	       
- DatabaseUtil:	     @local::bo_database    
- TimeService:        @local::bo_timeservice
+ Geometry:               @local::bo_geo
+ DetectorProperties:     @local::bo_detproperties
+ LArProperties:          @local::bo_properties
+ LArFFT:                 @local::bo_larfft
+ DatabaseUtil:           @local::bo_database
+ TimeService:            @local::bo_timeservice
+ SeedService:            @local::bo_seedservice
 }
 
 bo_simulation_services:
 {
- LArG4Parameters:    @local::bo_largeantparameters
- LArVoxelCalculator: @local::bo_larvoxelcalculator
- MagneticField:      @local::no_mag
+ LArG4Parameters:        @local::bo_largeantparameters
+ LArVoxelCalculator:     @local::bo_larvoxelcalculator
+ MagneticField:          @local::no_mag
  ExptGeoHelperInterface: @local::bo_geometry_helper
- Geometry:           @local::bo_geo          
- DetectorProperties: @local::bo_detproperties
- LArProperties:      @local::bo_properties            
- LArFFT:             @local::bo_larfft      
- DatabaseUtil:	     @local::bo_database    
- BackTracker:        @local::bo_backtracker  
- TimeService:        @local::bo_timeservice
+ Geometry:               @local::bo_geo
+ DetectorProperties:     @local::bo_detproperties
+ LArProperties:          @local::bo_properties
+ LArFFT:                 @local::bo_larfft
+ DatabaseUtil:           @local::bo_database
+ BackTracker:            @local::bo_backtracker
+ TimeService:            @local::bo_timeservice
+ SeedService:            @local::bo_seedservice
 }
 
 

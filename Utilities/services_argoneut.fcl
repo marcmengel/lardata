@@ -7,7 +7,7 @@
 #include "magfield.fcl"
 #include "databaseutil_argoneut.fcl"
 #include "backtracker.fcl"
-#include "seedservice.fcl"
+#include "seedservice_argoneut.fcl"
 #include "timeservice_argoneut.fcl"
 
 BEGIN_PROLOG
@@ -15,30 +15,30 @@ BEGIN_PROLOG
 argoneut_services:
 {
  ExptGeoHelperInterface: @local::argoneut_geometry_helper
- Geometry:           @local::argoneut_geo 	       
- DetectorProperties: @local::argoneut_detproperties
- LArProperties:      @local::argoneut_properties	       
- LArFFT:             @local::argoneut_larfft  	     
- DatabaseUtil:       @local::argoneut_database    
- BackTracker:        @local::argoneut_backtracker
- SeedService:        @local::linearmapping_seedservice
- TimeService:        @local::argoneut_timeservice
+ Geometry:               @local::argoneut_geo
+ DetectorProperties:     @local::argoneut_detproperties
+ LArProperties:          @local::argoneut_properties
+ LArFFT:                 @local::argoneut_larfft
+ DatabaseUtil:           @local::argoneut_database
+ BackTracker:            @local::argoneut_backtracker
+ SeedService:            @local::argoneut_seedservice
+ TimeService:            @local::argoneut_timeservice
 }
 
 argoneut_simulation_services:
 {
- LArG4Parameters:    @local::argoneut_largeantparameters
- LArVoxelCalculator: @local::argoneut_larvoxelcalculator
- MagneticField:      @local::no_mag
+ LArG4Parameters:        @local::argoneut_largeantparameters
+ LArVoxelCalculator:     @local::argoneut_larvoxelcalculator
+ MagneticField:          @local::no_mag
  ExptGeoHelperInterface: @local::argoneut_geometry_helper
- Geometry:           @local::argoneut_geo          
- DetectorProperties: @local::argoneut_detproperties
- LArProperties:      @local::argoneut_properties            
- LArFFT:             @local::argoneut_larfft         
- DatabaseUtil:       @local::argoneut_database    
- BackTracker:        @local::argoneut_backtracker  
- SeedService:        @local::linearmapping_seedservice
- TimeService:        @local::argoneut_timeservice
+ Geometry:               @local::argoneut_geo
+ DetectorProperties:     @local::argoneut_detproperties
+ LArProperties:          @local::argoneut_properties
+ LArFFT:                 @local::argoneut_larfft
+ DatabaseUtil:           @local::argoneut_database
+ BackTracker:            @local::argoneut_backtracker
+ SeedService:            @local::argoneut_seedservice
+ TimeService:            @local::argoneut_timeservice
 }
 
 
