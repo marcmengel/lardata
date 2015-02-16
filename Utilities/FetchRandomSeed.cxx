@@ -54,13 +54,14 @@ namespace lar {
 artext::SeedService::seed_t lar::util::FetchRandomSeed(
   std::string instance,
   fhicl::ParameterSet const* pset,
-  std::string seedcfgname /* = "Seed" */
+  std::initializer_list<std::string> seedcfgnames
 ) {
   artext::SeedService::seed_t seed;
   
   // 1. if we have a parameter set to look for... well, look for it
   if (pset) {
-    if (pset->get_if_present(seedcfgname, seed)) return seed;
+    for (std::string seedcfgname: seedcfgnames)
+      if (pset->get_if_present(seedcfgname, seed)) return seed;
   }
   
   // 2. check if SeedService is present... the hard way

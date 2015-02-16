@@ -10,6 +10,7 @@
 
 // C/C++ standard libraries
 #include <string>
+#include <initializer_list>
 
 // framework libraries
 #include "fhiclcpp/ParameterSet.h"
@@ -57,6 +58,27 @@ namespace lar {
      * @brief Retrieves a random seed
      * @param instance engine instance name
      * @param pset parameter set to get the seed from
+     * @param seedcfgnames names of possible seed parameter in the confiugration
+     * @return a random seed
+     * @see FetchRandomSeed(std::string, fhicl::ParameterSet const*, std::string)
+     * 
+     * This function works as
+     * FetchRandomSeed(std::string, fhicl::ParameterSet const*, std::string),
+     * except that all strings in seedcfgnames are tried one after another,
+     * and the first valid parameter is used to read the seed.
+     * The strings must be specified as initializer list, that is as a
+     * comma-separated list enclosed in braces.
+     */
+    artext::SeedService::seed_t FetchRandomSeed(
+      std::string instance,
+      fhicl::ParameterSet const* pset,
+      std::initializer_list<std::string> seedcfgnames
+      );
+    
+    /**
+     * @brief Retrieves a random seed
+     * @param instance engine instance name
+     * @param pset parameter set to get the seed from
      * @param seedcfgname name of the seed parameter in the confiugration
      * @return a random seed
      *
@@ -68,13 +90,33 @@ namespace lar {
      *    it will return the seed we are looking for, for the specified instance
      * -# extract the seed ourself; this is based taken from the clock
      *
-     *
      */
     artext::SeedService::seed_t FetchRandomSeed(
       std::string instance,
       fhicl::ParameterSet const* pset,
       std::string seedcfgname = "Seed"
-      );
+      )
+      { return FetchRandomSeed(instance, pset, { seedcfgname }); }
+    
+    /**
+     * @brief Retrieves a random seed
+     * @param pset parameter set to get the seed from
+     * @param seedcfgnames names of possible seed parameter in the confiugration
+     * @return a random seed
+     * @see FetchRandomSeed(fhicl::ParameterSet const*, std::string)
+     * 
+     * This function works as
+     * FetchRandomSeed(fhicl::ParameterSet const*, std::string),
+     * except that all strings in seedcfgnames are tried one after another,
+     * and the first valid parameter is used to read the seed.
+     * The strings must be specified as initializer list, that is as a
+     * comma-separated list enclosed in braces.
+     */
+    inline artext::SeedService::seed_t FetchRandomSeed(
+      fhicl::ParameterSet const* pset,
+      std::initializer_list<std::string> seedcfgnames
+      )
+      { return FetchRandomSeed("", pset, seedcfgnames); }
     
     /**
      * @brief Retrieves a random seed
@@ -89,7 +131,6 @@ namespace lar {
      * -# ask the seed service: if the SeedService is configured, *as it should*,
      *    it will return the seed we are looking for
      * -# extract the seed ourself; this is based taken from the clock
-     *
      *
      */
     inline artext::SeedService::seed_t FetchRandomSeed(
