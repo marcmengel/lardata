@@ -34,8 +34,8 @@ namespace recob {
 
 #ifndef __GCCXML__
   public:
-    SpacePoint(double *xyz,
-	       double *err,
+    SpacePoint(double const*xyz,
+	       double const*err,
 	       double  chisq,
 	       int     id=util::kBogusI);
 

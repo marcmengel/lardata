@@ -23,8 +23,8 @@ namespace recob{
   }
 
   //----------------------------------------------------------------------
-  SpacePoint::SpacePoint(double *xyz,
-       double *err,
+  SpacePoint::SpacePoint(double const*xyz,
+       double const*err,
        double  chisq,
        int    id)
     : fID(id)
