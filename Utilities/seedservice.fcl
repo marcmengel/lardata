@@ -79,6 +79,17 @@ random_seedservice: {
 } # random_seedservice
 
 
+per_event_seedservice: {
+  # policy: perEvent
+  # on each event, the seed is computed from event information
+  # 
+  policy            :    "perEvent"
+  
+  # print into the log all seeds at the end of the job
+  endOfJobSummary   :  false
+} # per_event_seedservice
+
+
 # choose our autoIncrement configuration as "standard"
 standard_seedservice: @local::autoincrement_seedservice
 

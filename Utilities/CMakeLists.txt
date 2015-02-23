@@ -7,7 +7,6 @@ art_make( NO_PLUGINS
                         TimeService_service
                         RecoBase
                         Geometry
-                        SeedService_service
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
