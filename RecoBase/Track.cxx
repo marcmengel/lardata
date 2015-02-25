@@ -172,7 +172,7 @@ namespace recob{
   // by default, gives pitch at the beginning of the trajectory
   double Track::PitchInView(geo::View_t view,
 			    size_t trajectory_point) const
-  {
+  { 
     if(view == geo::kUnknown)
       cet::exception("Track") << "Warning cannot obtain pitch for unknown view\n";
     
@@ -181,10 +181,26 @@ namespace recob{
 			      << trajectory_point
 			      << " when direction vector size is " 
 			      << fDir.size() << ".\n";
+    if(trajectory_point > fXYZ.size())
+      cet::exception("Track") << "ERROR: Asking for trajectory point " 
+			      << trajectory_point
+			      << " when XYZ vector size is " 
+			      << fXYZ.size() << ".\n";
     
     art::ServiceHandle<geo::Geometry> geo;
-    double wirePitch   = geo->WirePitch(view);
-    double angleToVert = geo->WireAngleToVertical(view) - 0.5*TMath::Pi();
+    int TPC  = 0;
+    int Cryo = 0;
+    double Position[3];
+    Position[0] = fXYZ[trajectory_point].X();
+    Position[1] = fXYZ[trajectory_point].Y();
+    Position[2] = fXYZ[trajectory_point].Z();
+    geo::TPCID tpcid = geo->FindTPCAtPosition ( Position );
+    if (tpcid.isValid) {
+      TPC  = tpcid.TPC;
+      Cryo = tpcid.Cryostat;
+    }
+    double wirePitch   = geo->WirePitch(view, TPC, Cryo);
+    double angleToVert = geo->WireAngleToVertical(view, TPC, Cryo) - 0.5*TMath::Pi();
 
     //(sin(angleToVert),cos(angleToVert)) is the direction perpendicular to wire
     double cosgamma = std::abs(std::sin(angleToVert)*fDir[trajectory_point].Y() +
