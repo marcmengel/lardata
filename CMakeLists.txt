@@ -45,7 +45,6 @@ cet_report_compiler_flags()
 find_ups_product( larcore v1_00_00 )
 find_ups_product( nutools v1_00_00 )
 find_ups_product( postgresql v9_1_5 )
-find_ups_product( artextensions v1_00_01 )
 
 #  Find all the libraries needed by our dependent CMakeList.txt files
 cet_find_library( BOOST_SERIALIZATION NAMES boost_serialization PATHS ENV BOOST_LIB NO_DEFAULT_PATH )
