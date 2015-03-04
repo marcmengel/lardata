@@ -9,8 +9,8 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "RecoBase/OpFlash.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
+
+#include <cstddef> // std::size_t
 
 namespace recob{
 

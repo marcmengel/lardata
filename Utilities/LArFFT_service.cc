@@ -42,7 +42,7 @@ void util::LArFFT::InitializeFFT(){
 
   int i;
   for(i = 1; i < fSize; i *= 2){ }   
-  mf::LogInfo("LArFFt") << "Requested size: " << fSize << " FFT size: " << i ;
+  // mf::LogInfo("LArFFt") << "Requested size: " << fSize << " FFT size: " << i ;
    
   fSize=i;
   fFreqSize = fSize/2+1;  

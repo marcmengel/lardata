@@ -8,6 +8,7 @@
 #include "databaseutil.fcl"
 #include "backtracker.fcl"
 #include "photpropservices.fcl"
+#include "seedservice_csu40L.fcl"
 #include "timeservice_csu40L.fcl"
 
 BEGIN_PROLOG
@@ -21,6 +22,7 @@ csu40L_services:
  LArFFT:                         @local::standard_larfft
  DatabaseUtil:                   @local::standard_database
  TimeService:                    @local::csu40L_timeservice
+ SeedService:                    @local::csu40L_seedservice
 }
 
 csu40L_simulation_services:
@@ -36,4 +38,5 @@ csu40L_simulation_services:
  DatabaseUtil:                   @local::standard_database
  BackTracker:                    @local::standard_backtracker
  TimeService:                    @local::csu40L_timeservice
+ SeedService:                    @local::csu40L_seedservice
 }
