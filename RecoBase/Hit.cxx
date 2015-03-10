@@ -88,11 +88,13 @@ namespace recob {
     o << std::setiosflags(std::ios::fixed) << std::setprecision(2);
     o <<   " Channel "          << std::setw(5) << std::right << hit.Channel()
       <<   " View = "           << std::setw(3) << std::right << hit.View()
+      <<   " Signal type = "    << std::setw(3) << std::right << hit.SignalType()
       <<   " Wire = "           << std::setw(3) << std::right << hit.WireID()
       << "\n\tStartTick = "     << std::setw(7) << std::right << hit.StartTick()
         << "\tEndTick = "       << std::setw(7) << std::right << hit.EndTick()
         << "\tPeakTime = "      << std::setw(7) << std::right << hit.PeakTime()
         << " +/- "              << std::setw(7) << std::right << hit.SigmaPeakTime()
+        << "\tRMS = "           << std::setw(7) << std::right << hit.RMS()
       << "\n\tIntegral = "      << std::setw(7) << std::right << hit.Integral()
         << " +/- "              << std::setw(7) << std::right << hit.SigmaIntegral()
         << "\tADCsum = "        << std::setw(7) << std::right << hit.SummedADC()
