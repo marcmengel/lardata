@@ -12,7 +12,7 @@
 
 // C/C++ standard library
 #include <utility> // std::move()
-#include <algorithm> // std::accumulate()
+#include <algorithm> // std::accumulate(), std::max()
 #include <limits> // std::numeric_limits<>
 
 // art libraries
@@ -404,7 +404,8 @@ namespace recob {
   
   //----------------------------------------------------------------------
   void HitCollectionAssociator::use_hits
-    (std::unique_ptr<std::vector<recob::Hit>>&& srchits) {
+    (std::unique_ptr<std::vector<recob::Hit>>&& srchits)
+  {
     hits = std::move(srchits);
   } // HitCollectionAssociator::use_hits()
   
@@ -420,6 +421,8 @@ namespace recob {
   void HitCollectionAssociator::prepare_associations
     (std::vector<recob::Hit> const& srchits, art::Event& event)
   {
+    if (!RawDigitAssns && !WireAssns) return; // no associations needed
+    
     // we make the associations anew
     if (RawDigitAssns) ClearAssociations(*RawDigitAssns);
     if (WireAssns)     ClearAssociations(*WireAssns);
@@ -445,10 +448,10 @@ namespace recob {
       // code will have FindOneP throw if that was not the case
       // (that's what we would do here anyway, maybe with a better message...)
       std::unique_ptr<art::FindOneP<raw::RawDigit>> WireToDigit;
-      WireToDigit.reset(bUseWiresForDigits
-        ? new art::FindOneP<raw::RawDigit>(hWires, event, wires_label)
-        : nullptr
-        );
+      if (bUseWiresForDigits) {
+        WireToDigit.reset
+          (new art::FindOneP<raw::RawDigit>(hWires, event, wires_label));
+      }
       
       // add associations, hit by hit:
       for (size_t iHit = 0; iHit < srchits.size(); ++iHit) {
@@ -519,6 +522,129 @@ namespace recob {
     } // if we have rawdigit label
     
   } // HitCollectionAssociator::put_into()
+  
+  
+  //****************************************************************************
+  //***  HitRefinerAssociator
+  //----------------------------------------------------------------------
+  HitRefinerAssociator::HitRefinerAssociator(
+    art::EDProducer& producer, art::Event& evt,
+    art::InputTag const& HitModuleLabel,
+    std::string instance_name /* = "" */,
+    bool doWireAssns /* = true */, bool doRawDigitAssns /* = true */
+  )
+    : HitAndAssociationsWriterBase
+        (producer, evt, instance_name, doWireAssns, doRawDigitAssns)
+    , hits_label(HitModuleLabel)
+  {
+    hits.reset(new std::vector<recob::Hit>);
+  } // HitRefinerAssociator::HitRefinerAssociator()
+  
+  
+  //----------------------------------------------------------------------
+  void HitRefinerAssociator::use_hits
+    (std::unique_ptr<std::vector<recob::Hit>>&& srchits)
+  {
+    hits = std::move(srchits);
+  } // HitRefinerAssociator::use_hits()
+  
+  
+  //----------------------------------------------------------------------
+  void HitRefinerAssociator::put_into(art::Event& event) {
+    prepare_associations(event);
+    HitAndAssociationsWriterBase::put_into(event);
+  } // HitRefinerAssociator::put_into()
+  
+  
+  //----------------------------------------------------------------------
+  void HitRefinerAssociator::prepare_associations
+    (std::vector<recob::Hit> const& srchits, art::Event& event)
+  {
+    if (!RawDigitAssns && !WireAssns) return; // no associations needed
+    
+    // we make the associations anew
+    if (RawDigitAssns) ClearAssociations(*RawDigitAssns);
+    
+    // read the hits; this is going to hurt performances...
+    // no solution to that until there is a way to have a lazy read
+    art::ValidHandle<std::vector<recob::Hit>> hHits
+      = event.getValidHandle<std::vector<recob::Hit>>(hits_label);
+    
+    // now get the associations
+    if (WireAssns) {
+      // we make the associations anew
+      ClearAssociations(*WireAssns);
+      
+      // find the associations between the hits and the wires
+      art::FindOneP<recob::Wire> HitToWire(hHits, event, hits_label);
+      if (!HitToWire.isValid()) {
+        throw art::Exception(art::errors::ProductNotFound)
+          << "Can't find the associations between hits and wires produced by '"
+          << hits_label << "'!";
+      } // if no association
+      
+      // fill a map of wire vs. channel number
+      std::vector<art::Ptr<recob::Wire>> WireMap;
+      for (size_t iAssn = 0; iAssn < HitToWire.size(); ++iAssn) {
+        art::Ptr<recob::Wire> wire = HitToWire.at(iAssn);
+        if (wire.isNull()) continue;
+        size_t channelID = (size_t) wire->Channel();
+        if (WireMap.size() <= channelID) // expand the map of necessary
+          WireMap.resize(std::max(channelID + 1, 2 * WireMap.size()), {});
+        WireMap[channelID] = std::move(wire);
+      } // for
+      
+      // now go through all the hits...
+      for (size_t iHit = 0; iHit < srchits.size(); ++iHit) {
+        recob::Hit const& hit = srchits[iHit];
+        size_t channelID = (size_t) hit.Channel();
+        
+        // no association if there is no wire to associate with
+        if ((channelID >= WireMap.size()) || !WireMap[channelID]) continue;
+        
+        // create an association using the same wire pointer
+        WireAssns->addSingle(WireMap[channelID], CreatePtr(iHit));
+      } // for hits
+    } // if wire associations
+    
+    // now get the associations
+    if (RawDigitAssns) {
+      // we make the associations anew
+      ClearAssociations(*RawDigitAssns);
+      
+      // find the associations between the hits and the raw digits
+      art::FindOneP<raw::RawDigit> HitToDigits(hHits, event, hits_label);
+      if (!HitToDigits.isValid()) {
+        throw art::Exception(art::errors::ProductNotFound)
+          << "Can't find the associations between hits and raw digits"
+          << " produced by '" << hits_label << "'!";
+      } // if no association
+      
+      // fill a map of digits vs. channel number
+      std::vector<art::Ptr<raw::RawDigit>> DigitMap;
+      for (size_t iAssn = 0; iAssn < HitToDigits.size(); ++iAssn) {
+        art::Ptr<raw::RawDigit> digits = HitToDigits.at(iAssn);
+        if (digits.isNull()) continue;
+        size_t channelID = (size_t) digits->Channel();
+        if (DigitMap.size() <= channelID) // expand the map of necessary
+          DigitMap.resize(std::max(channelID + 1, 2 * DigitMap.size()), {});
+        DigitMap[channelID] = std::move(digits);
+      } // for
+      
+      // now go through all the hits...
+      for (size_t iHit = 0; iHit < srchits.size(); ++iHit) {
+        recob::Hit const& hit = srchits[iHit];
+        size_t channelID = (size_t) hit.Channel();
+        
+        // no association if there is no digits to associate with
+        if ((channelID >= DigitMap.size()) || !DigitMap[channelID]) continue;
+        
+        // create an association using the same digits pointer
+        RawDigitAssns->addSingle(DigitMap[channelID], CreatePtr(iHit));
+      } // for hits
+    } // if digit associations
+    
+  } // HitRefinerAssociator::put_into()
   
   
   //----------------------------------------------------------------------

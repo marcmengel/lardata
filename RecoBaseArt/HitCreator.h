@@ -638,8 +638,8 @@ namespace recob {
    * @brief A class handling a collection of hits and its associations
    * 
    * Use this object if you already have a collection of recob::Hit and you
-   * simply want the associated to the wire and digit with the same channel
-   * name.
+   * simply want the hits associated to the wire and digit with the same
+   * channel.
    */
   class HitCollectionAssociator: public HitAndAssociationsWriterBase {
       public:
@@ -768,6 +768,99 @@ namespace recob {
       { prepare_associations(*hits, event); }
     
   }; // class HitCollectionAssociator
+  
+  /** **************************************************************************
+   * @brief A class handling a collection of hits and its associations
+   * 
+   * Use this object if you already have a recob::Hit data product and
+   * another collection that is going to become a data product, and you
+   * simply want the new hits associated to the wire and digit with the same
+   * channel.
+   * No hit-to-hit association is attempted (that would be, incidentally, not
+   * supported by art): the data product is used to get all the associated
+   * wires and digits, then they are associated to the new hits by channel ID.
+   * If a channel is not available, a warning is produced. If different hits
+   * on the same channel are associated to different wires or raw digits, an
+   * exception is thrown.
+   */
+  class HitRefinerAssociator: public HitAndAssociationsWriterBase {
+      public:
+    //@{
+    /**
+     * @brief Constructor: sets instance name and whether to build associations
+     * @param producer the module producing the data products
+     * @param event the event the products are going to be put into
+     * @param HitModuleLabel label of the module used to create hits
+     * @param instance_name name of the instance for all data products
+     * @param doWireAssns whether to enable associations to wires
+     * @param doRawDigitAssns whether to enable associations to raw digits
+     *
+     * All the data products (hit collection and associations) will have the
+     * specified product instance name.
+     */
+    HitRefinerAssociator(
+      art::EDProducer& producer, art::Event& evt,
+      art::InputTag const& HitModuleLabel,
+      std::string instance_name = "",
+      bool doWireAssns = true, bool doRawDigitAssns = true
+      );
+    
+    /**
+     * @brief Constructor: sets instance name and whether to build associations
+     * @param producer the module producing the data products
+     * @param event the event the products are going to be put into
+     * @param HitModuleLabel label of the module used to create hits
+     * @param doWireAssns whether to enable associations to wires
+     * @param doRawDigitAssns whether to enable associations to raw digits
+     *
+     * All the data products (hit collection and associations) will have an
+     * empty product instance name.
+     */
+    HitRefinerAssociator(
+      art::EDProducer& producer, art::Event& evt,
+      art::InputTag const& HitModuleLabel,
+      bool doWireAssns, bool doRawDigitAssns = true
+      ):
+      HitRefinerAssociator
+        (producer, evt, HitModuleLabel, "", doWireAssns, doRawDigitAssns)
+      {}
+      
+    //@}
+    // destructor, copy and move constructors and assignment are default
+    
+    /**
+     * @brief Uses the specified collection as data product
+     * @param srchits the collection to be used as data product
+     *
+     * The very same collection is put into the event.
+     * This object will temporary own the collection until the hits are put into
+     * the event.
+     * If there were previous hits in the object, they are lost.
+     */
+    void use_hits(std::unique_ptr<std::vector<recob::Hit>>&& srchits);
+    
+    
+    /**
+     * @brief Moves the data into an event
+     * @param event the target event
+     *
+     * The calling module must have already declared the production of these
+     * products with the proper instance name.
+     * After the move, the collections in this object are empty.
+     */
+    void put_into(art::Event& event);
+    
+    
+      protected:
+    art::InputTag hits_label; ///< label of the collection of hits
+    
+    /// Finds out the associations for the current hits
+    void prepare_associations
+      (std::vector<recob::Hit> const& srchits, art::Event& event);
+    void prepare_associations(art::Event& event)
+      { prepare_associations(*hits, event); }
+    
+  }; // class HitRefinerAssociator
   
 } // namespace recob
 
