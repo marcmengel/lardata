@@ -332,7 +332,7 @@ namespace recob {
     if (!hits) {
       throw art::Exception(art::errors::LogicError)
         << "HitCollectionCreator is trying to put into the event"
-        " a hit collection that was never created!";
+        " a hit collection that was never created!\n";
     }
     HitAndAssociationsWriterBase::put_into(event);
   } // HitCollectionCreator::put_into()
@@ -396,7 +396,7 @@ namespace recob {
     if (RawDigitAssns && !WireAssns) {
       throw art::Exception(art::errors::LogicError)
         << "HitCollectionAssociator can't create hit <--> raw digit"
-        " associations through wires, without wires!";
+        " associations through wires, without wires!\n";
     }
     hits.reset(new std::vector<recob::Hit>);
   } // HitCollectionAssociator::HitCollectionAssociator()
@@ -465,7 +465,7 @@ namespace recob {
         if (iWire == std::numeric_limits<size_t>::max()) {
           throw art::Exception(art::errors::LogicError)
             << "No wire associated to channel #" << iChannel << " whence hit #"
-            << iHit << " comes!";
+            << iHit << " comes!\n";
         } // if no channel
         
         // make the association with wires
@@ -480,7 +480,7 @@ namespace recob {
           if (digit.isNull()) {
             throw art::Exception(art::errors::LogicError)
               << "No raw digit associated to channel #" << iChannel
-              << " whence hit #" << iHit << " comes!";
+              << " whence hit #" << iHit << " comes!\n";
           } // if no channel
           
           // make the association
@@ -511,7 +511,7 @@ namespace recob {
         if (iDigit == std::numeric_limits<size_t>::max()) {
           throw art::Exception(art::errors::LogicError)
             << "No raw digit associated to channel #" << iChannel
-            << " whence hit #" << iHit << " comes!";
+            << " whence hit #" << iHit << " comes!\n";
         } // if no channel
         
         // make the association
@@ -580,7 +580,7 @@ namespace recob {
       if (!HitToWire.isValid()) {
         throw art::Exception(art::errors::ProductNotFound)
           << "Can't find the associations between hits and wires produced by '"
-          << hits_label << "'!";
+          << hits_label << "'!\n";
       } // if no association
       
       // fill a map of wire vs. channel number
@@ -617,7 +617,7 @@ namespace recob {
       if (!HitToDigits.isValid()) {
         throw art::Exception(art::errors::ProductNotFound)
           << "Can't find the associations between hits and raw digits"
-          << " produced by '" << hits_label << "'!";
+          << " produced by '" << hits_label << "'!\n";
       } // if no association
       
       // fill a map of digits vs. channel number
