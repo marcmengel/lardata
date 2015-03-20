@@ -356,6 +356,8 @@ namespace recob {
    * derived from this one:
 	* - HitCollectionCreator: push new hits one by one
 	* - HitCollectionAssociator: push a complete collection of hits
+	* - HitRefinerAssociator: push a complete collection of hits deriving their
+	*     associations from other hits
    * Using put_into() will transfer into the event the data.
    * 
    * The typical usage is to have the constructor of the module call the static
