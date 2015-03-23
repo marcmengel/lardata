@@ -32,7 +32,7 @@ namespace optdata {
       this->reserve(len);
     };
 
-    virtual ~ChannelData() {};
+    ~ChannelData() {};
 
     // The sections bracketed with GCCXML tests handle a problem ART
     // with generating its data dictionaries.

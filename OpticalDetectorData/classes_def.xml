@@ -19,8 +19,7 @@
  </class>
  <class name="std::vector<optdata::ChannelDataGroup>"                  />
  <class name="art::Wrapper< std::vector<optdata::ChannelDataGroup> >"  />
- <class name="optdata::FIFOChannel"        ClassVersion="12"           > 
-  <version ClassVersion="12" checksum="3864025948"/>
+ <class name="optdata::FIFOChannel"        ClassVersion="11"           > 
   <version ClassVersion="11" checksum="3267542788"/>
   <version ClassVersion="10" checksum="356351321"/>
  </class>
@@ -31,8 +30,7 @@
  </class>
  <class name="std::vector<optdata::PMTTrigger>"                        /> 
  <class name="art::Wrapper< std::vector<optdata::PMTTrigger> >"        /> 
- <class name="optdata::OpticalRawDigit"        ClassVersion="12"       > 
-  <version ClassVersion="12" checksum="2692327216"/>
+ <class name="optdata::OpticalRawDigit"        ClassVersion="11"       > 
   <version ClassVersion="11" checksum="204204586"/>
   <version ClassVersion="10" checksum="3273854562"/>
  </class>
