@@ -52,7 +52,7 @@ namespace raw {
 
         // Functions included for backwards compatability with previous data types
         std::vector<ADC_Count_t>& Waveform()         { return this;  }
-        TimeStamp_t               TimeSlice() const  { return fTime; }
+        TimeStamp_t               TimeSlice() const  { return fTimeStamp; }
 
 
 #ifndef __GCCXML__
