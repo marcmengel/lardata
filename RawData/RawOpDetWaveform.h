@@ -48,7 +48,7 @@ namespace raw {
         ~RawOpDetWaveform() {};
 
         // Functions included for backwards compatability with previous data types
-        std::vector<ADC_Count_t>& Waveform()         { return this;  }
+        std::vector<ADC_Count_t>& Waveform()         { return *this;  }
 
 #ifndef __GCCXML__
 
