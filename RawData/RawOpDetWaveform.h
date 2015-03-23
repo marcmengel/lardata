@@ -21,10 +21,7 @@ namespace raw {
     // Define the types used
     typedef short              ADC_Count_t;
     typedef unsigned int       Channel_t;
-    typedef unsigned long long TimeStamp_t;  ///< upper 32 bits for the 
-                                             ///< seconds since 1970
-                                             ///< lower 32 for nanoseconds
-
+    typedef double             TimeStamp_t;  ///< us since 1970, based on TimeService
 
     class RawOpDetWaveform  : public std::vector< ADC_Count_t >
     {
@@ -39,8 +36,8 @@ namespace raw {
         // a garbage value to indicate that there's a problem.
         // To save on memory reallocations, offer an option to specify the
         // the initial memory allocation of the channel vector.
-        RawOpDetWaveform( Channel_t   chan = std::numeric_limits<Channel_t>::max(),
-                          TimeStamp_t time = std::numeric_limits<TimeStamp_t>::max(),
+        RawOpDetWaveform( TimeStamp_t time = std::numeric_limits<TimeStamp_t>::max(),
+                          Channel_t   chan = std::numeric_limits<Channel_t>::max(),
                           size_type   len  = 0 )
             : fChannel(chan)
             , fTimeStamp(time)
@@ -52,8 +49,6 @@ namespace raw {
 
         // Functions included for backwards compatability with previous data types
         std::vector<ADC_Count_t>& Waveform()         { return this;  }
-        TimeStamp_t               TimeSlice() const  { return fTimeStamp; }
-
 
 #ifndef __GCCXML__
 
