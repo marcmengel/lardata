@@ -36,8 +36,8 @@ namespace raw {
         // a garbage value to indicate that there's a problem.
         // To save on memory reallocations, offer an option to specify the
         // the initial memory allocation of the channel vector.
-        RawOpDetWaveform( Channel_t   chan = std::numeric_limits<Channel_t>::max(),
-                          TimeStamp_t time = std::numeric_limits<TimeStamp_t>::max(),
+        RawOpDetWaveform( TimeStamp_t time = std::numeric_limits<TimeStamp_t>::max(),
+                          Channel_t   chan = std::numeric_limits<Channel_t>::max(),
                           size_type   len  = 0 )
             : fChannel(chan)
             , fTimeStamp(time)
