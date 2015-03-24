@@ -16,16 +16,19 @@ namespace anab{
     : fTime(0)
     , fTriggerType(0)
     , fTriggerBits(0)
+    , fID(-1)
   {
   }
 
   //----------------------------------------------------------------------
   T0::T0(double Time,
 	 unsigned int TriggerType,
-	 unsigned int TriggerBits)
+	 unsigned int TriggerBits,
+	 int ID)
     : fTime(Time)
     , fTriggerType(TriggerType)
     , fTriggerBits(TriggerBits)
+    , fID(ID)
   {
 
   }
@@ -38,6 +41,7 @@ namespace anab{
     o << "T0 with Time: "    << a.fTime
       << "\n from Trigger type: "   << a.fTriggerType
       << "\n with bits: "           << a.fTriggerBits
+      << "\n with ID: "             << a.fID
       <<std::endl;
     
 
