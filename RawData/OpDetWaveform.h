@@ -1,5 +1,5 @@
 /**
- * raw/RawOpDetWaveform.h
+ * raw/OpDetWaveform.h
  *
  * Raw signals from the photon detectors.
  * Waveform (adcs in time bins), a channel number, and a time stamp.
@@ -7,8 +7,8 @@
  */
 
 
-#ifndef RawOpDetWaveform_h
-#define RawOpDetWaveform_h
+#ifndef OpDetWaveform_h
+#define OpDetWaveform_h
 
 #include <vector>
 #include <functional> // so we can redefine less<> below
@@ -23,7 +23,7 @@ namespace raw {
     typedef unsigned int       Channel_t;
     typedef double             TimeStamp_t;  ///< us since 1970, based on TimeService
 
-    class RawOpDetWaveform  : public std::vector< ADC_Count_t >
+    class OpDetWaveform  : public std::vector< ADC_Count_t >
     {
       private:
         Channel_t   fChannel;
@@ -36,7 +36,7 @@ namespace raw {
         // a garbage value to indicate that there's a problem.
         // To save on memory reallocations, offer an option to specify the
         // the initial memory allocation of the channel vector.
-        RawOpDetWaveform( TimeStamp_t time = std::numeric_limits<TimeStamp_t>::max(),
+        OpDetWaveform( TimeStamp_t time = std::numeric_limits<TimeStamp_t>::max(),
                           Channel_t   chan = std::numeric_limits<Channel_t>::max(),
                           size_type   len  = 0 )
             : fChannel(chan)
@@ -44,8 +44,20 @@ namespace raw {
         {
             this->reserve(len);
         };
+
         
-        ~RawOpDetWaveform() {};
+        OpDetWaveform( TimeStamp_t time,
+                          Channel_t   chan,
+                          std::vector< uint16_t > rhs )
+            : fChannel(chan)
+            , fTimeStamp(time)
+        {
+            this->reserve(rhs.size());
+            for (auto val : rhs) this->push_back(val);
+        };
+
+        
+        ~OpDetWaveform() {};
 
         // Functions included for backwards compatability with previous data types
         std::vector<ADC_Count_t>& Waveform()         { return *this;  }
@@ -71,7 +83,7 @@ namespace raw {
 #ifndef __GCCXML__
 
 namespace raw {
-  bool operator<( const RawOpDetWaveform& lhs, const RawOpDetWaveform& rhs )
+  bool operator<( const OpDetWaveform& lhs, const OpDetWaveform& rhs )
   {
       // Sort by channel, then time
       if ( lhs.ChannelNumber()  < rhs.ChannelNumber() ) return true;
@@ -86,10 +98,10 @@ namespace raw {
 // case we want (for example) a std::set<ChannelData*>.
 namespace std {
   template <> 
-  class less<raw::RawOpDetWaveform*>
+  class less<raw::OpDetWaveform*>
   {
   public:
-    bool operator()( const raw::RawOpDetWaveform* lhs, const raw::RawOpDetWaveform* rhs )
+    bool operator()( const raw::OpDetWaveform* lhs, const raw::OpDetWaveform* rhs )
     {
       return (*lhs) < (*rhs);
     }
