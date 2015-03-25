@@ -113,6 +113,7 @@ template class art::Assns<anab::FlashMatch,  recob::OpFlash,    void>;
 template class art::Assns<recob::Track,      anab::CosmicTag,   void>;
 template class art::Assns<recob::Cluster,    anab::CosmicTag,   void>;
 template class art::Assns<recob::Hit,        anab::CosmicTag,   void>;
+template class art::Assns<recob::PFParticle, anab::CosmicTag,   void>;
 template class art::Assns<anab::CosmicTag,   recob::PFParticle, void>;
 template class art::Assns<anab::CosmicTag,   recob::Track,      void>;
 template class art::Assns<anab::CosmicTag,   recob::PCAxis,     void>;
