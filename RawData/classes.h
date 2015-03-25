@@ -25,6 +25,7 @@
 #include "RawData/BeamInfo.h"
 #include "RawData/ExternalTrigger.h"
 #include "RawData/TriggerData.h"
+#include "RawData/OpDetWaveform.h"
 
 //
 // Only include objects that we would like to be able to put into the event.
@@ -34,6 +35,7 @@ template class std::vector<raw::DAQHeader>;
 template class std::vector<raw::BeamInfo>;
 template class std::vector<raw::RawDigit>;
 template class std::vector<raw::OpDetPulse>;
+template class std::vector<raw::OpDetWaveform>;
 template class std::vector<raw::AuxDetDigit>;
 template class std::vector<raw::ExternalTrigger>;
 template class std::vector<raw::Trigger>;
@@ -45,8 +47,9 @@ template class art::Wrapper< raw::DAQHeader                >;
 template class art::Wrapper< raw::OpDetPulse               >;
 template class art::Wrapper< raw::AuxDetDigit              >;
 template class art::Wrapper< raw::BeamInfo                 >;
-template class art::Wrapper< raw::ExternalTrigger                >;
+template class art::Wrapper< raw::ExternalTrigger          >;
 template class art::Wrapper< raw::Trigger                  >;
+template class art::Wrapper< raw::OpDetWaveform            >;
 
 template class art::Wrapper< std::vector<raw::DAQHeader>   >;
 template class art::Wrapper< std::vector<raw::BeamInfo>    >;
@@ -55,3 +58,4 @@ template class art::Wrapper< std::vector<raw::OpDetPulse>  >;
 template class art::Wrapper< std::vector<raw::AuxDetDigit> >;
 template class art::Wrapper< std::vector<raw::ExternalTrigger> >;
 template class art::Wrapper< std::vector<raw::Trigger>     >;
+template class art::Wrapper< std::vector<raw::OpDetWaveform> >;

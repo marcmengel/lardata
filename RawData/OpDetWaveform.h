@@ -37,8 +37,8 @@ namespace raw {
         // To save on memory reallocations, offer an option to specify the
         // the initial memory allocation of the channel vector.
         OpDetWaveform( TimeStamp_t time = std::numeric_limits<TimeStamp_t>::max(),
-                          Channel_t   chan = std::numeric_limits<Channel_t>::max(),
-                          size_type   len  = 0 )
+                       Channel_t   chan = std::numeric_limits<Channel_t>::max(),
+                       size_type   len  = 0 )
             : fChannel(chan)
             , fTimeStamp(time)
         {
@@ -47,13 +47,14 @@ namespace raw {
 
         
         OpDetWaveform( TimeStamp_t time,
-                          Channel_t   chan,
-                          std::vector< uint16_t > rhs )
+                       Channel_t   chan,
+                       std::vector< uint16_t > rhs )
             : fChannel(chan)
             , fTimeStamp(time)
         {
             this->reserve(rhs.size());
-            for (auto val : rhs) this->push_back(val);
+            for (unsigned int i =0; i < rhs.size(); i++)
+                this->push_back(rhs[i]);
         };
 
         
