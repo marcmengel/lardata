@@ -21,21 +21,21 @@ namespace anab {
     
     T0();
     
-    double fTime;
-    unsigned int    fTriggerType;
-    unsigned int    fTriggerBits;    
-    int             fID;
+    double       fTime;
+    unsigned int fTriggerType;
+    int          fTriggerBits;    
+    int          fID;
 
 #ifndef __GCCXML__
   public:
 
-    T0(double Time, unsigned int TriggerType, unsigned int TriggerBits, int ID=-1);
+    T0(double Time, unsigned int TriggerType, int TriggerBits, int ID=-1);
 
     friend std::ostream& operator << (std::ostream &o, T0 const& a);
 
     const double&          Time()        const; 
     const unsigned int&    TriggerType() const;
-    const unsigned int&    TriggerBits() const;
+    const int&             TriggerBits() const;
     const int&             ID()          const;
     
 #endif
@@ -47,7 +47,7 @@ namespace anab {
 
 inline const double&          anab::T0::Time()            const { return fTime;        } 
 inline const unsigned int&    anab::T0::TriggerType()     const { return fTriggerType; }
-inline const unsigned int&    anab::T0::TriggerBits()     const { return fTriggerBits; }
+inline const int&             anab::T0::TriggerBits()     const { return fTriggerBits; }
 inline const int&             anab::T0::ID()              const { return fID;          }
 
 #endif

@@ -23,7 +23,7 @@ namespace anab{
   //----------------------------------------------------------------------
   T0::T0(double Time,
 	 unsigned int TriggerType,
-	 unsigned int TriggerBits,
+	 int TriggerBits,
 	 int ID)
     : fTime(Time)
     , fTriggerType(TriggerType)
