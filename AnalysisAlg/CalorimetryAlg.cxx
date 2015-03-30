@@ -46,72 +46,72 @@ namespace calo{
   //------------------------------------------------------------------------------------//
   // Functions to calculate the dEdX based on the AMPLITUDE of the pulse
   // ----------------------------------------------------------------------------------//
-  double CalorimetryAlg::dEdx_AMP(art::Ptr< recob::Hit >  hit, double pitch) const
+  double CalorimetryAlg::dEdx_AMP(art::Ptr< recob::Hit >  hit, double pitch, double T0) const
   {
-    return dEdx_AMP(hit->PeakAmplitude()/pitch, hit->PeakTime(), hit->WireID().Plane);
+    return dEdx_AMP(hit->PeakAmplitude()/pitch, hit->PeakTime(), hit->WireID().Plane, T0);
   }
   
   // ----------------------------------------------------------------------------------//
-  double CalorimetryAlg::dEdx_AMP(recob::Hit const&  hit, double pitch) const
+  double CalorimetryAlg::dEdx_AMP(recob::Hit const&  hit, double pitch, double T0) const
   {
-    return dEdx_AMP(hit.PeakAmplitude()/pitch, hit.PeakTime(), hit.WireID().Plane);
+    return dEdx_AMP(hit.PeakAmplitude()/pitch, hit.PeakTime(), hit.WireID().Plane, T0);
   }
 
   ///\todo The plane argument should really be for a view instead
   // ----------------------------------------------------------------------------------//
-  double CalorimetryAlg::dEdx_AMP(double dQ, double time, double pitch, unsigned int plane) const
+  double CalorimetryAlg::dEdx_AMP(double dQ, double time, double pitch, unsigned int plane, double T0) const
   {
     double dQdx   = dQ/pitch;           // in ADC/cm
-    return dEdx_AMP(dQdx, time, plane);
+    return dEdx_AMP(dQdx, time, plane, T0);
   }
     
   // ----------------------------------------------------------------------------------//
-  double CalorimetryAlg::dEdx_AMP(double dQdx,double time, unsigned int plane) const
+  double CalorimetryAlg::dEdx_AMP(double dQdx,double time, unsigned int plane, double T0) const
   {
     double fADCtoEl=1.;
     
     fADCtoEl = fCalAmpConstants[plane];
     
     double dQdx_e = dQdx/fADCtoEl;  // Conversion from ADC/cm to e/cm
-    return dEdx_from_dQdx_e(dQdx_e,time);
+    return dEdx_from_dQdx_e(dQdx_e,time, T0);
   }
   
   //------------------------------------------------------------------------------------//
   // Functions to calculate the dEdX based on the AREA of the pulse
   // ----------------------------------------------------------------------------------//
-  double CalorimetryAlg::dEdx_AREA(art::Ptr< recob::Hit >  hit, double pitch) const
+  double CalorimetryAlg::dEdx_AREA(art::Ptr< recob::Hit >  hit, double pitch, double T0) const
   {
-    return dEdx_AREA(hit->Integral()/pitch, hit->PeakTime(), hit->WireID().Plane);
+    return dEdx_AREA(hit->Integral()/pitch, hit->PeakTime(), hit->WireID().Plane, T0);
   }
 
   // ----------------------------------------------------------------------------------//
-  double CalorimetryAlg::dEdx_AREA(recob::Hit const&  hit, double pitch) const
+  double CalorimetryAlg::dEdx_AREA(recob::Hit const&  hit, double pitch, double T0) const
   {
-    return dEdx_AREA(hit.Integral()/pitch, hit.PeakTime(), hit.WireID().Plane);
+    return dEdx_AREA(hit.Integral()/pitch, hit.PeakTime(), hit.WireID().Plane, T0);
   }
     
   // ----------------------------------------------------------------------------------//
-  double CalorimetryAlg::dEdx_AREA(double dQ,double time, double pitch, unsigned int plane) const
+  double CalorimetryAlg::dEdx_AREA(double dQ,double time, double pitch, unsigned int plane, double T0) const
   {
     double dQdx   = dQ/pitch;           // in ADC/cm
-    return dEdx_AREA(dQdx, time, plane);
+    return dEdx_AREA(dQdx, time, plane, T0);
   }
   
   // ----------------------------------------------------------------------------------//  
-  double CalorimetryAlg::dEdx_AREA(double dQdx,double time, unsigned int plane) const
+  double CalorimetryAlg::dEdx_AREA(double dQdx,double time, unsigned int plane, double T0) const
   {
     double fADCtoEl=1.;
     
     fADCtoEl = fCalAreaConstants[plane];
     
     double dQdx_e = dQdx/fADCtoEl;  // Conversion from ADC/cm to e/cm
-    return dEdx_from_dQdx_e(dQdx_e, time);
+    return dEdx_from_dQdx_e(dQdx_e, time, T0);
   }
     
   // ----------------- apply Lifetime and recombination correction.  -----------------//
-  double CalorimetryAlg::dEdx_from_dQdx_e(double dQdx_e, double time) const
+  double CalorimetryAlg::dEdx_from_dQdx_e(double dQdx_e, double time, double T0) const
   {
-    dQdx_e *= LifetimeCorrection(time);   // Lifetime Correction (dQdx_e in e/cm)
+    dQdx_e *= LifetimeCorrection(time, T0);   // Lifetime Correction (dQdx_e in e/cm)
     if(fUseModBox) {
       return LArProp->ModBoxCorrection(dQdx_e);
     } else {
@@ -123,7 +123,7 @@ namespace calo{
   //------------------------------------------------------------------------------------//
   // for the time being copying from Calorimetry.cxx - should be decided where to keep it.
   // ----------------------------------------------------------------------------------//
-  double calo::CalorimetryAlg::LifetimeCorrection(double time) const
+  double calo::CalorimetryAlg::LifetimeCorrection(double time, double T0) const
   {  
     float t = time;
 
@@ -131,7 +131,9 @@ namespace calo{
     double presamplings = detprop->TriggerOffset();
     
     t -= presamplings;
-    time = t * timetick;  //  (in microsec)
+    time = t * timetick - T0*1e-3;  //  (in microsec)
+
+    std::cout << time <<" = " << t << "*"<< timetick << "-" << T0*1e-3  << std::endl;
     
     double tau = LArProp->ElectronLifetime();
     
