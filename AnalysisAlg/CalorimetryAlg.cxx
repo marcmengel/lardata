@@ -132,8 +132,6 @@ namespace calo{
     
     t -= presamplings;
     time = t * timetick - T0*1e-3;  //  (in microsec)
-
-    std::cout << time <<" = " << t << "*"<< timetick << "-" << T0*1e-3  << std::endl;
     
     double tau = LArProp->ElectronLifetime();
     
