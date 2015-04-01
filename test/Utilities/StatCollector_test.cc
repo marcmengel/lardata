@@ -14,11 +14,13 @@
 
 // C/C++ standard libraries
 #include <array>
+#include <vector>
 #include <valarray>
 #include <utility> // std::pair<>
 #include <memory> // std::unique_ptr<>
 #include <initializer_list>
 #include <tuple>
+#include <stdexcept> // std::range_error
 
 // Boost libraries
 /*
@@ -149,48 +151,6 @@ void CheckStats(
   }
   
 } // CheckStats<>(StatCollector2D)
-
-
-template <typename T>
-void CheckFit(
-  lar::util::LinearFit<T> const& fitter,
-  int n,
-  T intercept,
-  T slope,
-  T intercept_error,
-  T slope_error,
-  T intercept_slope_covariance,
-  T chisq,
-  int NDF
-) {
-  
-  using Data_t = T;
-  
-  BOOST_CHECK_EQUAL(fitter.N(), n);
-  if (n == 0) {
-    BOOST_CHECK(!fitter.isValid());
-    BOOST_CHECK_THROW(fitter.Slope(), std::range_error);
-    BOOST_CHECK_THROW(fitter.Intercept(), std::range_error);
-    BOOST_CHECK_THROW(fitter.SlopeError(), std::range_error);
-    BOOST_CHECK_THROW(fitter.InterceptError(), std::range_error);
-    BOOST_CHECK_THROW(fitter.InterceptSlopeCovariance(), std::range_error);
-    BOOST_CHECK_THROW(fitter.ChiSquare(), std::range_error);
-    BOOST_CHECK_EQUAL(fitter.NDF(), -3);
-  }
-  else {
-    BOOST_CHECK(fitter.isValid());
-    BOOST_CHECK_CLOSE(double(fitter.Intercept()), double(intercept), 0.1);
-    BOOST_CHECK_CLOSE(double(fitter.Slope()), double(slope), 0.1);
-    BOOST_CHECK_CLOSE
-      (double(fitter.InterceptError()), double(intercept_error), 0.1);
-    BOOST_CHECK_CLOSE(double(fitter.SlopeError()), double(slope_error), 0.1);
-    BOOST_CHECK_CLOSE(double(fitter.InterceptSlopeCovariance()),
-      double(intercept_slope_covariance), 0.1);
-    BOOST_CHECK_CLOSE(double(fitter.ChiSquare()), double(chisq), 0.1);
-    BOOST_CHECK_EQUAL(fitter.NDF(), NDF);
-  }
-  
-} // CheckFit<>()
 
 
 /**
@@ -571,154 +531,6 @@ void MinMaxCollectorTest() {
 } // MinMaxCollectorTest()
 
 
-/**
- * @brief Tests LinearFit object with a known input
- */
-template <typename T>
-void LinearFitTest() {
-  
-  using Data_t = T;
-  
-  using PerfectItem_t = std::pair<Data_t, Data_t>;
-  using UncertainItem_t = std::tuple<Data_t, Data_t, Data_t>;
-  
-  using PerfectData_t = std::vector<PerfectItem_t>;
-  using UncertainData_t = std::vector<UncertainItem_t>;
-  
-  // prepare input data
-  PerfectData_t perfect_data{
-    { Data_t(-4),  Data_t( 8) },
-    { Data_t( 0),  Data_t( 0) },
-    { Data_t( 4),  Data_t(-8) }
-    };
-  
-  const int      n          =         3;
-  const Data_t   intercept  = Data_t( 0);
-  const Data_t   slope      = Data_t(-2);
-  const Data_t   perf_chisq = Data_t( 0);
-  const Data_t   perf_intercept_error     = std::sqrt(Data_t(32)/Data_t(96));
-  const Data_t   perf_slope_error         = std::sqrt(Data_t( 3)/Data_t(96));
-  const Data_t   perf_intercept_slope_cov = - Data_t(0)/Data_t(96);
-  const int      perf_DoF   =         0;
-  
-  UncertainData_t uncertain_data({
-    UncertainItem_t{ Data_t(-4), Data_t( 8), Data_t(1) },
-    UncertainItem_t{ Data_t( 0), Data_t( 0), Data_t(2) },
-    UncertainItem_t{ Data_t( 4), Data_t(-8), Data_t(2) }
-    });
-  
-  const Data_t   unc_chisq               = Data_t( 0);
-  const Data_t   unc_intercept_error     = std::sqrt(Data_t(20)/Data_t(21));
-  const Data_t   unc_slope_error         = std::sqrt(Data_t(1.5)/Data_t(21));
-  const Data_t   unc_intercept_slope_cov = - Data_t(-3)/Data_t(21);
-  const int      unc_DoF                 =         0;
-  
-  //
-  // part I: construction
-  //
-  lar::util::LinearFit<Data_t> fitter;
-  
-  // check that everything is 0 or NaN-like
-  CheckFit<Data_t>(fitter, 0, 0., 0., 0., 0., 0., 0., 0);
-  
-  //
-  // part II: add elements one by one
-  //
-  // the data is the same as uncertain_data, just inserted one by one
-  // and exercising both uncertain and certain addition;
-  // this part deliberately ignores directly interfaces adding pairs and tuples
-  for (auto const& data: uncertain_data) {
-    if (std::get<2>(data) == Data_t(1))
-      fitter.add(std::get<0>(data), std::get<1>(data));
-    else
-      fitter.add(std::get<0>(data), std::get<1>(data), std::get<2>(data));
-  } // for
-  
-  // by construction of the input, the statistics for X and Y are the same
-  CheckFit<Data_t>(fitter, n,
-    intercept, slope,
-    unc_intercept_error, unc_slope_error, unc_intercept_slope_cov,
-    unc_chisq, unc_DoF
-    );
-  
-  
-  //
-  // part III: add elements without uncertainty by bulk
-  //
-  
-  // - III.1: clear the fitter
-  fitter.clear();
-  CheckFit<Data_t>(fitter, 0, 0., 0., 0., 0., 0., 0., 0);
-    
-  // - III.2: fill by iterators
-  fitter.add_without_uncertainty
-    (std::begin(perfect_data), std::end(perfect_data));
-  CheckFit<Data_t>(fitter, n,
-    intercept, slope,
-    perf_intercept_error, perf_slope_error, perf_intercept_slope_cov,
-    perf_chisq, perf_DoF
-    );
-  
-  // - III.3: fill by container
-  fitter.clear();
-  fitter.add_without_uncertainty(perfect_data);
-  CheckFit<Data_t>(fitter, n,
-    intercept, slope,
-    perf_intercept_error, perf_slope_error, perf_intercept_slope_cov,
-    perf_chisq, perf_DoF
-    );
-  
-  // - III.4: fill by iterators and extractor
-  fitter.clear();
-  fitter.add_without_uncertainty(
-    uncertain_data.begin(), uncertain_data.end(),
-    [](UncertainItem_t const& d)
-      { return PerfectItem_t{ std::get<0>(d), std::get<1>(d) }; }
-    );
-  CheckFit<Data_t>(fitter, n,
-    intercept, slope,
-    perf_intercept_error, perf_slope_error, perf_intercept_slope_cov,
-    perf_chisq, perf_DoF
-    );
-  
-  // - III.5: fill by container and extractor
-  fitter.clear();
-  fitter.add_without_uncertainty(uncertain_data,
-    [](UncertainItem_t const& d)
-      { return PerfectItem_t{ std::get<0>(d), std::get<1>(d) }; }
-    );
-  CheckFit<Data_t>(fitter, n,
-    intercept, slope,
-    perf_intercept_error, perf_slope_error, perf_intercept_slope_cov,
-    perf_chisq, perf_DoF
-    );
-  
-  
-  //
-  // part IV: add elements with uncertainty by bulk
-  //
-  
-  // - IV.1: fill by iterators
-  fitter.clear();
-  fitter.add_with_uncertainty(uncertain_data.begin(), uncertain_data.end());
-  CheckFit<Data_t>(fitter, n,
-    intercept, slope,
-    unc_intercept_error, unc_slope_error, unc_intercept_slope_cov,
-    unc_chisq, unc_DoF
-    );
-  
-  // - IV.2: fill by container
-  fitter.clear();
-  fitter.add_with_uncertainty(uncertain_data);
-  CheckFit<Data_t>(fitter, n,
-    intercept, slope,
-    unc_intercept_error, unc_slope_error, unc_intercept_slope_cov,
-    unc_chisq, unc_DoF
-    );
-  
-} // LinearFitTest()
-
-
 //------------------------------------------------------------------------------
 //--- registration of tests
 //
@@ -778,11 +590,3 @@ BOOST_AUTO_TEST_CASE(MinMaxCollectorIntegerTest) {
 BOOST_AUTO_TEST_CASE(MinMaxCollectorRealTest) {
   MinMaxCollectorTest<double>();
 }
-
-//
-// LinearFit tests
-//
-BOOST_AUTO_TEST_CASE(LinearFitRealTest) {
-  LinearFitTest<double>();
-}
-
