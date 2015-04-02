@@ -31,8 +31,6 @@ set(CMAKE_MODULE_PATH $ENV{ART_DIR}/Modules
 include(CetCMakeEnv)
 cet_cmake_env()
 
-set_install_root()
-
 cet_set_compiler_flags(DIAGS CAUTIOUS
   WERROR
   NO_UNDEFINED
@@ -45,6 +43,7 @@ cet_report_compiler_flags()
 find_ups_product( larcore v1_00_00 )
 find_ups_product( nutools v1_00_00 )
 find_ups_product( postgresql v9_1_5 )
+find_ups_product( cetbuildtools v4_09_00 )
 
 #  Find all the libraries needed by our dependent CMakeList.txt files
 cet_find_library( BOOST_SERIALIZATION NAMES boost_serialization PATHS ENV BOOST_LIB NO_DEFAULT_PATH )

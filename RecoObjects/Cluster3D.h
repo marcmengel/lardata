@@ -86,7 +86,7 @@ public:
 private:
     
     mutable size_t                         m_id;              ///< "id" of this hit (useful for indexing)
-    mutable unsigned                       m_statusBits;      ///< Volatile status information of this 3D hit
+    mutable unsigned int                   m_statusBits;      ///< Volatile status information of this 3D hit
     mutable double                         m_position[3];     ///< position of this hit combination in world coordinates
     double                                 m_totalCharge;     ///< Sum of charges of all associated recob::Hits
     double                                 m_avePeakTime;     ///< Average peak time of all associated recob::Hits
@@ -100,8 +100,19 @@ private:
 #ifndef __GCCXML__
 public:
     
+    enum StatusBits { REJECTEDHIT    = 0x80000000,            ///< Hit has been rejected for any reason
+                      SKELETONHIT    = 0x10000000,            ///< Hit is a "skeleton" hit
+                      EDGEHIT        = 0x20000000,            ///< Hit is an "edge" hit
+                      SEEDHIT        = 0x40000000,            ///< Hit is part of Seed for track fits
+                      MADESPACEPOINT = 0x08000000,            ///< Hit has been made into Space Point
+                      SKELETONPOSAVE = 0x00100000,            ///< Skeleton hit position averaged
+                      SELECTEDBYMST  = 0x00000100,            ///< Hit has been used in Cluster Splitting MST
+                      PCAOUTLIER     = 0x00000080             ///< Hit labelled outlier in PCA
+                    };
+        
+    
     ClusterHit3D(size_t                                        id,
-                 unsigned                                      statusBits,
+                 unsigned int                                  statusBits,
                  const double*                                 position,
                  double                                        totalCharge,
                  double                                        avePeakTime,
@@ -113,7 +124,7 @@ public:
                  const std::vector<const reco::ClusterHit2D*>& hitVec);
     
     size_t                                        getID()              const {return m_id;}
-    unsigned                                      getStatusBits()      const {return m_statusBits;}
+    unsigned int                                  getStatusBits()      const {return m_statusBits;}
     const double*                                 getPosition()        const {return m_position;}
     double                                        getX()               const {return m_position[0];}
     double                                        getY()               const {return m_position[1];}
@@ -126,6 +137,8 @@ public:
     double                                        getDocaToAxis()      const {return m_docaToAxis;}
     double                                        getArclenToPoca()    const {return m_arclenToPoca;}
     const std::vector<const reco::ClusterHit2D*>& getHits()            const {return m_hitVector;}
+    
+    bool bitsAreSet(const unsigned int& bitsToCheck)                   const {return m_statusBits & bitsToCheck;}
 
     void setID(const size_t& id)        const {m_id            = id;}
     void setStatusBit(unsigned bits)    const {m_statusBits   |= bits;}
@@ -236,9 +249,11 @@ public:
 
 
 // Some useful typedefs for the above objects
-typedef std::list<const reco::ClusterHit3D*>   HitPairListPtr;
-typedef std::set<const reco::ClusterHit3D*>    HitPairSetPtr;
-typedef std::map<int, HitPairListPtr >         HitPairClusterMap;
+typedef std::list<const reco::ClusterHit2D*> Hit2DListPtr;
+typedef std::list<const reco::ClusterHit3D*> HitPairListPtr;
+typedef std::set<const reco::ClusterHit3D*>  HitPairSetPtr;
+typedef std::list<HitPairListPtr >           HitPairListPtrList;
+typedef std::map<int, HitPairListPtr >       HitPairClusterMap;
 }
 
 #ifndef __GCCXML__
