@@ -46,8 +46,8 @@ namespace util {
     //-- Attribute variables --//
 
     double fTime;        ///< Time in nano-second
-    double fFramePeriod; ///< Frame period in nano-second
-    double fFrequency;   ///< Clock speed in GHz (should it be MHz? But GHz seems to match w/ nano-second...)
+    double fFramePeriod; ///< Frame period in micro-second
+    double fFrequency;   ///< Clock speed in MHz
     
   public:
 
@@ -83,10 +83,10 @@ namespace util {
     /// Given time in ticks w.r.t. electronics clock counting, return discretized time in double precision
     double Time(int ticks) const {return ticks/fFrequency; }
 
-    /// Frequency in Hz
+    /// Frequency in MHz
     double Frequency() const { return fFrequency; }
 
-    /// A single frame period in nano-second
+    /// A single frame period in micro-second
     double FramePeriod() const { return fFramePeriod; }
 
     /// # of Ticks
