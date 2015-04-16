@@ -100,6 +100,7 @@ void util::LArProperties::reconfigure(fhicl::ParameterSet const& pset)
   fScintBirksConstant   = pset.get<double>("ScintBirksConstant"  );
   fScintByParticleType  = pset.get<bool>("ScintByParticleType"   );
   fScintYield           = pset.get<double>("ScintYield"          );
+  fScintPreScale        = pset.get<double>("ScintPreScale"       );
   fScintYieldRatio      = pset.get<double>("ScintYieldRatio"     );
 
   if(fScintByParticleType){
