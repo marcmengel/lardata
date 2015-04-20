@@ -59,21 +59,22 @@ namespace util{
 
       bool ScintByParticleType()    const { return fScintByParticleType;  }
 
-      double ScintYield()           const { return fScintYield;           }
-      double ScintYieldRatio()      const { return fScintYieldRatio;      }
+      double ScintYield(bool prescale = false)         const { return fScintYield * ScintPreScale(prescale);}
+      double ScintPreScale(bool prescale = true)       const { return (prescale ? fScintPreScale : 1);      }
+      double ScintYieldRatio()                         const { return fScintYieldRatio;                     }
 
-      double ProtonScintYield()       const { return fProtonScintYield;         }
-      double ProtonScintYieldRatio()  const { return fProtonScintYieldRatio;    }
-      double MuonScintYield()         const { return fMuonScintYield;           }
-      double MuonScintYieldRatio()    const { return fMuonScintYieldRatio;      }
-      double KaonScintYield()         const { return fKaonScintYield;           }
-      double KaonScintYieldRatio()    const { return fKaonScintYieldRatio;      }
-      double PionScintYield()         const { return fPionScintYield;           }
-      double PionScintYieldRatio()    const { return fPionScintYieldRatio;      }
-      double ElectronScintYield()     const { return fElectronScintYield;       }
-      double ElectronScintYieldRatio() const { return fElectronScintYieldRatio;  }
-      double AlphaScintYield()        const { return fAlphaScintYield;          }
-      double AlphaScintYieldRatio()   const { return fAlphaScintYieldRatio;     }
+      double ProtonScintYield(bool prescale = false)   const { return fProtonScintYield * ScintPreScale(prescale);  }
+      double ProtonScintYieldRatio()                   const { return fProtonScintYieldRatio;                       }
+      double MuonScintYield(bool prescale = false)     const { return fMuonScintYield * ScintPreScale(prescale);    }
+      double MuonScintYieldRatio()                     const { return fMuonScintYieldRatio;                         }
+      double KaonScintYield(bool prescale = false)     const { return fKaonScintYield * ScintPreScale(prescale);    }
+      double KaonScintYieldRatio()                     const { return fKaonScintYieldRatio;                         }
+      double PionScintYield(bool prescale = false)     const { return fPionScintYield * ScintPreScale(prescale);    }
+      double PionScintYieldRatio()                     const { return fPionScintYieldRatio;                         }
+      double ElectronScintYield(bool prescale = false) const { return fElectronScintYield * ScintPreScale(prescale);}
+      double ElectronScintYieldRatio()                 const { return fElectronScintYieldRatio;                     }
+      double AlphaScintYield(bool prescale = false)    const { return fAlphaScintYield * ScintPreScale(prescale);   }
+      double AlphaScintYieldRatio()                    const { return fAlphaScintYieldRatio;                        }
 
       bool CerenkovLightEnabled()     const { return fEnableCerenkovLight;      }
 
@@ -144,6 +145,7 @@ namespace util{
       double fAlphaScintYieldRatio; 
 
       double fScintYield;
+      double fScintPreScale;
       double fScintResolutionScale;
       double fScintFastTimeConst;
       double fScintSlowTimeConst;

@@ -26,6 +26,9 @@
  <class name="raw::OpDetPulse 	  " ClassVersion="14"           >
   <version ClassVersion="14" checksum="3733748172"/>
  </class>
+ <class name="raw::OpDetWaveform 	  " ClassVersion="13"  >
+  <version ClassVersion="13" checksum="1572518718"/>
+ </class> 
  <class name="raw::ExternalTrigger" ClassVersion="10"           >
   <version ClassVersion="10" checksum="3590754331"/>
  </class>
@@ -38,6 +41,7 @@
  <class name="std::vector<raw::RawDigit>       "                />
  <class name="std::vector<raw::AuxDetDigit>    "                />
  <class name="std::vector<raw::OpDetPulse>     "                />
+ <class name="std::vector<raw::OpDetWaveform>     "                />
  <class name="std::vector<raw::ExternalTrigger>"                />
  <class name="std::vector<raw::Trigger>        "                />
  <!-- class name="std::bitset<16>"                                  / -->
@@ -51,6 +55,7 @@
  <class name="art::Wrapper< std::vector<raw::DAQHeader>       >"/>
  <class name="art::Wrapper< std::vector<raw::RawDigit>        >"/>
  <class name="art::Wrapper< std::vector<raw::OpDetPulse>      >"/>
+ <class name="art::Wrapper< std::vector<raw::OpDetWaveform>      >"/>
  <class name="art::Wrapper< std::vector<raw::AuxDetDigit>     >"/>
  <class name="art::Wrapper< std::vector<raw::ExternalTrigger> >"/>
  <class name="art::Wrapper< std::vector<raw::Trigger>         >"/>

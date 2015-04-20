@@ -254,20 +254,21 @@ namespace recob{
     //double dcoss[3];
     //double dcose[3];
     //a.Direction(dcoss,dcose);
+    TVector3 const& start = a.VertexDirection();
+    TVector3 const& end   = a.EndDirection();
     stream << std::setiosflags(std::ios::fixed) << std::setprecision(3)
-	   << "\n\n Track ID "       << std::setw(4) << std::right << a.ID()
-	   << " Theta = "            << std::setw(6) << std::right << a.Theta()
-	   << " Phi = "              << std::setw(6) << std::right << a.Phi()
-	   << " \nStartCosines : ( " << &a.VertexDirection()
-	   << ")  EndCosines : ( "   << &a.EndDirection()
-	   << ")\n\n"
-	   << " #Position and Direction = "
-	   << std::setw(5) << std::right << a.NumberTrajectoryPoints()
-	   << " #Covariance = "      << std::setw(6) << std::right << a.NumberCovariance()
-	   << " #dQdx = "            << std::setw(6) << "\n" << std::right;
-
+           << "\n Track ID "       << std::setw(4) << std::right << a.ID()
+           << " Theta = "            << std::setw(6) << std::right << a.Theta()
+           << " Phi = "              << std::setw(6) << std::right << a.Phi()
+           << "\n  StartCosines : ( " << start.X() << " ; " << start.Y() << " ; " << start.Z()
+           << ")  EndCosines : ( "   << end.X() << " ; " << end.Y() << " ; " << end.Z()
+           << ")"
+           << "\n  #Position and Direction = "
+           << std::setw(5) << std::right << a.NumberTrajectoryPoints()
+           << " #Covariance = "      << std::setw(6) << std::right << a.NumberCovariance()
+           << " #dQdx = "            << std::setw(6) << std::right;
     for(size_t i = 0; i < a.fdQdx.size(); ++i)
-      stream << a.fdQdx.at(i).size() << " ";
+      stream << " " << a.fdQdx.at(i).size();
 
     stream << std::endl;
 
