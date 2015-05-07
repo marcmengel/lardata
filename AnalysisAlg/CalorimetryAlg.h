@@ -33,15 +33,15 @@ namespace calo{
       
     void   reconfigure(fhicl::ParameterSet const& pset);
     
-    double dEdx_AMP(art::Ptr< recob::Hit >  hit, double pitch) const;
-    double dEdx_AMP(recob::Hit const&  hit, double pitch) const;
-    double dEdx_AMP(double dQ, double time, double pitch, unsigned int plane) const;
-    double dEdx_AMP(double dQdx,double time, unsigned int plane) const;
+    double dEdx_AMP(art::Ptr< recob::Hit >  hit, double pitch, double T0=0) const;
+    double dEdx_AMP(recob::Hit const&  hit, double pitch, double T0=0) const;
+    double dEdx_AMP(double dQ, double time, double pitch, unsigned int plane, double T0=0) const;
+    double dEdx_AMP(double dQdx,double time, unsigned int plane, double T0=0) const;
     
-    double dEdx_AREA(art::Ptr< recob::Hit >  hit, double pitch) const;
-    double dEdx_AREA(recob::Hit const&  hit, double pitch) const;
-    double dEdx_AREA(double dQ,double time, double pitch, unsigned int plane) const;
-    double dEdx_AREA(double dQdx,double time, unsigned int plane) const;
+    double dEdx_AREA(art::Ptr< recob::Hit >  hit, double pitch, double T0=0) const;
+    double dEdx_AREA(recob::Hit const&  hit, double pitch, double T0=0) const;
+    double dEdx_AREA(double dQ,double time, double pitch, unsigned int plane, double T0=0) const;
+    double dEdx_AREA(double dQdx,double time, unsigned int plane, double T0=0) const;
       
     double ElectronsFromADCPeak(double adc, unsigned short plane) const
     { return adc / fCalAmpConstants[plane]; }
@@ -49,7 +49,7 @@ namespace calo{
     double ElectronsFromADCArea(double area, unsigned short plane) const
     { return area / fCalAreaConstants[plane]; }
     
-    double LifetimeCorrection(double time) const;
+    double LifetimeCorrection(double time, double T0=0) const;
     
   private:
 
@@ -57,7 +57,7 @@ namespace calo{
     art::ServiceHandle<util::LArProperties> LArProp;
     art::ServiceHandle<util::DetectorProperties> detprop;
 
-    double dEdx_from_dQdx_e(double dQdx_e,double time) const;
+    double dEdx_from_dQdx_e(double dQdx_e,double time, double T0=0) const;
    
     std::vector< double > fCalAmpConstants;
     std::vector< double > fCalAreaConstants;
