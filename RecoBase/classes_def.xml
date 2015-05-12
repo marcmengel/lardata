@@ -23,10 +23,12 @@
  <class name="std::vector<TVector3>"                                      />
  <class name="std::vector<TMatrixT<double> >"                             />
    <!-- LArSoft structures -->
- <class name="geo::PlaneID"             ClassVersion="2"                   >
+ <class name="geo::PlaneID"             ClassVersion="3"                   >
+  <version ClassVersion="3" checksum="1787337437"/>
   <version ClassVersion="2" checksum="1305837428"/>
  </class>
- <class name="geo::WireID"             ClassVersion="11"                   >
+ <class name="geo::WireID"             ClassVersion="12"                   >
+  <version ClassVersion="12" checksum="235712999"/>
   <version ClassVersion="11" checksum="363582492"/>
  </class>
  <class name="lar::sparse_vector<float>"                                  />
