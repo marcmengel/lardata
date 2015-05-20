@@ -88,6 +88,26 @@ namespace raw {
   }
 
   //----------------------------------------------------------
+  void Compress(const boost::circular_buffer<std::vector<short>> &adcvec_neighbors,
+		std::vector<short> &adc,
+		raw::Compress_t     compress, 
+		unsigned int       &zerothreshold, 
+		int                &nearestneighbor)
+  { 
+    if(compress == raw::kHuffman) 
+      CompressHuffman(adc);
+    else if(compress == raw::kZeroSuppression) 
+      ZeroSuppression(adcvec_neighbors,adc,zerothreshold, nearestneighbor);
+    else if(compress == raw::kZeroHuffman){
+      ZeroSuppression(adcvec_neighbors,adc,zerothreshold, nearestneighbor);
+      CompressHuffman(adc);
+    }    
+
+    return;
+  }
+
+
+  //----------------------------------------------------------
   // Zero suppression function
   void ZeroSuppression(std::vector<short> &adc, 
 		       unsigned int       &zerothreshold)
@@ -256,6 +276,129 @@ namespace raw {
     //   std::cout << adc[i] << std::endl;
     //adc.resize(2+nblocks+nblocks+zerosuppressedsize);
   }
+
+  //----------------------------------------------------------
+  // Zero suppression function which merges blocks if they are 
+  // within parameter nearest neighbor of each other and makes
+  // blocks if neighboring wires have nonzero blocks there
+  void ZeroSuppression(const boost::circular_buffer<std::vector<short>> &adcvec_neighbors,
+		       std::vector<short> &adc, 
+		       unsigned int       &zerothreshold, 
+		       int                &nearestneighbor)
+  {
+   
+    const int adcsize = adc.size();
+    const int zerothresholdsigned = zerothreshold;
+    
+    std::vector<short> zerosuppressed(adcsize);
+    const int maxblocks = adcsize/2 + 1;
+    std::vector<short> blockbegin(maxblocks);
+    std::vector<short> blocksize(maxblocks);
+    
+    int nblocks = 0;
+    int zerosuppressedsize = 0;
+ 
+    int blockstartcheck = 0;
+    int endofblockcheck = 0;
+
+    for(int i = 0; i < adcsize; ++i){
+
+      //find maximum adc value among all neighboring channels within the nearest neighbor channel distance
+
+      int adc_current_value = 0;
+   
+      for(boost::circular_buffer<std::vector<short>>::const_iterator adcveciter = adcvec_neighbors.begin(); adcveciter!=adcvec_neighbors.end();++adcveciter){
+	const std::vector<short> &adcvec_current = *adcveciter;
+	const int adcvec_current_single = std::abs(adcvec_current[i]);
+      
+	if(adc_current_value < adcvec_current_single){
+	  adc_current_value = adcvec_current_single;
+	}
+      
+      }
+      if(blockstartcheck==0){
+	if(adc_current_value>zerothresholdsigned){
+	  if(nblocks>0){
+	    if(i-nearestneighbor<=blockbegin[nblocks-1]+blocksize[nblocks-1]+1){
+	      nblocks--;
+	      blocksize[nblocks] = i - blockbegin[nblocks] + 1;
+	      blockstartcheck = 1;
+	    }
+	    else{
+	      blockbegin[nblocks] = (i - nearestneighbor > 0) ? i - nearestneighbor : 0;
+	      blocksize[nblocks] = i - blockbegin[nblocks] + 1;
+	      blockstartcheck = 1;
+	    }
+	  }	
+	  else{
+	    blockbegin[nblocks] = (i - nearestneighbor > 0) ? i - nearestneighbor : 0;
+	    blocksize[nblocks] = i - blockbegin[nblocks] + 1;
+	    blockstartcheck = 1;	    
+	  }
+	}
+      }
+      else if(blockstartcheck==1){
+	if(adc_current_value>zerothresholdsigned){
+	  blocksize[nblocks]++;
+	  endofblockcheck = 0;
+	}
+	else{
+	  if(endofblockcheck<nearestneighbor){
+	    endofblockcheck++;
+	    blocksize[nblocks]++;
+	  }
+	  //block has ended
+	  else if(std::abs(adc[i+1]) <= zerothresholdsigned || std::abs(adc[i+2]) <= zerothresholdsigned){  
+	    endofblockcheck = 0;
+	    blockstartcheck = 0;
+	    nblocks++;	    
+	  }
+	  
+	  
+	} // end else
+      } // end if blockstartcheck == 1
+    }// end loop over adc size
+    
+
+    for(int i = 0; i < nblocks; ++i)
+      zerosuppressedsize += blocksize[i];
+    
+    
+    adc.resize(2+nblocks+nblocks+zerosuppressedsize);
+    zerosuppressed.resize(2+nblocks+nblocks+zerosuppressedsize);
+    
+    
+    int zerosuppressedcount = 0;
+    for(int i = 0; i < nblocks; ++i){
+      //zerosuppressedsize += blocksize[i];
+      for(int j = 0; j < blocksize[i]; ++j){
+	zerosuppressed[zerosuppressedcount] = adc[blockbegin[i] + j];
+	zerosuppressedcount++;
+      }
+    }
+    
+    adc[0] = adcsize; //fill first entry in adc with length of uncompressed vector
+    adc[1] = nblocks;
+    for(int i = 0; i < nblocks; ++i){
+      adc[i+2] = blockbegin[i];
+      adc[i+nblocks+2] = blocksize[i];
+    }
+    
+    
+    
+    for(int i = 0; i < zerosuppressedsize; ++i)
+      adc[i+nblocks+nblocks+2] = zerosuppressed[i];
+    
+    
+    // for(int i = 0; i < 2 + 2*nblocks + zerosuppressedsize; ++i)
+    //   std::cout << adc[i] << std::endl;
+    //adc.resize(2+nblocks+nblocks+zerosuppressedsize);
+  }
+
+
+
+
+
 
   //----------------------------------------------------------
   // Reverse zero suppression function
