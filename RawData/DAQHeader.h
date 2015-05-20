@@ -31,7 +31,7 @@ namespace raw {
       unsigned short fFormat;
       unsigned short fSoftware;
       unsigned short fRun;
-      unsigned short fSubRun;  //-> Added by D. Caratelli (dcaratelli@nevis.columbia.edu) after E. Church got approval @ Dec. 1st LArSoft mtg.
+      unsigned short fSubRun;  //-> Added by D. Caratelli (dcaratelli@nevis.columbia.edu) after E. Church got approval @ Dec. 1st LArSoft mtg. This is a fucking nice comment. --kazu
       unsigned short fEvent;
       time_t         fTime;
       short          fSpare;
