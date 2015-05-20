@@ -17,7 +17,8 @@ namespace raw{
   AuxDetDigit::AuxDetDigit()  
     : fADC(0)
     , fChannel(0) 
-    , fAuxDetType(raw::kUnknownAuxDet)
+    , fAuxDetName("UnknownAuxDet")
+    , fTimeStamp(UINT64_MAX)
   {
 
   }
@@ -25,10 +26,12 @@ namespace raw{
   //----------------------------------------------------------------------
   AuxDetDigit::AuxDetDigit(unsigned short     channel,
 			   std::vector<short> adclist, 
-			   raw::AuxDetType_t  type) 
+			   std::string        name,
+			   unsigned long long timeStamp) 
     : fADC(adclist) 
     , fChannel(channel) 
-    , fAuxDetType(type)
+    , fAuxDetName(name)
+    , fTimeStamp(timeStamp)
   { 
 
   }

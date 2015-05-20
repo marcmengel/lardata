@@ -1,83 +1,174 @@
-////////////////////////////////////////////////////////////////////////
-// \version $Id: Wire.h,v 1.7 2010/03/26 20:07:08 brebel Exp $
-//
-// \brief Definition of basic wire object.  The deconvoluted signals are stored in this class
-//
-// \author brebel@fnal.gov
-//
-////////////////////////////////////////////////////////////////////////
+/** ****************************************************************************
+ * @file Wire.h
+ * @brief Declaration of basic channel signal object.
+ * @author brebel@fnal.gov
+ * @see  Wire.cxx
+ * 
+ * Changes:
+ * 20141211 Gianluca Petrillo (petrillo@fnal.gov)
+ *   data architecture revision changes:
+ *   - fSignalType and SignalType() removed
+ *   - fRawDigit and RawDigit() removed
+ *   - fChannel and Channel() added
+ *   - constructors now take directly a RawDigit, not its art::Ptr
+ * 
+ * ****************************************************************************/
 
 #ifndef WIRE_H
 #define WIRE_H
 
 #include <vector>
-#include <stdint.h>
 
-#include "Utilities/sparse_vector.h"
-#include "RawData/RawDigit.h"
+#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "SimpleTypesAndConstants/geo_types.h"
+#include "Utilities/sparse_vector.h"
 
-#include "art/Persistency/Common/Ptr.h"
+
+// prototype declaration
+namespace raw { class RawDigit; }
 
 
-///Reconstruction base classes
+/// Reconstruction base classes
 namespace recob {
 
+  /**
+   * @brief Class holding the deconvoluted signals from a channel
+   * @note Despite the name, this class is associated to a readout channel, not
+   *       just a wire
+   *
+   * The channel content is expected to have been filtered from noise and
+   * corrected for electronics response.
+   * The content is presented as calibrated ADC counts, pedestal removed, as
+   * function of time in discrete TDC units (use TimeService to discover the
+   * exact extent of each tick).
+   * The content is organized as time intervals where some signal is present
+   * ("regions of interest", RoI), outside which we assume no signal, i.e,
+   * calibrated ADC counts of 0.
+   * Strictly speaking, the definition of the regions of interest is a negative
+   * one: we first define where we are sure no signal is present; the rest will
+   * constitute regions of interest.
+   * The identification of such regions is responsibility of the algorithm
+   * creating the Wire object. In the simple approach, the whole readout window
+   * is stored in a single region of interest, meaning that we don't claim any
+   * of the channel signal to be definitely signal free.
+   * 
+   * Algorithms using the regions of interest can access the channel signal
+   * information either ignoring the regions of interest, and being potentially
+   * flooded by zeroes from the non-signal regions:
+   *     
+   *     for (float ADCcount: wire.Signal()) ...
+   *     
+   * or they can analyze region by region:
+   *     
+   *     for (auto iROI = wire.begin_range(); wire.end_range(); ++iROI) {
+   *       const datarange_t& ROI = *iROI;
+   *       const int FirstTick = ROI.begin_index();
+   *       const int EndTick = ROI.end_index();
+   *       const float FirstADC = ROI[FirstTick]; // index access is by absolute tick number
+   *       for (float ADC: ROI) // ... or you can just iterate through
+   *       // ...
+   *     } // for
+   *     
+   * Note that the indexed access is always by absolute tick number.
+   * More examples of the use of SignalROI() return value are documented in
+   * lar::sparse_vector .
+   * 
+   * Each channel is associated with a raw::RawDigit object. These associations
+   * should be stored together with recob::Wire by the producer in a art::Assns
+   * data product.
+   */
   class Wire {
     public:
-        ///< a region of interest is a pair (TDC offset, readings)
+      /// a region of interest is a pair (TDC offset, readings)
       typedef lar::sparse_vector<float> RegionsOfInterest_t;
       
-      Wire(); // Default constructor
-      ~Wire();
+      /// Default constructor: a wire with no signal information
+      Wire();
       
     private:
-      RegionsOfInterest_t fSignalROI;
-      art::Ptr<raw::RawDigit> fRawDigit;   ///< vector to index of raw digit for this wire
-      geo::View_t             fView;       ///< view corresponding to the plane of this wire
-      geo::SigType_t          fSignalType; ///< signal type of the plane for this wire
-      unsigned int            fMaxSamples; ///< max number of ADC samples possible on the wire
+      raw::ChannelID_t    fChannel;   ///< ID of the associated channel
+      geo::View_t         fView;      ///< View corresponding to the plane of this wire
+      RegionsOfInterest_t fSignalROI; ///< Signal on the channel
 
 #ifndef __GCCXML__
-
-  // partial constructor, used only as common part by the other constructors
-      Wire(art::Ptr<raw::RawDigit> &rawdigit);
-  
+    
+    friend class WireCreator; // helper to create wires in art
+    
     public:
+      /**
+       * @brief Constructor: uses specified signal in regions of interest
+       * @param sigROIlist signal organized in regions of interest
+       * @param channel the ID of the channel
+       * @param view the view the channel belongs to
+       *
+       * The information used from the raw digit are the channel ID and the
+       * length in samples (TDC ticks) of the original readout window.
+       * 
+       * Signal is copied into the Wire object. If possible, use the other
+       * constructor that moves the data instead.
+       */
+      Wire(
+        RegionsOfInterest_t const& sigROIlist,
+        raw::ChannelID_t channel,
+        geo::View_t view
+        );
       
-      // ROI constructor
-      Wire(const RegionsOfInterest_t& sigROIlist,
-           art::Ptr<raw::RawDigit> &rawdigit);
-      Wire(RegionsOfInterest_t&& sigROIlist,
-           art::Ptr<raw::RawDigit> &rawdigit);
-
-      // Get Methods
-      // zero-padded full length vector filled with ROIs
+      /**
+       * @brief Constructor: uses specified signal in regions of interest
+       * @param sigROIlist signal organized in regions of interest
+       * @param channel the ID of the channel
+       * @param view the view the channel belongs to
+       *
+       * The information used from the raw digit are the channel ID and the
+       * length in samples (TDC ticks) of the original readout window.
+       * 
+       * Signal information is moved from sigROIlist, that becomes empty.
+       */
+      Wire(
+        RegionsOfInterest_t&& sigROIlist,
+        raw::ChannelID_t channel,
+        geo::View_t view
+        );
+      
+      ///@{
+      ///@name Accessors
+      
+      /// Return a zero-padded full length vector filled with RoI signal
       std::vector<float>  Signal() const;
-
+      
+      /// Returns the list of regions of interest
       const RegionsOfInterest_t& SignalROI()  const;
+      
+      /// Returns the number of time ticks, or samples, in the channel
       size_t                     NSignal()    const;
-      art::Ptr<raw::RawDigit>    RawDigit()   const;
+      
+      /// Returns the view the channel belongs to
       geo::View_t                View()       const;
-      geo::SigType_t             SignalType() const;
-      uint32_t                   Channel()    const;
-
-#endif
-
-    };
-}
+      
+      /// Returns the ID of the channel (or InvalidChannelID)
+      raw::ChannelID_t           Channel()    const;
+      ///@}
+      
+      /// Returns whether this channel ID is smaller than the other
+      bool operator< (const Wire& than) const;
+      
+#endif // !__GCCXML__
+      
+  }; // class Wire
+  
+} // namespace recob
 
 #ifndef __GCCXML__
 
 inline const recob::Wire::RegionsOfInterest_t&
-                                  recob::Wire::SignalROI()  const { return fSignalROI;          }
-inline size_t                     recob::Wire::NSignal()    const { return fMaxSamples;         }
-inline art::Ptr<raw::RawDigit>    recob::Wire::RawDigit()   const { return fRawDigit;           }
-inline geo::View_t                recob::Wire::View()       const { return fView;               }
-inline geo::SigType_t             recob::Wire::SignalType() const { return fSignalType;         }
-inline uint32_t                   recob::Wire::Channel()    const { return fRawDigit->Channel();}
+                                  recob::Wire::SignalROI()  const { return fSignalROI;        }
+inline size_t                     recob::Wire::NSignal()    const { return fSignalROI.size(); }
+inline geo::View_t                recob::Wire::View()       const { return fView;             }
+inline raw::ChannelID_t           recob::Wire::Channel()    const { return fChannel;          }
+inline bool                       recob::Wire::operator< (const Wire& than) const
+  { return Channel() < than.Channel(); }
 
-#endif
+#endif // !__GCCXML__
 
 #endif // WIRE_H
 

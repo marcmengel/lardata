@@ -1,11 +1,8 @@
 <!--                                                                                  -->
-<!--  $Id: classes_def.xml,v 1.10 2010/04/12 18:12:28  Exp $                          -->
-<!--  $Author:  $                                                                     -->
-<!--  $Date: 2010/04/12 18:12:28 $                                                    -->
-<!--                                                                                  -->
 <!--  Include art::Wrapper lines for objects that we would like to put into the event -->
 <!--  Include the non-wrapper lines for all objects on the art::Wrapper lines and     -->
 <!--  for all objects that are data members of those objects.                         -->
+<!--                                                                                  -->
 
 
 <lcgdict>
@@ -17,15 +14,22 @@
   <version ClassVersion="13" checksum="786471469"/>
   <version ClassVersion="12" checksum="4132299299"/>
  </class>
- <class name="raw::RawDigit   	  " ClassVersion="12"           >
+ <class name="raw::RawDigit   	  " ClassVersion="13"           >
   <version ClassVersion="12" checksum="160151695"/>
+  <version ClassVersion="13" checksum="412021819"/>
  </class>
- <class name="raw::AuxDetDigit	  " ClassVersion="10"           >
+ <class name="raw::AuxDetDigit	  " ClassVersion="13"           >
+  <version ClassVersion="13" checksum="3822054512" />
+  <version ClassVersion="12" checksum="372094003" />
+  <version ClassVersion="11" checksum="2699414988"/>
   <version ClassVersion="10" checksum="1690717253"/>
  </class>
  <class name="raw::OpDetPulse 	  " ClassVersion="14"           >
   <version ClassVersion="14" checksum="3733748172"/>
  </class>
+ <class name="raw::OpDetWaveform 	  " ClassVersion="13"  >
+  <version ClassVersion="13" checksum="1572518718"/>
+ </class> 
  <class name="raw::ExternalTrigger" ClassVersion="10"           >
   <version ClassVersion="10" checksum="3590754331"/>
  </class>
@@ -38,8 +42,10 @@
  <class name="std::vector<raw::RawDigit>       "                />
  <class name="std::vector<raw::AuxDetDigit>    "                />
  <class name="std::vector<raw::OpDetPulse>     "                />
+ <class name="std::vector<raw::OpDetWaveform>     "                />
  <class name="std::vector<raw::ExternalTrigger>"                />
  <class name="std::vector<raw::Trigger>        "                />
+ <!-- class name="std::bitset<16>"                                  / -->
  <class name="std::pair<std::string,std::vector<double> >"      />
  <class name="std::map<std::string,std::vector<double> >"       />
  <class name="art::Wrapper< raw::BeamInfo                     >"/>
@@ -50,6 +56,7 @@
  <class name="art::Wrapper< std::vector<raw::DAQHeader>       >"/>
  <class name="art::Wrapper< std::vector<raw::RawDigit>        >"/>
  <class name="art::Wrapper< std::vector<raw::OpDetPulse>      >"/>
+ <class name="art::Wrapper< std::vector<raw::OpDetWaveform>      >"/>
  <class name="art::Wrapper< std::vector<raw::AuxDetDigit>     >"/>
  <class name="art::Wrapper< std::vector<raw::ExternalTrigger> >"/>
  <class name="art::Wrapper< std::vector<raw::Trigger>         >"/>

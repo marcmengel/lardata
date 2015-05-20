@@ -77,6 +77,7 @@ void pid::Chi2PIDAlg::DoParticleID(art::Ptr<anab::Calorimetry> calo,
   std::vector<double> trkdedx = calo->dEdx();
   std::vector<double> trkres = calo->ResidualRange();
   std::vector<double> deadwireresrc = calo->DeadWireResRC();
+  pidOut.fPlaneID = calo->PlaneID();
 
   int used_trkres = 0;
   for (unsigned i = 0; i<trkdedx.size(); ++i){//hits

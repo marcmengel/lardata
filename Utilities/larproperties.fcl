@@ -35,10 +35,13 @@ standard_properties:
  ScintSlowTimeConst:   1590.  # slow scintillation time constant (ns)
  ScintBirksConstant:   0.069  # birks constant for LAr (1/MeV cm)
  ScintYield:           24000. # total scintillation yield (ph/Mev)         
+ ScintPreScale:        0.03   # Scale factor to reduce number of photons simulated
+                              # Later QE should be corrected for this scale
  ScintYieldRatio:      0.3    # fast / slow scint ratio (needs revisitting)
  ScintByParticleType:  false  # whether to use different yields and
                               # quenching per particle in fast op sim
  EnableCerenkovLight: true    # whether to switch on cerenkov light (slow)
+
 
 
 

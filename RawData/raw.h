@@ -8,7 +8,7 @@
 #define RAWDATA_RAW_H
 
 #include <vector>
-
+#include <boost/circular_buffer.hpp>
 #include "SimpleTypesAndConstants/RawTypes.h"
 
 namespace raw{
@@ -30,6 +30,12 @@ namespace raw{
                 raw::Compress_t     compress, 
                 unsigned int       &zerothreshold);
 
+  void Compress(const boost::circular_buffer<std::vector<short>> &adcvec_neighbors,
+		std::vector<short> &adc, 
+                raw::Compress_t     compress, 
+                unsigned int       &zerothreshold, 
+                int &nearestneighbor);
+
   void CompressHuffman(std::vector<short> &adc);
 
   void UncompressHuffman(const std::vector<short>& adc, 
@@ -38,8 +44,14 @@ namespace raw{
   void ZeroSuppression(std::vector<short> &adc, 
                        unsigned int       &zerothreshold, 
                        int                &nearestneighbor);
+
   void ZeroSuppression(std::vector<short> &adc, 
                        unsigned int       &zerothreshold);
+
+  void ZeroSuppression(const boost::circular_buffer<std::vector<short>> &adcvec_neighbors,
+		       std::vector<short> &adc,
+                       unsigned int       &zerothreshold, 
+                       int                &nearestneighbor);
 
   void ZeroUnsuppression(const std::vector<short>& adc, 
                          std::vector<short>      &uncompressed);

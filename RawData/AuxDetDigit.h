@@ -12,8 +12,7 @@
 
 #include <vector>
 #include <iosfwd>
-
-#include "SimpleTypesAndConstants/RawTypes.h"
+#include <string>
 
 ///Raw data description
 namespace raw {
@@ -23,26 +22,33 @@ namespace raw {
   public:
     AuxDetDigit(); // Default constructor
     
-
   private:
 
     std::vector<short> fADC;        ///< vector of adc counts
     unsigned short     fChannel;    ///< channel in the readout
-    raw::AuxDetType_t  fAuxDetType; ///< type of detector 
+    std::string        fAuxDetName; ///< name of the detector
+    unsigned long long fTimeStamp;  ///< timestamp, upper 32 bits
+                                    ///< for the seconds since 1970
+                                    ///< lower 32 for nanoseconds
     
 #ifndef __GCCXML__
+
+static_assert(sizeof(unsigned long long)==8,"unsigned long long is not 8 bytes");
+
   public:
     
-    AuxDetDigit(unsigned short channel,
+    AuxDetDigit(unsigned short     channel,
 		std::vector<short> adclist,
-		raw::AuxDetType_t type);
+		std::string        name="UknownAuxDet",
+		unsigned long long           timeStamp=UINT64_MAX);
     
     
     // Get Methods
-    size_t            NADC()        const;
-    short             ADC(size_t i) const;
-    unsigned short    Channel()     const;
-    raw::AuxDetType_t Type()        const;
+    size_t             NADC()        const;
+    short              ADC(size_t i) const;
+    unsigned short     Channel()     const;
+    std::string const& AuxDetName()  const;
+    unsigned long long TimeStamp()   const;
 
 #endif
   };
@@ -50,9 +56,10 @@ namespace raw {
 
 #ifndef __GCCXML__
 
-inline size_t            raw::AuxDetDigit::NADC()    const { return fADC.size(); }
-inline unsigned short    raw::AuxDetDigit::Channel() const { return fChannel;    }
-inline raw::AuxDetType_t raw::AuxDetDigit::Type()    const { return fAuxDetType; }
+inline size_t             raw::AuxDetDigit::NADC()       const { return fADC.size(); }
+inline unsigned short     raw::AuxDetDigit::Channel()    const { return fChannel;    }
+inline std::string const& raw::AuxDetDigit::AuxDetName() const { return fAuxDetName; }
+inline unsigned long long raw::AuxDetDigit::TimeStamp()  const { return fTimeStamp;  }
 
 #endif
 

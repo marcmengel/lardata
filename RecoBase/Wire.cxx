@@ -1,82 +1,53 @@
-////////////////////////////////////////////////////////////////////////
-// $Id: Wire.cxx,v 1.10 2010/04/15 18:13:36 brebel Exp $
-//
-// Wire class
-//
-// brebel@fnal.gov
-//
-////////////////////////////////////////////////////////////////////////
+/** ****************************************************************************
+ * @file Wire.cxx
+ * @brief Definition of basic channel signal object.
+ * @author brebel@fnal.gov
+ * @see  Wire.h
+ * 
+ * ****************************************************************************/
 
 #include "RecoBase/Wire.h"
 
-#include "Geometry/CryostatGeo.h"
-#include "Geometry/PlaneGeo.h"
-#include "Geometry/TPCGeo.h"
-#include "Geometry/Geometry.h"
-#include "RawData/raw.h"
+// C/C++ standard libraries
+#include <utility> // std::move()
 
 namespace recob{
 
   //----------------------------------------------------------------------
   Wire::Wire()
-    : fSignalROI(0)
-  {
-
-  }
+    : fChannel(raw::InvalidChannelID)
+    , fView(geo::kUnknown)
+    , fSignalROI()
+    {}
 
   //----------------------------------------------------------------------
   Wire::Wire(
-    art::Ptr<raw::RawDigit> &rawdigit)
-    : fSignalROI()
-    , fRawDigit(rawdigit)
-  {
-
-    art::ServiceHandle<geo::Geometry> geo;
-    
-    fView       = geo->View(rawdigit->Channel());
-    fSignalType = geo->SignalType(rawdigit->Channel());
-    fMaxSamples = rawdigit->Samples();
-    fSignalROI.resize(fMaxSamples); // "filled" with empty samples
-  }
+    RegionsOfInterest_t const& sigROIlist,
+    raw::ChannelID_t channel,
+    geo::View_t view
+    )
+    : fChannel(channel)
+    , fView(view)
+    , fSignalROI(sigROIlist)
+    {}
 
   //----------------------------------------------------------------------
-  Wire::Wire
-    (const RegionsOfInterest_t& sigROIlist, art::Ptr<raw::RawDigit> &rawdigit)
-    : Wire(rawdigit)
-  {
-    fSignalROI = sigROIlist;
-    fSignalROI.resize(fMaxSamples); // "filled" with empty samples
-  }
+  Wire::Wire(
+    RegionsOfInterest_t&& sigROIlist,
+    raw::ChannelID_t channel,
+    geo::View_t view
+    )
+    : fChannel(channel)
+    , fView(view)
+    , fSignalROI(std::move(sigROIlist))
+    {}
 
-  Wire::Wire
-    (RegionsOfInterest_t&& sigROIlist, art::Ptr<raw::RawDigit> &rawdigit)
-    : Wire(rawdigit)
-  {
-    fSignalROI = sigROIlist; // should use the move assignment
-    fSignalROI.resize(fMaxSamples); // "filled" with empty samples
-  }
 
-  std::vector<float> Wire::Signal() const
-  {
+  //----------------------------------------------------------------------
+  std::vector<float> Wire::Signal() const {
     return { fSignalROI.begin(), fSignalROI.end() };
-#if 0 
-    // *** untested code ***
-    // Return ROI signals in a zero padded vector of size that contains
-    // all ROIs
+  } // Wire::Signal()
 
-    std::vector<float> sigTemp(fMaxSamples, 0.);
-    for(const auto& RoI: fSignalROI.get_ranges())
-      std::copy(RoI.begin(), RoI.end(), sigTemp.begin() + RoI.begin_index());
-    return sigTemp;
-#endif // 0
-    
-  } // Wire::Signal
-
-  //----------------------------------------------------------------------
-  Wire::~Wire()
-  {
-
-  }
 
 }
 ////////////////////////////////////////////////////////////////////////

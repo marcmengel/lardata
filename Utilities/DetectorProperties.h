@@ -13,6 +13,7 @@
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
+#include "SimpleTypesAndConstants/geo_types.h"
 #include "Utilities/TimeService.h"
 
 ///General LArSoft Utilities
@@ -36,11 +37,20 @@ namespace util{
       double       TimeOffsetV()       const { return fTimeOffsetV; };
       double       TimeOffsetZ()       const { return fTimeOffsetZ; };
 
-      double             ConvertXToTicks(double X,     int p, int t, int c) ;
+      double             ConvertXToTicks(double X, int p, int t, int c) ;
+      double             ConvertXToTicks(double X, geo::PlaneID const& planeid)
+        { return ConvertXToTicks(X, planeid.Plane, planeid.TPC, planeid.Cryostat); }
       double             ConvertTicksToX(double ticks, int p, int t, int c) ;
+      double             ConvertTicksToX(double ticks, geo::PlaneID const& planeid)
+        { return ConvertTicksToX(ticks, planeid.Plane, planeid.TPC, planeid.Cryostat); }
 
       double             GetXTicksOffset(int p, int t, int c) ;
-      double             GetXTicksCoefficient() ;      
+      double             GetXTicksOffset(geo::PlaneID const& planeid)
+        { return GetXTicksOffset(planeid.Plane, planeid.TPC, planeid.Cryostat); }
+      double             GetXTicksCoefficient(int t, int c) ;
+      double             GetXTicksCoefficient(geo::TPCID const& tpcid)
+        { return GetXTicksCoefficient(tpcid.TPC, tpcid.Cryostat); }
+      double             GetXTicksCoefficient() ;
 
       // The following methods convert between TDC counts (SimChannel time) and
       // ticks (RawDigit/Wire time).
@@ -69,10 +79,12 @@ namespace util{
       double       fTimeOffsetZ;       ///< view
             
       bool         fInheritNumberTimeSamples; ///< Flag saying whether to inherit NumberTimeSamples
+      bool         fXTicksParamsLoaded;///<  calculations
 
       double       fXTicksCoefficient; ///< Parameters for x<-->ticks
-      bool         fXTicksParamsLoaded;///<  calculations
+
       std::vector<std::vector<std::vector<double> > > fXTicksOffsets;
+      std::vector<std::vector<double> >               fDriftDirection;
 
       fhicl::ParameterSet   fPS;       ///< Original parameter set.
 

@@ -19,6 +19,7 @@
 util::SignalShaping::SignalShaping() 
   : fResponseLocked(false)
   , fFilterLocked  (false)
+  , fNorm (true)
 {}
 
 
@@ -28,6 +29,17 @@ util::SignalShaping::SignalShaping()
 util::SignalShaping::~SignalShaping()
 {}
 
+// void util::SignalShaping::ResetDecon()
+// {
+//   fResponseLocked = false;
+//   fFilterLocked = false;
+//   fResponse.clear();
+//   fConvKernel.clear();
+//   fFilter.clear();
+//   fDeconvKernel.clear();
+//   //Set deconvolution polarity to + as default
+//   fDeconvKernelPolarity = +1;
+// }
 
 
 //----------------------------------------------------------------------
@@ -288,48 +300,48 @@ void util::SignalShaping::CalculateDeconvKernel() const
   std::vector<double> deconv(n, 0.);
   fft->DoInvFFT(const_cast<std::vector<TComplex>&>(fFilter), deconv);
 
-
-  // Find the peak value of the response
-  // Should normally be at zero, but don't assume that.
-  // Use DeconvKernelPolairty to find what to normalize to
-  double peak_response = 0;
-  if ( fDeconvKernelPolarity == -1 )
-    peak_response = 4096;
-  for(unsigned int i = 0; i < fResponse.size(); ++i) {
-    if( (fResponse[i] > peak_response) 
-	and (fDeconvKernelPolarity == 1))
-      peak_response = fResponse[i];
-    else if ( (fResponse[i] < peak_response)
-	      and ( fDeconvKernelPolarity == -1) )
-      peak_response = fResponse[i];
+  if (fNorm){
+    // Find the peak value of the response
+    // Should normally be at zero, but don't assume that.
+    // Use DeconvKernelPolairty to find what to normalize to
+    double peak_response = 0;
+    if ( fDeconvKernelPolarity == -1 )
+      peak_response = 4096;
+    for(unsigned int i = 0; i < fResponse.size(); ++i) {
+      if( (fResponse[i] > peak_response) 
+	  and (fDeconvKernelPolarity == 1))
+	peak_response = fResponse[i];
+      else if ( (fResponse[i] < peak_response)
+		and ( fDeconvKernelPolarity == -1) )
+	peak_response = fResponse[i];
+    }
+    if ( fDeconvKernelPolarity == -1 )
+      peak_response *= -1;
+    if (peak_response <= 0.) {
+      throw cet::exception("SignalShaping") << __func__
+					    << ": peak should always be positive (got " << peak_response << ")\n";
+    }
+    
+    // Find the peak value of the deconvoluted response
+    // Should normally be at zero, but don't assume that.
+    
+    double peak_deconv = 0.;
+    for(unsigned int i = 0; i < deconv.size(); ++i) {
+      if(deconv[i] > peak_deconv)
+	peak_deconv = deconv[i];
+    }
+    if (peak_deconv <= 0.) {
+      throw cet::exception("SignalShaping") << __func__
+					    << ": deconvolution peak should always be positive (got " << peak_deconv << ")\n";
+    }
+    
+    // Multiply the deconvolution kernel by a factor such that
+    // (Peak of response) = (Peak of deconvoluted response).
+    
+    double ratio = peak_response / peak_deconv;
+    for(unsigned int i = 0; i < fDeconvKernel.size(); ++i)
+      fDeconvKernel[i] *= ratio;
   }
-  if ( fDeconvKernelPolarity == -1 )
-    peak_response *= -1;
-  if (peak_response <= 0.) {
-    throw cet::exception("SignalShaping") << __func__
-      << ": peak should always be positive (got " << peak_response << ")\n";
-  }
-
-  // Find the peak value of the deconvoluted response
-  // Should normally be at zero, but don't assume that.
-
-  double peak_deconv = 0.;
-  for(unsigned int i = 0; i < deconv.size(); ++i) {
-    if(deconv[i] > peak_deconv)
-      peak_deconv = deconv[i];
-  }
-  if (peak_deconv <= 0.) {
-    throw cet::exception("SignalShaping") << __func__
-      << ": deconvolution peak should always be positive (got " << peak_deconv << ")\n";
-  }
-
-  // Multiply the deconvolution kernel by a factor such that
-  // (Peak of response) = (Peak of deconvoluted response).
-
-  double ratio = peak_response / peak_deconv;
-  for(unsigned int i = 0; i < fDeconvKernel.size(); ++i)
-    fDeconvKernel[i] *= ratio;
-
   // Set the lock flag.
 
   fFilterLocked = true;

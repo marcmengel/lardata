@@ -1,148 +1,134 @@
+/**
+ * \file MCShower.h
+ *
+ * \ingroup MCBase
+ * 
+ * \brief Class def header for MCShower data container
+ *
+ * @author Kazu - Nevis 2014
+ */
+
+/** \addtogroup MCBase
+
+    @{*/
+
 #ifndef MCSHOWER_H
 #define MCSHOWER_H
 
-#include <vector>
-#include "MCLimits.h"
-#include "MCBaseException.h"
+#include "MCStep.h"
+#include "SimulationBase/MCTruth.h"
 
 namespace sim {
 
   class MCShower {
-
+    
   public:
 
-    /// Default ctor 
-    MCShower() : fMotherVtx        (4,::sim::kINVALID_DOUBLE),
-		 fMotherMomentum   (4,::sim::kINVALID_DOUBLE),
-		 fDaughterVtx      (4,::sim::kINVALID_DOUBLE),
-		 fDaughterMomentum (4,::sim::kINVALID_DOUBLE)
-    { Clear(); }
+    /// Default constructor
+    MCShower() {Clear();}
 
-    /// Default dtor
-    ~MCShower(){}
+    /// Default destructor
+    virtual ~MCShower(){}
 
-    /// Initializer
-    void Clear() {
-
-      fMotherPDGID   = ::sim::kINVALID_INT;
-      fMotherTrackID = ::sim::kINVALID_UINT;      
-      fMotherProcess = "";
-      fDaughterTrackID.clear();
-      fPlaneCharge.clear();
-      for(size_t i=0; i<4; ++i) {
-
-	fMotherVtx[i]        = ::sim::kINVALID_DOUBLE;
-	fMotherMomentum[i]   = ::sim::kINVALID_DOUBLE;
-	fDaughterVtx[i]      = ::sim::kINVALID_DOUBLE;
-	fDaughterMomentum[i] = ::sim::kINVALID_DOUBLE;
-
-      }
-    }
+    /// Clear method
+    virtual void Clear();
 
 #ifndef __GCCXML__
 
-    //
     //--- Getters ---//
-    //
-    /// Mother PDG code
-    const int           MotherPDGID()   const         { return fMotherPDGID;     }
-    /// Mother G4 Track ID (to be matched w/ simb::MCParticle::fTrackId
-    const unsigned int  MotherTrackID() const         { return fMotherTrackID;   }
-    /// Mother G4 creation process string
-    const std::string&  MotherCreationProcess() const { return fMotherProcess;   }
-    /// Mother creation 4-position (x,y,z,t) [cm,ns]
-    const std::vector<double>& MotherPosition() const { return fMotherVtx;       }
-    /// Mother initial 4-momentum @ creation vtx (Px, Py, Pz, E) [MeV/c, MeV]
-    const std::vector<double>& MotherMomentum() const { return fMotherMomentum;  }
+
+    simb::Origin_t     Origin  () const { return fOrigin;  }
+
+    int                PdgCode () const { return fPDGCode; }
+    unsigned int       TrackID () const { return fTrackID; } 
+    const std::string& Process () const { return fProcess; }
+    const MCStep&      Start   () const { return fStart;   }
+    const MCStep&      End     () const { return fEnd;     }
+
+    int                MotherPdgCode () const { return fMotherPDGCode; }
+    unsigned int       MotherTrackID () const { return fMotherTrackID; }
+    const std::string& MotherProcess () const { return fMotherProcess; }
+    const MCStep&      MotherStart   () const { return fMotherStart;   }
+    const MCStep&      MotherEnd     () const { return fMotherEnd;     }
+
+    int                AncestorPdgCode () const { return fAncestorPDGCode; }
+    unsigned int       AncestorTrackID () const { return fAncestorTrackID; }
+    const std::string& AncestorProcess () const { return fAncestorProcess; }
+    const MCStep&      AncestorStart   () const { return fAncestorStart;   }
+    const MCStep&      AncestorEnd     () const { return fAncestorEnd;     }
+
+    const MCStep& DetProfile () const { return fDetProfile; }
     
-    /// Collection G4 Track ID from daughters (to be matched w/ simb::MCParticle::fTrackId)
-    const std::vector<unsigned int>& DaughterTrackID() const { return fDaughterTrackID;  }
-    /// First daughter (in time) creation 4-position (x,y,z,t) [cm,ns]
-    const std::vector<double>& DaughterPosition() const      { return fDaughterVtx;      }
-    /// Summed daughter momentum contributed in energy deposition (Px,Py,Pz,E), [MeV/c, MeV]
-    const std::vector<double>& DaughterMomentum() const      { return fDaughterMomentum; }
-    /// Summed ionization electrons detected per plane
-    const double Charge(const unsigned char plane) const
-    {
-      if(plane >= fPlaneCharge.size())
+    const std::vector<unsigned int>&  DaughterTrackID() const { return fDaughterTrackID; }
 
-	throw MCBaseException("Invalid plane ID requested in MCShower::Charge()");
+    double Charge(const size_t plane) const;
 
-      return fPlaneCharge[plane];
-    }
-    /// Summed ionization electrons detected per plane (all planes)
     const std::vector<double>& Charge() const { return fPlaneCharge; }
 
-    //
     //--- Setters ---//
-    //
-    void MotherPDGID(int const id)                              { fMotherPDGID = id;       }
-    void MotherTrackID(unsigned int const id)                   { fMotherTrackID = id;     }
-    void MotherCreationProcess(std::string const& name)         { fMotherProcess = name;   }
-    void MotherPosition(std::vector<double> const& vtx)         
-    { 
-      if(vtx.size() != 4)
+    void Origin    ( simb::Origin_t o ) { fOrigin    = o;    }
 
-	throw MCBaseException("MCShower::MotherPosition() takes std::vector<double> of length 4 only!");
+    void PdgCode ( int id                  ) { fPDGCode = id;   }
+    void TrackID ( unsigned int id         ) { fTrackID = id;   }
+    void Process ( const std::string &name ) { fProcess = name; }
+    void Start   ( const MCStep &s         ) { fStart   = s;    }
+    void End     ( const MCStep &s         ) { fEnd     = s;    }
 
-      fMotherVtx = vtx;        
-    }
+    void MotherPdgCode ( int id                  ) { fMotherPDGCode = id;   }
+    void MotherTrackID ( unsigned int id         ) { fMotherTrackID = id;   }
+    void MotherProcess ( const std::string& name ) { fMotherProcess = name; }
+    void MotherStart   ( const MCStep& s         ) { fMotherStart   = s;    }
+    void MotherEnd     ( const MCStep& s         ) { fMotherEnd     = s;    }
 
-    void MotherMomentum(std::vector<double> const& mom)         
-    { 
-      if(mom.size() != 4)
+    void AncestorPdgCode ( int id                  ) { fAncestorPDGCode   = id;   }
+    void AncestorTrackID ( unsigned int id         ) { fAncestorTrackID = id;     }
+    void AncestorProcess ( const std::string& name ) { fAncestorProcess   = name; }
+    void AncestorStart   ( const MCStep& s         ) { fAncestorStart   = s;      }
+    void AncestorEnd     ( const MCStep& s         ) { fAncestorEnd     = s;      }
 
-	throw MCBaseException("MCShower::MotherMomentum() takes std::vector<double> of length 4 only!");
+    void DetProfile ( const MCStep& s) { fDetProfile = s; }
 
-      fMotherMomentum = mom;   
+    void DaughterTrackID ( const std::vector<unsigned int>& id_v ) { fDaughterTrackID = id_v; }
 
-    }
-
-    void DaughterTrackID(std::vector<unsigned int> const& id_v) { fDaughterTrackID = id_v; }
-
-    void DaughterPosition(std::vector<double> const& vtx)       
-    { 
-      if(vtx.size() != 4)
-
-	throw MCBaseException("MCShower::DaughterPosition() takes std::vector<double> of length 4 only!");
-
-      fDaughterVtx = vtx;      
-
-    }
-
-    void DaughterMomentum(std::vector<double> const& mom)       
-    { 
-      if(mom.size() != 4)
-
-	throw MCBaseException("MCShower::MotherPosition() takes std::vector<double> of length 4 only!");
-
-      fDaughterMomentum = mom; 
-    }
-
-    void Charge(std::vector<double> const& q_v)                 { fPlaneCharge = q_v;      }
+    void Charge (const std::vector<double>& q) { fPlaneCharge = q; }
 
 #endif
 
-
   protected:
 
-    //---- Mother info ----//
-    int fMotherPDGID;                ///< mother PDG code
-    unsigned int fMotherTrackID;     ///< mother G4 Track ID
-    std::string fMotherProcess;      ///< mother's creation process
-    std::vector<double> fMotherVtx;  ///< mother position 4-vector @ generation
-    std::vector<double> fMotherMomentum;  ///< mother momentum 4-vector @ generation
+    //---- Origin info ----//
+    simb::Origin_t fOrigin;    ///< Origin information
 
-    //---- Daughter info ----//
-    std::vector<unsigned int> fDaughterTrackID; ///< Daughters' track ID
-    std::vector<double> fDaughterVtx;           ///< Daughters' first energy deposition vtx
-    std::vector<double> fDaughterMomentum;      ///< Daughters' deposit sum momentum 4-vector
+    //---- Shower particle info ----//
+    int          fPDGCode;   ///< Shower particle PDG code
+    unsigned int fTrackID;   ///< Shower particle G4 track ID
+    std::string  fProcess;   ///< Shower particle's creation process
+    MCStep       fStart;     ///< Shower particle's G4 start point
+    MCStep       fEnd;       ///< Shower particle's G4 end point
+
+    //---- Mother's particle info ---//
+    int          fMotherPDGCode; ///< Shower's mother PDG code   
+    unsigned int fMotherTrackID; ///< Shower's mother G4 track ID
+    std::string  fMotherProcess; ///< Shower's mother creation process
+    MCStep       fMotherStart;   ///< Shower's mother G4 start point
+    MCStep       fMotherEnd;     ///< Shower's mother G4 end point
+
+    //---- Ancestor's particle info ---//
+    int          fAncestorPDGCode; ///< Shower's ancestor PDG code   
+    unsigned int fAncestorTrackID; ///< Shower's ancestor G4 track ID
+    std::string  fAncestorProcess; ///< Shower's ancestor creation process
+    MCStep       fAncestorStart;   ///< Shower's ancestor G4 start point
+    MCStep       fAncestorEnd;     ///< Shower's ancestor G4 end point
+
+    //---- Energy deposition info ----//
+    std::vector<unsigned int>  fDaughterTrackID; ///< Daughters' track ID
+    MCStep                     fDetProfile;      ///< Combined energy deposition information
 
     //---- Charge per plane ----//
-    std::vector<double> fPlaneCharge;           ///< Daughter's plane charge
-
+    std::vector<double> fPlaneCharge; ///< Charge deposit per plane
   };
 
 }
 
 #endif
+/** @} */ // end of doxygen group 
