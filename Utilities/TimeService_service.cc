@@ -161,8 +161,12 @@ void util::TimeService::postOpenFile(const std::string& filename)
   // is to open it as a separate TFile object.  Do that now.
   
   if(!filename.empty()) {
-    
-    TFile* file = TFile::Open(filename.c_str(), "READ");
+    TFile* file = nullptr;
+    try{
+      file = TFile::Open(filename.c_str(), "READ");
+    }catch(...){
+      return;
+    }
     if(file != 0 && !file->IsZombie() && file->IsOpen()) {
       
       // Open the sqlite datatabase.
