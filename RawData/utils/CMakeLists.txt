@@ -16,7 +16,6 @@ art_make( NO_PLUGINS
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 			${CETLIB}
-                        ${Boost_SYSTEM_LIBRARY}
            	        ${PQ}
                         ${BOOST_SERIALIZATION}
                         ${BOOST_DATE_TIME}

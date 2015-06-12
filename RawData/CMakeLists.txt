@@ -12,7 +12,6 @@ art_make( LIBRARY_NAME  RawData
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 			${CETLIB}
-                        ${Boost_SYSTEM_LIBRARY}
 			${ROOT_BASIC_LIB_LIST}
                         ${ROOT_EG}
         )
