@@ -18,6 +18,7 @@
 //-----------------------------------------------
 util::DatabaseUtil::DatabaseUtil(fhicl::ParameterSet const& pset, art::ActivityRegistry & /* reg */)
 {
+  conn = NULL;
   this->reconfigure(pset);
     
 }
@@ -28,8 +29,14 @@ util::DatabaseUtil::~DatabaseUtil()
 
 }
 
+//----------------------------------------------
+PGconn * util::DatabaseUtil::GetConnect(int var)
+{ 
+  if (!conn) Connect(var);
+  return conn;
+}
 
-
+//----------------------------------------------
 int util::DatabaseUtil::Connect(int conn_wait)
 {
   if(!fShouldConnect)

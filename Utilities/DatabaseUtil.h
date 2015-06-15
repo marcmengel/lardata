@@ -31,7 +31,8 @@ namespace util{
       int GetTemperatureFromDB(int run,double &temp_real);
       int GetEfieldValuesFromDB(int run,std::vector<double> &efield);
       int GetPOTFromDB(int run,long double &POT);
-      
+      PGconn * GetConnect(int var);
+
       int SelectFieldByName(std::vector<std::string> &value,const char * field,const char * condition,const char * table);
       
       bool ToughErrorTreatment(){return fToughErrorTreatment;}
