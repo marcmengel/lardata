@@ -20,6 +20,7 @@ namespace raw{
     , fFormat(0)
     , fSoftware(0)
     , fRun(0)
+    , fSubRun(0)
     , fEvent(0)
     , fTime(0)
     , fSpare(0)
@@ -35,6 +36,7 @@ namespace raw{
     , fFormat(0)
     , fSoftware(0)
     , fRun(0)
+    , fSubRun(0)
     , fEvent(0)
     , fTime(0)
     , fSpare(0)
@@ -42,6 +44,32 @@ namespace raw{
   {
 
   }
+
+  //----------------------------------------------------------------------
+  DAQHeader::DAQHeader(unsigned int status,
+		       int fixed,
+		       unsigned short format,
+		       unsigned short software,
+		       unsigned short run,
+		       unsigned short subrun,
+		       unsigned short event,
+		       time_t time,
+		       short spare,
+		       uint32_t nchan) 
+    : fStatus(status)
+    , fFixed(fixed)
+    , fFormat(format)
+    , fSoftware(software)
+    , fRun(run)
+    , fSubRun(subrun)
+    , fEvent(event)
+    , fTime(time)
+    , fSpare(spare)
+    , fNchan(nchan)
+  { 
+  
+  }
+
 
   //----------------------------------------------------------------------
   DAQHeader::DAQHeader(unsigned int status,
@@ -58,6 +86,7 @@ namespace raw{
     , fFormat(format)
     , fSoftware(software)
     , fRun(run)
+    , fSubRun(0)
     , fEvent(event)
     , fTime(time)
     , fSpare(spare)

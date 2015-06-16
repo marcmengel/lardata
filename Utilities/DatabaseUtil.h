@@ -19,6 +19,37 @@
 
 ///General LArSoft Utilities
 namespace util{
+
+  class UBDaqID {
+  public:
+  UBDaqID() : crate(-1), card(-1), channel(-1) {};
+  UBDaqID( int _crate, int _card, int _channel ) :    
+    crate(_crate), card(_card), channel(_channel) {};
+    ~UBDaqID() {};
+    
+    int crate;
+    int card;
+    int channel;
+
+    const bool operator<(const UBDaqID& rhs) const {
+      bool is_less=false;
+      if (this->crate   == rhs.crate &&
+    	  this->card    == rhs.card  &&
+    	  this->channel <  rhs.channel) is_less=true;
+      else if (this->crate == rhs.crate &&
+    	       this->card  <  rhs.card) is_less=true;
+      else if (this->crate < rhs.crate) is_less=true;
+      return is_less;
+    }
+    
+  };
+
+  
+  typedef int UBLArSoftCh_t;
+
+  typedef std::map< UBDaqID, UBLArSoftCh_t > UBChannelMap_t;
+
+
     class DatabaseUtil {
     public:
       DatabaseUtil(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
@@ -31,7 +62,8 @@ namespace util{
       int GetTemperatureFromDB(int run,double &temp_real);
       int GetEfieldValuesFromDB(int run,std::vector<double> &efield);
       int GetPOTFromDB(int run,long double &POT);
-      
+      UBChannelMap_t GetUBChannelMap();
+
       int SelectFieldByName(std::vector<std::string> &value,const char * field,const char * condition,const char * table);
       
       bool ToughErrorTreatment(){return fToughErrorTreatment;}
