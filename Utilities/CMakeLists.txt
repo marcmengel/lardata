@@ -44,6 +44,13 @@ simple_plugin(DatabaseUtil "service"
 	      ${FHICLCPP}
 	      ${CETLIB}
 	      ${PQ}
+	      ${ART_UTILITIES}
+              ${ART_FRAMEWORK_CORE}
+              ${ART_FRAMEWORK_PRINCIPAL}
+              ${ART_PERSISTENCY_ROOTDB}
+              ${ART_PERSISTENCY_COMMON}
+              ${ART_PERSISTENCY_PROVENANCE}
+              ${ART_FRAMEWORK_SERVICES_REGISTRY}
               BASENAME_ONLY
 )
 

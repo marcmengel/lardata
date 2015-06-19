@@ -10,7 +10,8 @@
   <version ClassVersion="12" checksum="1420893295"/>
   <version ClassVersion="11" checksum="2883012746"/>
  </class>
- <class name="raw::DAQHeader  	  " ClassVersion="12"           >
+ <class name="raw::DAQHeader  	  " ClassVersion="13"           >
+  <version ClassVersion="13" checksum="786471469"/>
   <version ClassVersion="12" checksum="4132299299"/>
  </class>
  <class name="raw::RawDigit   	  " ClassVersion="13"           >
