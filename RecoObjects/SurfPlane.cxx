@@ -61,10 +61,12 @@ namespace trkf {
 
     // Calculate square root of the largest eigenvalue of error matrix.
 
-    double ddd = sqrt(vxx*vxx + vyy*vyy + vzz*vzz
-		      - 2.*vxx*vyy - 2.*vxx*vzz - 2.*vyy*vzz
-		      + 4.*vxy*vxy + 4.*vyz*vyz + 4.*vxz*vxz);
-    double lambda = sqrt(0.5 * ( vxx + vyy + vzz + ddd));
+    double ddd2 = vxx*vxx + vyy*vyy + vzz*vzz
+                  - 2.*vxx*vyy - 2.*vxx*vzz - 2.*vyy*vzz
+		  + 4.*vxy*vxy + 4.*vyz*vyz + 4.*vxz*vxz;
+    double ddd = sqrt(ddd2 > 0. ? ddd2 : 0.);
+    double lambda2 = 0.5 * ( vxx + vyy + vzz + ddd);
+    double lambda = sqrt(lambda2 > 0. ? lambda2 : 0.);
 
     return lambda;
   }
