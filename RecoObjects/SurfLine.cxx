@@ -39,9 +39,9 @@ namespace trkf {
 
     double phi = vec(2);
     double eta = vec(3);
-    double epp = err(2, 2);
-    double ehh = err(3, 3);
-    double ehp = err(3, 2);
+    double epp = err(2, 2);  // sigma^2(phi,phi)
+    double ehh = err(3, 3);  // sigma^2(eta,eta)
+    double ehp = err(3, 2);  // sigma^2(eta,phi)
 
     // Calculate error matrix of pointing unit vector in some coordinate system.
 
@@ -63,16 +63,22 @@ namespace trkf {
     double vyy = sh2*th2*sphi2 * ehh + sh2*cphi2 * epp - 2.*sh2*th*sphi*cphi * ehp;
     double vzz = sh4 * epp;
 
-    double vxy = sh2*th2*sphi*cphi * ehh - 
-    double vyz = ( xp*xp*yp * exx - yp*(1. + xp*xp) * eyy - xp*(1. + xp*xp - yp*yp) * exy ) / den3;
-    double vxz = ( -xp*(1. + yp*yp) * exx + xp*yp*yp * eyy - yp*(1. - xp*xp + yp*yp) * exy ) / den3;
+    double vxy = sh2*th2*sphi*cphi * ehh - sh2*sphi*cphi * epp - sh2*th*(cphi2-sphi2) * ehp;
+    double vyz = -sh3*th*sphi * ehh + sh3*cphi * ehp;
+    double vxz = -sh3*th*cphi * ehh - sh3*sphi * ehp;
+
+    // For debugging.  The determinant of the error matrix should be zero.
+
+    // double det = vxx*vyy*vzz + 2.*vxy*vyz*vxz - vxx*vyz*vyz - vyy*vxz*vxz - vzz*vxy*vxy;
 
     // Calculate square root of the largest eigenvalue of error matrix.
 
-    double ddd = sqrt(vxx*vxx + vyy*vyy + vzz*vzz
-		      - 2.*vxx*vyy - 2.*vxx*vzz - 2.*vyy*vzz
-		      + 4.*vxy*vxy + 4.*vyz*vyz + 4.*vxz*vxz);
-    double lambda = sqrt(0.5 * ( vxx + vyy + vzz + ddd));
+    double ddd2 = vxx*vxx + vyy*vyy + vzz*vzz
+                  - 2.*vxx*vyy - 2.*vxx*vzz - 2.*vyy*vzz
+		  + 4.*vxy*vxy + 4.*vyz*vyz + 4.*vxz*vxz;
+    double ddd = sqrt(ddd2 > 0. ? ddd2 : 0.);
+    double lambda2 = 0.5 * ( vxx + vyy + vzz + ddd);
+    double lambda = sqrt(lambda2 > 0. ? lambda2 : 0.);
 
     return lambda;
   }
@@ -88,8 +94,8 @@ namespace trkf {
     err.clear();
     err(0, 0) = 1000.;
     err(1, 1) = 1000.;
-    err(2, 2) = 1000.;
-    err(3, 3) = 1.;
+    err(2, 2) = 10.;
+    err(3, 3) = 10.;
     err(4, 4) = 10.;
   }
 

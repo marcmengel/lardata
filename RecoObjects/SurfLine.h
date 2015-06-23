@@ -14,7 +14,13 @@
 /// considered to be at this type of surface when it is at its closest
 /// approach to the v-axis.
 ///
-/// The track parameters for a line surface are (r, v, phi, eta, q/p).
+/// Track parameters on this type of surface are:
+///
+/// 1. r
+/// 2. v
+/// 3. phi
+/// 4. eta
+/// 5. 1/p (nonmagnetic) or q/p (magnetic)
 ///
 /// r = Signed impoact parameter.  Absolute value of r is the perpendicular
 ///     distance of the track to the v-axis at the point of closest 
