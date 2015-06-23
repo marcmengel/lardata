@@ -60,6 +60,18 @@ namespace trkf {
     				  TrackVector& vec, Surface::TrackDirection& dir,
     				  TrackMatrix* prop_matrix) const;
 
+    bool transformYZPlane_XYZPlane(double y01, double z01, double phi1,
+				   double x02, double y02, double z02,
+				   double theta2, double phi2,
+				   TrackVector& vec, Surface::TrackDirection& dir,
+				   TrackMatrix* prop_matrix) const;
+		   
+    bool transformXYZPlane_YZPlane(double x01, double y01, double z01,
+				   double theta1, double phi1,
+				   double y02, double z02, double phi2,
+				   TrackVector& vec, Surface::TrackDirection& dir,
+				   TrackMatrix* prop_matrix) const;
+		   
     bool transformXYZPlane_XYZPlane(double x01, double y01, double z01,
 				    double theta1, double phi1,
 				    double x02, double y02, double z02,
