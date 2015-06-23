@@ -188,7 +188,7 @@ namespace trkf {
       // within tolerance.
 
       double delta_phi = TVector2::Phi_mpi_pi(fPhi - psurf->phi());
-      if(abs(delta_phi) <= fPhiTolerance)
+      if(std::abs(delta_phi) <= fPhiTolerance)
 	result = true;
     }
     return result;
@@ -254,9 +254,9 @@ namespace trkf {
       double delta_phi = TVector2::Phi_mpi_pi(fPhi - psurf->phi());
       double dy = fY0 - psurf->y0();
       double dz = fZ0 - psurf->z0();
-      if(abs(delta_phi) <= fPhiTolerance && 
-	 abs(dy) <= fSepTolerance &&
-	 abs(dz) <= fSepTolerance)
+      if(std::abs(delta_phi) <= fPhiTolerance && 
+	 std::abs(dy) <= fSepTolerance &&
+	 std::abs(dz) <= fSepTolerance)
 	result = true;
     }
     return result;
