@@ -6,16 +6,14 @@
 ///
 /// \author H. Greenlee 
 ///
-/// Class for propagating between two SurfXYZPlane or SurfYZPlane 
-/// surfaces.  If the initial or destination surface is not a
-/// SurfXYZPlane or SurfYZPlane, return propation failure.
+/// Class for propagating to a destionation SurfYZPlane surface.
 ///
 ////////////////////////////////////////////////////////////////////////
 
 #ifndef PROPXYZPLANE_H
 #define PROPXYZPLANE_H
 
-#include "RecoObjects/Propagator.h"
+#include "RecoObjects/PropZero.h"
 
 namespace trkf {
 
@@ -41,6 +39,12 @@ namespace trkf {
 					   bool doDedx,
 					   TrackMatrix* prop_matrix = 0,
 					   TrackError* noise_matrix = 0) const;
+
+    // Data members.
+
+  private:
+
+    PropZero fPropZero;   // Zero distance propagator.
   };
 }
 
