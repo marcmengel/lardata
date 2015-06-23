@@ -15,8 +15,6 @@
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include <libpq-fe.h>
 
-#include <boost/bimap.hpp>
-
 ///General LArSoft Utilities
 namespace util{
 
@@ -47,7 +45,6 @@ namespace util{
   
   typedef int UBLArSoftCh_t;
 
-  typedef boost::bimap< UBDaqID, UBLArSoftCh_t > UBChannelBiMap_t;
   typedef std::map< UBDaqID, UBLArSoftCh_t > UBChannelMap_t;
   typedef std::map< UBLArSoftCh_t, UBDaqID > UBChannelReverseMap_t;
 
@@ -64,8 +61,8 @@ namespace util{
       int GetTemperatureFromDB(int run,double &temp_real);
       int GetEfieldValuesFromDB(int run,std::vector<double> &efield);
       int GetPOTFromDB(int run,long double &POT);
-      UBChannelMap_t GetUBChannelMap();
-      UBChannelBiMap_t GetUBChannelBiMap();
+      const UBChannelMap_t& GetUBChannelMap( bool get_from_db=false );
+      const UBChannelReverseMap_t& GetUBChannelReverseMap( bool get_from_db=false );
 
       int SelectFieldByName(std::vector<std::string> &value,const char * field,const char * condition,const char * table);
       
@@ -89,7 +86,10 @@ namespace util{
       bool fToughErrorTreatment;
       bool fShouldConnect;
       
-      
+      UBChannelMap_t        fChannelMap;
+      UBChannelReverseMap_t fChannelReverseMap;
+      void LoadUBChannelMap( bool get_from_db=false );
+
     }; // class DatabaseUtil
 } //namespace util
 
