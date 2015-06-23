@@ -31,15 +31,36 @@
 /// y = y0 + v*cos(phi) - w*sin(phi)
 /// z = z0 + v*sin(phi) + w*cos(phi)
 ///
-/// Track parameters on this type of surface are as follows.
+/// Track parameters on this type of surface are:
 ///
-/// 1. u
+/// 1. r
 /// 2. v
-/// 3. w
-/// 4. dv/ds
+/// 3. phi
+/// 4. eta
 /// 5. 1/p (nonmagnetic) or q/p (magnetic)
 ///
-/// where (u,v,w) are point of closest approach to the v-axis.
+/// r = Signed impoact parameter.  Absolute value of r is the perpendicular
+///     distance of the track to the v-axis at the point of closest 
+///     approach to v-axis.  Sign of r matches sign of L_v (v projection
+///     of angular momentum).
+/// v = V-coordinate of track at point of closest approach to v-axis.
+/// phi = Direction of track in u-w plane (phi = arctan(w/u)).
+/// eta = Pseudorapidity with respect to v-axis.
+/// q/p or 1/p = Inverse momentum.
+///
+/// In terms of these parameters, the point of closest approach to the
+/// v-axis is
+///
+/// u = -r sin(phi)
+/// v = v
+/// w = r cos(phi)
+///
+/// The unit direction vector is
+///
+/// du/ds = cos(phi) sech(eta)
+/// dv/ds = tanh(eta)
+/// dw/ds = sin(phi) sech(eta)
+///
 ///
 ////////////////////////////////////////////////////////////////////////
 
@@ -58,7 +79,7 @@ namespace trkf {
     SurfYZLine();
 
     /// Initializing constructor.
-    SurfYZLine(double y0, double z0, double phi);
+    SurfYZLine(double x0, double y0, double z0, double phi);
 
     /// Destructor.
     virtual ~SurfYZLine();
