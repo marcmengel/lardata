@@ -59,17 +59,19 @@ standard_properties:
  AlphaScintYield:         16800
  AlphaScintYieldRatio:    0.56
 
- # Refractive index as a function of energy
- RIndexEnergies:    [1.82, 3.09, 4.45, 6.19, 7.74, 9.16, 9.90, 10.12, 10.56, 10.87]
- RIndexSpectrum:    [1.23, 1.23, 1.24, 1.26, 1.29, 1.35, 1.39, 1.45,  1.54,  1.60]
+
+ # Refractive index as a function of energy (eV) from arXiv:1502.04213v1
+ RIndexEnergies: [ 1.900,  2.934,  3.592,  5.566,  6.694,  7.540,  8.574,  9.044,  9.232,  9.420,  9.514,  9.608,  9.702,  9.796,  9.890,  9.984,  10.08,  10.27,  10.45,  10.74,  10.92 ]
+ RIndexSpectrum: [ 1.232,  1.236,  1.240,  1.261,  1.282,  1.306,  1.353,  1.387,  1.404,  1.423,  1.434,  1.446,  1.459,  1.473,  1.488,  1.505,  1.524,  1.569,  1.627,  1.751,  1.879 ]
 
  # absorption length as function of energy
  AbsLengthEnergies: [ 4,     5,     6,     7,     8,     9,     10,    11   ]       
  AbsLengthSpectrum: [ 2000., 2000., 2000., 2000., 2000., 2000., 2000., 2000.] 
 
- # Rayleigh scattering length as a function of energy
- RayleighEnergies:  [ 4.95, 5.69, 6.51, 7.53, 8.50, 9.67, 9.95, 10.57 ]
- RayleighSpectrum:  [ 3790, 1850, 930,  410,  192,  90,   38,   10    ]   
+ # Rayleigh scattering length (cm) as a function of energy (eV) from arXiv:1502.04213v1, 
+ # scaled by x1.13 so average over LAr scintillation spectrum is 66cm (N. Ishida et al, 1997)
+ RayleighEnergies: [  2.95,  3.10,  3.54,  4.13,  4.96,  5.76,  6.53,  8.00,  8.40,  8.80,  9.00,  9.20,  9.40,  9.50,  9.60,  9.70,  9.80,  9.90,  10.0,  10.2,  10.4,  10.6,  10.8 ]
+ RayleighSpectrum: [43400.,34900.,20000.,10800., 4800., 2250., 1170.,  367.,  257.,  174.,  141.,  114.,  90.6,  80.5,  71.1,  62.6,  54.7,  47.4,  40.7,  29.0,  19.4,  12.0,  6.66 ] 
 
  # Surface reflectivity data - vector of energy spectrum per
  #   surface type
