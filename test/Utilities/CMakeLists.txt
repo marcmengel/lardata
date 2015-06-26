@@ -14,6 +14,7 @@ cet_test(timingreference_test HANDBUILT
   TEST_EXEC lar
   TEST_ARGS --rethrow-all --config timingreference_test.fcl
   DATAFILES timingreference_test.fcl
+  OPTIONAL_GROUPS ONLY_SLF
 )
 
 install_headers()

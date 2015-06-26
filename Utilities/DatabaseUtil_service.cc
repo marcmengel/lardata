@@ -20,7 +20,8 @@ util::DatabaseUtil::DatabaseUtil(fhicl::ParameterSet const& pset, art::ActivityR
 {
   conn = NULL;
   this->reconfigure(pset);
-    
+  fChannelMap.clear();
+  fChannelReverseMap.clear();
 }
 
 //------------------------------------------------
@@ -292,7 +293,13 @@ return -1;
 
 namespace util {
 
-  UBChannelBiMap_t DatabaseUtil::GetUBChannelBiMap() {
+
+  void DatabaseUtil::LoadUBChannelMap( bool get_from_db ) {
+
+    if ( get_from_db==false && fChannelMap.size()>0 ) {
+      // used prevously grabbed data to avoid repeated call to database.
+      return;
+    }
 
     if ( conn==NULL )
       Connect( 0 );
@@ -304,7 +311,8 @@ namespace util {
         << "Failed to get channel map from DB." << std::endl;
     }
     
-    UBChannelBiMap_t rval;
+    fChannelMap.clear();
+    fChannelReverseMap.clear();
 
     PGresult *res  = PQexec(conn, "BEGIN");    
     if (PQresultStatus(res) != PGRES_COMMAND_OK) { 
@@ -353,99 +361,30 @@ namespace util {
 
       UBDaqID daq_id(crate_id,slot,boardChan);
       std::pair<UBDaqID, UBLArSoftCh_t> p(daq_id,larsoft_chan);
-
-      if (rval.left.find(daq_id) != rval.left.end()){
+      
+      if ( fChannelMap.find(daq_id) != fChannelMap.end() ){
 	std::cout << __PRETTY_FUNCTION__ << ": ";
         std::cout << "Multiple entries!" << std::endl;
         mf::LogWarning("")<< "Multiple DB entries for same (crate,card,channel). "<<std::endl
 			  << "Redefining (crate,card,channel)=>id link ("
 			  << daq_id.crate<<", "<< daq_id.card<<", "<< daq_id.channel<<")=>"
-			  << rval.left.find(daq_id)->second;
-      }
-      rval.insert( UBChannelBiMap_t::value_type( daq_id, larsoft_chan ) );
-    }
-
-   
-
-    return rval; // I guess the compiler will automagically know to move and not copy
-  }// end of GetUBChannelBiMap
-
-  UBChannelMap_t DatabaseUtil::GetUBChannelMap() {
-
-    if ( conn==NULL )
-      Connect( 0 );
-
-    if(PQstatus(conn)!=CONNECTION_OK) {
-      mf::LogError("") << __PRETTY_FUNCTION__ << ": Couldn't open connection to postgresql interface";
-      PQfinish(conn);
-      throw art::Exception( art::errors::FileReadError )
-        << "Failed to get channel map from DB." << std::endl;
-    }
-    
-    UBChannelMap_t rval;
-
-    PGresult *res  = PQexec(conn, "BEGIN");    
-    if (PQresultStatus(res) != PGRES_COMMAND_OK) { 
-      mf::LogError("")<< "postgresql BEGIN failed";
-      PQclear(res);
-      PQfinish(conn);
-      throw art::Exception( art::errors::FileReadError )
-        << "postgresql BEGIN failed." << std::endl;
-    }
-    
-    // Andrzej's changed database
-    PQclear(res);
-    res = PQexec(conn,
-                 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id "
-                 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers_copy NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables_copy NATURAL JOIN ADCreceivers_copy_new NATURAL JOIN crates NATURAL JOIN fecards"
-                 );
-
-    if ((!res) || (PQresultStatus(res) != PGRES_TUPLES_OK))
-      {
-	mf::LogError("")<< "SELECT command did not return tuples properly";
-	PQclear(res);
-	PQfinish(conn);
-	throw art::Exception( art::errors::FileReadError )
-	  << "postgresql SELECT failed." << std::endl;
-      }
-
-    int num_records=PQntuples(res);
-    for (int i=0;i<num_records;i++) {
-      int crate_id     = atoi(PQgetvalue(res, i, 0));
-      int slot         = atoi(PQgetvalue(res, i, 1));
-      //auto const wPl   =      PQgetvalue(res, i, 2);
-      int larsoft_chan = atoi(PQgetvalue(res, i, 3));
-      int channel_id   = atoi(PQgetvalue(res, i, 4));
-      
-      int boardChan = channel_id%64;
-      
-      
-      if (crate_id==9 && slot==5) {
-	boardChan = (channel_id-32)%64;
-	//std::cout << " Hey there: " << channel_id << " -> " << boardChan << std::endl;
+			  << fChannelMap.find(daq_id)->second;
       }
       
-      // std::cout << "(" << i << ") Looking up in DB: [Crate, Card, Channel]: [" << crate_id << ", "
-      //           << slot << ", " << boardChan << "]";
-      // std::cout << "\tCh. Id (LArSoft): " << larsoft_chan  << std::endl;
-
-      UBDaqID daq_id(crate_id,slot,boardChan);
-      std::pair<UBDaqID, UBLArSoftCh_t> p(daq_id,larsoft_chan);
-
-      if (rval.find(daq_id) != rval.end()){
-	std::cout << __PRETTY_FUNCTION__ << ": ";
-        std::cout << "Multiple entries!" << std::endl;
-        mf::LogWarning("")<< "Multiple DB entries for same (crate,card,channel). "<<std::endl
-			  << "Redefining (crate,card,channel)=>id link ("
-			  << daq_id.crate<<", "<< daq_id.card<<", "<< daq_id.channel<<")=>"
-			  << rval[daq_id];
-      }
-      rval.insert(p);
+      fChannelMap.insert( p );
+      fChannelReverseMap.insert( std::pair< UBLArSoftCh_t, UBDaqID >( larsoft_chan, daq_id ) );
     }
 
-   
+  }// end of LoadUBChannelMap
 
-    return rval; // I guess the compiler will automagically know to move and not copy
+  const UBChannelMap_t& DatabaseUtil::GetUBChannelMap( bool get_from_db ) {
+    LoadUBChannelMap( get_from_db );
+    return fChannelMap;
+  }
+
+  const UBChannelReverseMap_t& DatabaseUtil::GetUBChannelReverseMap( bool get_from_db ) {
+    LoadUBChannelMap( get_from_db );
+    return fChannelReverseMap;
   }
   
 }
