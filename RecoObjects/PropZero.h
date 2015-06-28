@@ -55,6 +55,27 @@ namespace trkf {
     // The following methods transform the track to the destination surface
     // without propagation.  Return bool value indicates success or failure.
 
+    bool transformYZLine_YZLine(double x01, double y01, double z01, double phi1,
+				double x02, double y02, double z02, double phi2,
+				TrackVector& vec, Surface::TrackDirection& dir,
+				TrackMatrix* prop_matrix) const;
+
+    bool transformYZLine_YZPlane(double x01, double y01, double z01, double phi1,
+				 double y02, double z02, double phi2,
+				 TrackVector& vec, Surface::TrackDirection& dir,
+				 TrackMatrix* prop_matrix) const;
+
+    bool transformYZLine_XYZPlane(double x01, double y01, double z01, double phi1,
+				  double x02, double y02, double z02,
+				  double theta2, double phi2,
+				  TrackVector& vec, Surface::TrackDirection& dir,
+				  TrackMatrix* prop_matrix) const;
+
+    bool transformYZPlane_YZLine(double y01, double z01, double phi1,
+				 double x02, double y02, double z02, double phi2,
+				 TrackVector& vec, Surface::TrackDirection& dir,
+				 TrackMatrix* prop_matrix) const;
+
     bool transformYZPlane_YZPlane(double y01, double z01, double phi1,
     				  double y02, double z02, double phi2,
     				  TrackVector& vec, Surface::TrackDirection& dir,
@@ -65,6 +86,12 @@ namespace trkf {
 				   double theta2, double phi2,
 				   TrackVector& vec, Surface::TrackDirection& dir,
 				   TrackMatrix* prop_matrix) const;
+		   
+    bool transformXYZPlane_YZLine(double x01, double y01, double z01,
+				  double theta1, double phi1,
+				  double x02, double y02, double z02, double phi2,
+				  TrackVector& vec, Surface::TrackDirection& dir,
+				  TrackMatrix* prop_matrix) const;
 		   
     bool transformXYZPlane_YZPlane(double x01, double y01, double z01,
 				   double theta1, double phi1,

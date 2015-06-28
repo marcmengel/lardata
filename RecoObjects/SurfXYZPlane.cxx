@@ -63,7 +63,7 @@ namespace trkf {
   {
     // Calculate angles.
 
-    double nyz = std::sqrt(ny*ny + nz*nz);
+    double nyz = std::hypot(ny, nz);
     fTheta = atan2(nx, nyz);
     fPhi = 0.;
     if(nyz != 0.)

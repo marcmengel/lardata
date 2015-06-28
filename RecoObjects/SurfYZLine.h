@@ -61,6 +61,12 @@
 /// dv/ds = tanh(eta)
 /// dw/ds = sin(phi) sech(eta)
 ///
+/// Inversely:
+///
+/// phi = atan(dw/du) = atan2(dw/ds, du/ds)
+/// eta = atanh(dv/ds) = asinh(dv/duw)
+/// r = w cos(phi) - u sin(phi)
+///
 ///
 ////////////////////////////////////////////////////////////////////////
 

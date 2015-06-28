@@ -225,7 +225,7 @@ namespace trkf {
 
     // Distance of v-axis to other surface origin.
 
-    return std::sqrt(myuvw[0]*myuvw[0] + myuvw[2]*myuvw[2]);
+    return std::hypot(myuvw[0], myuvw[2]);
   }
 
   /// Test two surfaces for equality, within tolerance.

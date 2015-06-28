@@ -1,17 +1,16 @@
 ///////////////////////////////////////////////////////////////////////
 ///
-/// \file   PropXYZPlane.cxx
+/// \file   PropYZLine.cxx
 ///
-/// \brief  Propagate to SurfXYZPlane surface.
+/// \brief  Propagate to SurfYZLine surface.
 ///
 /// \author H. Greenlee
 ///
 ////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
-#include "RecoObjects/PropXYZPlane.h"
-#include "RecoObjects/SurfYZPlane.h"
-#include "RecoObjects/SurfXYZPlane.h"
+#include "RecoObjects/PropYZLine.h"
+#include "RecoObjects/SurfYZLine.h"
 #include "RecoObjects/InteractPlane.h"
 #include "cetlib/exception.h"
 
@@ -24,12 +23,12 @@ namespace trkf {
   /// tcut   - Delta ray energy cutoff for calculating dE/dx.
   /// doDedx - dE/dx enable flag.
   ///
-  PropXYZPlane::PropXYZPlane(double tcut, bool doDedx) :
+  PropYZLine::PropYZLine(double tcut, bool doDedx) :
     Propagator(tcut, doDedx, std::shared_ptr<const Interactor>(new InteractPlane(tcut)))
   {}
 
   /// Destructor.
-  PropXYZPlane::~PropXYZPlane()
+  PropYZLine::~PropYZLine()
   {}
 
   /// Propagate without error.
@@ -47,12 +46,12 @@ namespace trkf {
   /// Returned value: propagation distance + success flag.
   ///
   boost::optional<double>
-  PropXYZPlane::short_vec_prop(KTrack& trk,
-			       const std::shared_ptr<const Surface>& psurf, 
-			       Propagator::PropDirection dir,
-			       bool doDedx,
-			       TrackMatrix* prop_matrix,
-			       TrackError* noise_matrix) const
+  PropYZLine::short_vec_prop(KTrack& trk,
+			     const std::shared_ptr<const Surface>& psurf, 
+			     Propagator::PropDirection dir,
+			     bool doDedx,
+			     TrackMatrix* prop_matrix,
+			     TrackError* noise_matrix) const
   {
     // Set the default return value to be unitialized with value 0.
 
@@ -61,13 +60,12 @@ namespace trkf {
     // Get destination surface and surface parameters.
     // Return failure if wrong surface type.
 
-    const SurfXYZPlane* to = dynamic_cast<const SurfXYZPlane*>(&*psurf);
+    const SurfYZLine* to = dynamic_cast<const SurfYZLine*>(&*psurf);
     if(to == 0)
       return result;
     double x02 = to->x0();
     double y02 = to->y0();
     double z02 = to->z0();
-    double theta2 = to->theta();
     double phi2 = to->phi();
 
     // Generate an intermediate surface that coincides with track position, but
@@ -78,7 +76,7 @@ namespace trkf {
     double x01 = xyz[0];
     double y01 = xyz[1];
     double z01 = xyz[2];
-    const std::shared_ptr<const Surface> psurf1(new SurfXYZPlane(x01, y01, z01, phi2, theta2));
+    const std::shared_ptr<const Surface> psurf1(new SurfYZLine(x01, y01, z01, phi2));
 
     // Do zero-distance propagation to intermediate surface.
 
@@ -93,59 +91,51 @@ namespace trkf {
 
     const TrackVector& vec = trk.getVector();
     if(vec.size() != 5)
-      throw cet::exception("PropXYZPlane") 
+      throw cet::exception("PropYZLine") 
 	<< "Track state vector has wrong size" << vec.size() << "\n";
-    double u1 = vec(0);
+    double r1 = vec(0);
     double v1 = vec(1);
-    double dudw1 = vec(2);
-    double dvdw1 = vec(3);
+    double phid1 = vec(2);
+    double eta1 = vec(3);
     double pinv = vec(4);
-    Surface::TrackDirection dir1 = trk.getDirection();
-
-    // Make sure intermediate track has a valid direction.
-
-    if(dir1 == Surface::UNKNOWN)
-      return result;
 
     // Calculate transcendental functions.
 
-    double sinth2 = std::sin(theta2);
-    double costh2 = std::cos(theta2);
+    double sinphid1 = std::sin(phid1);
+    double cosphid1 = std::cos(phid1);
+    double sh1 = std::sinh(eta1);
+    double ch1 = std::cosh(eta1);
     double sinphi2 = std::sin(phi2);
     double cosphi2 = std::cos(phi2);
 
-    // Calculate elements of rotation matrix from global coordinate
-    // system to destination coordinate system.
+    // Calculate the initial position in the intermediate coordinate system.
 
-    double rux = costh2;
-    double ruy = sinth2*sinphi2;
-    double ruz = -sinth2*cosphi2;
+    double u1 = -r1 * sinphid1;
+    double w1 = r1 * cosphid1;
 
-    double rvx = 0.;
-    double rvy = cosphi2;
-    double rvz = sinphi2;
+    // Calculate initial position in the destination coordinate system.
 
-    double rwx = sinth2;
-    double rwy = -costh2*sinphi2;
-    double rwz = costh2*cosphi2;
+    double u2 = x01 - x02 + u1;
+    double v2 = (y01 - y02) * cosphi2 + (z01 - z02) * sinphi2 + v1;
+    double w2 = -(y01 - y02) * sinphi2 + (z01 - z02) * cosphi2 + w1;
 
-    // Calculate the initial position in the destination coordinate
-    // system.
+    // Calculate the impact parameter in the destination coordinate system.
 
-    double u2 = (x01-x02)*rux + (y01-y02)*ruy + (z01-z02)*ruz + u1;
-    double v2 = (x01-x02)*rvx + (y01-y02)*rvy + (z01-z02)*rvz + v1;
-    double w2 = (x01-x02)*rwx + (y01-y02)*rwy + (z01-z02)*rwz;
+    double r2 = w2 * cosphid1 - u2 * sinphid1;
 
-    // Calculate position at destination surface (propagate distance -w2).
+    // Calculate the perpendicular propagation distance.
 
-    double u2p = u2 - w2 * dudw1;
-    double v2p = v2 - w2 * dvdw1;
+    double d2 = -(w2 * sinphid1 + u2 * cosphid1);
+
+    // Calculate the final position in the destination coordinate system.
+
+    //double u2p = -r2 * sinphid1;
+    double v2p = v2 + d2 * sh1;
+    //double w2p = r2 * cosphid1;
 
     // Calculate the signed propagation distance.
 
-    double s = -w2 * std::sqrt(1. + dudw1*dudw1 + dvdw1*dvdw1);
-    if(dir1 == Surface::BACKWARD)
-      s = -s;
+    double s = d2 * ch1;
 
     // Check if propagation was in the right direction.
     // (Compare sign of s with requested direction).
@@ -186,34 +176,34 @@ namespace trkf {
 
       // Calculate partial derivatives.
 
-      pm(0,0) = 1.;      // du2/du1
-      pm(1,0) = 0.;      // dv2/du1
-      pm(2,0) = 0.;      // d(dudw2)/du1
-      pm(3,0) = 0.;      // d(dvdw2)/du1
-      pm(4,0) = 0.;      // d(pinv2)/du1
+      pm(0,0) = 1.;      // dr2/dr1
+      pm(1,0) = 0.;      // dv2/dr1
+      pm(2,0) = 0.;      // d(phi2)/dr1
+      pm(3,0) = 0.;      // d(eta2)/dr1
+      pm(4,0) = 0.;      // d(pinv2)/dr1
 
-      pm(0,1) = 0.;      // du2/dv1
+      pm(0,1) = 0.;      // dr2/dv1
       pm(1,1) = 1.;      // dv2/dv1
-      pm(2,1) = 0.;      // d(dudw2)/dv1
-      pm(3,1) = 0.;      // d(dvdw2)/dv1
+      pm(2,1) = 0.;      // d(phi2)/dv1
+      pm(3,1) = 0.;      // d(eta2)/dv1
       pm(4,1) = 0.;      // d(pinv2)/dv1
 
-      pm(0,2) = -w2;     // du2/d(dudw1);
-      pm(1,2) = 0.;      // dv2/d(dudw1);
-      pm(2,2) = 1.;      // d(dudw2)/d(dudw1);
-      pm(3,2) = 0.;      // d(dvdw2)/d(dudw1);
-      pm(4,2) = 0.;      // d(pinv2)/d(dudw1);
+      pm(0,2) = d2;      // dr2/d(phi1);
+      pm(1,2) = -r2*sh1; // dv2/d(phi1);
+      pm(2,2) = 1.;      // d(phi2)/d(phi1);
+      pm(3,2) = 0.;      // d(eta2)/d(phi1);
+      pm(4,2) = 0.;      // d(pinv2)/d(phi1);
 
-      pm(0,3) = 0.;      // du2/d(dvdw1);
-      pm(1,3) = -w2;     // dv2/d(dvdw1);
-      pm(2,3) = 0.;      // d(dudw2)/d(dvdw1);
-      pm(3,3) = 1.;      // d(dvdw2)/d(dvdw1);
-      pm(4,3) = 0.;      // d(pinv2)/d(dvdw1);
+      pm(0,3) = 0.;      // dr2/d(eta1);
+      pm(1,3) = d2*ch1;  // dv2/d(eta1);
+      pm(2,3) = 0.;      // d(phi2)/d(eta1);
+      pm(3,3) = 1.;      // d(eta2)/d(eta1);
+      pm(4,3) = 0.;      // d(pinv2)/d(eta1);
 
-      pm(0,4) = 0.;      // du2/d(pinv1);
+      pm(0,4) = 0.;      // dr2/d(pinv1);
       pm(1,4) = 0.;      // dv2/d(pinv1);
-      pm(2,4) = 0.;      // d(dudw2)/d(pinv1);
-      pm(3,4) = 0.;      // d(dvdw2)/d(pinv1);
+      pm(2,4) = 0.;      // d(phi2)/d(pinv1);
+      pm(3,4) = 0.;      // d(eta2)/d(pinv1);
       pm(4,4) = deriv;   // d(pinv2)/d(pinv1);
 
       // Compose the final propagation matrix from zero-distance propagation and
@@ -235,10 +225,10 @@ namespace trkf {
     // Construct track vector at destination surface.
 
     TrackVector vec2(vec.size());
-    vec2(0) = u2p;
+    vec2(0) = r2;
     vec2(1) = v2p;
-    vec2(2) = dudw1;
-    vec2(3) = dvdw1;
+    vec2(2) = phid1;
+    vec2(3) = eta1;
     vec2(4) = *pinv2;
 
     // Update track.

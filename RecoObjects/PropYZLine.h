@@ -1,36 +1,36 @@
 ////////////////////////////////////////////////////////////////////////
 ///
-/// \file   PropXYZPlane.h
+/// \file   PropYZLine.h
 ///
-/// \brief  Propagate to SurfXYZPlane surface.
+/// \brief  Propagate to SurfYZLine surface.
 ///
 /// \author H. Greenlee 
 ///
-/// Class for propagating to a destionation SurfYZPlane surface.
+/// Class for propagating to a destionation SurfYZLine surface.
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#ifndef PROPXYZPLANE_H
-#define PROPXYZPLANE_H
+#ifndef PROPYZLINE_H
+#define PROPYZLINE_H
 
 #include "RecoObjects/PropZero.h"
 
 namespace trkf {
 
-  class PropXYZPlane : public trkf::Propagator
+  class PropYZLine : public trkf::Propagator
   {
   public:
 
     /// Constructor.
-    PropXYZPlane(double tcut, bool doDedx);
+    PropYZLine(double tcut, bool doDedx);
 
     /// Destructor.
-    virtual ~PropXYZPlane();
+    virtual ~PropYZLine();
 
     // Overrides.
 
     /// Clone method.
-    Propagator* clone() const {return new PropXYZPlane(*this);}
+    Propagator* clone() const {return new PropYZLine(*this);}
 
     /// Propagate without error.
     boost::optional<double> short_vec_prop(KTrack& trk,

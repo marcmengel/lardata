@@ -2,7 +2,7 @@
 ///
 /// \file   PropYZPlane.h
 ///
-/// \brief  Propagate between two SurfYZPlanes.
+/// \brief  Propagate to PropYZPlane surface.
 ///
 /// \author H. Greenlee 
 ///

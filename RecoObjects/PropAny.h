@@ -16,6 +16,7 @@
 #define PROPANY_H
 
 #include "RecoObjects/Propagator.h"
+#include "RecoObjects/PropYZLine.h"
 #include "RecoObjects/PropYZPlane.h"
 #include "RecoObjects/PropXYZPlane.h"
 
@@ -50,6 +51,7 @@ namespace trkf {
 
     /// Underlying propagators.
 
+    PropYZLine fPropYZLine;
     PropYZPlane fPropYZPlane;
     PropXYZPlane fPropXYZPlane;
   };

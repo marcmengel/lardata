@@ -135,7 +135,7 @@ namespace trkf {
 	pinv = trk.getVector()(4);
 	double mass = trk.Mass();
 	double p = 1./std::abs(pinv);
-	double e = std::sqrt(p*p + mass*mass);
+	double e = std::hypot(p, mass);
 	double t = p*p / (e + mass);
 	double dedx = 0.001 * larprop->Eloss(p, mass, fTcut);
 	double smax = 0.1 * t / dedx;
@@ -465,7 +465,7 @@ namespace trkf {
     // Calculate final energy.
 
     double p1 = 1./std::abs(pinv);
-    double e1 = std::sqrt(p1*p1 + mass*mass);
+    double e1 = std::hypot(p1, mass);
     double de = -0.001 * s * larprop->Eloss(p1, mass, fTcut);
     double emid = e1 + 0.5 * de;
     if(emid > mass) {

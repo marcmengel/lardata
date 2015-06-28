@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include "RecoObjects/PropAny.h"
+#include "RecoObjects/SurfYZLine.h"
 #include "RecoObjects/SurfYZPlane.h"
 #include "RecoObjects/SurfXYZPlane.h"
 #include "RecoObjects/InteractPlane.h"
@@ -26,6 +27,7 @@ namespace trkf {
   ///
   PropAny::PropAny(double tcut, bool doDedx) :
     Propagator(tcut, doDedx, std::shared_ptr<const Interactor>(new InteractPlane(tcut))),
+    fPropYZLine(tcut, doDedx),
     fPropYZPlane(tcut, doDedx),
     fPropXYZPlane(tcut, doDedx)
   {}
@@ -64,7 +66,9 @@ namespace trkf {
 
     // Test the type of the destination surface.
 
-    if(dynamic_cast<const SurfYZPlane*>(&*psurf))
+    if(dynamic_cast<const SurfYZLine*>(&*psurf))
+      result = fPropYZLine.short_vec_prop(trk, psurf, dir, doDedx, prop_matrix, noise_matrix);
+    else if(dynamic_cast<const SurfYZPlane*>(&*psurf))
       result = fPropYZPlane.short_vec_prop(trk, psurf, dir, doDedx, prop_matrix, noise_matrix);
     else if(dynamic_cast<const SurfXYZPlane*>(&*psurf))
       result = fPropXYZPlane.short_vec_prop(trk, psurf, dir, doDedx, prop_matrix, noise_matrix);
