@@ -80,4 +80,42 @@ namespace trkf {
     return result;
   }
 
+  /// Propagate without error to dynamically generated origin surface.
+  /// Optionally return propagation matrix.
+  ///
+  /// Arguments:
+  ///
+  /// trk - Track to propagate.
+  /// porient - Orientation surface.
+  /// prop_matrix - Pointer to optional propagation matrix.
+  ///
+  /// Returned value: propagation distance + success flag.
+  ///
+  /// Propagation distance is always zero after successful propagation.
+  ///
+  boost::optional<double> 
+  PropAny::origin_vec_prop(KTrack& trk,
+			   const std::shared_ptr<const Surface>& porient,
+			   TrackMatrix* prop_matrix) const
+  {
+    // Default result.
+
+    boost::optional<double> result(false, 0.);
+
+    // Test the type of the destination surface.
+
+    if(dynamic_cast<const SurfYZLine*>(&*porient))
+      result = fPropYZLine.origin_vec_prop(trk, porient, prop_matrix);
+    else if(dynamic_cast<const SurfYZPlane*>(&*porient))
+      result = fPropYZPlane.origin_vec_prop(trk, porient, prop_matrix);
+    else if(dynamic_cast<const SurfXYZPlane*>(&*porient))
+      result = fPropXYZPlane.origin_vec_prop(trk, porient, prop_matrix);
+    else
+      throw cet::exception("PropAny") << "Destination surface has unknown type.\n";
+
+    // Done.
+
+    return result;
+  }
+
 } // end namespace trkf

@@ -17,10 +17,11 @@
 /// 3.  Linearized propagation without error, short distance (method lin_prop).
 /// 4.  Propagate with error, but without noise (method err_prop).
 /// 5.  Propagate with error and noise (method noise_prop).
+/// 6.  Coordinate transformations without motion (method origin_vec_prop).
 ///
+/// Methods short_vec_prop and origin_vec_prop are pure virtual.
 ///
-/// All methods except short_vec_prop are implemented locally within
-/// this class by calling short_vec_prop, which is pure virtual.
+/// Other methods are implemented by calling short_vec_prop internally.
 ///
 /// The long distance propagation method (vec_prop) divides
 /// propagation into steps if the distance exceeds some threshold
@@ -46,9 +47,10 @@
 /// Use case four (propagate with error and noise) adds irreversible
 /// propagation noise to the error matrix.
 ///
-/// All propagation methods allow the direction of propagation to be 
-/// specified as forward, backward, or unknown.  If the direction is 
-/// specified as unknown, the propagator decides which direction to use.
+/// All propagation methods except origin_vec_prop allow the direction
+/// of propagation to be specified as forward, backward, or unknown.
+/// If the direction is specified as unknown, the propagator decides
+/// which direction to use.
 ///
 /// All propagation methods return the propagation distance as a value
 /// of type boost::optional<double>.  This type of value is equivalent
@@ -60,6 +62,11 @@
 /// the constructor, as well as by a flag passed to individual
 /// propagation methods.  Nonzero energy loss will take place only if
 /// both flags are true.
+///
+/// Method origin_vec_prop always returns a propgation distance of
+/// zero (if successful).  Origin propagation does not calculate noise
+/// (noise is zero by definition).  Origin propagation does not accept
+/// or need a propgation direction or dE/dx flag.
 ///
 ////////////////////////////////////////////////////////////////////////
 
@@ -105,6 +112,11 @@ namespace trkf {
 						   bool doDedx,
 						   TrackMatrix* prop_matrix = 0,
 						   TrackError* noise_matrix = 0) const = 0;
+
+    /// Propagate without error to surface whose origin parameters coincide with track position.
+    virtual boost::optional<double> origin_vec_prop(KTrack& trk,
+						    const std::shared_ptr<const Surface>& porient,
+						    TrackMatrix* prop_matrix = 0) const = 0;
 
     /// Propagate without error (long distance).
     boost::optional<double> vec_prop(KTrack& trk,

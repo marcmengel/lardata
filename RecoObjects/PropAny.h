@@ -45,6 +45,11 @@ namespace trkf {
 					   TrackMatrix* prop_matrix = 0,
 					   TrackError* noise_matrix = 0) const;
 
+    /// Propagate without error to surface whose origin parameters coincide with track position.
+    virtual boost::optional<double> origin_vec_prop(KTrack& trk,
+                                                   const std::shared_ptr<const Surface>& porient,
+                                                   TrackMatrix* prop_matrix = 0) const;
+
     // Data members.
 
   private:
@@ -54,7 +59,7 @@ namespace trkf {
     PropYZLine fPropYZLine;
     PropYZPlane fPropYZPlane;
     PropXYZPlane fPropXYZPlane;
-  };
+ };
 }
 
 #endif

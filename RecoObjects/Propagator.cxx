@@ -192,7 +192,7 @@ namespace trkf {
 
 	  // Make intermediate surface object.
 
-	  pstep = std::shared_ptr<const Surface>(new SurfYZPlane(xyz[1], xyz[2], phi));
+	  pstep = std::shared_ptr<const Surface>(new SurfYZPlane(0., xyz[1], xyz[2], phi));
 	}
 
 	// Do the actual step propagation.
