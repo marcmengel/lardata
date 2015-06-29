@@ -10,9 +10,7 @@
 /// x-axis, or equivalently, parallel to the yz-plane.
 ///
 /// The surface parameters and local coordinate system of this
-/// surface are closely related to those of SurfYZPlane, with the
-/// only difference being that this surface includes an additional
-/// arbitrary shift of the local origin in the x-direciton.
+/// surface are the same as SurfYZPlane.
 ///
 /// This surface is defined by four parameters, which are,
 /// (x0, y0, z0) - Local origin in global coordinates.

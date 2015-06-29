@@ -18,9 +18,9 @@ struct SurfYZTestFixture
 {
   SurfYZTestFixture() : 
     surf1(),
-    surf2(0., 0., 0.),
-    surf3(1., 1., 0.),
-    surf4(2., 2., 1.) {}
+    surf2(0., 0., 0., 0.),
+    surf3(1., 1., 1., 0.),
+    surf4(2., 3., 4., 1.) {}
   trkf::SurfYZPlane surf1;  // Default constructed.
   trkf::SurfYZPlane surf2;  // Same as surf1.
   trkf::SurfYZPlane surf3;  // Different origin, parallel to surf1 and surf2.
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE(TrackParameters) {
   BOOST_CHECK_CLOSE(xyz[1], 0.2, 1.e-6);
   BOOST_CHECK_CLOSE(xyz[2], 0.0, 1.e-6);
   surf3.getPosition(v, xyz);
-  BOOST_CHECK_CLOSE(xyz[0], 0.1, 1.e-6);
+  BOOST_CHECK_CLOSE(xyz[0], 1.1, 1.e-6);
   BOOST_CHECK_CLOSE(xyz[1], 1.2, 1.e-6);
   BOOST_CHECK_CLOSE(xyz[2], 1.0, 1.e-6);
   surf1.getMomentum(v, mom, trkf::Surface::FORWARD);
