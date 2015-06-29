@@ -46,7 +46,7 @@ namespace trkf {
 	  
 	  // Update base class.
 	  
-	  *static_cast<SurfYZPlane*>(this) = SurfYZPlane(xyz[1], xyz[2], phi);
+	  *static_cast<SurfYZPlane*>(this) = SurfYZPlane(0., xyz[1], xyz[2], phi);
 	} else {
 		throw cet::exception("Can't Find Wire for that channel") << channel << "\n"; 
 
