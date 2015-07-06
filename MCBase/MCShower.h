@@ -94,6 +94,8 @@ namespace sim {
 
     void Charge (const std::vector<double>& q) { fPlaneCharge = q; }
     
+    void dEdx (const double& dedx) {fdEdx = dedx;}
+
 #endif
 
   protected:
@@ -126,7 +128,7 @@ namespace sim {
     //---- Energy deposition info ----//
     std::vector<unsigned int>  fDaughterTrackID; ///< Daughters' track ID
     MCStep                     fDetProfile;      ///< Combined energy deposition information
-    //    double                     fdEdx;            ///< Shower True dEdx 
+    double                     fdEdx;            ///< Shower True dEdx 
   
     //---- Charge per plane ----//
     std::vector<double> fPlaneCharge; ///< Charge deposit per plane
