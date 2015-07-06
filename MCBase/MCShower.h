@@ -65,6 +65,8 @@ namespace sim {
 
     const std::vector<double>& Charge() const { return fPlaneCharge; }
 
+    //    double dEdx(const size_t plane) const;
+
     //--- Setters ---//
     void Origin    ( simb::Origin_t o ) { fOrigin    = o;    }
 
@@ -91,7 +93,7 @@ namespace sim {
     void DaughterTrackID ( const std::vector<unsigned int>& id_v ) { fDaughterTrackID = id_v; }
 
     void Charge (const std::vector<double>& q) { fPlaneCharge = q; }
-
+    
 #endif
 
   protected:
@@ -105,6 +107,7 @@ namespace sim {
     std::string  fProcess;   ///< Shower particle's creation process
     MCStep       fStart;     ///< Shower particle's G4 start point
     MCStep       fEnd;       ///< Shower particle's G4 end point
+  
 
     //---- Mother's particle info ---//
     int          fMotherPDGCode; ///< Shower's mother PDG code   
@@ -123,7 +126,8 @@ namespace sim {
     //---- Energy deposition info ----//
     std::vector<unsigned int>  fDaughterTrackID; ///< Daughters' track ID
     MCStep                     fDetProfile;      ///< Combined energy deposition information
-
+    //    double                     fdEdx;            ///< Shower True dEdx 
+  
     //---- Charge per plane ----//
     std::vector<double> fPlaneCharge; ///< Charge deposit per plane
   };
