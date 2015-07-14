@@ -16,6 +16,7 @@
 #define MCSHOWER_H
 
 #include "MCStep.h"
+#include <TVector3.h>
 #include "SimulationBase/MCTruth.h"
 
 namespace sim {
@@ -70,11 +71,12 @@ namespace sim {
     //--- Setters ---//
     void Origin    ( simb::Origin_t o ) { fOrigin    = o;    }
 
-    void PdgCode ( int id                  ) { fPDGCode = id;   }
-    void TrackID ( unsigned int id         ) { fTrackID = id;   }
-    void Process ( const std::string &name ) { fProcess = name; }
-    void Start   ( const MCStep &s         ) { fStart   = s;    }
-    void End     ( const MCStep &s         ) { fEnd     = s;    }
+    void PdgCode  ( int id                    ) { fPDGCode = id;    }
+    void TrackID  ( unsigned int id           ) { fTrackID = id;    }
+    void Process  ( const std::string &name   ) { fProcess = name;  }
+    void Start    ( const MCStep &s           ) { fStart   = s;     }
+    void End      ( const MCStep &s           ) { fEnd     = s;     }
+    void StartDir ( const TVector3 &sdir) { fStartDir = sdir; }
 
     void MotherPdgCode ( int id                  ) { fMotherPDGCode = id;   }
     void MotherTrackID ( unsigned int id         ) { fMotherTrackID = id;   }
@@ -94,7 +96,8 @@ namespace sim {
 
     void Charge (const std::vector<double>& q) { fPlaneCharge = q; }
     
-    void dEdx (const double& dedx) {fdEdx = dedx;}
+    void dEdx    (const double& dedx) {fdEdx = dedx;}
+    void dEdxRAD (const double& dedx) {fdEdx_radial = dedx;}
 
 #endif
 
@@ -109,7 +112,9 @@ namespace sim {
     std::string  fProcess;   ///< Shower particle's creation process
     MCStep       fStart;     ///< Shower particle's G4 start point
     MCStep       fEnd;       ///< Shower particle's G4 end point
+    TVector3 fStartDir; ///< Shower Starting Direction, within the first 2.4cm
   
+
 
     //---- Mother's particle info ---//
     int          fMotherPDGCode; ///< Shower's mother PDG code   
@@ -129,7 +134,9 @@ namespace sim {
     std::vector<unsigned int>  fDaughterTrackID; ///< Daughters' track ID
     MCStep                     fDetProfile;      ///< Combined energy deposition information
     double                     fdEdx;            ///< Shower True dEdx 
+    double                     fdEdx_radial;     ///< Shower True dEdx, with a radial requirement  
   
+
     //---- Charge per plane ----//
     std::vector<double> fPlaneCharge; ///< Charge deposit per plane
   };
