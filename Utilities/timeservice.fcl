@@ -11,6 +11,7 @@ standard_timeservice:
   ClockSpeedTPC:     5.0505  # TPC clock speed in MHz; 1 / 198.0 ns
   ClockSpeedOptical: 64    # Optical clock speed in MHz
   ClockSpeedTrigger: 16    # Trigger clock speed in MHz
+  ClockSpeedExternal:31.25 # External clock speed in MHz
   DefaultTrigTime:   0     # Default trigger time in electronics clock [us]
   DefaultBeamTime:   0     # Default beam gate time in electronics clock [us]
 }

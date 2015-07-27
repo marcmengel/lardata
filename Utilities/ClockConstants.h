@@ -25,6 +25,9 @@ namespace util {
   /// Default Trigger clock speed in MHz
   const double kDEFAULT_FREQUENCY_TRIGGER = 16.;
 
+  /// Default External clock speed in MHz
+  const double kDEFAULT_FREQUENCY_EXTERNAL = 31.25;
+
   /// Default G4 reference time in micro-second
   const double kDEFAULT_MC_CLOCK_T0 = 0;
 
