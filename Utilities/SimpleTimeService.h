@@ -23,6 +23,8 @@ namespace util {
      \class SimpleTimeService
      This class provides electronics various electronics clocks. Currently supports
      three types of clocks: TPC, Optical, and Trigger in order to support MicroBooNE experiments.
+
+     Added another clock: External. Currently reserved for 35ton muon paddle system. -mthiesse, 29/6/2015
   */
   class SimpleTimeService{
     
@@ -35,6 +37,7 @@ namespace util {
 	fTPCClock     (0,kDEFAULT_FRAME_PERIOD,kDEFAULT_FREQUENCY_TPC),
 	fOpticalClock (0,kDEFAULT_FRAME_PERIOD,kDEFAULT_FREQUENCY_OPTICAL),
 	fTriggerClock (0,kDEFAULT_FRAME_PERIOD,kDEFAULT_FREQUENCY_TRIGGER),
+      fExternalClock(0,kDEFAULT_FRAME_PERIOD,kDEFAULT_FREQUENCY_EXTERNAL),
 	fTriggerOffsetTPC     (kDEFAULT_TRIG_OFFSET_TPC),
 	fTriggerTime  (0),
 	fBeamGateTime (0)
@@ -57,6 +60,9 @@ namespace util {
 
     /// Trigger clock
     ::util::ElecClock fTriggerClock;
+
+    /// External clock
+    ::util::ElecClock fExternalClock;
 
     /// Time offset from trigger to TPC readout start
     double fTriggerOffsetTPC;
@@ -81,6 +87,7 @@ namespace util {
       fTPCClock.SetTime(trig_time);
       fOpticalClock.SetTime(trig_time);
       fTriggerClock.SetTime(trig_time);
+      fExternalClock.SetTime(trig_time);
     }
 
   public:
@@ -152,6 +159,22 @@ namespace util {
     { ElecClock clock = TriggerClock(); clock.SetTime(sample,frame); return clock; }
 
     //
+    // Getters of External ElecClock
+    //
+    /// Borrow a const Trigger clock with time set to External Time [us]
+    const ElecClock& ExternalClock() const
+    { return fExternalClock; }
+
+    /// Create a External clock for a given time [us] from clock counting start
+    ElecClock ExternalClock(double time) const
+    { return ElecClock(time,fExternalClock.FramePeriod(),fTriggerClock.Frequency());}
+
+    /// Create a External clock for a given sample/frame number in External clock frequency
+    ElecClock ExternalClock(unsigned int sample,
+			    unsigned int frame) const
+    { ElecClock clock = ExternalClock(); clock.SetTime(sample,frame); return clock; }
+
+    //
     // Getters for time [us] w.r.t. trigger given information from waveform
     //
 
@@ -167,8 +190,13 @@ namespace util {
     /// Given Optical time-tick (waveform index), sample and frame number, returns time [us] w.r.t. beam gate time stamp
     double OpticalTick2BeamTime(double tick, size_t sample, size_t frame) const
     { return fOpticalClock.TickPeriod() * tick + fOpticalClock.Time(sample,frame) - BeamGateTime(); }
-
-
+    /// Given External time-tick (waveform index), sample and frame number, returns time [us] w.r.t. trigger time stamp
+    double ExternalTick2TrigTime(double tick, size_t sample, size_t frame) const
+    { return fExternalClock.TickPeriod() * tick + fExternalClock.Time(sample,frame) - TriggerTime(); }
+    /// Given External time-tick (waveform index), sample and frame number, returns time [us] w.r.t. beam gate time stamp
+    double ExternalTick2BeamTime(double tick, size_t sample, size_t frame) const
+    { return fExternalClock.TickPeriod() * tick + fExternalClock.Time(sample,frame) - BeamGateTime(); }
+    
     //
     // Getters for time [tdc] (electronics clock counting ... in double precision) 
     //
@@ -185,6 +213,12 @@ namespace util {
     /// Given G4 time [ns], returns corresponding Optical electronics clock count [tdc]  
     double OpticalG4Time2TDC(double g4time) const
     { return G4ToElecTime(g4time) / fOpticalClock.TickPeriod(); }
+    /// Given External time-tick (waveform index), sample and frame number, returns time electronics clock count [tdc]
+    double ExternalTick2TDC(double tick, size_t sample, size_t frame) const
+    { return fExternalClock.Ticks(sample,frame) + tick; }
+    /// Given G4 time [ns], returns corresponding External electronics clock count [tdc]
+    double ExternalG4Time2TDC(double g4time) const
+    { return G4ToElecTime(g4time) / fExternalClock.TickPeriod(); }
 
     //
     // Getters for time [us] (electronics clock counting ... in double precision)
@@ -195,6 +229,9 @@ namespace util {
     /// Given Optical time-tick (waveform index), sample and frame number, returns electronics clock [us]
     double OpticalTick2Time(double tick, size_t sample, size_t frame) const
     { return fOpticalClock.Time(sample,frame) + tick * fOpticalClock.TickPeriod(); }
+    /// Given External time-tick (waveform index), sample and frame number, returns electronics clock [us]
+    double ExternalTick2Time(double tick, size_t sample, size_t frame) const
+    { return fExternalClock.Time(sample,frame) + tick * fExternalClock.TickPeriod(); }
 
     //
     // Getters for time [ticks] (waveform index number)
