@@ -2,19 +2,20 @@
 ///
 /// \file   SurfWireX.h
 ///
-/// \brief  Planar surface defined by readout wire and x-axis.
+/// \brief  Planar surface defined by wire id and x-axis.
 ///
 /// \author H. Greenlee 
 ///
 /// This class derives from SurfYZPlane.  This class does not add any
 /// new members, but has a constructor that allows construction from
-/// a readout channel number.
+/// a wire id.
 ///
 ////////////////////////////////////////////////////////////////////////
 
 #ifndef SURFWIREX_H
 #define SURFWIREX_H
 
+#include "SimpleTypesAndConstants/geo_types.h"
 #include "RecoObjects/SurfYZPlane.h"
 
 namespace trkf {
@@ -24,7 +25,7 @@ namespace trkf {
   public:
 
     /// Constructor.
-    SurfWireX(unsigned int channel);
+    SurfWireX(const geo::WireID& wireid);
 
     /// Destructor.
     virtual ~SurfWireX();

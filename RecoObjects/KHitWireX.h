@@ -47,7 +47,7 @@ namespace trkf {
 	      const std::shared_ptr<const Surface>& psurf);
 
     /// Constructor from channel (mainly for testing).
-    KHitWireX(unsigned int channel, double x, double xerr);
+    KHitWireX(const geo::WireID& wireid, double x, double xerr);
 
     /// Destructor.
     virtual ~KHitWireX();
