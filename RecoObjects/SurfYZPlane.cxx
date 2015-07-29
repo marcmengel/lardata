@@ -22,6 +22,7 @@ namespace trkf {
 
   /// Default constructor.
   SurfYZPlane::SurfYZPlane() :
+    fX0(0.),
     fY0(0.),
     fZ0(0.),
     fPhi(0.)
@@ -31,10 +32,11 @@ namespace trkf {
   ///
   /// Arguments:
   ///
-  /// y0, z0 - Global coordinates of local origin.
+  /// x0, y0, z0 - Global coordinates of local origin.
   /// phi - Rotation angle about x-axis.
   ///
-  SurfYZPlane::SurfYZPlane(double y0, double z0, double phi) :
+  SurfYZPlane::SurfYZPlane(double x0, double y0, double z0, double phi) :
+    fX0(x0),
     fY0(y0),
     fZ0(z0),
     fPhi(phi)
@@ -62,8 +64,8 @@ namespace trkf {
     double sinphi = std::sin(fPhi);
     double cosphi = std::cos(fPhi);
 
-    // u = x
-    uvw[0] = xyz[0];
+    // u = x-x0
+    uvw[0] = xyz[0] - fX0;
 
     // v =  (y-y0)*cos(phi) + (z-z0)*sin(phi)
     uvw[1] = (xyz[1] - fY0) * cosphi + (xyz[2] - fZ0) * sinphi;
@@ -84,8 +86,8 @@ namespace trkf {
     double sinphi = std::sin(fPhi);
     double cosphi = std::cos(fPhi);
 
-    // x = u
-    xyz[0] = uvw[0];
+    // x = x0 + u
+    xyz[0] = fX0 + uvw[0];
 
     // y = y0 + v*cos(phi) - w*sin(phi)
     xyz[1] = fY0 + uvw[1] * cosphi - uvw[2] * sinphi;
@@ -188,7 +190,7 @@ namespace trkf {
       // within tolerance.
 
       double delta_phi = TVector2::Phi_mpi_pi(fPhi - psurf->phi());
-      if(abs(delta_phi) <= fPhiTolerance)
+      if(std::abs(delta_phi) <= fPhiTolerance)
 	result = true;
     }
     return result;
@@ -252,11 +254,13 @@ namespace trkf {
       // Test whether surface parameters are the same within tolerance.
 
       double delta_phi = TVector2::Phi_mpi_pi(fPhi - psurf->phi());
+      double dx = fX0 - psurf->x0();
       double dy = fY0 - psurf->y0();
       double dz = fZ0 - psurf->z0();
-      if(abs(delta_phi) <= fPhiTolerance && 
-	 abs(dy) <= fSepTolerance &&
-	 abs(dz) <= fSepTolerance)
+      if(std::abs(delta_phi) <= fPhiTolerance && 
+	 std::abs(dx) <= fSepTolerance &&
+	 std::abs(dy) <= fSepTolerance &&
+	 std::abs(dz) <= fSepTolerance)
 	result = true;
     }
     return result;
@@ -265,7 +269,7 @@ namespace trkf {
   /// Printout
   std::ostream& SurfYZPlane::Print(std::ostream& out) const
   {
-    out << "SurfYZPlane{ y0=" << fY0 << ", z0=" << fZ0 << ", phi=" << fPhi << "}";
+    out << "SurfYZPlane{ x0=" << fX0 << ", y0=" << fY0 << ", z0=" << fZ0 << ", phi=" << fPhi << "}";
     return out;
   }
 
