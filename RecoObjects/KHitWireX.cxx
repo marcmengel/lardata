@@ -37,7 +37,7 @@ namespace trkf {
     art::ServiceHandle<util::DetectorProperties> detprop;
 
     // Extract channel number.
-    uint32_t channel = hit->Channel();
+    geo::WireID wireid = hit->WireID();
 
     // Check the surface (determined by channel number).  If the
     // surface pointer is null, make a new SurfWireX surface and
@@ -45,13 +45,13 @@ namespace trkf {
     // that the specified surface agrees with the channel number.
 
     if(psurf.get() == 0) {
-      std::shared_ptr<const Surface> new_psurf(new SurfWireX(channel));
+      std::shared_ptr<const Surface> new_psurf(new SurfWireX(wireid));
       setMeasSurface(new_psurf);
     }
     else {
-      SurfWireX check_surf(channel);
+      SurfWireX check_surf(wireid);
       if(!check_surf.isEqual(*psurf))
-	throw cet::exception("KHitWireX") << "Measurement surface doesn't match channel.\n";
+	throw cet::exception("KHitWireX") << "Measurement surface doesn't match wire id.\n";
     }
 
     setMeasPlane(hit->WireID().Plane);
@@ -83,7 +83,7 @@ namespace trkf {
 
     // Set the unique id from a combination of the channel number and the time.
 
-    fID = (channel % 200000) * 10000 + (int(std::abs(t)) % 10000);
+    fID = (hit->Channel() % 200000) * 10000 + (int(std::abs(t)) % 10000);
   }
 
   /// Constructor.
@@ -94,8 +94,8 @@ namespace trkf {
   /// x       - X coordinate.
   /// xerr    - X error.
   ///
-  KHitWireX::KHitWireX(unsigned int channel, double x, double xerr) :
-    KHit(std::shared_ptr<const Surface>(new SurfWireX(channel)))
+  KHitWireX::KHitWireX(const geo::WireID& wireid, double x, double xerr) :
+    KHit(std::shared_ptr<const Surface>(new SurfWireX(wireid)))
   {
     // Get services.
 
@@ -103,24 +103,16 @@ namespace trkf {
 
     // Get plane number.
 
-    //unsigned int cstat, tpc, plane, wire;
-    //geom->ChannelToWire(channel, cstat, tpc, plane, wire);
-	  
-    std::vector<geo::WireID> channelWireIDs = geom->ChannelToWire(channel);
+    setMeasPlane(wireid.Plane);
 
-    for (auto i=channelWireIDs.begin(), e=channelWireIDs.end(); i!=e; ++i ) {
-      setMeasPlane(i->Plane);
-      //setMeasPlane(plane);
+    // Update measurement vector and error matrix.
 
-      // Update measurement vector and error matrix.
+    trkf::KVector<1>::type mvec(1, x);
+    setMeasVector(mvec);
 
-      trkf::KVector<1>::type mvec(1, x);
-      setMeasVector(mvec);
-
-      trkf::KSymMatrix<1>::type merr(1);
-      merr(0,0) = xerr * xerr;
-      setMeasError(merr);
-    }
+    trkf::KSymMatrix<1>::type merr(1);
+    merr(0,0) = xerr * xerr;
+    setMeasError(merr);
   }
 
   /// Destructor.
