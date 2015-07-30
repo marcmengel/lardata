@@ -19,7 +19,7 @@ namespace trkf {
   ///
   /// Arguments:
   ///
-  /// channel - Readout channel number.
+  /// wireid - Wire id.
   ///
   SurfWireX::SurfWireX(const geo::WireID& wireid)
   {
