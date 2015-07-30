@@ -1,17 +1,16 @@
 ///////////////////////////////////////////////////////////////////////
 ///
-/// \file   SurfWireTime.cxx
+/// \file   SurfWireLine.cxx
 ///
-/// \brief  Linear surface defined by wire id and drift time.
+/// \brief  Linear surface defined by wire id and x coordinate.
 ///
 /// \author H. Greenlee
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "RecoObjects/SurfWireTime.h"
+#include "RecoObjects/SurfWireLine.h"
 #include "Geometry/Geometry.h"
 #include "Geometry/WireGeo.h"
-#include "Utilities/DetectorProperties.h"
 #include "TMath.h"
 
 namespace trkf {
@@ -21,14 +20,13 @@ namespace trkf {
   /// Arguments:
   ///
   /// wireid - Wire id.
-  /// time   - Drift time (ticks).
+  /// x      - X coordinate.
   ///
-  SurfWireTime::SurfWireTime(const geo::WireID& wireid, double time)
+  SurfWireLine::SurfWireLine(const geo::WireID& wireid, double x)
   {
-    // Get services.
+    // Get geometry service.
 
     art::ServiceHandle<geo::Geometry> geom;
-    art::ServiceHandle<util::DetectorProperties> detprop;
 
     // Get wire geometry.
 
@@ -41,17 +39,13 @@ namespace trkf {
     wgeom.GetCenter(xyz);
     double phi = TMath::PiOver2() - wgeom.ThetaZ();
 
-    // Get x coordinate.
-
-    double x = detprop->ConvertTicksToX(time, wireid.Plane, wireid.TPC, wireid.Cryostat);    
-	  
     // Update base class.
 	  
     *static_cast<SurfYZLine*>(this) = SurfYZLine(x, xyz[1], xyz[2], phi);
   }
 
   /// Destructor.
-  SurfWireTime::~SurfWireTime()
+  SurfWireLine::~SurfWireLine()
   {}
 
 } // end namespace trkf

@@ -1,14 +1,14 @@
 ////////////////////////////////////////////////////////////////////////
 ///
-/// \file   SurfWireTime.h
+/// \file   SurfWireLine.h
 ///
-/// \brief  Linear surface defined by wire id and drift time.
+/// \brief  Linear surface defined by wire id and x coordinate.
 ///
 /// \author H. Greenlee 
 ///
 /// This class derives from SurfYZLine.  This class does not add any
 /// new members, but has a constructor that allows construction from
-/// a wire id and drift time or recob::Hit.
+/// a wire id and x coordinate.
 ///
 ////////////////////////////////////////////////////////////////////////
 
@@ -20,15 +20,15 @@
 
 namespace trkf {
 
-  class SurfWireTime : public SurfYZLine
+  class SurfWireLine : public SurfYZLine
   {
   public:
 
     /// Constructor.
-    SurfWireTime(const geo::WireID& wireid, double time);
+    SurfWireLine(const geo::WireID& wireid, double x);
 
     /// Destructor.
-    virtual ~SurfWireTime();
+    virtual ~SurfWireLine();
   };
 }
 
