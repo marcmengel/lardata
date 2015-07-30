@@ -36,13 +36,13 @@ namespace trkf {
     // Get services.
     art::ServiceHandle<util::DetectorProperties> detprop;
 
-    // Extract channel number.
+    // Extract wire id.
     geo::WireID wireid = hit->WireID();
 
-    // Check the surface (determined by channel number).  If the
+    // Check the surface (determined by wire id).  If the
     // surface pointer is null, make a new SurfWireX surface and
     // update the base class appropriately.  Otherwise, just check
-    // that the specified surface agrees with the channel number.
+    // that the specified surface agrees with the wire id.
 
     if(psurf.get() == 0) {
       std::shared_ptr<const Surface> new_psurf(new SurfWireX(wireid));
@@ -90,7 +90,7 @@ namespace trkf {
   ///
   /// Arguments:
   ///
-  /// channel - Channel number.
+  /// wireid  - Wire id.
   /// x       - X coordinate.
   /// xerr    - X error.
   ///

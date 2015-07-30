@@ -19,7 +19,7 @@
 /// The following data are extracted from the Hit, and are stored in
 /// the base class.
 ///
-/// 1.  Channel (defines measurement surface).
+/// 1.  Wire id (defines measurement surface).
 /// 2.  X position.
 /// 3.  X error.
 ///
@@ -46,7 +46,7 @@ namespace trkf {
     KHitWireX(const art::Ptr<recob::Hit>& hit,
 	      const std::shared_ptr<const Surface>& psurf);
 
-    /// Constructor from channel (mainly for testing).
+    /// Constructor from wire id (mainly for testing).
     KHitWireX(const geo::WireID& wireid, double x, double xerr);
 
     /// Destructor.
