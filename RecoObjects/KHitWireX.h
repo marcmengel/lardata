@@ -11,21 +11,10 @@
 /// x-axis (approprite for nonmagnetic LAr tpc).
 ///
 /// This class derives from base class KHit<1>, which is the general
-/// one-dimensional measurement base class.  It is constructed from a
-/// art::Ptr<recob::Hit>, which pointer is saved in this class as a
-/// data member.  This class overrides virtual base class method
-/// subpredict.
+/// one-dimensional measurement base class.  This class has a constructor
+/// from an art::Ptr<recob::Hit>, which pointer is retained as a data
+/// product.  This class overrides virtual base class method subpredict.
 ///
-/// The following data are extracted from the Hit, and are stored in
-/// the base class.
-///
-/// 1.  Wire id (defines measurement surface).
-/// 2.  X position.
-/// 3.  X error.
-///
-/// The x position and error are specified in the global coordinate
-/// system, which is the same as the local u coordinate of the
-/// measurement surface coordinate system.
 ///
 ////////////////////////////////////////////////////////////////////////
 
@@ -70,7 +59,6 @@ namespace trkf {
     // Attributes.
 
     art::Ptr<recob::Hit> fHit;
-    double fPitch;              // Wire pitch.
   };
 }
 
