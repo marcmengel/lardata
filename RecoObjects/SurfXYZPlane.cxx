@@ -225,7 +225,7 @@ namespace trkf {
 
       double delta_phi = TVector2::Phi_mpi_pi(fPhi - psurf->phi());
       double delta_theta = fTheta - psurf->theta();
-      if(std::abs(delta_phi) <= fPhiTolerance && delta_theta <= fThetaTolerance)
+      if(std::abs(delta_phi) <= fPhiTolerance && std::abs(delta_theta) <= fThetaTolerance)
 	result = true;
     }
     return result;
