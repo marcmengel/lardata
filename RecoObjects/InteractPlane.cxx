@@ -127,7 +127,9 @@ namespace trkf {
     double uvfact = std::sqrt(uvfact2);
     double uv = dudw * dvdw;
     double dist2_3 = s*s / 3.;
-    double dist_2 = s / 2.;
+    double dist_2 = std::abs(s) / 2.;
+    if(trk.getDirection() == Surface::BACKWARD)
+      dist_2 = -dist_2;
 
     // Calculate energy loss fluctuations.
 
