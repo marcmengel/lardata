@@ -26,7 +26,9 @@ namespace trkf {
   /// doDedx - dE/dx enable flag.
   ///
   PropYZPlane::PropYZPlane(double tcut, bool doDedx) :
-    Propagator(tcut, doDedx, std::shared_ptr<const Interactor>(new InteractPlane(tcut)))
+    Propagator(tcut, doDedx, (tcut >= 0. ? 
+			      std::shared_ptr<const Interactor>(new InteractPlane(tcut)) :
+			      std::shared_ptr<const Interactor>()))
   {}
 
   /// Destructor.
@@ -154,7 +156,7 @@ namespace trkf {
     if(!pinv2)
       return result;
 
-    // Update result object (success guaranteed).
+    // Update default result to success and store propagation distance.
 
     result = boost::optional<double>(true, s);		
 
@@ -206,8 +208,11 @@ namespace trkf {
 
     if(noise_matrix != 0) {
       noise_matrix->resize(vec.size(), vec.size(), false);
-      if(getInteractor().get() != 0)
-	getInteractor()->noise(trk, s, *noise_matrix);
+      if(getInteractor().get() != 0) {
+	bool ok = getInteractor()->noise(trk, s, *noise_matrix);
+	if(!ok)
+	  return boost::optional<double>(false, 0.);
+      }
       else
 	noise_matrix->clear();
     }

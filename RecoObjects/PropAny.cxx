@@ -26,7 +26,9 @@ namespace trkf {
   /// doDedx - dE/dx enable flag.
   ///
   PropAny::PropAny(double tcut, bool doDedx) :
-    Propagator(tcut, doDedx, std::shared_ptr<const Interactor>(new InteractPlane(tcut))),
+    Propagator(tcut, doDedx, (tcut >= 0 ? 
+			      std::shared_ptr<const Interactor>(new InteractPlane(tcut)) :
+			      std::shared_ptr<const Interactor>())),
     fPropYZLine(tcut, doDedx),
     fPropYZPlane(tcut, doDedx),
     fPropXYZPlane(tcut, doDedx)
