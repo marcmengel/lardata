@@ -82,6 +82,8 @@ namespace trkf {
 
   /// Add track.
   void KGTrack::addTrack(const KHitTrack& trh) {
+    if(!trh.isValid())
+      throw cet::exception("KGTrack") << "Adding invalid track to KGTrack.\n";
     fTrackMap.insert(std::make_pair(trh.getPath() + trh.getHit()->getPredDistance(), trh));
   }
 
