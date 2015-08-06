@@ -41,6 +41,9 @@
 /// provided the propagation is successful.  The error and noise
 /// propagation methods additionally update the track error matrix.
 ///
+/// In case of propagation failure, all propagation methods promise 
+/// to leave the original track unmodified.
+///
 /// Use case three (propagate with error, but without noise) updates the
 /// track error matrix reversibly.
 ///

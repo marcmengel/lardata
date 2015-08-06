@@ -73,6 +73,10 @@ namespace trkf {
     double theta2 = to->theta();
     double phi2 = to->phi();
 
+    // Remember starting track.
+
+    KTrack trk0(trk);
+
     // Get track position.
 
     double xyz[3];
@@ -104,8 +108,10 @@ namespace trkf {
 
     // Make sure intermediate track has a valid direction.
 
-    if(dir1 == Surface::UNKNOWN)
+    if(dir1 == Surface::UNKNOWN) {
+      trk = trk0;
       return result;
+    }
 
     // Calculate transcendental functions.
 
@@ -156,8 +162,10 @@ namespace trkf {
     // If wrong direction, return failure without updating the track
     // or propagation matrix.
 
-    if(!sok)
+    if(!sok) {
+      trk = trk0;
       return result;
+    }
 
     // Find final momentum.
 
@@ -170,8 +178,10 @@ namespace trkf {
 
     // Return failure in case of range out.
 
-    if(!pinv2)
+    if(!pinv2) {
+      trk = trk0;
       return result;
+    }
 
     // Update default result to success and store propagation distance.
 
@@ -227,8 +237,10 @@ namespace trkf {
       noise_matrix->resize(vec.size(), vec.size(), false);
       if(getInteractor().get() != 0) {
 	bool ok = getInteractor()->noise(trk, s, *noise_matrix);
-	if(!ok)
+	if(!ok) {
+	  trk = trk0;
 	  return boost::optional<double>(false, 0.);
+	}
       }
       else
 	noise_matrix->clear();
@@ -274,6 +286,10 @@ namespace trkf {
     // Set the default return value to be unitialized with value 0.
 
     boost::optional<double> result(false, 0.);
+
+    // Remember starting track.
+
+    KTrack trk0(trk);
 
     // Get initial track parameters and direction.
     // Note the initial track can be on any type of surface.
@@ -353,6 +369,13 @@ namespace trkf {
     trk.setSurface(porigin);
     trk.setVector(vec);
     trk.setDirection(dir);
+
+    // Final validity check.
+
+    if(!trk.isValid()) {
+      trk = trk0;
+      result = boost::optional<double>(false, 0.);
+    }
 
     // Done.
 

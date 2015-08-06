@@ -279,9 +279,10 @@ namespace trkf {
 	throw cet::exception("Propagator") << 
 	  "Input track and reference track not on same surface.\n";
 
-      // Remember the starting reference track.
+      // Remember the starting track and reference track.
 
-      KTrack ref0 = *ref;
+      KTrack trk0(trk);
+      KTrack ref0(*ref);
 
       // Propagate the reference track.  Make sure we calculate the
       // propagation matrix.
@@ -309,6 +310,15 @@ namespace trkf {
 	trk.setDirection(ref->getDirection());
 	if (!trk.getSurface()->isEqual(*(ref->getSurface())))
 	  throw cet::exception("Propagator") << __func__ << ": surface mismatch";
+
+	// Final validity check.  In case of failure, restore the track
+	// and reference track to their starting values.
+
+	if(!trk.isValid()) {
+	  result = boost::optional<double>(false, 0.);
+	  trk = trk0;
+	  *ref = ref0;
+	}
       }
       else {
 
@@ -316,8 +326,8 @@ namespace trkf {
 	// Restore the reference track to its starting value, so that we ensure 
 	// the reference track and the actual track remain on the same surface.
 
+	trk = trk0;
 	*ref = ref0;
-
       }
     }
 
