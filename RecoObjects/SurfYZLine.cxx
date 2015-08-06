@@ -52,6 +52,14 @@ namespace trkf {
     return new SurfYZLine(*this);
   }
 
+  /// Surface-specific tests of validity of track parameters.
+  bool SurfYZLine::isTrackValid(const TrackVector& vec) const
+  {
+    // Limit allowed range of eta parameter.
+
+    return std::abs(vec(3)) < 10.;
+  }
+
   /// Transform global to local coordinates.
   ///
   /// Arguments:

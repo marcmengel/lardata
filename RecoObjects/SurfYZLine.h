@@ -97,6 +97,9 @@ namespace trkf {
     /// Clone method.
     virtual Surface* clone() const;
 
+    /// Surface-specific tests of validity of track parameters.
+    virtual bool isTrackValid(const TrackVector& vec) const;
+
     /// Transform global to local coordinates.
     virtual void toLocal(const double xyz[3], double uvw[3]) const;
 

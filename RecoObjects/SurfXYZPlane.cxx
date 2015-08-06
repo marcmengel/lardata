@@ -80,6 +80,12 @@ namespace trkf {
     return new SurfXYZPlane(*this);
   }
 
+  /// Surface-specific tests of validity of track parameters.
+  bool SurfXYZPlane::isTrackValid(const TrackVector& vec) const
+  {
+    return true;
+  }
+
   /// Transform global to local coordinates.
   ///
   /// Arguments:
