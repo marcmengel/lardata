@@ -36,7 +36,7 @@ namespace trkf {
     Interactor* clone() const {return new InteractPlane(*this);}
 
     /// Calculate noise matrix.
-    virtual void noise(const KTrack& trk, double s, TrackError& noise_matrix) const;
+    virtual bool noise(const KTrack& trk, double s, TrackError& noise_matrix) const;
   };
 }
 
