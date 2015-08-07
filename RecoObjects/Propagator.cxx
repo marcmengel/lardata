@@ -9,7 +9,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "RecoObjects/Propagator.h"
-#include "RecoObjects/SurfYZPlane.h"
+#include "RecoObjects/SurfXYZPlane.h"
 #include "Utilities/LArProperties.h"
 #include "cetlib/exception.h"
 
@@ -125,6 +125,7 @@ namespace trkf {
 
 	++nit;
 	if(nit > nitmax) {
+	  trk = trk0;
 	  result = boost::optional<double>(false, 0.);
 	  return result;
 	}
@@ -184,15 +185,15 @@ namespace trkf {
 	  xyz[2] = xyz0[2] + frac * (xyz1[2] - xyz0[2]);
 
 	  // Choose orientation of intermediate surface perpendicular
-	  // to track in yz-plane.
+	  // to track.
 
 	  double mom[3];
 	  trk.getMomentum(mom);
-	  double phi = std::atan2(mom[1], mom[2]);
 
 	  // Make intermediate surface object.
 
-	  pstep = std::shared_ptr<const Surface>(new SurfYZPlane(0., xyz[1], xyz[2], phi));
+	  pstep = std::shared_ptr<const Surface>(new SurfXYZPlane(xyz[0], xyz[1], xyz[2],
+								  mom[0], mom[1], mom[2]));
 	}
 
 	// Do the actual step propagation.
