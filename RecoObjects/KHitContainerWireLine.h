@@ -13,8 +13,8 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#ifndef KHITCONTAINERWIREX_H
-#define KHITCONTAINERWIREX_H
+#ifndef KHITCONTAINERWIRELINE_H
+#define KHITCONTAINERWIRELINE_H
 
 #include "RecoObjects/KHitContainer.h"
 #include "RecoBase/Hit.h"
