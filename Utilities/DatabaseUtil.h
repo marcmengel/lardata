@@ -66,8 +66,8 @@ namespace util{
 
       int SelectFieldByName(std::vector<std::string> &value,const char * field,const char * condition,const char * table);
       
-      bool ToughErrorTreatment(){return fToughErrorTreatment;}
-      bool ShouldConnect(){return fShouldConnect;}
+      bool ToughErrorTreatment() const { return fToughErrorTreatment; }
+      bool ShouldConnect() const { return fShouldConnect; }
       
     private:
       
