@@ -29,7 +29,7 @@ namespace trkf {
   /// memory.
   ///
   KHitWireLine::KHitWireLine(const art::Ptr<recob::Hit>& hit,
-		       const std::shared_ptr<const Surface>& psurf) :
+			     const std::shared_ptr<const Surface>& psurf) :
     KHit(psurf),
     fHit(hit)
   {
@@ -121,9 +121,9 @@ namespace trkf {
   {}
 
   bool KHitWireLine::subpredict(const KETrack& tre,
-			     KVector<1>::type& pvec,
-			     KSymMatrix<1>::type& perr,
-			     KHMatrix<1>::type& hmatrix) const
+				KVector<1>::type& pvec,
+				KSymMatrix<1>::type& perr,
+				KHMatrix<1>::type& hmatrix) const
   {
     // Make sure that the track surface and the measurement surface are the same.
     // Throw an exception if they are not.
@@ -146,8 +146,9 @@ namespace trkf {
 
     art::ServiceHandle<geo::Geometry> geom;
     double pitch = geom->WirePitch();
-    double slope = tre.getVector()(2);
-    double slopevar = pitch*pitch * slope*slope / 12.;
+    double phi = tre.getVector()(2);
+    double cosphi = std::cos(phi);
+    double slopevar = pitch*pitch * cosphi*cosphi / 12.;
     perr(0,0) += slopevar;
 
     // Hmatrix - dr/dr = 1., all others are zero.
