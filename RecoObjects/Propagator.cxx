@@ -301,7 +301,7 @@ namespace trkf {
 	// Propagation of reference track succeeded.  Update the track
 	// state vector and surface of the track to be propagated.
 
-	TrackVector diff = trk.getVector() - ref0.getVector();
+	TrackVector diff = trk.getSurface()->getDiff(trk.getVector(), ref0.getVector());
 	TrackVector newvec = ref->getVector() + prod(*prop_matrix, diff);
 
 	// Store updated state vector and surface.

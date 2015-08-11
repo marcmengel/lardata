@@ -106,6 +106,9 @@ namespace trkf {
     /// Transform local to global coordinates.
     virtual void toGlobal(const double uvw[3], double xyz[3]) const;
 
+    /// Calculate difference of two track parameter vectors.
+    virtual TrackVector getDiff(const TrackVector& vec1, const TrackVector& vec2) const;
+
     /// Get position of track.
     virtual void getPosition(const TrackVector& vec, double xyz[3]) const;
 

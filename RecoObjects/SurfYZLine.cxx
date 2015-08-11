@@ -12,6 +12,7 @@
 #include "RecoObjects/SurfYZLine.h"
 #include "cetlib/exception.h"
 #include "TVector2.h"
+#include "TMath.h"
 
 namespace trkf {
 
@@ -102,6 +103,25 @@ namespace trkf {
 
     // z = z0 + v*sin(phi) + w*cos(phi)
     xyz[2] = fZ0 + uvw[1] * sinphi + uvw[2] * cosphi;
+  }
+
+  /// Calculate difference of two track parameter vectors, taking into account phi wrap.
+  ///
+  /// Arguments:
+  ///
+  /// vec1 - First vector.
+  /// vec2 - Second vector.
+  ///
+  /// Returns: vec1 - vec2
+  ///
+  TrackVector SurfYZLine::getDiff(const TrackVector& vec1, const TrackVector& vec2) const
+  {
+    TrackVector result = vec1 - vec2;
+    while(result(2) <= -TMath::Pi())
+      result(2) += TMath::TwoPi();
+    while(result(2) > TMath::Pi())
+      result(2) -= TMath::TwoPi();
+    return result;
   }
 
   /// Get position of track.
