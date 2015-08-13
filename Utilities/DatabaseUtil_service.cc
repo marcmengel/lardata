@@ -327,7 +327,8 @@ namespace util {
     PQclear(res);
     res = PQexec(conn,
 		 "SELECT crate_id, daq_slot, fem_channel, wireplane, larsoft_channel "
-		 "FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN motherboard_mapping NATURAL JOIN coldcables_v2 NATURAL JOIN intermediateamplifiers_v1 NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables_copy NATURAL JOIN adcreceivers_v1 NATURAL JOIN fecards NATURAL JOIN fem_mapping_2015_08_06 NATURAL JOIN fem_map_ranges_v1 NATURAL JOIN fem_crate_ranges NATURAL JOIN fem_slot_ranges_v1 ORDER BY crate_id, daq_slot, fem_channel;"
+		 "FROM channels_m24 NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN motherboard_mapping NATURAL JOIN coldcables_v2 NATURAL JOIN intermediateamplifiers_v1 NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables_copy2 NATURAL JOIN adcreceivers_v1 NATURAL JOIN fecards NATURAL JOIN fem_mapping_2015_08_06 NATURAL JOIN fem_map_ranges_v1 NATURAL JOIN fem_crate_ranges NATURAL JOIN fem_slot_ranges_v1 ORDER BY crate_id, daq_slot, fem_channel;"
+		 //"FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN motherboard_mapping NATURAL JOIN coldcables_v2 NATURAL JOIN intermediateamplifiers_v1 NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables_copy NATURAL JOIN adcreceivers_v1 NATURAL JOIN fecards NATURAL JOIN fem_mapping_2015_08_06 NATURAL JOIN fem_map_ranges_v1 NATURAL JOIN fem_crate_ranges NATURAL JOIN fem_slot_ranges_v1 ORDER BY crate_id, daq_slot, fem_channel;"
 	      );
 
     if ((!res) || (PQresultStatus(res) != PGRES_TUPLES_OK))
