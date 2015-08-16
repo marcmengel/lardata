@@ -23,6 +23,7 @@
 #include "cetlib/exception.h"
 //-----------------------------------------------
 util::LArProperties::LArProperties(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
+  : DBsettings() // reads information from DatabaseUtil service
    //fval(0),
  //fElectronlifetime(  ( )
 {
@@ -399,27 +400,32 @@ double util::LArProperties::ElossVar(double mom, double mass) const
 //---------------------------------------------------------------------------------
 void util::LArProperties::checkDBstatus() const
 {
-  bool fToughErrorTreatment= art::ServiceHandle<util::DatabaseUtil>()->ToughErrorTreatment();
-  bool fShouldConnect =  art::ServiceHandle<util::DatabaseUtil>()->ShouldConnect();
-  //Have not read from DB, should read and requested tough treatment
-    if(!fAlreadyReadFromDB && fToughErrorTreatment && fShouldConnect )
-      throw cet::exception("LArProperties") << " Extracting values from LArProperties before they "
-              << " have been read in from database. \n "
-              << "Set ToughErrorTreatment or ShouldConnect "
-              << " to false in databaseutil.fcl if you want "
-              << " to avoid this. \n";
-   //Have not read from DB, should read and requested soft treatment
-    else if(!fAlreadyReadFromDB && !fToughErrorTreatment && fShouldConnect )
-      mf::LogWarning("LArProperties") <<  "!!! Extracting values from LArProperties before they "
-              << " have been read in from the database. \n "
-              << " You may not be using the correct values of "
-              << " electron lifetime, temperature and electric field!"
-              << " You should not be initializing"
-              << " Database originating values in BeginJob()s or constructors."
-              << " You have been warned !!! \n ";
-
-    //In other cases, either already read from DB, or should not connect so it doesn't matter
-}
+  
+  // if we don't have any business with DBs, we have already wasted enough time
+  if (!DBsettings.ShouldConnect) return;
+    
+    // have we already done our duty?
+  if (fAlreadyReadFromDB) return;
+  
+  if(DBsettings.ToughErrorTreatment) {
+    // Have not read from DB: should read and requested tough treatment
+    throw cet::exception("LArProperties") << " Extracting values from LArProperties before they "
+            << " have been read in from database. \n "
+            << "Set ToughErrorTreatment or ShouldConnect "
+            << " to false in databaseutil.fcl if you want "
+            << " to avoid this. \n";
+  }
+  else {
+    // Have not read from DB, should read and requested soft treatment
+    mf::LogWarning("LArProperties") <<  "!!! Extracting values from LArProperties before they "
+            << " have been read in from the database. \n "
+            << " You may not be using the correct values of "
+            << " electron lifetime, temperature and electric field!"
+            << " You should not be initializing"
+            << " Database originating values in BeginJob()s or constructors."
+            << " You have been warned !!! \n ";
+  }
+} // util::LArProperties::checkDBstatus()
 
 
 //---------------------------------------------------------------------------------
@@ -555,6 +561,16 @@ std::map<std::string, std::map<double,double> > util::LArProperties::SurfaceRefl
   return ToReturn;
 }
 
+
+//---------------------------------------------------------------------------------
+util::LArProperties::DBsettingsClass::DBsettingsClass() {
+  auto const& DButil = *art::ServiceHandle<util::DatabaseUtil>();
+  ToughErrorTreatment= DButil.ToughErrorTreatment();
+  ShouldConnect = DButil.ShouldConnect();
+} // util::LArProperties::DBsettingsClass::DBsettingsClass()
+
+
+//---------------------------------------------------------------------------------
 
 
 namespace util{
