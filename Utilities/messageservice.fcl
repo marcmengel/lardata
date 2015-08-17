@@ -2,7 +2,7 @@ BEGIN_PROLOG
 
 standard_debug:
 {
- debugModules: "*"         # list individual module names here if you only want output from specific modules
+ debugModules: [ "*" ]     # list individual module names here if you only want output from specific modules
  destinations:
  {	
   debugmsg:
