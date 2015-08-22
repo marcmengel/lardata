@@ -40,6 +40,8 @@ namespace anab {
   public:
     
     CosmicTag();
+      
+  private:
 
     std::vector<float> endPt1; // x,y,z assuming t_0 = t_beam
     std::vector<float> endPt2; // x,y,z assuming t_0 = t_beam
@@ -59,14 +61,18 @@ namespace anab {
     CosmicTag(float cScore);
 
 
+    // Allow direct access to score/type
+    float&         CosmicScore() {return fCosmicScore;}
+    CosmicTagID_t& CosmicType()  {return fCosmicType;}
 
     friend std::ostream& operator << (std::ostream &o, CosmicTag const& a);
 
-    float getXInteraction(float oldX, float xDrift, int tSample,  
-			  float realTime, int tick ); 
+    float getXInteraction(float oldX, float xDrift, int tSample, float realTime, int tick ) const;
 
-    const float& CosmicScore() const;
-    const CosmicTagID_t& CosmicType() const;
+    const std::vector<float>& EndPoint1()   const;
+    const std::vector<float>& EndPoint2()   const;
+    const float&              CosmicScore() const;
+    const CosmicTagID_t&      CosmicType()  const;
     
 #endif
   };
@@ -75,7 +81,9 @@ namespace anab {
 
 #ifndef __GCCXML__
 
-inline const float& anab::CosmicTag::CosmicScore() const {return fCosmicScore; }
+inline const std::vector<float>& anab::CosmicTag::EndPoint1()   const {return endPt1;}
+inline const std::vector<float>& anab::CosmicTag::EndPoint2()   const {return endPt2;}
+inline const float& anab::CosmicTag::CosmicScore()              const {return fCosmicScore; }
 inline const anab::CosmicTagID_t& anab::CosmicTag::CosmicType() const {return fCosmicType; }
 
 
