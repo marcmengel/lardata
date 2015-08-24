@@ -64,9 +64,12 @@ namespace sim {
 
     double Charge(const size_t plane) const;
 
+    const double& dEdx() const{ return fdEdx;}
+
+    const TVector3& StartDir() const {return fStartDir;}
+
     const std::vector<double>& Charge() const { return fPlaneCharge; }
 
-    //    double dEdx(const size_t plane) const;
 
     //--- Setters ---//
     void Origin    ( simb::Origin_t o ) { fOrigin    = o;    }
