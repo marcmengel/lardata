@@ -67,7 +67,7 @@ namespace anab{
   }
  
   float CosmicTag::getXInteraction(float oldX, float xDrift, int tSample, 
-				   float realTime, int tick ) {
+				   float realTime, int tick ) const {
     // fix this
     int t =3*tSample;
     if( (tick > 0*tSample) && (tick < 1*tSample) ) t = 0*tSample;

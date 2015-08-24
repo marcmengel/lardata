@@ -16,6 +16,7 @@ util::TimeService::TimeService(fhicl::ParameterSet const& pset, art::ActivityReg
   fConfigName.at(kClockSpeedTPC)     = "ClockSpeedTPC";
   fConfigName.at(kClockSpeedOptical) = "ClockSpeedOptical";
   fConfigName.at(kClockSpeedTrigger) = "ClockSpeedTrigger";
+  fConfigName.at(kClockSpeedExternal)= "ClockSpeedExternal";
   fConfigName.at(kDefaultTrigTime)   = "DefaultTrigTime";
   fConfigName.at(kDefaultBeamTime)   = "DefaultBeamTime";
   
@@ -43,6 +44,7 @@ void util::TimeService::reconfigure(fhicl::ParameterSet const& pset)
   fConfigValue.at(kClockSpeedTPC)     = pset.get< double      >( fConfigName.at(kClockSpeedTPC).c_str()     );
   fConfigValue.at(kClockSpeedOptical) = pset.get< double      >( fConfigName.at(kClockSpeedOptical).c_str() );
   fConfigValue.at(kClockSpeedTrigger) = pset.get< double      >( fConfigName.at(kClockSpeedTrigger).c_str() );
+  fConfigValue.at(kClockSpeedExternal)= pset.get< double      >( fConfigName.at(kClockSpeedExternal).c_str());
   fConfigValue.at(kDefaultTrigTime)   = pset.get< double      >( fConfigName.at(kDefaultTrigTime).c_str()   );
   fConfigValue.at(kDefaultBeamTime)   = pset.get< double      >( fConfigName.at(kDefaultBeamTime).c_str()   );
 
@@ -65,6 +67,7 @@ void util::TimeService::ApplyParams()
   fTPCClock     = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedTPC     ) );
   fOpticalClock = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedOptical ) );
   fTriggerClock = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedTrigger ) );
+  fExternalClock= ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedExternal) );
 
 }
 
@@ -266,13 +269,14 @@ void util::TimeService::debugReport() const
   std::cout<<std::endl;
   
   std::cout 
-    << "Trigger  time @ " << fTriggerTime       << std::endl
-    << "BeamGate time @ " << fBeamGateTime      << std::endl
-    << "TrigOffsetTPC @ " << TriggerOffsetTPC() << std::endl
-    << "G4RefTime     @ " << fG4RefTime         << std::endl
-    << "TPC     Freq. @ " << fTPCClock.Frequency() << std::endl
-    << "Optical Freq. @ " << fOpticalClock.Frequency() << std::endl
-    << "Trigger Freq. @ " << fTriggerClock.Frequency() << std::endl
+    << "Trigger   time @ " << fTriggerTime       << std::endl
+    << "BeamGate  time @ " << fBeamGateTime      << std::endl
+    << "TrigOffsetTPC  @ " << TriggerOffsetTPC() << std::endl
+    << "G4RefTime      @ " << fG4RefTime         << std::endl
+    << "TPC      Freq. @ " << fTPCClock.Frequency() << std::endl
+    << "Optical  Freq. @ " << fOpticalClock.Frequency() << std::endl
+    << "Trigger  Freq. @ " << fTriggerClock.Frequency() << std::endl
+    << "External Freq. @ " << fExternalClock.Frequency() << std::endl
     << "TPC start tick [tdc]             : " << TPCTick2TDC(0) <<std::endl
     << "TPC start tick from trigger [us] : " << TPCTick2TrigTime(0) <<std::endl
     << "TPC start tick from beam    [us] : " << TPCTick2BeamTime(0) <<std::endl
