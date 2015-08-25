@@ -323,41 +323,30 @@ namespace util {
         << "postgresql BEGIN failed." << std::endl;
     }
     
-    // Andrzej's changed database
+    // Jason St. John's updated call to versioned database.
+    // getmap(data_taking_timestamp timestamp DEFAULT now(), 
+    //        swizzling_timestamp timestamp DEFAULT now()    )
+    // Returns rows of: crate, slot, fem_channel, larsoft_channel 
+    // Both arguments are optional, or can be passed their default of now(), or can be passed an explicit timestamp:
+    // Example: "SELECT getmap(TIMESTAMP '2015-08-01 12:34:56')"
     PQclear(res);
-    res = PQexec(conn,
-                 "SELECT crate_id, slot, wireplane, larsoft_channel, channel_id "
-                 " FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN coldcables NATURAL JOIN motherboard_mapping NATURAL JOIN intermediateamplifiers_copy NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables_copy NATURAL JOIN ADCreceivers_copy_new NATURAL JOIN crates NATURAL JOIN fecards"
-                 );
+    res = PQexec(conn, "SELECT get_map()");
 
     if ((!res) || (PQresultStatus(res) != PGRES_TUPLES_OK))
       {
 	mf::LogError("")<< "SELECT command did not return tuples properly";
-	PQclear(res);
-	PQfinish(conn);
-	throw art::Exception( art::errors::FileReadError )
-	  << "postgresql SELECT failed." << std::endl;
+        PQclear(res);
+        PQfinish(conn);
+        throw art::Exception( art::errors::FileReadError )
+          << "postgresql SELECT failed." << std::endl;
       }
 
     int num_records=PQntuples(res);
     for (int i=0;i<num_records;i++) {
-      int crate_id     = atoi(PQgetvalue(res, i, 0));
+      int crate_id     =  atoi(PQgetvalue(res, i, 0));
       int slot         = atoi(PQgetvalue(res, i, 1));
-      //auto const wPl   =      PQgetvalue(res, i, 2);
+      int boardChan   = atoi(PQgetvalue(res, i, 2));
       int larsoft_chan = atoi(PQgetvalue(res, i, 3));
-      int channel_id   = atoi(PQgetvalue(res, i, 4));
-      
-      int boardChan = channel_id%64;
-      
-      
-      if (crate_id==9 && slot==5) {
-	boardChan = (channel_id-32)%64;
-	//std::cout << " Hey there: " << channel_id << " -> " << boardChan << std::endl;
-      }
-      
-      // std::cout << "(" << i << ") Looking up in DB: [Crate, Card, Channel]: [" << crate_id << ", "
-      //           << slot << ", " << boardChan << "]";
-      // std::cout << "\tCh. Id (LArSoft): " << larsoft_chan  << std::endl;
 
       UBDaqID daq_id(crate_id,slot,boardChan);
       std::pair<UBDaqID, UBLArSoftCh_t> p(daq_id,larsoft_chan);
@@ -370,7 +359,7 @@ namespace util {
 			  << daq_id.crate<<", "<< daq_id.card<<", "<< daq_id.channel<<")=>"
 			  << fChannelMap.find(daq_id)->second;
       }
-      
+       
       fChannelMap.insert( p );
       fChannelReverseMap.insert( std::pair< UBLArSoftCh_t, UBDaqID >( larsoft_chan, daq_id ) );
     }
