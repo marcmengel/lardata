@@ -330,7 +330,7 @@ namespace util {
     // Both arguments are optional, or can be passed their default of now(), or can be passed an explicit timestamp:
     // Example: "SELECT getmap(TIMESTAMP '2015-08-01 12:34:56')"
     PQclear(res);
-    res = PQexec(conn, "SELECT get_map()");
+    res = PQexec(conn, "SELECT get_ map();" //);
 
     if ((!res) || (PQresultStatus(res) != PGRES_TUPLES_OK))
       {
