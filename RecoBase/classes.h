@@ -203,6 +203,7 @@ template class art::Assns<recob::SpacePoint, recob::Track,      void>;
 template class art::Assns<recob::SpacePoint, recob::Shower,     void>;
 template class art::Assns<recob::Track,      recob::Cluster,    void>;
 template class art::Assns<recob::Track,      recob::Hit,        void>;
+template class art::Assns<recob::Track,      recob::Hit,        size_t>;
 template class art::Assns<recob::Track,      recob::PFParticle, void>;
 template class art::Assns<recob::Track,      recob::SpacePoint, void>;
 template class art::Assns<recob::Track,      recob::Vertex,     void>;
