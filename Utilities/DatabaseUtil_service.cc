@@ -324,13 +324,13 @@ namespace util {
     }
     
     // Jason St. John's updated call to versioned database.
-    // getmap(data_taking_timestamp timestamp DEFAULT now(), 
+    // get_map(data_taking_timestamp timestamp DEFAULT now(), 
     //        swizzling_timestamp timestamp DEFAULT now()    )
     // Returns rows of: crate, slot, fem_channel, larsoft_channel 
     // Both arguments are optional, or can be passed their default of now(), or can be passed an explicit timestamp:
     // Example: "SELECT getmap(TIMESTAMP '2015-08-01 12:34:56')"
     PQclear(res);
-    res = PQexec(conn, "SELECT get_ map();" //);
+    res = PQexec(conn, "SELECT get_map();");
 
     if ((!res) || (PQresultStatus(res) != PGRES_TUPLES_OK))
       {
