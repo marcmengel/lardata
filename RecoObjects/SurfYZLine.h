@@ -1,16 +1,19 @@
 ////////////////////////////////////////////////////////////////////////
 ///
-/// \file   SurfYZPlane.h
+/// \file   SurfYZLine.h
 ///
-/// \brief  Planar surface parallel to x-axis.
+/// \brief  Line surface perpendicular to x-axis.
 ///
 /// \author H. Greenlee 
 ///
-/// This class represents a planar surface parallel to the global 
-/// x-axis, or equivalently, the normal vector is in the yz-plane.
+/// This class represents a line surface perpendicular to the global 
+/// x-axis, or equivalently, parallel to the yz-plane.
+///
+/// The surface parameters and local coordinate system of this
+/// surface are the same as SurfYZPlane.
 ///
 /// This surface is defined by four parameters, which are,
-/// (x0, y0, z0) - Local origin in yz-plane.
+/// (x0, y0, z0) - Local origin in global coordinates.
 /// phi - Rotation angle around x-axis.
 ///
 /// The local uvw coordinate system is related to the global xyz
@@ -26,35 +29,64 @@
 /// y = y0 + v*cos(phi) - w*sin(phi)
 /// z = z0 + v*sin(phi) + w*cos(phi)
 ///
-/// Track parameters on this type of surface are as follows.
+/// Track parameters on this type of surface are:
 ///
-/// 1. u
+/// 1. r
 /// 2. v
-/// 3. du/dw
-/// 4. dv/dw
+/// 3. phi
+/// 4. eta
 /// 5. 1/p (nonmagnetic) or q/p (magnetic)
+///
+/// r = Signed impoact parameter.  Absolute value of r is the perpendicular
+///     distance of the track to the v-axis at the point of closest 
+///     approach to v-axis.  Sign of r matches sign of L_v (v projection
+///     of angular momentum).
+/// v = V-coordinate of track at point of closest approach to v-axis.
+/// phi = Direction of track in u-w plane (phi = arctan(w/u)).
+/// eta = Pseudorapidity with respect to v-axis.
+/// q/p or 1/p = Inverse momentum.
+///
+/// In terms of these parameters, the point of closest approach to the
+/// v-axis is
+///
+/// u = -r sin(phi)
+/// v = v
+/// w = r cos(phi)
+///
+/// The unit direction vector is
+///
+/// du/ds = cos(phi) sech(eta)
+/// dv/ds = tanh(eta)
+/// dw/ds = sin(phi) sech(eta)
+///
+/// Inversely:
+///
+/// phi = atan(dw/du) = atan2(dw/ds, du/ds)
+/// eta = atanh(dv/ds) = asinh(dv/duw)
+/// r = w cos(phi) - u sin(phi)
+///
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#ifndef SURFYZPLANE_H
-#define SURFYZPLANE_H
+#ifndef SURFYZLINE_H
+#define SURFYZLINE_H
 
-#include "RecoObjects/SurfPlane.h"
+#include "RecoObjects/SurfLine.h"
 
 namespace trkf {
 
-  class SurfYZPlane : public SurfPlane
+  class SurfYZLine : public SurfLine
   {
   public:
 
     /// Default constructor.
-    SurfYZPlane();
+    SurfYZLine();
 
     /// Initializing constructor.
-    SurfYZPlane(double x0, double y0, double z0, double phi);
+    SurfYZLine(double x0, double y0, double z0, double phi);
 
     /// Destructor.
-    virtual ~SurfYZPlane();
+    virtual ~SurfYZLine();
 
     // Accessors.
     double x0() const {return fX0;}     ///< X origin.
@@ -74,6 +106,9 @@ namespace trkf {
     /// Transform local to global coordinates.
     virtual void toGlobal(const double uvw[3], double xyz[3]) const;
 
+    /// Calculate difference of two track parameter vectors.
+    virtual TrackVector getDiff(const TrackVector& vec1, const TrackVector& vec2) const;
+
     /// Get position of track.
     virtual void getPosition(const TrackVector& vec, double xyz[3]) const;
 
@@ -84,7 +119,7 @@ namespace trkf {
     /// Test whether two surfaces are parallel, within tolerance.
     virtual bool isParallel(const Surface& surf) const;
 
-    /// Find perpendicular forward distance to a parallel surface
+    /// Find perpendicular distance to a parallel surface
     virtual double distanceTo(const Surface& surf) const;
 
     /// Test two surfaces for equality, within tolerance.

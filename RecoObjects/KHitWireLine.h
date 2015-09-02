@@ -1,14 +1,14 @@
 ////////////////////////////////////////////////////////////////////////
 ///
-/// \file   KHitWireX.h
+/// \file   KHitWireLine.h
 ///
-/// \brief  Kalman filter wire-time measurement on a SurfWireX surface.
+/// \brief  Kalman filter wire-time measurement on a SurfWireLine surface.
 ///
 /// \author H. Greenlee 
 ///
 /// This class is a type of one-dimensional Kalman filter measurement
-/// reprsenting a single wire-time hit on a surface parallel to the
-/// x-axis (approprite for nonmagnetic LAr tpc).
+/// reprsenting a single wire-time hit on a line surface parallel to the
+/// a readout wire corresponding to a specified hit or drift time.
 ///
 /// This class derives from base class KHit<1>, which is the general
 /// one-dimensional measurement base class.  This class has a constructor
@@ -18,8 +18,8 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#ifndef KHITWIREX_H
-#define KHITWIREX_H
+#ifndef KHITWIRELINE_H
+#define KHITWIRELINE_H
 
 #include "RecoObjects/KHit.h"
 #include "RecoBase/Hit.h"
@@ -27,19 +27,19 @@
 
 namespace trkf {
 
-  class KHitWireX : public KHit<1>
+  class KHitWireLine : public KHit<1>
   {
   public:
 
     /// Constructor from Hit.
-    KHitWireX(const art::Ptr<recob::Hit>& hit,
-	      const std::shared_ptr<const Surface>& psurf);
+    KHitWireLine(const art::Ptr<recob::Hit>& hit,
+		 const std::shared_ptr<const Surface>& psurf);
 
     /// Constructor from wire id (mainly for testing).
-    KHitWireX(const geo::WireID& wireid, double x, double xerr);
+    KHitWireLine(const geo::WireID& wireid, double x, double xerr);
 
     /// Destructor.
-    virtual ~KHitWireX();
+    virtual ~KHitWireLine();
 
     // Accessors.
 

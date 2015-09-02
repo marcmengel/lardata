@@ -130,6 +130,7 @@ template class std::pair< art::Ptr<recob::Shower>,       art::Ptr<recob::Cluster
 template class std::pair< art::Ptr<recob::Shower>,       art::Ptr<recob::Hit>        >;
 template class std::pair< art::Ptr<recob::Shower>,       art::Ptr<recob::PFParticle> >;
 template class std::pair< art::Ptr<recob::Shower>,       art::Ptr<recob::SpacePoint> >;
+template class std::pair< art::Ptr<recob::Shower>,       art::Ptr<recob::Track>      >;
 template class std::pair< art::Ptr<recob::Shower>,       art::Ptr<recob::Vertex>     >;
 template class std::pair< art::Ptr<recob::SpacePoint>,   art::Ptr<recob::Hit>        >;
 template class std::pair< art::Ptr<recob::SpacePoint>,   art::Ptr<recob::Cluster>    >;
@@ -193,6 +194,7 @@ template class art::Assns<recob::Shower,     recob::Cluster,    void>;
 template class art::Assns<recob::Shower,     recob::Hit,        void>;
 template class art::Assns<recob::Shower,     recob::PFParticle, void>;
 template class art::Assns<recob::Shower,     recob::SpacePoint, void>;
+template class art::Assns<recob::Shower,     recob::Track,      void>;
 template class art::Assns<recob::Shower,     recob::Vertex,     void>;
 template class art::Assns<recob::SpacePoint, recob::Hit,        void>;
 template class art::Assns<recob::SpacePoint, recob::Cluster,    void>;
@@ -257,6 +259,7 @@ template class art::Wrapper< art::Assns<recob::Shower,     recob::Cluster,    vo
 template class art::Wrapper< art::Assns<recob::Shower,     recob::Hit,        void> >;
 template class art::Wrapper< art::Assns<recob::Shower,     recob::PFParticle, void> >;
 template class art::Wrapper< art::Assns<recob::Shower,     recob::SpacePoint, void> >;
+template class art::Wrapper< art::Assns<recob::Shower,     recob::Track,      void> >;
 template class art::Wrapper< art::Assns<recob::Shower,     recob::Vertex,     void> >;
 template class art::Wrapper< art::Assns<recob::SpacePoint, recob::Hit,        void> >;
 template class art::Wrapper< art::Assns<recob::SpacePoint, recob::Cluster,    void> >;

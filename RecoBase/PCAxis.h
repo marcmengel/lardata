@@ -1,9 +1,12 @@
 ////////////////////////////////////////////////////////////////////////////
 // \version $Id: PCAxis.h,v 1.0 2010/02/15 20:32:46 usher Exp $
 //
+// \file  PCAxis.h
 // \brief Definition of a Principal Component Axis object for LArSoft
 //
 // \author usher@slac.stanford.edu
+//
+// \see   PCAxis.cxx
 //
 ////////////////////////////////////////////////////////////////////////////
 
@@ -18,43 +21,46 @@
 
 namespace recob
 {
+    //
+    // @brief PCAxis is an object containting the results of a Principal Components
+    //        Analysis of a group of space points.
 
-class PCAxis
-{
-public:
+    class PCAxis
+    {
+    public:
     
-    typedef std::vector<std::vector<double> > EigenVectors;
+        typedef std::vector<std::vector<double> > EigenVectors;
     
-    PCAxis();
+        PCAxis();
     
-private:
+    private:
     
-    bool         fSvdOK;            /// SVD Decomposition was successful
-    int          fNumHitsUsed;      /// Number of hits in the decomposition
-    double       fEigenValues[3];   /// Eigen values from SVD decomposition
-    EigenVectors fEigenVectors;     /// The three principle axes
-    double       fAvePosition[3];   /// Average position of hits fed to PCA
-    double       fAveHitDoca;       /// Average doca of hits used in PCA
-    size_t       fID;               ///< axis ID
+        bool         fSvdOK;            ///< SVD Decomposition was successful
+        int          fNumHitsUsed;      ///< Number of hits in the decomposition
+        double       fEigenValues[3];   ///< Eigen values from SVD decomposition
+        EigenVectors fEigenVectors;     ///< The three principle axes
+        double       fAvePosition[3];   ///< Average position of hits fed to PCA
+        double       fAveHitDoca;       ///< Average doca of hits used in PCA
+        size_t       fID;               ///< axis ID
     
 #ifndef __GCCXML__
-public:
+    public:
     
-    PCAxis(bool ok, int nHits, const double* eigenValues, const EigenVectors& eigenVecs, const double* avePos, const double aveHitDoca = 9999., size_t id=0);
+        PCAxis(bool ok, int nHits, const double* eigenValues, const EigenVectors& eigenVecs, const double* avePos, const double aveHitDoca = 9999., size_t id=0);
     
-    bool                getSvdOK()        const;
-    int                 getNumHitsUsed()  const;
-    const double*       getEigenValues()  const;
-    const EigenVectors& getEigenVectors() const;
-    const double*       getAvePosition()  const;
-    const double        getAveHitDoca()   const;
-    size_t              getID()           const;
+        bool                getSvdOK()        const;
+        int                 getNumHitsUsed()  const;
+        const double*       getEigenValues()  const;
+        const EigenVectors& getEigenVectors() const;
+        const double*       getAvePosition()  const;
+        const double        getAveHitDoca()   const;
+        size_t              getID()           const;
     
-    friend std::ostream&  operator << (std::ostream & o, const PCAxis& a);
-    friend bool operator < (const PCAxis& a, const PCAxis& b);
+        friend std::ostream&  operator << (std::ostream & o, const PCAxis& a);
+        friend bool operator < (const PCAxis& a, const PCAxis& b);
     
 #endif
-};
+    };
     
 }
 

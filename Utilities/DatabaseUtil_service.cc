@@ -350,6 +350,33 @@ namespace util {
 
       UBDaqID daq_id(crate_id,slot,boardChan);
       std::pair<UBDaqID, UBLArSoftCh_t> p(daq_id,larsoft_chan);
+    
+    // // Jason St. John's updated call to connections db tables, 2015.07.23
+    // PQclear(res);
+    // res = PQexec(conn,
+    //              "SELECT crate_id, daq_slot, fem_channel, wireplane, larsoft_channel "
+    //              "FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN motherboard_mapping NATURAL JOIN coldcables_v1 NATURAL JOIN intermediateamplifiers_v1 NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables_copy NATURAL JOIN adcreceivers_v1 NATURAL JOIN fecards NATURAL JOIN fem_mapping_2015_08_06 NATURAL JOIN fem_map_ranges_v1 NATURAL JOIN fem_crate_ranges NATURAL JOIN fem_slot_ranges_v1;"
+    //              );
+
+    // if ((!res) || (PQresultStatus(res) != PGRES_TUPLES_OK))
+    //   {
+    // 	mf::LogError("")<< "SELECT command did not return tuples properly";
+    //     PQclear(res);
+    //     PQfinish(conn);
+    //     throw art::Exception( art::errors::FileReadError )
+    //       << "postgresql SELECT failed." << std::endl;
+    //   }
+
+    // int num_records=PQntuples(res);
+    // for (int i=0;i<num_records;i++) {
+    //   int crate_id     = atoi(PQgetvalue(res, i, 0));
+    //   int slot         = atoi(PQgetvalue(res, i, 1));
+    //   int boardChan   = atoi(PQgetvalue(res, i, 2));
+    //   //auto const wPl   =      PQgetvalue(res, i, 3);
+    //   int larsoft_chan = atoi(PQgetvalue(res, i, 4));
+
+    //   UBDaqID daq_id(crate_id,slot,boardChan);
+    //   std::pair<UBDaqID, UBLArSoftCh_t> p(daq_id,larsoft_chan);
       
       if ( fChannelMap.find(daq_id) != fChannelMap.end() ){
 	std::cout << __PRETTY_FUNCTION__ << ": ";

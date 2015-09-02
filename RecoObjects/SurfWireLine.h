@@ -1,14 +1,14 @@
 ////////////////////////////////////////////////////////////////////////
 ///
-/// \file   SurfWireX.h
+/// \file   SurfWireLine.h
 ///
-/// \brief  Planar surface defined by wire id and x-axis.
+/// \brief  Linear surface defined by wire id and x coordinate.
 ///
 /// \author H. Greenlee 
 ///
-/// This class derives from SurfYZPlane.  This class does not add any
+/// This class derives from SurfYZLine.  This class does not add any
 /// new members, but has a constructor that allows construction from
-/// a wire id.
+/// a wire id and x coordinate.
 ///
 ////////////////////////////////////////////////////////////////////////
 
@@ -16,19 +16,19 @@
 #define SURFWIREX_H
 
 #include "SimpleTypesAndConstants/geo_types.h"
-#include "RecoObjects/SurfYZPlane.h"
+#include "RecoObjects/SurfYZLine.h"
 
 namespace trkf {
 
-  class SurfWireX : public SurfYZPlane
+  class SurfWireLine : public SurfYZLine
   {
   public:
 
     /// Constructor.
-    SurfWireX(const geo::WireID& wireid);
+    SurfWireLine(const geo::WireID& wireid, double x);
 
     /// Destructor.
-    virtual ~SurfWireX();
+    virtual ~SurfWireLine();
   };
 }
 

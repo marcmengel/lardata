@@ -1,14 +1,14 @@
 ///////////////////////////////////////////////////////////////////////
 ///
-/// \file   SurfWireX.cxx
+/// \file   SurfWireLine.cxx
 ///
-/// \brief  Planar surface defined by wire id and x-axis.
+/// \brief  Linear surface defined by wire id and x coordinate.
 ///
 /// \author H. Greenlee
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "RecoObjects/SurfWireX.h"
+#include "RecoObjects/SurfWireLine.h"
 #include "Geometry/Geometry.h"
 #include "Geometry/WireGeo.h"
 #include "TMath.h"
@@ -20,8 +20,9 @@ namespace trkf {
   /// Arguments:
   ///
   /// wireid - Wire id.
+  /// x      - X coordinate.
   ///
-  SurfWireX::SurfWireX(const geo::WireID& wireid)
+  SurfWireLine::SurfWireLine(const geo::WireID& wireid, double x)
   {
     // Get geometry service.
 
@@ -37,14 +38,14 @@ namespace trkf {
     double xyz[3] = {0.};
     wgeom.GetCenter(xyz);
     double phi = TMath::PiOver2() - wgeom.ThetaZ();
-	  
+
     // Update base class.
 	  
-    *static_cast<SurfYZPlane*>(this) = SurfYZPlane(0., xyz[1], xyz[2], phi);
+    *static_cast<SurfYZLine*>(this) = SurfYZLine(x, xyz[1], xyz[2], phi);
   }
 
   /// Destructor.
-  SurfWireX::~SurfWireX()
+  SurfWireLine::~SurfWireLine()
   {}
 
 } // end namespace trkf

@@ -12,6 +12,7 @@
 #include <iomanip>
 #include "RecoObjects/KGTrack.h"
 #include "RecoObjects/KHitWireX.h"
+#include "RecoObjects/KHitWireLine.h"
 #include "RecoObjects/SurfXYZPlane.h"
 #include "RecoObjects/PropXYZPlane.h"
 #include "Geometry/Geometry.h"
@@ -82,6 +83,8 @@ namespace trkf {
 
   /// Add track.
   void KGTrack::addTrack(const KHitTrack& trh) {
+    if(!trh.isValid())
+      throw cet::exception("KGTrack") << "Adding invalid track to KGTrack.\n";
     fTrackMap.insert(std::make_pair(trh.getPath() + trh.getHit()->getPredDistance(), trh));
   }
 
@@ -204,26 +207,27 @@ namespace trkf {
 	cov.back() = covar;
 
       // Get charge.
-      // Only implemented for KHitWireX type measurements.
+      // Only implemented for KHitWireX and KHitWireLine type measurements.
 
       for(int iview=0; iview<nview; ++iview)
 	dqdx[iview].push_back(0.);
       const std::shared_ptr<const KHitBase>& phit = trh.getHit();
       if(phit.get() != 0) {
-	const KHitWireX* phitx = dynamic_cast<const KHitWireX*>(&*phit);
-	if(phitx != 0) {
-	  const art::Ptr<recob::Hit>& parthit = phitx->getHit();
-	  if(parthit.get() != 0) {
-	    const recob::Hit& arthit = *parthit;
-	    geo::View_t view = arthit.View();
-	    double pitch = geom->WirePitch(view);
-	    double charge = arthit.PeakAmplitude();
-	    double dudw = trh.getVector()[2];
-	    double dvdw = trh.getVector()[3];
-	    double dist = pitch * std::sqrt(1. + dudw * dudw + dvdw * dvdw);
-	    double qdist = charge / dist;
-	    dqdx.at(view).back() = qdist;
-	  }
+	art::Ptr<recob::Hit> parthit;
+	if(const KHitWireX* phitx = dynamic_cast<const KHitWireX*>(&*phit))
+	  parthit = phitx->getHit();
+	else if(const KHitWireLine* phitl = dynamic_cast<const KHitWireLine*>(&*phit))
+	  parthit = phitl->getHit();
+	if(parthit.get() != 0) {
+	  const recob::Hit& arthit = *parthit;
+	  geo::View_t view = arthit.View();
+	  double pitch = geom->WirePitch(view);
+	  double charge = arthit.PeakAmplitude();
+	  double dudw = trh.getVector()[2];
+	  double dvdw = trh.getVector()[3];
+	  double dist = pitch * std::sqrt(1. + dudw * dudw + dvdw * dvdw);
+	  double qdist = charge / dist;
+	  dqdx.at(view).back() = qdist;
 	}
       }
     }
@@ -253,8 +257,12 @@ namespace trkf {
       // Extrack Hit from track.
 
       const std::shared_ptr<const KHitBase>& hit = track.getHit();
-      const KHitWireX* phit = dynamic_cast<const KHitWireX*>(&*hit);
-      if(phit != 0) {
+      if(const KHitWireX* phit = dynamic_cast<const KHitWireX*>(&*hit)) {
+	const art::Ptr<recob::Hit> prhit = phit->getHit();
+	if(!prhit.isNull())
+	  hits.push_back(prhit);
+      }
+      else if(const KHitWireLine* phit = dynamic_cast<const KHitWireLine*>(&*hit)) {
 	const art::Ptr<recob::Hit> prhit = phit->getHit();
 	if(!prhit.isNull())
 	  hits.push_back(prhit);
