@@ -341,11 +341,11 @@ namespace util {
           << "postgresql SELECT failed." << std::endl;
       } 
 
-    int num_records=PQntuples(res);
+    int num_records=PQntuples(res); //One record per channel, ideally.
 
     for (int i=0;i<num_records;i++) {
-      std::string tup = PQgetvalue(res, i, 0);
-      tup = tup.substr(1,tup.length()-2);
+      std::string tup = PQgetvalue(res, i, 0); //(crate,slot,FEMch,larsoft_chan) format
+      tup = tup.substr(1,tup.length()-2);  // Strip initial & final parentheses.
       std::vector<std::string> fields;
       split(tup, ',', fields);
       
