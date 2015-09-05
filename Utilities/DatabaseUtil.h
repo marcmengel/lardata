@@ -49,48 +49,49 @@ namespace util{
   typedef std::map< UBLArSoftCh_t, UBDaqID > UBChannelReverseMap_t;
 
 
-    class DatabaseUtil {
-    public:
-      DatabaseUtil(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
-      ~DatabaseUtil();
+  class DatabaseUtil {
+  public:
+    DatabaseUtil(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
+    ~DatabaseUtil();
 
-      void   reconfigure(fhicl::ParameterSet const& pset);
+    void   reconfigure(fhicl::ParameterSet const& pset);
       
-      int GetLifetimeFromDB(int run,double &lftime_real);
-      int GetTriggerOffsetFromDB(int run,double &T0_real);
-      int GetTemperatureFromDB(int run,double &temp_real);
-      int GetEfieldValuesFromDB(int run,std::vector<double> &efield);
-      int GetPOTFromDB(int run,long double &POT);
-      const UBChannelMap_t& GetUBChannelMap( bool get_from_db=false );
-      const UBChannelReverseMap_t& GetUBChannelReverseMap( bool get_from_db=false );
+    int GetLifetimeFromDB(int run,double &lftime_real);
+    int GetTriggerOffsetFromDB(int run,double &T0_real);
+    int GetTemperatureFromDB(int run,double &temp_real);
+    int GetEfieldValuesFromDB(int run,std::vector<double> &efield);
+    int GetPOTFromDB(int run,long double &POT);
+    const UBChannelMap_t& GetUBChannelMap( bool get_from_db=false );
+    const UBChannelReverseMap_t& GetUBChannelReverseMap( bool get_from_db=false );
 
-      int SelectFieldByName(std::vector<std::string> &value,const char * field,const char * condition,const char * table);
-      
-      bool ToughErrorTreatment() const { return fToughErrorTreatment; }
-      bool ShouldConnect() const { return fShouldConnect; }
-      
-    private:
-      
-      int SelectSingleFieldByQuery(std::vector<std::string> &value,const char * query);
-      int Connect(int conn_wait=0);
-      int DisConnect();
-      char connection_str[200];
-      
-      PGconn *conn;       // database connection handle
-      std::string fDBHostName;
-      std::string fDBName;
-      std::string fDBUser;
-      std::string fTableName;
-      int fPort;
-      std::string fPassword;
-      bool fToughErrorTreatment;
-      bool fShouldConnect;
-      
-      UBChannelMap_t        fChannelMap;
-      UBChannelReverseMap_t fChannelReverseMap;
-      void LoadUBChannelMap( bool get_from_db=false );
+    int SelectFieldByName(std::vector<std::string> &value,const char * field,const char * condition,const char * table);
+    std::vector<std::string> & split(const std::string &s, char delim, std::vector<std::string> &elems);
 
-    }; // class DatabaseUtil
+    bool ToughErrorTreatment() const { return fToughErrorTreatment; }
+    bool ShouldConnect() const { return fShouldConnect; }
+      
+  private:
+      
+    int SelectSingleFieldByQuery(std::vector<std::string> &value,const char * query);
+    int Connect(int conn_wait=0);
+    int DisConnect();
+    char connection_str[200];
+      
+    PGconn *conn;       // database connection handle
+    std::string fDBHostName;
+    std::string fDBName;
+    std::string fDBUser;
+    std::string fTableName;
+    int fPort;
+    std::string fPassword;
+    bool fToughErrorTreatment;
+    bool fShouldConnect;
+      
+    UBChannelMap_t        fChannelMap;
+    UBChannelReverseMap_t fChannelReverseMap;
+    void LoadUBChannelMap( bool get_from_db=false );
+
+  }; // class DatabaseUtil
 } //namespace util
 
 DECLARE_ART_SERVICE(util::DatabaseUtil, LEGACY)

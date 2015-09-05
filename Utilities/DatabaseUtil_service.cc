@@ -334,50 +334,29 @@ namespace util {
 
     if ((!res) || (PQresultStatus(res) != PGRES_TUPLES_OK))
       {
-	mf::LogError("")<< "SELECT command did not return tuples properly";
+	mf::LogError("")<< "SELECT command did not return tuples properly. \n" << PQresultErrorMessage(res);
         PQclear(res);
         PQfinish(conn);
         throw art::Exception( art::errors::FileReadError )
           << "postgresql SELECT failed." << std::endl;
-      }
+      } 
 
     int num_records=PQntuples(res);
-    for (int i=0;i<num_records;i++) {
-      int crate_id     =  atoi(PQgetvalue(res, i, 0));
-      int slot         = atoi(PQgetvalue(res, i, 1));
-      int boardChan   = atoi(PQgetvalue(res, i, 2));
-      int larsoft_chan = atoi(PQgetvalue(res, i, 3));
 
+    for (int i=0;i<num_records;i++) {
+      std::string tup = PQgetvalue(res, i, 0);
+      tup = tup.substr(1,tup.length()-2);
+      std::vector<std::string> fields;
+      split(tup, ',', fields);
+      
+      int crate_id     = atoi( fields[0].c_str() );
+      int slot         = atoi( fields[1].c_str() );
+      int boardChan    = atoi( fields[2].c_str() );
+      int larsoft_chan = atoi( fields[3].c_str() );
+      
       UBDaqID daq_id(crate_id,slot,boardChan);
       std::pair<UBDaqID, UBLArSoftCh_t> p(daq_id,larsoft_chan);
-    
-    // // Jason St. John's updated call to connections db tables, 2015.07.23
-    // PQclear(res);
-    // res = PQexec(conn,
-    //              "SELECT crate_id, daq_slot, fem_channel, wireplane, larsoft_channel "
-    //              "FROM channels NATURAL JOIN asics NATURAL JOIN motherboards NATURAL JOIN motherboard_mapping NATURAL JOIN coldcables_v1 NATURAL JOIN intermediateamplifiers_v1 NATURAL JOIN servicecables NATURAL JOIN servicecards NATURAL JOIN warmcables_copy NATURAL JOIN adcreceivers_v1 NATURAL JOIN fecards NATURAL JOIN fem_mapping_2015_08_06 NATURAL JOIN fem_map_ranges_v1 NATURAL JOIN fem_crate_ranges NATURAL JOIN fem_slot_ranges_v1;"
-    //              );
 
-    // if ((!res) || (PQresultStatus(res) != PGRES_TUPLES_OK))
-    //   {
-    // 	mf::LogError("")<< "SELECT command did not return tuples properly";
-    //     PQclear(res);
-    //     PQfinish(conn);
-    //     throw art::Exception( art::errors::FileReadError )
-    //       << "postgresql SELECT failed." << std::endl;
-    //   }
-
-    // int num_records=PQntuples(res);
-    // for (int i=0;i<num_records;i++) {
-    //   int crate_id     = atoi(PQgetvalue(res, i, 0));
-    //   int slot         = atoi(PQgetvalue(res, i, 1));
-    //   int boardChan   = atoi(PQgetvalue(res, i, 2));
-    //   //auto const wPl   =      PQgetvalue(res, i, 3);
-    //   int larsoft_chan = atoi(PQgetvalue(res, i, 4));
-
-    //   UBDaqID daq_id(crate_id,slot,boardChan);
-    //   std::pair<UBDaqID, UBLArSoftCh_t> p(daq_id,larsoft_chan);
-      
       if ( fChannelMap.find(daq_id) != fChannelMap.end() ){
 	std::cout << __PRETTY_FUNCTION__ << ": ";
         std::cout << "Multiple entries!" << std::endl;
@@ -387,10 +366,10 @@ namespace util {
 			  << fChannelMap.find(daq_id)->second;
       }
        
+      
       fChannelMap.insert( p );
       fChannelReverseMap.insert( std::pair< UBLArSoftCh_t, UBDaqID >( larsoft_chan, daq_id ) );
     }
-
   }// end of LoadUBChannelMap
 
   const UBChannelMap_t& DatabaseUtil::GetUBChannelMap( bool get_from_db ) {
@@ -402,8 +381,20 @@ namespace util {
     LoadUBChannelMap( get_from_db );
     return fChannelReverseMap;
   }
-  
+
+  std::vector<std::string> & DatabaseUtil::split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+      elems.push_back(item);
+    }
+    return elems;
+  }
+ 
+ 
 }
+
+
 
 namespace util{
  
