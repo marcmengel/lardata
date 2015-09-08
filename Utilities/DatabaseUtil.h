@@ -61,8 +61,8 @@ namespace util{
     int GetTemperatureFromDB(int run,double &temp_real);
     int GetEfieldValuesFromDB(int run,std::vector<double> &efield);
     int GetPOTFromDB(int run,long double &POT);
-    const UBChannelMap_t& GetUBChannelMap( bool get_from_db=false );
-    const UBChannelReverseMap_t& GetUBChannelReverseMap( bool get_from_db=false );
+    UBChannelMap_t GetUBChannelMap( bool get_from_db=false );
+    UBChannelReverseMap_t GetUBChannelReverseMap( bool get_from_db=false );
 
     int SelectFieldByName(std::vector<std::string> &value,const char * field,const char * condition,const char * table);
     std::vector<std::string> & split(const std::string &s, char delim, std::vector<std::string> &elems);
