@@ -86,10 +86,10 @@ namespace util{
     std::string fPassword;
     bool fToughErrorTreatment;
     bool fShouldConnect;
-      
+
     UBChannelMap_t        fChannelMap;
     UBChannelReverseMap_t fChannelReverseMap;
-    void LoadUBChannelMap( bool get_from_db=false );
+    void LoadUBChannelMap(int data_taking_timestamp = -1 , int  swizzling_timestamp = -1 );
 
   }; // class DatabaseUtil
 } //namespace util

@@ -293,22 +293,16 @@ return -1;
 
 namespace util {
 
-
-  void DatabaseUtil::LoadUBChannelMap( bool get_from_db ) {
-
-    if ( get_from_db==false && fChannelMap.size()>0 ) {
-      // used prevously grabbed data to avoid repeated call to database.
-      return;
-    }
+void DatabaseUtil::LoadUBChannelMap( int data_taking_timestamp, int  swizzling_timestamp) {
 
     if ( conn==NULL )
       Connect( 0 );
 
     if(PQstatus(conn)!=CONNECTION_OK) {
-      mf::LogError("") << __PRETTY_FUNCTION__ << ": Couldn't open connection to postgresql interface";
+      mf::LogError("") << __PRETTY_FUNCTION__ << ": Couldn't open connection to postgresql interface"  << PQdb(conn) <<":"<<PQhost(conn);
       PQfinish(conn);
       throw art::Exception( art::errors::FileReadError )
-        << "Failed to get channel map from DB." << std::endl;
+        << "Failed to get channel map from DB."<< std::endl;
     }
     
     fChannelMap.clear();
@@ -324,11 +318,11 @@ namespace util {
     }
     
     // Jason St. John's updated call to versioned database.
-    // get_map_double_sec (data_taking_timestamp timestamp DEFAULT now() , 
-    //        swizzling_timestamp timestamp DEFAULT now()    )
+    // get_map_double_sec (data_taking_timestamp int DEFAULT now() , 
+    //                     swizzling_timestamp   int DEFAULT now() )
     // Returns rows of: crate, slot, fem_channel, larsoft_channel 
     // Both arguments are optional, or can be passed their default of now(), or can be passed an explicit timestamp:
-    // Example: "SELECT getmap(TIMESTAMP '2015-08-01 12:34:56')"
+    // Example: "SELECT get_map_double_sec(1438430400);"
     PQclear(res);
     res = PQexec(conn, "SELECT get_map_double_sec()"); //hard-coded time for development dolphins
 
@@ -372,13 +366,13 @@ namespace util {
     }
   }// end of LoadUBChannelMap
 
-  UBChannelMap_t DatabaseUtil::GetUBChannelMap( bool get_from_db ) {
-    LoadUBChannelMap( get_from_db );
+  UBChannelMap_t DatabaseUtil::GetUBChannelMap(bool get_from_db ) {
+    LoadUBChannelMap();
     return fChannelMap;
   }
 
   UBChannelReverseMap_t DatabaseUtil::GetUBChannelReverseMap( bool get_from_db ) {
-    LoadUBChannelMap( get_from_db );
+    LoadUBChannelMap();
     return fChannelReverseMap;
   }
 
