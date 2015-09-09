@@ -39,6 +39,7 @@ namespace sim {
     
     fDaughterTrackID.clear();
     fPlaneCharge.clear();
+    fdQdx.clear();
   }
 
   //----------------------------------------------------
@@ -54,6 +55,21 @@ namespace sim {
       
     return fPlaneCharge[plane];
   }
+
+  //----------------------------------------------------
+  double MCShower::dQdx(const size_t plane) const
+  //----------------------------------------------------
+  {
+    if(plane > fdQdx.size()) {
+
+      std::cerr<<"\033[93m"<<"No charge stored for plane: "<<plane<<"\033[00m"<<std::endl;
+      return -1;
+
+    }
+      
+    return fdQdx[plane];
+  }
+
 
 }
 

@@ -63,12 +63,14 @@ namespace sim {
     const std::vector<unsigned int>&  DaughterTrackID() const { return fDaughterTrackID; }
 
     double Charge(const size_t plane) const;
+    double dQdx(const size_t plane) const;
+
+    const std::vector<double>& Charge() const { return fPlaneCharge; } 
+    const std::vector<double>& dQdx() const { return fdQdx; }
+
 
     const double& dEdx() const{ return fdEdx;}
-
     const TVector3& StartDir() const {return fStartDir;}
-
-    const std::vector<double>& Charge() const { return fPlaneCharge; }
 
 
     //--- Setters ---//
@@ -98,7 +100,8 @@ namespace sim {
     void DaughterTrackID ( const std::vector<unsigned int>& id_v ) { fDaughterTrackID = id_v; }
 
     void Charge (const std::vector<double>& q) { fPlaneCharge = q; }
-    
+
+    void dQdx (const std::vector<double>& dqdx) { fdQdx = dqdx; }    
     void dEdx    (const double& dedx) {fdEdx = dedx;}
     void dEdxRAD (const double& dedx) {fdEdx_radial = dedx;}
 
@@ -142,6 +145,7 @@ namespace sim {
 
     //---- Charge per plane ----//
     std::vector<double> fPlaneCharge; ///< Charge deposit per plane
+    std::vector<double> fdQdx; ///< Charge deposit per plane
   };
 
 }
