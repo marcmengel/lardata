@@ -61,8 +61,8 @@ namespace util{
     int GetTemperatureFromDB(int run,double &temp_real);
     int GetEfieldValuesFromDB(int run,std::vector<double> &efield);
     int GetPOTFromDB(int run,long double &POT);
-    UBChannelMap_t GetUBChannelMap( bool get_from_db=false );
-    UBChannelReverseMap_t GetUBChannelReverseMap( bool get_from_db=false );
+    UBChannelMap_t GetUBChannelMap(int data_taking_timestamp = -1 , int  swizzling_timestamp = -1 );
+    UBChannelReverseMap_t GetUBChannelReverseMap(int data_taking_timestamp = -1 , int  swizzling_timestamp = -1 );
 
     int SelectFieldByName(std::vector<std::string> &value,const char * field,const char * condition,const char * table);
     std::vector<std::string> & split(const std::string &s, char delim, std::vector<std::string> &elems);
@@ -90,7 +90,7 @@ namespace util{
     UBChannelMap_t        fChannelMap;
     UBChannelReverseMap_t fChannelReverseMap;
     void LoadUBChannelMap(int data_taking_timestamp = -1 , int  swizzling_timestamp = -1 );
-
+    
   }; // class DatabaseUtil
 } //namespace util
 
