@@ -15,9 +15,21 @@
 #ifndef MCSHOWER_H
 #define MCSHOWER_H
 
-#include "MCStep.h"
-#include <TVector3.h>
+// LArSoft libraries
+#include "MCBase/MCStep.h"
+
+// Supporting tools
 #include "SimulationBase/MCTruth.h"
+
+// ROOT libraries
+#include <TVector3.h>
+
+// Standard C/C++ libraries
+#include <string>
+#include <vector>
+#ifndef __GCCXML__
+#  include <utility> // std::move()
+#endif // __GCCXML__
 
 namespace sim {
 
@@ -25,16 +37,16 @@ namespace sim {
     
   public:
 
-    /// Default constructor
-    MCShower() {Clear();}
-
-    /// Default destructor
-    virtual ~MCShower(){}
-
-    /// Clear method
-    virtual void Clear();
+    /// Default constructor; clears the local data
+    MCShower() { ClearData(); }
 
 #ifndef __GCCXML__
+
+    /// Clear method
+    virtual void Clear() { ClearData(); }
+
+    /// Default destructor
+    virtual ~MCShower() = default;
 
     //--- Getters ---//
 
@@ -62,16 +74,15 @@ namespace sim {
     
     const std::vector<unsigned int>&  DaughterTrackID() const { return fDaughterTrackID; }
 
-    double Charge(const size_t plane) const;
-    double dQdx(const size_t plane) const;
+    double Charge(size_t plane) const;
+    double dQdx(size_t plane) const;
 
     const std::vector<double>& Charge() const { return fPlaneCharge; } 
     const std::vector<double>& dQdx() const { return fdQdx; }
 
 
-    const double& dEdx() const{ return fdEdx;}
+    double dEdx() const { return fdEdx; }
     const TVector3& StartDir() const {return fStartDir;}
-
 
     //--- Setters ---//
     void Origin    ( simb::Origin_t o ) { fOrigin    = o;    }
@@ -99,56 +110,81 @@ namespace sim {
 
     void DaughterTrackID ( const std::vector<unsigned int>& id_v ) { fDaughterTrackID = id_v; }
 
+    /// Copies the specified charge vector (one entry per plane) into this object
     void Charge (const std::vector<double>& q) { fPlaneCharge = q; }
+    /// Moves the specified charge vector (one entry per plane) into this object
+    void Charge (std::vector<double>&& q) { fPlaneCharge = std::move(q); }
 
-    void dQdx (const std::vector<double>& dqdx) { fdQdx = dqdx; }    
-    void dEdx    (const double& dedx) {fdEdx = dedx;}
-    void dEdxRAD (const double& dedx) {fdEdx_radial = dedx;}
+    /// Copies the specified dQ/dx vector (one entry per plane) into this object
+    void dQdx (const std::vector<double>& dqdx) { fdQdx = dqdx; }
+    /// Moves the specified dQ/dx vector (one entry per plane) into this object
+    void dQdx (std::vector<double>&& dqdx) { fdQdx = std::move(dqdx); }
+    
+    void dEdx    (double dedx) {fdEdx = dedx;}
+    void dEdxRAD (double dedx) {fdEdx_radial = dedx;}
+    
 
-#endif
+    
+#endif // __GCCXML__
 
   protected:
 
-    //---- Origin info ----//
+    /// @{
+    /// @name Origin info
     simb::Origin_t fOrigin;    ///< Origin information
+    /// @}
 
-    //---- Shower particle info ----//
+    /// @{
+    /// @name Shower particle info
     int          fPDGCode;   ///< Shower particle PDG code
     unsigned int fTrackID;   ///< Shower particle G4 track ID
     std::string  fProcess;   ///< Shower particle's creation process
     MCStep       fStart;     ///< Shower particle's G4 start point
     MCStep       fEnd;       ///< Shower particle's G4 end point
     TVector3 fStartDir; ///< Shower Starting Direction, within the first 2.4cm
-  
+    /// @}
 
 
-    //---- Mother's particle info ---//
+    /// @{
+    /// @name Mother's particle info
     int          fMotherPDGCode; ///< Shower's mother PDG code   
     unsigned int fMotherTrackID; ///< Shower's mother G4 track ID
     std::string  fMotherProcess; ///< Shower's mother creation process
     MCStep       fMotherStart;   ///< Shower's mother G4 start point
     MCStep       fMotherEnd;     ///< Shower's mother G4 end point
+    /// @}
 
-    //---- Ancestor's particle info ---//
+    /// @{
+    /// @name Ancestor's particle info
     int          fAncestorPDGCode; ///< Shower's ancestor PDG code   
     unsigned int fAncestorTrackID; ///< Shower's ancestor G4 track ID
     std::string  fAncestorProcess; ///< Shower's ancestor creation process
     MCStep       fAncestorStart;   ///< Shower's ancestor G4 start point
     MCStep       fAncestorEnd;     ///< Shower's ancestor G4 end point
+    /// @}
 
-    //---- Energy deposition info ----//
+    /// @{
+    /// @name Energy deposition info
     std::vector<unsigned int>  fDaughterTrackID; ///< Daughters' track ID
     MCStep                     fDetProfile;      ///< Combined energy deposition information
     double                     fdEdx;            ///< Shower True dEdx 
     double                     fdEdx_radial;     ///< Shower True dEdx, with a radial requirement  
+    /// @}
   
 
-    //---- Charge per plane ----//
+    /// @{
+    /// @name Charge per plane
     std::vector<double> fPlaneCharge; ///< Charge deposit per plane
     std::vector<double> fdQdx; ///< Charge deposit per plane
-  };
+    /// @}
+    
+    
+    /// Clears the fields of this class
+    void ClearData();
+    
+  }; // class MCShower
 
-}
+} // namespace sim
 
-#endif
+#endif // MCSHOWER_H
 /** @} */ // end of doxygen group 
