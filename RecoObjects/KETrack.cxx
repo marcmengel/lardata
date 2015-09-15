@@ -174,6 +174,11 @@ namespace trkf {
       result = boost::optional<double>(true, chisq);
     }
 
+    // Final validity check.
+
+    if(!isValid())
+      result = boost::optional<double>(false, 0.);
+
     // Done.
 
     return result;

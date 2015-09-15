@@ -43,6 +43,7 @@
 #include "boost/numeric/ublas/vector.hpp"
 #include "boost/numeric/ublas/matrix.hpp"
 #include "boost/numeric/ublas/symmetric.hpp"
+#include "boost/numeric/ublas/lu.hpp"
 
 namespace trkf {
 
@@ -178,6 +179,45 @@ namespace trkf {
 	m(i,j) = sum;
       }
     }
+
+    // Done (success).
+
+    return true;
+  }
+
+  /// Invert general square matrix by LU decomposition with partial pivoting.
+  /// Return false if singular or not square.
+  ///
+  template <class T, class L, class A>
+  bool invert(ublas::matrix<T, L, A>& m)
+  {
+    // Make sure matrix is square.
+
+    if(m.size1() != m.size2())
+      return false;
+
+    // Create permutation matrix for pivoting.
+
+    ublas::permutation_matrix<std::size_t> pm(m.size1());
+
+    // Make temp copy of input matrix.
+
+    ublas::matrix<T, L, A> mcopy(m);
+
+    // Do LU factorization with partial pivoting.
+    // This step will fail if matrix is singular.
+
+    int res = lu_factorize(mcopy, pm);
+    if( res != 0 )
+      return false;
+
+    // Set original matrix to the identity matrix.
+
+    m.assign(ublas::identity_matrix<T>(m.size1()));
+
+    // Do backsubstitution.
+
+    lu_substitute(mcopy, pm, m);
 
     // Done (success).
 

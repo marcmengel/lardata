@@ -38,6 +38,7 @@ namespace trkf {
   /// s            - Path distance.
   /// noise_matrix - Resultant noise matrix.
   ///
+  /// Returns: True if success.
   ///
   /// Currently calculate noise from multiple scattering only.
   ///
@@ -65,7 +66,7 @@ namespace trkf {
   /// Correlation between position and slope in the opposite view is
   /// (sqrt(3)/2) u' v' / sqrt((1 + u'^2)(1 + v'^2))
   ///
-  void InteractPlane::noise(const KTrack& trk, double s, TrackError& noise_matrix) const
+  bool InteractPlane::noise(const KTrack& trk, double s, TrackError& noise_matrix) const
   {
     // Get LAr service.
 
@@ -93,7 +94,7 @@ namespace trkf {
     // If distance is zero, or momentum is infinite, return zero noise.
 
     if(pinv == 0. || s == 0.)
-      return;
+      return true;
 
     // Make a crude estimate of the range of the track.
 
@@ -127,7 +128,9 @@ namespace trkf {
     double uvfact = std::sqrt(uvfact2);
     double uv = dudw * dvdw;
     double dist2_3 = s*s / 3.;
-    double dist_2 = s / 2.;
+    double dist_2 = std::abs(s) / 2.;
+    if(trk.getDirection() == Surface::BACKWARD)
+      dist_2 = -dist_2;
 
     // Calculate energy loss fluctuations.
 
@@ -168,6 +171,10 @@ namespace trkf {
     // Energy loss fluctuations.
 
     noise_matrix(4,4) = pinvvar;                              // sigma^2(pinv, pinv)
+
+    // Done (success).
+
+    return true;
   }
 
 } // end namespace trkf

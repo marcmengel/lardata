@@ -1,27 +1,28 @@
 ///////////////////////////////////////////////////////////////////////
 ///
-/// \file   SurfYZPlane.cxx
+/// \file   SurfYZLine.cxx
 ///
-/// \brief  Planar surface parallel to x-axis.
+/// \brief  Line surface perpendicular to x-axis.
 ///
 /// \author H. Greenlee
 ///
 ////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
-#include "RecoObjects/SurfYZPlane.h"
+#include "RecoObjects/SurfYZLine.h"
 #include "cetlib/exception.h"
 #include "TVector2.h"
+#include "TMath.h"
 
 namespace trkf {
 
   // Static attributes.
 
-  double SurfYZPlane::fPhiTolerance = 1.e-10;
-  double SurfYZPlane::fSepTolerance = 1.e-6;
+  double SurfYZLine::fPhiTolerance = 1.e-10;
+  double SurfYZLine::fSepTolerance = 1.e-6;
 
   /// Default constructor.
-  SurfYZPlane::SurfYZPlane() :
+  SurfYZLine::SurfYZLine() :
     fX0(0.),
     fY0(0.),
     fZ0(0.),
@@ -35,7 +36,7 @@ namespace trkf {
   /// x0, y0, z0 - Global coordinates of local origin.
   /// phi - Rotation angle about x-axis.
   ///
-  SurfYZPlane::SurfYZPlane(double x0, double y0, double z0, double phi) :
+  SurfYZLine::SurfYZLine(double x0, double y0, double z0, double phi) :
     fX0(x0),
     fY0(y0),
     fZ0(z0),
@@ -43,19 +44,21 @@ namespace trkf {
   {}
 
   /// Destructor.
-  SurfYZPlane::~SurfYZPlane()
+  SurfYZLine::~SurfYZLine()
   {}
 
   /// Clone method.
-  Surface* SurfYZPlane::clone() const
+  Surface* SurfYZLine::clone() const
   {
-    return new SurfYZPlane(*this);
+    return new SurfYZLine(*this);
   }
 
   /// Surface-specific tests of validity of track parameters.
-  bool SurfYZPlane::isTrackValid(const TrackVector& vec) const
+  bool SurfYZLine::isTrackValid(const TrackVector& vec) const
   {
-    return true;
+    // Limit allowed range of eta parameter.
+
+    return std::abs(vec(3)) < 10.;
   }
 
   /// Transform global to local coordinates.
@@ -65,7 +68,7 @@ namespace trkf {
   /// xyz - Cartesian coordinates in global coordinate system.
   /// uvw - Cartesian coordinates in local coordinate system.
   ///
-  void SurfYZPlane::toLocal(const double xyz[3], double uvw[3]) const
+  void SurfYZLine::toLocal(const double xyz[3], double uvw[3]) const
   {
     double sinphi = std::sin(fPhi);
     double cosphi = std::cos(fPhi);
@@ -87,7 +90,7 @@ namespace trkf {
   /// uvw - Cartesian coordinates in local coordinate system.
   /// xyz - Cartesian coordinates in global coordinate system.
   ///
-  void SurfYZPlane::toGlobal(const double uvw[3], double xyz[3]) const
+  void SurfYZLine::toGlobal(const double uvw[3], double xyz[3]) const
   {
     double sinphi = std::sin(fPhi);
     double cosphi = std::cos(fPhi);
@@ -102,6 +105,25 @@ namespace trkf {
     xyz[2] = fZ0 + uvw[1] * sinphi + uvw[2] * cosphi;
   }
 
+  /// Calculate difference of two track parameter vectors, taking into account phi wrap.
+  ///
+  /// Arguments:
+  ///
+  /// vec1 - First vector.
+  /// vec2 - Second vector.
+  ///
+  /// Returns: vec1 - vec2
+  ///
+  TrackVector SurfYZLine::getDiff(const TrackVector& vec1, const TrackVector& vec2) const
+  {
+    TrackVector result = vec1 - vec2;
+    while(result(2) <= -TMath::Pi())
+      result(2) += TMath::TwoPi();
+    while(result(2) > TMath::Pi())
+      result(2) -= TMath::TwoPi();
+    return result;
+  }
+
   /// Get position of track.
   ///
   /// Arguments:
@@ -109,14 +131,18 @@ namespace trkf {
   /// vec - Track state vector.
   /// xyz - Position in global coordinate system.
   ///
-  void SurfYZPlane::getPosition(const TrackVector& vec, double xyz[3]) const
+  void SurfYZLine::getPosition(const TrackVector& vec, double xyz[3]) const
   {
     // Get position in local coordinate system.
 
+    double phi = vec(2);
+    double sinphi = std::sin(phi);
+    double cosphi = std::cos(phi);
+
     double uvw[3];
-    uvw[0] = vec(0);
+    uvw[0] = -vec(0) * sinphi;
     uvw[1] = vec(1);
-    uvw[2] = 0.;
+    uvw[2] = vec(0) * cosphi;
 
     // Transform to global coordinate system.
 
@@ -130,10 +156,10 @@ namespace trkf {
   ///
   /// vec - Track state vector.
   /// mom - Momentum vector in global coordinate system.
-  /// dir - Track direction.
+  /// dir - Track direction (ignored).
   ///
-  void SurfYZPlane::getMomentum(const TrackVector& vec, double mom[3],
-				TrackDirection dir) const
+  void SurfYZLine::getMomentum(const TrackVector& vec, double mom[3],
+			       TrackDirection dir) const
   {
 
     // Get momentum.
@@ -141,41 +167,37 @@ namespace trkf {
     double invp = std::abs(vec(4));
     double p = 1. / std::max(invp, 1.e-3);   // Capped at 1000. GeV/c.
 
-    // Get track slope parameters.
+    // Get track direction parameters.
 
-    double dudw = vec(2);
-    double dvdw = vec(3);
+    double phi = vec(2);
+    double eta = vec(3);
 
-    // Calculate dw/ds.
-
-    double dwds = 1. / std::sqrt(1. + dudw*dudw + dvdw*dvdw);
-    TrackDirection realdir = getDirection(vec, dir);   // Should be same as original direction.
-    if(realdir == BACKWARD)
-      dwds = -dwds;
-    else if(realdir != FORWARD)
-      throw cet::exception("SurfYZPlane") << "Track direction not specified.\n";
+    double sinphi = std::sin(phi);
+    double cosphi = std::cos(phi);
+    double sh = 1./std::cosh(eta);  // sech(eta)
+    double th = std::tanh(eta);
 
     // Calculate momentum vector in local coordinate system.
 
-    double pu = p * dudw * dwds;
-    double pv = p * dvdw * dwds;
-    double pw = p * dwds;
+    double pu = p * cosphi * sh;
+    double pv = p * th;
+    double pw = p * sinphi * sh;
 
     // Rotate momentum to global coordinte system.
 
-    double sinphi = std::sin(fPhi);
-    double cosphi = std::cos(fPhi);
+    double sinfphi = std::sin(fPhi);
+    double cosfphi = std::cos(fPhi);
 
     mom[0] = pu;
-    mom[1] = pv * cosphi - pw * sinphi;
-    mom[2] = pv * sinphi + pw * cosphi;
+    mom[1] = pv * cosfphi - pw * sinfphi;
+    mom[2] = pv * sinfphi + pw * cosfphi;
 
     return;
   }
 
   /// Test whether two surfaces are parallel, within tolerance.
   /// This method will only return true if the other surface
-  /// is a SurfYZPlane.
+  /// is a SurfYZLine.
   ///
   /// Arguments:
   ///
@@ -183,13 +205,13 @@ namespace trkf {
   ///
   /// Returned value: true if parallel.
   ///
-  bool SurfYZPlane::isParallel(const Surface& surf) const
+  bool SurfYZLine::isParallel(const Surface& surf) const
   {
     bool result = false;
 
-    // Test if the other surface is a SurfYZPlane.
+    // Test if the other surface is a SurfYZLine.
 
-    const SurfYZPlane* psurf = dynamic_cast<const SurfYZPlane*>(&surf);
+    const SurfYZLine* psurf = dynamic_cast<const SurfYZLine*>(&surf);
     if(psurf != 0) {
 
       // Test whether surface angle parameters are the same
@@ -202,12 +224,9 @@ namespace trkf {
     return result;
   }
 
-  /// Find perpendicular forward distance to a parallel surface.
+  /// Find perpendicular distance to a parallel surface.
   ///
   /// Throw an exception if the other surface is not parallel.
-  ///
-  /// Assuming the other surface is parallel, the distance is 
-  /// simply the w-coordinate of the other surface, and is signed.
   ///
   /// Arguments:
   ///
@@ -215,13 +234,13 @@ namespace trkf {
   ///
   /// Returned value: Distance.
   ///
-  double SurfYZPlane::distanceTo(const Surface& surf) const
+  double SurfYZLine::distanceTo(const Surface& surf) const
   {
     // Check if the other surface is parallel to this one.
 
     bool parallel = isParallel(surf);
     if(!parallel)
-      throw cet::exception("SurfYZPlane") << "Attempt to find distance to non-parallel surface.\n";
+      throw cet::exception("SurfYZLine") << "Attempt to find distance to non-parallel surface.\n";
 
     // Find the origin of the other surface in global coordinates,
     // then convert to our local coordinates.
@@ -232,9 +251,9 @@ namespace trkf {
     surf.toGlobal(otheruvw, xyz);
     toLocal(xyz, myuvw);
 
-    // Distance is local w-coordinate of other surface origin.
+    // Distance of v-axis to other surface origin.
 
-    return myuvw[2];
+    return std::hypot(myuvw[0], myuvw[2]);
   }
 
   /// Test two surfaces for equality, within tolerance.
@@ -248,13 +267,13 @@ namespace trkf {
   ///
   /// Returned values: true if equal.
   ///
-  bool SurfYZPlane::isEqual(const Surface& surf) const
+  bool SurfYZLine::isEqual(const Surface& surf) const
   {
     bool result = false;
 
-    // Test if the other surface is a SurfYZPlane.
+    // Test if the other surface is a SurfYZLine.
 
-    const SurfYZPlane* psurf = dynamic_cast<const SurfYZPlane*>(&surf);
+    const SurfYZLine* psurf = dynamic_cast<const SurfYZLine*>(&surf);
     if(psurf != 0) {
 
       // Test whether surface parameters are the same within tolerance.
@@ -273,9 +292,9 @@ namespace trkf {
   }
 
   /// Printout
-  std::ostream& SurfYZPlane::Print(std::ostream& out) const
+  std::ostream& SurfYZLine::Print(std::ostream& out) const
   {
-    out << "SurfYZPlane{ x0=" << fX0 << ", y0=" << fY0 << ", z0=" << fZ0 << ", phi=" << fPhi << "}";
+    out << "SurfYZLine{ x0=" << fX0 << ", y0=" << fY0 << ", z0=" << fZ0 << ", phi=" << fPhi << "}";
     return out;
   }
 

@@ -63,7 +63,7 @@ namespace trkf {
   {
     // Calculate angles.
 
-    double nyz = std::sqrt(ny*ny + nz*nz);
+    double nyz = std::hypot(ny, nz);
     fTheta = atan2(nx, nyz);
     fPhi = 0.;
     if(nyz != 0.)
@@ -78,6 +78,12 @@ namespace trkf {
   Surface* SurfXYZPlane::clone() const
   {
     return new SurfXYZPlane(*this);
+  }
+
+  /// Surface-specific tests of validity of track parameters.
+  bool SurfXYZPlane::isTrackValid(const TrackVector& vec) const
+  {
+    return true;
   }
 
   /// Transform global to local coordinates.
@@ -225,7 +231,7 @@ namespace trkf {
 
       double delta_phi = TVector2::Phi_mpi_pi(fPhi - psurf->phi());
       double delta_theta = fTheta - psurf->theta();
-      if(abs(delta_phi) <= fPhiTolerance && delta_theta <= fThetaTolerance)
+      if(std::abs(delta_phi) <= fPhiTolerance && std::abs(delta_theta) <= fThetaTolerance)
 	result = true;
     }
     return result;

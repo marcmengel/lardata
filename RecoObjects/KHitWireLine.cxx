@@ -1,16 +1,16 @@
 ///////////////////////////////////////////////////////////////////////
 ///
-/// \file   KHitWireX.cxx
+/// \file   KHitWireLine.cxx
 ///
-/// \brief  Kalman filter wire-time measurement on a SurfWireX surface.
+/// \brief  Kalman filter wire-time measurement on a SurfWireLine surface.
 ///
 /// \author H. Greenlee
 ///
 ////////////////////////////////////////////////////////////////////////
 #include <stdint.h>
 
-#include "RecoObjects/KHitWireX.h"
-#include "RecoObjects/SurfWireX.h"
+#include "RecoObjects/KHitWireLine.h"
+#include "RecoObjects/SurfWireLine.h"
 #include "Geometry/Geometry.h"
 #include "Utilities/DetectorProperties.h"
 #include "cetlib/exception.h"
@@ -28,8 +28,8 @@ namespace trkf {
   /// be specified to allow measurements to whare surfaces to save
   /// memory.
   ///
-  KHitWireX::KHitWireX(const art::Ptr<recob::Hit>& hit,
-		       const std::shared_ptr<const Surface>& psurf) :
+  KHitWireLine::KHitWireLine(const art::Ptr<recob::Hit>& hit,
+			     const std::shared_ptr<const Surface>& psurf) :
     KHit(psurf),
     fHit(hit)
   {
@@ -38,23 +38,6 @@ namespace trkf {
 
     // Extract wire id.
     geo::WireID wireid = hit->WireID();
-
-    // Check the surface (determined by wire id).  If the
-    // surface pointer is null, make a new SurfWireX surface and
-    // update the base class appropriately.  Otherwise, just check
-    // that the specified surface agrees with the wire id.
-
-    if(psurf.get() == 0) {
-      std::shared_ptr<const Surface> new_psurf(new SurfWireX(wireid));
-      setMeasSurface(new_psurf);
-    }
-    else {
-      SurfWireX check_surf(wireid);
-      if(!check_surf.isEqual(*psurf))
-	throw cet::exception("KHitWireX") << "Measurement surface doesn't match wire id.\n";
-    }
-
-    setMeasPlane(hit->WireID().Plane);
 
     // Extract time information from hit.
 
@@ -69,12 +52,29 @@ namespace trkf {
 
     // Calculate position and error.
 
-    double x = detprop->ConvertTicksToX(t, hit->WireID().Plane, hit->WireID().TPC, hit->WireID().Cryostat);
+    double x = detprop->ConvertTicksToX(t, wireid.Plane, wireid.TPC, wireid.Cryostat);
     double xerr = terr * detprop->GetXTicksCoefficient();
+
+    // Check the surface (determined by wire id + drift time).  If the
+    // surface pointer is null, make a new SurfWireLine surface and
+    // update the base class appropriately.  Otherwise, just check
+    // that the specified surface agrees with the wire id + drift time.
+
+    if(psurf.get() == 0) {
+      std::shared_ptr<const Surface> new_psurf(new SurfWireLine(wireid, x));
+      setMeasSurface(new_psurf);
+    }
+    else {
+      SurfWireLine check_surf(wireid, x);
+      if(!check_surf.isEqual(*psurf))
+	throw cet::exception("KHitWireLine") << "Measurement surface doesn't match hit.\n";
+    }
+
+    setMeasPlane(wireid.Plane);
 
     // Update measurement vector and error matrix.
 
-    trkf::KVector<1>::type mvec(1, x);
+    trkf::KVector<1>::type mvec(1, 0.);
     setMeasVector(mvec);
 
     trkf::KSymMatrix<1>::type merr(1);
@@ -94,8 +94,8 @@ namespace trkf {
   /// x       - X coordinate.
   /// xerr    - X error.
   ///
-  KHitWireX::KHitWireX(const geo::WireID& wireid, double x, double xerr) :
-    KHit(std::shared_ptr<const Surface>(new SurfWireX(wireid)))
+  KHitWireLine::KHitWireLine(const geo::WireID& wireid, double x, double xerr) :
+    KHit(std::shared_ptr<const Surface>(new SurfWireLine(wireid, x)))
   {
     // Get services.
 
@@ -106,8 +106,9 @@ namespace trkf {
     setMeasPlane(wireid.Plane);
 
     // Update measurement vector and error matrix.
+    // The measured value (aka impact parameter) is always zero.
 
-    trkf::KVector<1>::type mvec(1, x);
+    trkf::KVector<1>::type mvec(1, 0.);
     setMeasVector(mvec);
 
     trkf::KSymMatrix<1>::type merr(1);
@@ -116,21 +117,21 @@ namespace trkf {
   }
 
   /// Destructor.
-  KHitWireX::~KHitWireX()
+  KHitWireLine::~KHitWireLine()
   {}
 
-  bool KHitWireX::subpredict(const KETrack& tre,
-			     KVector<1>::type& pvec,
-			     KSymMatrix<1>::type& perr,
-			     KHMatrix<1>::type& hmatrix) const
+  bool KHitWireLine::subpredict(const KETrack& tre,
+				KVector<1>::type& pvec,
+				KSymMatrix<1>::type& perr,
+				KHMatrix<1>::type& hmatrix) const
   {
     // Make sure that the track surface and the measurement surface are the same.
     // Throw an exception if they are not.
 
     if(!getMeasSurface()->isEqual(*tre.getSurface()))
-      throw cet::exception("KHitWireX") << "Track surface not the same as measurement surface.\n";
+      throw cet::exception("KHitWireLine") << "Track surface not the same as measurement surface.\n";
  
-    // Prediction is just u track perameter and error.
+    // Prediction is the signed impact parameter (parameter 0).
 
     int size = tre.getVector().size();
     pvec.resize(1, /* preserve */ false);
@@ -145,11 +146,12 @@ namespace trkf {
 
     art::ServiceHandle<geo::Geometry> geom;
     double pitch = geom->WirePitch();
-    double slope = tre.getVector()(2);
-    double slopevar = pitch*pitch * slope*slope / 12.;
+    double phi = tre.getVector()(2);
+    double cosphi = std::cos(phi);
+    double slopevar = pitch*pitch * cosphi*cosphi / 12.;
     perr(0,0) += slopevar;
 
-    // Hmatrix - du/du = 1., all others are zero.
+    // Hmatrix - dr/dr = 1., all others are zero.
 
     hmatrix.resize(1, size, /* preserve */ false);
     hmatrix.clear();

@@ -1,36 +1,36 @@
 ////////////////////////////////////////////////////////////////////////
 ///
-/// \file   PropXYZPlane.h
+/// \file   PropYZLine.h
 ///
-/// \brief  Propagate to SurfXYZPlane surface.
+/// \brief  Propagate to SurfYZLine surface.
 ///
 /// \author H. Greenlee 
 ///
-/// Class for propagating to a destionation SurfYZPlane surface.
+/// Class for propagating to a destionation SurfYZLine surface.
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#ifndef PROPXYZPLANE_H
-#define PROPXYZPLANE_H
+#ifndef PROPYZLINE_H
+#define PROPYZLINE_H
 
 #include "RecoObjects/Propagator.h"
 
 namespace trkf {
 
-  class PropXYZPlane : public trkf::Propagator
+  class PropYZLine : public trkf::Propagator
   {
   public:
 
     /// Constructor.
-    PropXYZPlane(double tcut, bool doDedx);
+    PropYZLine(double tcut, bool doDedx);
 
     /// Destructor.
-    virtual ~PropXYZPlane();
+    virtual ~PropYZLine();
 
     // Overrides.
 
     /// Clone method.
-    Propagator* clone() const {return new PropXYZPlane(*this);}
+    Propagator* clone() const {return new PropYZLine(*this);}
 
     /// Propagate without error.
     boost::optional<double> short_vec_prop(KTrack& trk,
@@ -48,7 +48,7 @@ namespace trkf {
   private:
 
     /// The following methods transform the track parameters from
-    /// initial surface to SurfXYZPlane origin surface, and generate a
+    /// initial surface to SurfYZLine origin surface, and generate a
     /// propagation matrix.  The first group of function parameters
     /// are the orientation surface parameters of the initial surface.
     /// The second group of function parameters are the orientation
@@ -56,25 +56,25 @@ namespace trkf {
     /// parameters of the destination surface are assumed to match the
     /// position of the track.
 
-    /// Transform yz line -> xyz plane.
+    /// Transform yz line -> yz line.
 
     bool transformYZLine(double phi1,
-			 double theta2, double phi2,
+			 double phi2,
 			 TrackVector& vec,
 			 Surface::TrackDirection& dir,
 			 TrackMatrix* prop_matrix) const;
 
-    /// Transform yz plane -> xyz plane.
+    /// Transform yz plane -> yz line.
 
     bool transformYZPlane(double phi1,
-			  double theta2, double phi2,
+			  double phi2,
 			  TrackVector& vec,
 			  Surface::TrackDirection& dir,
 			  TrackMatrix* prop_matrix) const;
-    /// Transform xyz plane -> xyz plane.
+    /// Transform xyz plane -> yz line.
 
     bool transformXYZPlane(double theta1, double phi1,
-			   double theta2, double phi2,
+			   double phi2,
 			   TrackVector& vec,
 			   Surface::TrackDirection& dir,
 			   TrackMatrix* prop_matrix) const;
