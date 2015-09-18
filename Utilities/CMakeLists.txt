@@ -1,10 +1,11 @@
 
 art_make( NO_PLUGINS
           LIBRARY_NAME  Utilities
-          LIB_LIBRARIES DetectorProperties_service
-                        LArProperties_service
+          LIB_LIBRARIES 
+	                DetectorPropertiesService_service
+                        LArPropertiesService_service
                         LArFFT_service
-                        TimeService_service
+                        DetectorClocksService_service
                         RecoBase
                         Geometry
                         ${ART_FRAMEWORK_CORE}
@@ -19,9 +20,10 @@ art_make( NO_PLUGINS
                         ${ROOT_BASIC_LIB_LIST}
         )
 
-simple_plugin(TimeService "service"
+simple_plugin(DetectorClocksService "service"
+              DataProviders
 	      RawData
-              DatabaseUtil_service
+#              DatabaseUtil_service
 	      ${ART_UTILITIES}
               ${ART_FRAMEWORK_CORE}
 	      ${ART_FRAMEWORK_PRINCIPAL}
@@ -47,10 +49,11 @@ simple_plugin(DatabaseUtil "service"
               BASENAME_ONLY
 )
 
-simple_plugin(DetectorProperties "service"
+simple_plugin(DetectorPropertiesService "service"
+              DataProviders
               TimeService_service
               LArProperties_service
-              DatabaseUtil_service
+#              DatabaseUtil_service
               Geometry_service
               Geometry
 	      ${ART_PERSISTENCY_ROOTDB}
@@ -87,8 +90,10 @@ simple_plugin(LArFFT "service"
               BASENAME_ONLY
 )
 
-simple_plugin(LArProperties "service"
-              DatabaseUtil_service
+simple_plugin(LArPropertiesService "service"
+#              Utilities
+	      DataProviders
+#              DatabaseUtil_service
 	      ${ART_UTILITIES}
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
@@ -121,5 +126,5 @@ install_headers()
 install_fhicl()
 install_source()
 
-add_subdirectory(test)
+#add_subdirectory(test)
 

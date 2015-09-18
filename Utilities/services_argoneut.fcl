@@ -14,15 +14,15 @@ BEGIN_PROLOG
 
 argoneut_services:
 {
- ExptGeoHelperInterface: @local::argoneut_geometry_helper
- Geometry:               @local::argoneut_geo
- DetectorProperties:     @local::argoneut_detproperties
- LArProperties:          @local::argoneut_properties
- LArFFT:                 @local::argoneut_larfft
- DatabaseUtil:           @local::argoneut_database
- BackTracker:            @local::argoneut_backtracker
- SeedService:            @local::argoneut_seedservice
- TimeService:            @local::argoneut_timeservice
+ ExptGeoHelperInterface:        @local::argoneut_geometry_helper
+ Geometry:                      @local::argoneut_geo
+ DetectorPropertiesService:     @local::argoneut_detproperties
+ LArPropertiesService:          @local::argoneut_properties
+ LArFFT:                        @local::argoneut_larfft
+ DatabaseUtil:                  @local::argoneut_database
+ BackTracker:                   @local::argoneut_backtracker
+ SeedService:                   @local::argoneut_seedservice
+ TimeService:                   @local::argoneut_timeservice
 }
 
 argoneut_simulation_services:
