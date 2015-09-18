@@ -40,13 +40,13 @@ namespace sim {
     /// Default constructor; clears the local data
     MCShower() { ClearData(); }
 
+    /// Default destructor
+    virtual ~MCShower();
+
 #ifndef __GCCXML__
 
     /// Clear method
     virtual void Clear() { ClearData(); }
-
-    /// Default destructor
-    virtual ~MCShower() = default;
 
     //--- Getters ---//
 
