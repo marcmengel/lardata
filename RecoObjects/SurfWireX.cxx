@@ -2,7 +2,7 @@
 ///
 /// \file   SurfWireX.cxx
 ///
-/// \brief  Planar surface defined by readout wire and x-axis.
+/// \brief  Planar surface defined by wire id and x-axis.
 ///
 /// \author H. Greenlee
 ///
@@ -19,9 +19,9 @@ namespace trkf {
   ///
   /// Arguments:
   ///
-  /// channel - Readout channel number.
+  /// wireid - Wire id.
   ///
-  SurfWireX::SurfWireX(unsigned int channel)
+  SurfWireX::SurfWireX(const geo::WireID& wireid)
   {
     // Get geometry service.
 
@@ -29,29 +29,18 @@ namespace trkf {
 
     // Get wire geometry.
 
-    //unsigned int cstat, tpc, plane, wire;
-	
-	std::vector<geo::WireID> vecChannelWireID = geom->ChannelToWire(channel);
+    geo::WireGeo const& wgeom = geom->WireIDToWireGeo(wireid);
 	  
-	if (vecChannelWireID.size() != 0) {
+    // Get wire center and angle from the wire geometry.
+    // Put local origin at center of wire.
 	  
-	  geo::WireGeo const& wgeom = geom->WireIDToWireGeo(vecChannelWireID[0]);
+    double xyz[3] = {0.};
+    wgeom.GetCenter(xyz);
+    double phi = TMath::PiOver2() - wgeom.ThetaZ();
 	  
-	  // Get wire center and angle from the wire geometry.
-	  // Put local origin at center of wire.
+    // Update base class.
 	  
-	  double xyz[3] = {0.};
-	  wgeom.GetCenter(xyz);
-	  double phi = TMath::PiOver2() - wgeom.ThetaZ();
-	  
-	  // Update base class.
-	  
-	  *static_cast<SurfYZPlane*>(this) = SurfYZPlane(xyz[1], xyz[2], phi);
-	} else {
-		throw cet::exception("Can't Find Wire for that channel") << channel << "\n"; 
-
-	}
-
+    *static_cast<SurfYZPlane*>(this) = SurfYZPlane(0., xyz[1], xyz[2], phi);
   }
 
   /// Destructor.

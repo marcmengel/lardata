@@ -17,6 +17,7 @@
 template class art::Wrapper< std::vector<optdata::ADC_Count_t>      >;
 template class art::Wrapper< std::vector< std::pair< optdata::TimeSlice_t, optdata::TimeSlice_t > > >;
 template class art::Wrapper< std::vector<optdata::ChannelData>      >;
+template class art::Wrapper< optdata::ChannelDataGroup              >;
 template class art::Wrapper< std::vector<optdata::ChannelDataGroup> >;
 template class art::Wrapper< std::vector<optdata::FIFOChannel>      >;
 template class art::Wrapper< std::vector<optdata::PMTTrigger>       >;

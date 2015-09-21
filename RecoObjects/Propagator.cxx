@@ -9,7 +9,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "RecoObjects/Propagator.h"
-#include "RecoObjects/SurfYZPlane.h"
+#include "RecoObjects/SurfXYZPlane.h"
 #include "Utilities/LArProperties.h"
 #include "cetlib/exception.h"
 
@@ -125,6 +125,7 @@ namespace trkf {
 
 	++nit;
 	if(nit > nitmax) {
+	  trk = trk0;
 	  result = boost::optional<double>(false, 0.);
 	  return result;
 	}
@@ -135,7 +136,7 @@ namespace trkf {
 	pinv = trk.getVector()(4);
 	double mass = trk.Mass();
 	double p = 1./std::abs(pinv);
-	double e = std::sqrt(p*p + mass*mass);
+	double e = std::hypot(p, mass);
 	double t = p*p / (e + mass);
 	double dedx = 0.001 * larprop->Eloss(p, mass, fTcut);
 	double smax = 0.1 * t / dedx;
@@ -184,15 +185,15 @@ namespace trkf {
 	  xyz[2] = xyz0[2] + frac * (xyz1[2] - xyz0[2]);
 
 	  // Choose orientation of intermediate surface perpendicular
-	  // to track in yz-plane.
+	  // to track.
 
 	  double mom[3];
 	  trk.getMomentum(mom);
-	  double phi = std::atan2(mom[1], mom[2]);
 
 	  // Make intermediate surface object.
 
-	  pstep = std::shared_ptr<const Surface>(new SurfYZPlane(xyz[1], xyz[2], phi));
+	  pstep = std::shared_ptr<const Surface>(new SurfXYZPlane(xyz[0], xyz[1], xyz[2],
+								  mom[0], mom[1], mom[2]));
 	}
 
 	// Do the actual step propagation.
@@ -279,9 +280,10 @@ namespace trkf {
 	throw cet::exception("Propagator") << 
 	  "Input track and reference track not on same surface.\n";
 
-      // Remember the starting reference track.
+      // Remember the starting track and reference track.
 
-      KTrack ref0 = *ref;
+      KTrack trk0(trk);
+      KTrack ref0(*ref);
 
       // Propagate the reference track.  Make sure we calculate the
       // propagation matrix.
@@ -299,7 +301,7 @@ namespace trkf {
 	// Propagation of reference track succeeded.  Update the track
 	// state vector and surface of the track to be propagated.
 
-	TrackVector diff = trk.getVector() - ref0.getVector();
+	TrackVector diff = trk.getSurface()->getDiff(trk.getVector(), ref0.getVector());
 	TrackVector newvec = ref->getVector() + prod(*prop_matrix, diff);
 
 	// Store updated state vector and surface.
@@ -309,6 +311,15 @@ namespace trkf {
 	trk.setDirection(ref->getDirection());
 	if (!trk.getSurface()->isEqual(*(ref->getSurface())))
 	  throw cet::exception("Propagator") << __func__ << ": surface mismatch";
+
+	// Final validity check.  In case of failure, restore the track
+	// and reference track to their starting values.
+
+	if(!trk.isValid()) {
+	  result = boost::optional<double>(false, 0.);
+	  trk = trk0;
+	  *ref = ref0;
+	}
       }
       else {
 
@@ -316,8 +327,8 @@ namespace trkf {
 	// Restore the reference track to its starting value, so that we ensure 
 	// the reference track and the actual track remain on the same surface.
 
+	trk = trk0;
 	*ref = ref0;
-
       }
     }
 
@@ -465,7 +476,7 @@ namespace trkf {
     // Calculate final energy.
 
     double p1 = 1./std::abs(pinv);
-    double e1 = std::sqrt(p1*p1 + mass*mass);
+    double e1 = std::hypot(p1, mass);
     double de = -0.001 * s * larprop->Eloss(p1, mass, fTcut);
     double emid = e1 + 0.5 * de;
     if(emid > mass) {

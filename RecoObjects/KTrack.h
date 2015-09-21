@@ -69,7 +69,7 @@ namespace trkf {
     void setPdgCode(int pdg) {fPdgCode = pdg;}                          ///< Set pdg code.
 
     /// Test if track is valid.
-    bool isValid() const {return getDirection() != Surface::UNKNOWN;}
+    bool isValid() const;
 
     /// Get position of track.
     void getPosition(double xyz[3]) const;

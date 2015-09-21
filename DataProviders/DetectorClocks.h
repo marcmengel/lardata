@@ -27,6 +27,7 @@ namespace dataprov{
     kClockSpeedTPC,
     kClockSpeedOptical,
     kClockSpeedTrigger,
+    kClockSpeedExternal,
     kDefaultTrigTime,
     kDefaultBeamTime,
     kInheritConfigTypeMax
@@ -50,7 +51,7 @@ namespace dataprov{
       else
 	return -fTriggerOffsetTPC/fTPCClock.Frequency(); //convert ticks to us
     }
-
+    
     /// Function to report variable contents for cout-debugging
     virtual void debugReport() const;
     
@@ -112,6 +113,22 @@ namespace dataprov{
     { util::ElecClock clock = TriggerClock(); clock.SetTime(sample,frame); return clock; }
 
     //
+    // Getters of External ElecClock
+    //
+    /// Borrow a const Trigger clock with time set to External Time [us]
+    const ElecClock& ExternalClock() const
+    { return fExternalClock; }
+
+    /// Create a External clock for a given time [us] from clock counting start
+    ElecClock ExternalClock(double time) const
+    { return ElecClock(time,fExternalClock.FramePeriod(),fTriggerClock.Frequency());}
+
+    /// Create a External clock for a given sample/frame number in External clock frequency
+    ElecClock ExternalClock(unsigned int sample,
+			    unsigned int frame) const
+    { ElecClock clock = ExternalClock(); clock.SetTime(sample,frame); return clock; }
+
+    //
     // Getters for time [us] w.r.t. trigger given information from waveform
     //
 
@@ -127,8 +144,13 @@ namespace dataprov{
     /// Given Optical time-tick (waveform index), sample and frame number, returns time [us] w.r.t. beam gate time stamp
     double OpticalTick2BeamTime(double tick, size_t sample, size_t frame) const
     { return fOpticalClock.TickPeriod() * tick + fOpticalClock.Time(sample,frame) - BeamGateTime(); }
-
-
+    /// Given External time-tick (waveform index), sample and frame number, returns time [us] w.r.t. trigger time stamp
+    double ExternalTick2TrigTime(double tick, size_t sample, size_t frame) const
+    { return fExternalClock.TickPeriod() * tick + fExternalClock.Time(sample,frame) - TriggerTime(); }
+    /// Given External time-tick (waveform index), sample and frame number, returns time [us] w.r.t. beam gate time stamp
+    double ExternalTick2BeamTime(double tick, size_t sample, size_t frame) const
+    { return fExternalClock.TickPeriod() * tick + fExternalClock.Time(sample,frame) - BeamGateTime(); }
+    
     //
     // Getters for time [tdc] (electronics clock counting ... in double precision) 
     //
@@ -145,6 +167,12 @@ namespace dataprov{
     /// Given G4 time [ns], returns corresponding Optical electronics clock count [tdc]  
     double OpticalG4Time2TDC(double g4time) const
     { return G4ToElecTime(g4time) / fOpticalClock.TickPeriod(); }
+    /// Given External time-tick (waveform index), sample and frame number, returns time electronics clock count [tdc]
+    double ExternalTick2TDC(double tick, size_t sample, size_t frame) const
+    { return fExternalClock.Ticks(sample,frame) + tick; }
+    /// Given G4 time [ns], returns corresponding External electronics clock count [tdc]
+    double ExternalG4Time2TDC(double g4time) const
+    { return G4ToElecTime(g4time) / fExternalClock.TickPeriod(); }
 
     //
     // Getters for time [us] (electronics clock counting ... in double precision)
@@ -155,6 +183,9 @@ namespace dataprov{
     /// Given Optical time-tick (waveform index), sample and frame number, returns electronics clock [us]
     double OpticalTick2Time(double tick, size_t sample, size_t frame) const
     { return fOpticalClock.Time(sample,frame) + tick * fOpticalClock.TickPeriod(); }
+    /// Given External time-tick (waveform index), sample and frame number, returns electronics clock [us]
+    double ExternalTick2Time(double tick, size_t sample, size_t frame) const
+    { return fExternalClock.Time(sample,frame) + tick * fExternalClock.TickPeriod(); }
 
     //
     // Getters for time [ticks] (waveform index number)
@@ -216,6 +247,9 @@ namespace dataprov{
 
     /// Trigger clock
     ::util::ElecClock fTriggerClock;
+
+    /// External clock
+    ::util::ElecClock fExternalClock;
 
     /// Time offset from trigger to TPC readout start
     double fTriggerOffsetTPC;

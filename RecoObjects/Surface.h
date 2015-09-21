@@ -66,11 +66,17 @@ namespace trkf {
     /// Clone method.
     virtual Surface* clone() const = 0;
 
+    /// Surface-specific tests of validity of track parameters.
+    virtual bool isTrackValid(const TrackVector& vec) const = 0;
+
     /// Transform global to local coordinates.
     virtual void toLocal(const double xyz[3], double uvw[3]) const = 0;
 
     /// Transform local to global coordinates.
     virtual void toGlobal(const double uvw[3], double xyz[3]) const = 0;
+
+    /// Calculate difference of two track parameter vectors.
+    virtual TrackVector getDiff(const TrackVector& vec1, const TrackVector& vec2) const;
 
     /// Get position of track.
     virtual void getPosition(const TrackVector& vec, double xyz[3]) const = 0;

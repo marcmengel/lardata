@@ -9,6 +9,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
+#include <cstdlib>
 #include "RecoObjects/KTrack.h"
 #include "cetlib/exception.h"
 
@@ -73,6 +74,53 @@ namespace trkf {
     Surface::TrackDirection result = Surface::UNKNOWN;
     if(fSurf.get() != 0)
       result = fSurf->getDirection(fVec, fDir);
+    return result;
+  }
+
+  /// Test if track is valid.
+  ///
+  /// A default-constructed or partially-constructed track, is
+  /// invalid by virtue of having an unknown propagation direction
+  /// or a null surface pointer.
+  ///
+  /// Tracks can become invaliddynamically for other reasons.  This
+  /// method also does the following checks:
+  /// a) Check for invalid floating point values (inf and nan).
+  /// b) Surface-dependent checks via virtual method Surface::isTrackValid.
+  bool KTrack::isValid() const
+  {
+    bool result = true;
+
+    // Check for valid direction.
+
+    if(getDirection() == Surface::UNKNOWN)
+      result = false;
+
+    // Check for non-null surface pointer (for safety, should be redundant
+    // with previous check.
+
+    if(result && fSurf.get() == 0)
+      result = false;
+
+    // Check for track parameters containing invalid floating point
+    // values.
+
+    if(result) {
+      for(unsigned int i=0; i<fVec.size(); ++i) {
+	if(!std::isfinite(fVec(i))) {
+	  result = false;
+	  break;
+	}
+      }
+    }
+
+    // Surface-dependent check on track validity.
+
+    if(result && !fSurf->isTrackValid(fVec))
+      result = false;
+
+    // Done.
+
     return result;
   }
 

@@ -62,7 +62,7 @@ namespace trkf {
 	ihit != hits.end(); ++ihit) {
       const recob::Hit& hit = **ihit;
 
-      // Extract the channel number from the Hit.
+      // Extract the wire id from the Hit.
       geo::WireID hitWireID = hit.WireID();
 		
       uint32_t channel = hit.Channel();

@@ -10,6 +10,7 @@ dataprov::DetectorClocks::DetectorClocks()
     fTPCClock     (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_TPC),
     fOpticalClock (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_OPTICAL),
     fTriggerClock (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_TRIGGER),
+    fExternalClock(0,kDEFAULT_FRAME_PERIOD,kDEFAULT_FREQUENCY_EXTERNAL),
     fTriggerOffsetTPC     (util::kDEFAULT_TRIG_OFFSET_TPC),
     fTriggerTime  (0),
     fBeamGateTime (0)
@@ -21,6 +22,7 @@ dataprov::DetectorClocks::DetectorClocks()
   fConfigName.at(dataprov::kClockSpeedTPC)     = "ClockSpeedTPC";
   fConfigName.at(dataprov::kClockSpeedOptical) = "ClockSpeedOptical";
   fConfigName.at(dataprov::kClockSpeedTrigger) = "ClockSpeedTrigger";
+  fConfigName.at(dataprov::kClockSpeedExternal) = "ClockSpeedExternal";
   fConfigName.at(dataprov::kDefaultTrigTime)   = "DefaultTrigTime";
   fConfigName.at(dataprov::kDefaultBeamTime)   = "DefaultBeamTime";
   
@@ -37,6 +39,7 @@ dataprov::DetectorClocks::DetectorClocks(fhicl::ParameterSet const& pset)
     fTPCClock     (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_TPC),
     fOpticalClock (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_OPTICAL),
     fTriggerClock (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_TRIGGER),
+    fExternalClock(0,kDEFAULT_FRAME_PERIOD,kDEFAULT_FREQUENCY_EXTERNAL),
     fTriggerOffsetTPC     (util::kDEFAULT_TRIG_OFFSET_TPC),
     fTriggerTime  (0),
     fBeamGateTime (0)
@@ -48,6 +51,7 @@ dataprov::DetectorClocks::DetectorClocks(fhicl::ParameterSet const& pset)
   fConfigName.at(dataprov::kClockSpeedTPC)     = "ClockSpeedTPC";
   fConfigName.at(dataprov::kClockSpeedOptical) = "ClockSpeedOptical";
   fConfigName.at(dataprov::kClockSpeedTrigger) = "ClockSpeedTrigger";
+  fConfigName.at(dataprov::kClockSpeedExternal) = "ClockSpeedExternal";
   fConfigName.at(dataprov::kDefaultTrigTime)   = "DefaultTrigTime";
   fConfigName.at(dataprov::kDefaultBeamTime)   = "DefaultBeamTime";
   
@@ -66,11 +70,12 @@ bool dataprov::DetectorClocks::Configure(fhicl::ParameterSet const& pset)
   fInheritClockConfig                 = pset.get< bool >( "InheritClockConfig" );
   fConfigValue.at(kG4RefTime)         = pset.get< double >( fConfigName.at(kG4RefTime).c_str() );
   fConfigValue.at(kFramePeriod)       = pset.get< double >( fConfigName.at(kFramePeriod).c_str() );
-  fConfigValue.at(kTriggerOffsetTPC)  = pset.get< double >( fConfigName.at(kTriggerOffsetTPC).c_str() );
+  fConfigValue.at(kTriggerOffsetTPC)  = pset.get< double >( fConfigName.at(kTriggerOffsetTPC).c_str());
   fConfigValue.at(kClockSpeedTPC)     = pset.get< double >( fConfigName.at(kClockSpeedTPC).c_str() );
-  fConfigValue.at(kClockSpeedOptical) = pset.get< double >( fConfigName.at(kClockSpeedOptical).c_str() );
+  fConfigValue.at(kClockSpeedOptical) = pset.get< double >( fConfigName.at(kClockSpeedOptical).c_str());
   fConfigValue.at(kClockSpeedTrigger) = pset.get< double >( fConfigName.at(kClockSpeedTrigger).c_str() );
-  fConfigValue.at(kDefaultTrigTime)   = pset.get< double >( fConfigName.at(kDefaultTrigTime).c_str() );
+  fConfigValue.at(kClockSpeedExternal)= pset.get< double >( fConfigName.at(kClockSpeedExternal).c_str());
+ fConfigValue.at(kDefaultTrigTime)    = pset.get< double >( fConfigName.at(kDefaultTrigTime).c_str() );
   fConfigValue.at(kDefaultBeamTime)   = pset.get< double >( fConfigName.at(kDefaultBeamTime).c_str() );
 
   // Save fcl parameters in a container to check for inheritance
@@ -130,6 +135,7 @@ void dataprov::DetectorClocks::debugReport() const
     << "TPC     Freq. @ " << fTPCClock.Frequency() << std::endl
     << "Optical Freq. @ " << fOpticalClock.Frequency() << std::endl
     << "Trigger Freq. @ " << fTriggerClock.Frequency() << std::endl
+    << "External Freq. @ " << fExternalClock.Frequency() << std::endl
     << "TPC start tick [tdc]             : " << TPCTick2TDC(0) <<std::endl
     << "TPC start tick from trigger [us] : " << TPCTick2TrigTime(0) <<std::endl
     << "TPC start tick from beam    [us] : " << TPCTick2BeamTime(0) <<std::endl

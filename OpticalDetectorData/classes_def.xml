@@ -17,6 +17,7 @@
  <class name="optdata::ChannelDataGroup"   ClassVersion="10"           > 
   <version ClassVersion="10" checksum="2754925479"/>
  </class>
+ <class name="art::Wrapper< optdata::ChannelDataGroup>"  />
  <class name="std::vector<optdata::ChannelDataGroup>"                  />
  <class name="art::Wrapper< std::vector<optdata::ChannelDataGroup> >"  />
  <class name="optdata::FIFOChannel"        ClassVersion="11"           > 
