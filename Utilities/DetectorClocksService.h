@@ -14,6 +14,7 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "art/Framework/Principal/Run.h"
+#include "art/Framework/Principal/Event.h"
 
 #include "DataProviders/DetectorClocks.h"
 
@@ -22,12 +23,12 @@ namespace util{
   class DetectorClocksService {
   public:
     DetectorClocksService(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
-    virtual ~DetectorClocksService();
+    virtual ~DetectorClocksService() {};
     
     virtual void   reconfigure(fhicl::ParameterSet const& pset);
     virtual void   preBeginRun(const art::Run& run);
     virtual void   preProcessEvent(const art::Event& evt);
-    virtual void   postOpenFileconst(std::string& filename);
+    virtual void   postOpenFile(const std::string& filename);
     
     const  dataprov::DetectorClocks* getDetectorClocks() { return fClocks.get();}
     

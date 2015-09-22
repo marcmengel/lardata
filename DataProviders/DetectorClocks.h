@@ -42,7 +42,7 @@ namespace dataprov{
     virtual ~DetectorClocks(){};
 
     virtual bool Configure(fhicl::ParameterSet const& pset);
-    virtual bool Update(uint64_t ts=0) = 0;
+    virtual bool Update(uint64_t ts=0);
     
     virtual double TriggerOffsetTPC() const
     { 
@@ -55,6 +55,8 @@ namespace dataprov{
     /// Function to report variable contents for cout-debugging
     virtual void debugReport() const;
     
+    std::string TrigModuleName() const { return fTrigModuleName; }
+
     /// Given Geant4 time [ns], returns relative time [us] w.r.t. electronics time T0 
     double G4ToElecTime(double g4_time) const {return g4_time * 1.e-3 - fG4RefTime; }
     
@@ -63,6 +65,21 @@ namespace dataprov{
     
     /// Beam gate electronics clock time in [us]
     double BeamGateTime() const { return fBeamGateTime; }
+
+    std::vector<std::string> ConfigNames() const { return fConfigName; }
+    std::vector<double> ConfigValues() const { return fConfigValue; }
+
+    void SetConfigValue(size_t i, double val) { fConfigValue[i] = val; }
+
+        /// Setter for trigger times
+    virtual void SetTriggerTime(double trig_time, double beam_time)
+    { 
+      fTriggerTime  = trig_time;
+      fBeamGateTime = beam_time;
+      fTPCClock.SetTime(trig_time);
+      fOpticalClock.SetTime(trig_time);
+      fTriggerClock.SetTime(trig_time);
+    }
 
     //
     // Getters of TPC ElecClock
@@ -116,18 +133,18 @@ namespace dataprov{
     // Getters of External ElecClock
     //
     /// Borrow a const Trigger clock with time set to External Time [us]
-    const ElecClock& ExternalClock() const
+    const util::ElecClock& ExternalClock() const
     { return fExternalClock; }
 
     /// Create a External clock for a given time [us] from clock counting start
-    ElecClock ExternalClock(double time) const
-    { return ElecClock(time,fExternalClock.FramePeriod(),fTriggerClock.Frequency());}
-
+    util::ElecClock ExternalClock(double time) const
+      { return util::ElecClock(time,fExternalClock.FramePeriod(),fTriggerClock.Frequency());}
+    
     /// Create a External clock for a given sample/frame number in External clock frequency
-    ElecClock ExternalClock(unsigned int sample,
-			    unsigned int frame) const
-    { ElecClock clock = ExternalClock(); clock.SetTime(sample,frame); return clock; }
-
+    util::ElecClock ExternalClock(unsigned int sample,
+				  unsigned int frame) const
+      { util::ElecClock clock = ExternalClock(); clock.SetTime(sample,frame); return clock; }
+    
     //
     // Getters for time [us] w.r.t. trigger given information from waveform
     //
@@ -200,28 +217,11 @@ namespace dataprov{
 
     bool InheritClockConfig() { return fInheritClockConfig; }
     
-  protected:
-
-    /// Setter for trigger times
-    virtual void SetTriggerTime(double trig_time, double beam_time)
-    { 
-      fTriggerTime  = trig_time;
-      fBeamGateTime = beam_time;
-      fTPCClock.SetTime(trig_time);
-      fOpticalClock.SetTime(trig_time);
-      fTriggerClock.SetTime(trig_time);
-    }
-
     /// Internal function to apply loaded parameters to member attributes
     void ApplyParams();
 
     /// Internal function used to search for the right configuration set in the data file
     bool IsRightConfig(const fhicl::ParameterSet& ps) const;
-
-    std::vector<std::string> ConfigNames() const { return fConfigName; }
-    std::vector<double> ConfigValues() const { return fConfigValue; }
-
-    void SetConfigValue(size_t i, double val) { fConfigValue[i] = val; }
     
   protected:
 

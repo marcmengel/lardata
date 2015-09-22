@@ -6,12 +6,15 @@
 // Framework includes
 
 // LArSoft includes
+#include "Utilities/DetectorPropertiesService.h"
 #include "DataProviders/LArProperties.h"
 #include "Geometry/Geometry.h"
 #include "Geometry/CryostatGeo.h"
 #include "Geometry/TPCGeo.h"
 #include "Geometry/PlaneGeo.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include "Utilities/LArPropertiesService.h"
+#include "Utilities/DetectorClocksService.h"
 
 // Art includes
 #include "art/Persistency/RootDB/SQLite3Wrapper.h"
@@ -22,7 +25,6 @@ namespace util{
   //--------------------------------------------------------------------
   DetectorPropertiesService::DetectorPropertiesService(fhicl::ParameterSet const& pset, 
 					 art::ActivityRegistry &reg) 
-    : fNumberTimeSamples(pset.get< unsigned int >("NumberTimeSamples"))
   {
     this->reconfigure(pset);
 
@@ -31,11 +33,15 @@ namespace util{
     reg.sPostOpenFile.watch    (this, &DetectorPropertiesService::postOpenFile);
     reg.sPreProcessEvent.watch (this, &DetectorPropertiesService::preProcessEvent);
 
-    const geo::GeometryCore* geo = static_cast<const GeometryCore*>(art::ServiceHandle<geo::Geometry>());
+    //    const geo::GeometryCore* geo = static_cast<const geo::GeometryCore*>(art::ServiceHandle<geo::Geometry>());
+
+    geo::GeometryCore const* geo = static_cast<geo::GeometryCore const*>
+ (&*(art::ServiceHandle<geo::Geometry>()));
+
     const dataprov::LArProperties* lp = art::ServiceHandle<util::LArPropertiesService>()->getLArProperties();
     const dataprov::DetectorClocks* clks = art::ServiceHandle<util::DetectorClocksService>()->getDetectorClocks();
     
-    fProp.reset(new DetectorProperties(pset,geo,lp,clks));
+    fProp.reset(new dataprov::DetectorProperties(pset,geo,lp,clks));
   }
 
   //--------------------------------------------------------------------
@@ -59,8 +65,8 @@ namespace util{
   void DetectorPropertiesService::preProcessEvent(const art::Event& evt)
   {
     // Make sure TPC Clock is updated with TimeService (though in principle it shouldn't change
-    art::ServiceHandle<util::DetectorClocks> clks;
-    fProp->UpdateClocks(art::ServiceHandle<util::DetectorClocksService>().getDetectorClocks());
+    art::ServiceHandle<util::DetectorClocksService> clks;
+    fProp->UpdateClocks(art::ServiceHandle<util::DetectorClocksService>()->getDetectorClocks());
   }
 
   //--------------------------------------------------------------------

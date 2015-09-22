@@ -31,7 +31,10 @@ namespace util{
   GeometryUtilities::GeometryUtilities() 
   {
     //_name = "GeometryUtilities";
-
+    detp = art::ServiceHandle<util::DetectorPropertiesService>()->getDetectorProperties();
+ 
+    larp = art::ServiceHandle<util::LArPropertiesService>()->getLArProperties();
+    
     Reconfigure();
   }
 
@@ -51,7 +54,7 @@ namespace util{
         
     fWirePitch = geom->WirePitch(0,1,0);
     fTimeTick=detp->SamplingRate()/1000.; 
-    fDriftVelocity=larp->DriftVelocity(larp->Efield(),larp->Temperature());
+    fDriftVelocity=detp->DriftVelocity(detp->Efield(),larp->Temperature());
     
     fWiretoCm=fWirePitch;
     fTimetoCm=fTimeTick*fDriftVelocity;

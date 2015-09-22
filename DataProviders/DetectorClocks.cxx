@@ -10,7 +10,7 @@ dataprov::DetectorClocks::DetectorClocks()
     fTPCClock     (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_TPC),
     fOpticalClock (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_OPTICAL),
     fTriggerClock (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_TRIGGER),
-    fExternalClock(0,kDEFAULT_FRAME_PERIOD,kDEFAULT_FREQUENCY_EXTERNAL),
+    fExternalClock(0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_EXTERNAL),
     fTriggerOffsetTPC     (util::kDEFAULT_TRIG_OFFSET_TPC),
     fTriggerTime  (0),
     fBeamGateTime (0)
@@ -39,7 +39,7 @@ dataprov::DetectorClocks::DetectorClocks(fhicl::ParameterSet const& pset)
     fTPCClock     (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_TPC),
     fOpticalClock (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_OPTICAL),
     fTriggerClock (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_TRIGGER),
-    fExternalClock(0,kDEFAULT_FRAME_PERIOD,kDEFAULT_FREQUENCY_EXTERNAL),
+    fExternalClock(0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_EXTERNAL),
     fTriggerOffsetTPC     (util::kDEFAULT_TRIG_OFFSET_TPC),
     fTriggerTime  (0),
     fBeamGateTime (0)
@@ -60,9 +60,15 @@ dataprov::DetectorClocks::DetectorClocks(fhicl::ParameterSet const& pset)
 
 }
 
+
+//------------------------------------------------------------------
+bool dataprov::DetectorClocks::Update(uint64_t ts)
+{
+  return true;
+}
+
 //------------------------------------------------------------------
 bool dataprov::DetectorClocks::Configure(fhicl::ParameterSet const& pset)
-//------------------------------------------------------------------
 {
 
   // Read fcl parameters

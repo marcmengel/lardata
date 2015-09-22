@@ -1,19 +1,21 @@
 #include "Utilities/DetectorClocksService.h"
+#include "TFile.h"
+#include "art/Persistency/RootDB/SQLite3Wrapper.h"
+#include "fhiclcpp/make_ParameterSet.h"
 
 //-----------------------------------------------------------------------------------------
 util::DetectorClocksService::DetectorClocksService(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
-  : fConfigName(kInheritConfigTypeMax,""),
-    fConfigValue(kInheritConfigTypeMax,0),
-    fTrigModuleName("")
-//----------------------------------------------------------------------------------------
 {
-
+  
   reconfigure(pset);
-
+  
   reg.sPreProcessEvent.watch (this, &DetectorClocksService::preProcessEvent);
-  reg.sPostOpenFile.watch    (this, &DetectorClocksService::postOpenFile );
-  reg.sPreBeginRun.watch     (this, &DetectorClocksService::preBeginRun  );
-
+  reg.sPostOpenFile.watch    (this, &DetectorClocksService::postOpenFile);
+  reg.sPreBeginRun.watch     (this, &DetectorClocksService::preBeginRun);
+  
+  fClocks.reset(new dataprov::DetectorClocks());
+  this->reconfigure(pset);
+  
 }
 
 //------------------------------------------------------------------
@@ -29,13 +31,15 @@ void util::DetectorClocksService::preProcessEvent(const art::Event& evt)
 //------------------------------------------------------------
 {
   art::Handle<std::vector<raw::Trigger> > trig_handle;
-  evt.getByLabel(fTrigModuleName, trig_handle);
+  evt.getByLabel(fClocks->TrigModuleName(), trig_handle);
 
+  std::vector<std::string> cfgNames = fClocks->ConfigNames();
+  std::vector<double> cfgValues = fClocks->ConfigValues();
+  
   if(!trig_handle.isValid()) {
     // Trigger simulation has not run yet!
-    fClocks->SetTriggerTime(fConfigValue.at(kDefaultTrigTime),
-		   fConfigValue.at(kDefaultBeamTime)
-		   );
+    fClocks->SetTriggerTime(cfgValues.at(dataprov::kDefaultTrigTime),
+			    cfgValues.at(dataprov::kDefaultBeamTime) );
     return;
   }
 
@@ -57,26 +61,9 @@ void util::DetectorClocksService::preBeginRun(art::Run const& run)
 //------------------------------------------------------
 {
 
-  int nrun = run.id().run();
-  fClocks->ApplyParams();
-
-  /*
-  art::ServiceHandle<util::DatabaseUtil> DButil;
-  if (nrun != 0){
-    
-    double inpvalue = 0.;
-    
-    //get T0 for a given run. If it doesn't work return to default value.
-    if(DButil->GetTriggerOffsetFromDB(nrun,inpvalue)!=-1)
-      fConfigValue.at(kTriggerOffsetTPC) = inpvalue;
-    
-  }
-  else
-    std::cerr<< "run number == 0, not extracting info from DB\n" ;
-  */
+  if (run.id().run() < 0) return;
   
   fClocks->ApplyParams();
-  //  fAlreadyReadFromDB=true;
 
 }
 
@@ -143,7 +130,7 @@ void util::DetectorClocksService::postOpenFile(const std::string& filename)
 
       // Override parameters 
 
-      for(size_t i=0; i<kInheritConfigTypeMax; ++i)
+      for(size_t i=0; i<dataprov::kInheritConfigTypeMax; ++i)
 
 	if(config_count.at(i) && cfgValue.at(i) != config_value.at(i)) {
 
@@ -171,9 +158,5 @@ void util::DetectorClocksService::postOpenFile(const std::string& filename)
 
 }
 
-namespace util{
-
-  DEFINE_ART_SERVICE(DetectorClocksService)
-
-} // namespace util  
+DEFINE_ART_SERVICE(util::DetectorClocksService)
 

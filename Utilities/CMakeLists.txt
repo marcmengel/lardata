@@ -58,8 +58,8 @@ simple_plugin(DatabaseUtil "service"
 
 simple_plugin(DetectorPropertiesService "service"
               DataProviders
-              TimeService_service
-              LArProperties_service
+              DetectorClocksService_service
+              LArPropertiesService_service
 #              DatabaseUtil_service
               Geometry_service
               Geometry
@@ -87,6 +87,7 @@ simple_plugin(FileCatalogMetadataExtras "service"
 )
 
 simple_plugin(LArFFT "service"
+              DetectorPropertiesService_service
 	      ${ART_UTILITIES}
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}

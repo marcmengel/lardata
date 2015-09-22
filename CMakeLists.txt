@@ -61,6 +61,7 @@ add_subdirectory(AnalysisAlg)
 add_subdirectory(AnalysisBase)
 ## retired - obsolete code for ArgoNeut - needs an overhaul for art 1.08.xx
 ##add_subdirectory(Monitoring)
+add_subdirectory(DataProviders)
 add_subdirectory(OpticalDetectorData)
 add_subdirectory(RawData)
 add_subdirectory(RecoBase)

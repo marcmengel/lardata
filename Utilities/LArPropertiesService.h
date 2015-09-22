@@ -26,7 +26,7 @@ namespace util{
       void   reconfigure(fhicl::ParameterSet const& pset);
       void   preBeginRun(const art::Run& run);
 
-      const  LArProperties* getLArProperties() { return fProp.get();}
+      const  dataprov::LArProperties* getLArProperties() { return fProp.get();}
 
     private:
 

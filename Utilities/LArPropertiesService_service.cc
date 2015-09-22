@@ -33,9 +33,7 @@ util::LArPropertiesService::~LArPropertiesService()
 //----------------------------------------------
 void util::LArPropertiesService::preBeginRun(const art::Run& run)
 {
-  int nrun = run.id().run();
   fProp->Update(run.id().run());
-
 }
 
 

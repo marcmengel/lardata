@@ -24,9 +24,9 @@ namespace util{
 				art::ActivityRegistry& reg);
       virtual ~DetectorPropertiesService();
 
-      void   reconfigure(fhicl::ParameterSet const& pset);
-      void   preProcessEvent(const art::Event& evt);
-      void   postOpenFile(std::string& filename);
+      virtual void   reconfigure(fhicl::ParameterSet const& pset);
+      virtual void   preProcessEvent(const art::Event& evt);
+      virtual void   postOpenFile(const std::string& filename);
       
       const  dataprov::DetectorProperties* getDetectorProperties() { return fProp.get();}
       

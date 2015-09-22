@@ -8,8 +8,8 @@
 // Separation of service from data provider class:
 // jpaley@fnal.gov
 ////////////////////////////////////////////////////////////////////////
-#ifndef UTIL_DETECTORPROPERTIES_H
-#define UTIL_DETECTORPROPERTIES_H
+#ifndef DATAPROV_DETECTORPROPERTIES_H
+#define DATAPROV_DETECTORPROPERTIES_H
 
 #include "fhiclcpp/ParameterSet.h"
 #include "DataProviders/LArProperties.h"
@@ -30,7 +30,7 @@ namespace dataprov{
       virtual ~DetectorProperties();
       
       virtual void Configure(fhicl::ParameterSet const& p);
-      virtual bool Update(uint64_t ts)=0;
+      virtual bool Update(uint64_t ts);
       virtual bool UpdateClocks(const dataprov::DetectorClocks* clks);
 
       void SetGeometry(const geo::GeometryCore* g) { fGeo = g; }
@@ -112,10 +112,8 @@ namespace dataprov{
       std::vector<std::vector<std::vector<double> > > fXTicksOffsets;
       std::vector<std::vector<double> >               fDriftDirection;
 
-      bool	   fAlreadyReadFromDB; ///< tests whether the values have alread been picked up from the Database
-
       ::util::ElecClock fTPCClock;     ///< TPC electronics clock
     }; // class DetectorProperties
 } //namespace dataprov
 
-#endif // UTIL_DETECTOR_PROPERTIES_H
+#endif // DATAPROV_DETECTOR_PROPERTIES_H
