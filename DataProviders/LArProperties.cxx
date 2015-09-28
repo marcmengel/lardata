@@ -316,7 +316,7 @@ std::map<double, double> dataprov::LArProperties::RayleighSpectrum() const
 }
 
 //---------------------------------------------------------------------------------
-std::map<std::string, std::map<double,double> > dataprov::LArProperties::SurfaceReflectances()
+std::map<std::string, std::map<double,double> > dataprov::LArProperties::SurfaceReflectances() const
 {
   std::map<std::string, std::map<double, double> > ToReturn;
 
@@ -340,7 +340,7 @@ std::map<std::string, std::map<double,double> > dataprov::LArProperties::Surface
 }
 
 //---------------------------------------------------------------------------------
-std::map<std::string, std::map<double,double> > dataprov::LArProperties::SurfaceReflectanceDiffuseFractions()
+std::map<std::string, std::map<double,double> > dataprov::LArProperties::SurfaceReflectanceDiffuseFractions() const
 {
   std::map<std::string, std::map<double, double> > ToReturn;
 

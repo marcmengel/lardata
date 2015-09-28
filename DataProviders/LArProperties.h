@@ -90,8 +90,8 @@ namespace dataprov {
     std::map<double, double> AbsLengthSpectrum() const;
     std::map<double, double> RayleighSpectrum() const;
 	
-    std::map<std::string, std::map<double, double> > SurfaceReflectances();
-    std::map<std::string, std::map<double, double> > SurfaceReflectanceDiffuseFractions();
+    std::map<std::string, std::map<double, double> > SurfaceReflectances() const;
+    std::map<std::string, std::map<double, double> > SurfaceReflectanceDiffuseFractions() const;
 	
     void SetTemperature(double temp) { fTemperature = temp;}
     void SetElectronlifetime(double lt) { fElectronlifetime = lt; }
