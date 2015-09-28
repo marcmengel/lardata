@@ -11,9 +11,9 @@
 
 #include "fhiclcpp/ParameterSet.h"
 
-#include "Utilities/LArProperties.h"
+#include "Utilities/LArPropertiesService.h"
 #include "Geometry/Geometry.h"
-#include "Utilities/DetectorProperties.h"
+#include "Utilities/DetectorPropertiesService.h"
 #include <vector>
 
 namespace recob { 
@@ -54,8 +54,7 @@ namespace calo{
   private:
 
     art::ServiceHandle<geo::Geometry> geom; 
-    art::ServiceHandle<util::LArProperties> LArProp;
-    art::ServiceHandle<util::DetectorProperties> detprop;
+    const dataprov::DetectorProperties* detprop;
 
     double dEdx_from_dQdx_e(double dQdx_e,double time, double T0=0) const;
    

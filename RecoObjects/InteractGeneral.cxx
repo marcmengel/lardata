@@ -11,7 +11,6 @@
 #include <cmath>
 #include "RecoObjects/InteractGeneral.h"
 #include "RecoObjects/SurfXYZPlane.h"
-#include "Utilities/LArProperties.h"
 #include "cetlib/exception.h"
 
 namespace trkf {

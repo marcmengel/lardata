@@ -11,7 +11,7 @@
 #include <cmath>
 #include "RecoObjects/InteractPlane.h"
 #include "RecoObjects/SurfPlane.h"
-#include "Utilities/LArProperties.h"
+#include "Utilities/LArPropertiesService.h"
 #include "cetlib/exception.h"
 
 namespace trkf {
@@ -70,7 +70,7 @@ namespace trkf {
   {
     // Get LAr service.
 
-    art::ServiceHandle<util::LArProperties> larprop;
+    const dataprov::LArProperties* larprop = art::ServiceHandle<util::LArPropertiesService>()->getLArProperties();
 
     // Make sure we are on a plane surface (throw exception if not).
 

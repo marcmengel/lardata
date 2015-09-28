@@ -12,7 +12,7 @@
 #include "RecoObjects/KHitWireX.h"
 #include "RecoObjects/SurfWireX.h"
 #include "Geometry/Geometry.h"
-#include "Utilities/DetectorProperties.h"
+#include "Utilities/DetectorPropertiesService.h"
 #include "cetlib/exception.h"
 
 namespace trkf {
@@ -34,7 +34,7 @@ namespace trkf {
     fHit(hit)
   {
     // Get services.
-    art::ServiceHandle<util::DetectorProperties> detprop;
+    const dataprov::DetectorProperties*  detprop = art::ServiceHandle<util::DetectorPropertiesService>()->getDetectorProperties();
 
     // Extract wire id.
     geo::WireID wireid = hit->WireID();

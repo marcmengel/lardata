@@ -84,11 +84,11 @@ namespace dataprov {
     bool CerenkovLightEnabled()                      const { return fEnableCerenkovLight;                         }
 	
 	
-    std::map<double, double>  SlowScintSpectrum();   
-    std::map<double, double>  FastScintSpectrum();
-    std::map<double, double>  RIndexSpectrum();
-    std::map<double, double>  AbsLengthSpectrum();
-    std::map<double, double>  RayleighSpectrum();
+    std::map<double, double> SlowScintSpectrum() const;   
+    std::map<double, double> FastScintSpectrum() const;
+    std::map<double, double> RIndexSpectrum() const;
+    std::map<double, double> AbsLengthSpectrum() const;
+    std::map<double, double> RayleighSpectrum() const;
 	
     std::map<std::string, std::map<double, double> > SurfaceReflectances();
     std::map<std::string, std::map<double, double> > SurfaceReflectanceDiffuseFractions();

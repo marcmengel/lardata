@@ -230,7 +230,7 @@ double dataprov::LArProperties::ElossVar(double mom, double mass) const
 }
 
 //---------------------------------------------------------------------------------
-std::map<double,double> dataprov::LArProperties::FastScintSpectrum()
+std::map<double,double> dataprov::LArProperties::FastScintSpectrum() const
 {
   if(fFastScintSpectrum.size()!=fFastScintEnergies.size()){
     throw cet::exception("Incorrect vector sizes in LArProperties")
@@ -247,7 +247,7 @@ std::map<double,double> dataprov::LArProperties::FastScintSpectrum()
 }
 
 //---------------------------------------------------------------------------------
-std::map<double, double> dataprov::LArProperties::SlowScintSpectrum()
+std::map<double, double> dataprov::LArProperties::SlowScintSpectrum() const
 {
   if(fSlowScintSpectrum.size()!=fSlowScintEnergies.size()){
       throw cet::exception("Incorrect vector sizes in LArProperties")
@@ -264,7 +264,7 @@ std::map<double, double> dataprov::LArProperties::SlowScintSpectrum()
 }
 
 //---------------------------------------------------------------------------------
-std::map<double, double> dataprov::LArProperties::RIndexSpectrum()
+std::map<double, double> dataprov::LArProperties::RIndexSpectrum() const
 {
   if(fRIndexSpectrum.size()!=fRIndexEnergies.size()){
       throw cet::exception("Incorrect vector sizes in LArProperties")
@@ -282,7 +282,7 @@ std::map<double, double> dataprov::LArProperties::RIndexSpectrum()
 
 
 //---------------------------------------------------------------------------------
-std::map<double, double> dataprov::LArProperties::AbsLengthSpectrum()
+std::map<double, double> dataprov::LArProperties::AbsLengthSpectrum() const
 {
   if(fAbsLengthSpectrum.size()!=fAbsLengthEnergies.size()){
     throw cet::exception("Incorrect vector sizes in LArProperties")
@@ -299,7 +299,7 @@ std::map<double, double> dataprov::LArProperties::AbsLengthSpectrum()
 }
 
 //---------------------------------------------------------------------------------
-std::map<double, double> dataprov::LArProperties::RayleighSpectrum()
+std::map<double, double> dataprov::LArProperties::RayleighSpectrum() const
 {
   if(fRayleighSpectrum.size()!=fRayleighEnergies.size()){
     throw cet::exception("Incorrect vector sizes in LArProperties")

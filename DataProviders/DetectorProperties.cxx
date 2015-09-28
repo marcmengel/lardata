@@ -56,6 +56,8 @@ namespace dataprov{
   //--------------------------------------------------------------------
   bool DetectorProperties::Update(uint64_t t) 
   {
+
+    CalculateXTicksParams();
     return true;
   }
 
@@ -65,6 +67,7 @@ namespace dataprov{
     fClocks = clks;
     
     fTPCClock = fClocks->TPCClock();
+    CalculateXTicksParams();
     return true;
   }
   
@@ -107,8 +110,9 @@ namespace dataprov{
     fTimeOffsetV       	      = p.get< double 	    >("TimeOffsetV"      );
     fTimeOffsetZ       	      = p.get< double 	    >("TimeOffsetZ"      );
     fInheritNumberTimeSamples = p.get<bool          >("InheritNumberTimeSamples", false);
-    fXTicksParamsLoaded = false;
-        
+
+    CalculateXTicksParams();
+    
     return;
   }
   
@@ -271,21 +275,19 @@ namespace dataprov{
   // Take an X coordinate, and convert to a number of ticks, the
   // charge deposit occured at t=0
  
-  double DetectorProperties::ConvertXToTicks(double X, int p, int t, int c)
+  double DetectorProperties::ConvertXToTicks(double X, int p, int t, int c) const
   {
-    if(!fXTicksParamsLoaded) CalculateXTicksParams();
     return (X / (fXTicksCoefficient * fDriftDirection.at(c).at(t)) +  fXTicksOffsets.at(c).at(t).at(p) );
   }
-
+  
 
 
   //-------------------------------------------------------------------
   // Take a cooridnate in ticks, and convert to an x position
   // assuming event deposit occured at t=0
  
-  double  DetectorProperties::ConvertTicksToX(double ticks, int p, int t, int c)
+  double  DetectorProperties::ConvertTicksToX(double ticks, int p, int t, int c) const
   {
-    if(!fXTicksParamsLoaded) CalculateXTicksParams();
     return (ticks - fXTicksOffsets.at(c).at(t).at(p)) * fXTicksCoefficient * fDriftDirection.at(c).at(t);  
   }
   
@@ -400,33 +402,29 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
       }
     }
 
-    fXTicksParamsLoaded=true;
   }
 
   //--------------------------------------------------------------------
   // Get scale factor for x<-->ticks
 
-  double DetectorProperties::GetXTicksCoefficient(int t, int c)
+  double DetectorProperties::GetXTicksCoefficient(int t, int c) const
   {
-    if(!fXTicksParamsLoaded) CalculateXTicksParams();
     return fXTicksCoefficient * fDriftDirection.at(c).at(t);
   }
 
   //--------------------------------------------------------------------
   // Get scale factor for x<-->ticks
 
-  double DetectorProperties::GetXTicksCoefficient()
+  double DetectorProperties::GetXTicksCoefficient() const
   {
-    if(!fXTicksParamsLoaded) CalculateXTicksParams();
     return fXTicksCoefficient;
   }
 
   //--------------------------------------------------------------------
   //  Get offset for x<-->ticks
 
-  double DetectorProperties::GetXTicksOffset(int p, int t, int c) 
+  double DetectorProperties::GetXTicksOffset(int p, int t, int c) const
   {
-    if(!fXTicksParamsLoaded) CalculateXTicksParams();
     return fXTicksOffsets.at(c).at(t).at(p);	
   }
 

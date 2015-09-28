@@ -15,8 +15,6 @@
 #include "cetlib/exception.h"
 
 #include "RecoObjects/KHitWireX.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/DetectorProperties.h"
 #include "Geometry/Geometry.h"
 
 namespace trkf {
@@ -47,8 +45,6 @@ namespace trkf {
     // Get services.
 
     art::ServiceHandle<geo::Geometry> geom;
-    art::ServiceHandle<util::LArProperties> larprop;
-    art::ServiceHandle<util::DetectorProperties> detprop;
 
     // Make a temporary map from channel number to KHitGroup objects.
     // The KHitGroup pointers are borrowed references to KHitGroup

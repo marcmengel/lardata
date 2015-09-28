@@ -15,7 +15,7 @@
 #define ElecClock_H
 
 #include "ClockConstants.h"
-#include "TimeServiceException.h"
+#include "DetectorClocksException.h"
 #include <iostream>
 namespace util {
   /**
@@ -35,7 +35,7 @@ namespace util {
 	fFramePeriod(frame_period),
 	fFrequency(frequency)
     { 
-      if( fFrequency <= 0 ) throw util::TimeServiceException("Negative frequency is prohibited!"); 
+      if( fFrequency <= 0 ) throw util::DetectorClocksException("Negative frequency is prohibited!"); 
     }
     
     /// Default destructor
