@@ -9,6 +9,7 @@
 #include "backtracker.fcl"
 #include "seedservice_argoneut.fcl"
 #include "timeservice_argoneut.fcl"
+#include "channelstatus_argoneut.fcl"
 
 BEGIN_PROLOG
 
@@ -23,6 +24,7 @@ argoneut_services:
  BackTracker:            @local::argoneut_backtracker
  SeedService:            @local::argoneut_seedservice
  TimeService:            @local::argoneut_timeservice
+ IChannelStatusService:  @local::argoneut_channelstatus
 }
 
 argoneut_simulation_services:
@@ -39,6 +41,7 @@ argoneut_simulation_services:
  BackTracker:            @local::argoneut_backtracker
  SeedService:            @local::argoneut_seedservice
  TimeService:            @local::argoneut_timeservice
+ IChannelStatusService:  @local::argoneut_channelstatus
 }
 
 
