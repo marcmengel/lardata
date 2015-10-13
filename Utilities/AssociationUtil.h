@@ -402,7 +402,7 @@ namespace util {
     std::vector<T>  const& a,
     std::vector<U>  const& b,
     art::Assns<T,U>      & assn,
-    std::vector<size_t>  & indices,
+    std::vector<size_t> const& indices,
     size_t                 indx = UINT_MAX
     );
 
@@ -768,7 +768,7 @@ bool util::CreateAssn(
 } // util::CreateAssn() [07]
 
 //----------------------------------------------------------------------
-// MARK CreateAssn_07
+// MARK CreateAssn_07a
 template<class T, class U>
 bool util::CreateAssn(
   art::EDProducer const& prod,
@@ -776,7 +776,7 @@ bool util::CreateAssn(
   std::vector<T>  const& a,
   std::vector<U>  const& /* b */,
   art::Assns<T,U>      & assn,
-  std::vector<size_t>  & indices,
+  std::vector<size_t> const& indices,
   size_t                 indx /* = UINT_MAX */
 ) {
   
@@ -787,8 +787,8 @@ bool util::CreateAssn(
     art::ProductID bid = prod.getProductID< std::vector<U> >(evt);
     art::Ptr<T> aptr(aid, indx, evt.productGetter(aid));
     auto const* getter = evt.productGetter(bid); // I don't want to know what it is
-    for(size_t i = 0; i < indices.size(); ++i){
-      art::Ptr<U> bptr(bid, indices[i], getter);
+    for(size_t index: indices){
+      art::Ptr<U> bptr(bid, index, getter);
       assn.addSingle(aptr, bptr);
     }
   }
