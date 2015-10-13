@@ -372,6 +372,44 @@ namespace util {
    * @brief Creates a single one-to-many association
    * @tparam T type of the new object to associate
    * @tparam U type of the many objects already in the data product or art::Ptr
+   * @param prod reference to the producer that will write the vector a
+   * @param evt reference to the current event
+   * @param a vector of data products that are in, or will be put into, evt
+   * @param b vector of the (new) objects to be associated to the one in a
+   * @param assn reference to association object where the new one will be put
+   * @param indices indices of the elements in b to be associated to the one in a
+   * @param indx index of the element in a to be associated with all the ones
+   *             in b (default: the last element)
+   * @return whether the operation was successful (can it ever fail??)
+   *
+   * Use this when the objects in b are not yet stored in the event and are in a
+   * std::vector collection instead.
+   * 
+   * The method gets the product id for those as well as for the element in a.
+   * Also specify the entries to use from the std::vector collection of
+   * U objects.
+   * 
+   * A "one-to-many" association is actually a number of one-to-one
+   * associations. If you want to keep the information of the order of the many,
+   * you may have to use an association with a data member (the third template
+   * parameter that we pretent not to exist).
+   */
+  // MARK CreateAssn_07a
+  template<class T, class U>
+  bool CreateAssn(
+    art::EDProducer const& prod,
+    art::Event           & evt,
+    std::vector<T>  const& a,
+    std::vector<U>  const& b,
+    art::Assns<T,U>      & assn,
+    std::vector<size_t>  & indices,
+    size_t                 indx = UINT_MAX
+    );
+
+  /**
+   * @brief Creates a single one-to-many association
+   * @tparam T type of the new object to associate
+   * @tparam U type of the many objects already in the data product or art::Ptr
    * @tparam Iter iterator to size_t-compatible elements
    * @param prod reference to the producer that will write the vector a
    * @param evt reference to the current event
@@ -729,6 +767,39 @@ bool util::CreateAssn(
   return true;
 } // util::CreateAssn() [07]
 
+//----------------------------------------------------------------------
+// MARK CreateAssn_07
+template<class T, class U>
+bool util::CreateAssn(
+  art::EDProducer const& prod,
+  art::Event           & evt,
+  std::vector<T>  const& a,
+  std::vector<U>  const& /* b */,
+  art::Assns<T,U>      & assn,
+  std::vector<size_t>  & indices,
+  size_t                 indx /* = UINT_MAX */
+) {
+  
+  if(indx == UINT_MAX) indx = a.size() - 1;
+  
+  try{
+    art::ProductID aid = prod.getProductID< std::vector<T> >(evt);
+    art::ProductID bid = prod.getProductID< std::vector<U> >(evt);
+    art::Ptr<T> aptr(aid, indx, evt.productGetter(aid));
+    auto const* getter = evt.productGetter(bid); // I don't want to know what it is
+    for(size_t i = 0; i < indices.size(); ++i){
+      art::Ptr<U> bptr(bid, indices[i], getter);
+      assn.addSingle(aptr, bptr);
+    }
+  }
+  catch(cet::exception &e){
+    mf::LogWarning("AssociationUtil")
+      << "unable to create requested art:Assns, exception thrown: " << e;
+    return false;
+  }
+  
+  return true;
+} // util::CreateAssn() [07a]
 
 //----------------------------------------------------------------------
 // MARK CreateAssn_08
