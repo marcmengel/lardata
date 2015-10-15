@@ -18,8 +18,8 @@ art_make( NO_PLUGINS
 			${CETLIB}
                         ${Boost_SYSTEM_LIBRARY}
            	        ${PQ}
-                        ${BOOST_SERIALIZATION}
-                        ${BOOST_DATE_TIME}
+                        ${Boost_SERIALIZATION_LIBRARY}
+                        ${Boost_DATE_TIME_LIBRARY}
 	                ${ROOT_CORE}
                         ${ROOT_CINT} 
                         ${ROOT_RIO}

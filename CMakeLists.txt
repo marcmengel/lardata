@@ -47,8 +47,6 @@ find_ups_product( postgresql v9_1_5 )
 find_ups_product( cetbuildtools v4_09_00 )
 
 #  Find all the libraries needed by our dependent CMakeList.txt files
-cet_find_library( BOOST_SERIALIZATION NAMES boost_serialization PATHS ENV BOOST_LIB NO_DEFAULT_PATH )
-cet_find_library( BOOST_DATE_TIME     NAMES boost_date_time     PATHS ENV BOOST_LIB NO_DEFAULT_PATH )
 cet_find_library( SIMULATIONBASE      NAMES SimulationBase      PATHS ENV NUTOOLS_LIB NO_DEFAULT_PATH )
 cet_find_library( PQ                  NAMES pq                  PATHS ENV POSTGRESQL_LIBRARIES NO_DEFAULT_PATH )
 
