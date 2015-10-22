@@ -106,6 +106,47 @@ namespace raw {
     return;
   }
 
+  //----------------------------------------------------------
+  void Compress(std::vector<short> &adc, 
+		raw::Compress_t     compress, 
+		unsigned int       &zerothreshold, 
+		int               &pedestal,
+		int                &nearestneighbor,
+		bool              fADCStickyCodeFeature)
+  { 
+    if(compress == raw::kHuffman) 
+      CompressHuffman(adc);
+    else if(compress == raw::kZeroSuppression) 
+      ZeroSuppression(adc,zerothreshold, pedestal, nearestneighbor, fADCStickyCodeFeature);
+    else if(compress == raw::kZeroHuffman){
+      ZeroSuppression(adc,zerothreshold, pedestal, nearestneighbor, fADCStickyCodeFeature);
+      CompressHuffman(adc);
+    }    
+
+    return;
+  }
+
+  //----------------------------------------------------------
+  void Compress(const boost::circular_buffer<std::vector<short>> &adcvec_neighbors,
+		std::vector<short> &adc,
+		raw::Compress_t     compress, 
+		unsigned int       &zerothreshold, 
+		int               &pedestal,
+		int                &nearestneighbor,
+		bool              fADCStickyCodeFeature)
+  { 
+    if(compress == raw::kHuffman) 
+      CompressHuffman(adc);
+    else if(compress == raw::kZeroSuppression) 
+      ZeroSuppression(adcvec_neighbors,adc,zerothreshold, pedestal, nearestneighbor, fADCStickyCodeFeature);
+    else if(compress == raw::kZeroHuffman){
+      ZeroSuppression(adcvec_neighbors,adc,zerothreshold, pedestal, nearestneighbor, fADCStickyCodeFeature);
+      CompressHuffman(adc);
+    }    
+
+    return;
+  }
+
 
   //----------------------------------------------------------
   // Zero suppression function
@@ -126,7 +167,7 @@ namespace raw {
     int blockcheck = 0;
 
     for(int i = 0; i < adcsize; ++i){
-      const int adc_current_value = std::abs(adc[i]);
+      int adc_current_value = std::abs(adc[i]);
     
       if(adc_current_value > zerothresholdsigned){
 
@@ -197,7 +238,7 @@ namespace raw {
     int endofblockcheck = 0;
 
     for(int i = 0; i < adcsize; ++i){
-      const int adc_current_value = std::abs(adc[i]);
+      int adc_current_value = std::abs(adc[i]);
 
       if(blockstartcheck==0){
 	if(adc_current_value>zerothresholdsigned){
@@ -232,6 +273,112 @@ namespace raw {
 	  }
 	  //block has ended
 	  else if(std::abs(adc[i+1]) <= zerothresholdsigned || std::abs(adc[i+2]) <= zerothresholdsigned){  
+	    endofblockcheck = 0;
+	    blockstartcheck = 0;
+	    nblocks++;	    
+	  }
+	  
+	  
+	} // end else
+      } // end if blockstartcheck == 1
+    }// end loop over adc size
+    
+    for(int i = 0; i < nblocks; ++i)
+      zerosuppressedsize += blocksize[i];
+    
+    
+    adc.resize(2+nblocks+nblocks+zerosuppressedsize);
+    zerosuppressed.resize(2+nblocks+nblocks+zerosuppressedsize);
+    
+    
+    int zerosuppressedcount = 0;
+    for(int i = 0; i < nblocks; ++i){
+      //zerosuppressedsize += blocksize[i];
+      for(int j = 0; j < blocksize[i]; ++j){
+	zerosuppressed[zerosuppressedcount] = adc[blockbegin[i] + j];
+	zerosuppressedcount++;
+      }
+    }
+    
+    adc[0] = adcsize; //fill first entry in adc with length of uncompressed vector
+    adc[1] = nblocks;
+    for(int i = 0; i < nblocks; ++i){
+      adc[i+2] = blockbegin[i];
+      adc[i+nblocks+2] = blocksize[i];
+    }
+    
+    
+    
+    for(int i = 0; i < zerosuppressedsize; ++i)
+      adc[i+nblocks+nblocks+2] = zerosuppressed[i];
+    
+    
+    // for(int i = 0; i < 2 + 2*nblocks + zerosuppressedsize; ++i)
+    //   std::cout << adc[i] << std::endl;
+    //adc.resize(2+nblocks+nblocks+zerosuppressedsize);
+  }
+
+  //----------------------------------------------------------
+  // Zero suppression function which merges blocks if they are 
+  // within parameter nearestneighbor of each other
+  // after subtracting pedestal value
+  void ZeroSuppression(std::vector<short> &adc, 
+		       unsigned int       &zerothreshold, 
+		       int               &pedestal,
+		       int                &nearestneighbor,
+		       bool              fADCStickyCodeFeature)
+  {
+   
+    const int adcsize = adc.size();
+    const int zerothresholdsigned = zerothreshold;
+    
+    std::vector<short> zerosuppressed(adcsize);
+    int maxblocks = adcsize/2 + 1;
+    std::vector<short> blockbegin(maxblocks);
+    std::vector<short> blocksize(maxblocks);
+    
+    int nblocks = 0;
+    int zerosuppressedsize = 0;
+ 
+    int blockstartcheck = 0;
+    int endofblockcheck = 0;
+
+    for(int i = 0; i < adcsize; ++i){
+      int adc_current_value = ADCStickyCodeCheck(adc[i],pedestal,fADCStickyCodeFeature);
+
+      if(blockstartcheck==0){
+	if(adc_current_value>zerothresholdsigned){
+	  if(nblocks>0){
+	    if(i-nearestneighbor<=blockbegin[nblocks-1]+blocksize[nblocks-1]+1){
+	      nblocks--;
+	      blocksize[nblocks] = i - blockbegin[nblocks] + 1;
+	      blockstartcheck = 1;
+	    }
+	    else{
+	      blockbegin[nblocks] = (i - nearestneighbor > 0) ? i - nearestneighbor : 0;
+	      blocksize[nblocks] = i - blockbegin[nblocks] + 1;
+	      blockstartcheck = 1;
+	    }
+	  }	
+	  else{
+	    blockbegin[nblocks] = (i - nearestneighbor > 0) ? i - nearestneighbor : 0;
+	    blocksize[nblocks] = i - blockbegin[nblocks] + 1;
+	    blockstartcheck = 1;	    
+	  }
+	}
+      }
+      else if(blockstartcheck==1){
+	if(adc_current_value>zerothresholdsigned){
+	  blocksize[nblocks]++;
+	  endofblockcheck = 0;
+	}
+	else{
+	  if(endofblockcheck<nearestneighbor){
+	    endofblockcheck++;
+	    blocksize[nblocks]++;
+	  }
+	  //block has ended
+	  else if(ADCStickyCodeCheck(adc[i+1],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned || ADCStickyCodeCheck(adc[i+2],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned){  
 	    endofblockcheck = 0;
 	    blockstartcheck = 0;
 	    nblocks++;	    
@@ -395,9 +542,126 @@ namespace raw {
     //adc.resize(2+nblocks+nblocks+zerosuppressedsize);
   }
 
+  //----------------------------------------------------------
+  // Zero suppression function which merges blocks if they are 
+  // within parameter nearest neighbor of each other and makes
+  // blocks if neighboring wires have nonzero blocks there
+  // after subtracting pedestal values
+  void ZeroSuppression(const boost::circular_buffer<std::vector<short>> &adcvec_neighbors,
+		       std::vector<short> &adc, 
+		       unsigned int       &zerothreshold, 
+		       int               &pedestal,
+		       int                &nearestneighbor,
+		       bool              fADCStickyCodeFeature)
+  {
+   
+    const int adcsize = adc.size();
+    const int zerothresholdsigned = zerothreshold;
+    
+    std::vector<short> zerosuppressed(adcsize);
+    const int maxblocks = adcsize/2 + 1;
+    std::vector<short> blockbegin(maxblocks);
+    std::vector<short> blocksize(maxblocks);
+    
+    int nblocks = 0;
+    int zerosuppressedsize = 0;
+ 
+    int blockstartcheck = 0;
+    int endofblockcheck = 0;
 
+    for(int i = 0; i < adcsize; ++i){
 
+      //find maximum adc value among all neighboring channels within the nearest neighbor channel distance
 
+      int adc_current_value = ADCStickyCodeCheck(adc[i],pedestal,fADCStickyCodeFeature);
+   
+      for(boost::circular_buffer<std::vector<short>>::const_iterator adcveciter = adcvec_neighbors.begin(); adcveciter!=adcvec_neighbors.end();++adcveciter){
+	const std::vector<short> &adcvec_current = *adcveciter;
+	const int adcvec_current_single = std::abs(adcvec_current[i] - pedestal);
+      
+	if(adc_current_value < adcvec_current_single){
+	  adc_current_value = adcvec_current_single;
+	}
+      
+      }
+      if(blockstartcheck==0){
+	if(adc_current_value>zerothresholdsigned){
+	  if(nblocks>0){
+	    if(i-nearestneighbor<=blockbegin[nblocks-1]+blocksize[nblocks-1]+1){
+	      nblocks--;
+	      blocksize[nblocks] = i - blockbegin[nblocks] + 1;
+	      blockstartcheck = 1;
+	    }
+	    else{
+	      blockbegin[nblocks] = (i - nearestneighbor > 0) ? i - nearestneighbor : 0;
+	      blocksize[nblocks] = i - blockbegin[nblocks] + 1;
+	      blockstartcheck = 1;
+	    }
+	  }	
+	  else{
+	    blockbegin[nblocks] = (i - nearestneighbor > 0) ? i - nearestneighbor : 0;
+	    blocksize[nblocks] = i - blockbegin[nblocks] + 1;
+	    blockstartcheck = 1;	    
+	  }
+	}
+      }
+      else if(blockstartcheck==1){
+	if(adc_current_value>zerothresholdsigned){
+	  blocksize[nblocks]++;
+	  endofblockcheck = 0;
+	}
+	else{
+	  if(endofblockcheck<nearestneighbor){
+	    endofblockcheck++;
+	    blocksize[nblocks]++;
+	  }
+	  //block has ended
+	  else if(ADCStickyCodeCheck(adc[i+1],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned || ADCStickyCodeCheck(adc[i+2],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned){  
+	    endofblockcheck = 0;
+	    blockstartcheck = 0;
+	    nblocks++;	    
+	  }
+	  
+	  
+	} // end else
+      } // end if blockstartcheck == 1
+    }// end loop over adc size
+    
+
+    for(int i = 0; i < nblocks; ++i)
+      zerosuppressedsize += blocksize[i];
+    
+    
+    adc.resize(2+nblocks+nblocks+zerosuppressedsize);
+    zerosuppressed.resize(2+nblocks+nblocks+zerosuppressedsize);
+    
+    
+    int zerosuppressedcount = 0;
+    for(int i = 0; i < nblocks; ++i){
+      //zerosuppressedsize += blocksize[i];
+      for(int j = 0; j < blocksize[i]; ++j){
+	zerosuppressed[zerosuppressedcount] = adc[blockbegin[i] + j];
+	zerosuppressedcount++;
+      }
+    }
+    
+    adc[0] = adcsize; //fill first entry in adc with length of uncompressed vector
+    adc[1] = nblocks;
+    for(int i = 0; i < nblocks; ++i){
+      adc[i+2] = blockbegin[i];
+      adc[i+nblocks+2] = blocksize[i];
+    }
+    
+    
+    
+    for(int i = 0; i < zerosuppressedsize; ++i)
+      adc[i+nblocks+nblocks+2] = zerosuppressed[i];
+    
+    
+    // for(int i = 0; i < 2 + 2*nblocks + zerosuppressedsize; ++i)
+    //   std::cout << adc[i] << std::endl;
+    //adc.resize(2+nblocks+nblocks+zerosuppressedsize);
+  }
 
 
   //----------------------------------------------------------
@@ -430,6 +694,37 @@ namespace raw {
   }
 
   //----------------------------------------------------------
+  // Reverse zero suppression function with pedestal re-addition
+  void ZeroUnsuppression(const std::vector<short>& adc, 
+			 std::vector<short>      &uncompressed,
+			 int               &pedestal)
+  {
+    const int lengthofadc = adc[0];
+    const int nblocks = adc[1];
+
+    uncompressed.resize(lengthofadc);
+    for (int i = 0;i < lengthofadc; ++i){
+      uncompressed[i] = pedestal;
+    }
+    
+    int zerosuppressedindex = nblocks*2 + 2;
+
+    for(int i = 0; i < nblocks; ++i){ //loop over each nonzero block of the compressed vector
+      
+      for(int j = 0; j < adc[2+nblocks+i]; ++j){//loop over each block size
+
+	//set uncompressed value
+	uncompressed[adc[2+i]+j] = adc[zerosuppressedindex];
+	zerosuppressedindex++;
+
+      }
+    }
+
+    return;
+  }
+
+
+  //----------------------------------------------------------
   // if the compression type is kNone, copy the adc vector into the uncompressed vector
   void Uncompress(const std::vector<short>& adc, 
 		  std::vector<short>      &uncompressed, 
@@ -454,6 +749,33 @@ namespace raw {
     return;
   }
   
+  //----------------------------------------------------------
+  // if the compression type is kNone, copy the adc vector into the uncompressed vector
+  void Uncompress(const std::vector<short>& adc, 
+		  std::vector<short>      &uncompressed, 
+		  int               &pedestal,
+		  raw::Compress_t          compress)
+  {
+    if(compress == raw::kHuffman) UncompressHuffman(adc, uncompressed);
+    else if(compress == raw::kZeroSuppression){
+      ZeroUnsuppression(adc, uncompressed, pedestal);
+    }
+    else if(compress == raw::kZeroHuffman){
+      UncompressHuffman(adc, uncompressed);
+      ZeroUnsuppression(adc, uncompressed, pedestal);
+    }
+    else if(compress == raw::kNone){
+      for(unsigned int i = 0; i < adc.size(); ++i) uncompressed[i] = adc[i];
+    }
+    else {
+      throw cet::exception("raw")
+        << "raw::Uncompress() does not support compression #"
+        << ((int) compress);
+    }
+    return;
+  }
+  
+
   // the current Huffman Coding scheme used by uBooNE is
   // based on differences between adc values in adjacent time bins
   // the code is 
@@ -799,6 +1121,27 @@ namespace raw {
     }// end loop over entries in adc
 
     return;
+  }
+
+  //--------------------------------------------------------
+  // need to decrement the bit you are looking at to determine the deltas as that is how
+  // the bits are set
+  int ADCStickyCodeCheck(const short &adc_value,
+			 const int &pedestal,
+			 bool fADCStickyCodeFeature){
+
+    int adc_return_value = std::abs(adc_value - pedestal);
+
+      if(!fADCStickyCodeFeature){
+	return adc_return_value;
+      }
+     // if DUNE 35t ADC sticky code feature is enabled in simulation, skip over ADC codes with LSBs of 0x00 or 0x3f
+      unsigned int sixlsbs = adc_value & onemask;
+      
+      if((sixlsbs==onemask || sixlsbs==0) && std::abs(adc_value - pedestal) < 64){ 
+	adc_return_value = 0; //set current adc value to zero if its LSBs are at sticky values and if it is within one MSB cell (64 ADC counts) of the pedestal value
+      }
+      return adc_return_value;
   }
 
 }
