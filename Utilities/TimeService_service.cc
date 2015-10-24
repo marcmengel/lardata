@@ -78,7 +78,7 @@ void util::TimeService::preProcessEvent(const art::Event& evt)
   art::Handle<std::vector<raw::Trigger> > trig_handle;
   evt.getByLabel(fTrigModuleName, trig_handle);
 
-  if(!trig_handle.isValid()) {
+if((!trig_handle.isValid()) || (trig_handle->empty())) {
     // Trigger simulation has not run yet!
     SetTriggerTime(fConfigValue.at(kDefaultTrigTime),
 		   fConfigValue.at(kDefaultBeamTime)
