@@ -68,10 +68,9 @@ standard_properties:
  AbsLengthEnergies: [ 4,     5,     6,     7,     8,     9,     10,    11   ]       
  AbsLengthSpectrum: [ 2000., 2000., 2000., 2000., 2000., 2000., 2000., 2000.] 
 
- # Rayleigh scattering length (cm) as a function of energy (eV) from arXiv:1502.04213v1, 
- # scaled by x1.13 so average over LAr scintillation spectrum is 66cm (N. Ishida et al, 1997)
- RayleighEnergies: [  2.95,  3.10,  3.54,  4.13,  4.96,  5.76,  6.53,  8.00,  8.40,  8.80,  9.00,  9.20,  9.40,  9.50,  9.60,  9.70,  9.80,  9.90,  10.0,  10.2,  10.4,  10.6,  10.8 ]
- RayleighSpectrum: [43400.,34900.,20000.,10800., 4800., 2250., 1170.,  367.,  257.,  174.,  141.,  114.,  90.6,  80.5,  71.1,  62.6,  54.7,  47.4,  40.7,  29.0,  19.4,  12.0,  6.66 ] 
+ # Rayleigh scattering length (cm) @ 90K as a function of energy (eV) from arXiv:1502.04213
+ RayleighEnergies: [   2.80,   3.00,   3.50,   4.00,  5.00,  6.00,  7.00,  8.00,  8.50,  9.00,  9.20,  9.40,  9.50,  9.60,  9.70,  9.80,  9.90,  10.0,  10.2,  10.4,  10.6, 10.8 ]
+ RayleighSpectrum: [ 47923., 35981., 18825., 10653., 3972., 1681., 750.9, 334.7, 216.8, 135.0, 109.7, 88.06, 78.32, 69.34, 61.06, 53.46, 46.50, 40.13, 28.91, 19.81, 12.61, 7.20 ]
 
  # Surface reflectivity data - vector of energy spectrum per
  #   surface type

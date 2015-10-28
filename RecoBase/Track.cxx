@@ -353,5 +353,37 @@ namespace recob{
 
     return false; //They are equal
   }
+  
+  //----------------------------------------------------------------------------
+  double Track::ZenithAngle() const 
+  {
+    /// Returns the zenith angle, the angle which the track makes with respect to the
+    /// y axis (vertical) in radians. The positive (negative) y direction returns pi (0)
+    /// Conversion from LArSoft co-ordinates to 'regular' cartesian co-ordinates is 
+    /// required and is done by; x -> y, y -> z, z -> x. (LAr -> vec)
+    
+    TVector3 CartVec;
+    CartVec[0] = fDir.front()[2]; // x = z(LAr)
+    CartVec[1] = fDir.front()[0]; // y = x(LAr)
+    CartVec[2] = fDir.front()[1]; // z = y(LAr)
 
+    return TMath::Pi() - CartVec.Theta();
+  }
+
+  //----------------------------------------------------------------------------
+  double Track::AzimuthAngle() const 
+  {
+    /// Returns the azimuthal angle, the angle which the track makes around the y axis
+    /// (vertical) in radians. The positive z direction returns 0.
+    /// Conversion from LArSoft co-ordinates to 'regular' cartesian co-ordinates is 
+    /// required and is done by; x -> y, y -> z, z -> x. (LAr -> vec)
+   
+    TVector3 CartVec;
+    CartVec[0] = fDir.front()[2]; // x = z(LAr)
+    CartVec[1] = fDir.front()[0]; // y = x(LAr)
+    CartVec[2] = fDir.front()[1]; // z = y(LAr)
+    
+    return CartVec.Phi();
+  }
+  
 }

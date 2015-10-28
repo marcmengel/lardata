@@ -1,12 +1,15 @@
-#ifndef MCSHOWER_CXX
-#define MCSHOWER_CXX
+#include "MCBase/MCShower.h"
 
-#include "MCShower.h"
+#include <stdexcept> // std::out_of_range
+#include <string> // std::out_of_range
 
 namespace sim {
 
   //-------------------------------------------------------------
-  void MCShower::Clear()
+  MCShower::~MCShower() = default;
+
+  //-------------------------------------------------------------
+  void MCShower::ClearData()
   //-------------------------------------------------------------
   {
     TLorentzVector invalid(kINVALID_DOUBLE,
@@ -39,22 +42,25 @@ namespace sim {
     
     fDaughterTrackID.clear();
     fPlaneCharge.clear();
+    fdQdx.clear();
   }
 
   //----------------------------------------------------
-  double MCShower::Charge(const size_t plane) const
+  double MCShower::Charge(size_t plane) const
   //----------------------------------------------------
   {
-    if(plane > fPlaneCharge.size()) {
-
-      std::cerr<<"\033[93m"<<"No charge stored for plane: "<<plane<<"\033[00m"<<std::endl;
-      return -1;
-
-    }
-      
+    if (plane >= fPlaneCharge.size())
+      throw std::out_of_range("No charge stored for plane " + std::to_string(plane));
     return fPlaneCharge[plane];
-  }
+  } // MCShower::Charge()
+
+  //----------------------------------------------------
+  double MCShower::dQdx(size_t plane) const
+  //----------------------------------------------------
+  {
+    if (plane >= fdQdx.size())
+      throw std::out_of_range("No dQ/dx stored for plane " + std::to_string(plane));
+    return fdQdx[plane];
+  } // MCShower::dQdx()
 
 }
-
-#endif
