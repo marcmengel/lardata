@@ -275,10 +275,12 @@ namespace raw {
 	    blocksize[nblocks]++;
 	  }
 	  //block has ended
-	  else if(std::abs(adc[i+1]) <= zerothresholdsigned || std::abs(adc[i+2]) <= zerothresholdsigned){  
-	    endofblockcheck = 0;
-	    blockstartcheck = 0;
-	    nblocks++;	    
+	  else if(i+2<adcsize){ //check if end of adc vector is near
+	    if(std::abs(adc[i+1]) <= zerothresholdsigned && std::abs(adc[i+2]) <= zerothresholdsigned){  
+	      endofblockcheck = 0;
+	      blockstartcheck = 0;
+	      nblocks++;	    
+	    }
 	  }
 	  
 	  
@@ -385,13 +387,13 @@ namespace raw {
 	    blocksize[nblocks]++;
 	  }
 	  //block has ended
-	  else if(ADCStickyCodeCheck(adc[i+1],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned || ADCStickyCodeCheck(adc[i+2],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned){  
-	    endofblockcheck = 0;
-	    blockstartcheck = 0;
-	    nblocks++;	    
-	  }
-	  
-	  
+	  else if(i+2<adcsize){ //check if end of adc vector is near
+	    if(ADCStickyCodeCheck(adc[i+1],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned && ADCStickyCodeCheck(adc[i+2],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned){  
+	      endofblockcheck = 0;
+	      blockstartcheck = 0;
+	      nblocks++;	    
+	    }
+	  }	  
 	} // end else
       } // end if blockstartcheck == 1
     }// end loop over adc size
@@ -507,12 +509,13 @@ namespace raw {
 	    blocksize[nblocks]++;
 	  }
 	  //block has ended
-	  else if(std::abs(adc[i+1]) <= zerothresholdsigned || std::abs(adc[i+2]) <= zerothresholdsigned){  
-	    endofblockcheck = 0;
-	    blockstartcheck = 0;
-	    nblocks++;	    
+	  else  if(i+2<adcsize){ //check if end of adc vector is near
+	    if(std::abs(adc[i+1]) <= zerothresholdsigned && std::abs(adc[i+2]) <= zerothresholdsigned){  
+	      endofblockcheck = 0;
+	      blockstartcheck = 0;
+	      nblocks++;	    
+	    }
 	  }
-	  
 	  
 	} // end else
       } // end if blockstartcheck == 1
@@ -633,12 +636,14 @@ namespace raw {
 	    blocksize[nblocks]++;
 	  }
 	  //block has ended
-	  else if(ADCStickyCodeCheck(adc[i+1],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned || ADCStickyCodeCheck(adc[i+2],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned){  
-	    endofblockcheck = 0;
-	    blockstartcheck = 0;
-	    nblocks++;	    
+
+	  else  if(i+2<adcsize){ //check if end of adc vector is near
+	    if(ADCStickyCodeCheck(adc[i+1],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned && ADCStickyCodeCheck(adc[i+2],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned){  
+	      endofblockcheck = 0;
+	      blockstartcheck = 0;
+	      nblocks++;	    
+	    }
 	  }
-	  
 	  
 	} // end else
       } // end if blockstartcheck == 1
