@@ -194,6 +194,8 @@ namespace raw {
       } 
     }
 
+
+
     adc.resize(2+nblocks+nblocks+zerosuppressedsize);
 
     adc[0] = adcsize; //fill first entry in adc with length of uncompressed vector
@@ -243,7 +245,8 @@ namespace raw {
       if(blockstartcheck==0){
 	if(adc_current_value>zerothresholdsigned){
 	  if(nblocks>0){
-	    if(i-nearestneighbor<=blockbegin[nblocks-1]+blocksize[nblocks-1]+1){
+	    if((i-nearestneighbor)<=(blockbegin[nblocks-1]+blocksize[nblocks-1]+1)){
+	  
 	      nblocks--;
 	      blocksize[nblocks] = i - blockbegin[nblocks] + 1;
 	      blockstartcheck = 1;
@@ -282,7 +285,11 @@ namespace raw {
 	} // end else
       } // end if blockstartcheck == 1
     }// end loop over adc size
-    
+
+    if(blockstartcheck==1){ // we reached the end of the adc vector with the block still going
+      ++nblocks;
+    }
+
     for(int i = 0; i < nblocks; ++i)
       zerosuppressedsize += blocksize[i];
     
@@ -389,6 +396,11 @@ namespace raw {
       } // end if blockstartcheck == 1
     }// end loop over adc size
     
+    if(blockstartcheck==1){ // we reached the end of the adc vector with the block still going
+      ++nblocks;
+    }
+
+
     for(int i = 0; i < nblocks; ++i)
       zerosuppressedsize += blocksize[i];
     
@@ -506,6 +518,11 @@ namespace raw {
       } // end if blockstartcheck == 1
     }// end loop over adc size
     
+    if(blockstartcheck==1){ // we reached the end of the adc vector with the block still going
+      ++nblocks;
+    }
+
+
 
     for(int i = 0; i < nblocks; ++i)
       zerosuppressedsize += blocksize[i];
@@ -627,6 +644,11 @@ namespace raw {
       } // end if blockstartcheck == 1
     }// end loop over adc size
     
+    if(blockstartcheck==1){ // we reached the end of the adc vector with the block still going
+      ++nblocks;
+    }
+
+
 
     for(int i = 0; i < nblocks; ++i)
       zerosuppressedsize += blocksize[i];
