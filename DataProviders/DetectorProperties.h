@@ -14,24 +14,25 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "DataProviders/LArProperties.h"
 #include "DataProviders/DetectorClocks.h"
-#include "Geometry/Geometry.h"
+#include "DataProviders/IDetectorProperties.h"
 
 ///General LArSoft Utilities
 namespace dataprov{
   
-    class DetectorProperties {
+  class DetectorProperties : public IDetectorProperties {
     public:
 
       DetectorProperties();
       DetectorProperties(fhicl::ParameterSet const& pset, 
 			 const geo::GeometryCore* geo,
-			 const dataprov::LArProperties* lp,
-			 const dataprov::DetectorClocks* c);
+			 const dataprov::ILArProperties* lp,
+			 const dataprov::IDetectorClocks* c);
+      DetectorProperties(DetectorProperties const&) = delete;
       virtual ~DetectorProperties();
       
-      virtual void Configure(fhicl::ParameterSet const& p);
-      virtual bool Update(uint64_t ts);
-      virtual bool UpdateClocks(const dataprov::DetectorClocks* clks);
+      void Configure(fhicl::ParameterSet const& p);
+      bool Update(uint64_t ts);
+      bool UpdateClocks(const dataprov::IDetectorClocks* clks);
 
       void SetGeometry(const geo::GeometryCore* g) { fGeo = g; }
       void SetLArProperties(const dataprov::LArProperties* lp) { fLP = lp; }
@@ -40,47 +41,47 @@ namespace dataprov{
       void SetNumberTimeSamples(unsigned int nsamp) { fNumberTimeSamples=nsamp;}
       // Accessors.
 
-      virtual double Efield(unsigned int planegap=0) const; ///< kV/cm
+      virtual double Efield(unsigned int planegap=0) const override; ///< kV/cm
       void SetEfield(std::vector<double> e) { fEfield = e;}
 
-      virtual double DriftVelocity(double efield=0., double temperature=0.) const;  ///< cm/us
+      virtual double DriftVelocity(double efield=0., double temperature=0.) const override;  ///< cm/us
       
       /// dQ/dX in electrons/cm, returns dE/dX in MeV/cm.
-      virtual double BirksCorrection(double dQdX) const;
-      virtual double ModBoxCorrection(double dQdX) const;
+      virtual double BirksCorrection(double dQdX) const override;
+      virtual double ModBoxCorrection(double dQdX) const override;
 
-      virtual double ElectronLifetime() const { return fElectronlifetime; }   //< microseconds
+      virtual double ElectronLifetime() const override { return fElectronlifetime; }   //< microseconds
       
-      double       SamplingRate()      const { return fTPCClock.TickPeriod() * 1.e3; }
-      double       ElectronsToADC()    const { return fElectronsToADC; }
-      unsigned int NumberTimeSamples() const { return fNumberTimeSamples; }
-      unsigned int ReadOutWindowSize() const { return fReadOutWindowSize; }
-      int          TriggerOffset()     const;
-      double       TimeOffsetU()       const { return fTimeOffsetU; };
-      double       TimeOffsetV()       const { return fTimeOffsetV; };
-      double       TimeOffsetZ()       const { return fTimeOffsetZ; };
+      virtual double       SamplingRate()      const override { return fTPCClock.TickPeriod() * 1.e3; }
+      virtual double       ElectronsToADC()    const override { return fElectronsToADC; }
+      virtual unsigned int NumberTimeSamples() const override { return fNumberTimeSamples; }
+      virtual unsigned int ReadOutWindowSize() const override { return fReadOutWindowSize; }
+      virtual int          TriggerOffset()     const override;
+      virtual double       TimeOffsetU()       const override{ return fTimeOffsetU; };
+      virtual double       TimeOffsetV()       const override { return fTimeOffsetV; };
+      virtual double       TimeOffsetZ()       const override{ return fTimeOffsetZ; };
 
-      double       ConvertXToTicks(double X, int p, int t, int c) const;
-      double       ConvertXToTicks(double X, geo::PlaneID const& planeid) const
+      virtual double       ConvertXToTicks(double X, int p, int t, int c) const override;
+      virtual double       ConvertXToTicks(double X, geo::PlaneID const& planeid) const override
         { return ConvertXToTicks(X, planeid.Plane, planeid.TPC, planeid.Cryostat); }
-      double       ConvertTicksToX(double ticks, int p, int t, int c) const;
-      double       ConvertTicksToX(double ticks, geo::PlaneID const& planeid) const
+      virtual double       ConvertTicksToX(double ticks, int p, int t, int c) const override;
+      virtual double       ConvertTicksToX(double ticks, geo::PlaneID const& planeid) const override
         { return ConvertTicksToX(ticks, planeid.Plane, planeid.TPC, planeid.Cryostat); }
 
-      double       GetXTicksOffset(int p, int t, int c) const ;
-      double       GetXTicksOffset(geo::PlaneID const& planeid) const
+      virtual double       GetXTicksOffset(int p, int t, int c) const override;
+      virtual double       GetXTicksOffset(geo::PlaneID const& planeid) const override
         { return GetXTicksOffset(planeid.Plane, planeid.TPC, planeid.Cryostat); }
-      double       GetXTicksCoefficient(int t, int c) const;
-      double       GetXTicksCoefficient(geo::TPCID const& tpcid) const
+      virtual double       GetXTicksCoefficient(int t, int c) const override;
+      virtual double       GetXTicksCoefficient(geo::TPCID const& tpcid) const override
         { return GetXTicksCoefficient(tpcid.TPC, tpcid.Cryostat); }
-      double       GetXTicksCoefficient() const ;
+      virtual double       GetXTicksCoefficient() const override;
 
       // The following methods convert between TDC counts (SimChannel time) and
       // ticks (RawDigit/Wire time).
-      double       ConvertTDCToTicks(double tdc) const;
-      double       ConvertTicksToTDC(double ticks) const;
+      virtual double       ConvertTDCToTicks(double tdc) const override;
+      virtual double       ConvertTicksToTDC(double ticks) const override;
 
-      bool         InheritNumberTimeSamples() const { return fInheritNumberTimeSamples; }
+      virtual bool         InheritNumberTimeSamples() const override { return fInheritNumberTimeSamples; }
       
     private:
 
@@ -90,8 +91,8 @@ namespace dataprov{
             
       void         CalculateXTicksParams();
       
-      const dataprov::LArProperties* fLP;
-      const dataprov::DetectorClocks* fClocks;
+      const dataprov::ILArProperties* fLP;
+      const dataprov::IDetectorClocks* fClocks;
       const geo::GeometryCore* fGeo;
       
       std::vector< double >          fEfield;           ///< kV/cm

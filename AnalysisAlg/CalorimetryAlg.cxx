@@ -25,7 +25,7 @@ namespace calo{
   {
      this->reconfigure( pset);
 
-     detprop = art::ServiceHandle<util::DetectorPropertiesService>()->getDetectorProperties();
+     detprop = art::ServiceHandle<util::IDetectorPropertiesService>()->provider();
   }
 
   //--------------------------------------------------------------------

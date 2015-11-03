@@ -8,7 +8,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 
-#include "GeometryUtilities.h"
+#include "Utilities/GeometryUtilities.h"
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 //#include "PxHitConverter.h"
 
@@ -31,9 +31,9 @@ namespace util{
   GeometryUtilities::GeometryUtilities() 
   {
     //_name = "GeometryUtilities";
-    detp = art::ServiceHandle<util::DetectorPropertiesService>()->getDetectorProperties();
+    detp = lar::providerFrom<util::IDetectorPropertiesService>();
  
-    larp = art::ServiceHandle<util::LArPropertiesService>()->getLArProperties();
+    larp = lar::providerFrom<util::ILArPropertiesService>();
     
     Reconfigure();
   }

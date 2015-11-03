@@ -7,14 +7,14 @@
 
 // LArSoft includes
 #include "Utilities/DetectorPropertiesService.h"
-#include "DataProviders/LArProperties.h"
+#include "DataProviders/ILArProperties.h"
 #include "Geometry/Geometry.h"
 #include "Geometry/CryostatGeo.h"
 #include "Geometry/TPCGeo.h"
 #include "Geometry/PlaneGeo.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "Utilities/LArPropertiesService.h"
-#include "Utilities/DetectorClocksService.h"
+#include "Utilities/ILArPropertiesService.h"
+#include "Utilities/IDetectorClocksService.h"
 
 // Art includes
 #include "art/Persistency/RootDB/SQLite3Wrapper.h"
@@ -37,17 +37,12 @@ namespace util{
 
     geo::GeometryCore const* geo = static_cast<geo::GeometryCore const*>
  (&*(art::ServiceHandle<geo::Geometry>()));
-
-    const dataprov::LArProperties* lp = art::ServiceHandle<util::LArPropertiesService>()->getLArProperties();
-    const dataprov::DetectorClocks* clks = art::ServiceHandle<util::DetectorClocksService>()->getDetectorClocks();
+    
+    const dataprov::ILArProperties* lp = lar::providerFrom<util::ILArPropertiesService>();
+    
+    const dataprov::IDetectorClocks* clks = lar::providerFrom<util::IDetectorClocksService>();
     
     fProp.reset(new dataprov::DetectorProperties(pset,geo,lp,clks));
-  }
-
-  //--------------------------------------------------------------------
-  DetectorPropertiesService::~DetectorPropertiesService() 
-  {
-    
   }
 
   //--------------------------------------------------------------------
@@ -65,8 +60,7 @@ namespace util{
   void DetectorPropertiesService::preProcessEvent(const art::Event& evt)
   {
     // Make sure TPC Clock is updated with TimeService (though in principle it shouldn't change
-    art::ServiceHandle<util::DetectorClocksService> clks;
-    fProp->UpdateClocks(art::ServiceHandle<util::DetectorClocksService>()->getDetectorClocks());
+    fProp->UpdateClocks(lar::providerFrom<util::IDetectorClocksService>());
   }
 
   //--------------------------------------------------------------------
@@ -199,6 +193,6 @@ namespace util{
 
 namespace util{
  
-  DEFINE_ART_SERVICE(DetectorPropertiesService)
+  DEFINE_ART_SERVICE_INTERFACE_IMPL(util::DetectorPropertiesService, util::IDetectorPropertiesService)
 
 } // namespace util

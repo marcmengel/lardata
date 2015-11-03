@@ -16,7 +16,6 @@
 #include "Geometry/CryostatGeo.h"
 #include "Geometry/TPCGeo.h"
 #include "Geometry/PlaneGeo.h"
-#include "Utilities/DatabaseUtil.h"
 #include "SimpleTypesAndConstants/PhysicalConstants.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -33,12 +32,12 @@ namespace dataprov{
   {
 
   }
-
+    
   //--------------------------------------------------------------------
   DetectorProperties::DetectorProperties(fhicl::ParameterSet const& pset,
 					 const geo::GeometryCore* geo,
-					 const dataprov::LArProperties* lp,
-					 const dataprov::DetectorClocks* c):
+					 const dataprov::ILArProperties* lp,
+					 const dataprov::IDetectorClocks* c):
     fLP(lp), fClocks(c), fGeo(geo)
   {
     Configure(pset);
@@ -62,7 +61,7 @@ namespace dataprov{
   }
 
   //--------------------------------------------------------------------
-  bool DetectorProperties::UpdateClocks(const dataprov::DetectorClocks* clks) 
+  bool DetectorProperties::UpdateClocks(const dataprov::IDetectorClocks* clks) 
   {
     fClocks = clks;
     

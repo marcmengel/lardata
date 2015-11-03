@@ -25,11 +25,6 @@ util::LArPropertiesService::LArPropertiesService(fhicl::ParameterSet const& pset
   reg.sPreBeginRun.watch(this, &LArPropertiesService::preBeginRun);
 }
 
-//------------------------------------------------
-util::LArPropertiesService::~LArPropertiesService()
-{
-}
-
 //----------------------------------------------
 void util::LArPropertiesService::preBeginRun(const art::Run& run)
 {
@@ -49,6 +44,6 @@ void util::LArPropertiesService::reconfigure(fhicl::ParameterSet const& pset)
 //------------------------------------------------
 namespace util{
  
-  DEFINE_ART_SERVICE(LArPropertiesService)
+  DEFINE_ART_SERVICE_INTERFACE_IMPL(util::LArPropertiesService, util::ILArPropertiesService)
 
 } // namespace util

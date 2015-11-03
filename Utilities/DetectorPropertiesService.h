@@ -15,20 +15,21 @@
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "art/Framework/Principal/Run.h"
 #include "DataProviders/DetectorProperties.h"
+#include "Utilities/IDetectorPropertiesService.h"
 
 ///General LArSoft Utilities
 namespace util{
-  class DetectorPropertiesService {
+  class DetectorPropertiesService : public IDetectorPropertiesService {
+
     public:
       DetectorPropertiesService(fhicl::ParameterSet const& pset,
 				art::ActivityRegistry& reg);
-      virtual ~DetectorPropertiesService();
 
-      virtual void   reconfigure(fhicl::ParameterSet const& pset);
-      virtual void   preProcessEvent(const art::Event& evt);
-      virtual void   postOpenFile(const std::string& filename);
+      virtual void   reconfigure(fhicl::ParameterSet const& pset) override;
+      void   preProcessEvent(const art::Event& evt);
+      void   postOpenFile(const std::string& filename);
       
-      const  dataprov::DetectorProperties* getDetectorProperties() { return fProp.get();}
+      virtual const provider_type* provider() const override { return fProp.get();}
       
     private:
 
@@ -39,5 +40,5 @@ namespace util{
       
     }; // class DetectorPropertiesService
 } //namespace utils
-DECLARE_ART_SERVICE(util::DetectorPropertiesService, LEGACY)
+DECLARE_ART_SERVICE_INTERFACE_IMPL(util::DetectorPropertiesService, util::IDetectorPropertiesService, LEGACY)
 #endif // DETPROPERTIES_SERVICE_H

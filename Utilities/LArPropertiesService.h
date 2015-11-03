@@ -15,18 +15,18 @@
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "art/Framework/Principal/Run.h"
 #include "DataProviders/LArProperties.h"
+#include "Utilities/ILArPropertiesService.h"
 
 ///General LArSoft Utilities
 namespace util{
-  class LArPropertiesService {
+  class LArPropertiesService : public ILArPropertiesService {
     public:
       LArPropertiesService(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
-      virtual ~LArPropertiesService();
 
-      void   reconfigure(fhicl::ParameterSet const& pset);
+      virtual void   reconfigure(fhicl::ParameterSet const& pset);
       void   preBeginRun(const art::Run& run);
 
-      const  dataprov::LArProperties* getLArProperties() { return fProp.get();}
+      virtual const  provider_type* provider() const override { return fProp.get();}
 
     private:
 
@@ -34,5 +34,5 @@ namespace util{
 
     }; // class LArPropertiesService
 } //namespace utils
-DECLARE_ART_SERVICE(util::LArPropertiesService, LEGACY)
+DECLARE_ART_SERVICE_INTERFACE_IMPL(util::LArPropertiesService, util::ILArPropertiesService, LEGACY)
 #endif // LARPROPERTIES_SERVICE_H

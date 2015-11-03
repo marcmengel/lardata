@@ -20,58 +20,49 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"
 
-namespace rh = dataprov::runhistory;
+namespace dataprov {
+  //-----------------------------------------------
+  RunHistory::RunHistory() :
+    fRun(-1), fNSubruns(0), fRunType(kUnknownRunType)
+  {
+  }
+  
+  //-----------------------------------------------
+  RunHistory::RunHistory(int run)
+  {
+    fRun=run;
+  }
+  
+  //------------------------------------------------
+  RunHistory::~RunHistory()
+  {
+  }
 
-//-----------------------------------------------
-rh::RunHistory::RunHistory() :
-  fRun(-1), fNSubruns(0), fRunType(rh::kUnknownRunType)
-{
-}
+  //------------------------------------------------
+  bool RunHistory::Update(uint64_t ts) 
+  {
+    if (ts == 0) return false;
 
-//-----------------------------------------------
-rh::RunHistory::RunHistory(int run, fhicl::ParameterSet const& pset)
-{
-  fRun=run;
-  this->Configure(pset);
-}
+    return true;
+  }
 
-//------------------------------------------------
-rh::RunHistory::~RunHistory()
-{
-}
-
-//------------------------------------------------
-bool rh::RunHistory::Configure(fhicl::ParameterSet const& pset)
-{  
-
-  return true;
-}
-
-//------------------------------------------------
-bool rh::RunHistory::Update(uint64_t ts) 
-{
-  if (ts == 0) return false;
-
-  return true;
-}
-
-//------------------------------------------------
-std::string rh::RunHistory::RunTypeAsString()
-{
-  switch(fRunType) {
-  case(rh::kProductionRun):
-    return std::string("Production");
-  case(rh::kCommissioningRun):
-    return std::string("Commissioning");
-  case(rh::kTestRun):
-    return std::string("Test");
-  case(rh::kPedestalRun):
-    return std::string("Pedestal");
-  case(rh::kCalibrationRun):
-    return std::string("Calibration");
-  case(rh::kUnknownRunType):
-  default:
-    return std::string("Uknown");
+  //------------------------------------------------
+  std::string RunHistory::RunTypeAsString() const
+  {
+    switch(fRunType) {
+    case(kProductionRun):
+      return std::string("Production");
+    case(kCommissioningRun):
+      return std::string("Commissioning");
+    case(kTestRun):
+      return std::string("Test");
+    case(kPedestalRun):
+      return std::string("Pedestal");
+    case(kCalibrationRun):
+      return std::string("Calibration");
+    case(kUnknownRunType):
+    default:
+      return std::string("Uknown");
+    }
   }
 }
-

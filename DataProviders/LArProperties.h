@@ -22,6 +22,7 @@
 #include <vector>
 #include <map>
 
+#include "DataProviders/ILArProperties.h"
 #include "fhiclcpp/ParameterSet.h"
 
 namespace dataprov {
@@ -36,62 +37,63 @@ namespace dataprov {
    * and not any content of the databases themselves.
    * @note 2: the database connection features for this base class have been removed
    */
-  class LArProperties {
+  class LArProperties : public ILArProperties {
       public:
     LArProperties();
     LArProperties(fhicl::ParameterSet const& pset);
+    LArProperties(LArProperties const&) = delete;
     virtual ~LArProperties();
     
-    virtual bool   Configure(fhicl::ParameterSet const& pset);
-    virtual bool   Update(uint64_t ts=0) = 0;
+    bool   Configure(fhicl::ParameterSet const& pset);
+    bool   Update(uint64_t ts=0);
     
-    virtual double Density(double temperature=0.) const;                          ///< g/cm^3
+    virtual double Density(double temperature=0.) const override;                          ///< g/cm^3
     
-    virtual double Temperature()                   const; 				///< kelvin	    
-    double RadiationLength()  	     const { return fRadiationLength; } ///< g/cm^2      
+    virtual double Temperature()                   const override; 				///< kelvin	    
+    virtual double RadiationLength()  	     const override { return fRadiationLength; } ///< g/cm^2      
     
-    double Argon39DecayRate()              const { return fArgon39DecayRate; }  // decays per cm^3 per second
+    virtual double Argon39DecayRate()              const override { return fArgon39DecayRate; }  // decays per cm^3 per second
     
     /// Restricted mean dE/dx energy loss (MeV/cm).
-    double Eloss(double mom, double mass, double tcut) const;
+    virtual double Eloss(double mom, double mass, double tcut) const override;
     
  /// Energy loss fluctuation (sigma_E^2 / length in MeV^2/cm).
-    double ElossVar(double mom, double mass) const;
+    virtual double ElossVar(double mom, double mass) const override;
 	
-    double ScintResolutionScale() const { return fScintResolutionScale; }
-    double ScintFastTimeConst()   const { return fScintFastTimeConst;   } 
-    double ScintSlowTimeConst()   const { return fScintSlowTimeConst;   }
-    double ScintBirksConstant()   const { return fScintBirksConstant;   }
+    virtual double ScintResolutionScale() const override { return fScintResolutionScale; }
+    virtual double ScintFastTimeConst()   const override { return fScintFastTimeConst;   } 
+    virtual double ScintSlowTimeConst()   const override { return fScintSlowTimeConst;   }
+    virtual double ScintBirksConstant()   const override { return fScintBirksConstant;   }
 	
-    bool ScintByParticleType()    const { return fScintByParticleType;  }
+    virtual bool ScintByParticleType()    const override { return fScintByParticleType;  }
 
-    double ScintYield(bool prescale = false)         const { return fScintYield * ScintPreScale(prescale);}
-    double ScintPreScale(bool prescale = true)       const { return (prescale ? fScintPreScale : 1);      }
-    double ScintYieldRatio()                         const { return fScintYieldRatio;                     }
+    virtual double ScintYield(bool prescale = false)         const override { return fScintYield * ScintPreScale(prescale);}
+    virtual double ScintPreScale(bool prescale = true)       const override { return (prescale ? fScintPreScale : 1);      }
+    virtual double ScintYieldRatio()                         const override { return fScintYieldRatio;                     }
 	
-    double ProtonScintYield(bool prescale = false)   const { return fProtonScintYield * ScintPreScale(prescale);  }
-    double ProtonScintYieldRatio()                   const { return fProtonScintYieldRatio;                       }
-    double MuonScintYield(bool prescale = false)     const { return fMuonScintYield * ScintPreScale(prescale);    }
-    double MuonScintYieldRatio()                     const { return fMuonScintYieldRatio;                         }
-    double KaonScintYield(bool prescale = false)     const { return fKaonScintYield * ScintPreScale(prescale);    }
-    double KaonScintYieldRatio()                     const { return fKaonScintYieldRatio;                         }
-    double PionScintYield(bool prescale = false)     const { return fPionScintYield * ScintPreScale(prescale);    }
-    double PionScintYieldRatio()                     const { return fPionScintYieldRatio;                         }
-    double ElectronScintYield(bool prescale = false) const { return fElectronScintYield * ScintPreScale(prescale);}
-    double ElectronScintYieldRatio()                 const { return fElectronScintYieldRatio;                     }
-    double AlphaScintYield(bool prescale = false)    const { return fAlphaScintYield * ScintPreScale(prescale);   }
-    double AlphaScintYieldRatio()                    const { return fAlphaScintYieldRatio;                        }
-    bool CerenkovLightEnabled()                      const { return fEnableCerenkovLight;                         }
+    virtual double ProtonScintYield(bool prescale = false)   const override { return fProtonScintYield * ScintPreScale(prescale);  }
+    virtual double ProtonScintYieldRatio()                   const override { return fProtonScintYieldRatio;                       }
+    virtual double MuonScintYield(bool prescale = false)     const override { return fMuonScintYield * ScintPreScale(prescale);    }
+    virtual double MuonScintYieldRatio()                     const override { return fMuonScintYieldRatio;                         }
+    virtual double KaonScintYield(bool prescale = false)     const override { return fKaonScintYield * ScintPreScale(prescale);    }
+    virtual double KaonScintYieldRatio()                     const override { return fKaonScintYieldRatio;                         }
+    virtual double PionScintYield(bool prescale = false)     const override { return fPionScintYield * ScintPreScale(prescale);    }
+    virtual double PionScintYieldRatio()                     const override { return fPionScintYieldRatio;                         }
+    virtual double ElectronScintYield(bool prescale = false) const override { return fElectronScintYield * ScintPreScale(prescale);}
+    virtual double ElectronScintYieldRatio()                 const override { return fElectronScintYieldRatio;                     }
+    virtual double AlphaScintYield(bool prescale = false)    const override { return fAlphaScintYield * ScintPreScale(prescale);   }
+    virtual double AlphaScintYieldRatio()                    const override { return fAlphaScintYieldRatio;                        }
+    virtual bool CerenkovLightEnabled()                      const override { return fEnableCerenkovLight;                         }
 	
 	
-    std::map<double, double> SlowScintSpectrum() const;   
-    std::map<double, double> FastScintSpectrum() const;
-    std::map<double, double> RIndexSpectrum() const;
-    std::map<double, double> AbsLengthSpectrum() const;
-    std::map<double, double> RayleighSpectrum() const;
+    virtual std::map<double, double> SlowScintSpectrum() const override;   
+    virtual std::map<double, double> FastScintSpectrum() const override;
+    virtual std::map<double, double> RIndexSpectrum() const override;
+    virtual std::map<double, double> AbsLengthSpectrum() const override;
+    virtual std::map<double, double> RayleighSpectrum() const override;
 	
-    std::map<std::string, std::map<double, double> > SurfaceReflectances() const;
-    std::map<std::string, std::map<double, double> > SurfaceReflectanceDiffuseFractions() const;
+    virtual std::map<std::string, std::map<double, double> > SurfaceReflectances() const override;
+    virtual std::map<std::string, std::map<double, double> > SurfaceReflectanceDiffuseFractions() const override;
 	
     void SetTemperature(double temp) { fTemperature = temp;}
     void SetElectronlifetime(double lt) { fElectronlifetime = lt; }

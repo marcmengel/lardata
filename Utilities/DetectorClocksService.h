@@ -17,20 +17,20 @@
 #include "art/Framework/Principal/Event.h"
 
 #include "DataProviders/DetectorClocks.h"
+#include "Utilities/IDetectorClocksService.h"
 
 ///General LArSoft Utilities
 namespace util{
-  class DetectorClocksService {
+  class DetectorClocksService : public IDetectorClocksService {
   public:
     DetectorClocksService(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
-    virtual ~DetectorClocksService() {};
     
     virtual void   reconfigure(fhicl::ParameterSet const& pset);
-    virtual void   preBeginRun(const art::Run& run);
-    virtual void   preProcessEvent(const art::Event& evt);
-    virtual void   postOpenFile(const std::string& filename);
+    void   preBeginRun(const art::Run& run);
+    void   preProcessEvent(const art::Event& evt);
+    void   postOpenFile(const std::string& filename);
     
-    const  dataprov::DetectorClocks* getDetectorClocks() { return fClocks.get();}
+    virtual const provider_type* provider() const override { return fClocks.get();}
     
   private:
     
