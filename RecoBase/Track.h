@@ -103,6 +103,8 @@ namespace recob {
 
     double          Theta()                                     const;
     double          Phi()                                       const;
+    double          ZenithAngle()                               const;
+    double          AzimuthAngle()                              const;
 
     // Calculate rotation matrices between global (x,y,z) and local (u,v,w)
     // coordinate systems based on track direction (fDir).
@@ -139,8 +141,8 @@ inline const TMatrixD& recob::Track::VertexCovariance()                 const { 
 inline const TMatrixD& recob::Track::EndCovariance()                    const { return fCov.back();          }
 inline const double&   recob::Track::VertexMomentum()                   const { return fFitMomentum.front(); }
 inline const double&   recob::Track::EndMomentum()                      const { return fFitMomentum.back();  }
-inline double          recob::Track::Theta()                            const { return fXYZ.front().Theta(); }
-inline double          recob::Track::Phi()                              const { return fXYZ.front().Phi();   }
+inline double          recob::Track::Theta()                            const { return fDir.front().Theta(); }
+inline double          recob::Track::Phi()                              const { return fDir.front().Phi();   }
 
 
 #endif

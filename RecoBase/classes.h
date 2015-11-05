@@ -32,6 +32,8 @@
 #include "RecoBase/Wire.h"
 #include "RecoBase/PFParticle.h"
 #include "RecoBase/PCAxis.h"
+#include "RecoBase/TrackHitMeta.h"
+
 
 // make dummy variables of the PtrVector types so that we are
 // sure to generate the dictionaries for them
@@ -49,6 +51,8 @@ namespace {
   art::PtrVector<recob::Wire>       wpv;
   art::PtrVector<recob::PFParticle> partpv;
   art::PtrVector<recob::PCAxis>     pcapv;
+
+  art::PtrVector<recob::TrackHitMeta> thm;
 }
 
 //
@@ -72,6 +76,7 @@ template class std::vector<recob::OpHit>;
 template class std::vector<recob::OpFlash>;
 template class std::vector<recob::PFParticle>;
 template class std::vector<recob::PCAxis>;
+template class std::vector<recob::TrackHitMeta>;
 
 template class art::Ptr<recob::Cluster>;
 template class art::PtrVector<recob::Cluster>;
@@ -96,6 +101,9 @@ template class art::PtrVector<recob::OpHit>;
 
 template class art::Ptr<recob::OpFlash>;
 template class art::PtrVector<recob::OpFlash>;
+
+template class art::Ptr<recob::TrackHitMeta>;
+template class art::PtrVector<recob::TrackHitMeta>;
 
 template class std::pair< art::Ptr<recob::Cluster>,      art::Ptr<recob::EndPoint2D> >;
 template class std::pair< art::Ptr<recob::Cluster>,      art::Ptr<recob::Hit>        >;
@@ -142,6 +150,8 @@ template class std::pair< art::Ptr<recob::Track>,        art::Ptr<recob::Hit>   
 template class std::pair< art::Ptr<recob::Track>,        art::Ptr<recob::PFParticle> >;
 template class std::pair< art::Ptr<recob::Track>,        art::Ptr<recob::SpacePoint> >;
 template class std::pair< art::Ptr<recob::Track>,        art::Ptr<recob::Vertex>     >;
+//template class std::pair< art::Ptr<recob::Track>,        art::Ptr<recob::TrackHitMeta> >;
+//template class std::pair< art::Ptr<recob::TrackHitMeta>, art::Ptr<recob::Track>        >;
 template class std::pair< art::Ptr<recob::OpFlash>,      art::Ptr<recob::OpHit>      >;
 template class std::pair< art::Ptr<recob::OpFlash>,      art::Ptr<recob::Cluster>    >;
 template class std::pair< art::Ptr<recob::OpFlash>,      art::Ptr<recob::Track>      >;
@@ -203,6 +213,8 @@ template class art::Assns<recob::SpacePoint, recob::Track,      void>;
 template class art::Assns<recob::SpacePoint, recob::Shower,     void>;
 template class art::Assns<recob::Track,      recob::Cluster,    void>;
 template class art::Assns<recob::Track,      recob::Hit,        void>;
+template class art::Assns<recob::Track,      recob::Hit,        unsigned int>;
+template class art::Assns<recob::Track,      recob::Hit,        recob::TrackHitMeta>;
 template class art::Assns<recob::Track,      recob::PFParticle, void>;
 template class art::Assns<recob::Track,      recob::SpacePoint, void>;
 template class art::Assns<recob::Track,      recob::Vertex,     void>;
@@ -268,6 +280,8 @@ template class art::Wrapper< art::Assns<recob::SpacePoint, recob::PFParticle, vo
 template class art::Wrapper< art::Assns<recob::SpacePoint, recob::Shower,     void> >;
 template class art::Wrapper< art::Assns<recob::Track,      recob::Cluster,    void> >;
 template class art::Wrapper< art::Assns<recob::Track,      recob::Hit,        void> >;
+template class art::Wrapper< art::Assns<recob::Track,      recob::Hit,        unsigned int> >;
+template class art::Wrapper< art::Assns<recob::Track,      recob::Hit,        recob::TrackHitMeta> >;
 template class art::Wrapper< art::Assns<recob::Track,      recob::PFParticle, void> >;
 template class art::Wrapper< art::Assns<recob::Track,      recob::SpacePoint, void> >;
 template class art::Wrapper< art::Assns<recob::Track,      recob::Vertex,     void> >;
@@ -296,6 +310,8 @@ template class art::Wrapper< std::vector<recob::Vertex>                      >;
 template class art::Wrapper< std::vector<recob::Event>                	     >;
 template class art::Wrapper< std::vector<recob::OpHit>                	     >;
 template class art::Wrapper< std::vector<recob::OpFlash>                     >;
+template class art::Wrapper< std::vector<recob::TrackHitMeta>                >;
 template class art::Wrapper< std::vector<art::PtrVector<recob::Cluster> >    >;
 template class art::Wrapper< std::vector<art::PtrVector<recob::SpacePoint> > >;
-template class art::Wrapper< std::vector<art::PtrVector<recob::Track>      > >;
+template class art::Wrapper< std::vector<art::PtrVector<recob::Track> >      >;
+template class art::Wrapper< std::vector<art::PtrVector<recob::TrackHitMeta> > >;
