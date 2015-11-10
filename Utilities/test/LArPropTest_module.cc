@@ -12,7 +12,11 @@
 #include "art/Framework/Core/ModuleMacros.h" 
 #include "art/Framework/Core/EDAnalyzer.h"
 
-#include "Utilities/LArProperties.h"
+#include "Utilities/ILArPropertiesService.h"
+#include "Utilities/IDetectorPropertiesService.h"
+#include "DataProviders/ILArProperties.h"
+#include "DataProviders/IDetectorProperties.h"
+#include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 
 namespace util
 {
@@ -51,15 +55,16 @@ namespace util
 
     // Get services.
 
-    art::ServiceHandle<util::LArProperties> larprop;
+    dataprov::ILArProperties const* larprop = lar::providerFrom<util::ILArPropertiesService>();
+    dataprov::IDetectorProperties const* detprop = lar::providerFrom<util::IDetectorPropertiesService>();
 
     // Test (default) accessors.
 
     std::cout << "Density = " << larprop->Density() << " g/cm^3" << std::endl;
-    std::cout << "Drift velocity = " << larprop->DriftVelocity() << " cm/usec" << std::endl;
-    std::cout << "Efield = " << larprop->Efield() << " kV/cm" << std::endl;
+    std::cout << "Drift velocity = " << detprop->DriftVelocity() << " cm/usec" << std::endl;
+    std::cout << "Efield = " << detprop->Efield() << " kV/cm" << std::endl;
     std::cout << "Temperature = " << larprop->Temperature() << " Kelvin" << std::endl;
-    std::cout << "Electron lifetime = " << larprop->ElectronLifetime() << " usec" << std::endl;
+    std::cout << "Electron lifetime = " << detprop->ElectronLifetime() << " usec" << std::endl;
     std::cout << "Radiation Length = " << larprop->RadiationLength() << " g/cm^2" << std::endl;
     std::cout << "Radiation Length = " << larprop->RadiationLength()/larprop->Density()
 	      << " cm" << std::endl;
@@ -68,8 +73,8 @@ namespace util
 
     assert(larprop->Density() == larprop->Density(larprop->Temperature()));
     assert(larprop->Density() != larprop->Density(larprop->Temperature()+0.1));
-    assert(larprop->DriftVelocity() == larprop->DriftVelocity(larprop->Efield()));
-    assert(larprop->DriftVelocity() == larprop->DriftVelocity(larprop->Efield(),
+    assert(detprop->DriftVelocity() == detprop->DriftVelocity(detprop->Efield()));
+    assert(detprop->DriftVelocity() == detprop->DriftVelocity(detprop->Efield(),
 							      larprop->Temperature()));
 
     // Drift velocity vs. electric field.
@@ -82,7 +87,7 @@ namespace util
 	e = 0.666667;
       else if(i == 2)
 	e = 0.8;
-      double v = larprop->DriftVelocity(e);
+      double v = detprop->DriftVelocity(e);
       std::cout << std::setprecision(3) << std::setw(15) << e 
 		<< std::setprecision(4) << std::setw(15) << v << std::endl;
     }

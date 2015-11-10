@@ -1,7 +1,8 @@
 cet_enable_asserts()
 
 simple_plugin(LArPropTest "module"
-	      LArProperties_service
+              DataProviders
+	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
 	      ${FHICLCPP}
