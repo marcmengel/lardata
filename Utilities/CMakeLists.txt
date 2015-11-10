@@ -2,10 +2,7 @@
 art_make( NO_PLUGINS
           LIBRARY_NAME  Utilities
           LIB_LIBRARIES 
-	                DetectorPropertiesService_service
-                        LArPropertiesService_service
                         LArFFT_service
-                        DetectorClocksService_service
                         RecoBase
                         Geometry
                         ${ART_FRAMEWORK_CORE}
@@ -58,8 +55,6 @@ simple_plugin(DatabaseUtil "service"
 
 simple_plugin(DetectorPropertiesService "service"
               DataProviders
-              DetectorClocksService_service
-              LArPropertiesService_service
 #              DatabaseUtil_service
               Geometry_service
               Geometry
@@ -87,7 +82,6 @@ simple_plugin(FileCatalogMetadataExtras "service"
 )
 
 simple_plugin(LArFFT "service"
-              DetectorPropertiesService_service
 	      ${ART_UTILITIES}
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
