@@ -10,7 +10,7 @@
 
 #include "RecoObjects/Propagator.h"
 #include "RecoObjects/SurfXYZPlane.h"
-#include "Utilities/ILArPropertiesService.h"
+#include "Utilities/LArPropertiesService.h"
 #include "cetlib/exception.h"
 
 namespace trkf {
@@ -80,7 +80,7 @@ namespace trkf {
 
       // Get LAr service.
 
-      auto const * larprop = lar::providerFrom<util::ILArPropertiesService>();
+      auto const * larprop = lar::providerFrom<util::LArPropertiesService>();
 
       // Initialize propagation matrix to unit matrix (if specified).
 
@@ -471,7 +471,7 @@ namespace trkf {
 
     // Get LAr service.
 
-    auto const * larprop = lar::providerFrom<util::ILArPropertiesService>();
+    auto const * larprop = lar::providerFrom<util::LArPropertiesService>();
 
     // Calculate final energy.
 

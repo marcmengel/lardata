@@ -6,15 +6,15 @@
 // Framework includes
 
 // LArSoft includes
-#include "Utilities/DetectorPropertiesService.h"
-#include "DataProviders/ILArProperties.h"
+#include "Utilities/DetectorPropertiesServiceStandard.h"
+#include "DataProviders/LArProperties.h"
 #include "Geometry/Geometry.h"
 #include "Geometry/CryostatGeo.h"
 #include "Geometry/TPCGeo.h"
 #include "Geometry/PlaneGeo.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "Utilities/ILArPropertiesService.h"
-#include "Utilities/IDetectorClocksService.h"
+#include "Utilities/LArPropertiesService.h"
+#include "Utilities/DetectorClocksService.h"
 
 // Art includes
 #include "art/Persistency/RootDB/SQLite3Wrapper.h"
@@ -23,30 +23,30 @@
 namespace util{
 
   //--------------------------------------------------------------------
-  DetectorPropertiesService::DetectorPropertiesService(fhicl::ParameterSet const& pset, 
+  DetectorPropertiesServiceStandard::DetectorPropertiesServiceStandard(fhicl::ParameterSet const& pset, 
 					 art::ActivityRegistry &reg) 
   {
     this->reconfigure(pset);
 
     // Register for callbacks.
 
-    reg.sPostOpenFile.watch    (this, &DetectorPropertiesService::postOpenFile);
-    reg.sPreProcessEvent.watch (this, &DetectorPropertiesService::preProcessEvent);
+    reg.sPostOpenFile.watch    (this, &DetectorPropertiesServiceStandard::postOpenFile);
+    reg.sPreProcessEvent.watch (this, &DetectorPropertiesServiceStandard::preProcessEvent);
 
-    //    const geo::GeometryCore* geo = static_cast<const geo::GeometryCore*>(art::ServiceHandle<geo::Geometry>());
+    //    const geo::GeometryCore* geo = static_cast<const geo::GeometryCore*>(art::ServiceStandardHandle<geo::Geometry>());
 
     geo::GeometryCore const* geo = static_cast<geo::GeometryCore const*>
  (&*(art::ServiceHandle<geo::Geometry>()));
     
-    const dataprov::ILArProperties* lp = lar::providerFrom<util::ILArPropertiesService>();
+    const dataprov::LArProperties* lp = lar::providerFrom<util::LArPropertiesService>();
     
-    const dataprov::IDetectorClocks* clks = lar::providerFrom<util::IDetectorClocksService>();
+    const dataprov::DetectorClocks* clks = lar::providerFrom<util::DetectorClocksService>();
     
-    fProp.reset(new dataprov::DetectorProperties(pset,geo,lp,clks));
+    fProp.reset(new dataprov::DetectorPropertiesStandard(pset,geo,lp,clks));
   }
 
   //--------------------------------------------------------------------
-  void DetectorPropertiesService::reconfigure(fhicl::ParameterSet const& p)
+  void DetectorPropertiesServiceStandard::reconfigure(fhicl::ParameterSet const& p)
   {
     fProp->Configure(p);
     
@@ -57,16 +57,16 @@ namespace util{
   }
 
   //-------------------------------------------------------------
-  void DetectorPropertiesService::preProcessEvent(const art::Event& evt)
+  void DetectorPropertiesServiceStandard::preProcessEvent(const art::Event& evt)
   {
     // Make sure TPC Clock is updated with TimeService (though in principle it shouldn't change
-    fProp->UpdateClocks(lar::providerFrom<util::IDetectorClocksService>());
+    fProp->UpdateClocks(lar::providerFrom<util::DetectorClocksService>());
   }
 
   //--------------------------------------------------------------------
   //  Callback called after input file is opened.
 
-  void DetectorPropertiesService::postOpenFile(const std::string& filename)
+  void DetectorPropertiesServiceStandard::postOpenFile(const std::string& filename)
   {
     // Use this method to figure out whether to inherit configuration
     // parameters from previous jobs.
@@ -148,7 +148,7 @@ namespace util{
 	if(// fInheritNumberTimeSamples && 
 	   nNumberTimeSamples != 0 && 
 	   iNumberTimeSamples != fProp->NumberTimeSamples()) {
-	  mf::LogInfo("DetectorPropertiesService")
+	  mf::LogInfo("DetectorPropertiesServiceStandard")
 	    << "Overriding configuration parameter NumberTimeSamples using historical value.\n"
 	    << "  Configured value:        " << fProp->NumberTimeSamples() << "\n"
 	    << "  Historical (used) value: " << iNumberTimeSamples << "\n";
@@ -169,7 +169,7 @@ namespace util{
   //--------------------------------------------------------------------
   //  Determine whether a parameter set is a DetectorPropertiesService configuration.
   
-  bool DetectorPropertiesService::isDetectorPropertiesService(const fhicl::ParameterSet& ps)
+  bool DetectorPropertiesServiceStandard::isDetectorPropertiesService(const fhicl::ParameterSet& ps)
   {
     // This method uses heuristics to determine whether the parameter
     // set passed as argument is a DetectorPropertiesService configuration
@@ -193,6 +193,6 @@ namespace util{
 
 namespace util{
  
-  DEFINE_ART_SERVICE_INTERFACE_IMPL(util::DetectorPropertiesService, util::IDetectorPropertiesService)
+  DEFINE_ART_SERVICE_INTERFACE_IMPL(util::DetectorPropertiesServiceStandard, util::DetectorPropertiesService)
 
 } // namespace util

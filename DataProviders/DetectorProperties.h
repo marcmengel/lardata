@@ -1,119 +1,69 @@
 ////////////////////////////////////////////////////////////////////////
 // \file DetectorProperties.h
 //
-// \brief service to contain information about detector electronics, etc
+// \brief pure virtual base interface for detector properties
 //
-// \author brebel@fnal.gov
+// \author jpaley@fnal.gov
 // 
-// Separation of service from data provider class:
-// jpaley@fnal.gov
 ////////////////////////////////////////////////////////////////////////
-#ifndef DATAPROV_DETECTORPROPERTIES_H
-#define DATAPROV_DETECTORPROPERTIES_H
+#ifndef DATAPROV_IDETECTORPROPERTIES_H
+#define DATAPROV_IDETECTORPROPERTIES_H
 
 #include "fhiclcpp/ParameterSet.h"
-#include "DataProviders/LArProperties.h"
-#include "DataProviders/DetectorClocks.h"
-#include "DataProviders/IDetectorProperties.h"
+#include "Geometry/Geometry.h"
 
 ///General LArSoft Utilities
 namespace dataprov{
   
-  class DetectorProperties : public IDetectorProperties {
+  class DetectorProperties {
     public:
 
-      DetectorProperties();
-      DetectorProperties(fhicl::ParameterSet const& pset, 
-			 const geo::GeometryCore* geo,
-			 const dataprov::ILArProperties* lp,
-			 const dataprov::IDetectorClocks* c);
-      DetectorProperties(DetectorProperties const&) = delete;
-      virtual ~DetectorProperties();
+      DetectorProperties(const DetectorProperties &) = delete;
+      DetectorProperties(DetectorProperties &&) = delete;
+      DetectorProperties& operator = (const DetectorProperties &) = delete;
+      DetectorProperties& operator = (DetectorProperties &&) = delete;
+      virtual ~DetectorProperties() = default;
       
-      void Configure(fhicl::ParameterSet const& p);
-      bool Update(uint64_t ts);
-      bool UpdateClocks(const dataprov::IDetectorClocks* clks);
+      virtual double Efield(unsigned int planegap=0) const = 0; ///< kV/cm
 
-      void SetGeometry(const geo::GeometryCore* g) { fGeo = g; }
-      void SetLArProperties(const dataprov::LArProperties* lp) { fLP = lp; }
-      void SetDetectorClocks(const dataprov::DetectorClocks* clks) { fClocks = clks; }
-
-      void SetNumberTimeSamples(unsigned int nsamp) { fNumberTimeSamples=nsamp;}
-      // Accessors.
-
-      virtual double Efield(unsigned int planegap=0) const override; ///< kV/cm
-      void SetEfield(std::vector<double> e) { fEfield = e;}
-
-      virtual double DriftVelocity(double efield=0., double temperature=0.) const override;  ///< cm/us
+      virtual double DriftVelocity(double efield=0., double temperature=0.) const = 0;
       
       /// dQ/dX in electrons/cm, returns dE/dX in MeV/cm.
-      virtual double BirksCorrection(double dQdX) const override;
-      virtual double ModBoxCorrection(double dQdX) const override;
+      virtual double BirksCorrection(double dQdX) const = 0;
+      virtual double ModBoxCorrection(double dQdX) const = 0;
 
-      virtual double ElectronLifetime() const override { return fElectronlifetime; }   //< microseconds
+      virtual double ElectronLifetime() const = 0;
       
-      virtual double       SamplingRate()      const override { return fTPCClock.TickPeriod() * 1.e3; }
-      virtual double       ElectronsToADC()    const override { return fElectronsToADC; }
-      virtual unsigned int NumberTimeSamples() const override { return fNumberTimeSamples; }
-      virtual unsigned int ReadOutWindowSize() const override { return fReadOutWindowSize; }
-      virtual int          TriggerOffset()     const override;
-      virtual double       TimeOffsetU()       const override{ return fTimeOffsetU; };
-      virtual double       TimeOffsetV()       const override { return fTimeOffsetV; };
-      virtual double       TimeOffsetZ()       const override{ return fTimeOffsetZ; };
+      virtual double       SamplingRate()      const = 0;
+      virtual double       ElectronsToADC()    const = 0;
+      virtual unsigned int NumberTimeSamples() const = 0;
+      virtual unsigned int ReadOutWindowSize() const = 0;
+      virtual int          TriggerOffset()     const = 0;
+      virtual double       TimeOffsetU()       const = 0;
+      virtual double       TimeOffsetV()       const = 0;
+      virtual double       TimeOffsetZ()       const = 0;
 
-      virtual double       ConvertXToTicks(double X, int p, int t, int c) const override;
-      virtual double       ConvertXToTicks(double X, geo::PlaneID const& planeid) const override
-        { return ConvertXToTicks(X, planeid.Plane, planeid.TPC, planeid.Cryostat); }
-      virtual double       ConvertTicksToX(double ticks, int p, int t, int c) const override;
-      virtual double       ConvertTicksToX(double ticks, geo::PlaneID const& planeid) const override
-        { return ConvertTicksToX(ticks, planeid.Plane, planeid.TPC, planeid.Cryostat); }
-
-      virtual double       GetXTicksOffset(int p, int t, int c) const override;
-      virtual double       GetXTicksOffset(geo::PlaneID const& planeid) const override
-        { return GetXTicksOffset(planeid.Plane, planeid.TPC, planeid.Cryostat); }
-      virtual double       GetXTicksCoefficient(int t, int c) const override;
-      virtual double       GetXTicksCoefficient(geo::TPCID const& tpcid) const override
-        { return GetXTicksCoefficient(tpcid.TPC, tpcid.Cryostat); }
-      virtual double       GetXTicksCoefficient() const override;
+      virtual double       ConvertXToTicks(double X, int p, int t, int c) const = 0;
+      virtual double       ConvertXToTicks(double X, geo::PlaneID const& planeid) const = 0;
+      virtual double       ConvertTicksToX(double ticks, int p, int t, int c) const = 0;
+      virtual double       ConvertTicksToX(double ticks, geo::PlaneID const& planeid) const = 0;
+      virtual double       GetXTicksOffset(int p, int t, int c) const = 0;
+      virtual double       GetXTicksOffset(geo::PlaneID const& planeid) const = 0;
+      virtual double       GetXTicksCoefficient(int t, int c) const = 0;
+      virtual double       GetXTicksCoefficient(geo::TPCID const& tpcid) const = 0; 
+      virtual double       GetXTicksCoefficient() const = 0;
 
       // The following methods convert between TDC counts (SimChannel time) and
       // ticks (RawDigit/Wire time).
-      virtual double       ConvertTDCToTicks(double tdc) const override;
-      virtual double       ConvertTicksToTDC(double ticks) const override;
+      virtual double       ConvertTDCToTicks(double tdc) const = 0;
+      virtual double       ConvertTicksToTDC(double ticks) const = 0;
 
-      virtual bool         InheritNumberTimeSamples() const override { return fInheritNumberTimeSamples; }
-      
-    private:
+      virtual bool         InheritNumberTimeSamples() const = 0;
 
-      void CheckIfConfigured();
-      
     protected:
-            
-      void         CalculateXTicksParams();
-      
-      const dataprov::ILArProperties* fLP;
-      const dataprov::IDetectorClocks* fClocks;
-      const geo::GeometryCore* fGeo;
-      
-      std::vector< double >          fEfield;           ///< kV/cm
-      double                         fElectronlifetime; ///< microseconds
-      double       fSamplingRate;      ///< in ns
-      double 	   fElectronsToADC;    ///< conversion factor for # of ionization electrons to 1 ADC count
-      unsigned int fNumberTimeSamples; ///< number of clock ticks per event
-      unsigned int fReadOutWindowSize; ///< number of clock ticks per readout window
-      double       fTimeOffsetU;       ///< time offsets to convert spacepoint
-      double       fTimeOffsetV;       ///< coordinates to hit times on each
-      double       fTimeOffsetZ;       ///< view
-            
-      bool         fInheritNumberTimeSamples; ///< Flag saying whether to inherit NumberTimeSamples
+      DetectorProperties() = default;
 
-      double       fXTicksCoefficient; ///< Parameters for x<-->ticks
-
-      std::vector<std::vector<std::vector<double> > > fXTicksOffsets;
-      std::vector<std::vector<double> >               fDriftDirection;
-
-      ::util::ElecClock fTPCClock;     ///< TPC electronics clock
     }; // class DetectorProperties
 } //namespace dataprov
 
-#endif // DATAPROV_DETECTOR_PROPERTIES_H
+#endif // DATAPROV_IDETECTORPROPERTIES_H

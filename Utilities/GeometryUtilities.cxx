@@ -31,9 +31,9 @@ namespace util{
   GeometryUtilities::GeometryUtilities() 
   {
     //_name = "GeometryUtilities";
-    detp = lar::providerFrom<util::IDetectorPropertiesService>();
+    detp = lar::providerFrom<util::DetectorPropertiesService>();
  
-    larp = lar::providerFrom<util::ILArPropertiesService>();
+    larp = lar::providerFrom<util::LArPropertiesService>();
     
     Reconfigure();
   }

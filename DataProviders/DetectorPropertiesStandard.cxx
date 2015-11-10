@@ -11,7 +11,7 @@
 #include <cassert>
 
 // LArSoft includes
-#include "DataProviders/DetectorProperties.h"
+#include "DataProviders/DetectorPropertiesStandard.h"
 #include "Geometry/Geometry.h"
 #include "Geometry/CryostatGeo.h"
 #include "Geometry/TPCGeo.h"
@@ -27,17 +27,17 @@
 namespace dataprov{
 
   //--------------------------------------------------------------------
-  DetectorProperties::DetectorProperties() :
+  DetectorPropertiesStandard::DetectorPropertiesStandard() :
     fLP(0), fClocks(0), fGeo(0)
   {
 
   }
     
   //--------------------------------------------------------------------
-  DetectorProperties::DetectorProperties(fhicl::ParameterSet const& pset,
+  DetectorPropertiesStandard::DetectorPropertiesStandard(fhicl::ParameterSet const& pset,
 					 const geo::GeometryCore* geo,
-					 const dataprov::ILArProperties* lp,
-					 const dataprov::IDetectorClocks* c):
+					 const dataprov::LArProperties* lp,
+					 const dataprov::DetectorClocks* c):
     fLP(lp), fClocks(c), fGeo(geo)
   {
     Configure(pset);
@@ -47,13 +47,13 @@ namespace dataprov{
   }
   
   //--------------------------------------------------------------------
-  DetectorProperties::~DetectorProperties() 
+  DetectorPropertiesStandard::~DetectorPropertiesStandard() 
   {
     
   }
 
   //--------------------------------------------------------------------
-  bool DetectorProperties::Update(uint64_t t) 
+  bool DetectorPropertiesStandard::Update(uint64_t t) 
   {
 
     CalculateXTicksParams();
@@ -61,7 +61,7 @@ namespace dataprov{
   }
 
   //--------------------------------------------------------------------
-  bool DetectorProperties::UpdateClocks(const dataprov::IDetectorClocks* clks) 
+  bool DetectorPropertiesStandard::UpdateClocks(const dataprov::DetectorClocks* clks) 
   {
     fClocks = clks;
     
@@ -71,7 +71,7 @@ namespace dataprov{
   }
   
   //------------------------------------------------------------
-  double DetectorProperties::ConvertTDCToTicks(double tdc) const
+  double DetectorPropertiesStandard::ConvertTDCToTicks(double tdc) const
   {
     if (fClocks!=0) throw cet::exception(__FUNCTION__) << "DetectorClocks is uninitialized!";
 
@@ -79,25 +79,25 @@ namespace dataprov{
   }
   
   //--------------------------------------------------------------
-  double DetectorProperties::ConvertTicksToTDC(double ticks) const
+  double DetectorPropertiesStandard::ConvertTicksToTDC(double ticks) const
   {
     if (fClocks!=0) throw cet::exception(__FUNCTION__) << "DetectorClocks is uninitialized!";
     return fClocks->TPCTick2TDC(ticks);
   }
   
   //--------------------------------------------------------------------
-  void DetectorProperties::Configure(fhicl::ParameterSet const& p)
+  void DetectorPropertiesStandard::Configure(fhicl::ParameterSet const& p)
   {
     //fSamplingRate             = p.get< double        >("SamplingRate"     );
     double d;
     int    i;
     bool   b;
     if(p.get_if_present<double>("SamplingRate",d))
-      throw cet::exception(__FUNCTION__) << "SamplingRate is a deprecated fcl parameter for DetectorProperties!";
+      throw cet::exception(__FUNCTION__) << "SamplingRate is a deprecated fcl parameter for DetectorPropertiesStandard!";
     if(p.get_if_present<int>("TriggerOffset",i))
-      throw cet::exception(__FUNCTION__) << "TriggerOffset is a deprecated fcl parameter for DetectorProperties!";
+      throw cet::exception(__FUNCTION__) << "TriggerOffset is a deprecated fcl parameter for DetectorPropertiesStandard!";
     if(p.get_if_present<bool>("InheritTriggerOffset",b))
-      throw cet::exception(__FUNCTION__) << "InheritTriggerOffset is a deprecated fcl parameter for DetectorProperties!";
+      throw cet::exception(__FUNCTION__) << "InheritTriggerOffset is a deprecated fcl parameter for DetectorPropertiesStandard!";
     
     SetEfield(p.get< std::vector<double> >("Efield"));
     fElectronlifetime         = p.get< double       >("Electronlifetime");
@@ -117,16 +117,16 @@ namespace dataprov{
   
   
 //------------------------------------------------------------------------------------//
-  double DetectorProperties::Efield(unsigned int planegap) const
+  double DetectorPropertiesStandard::Efield(unsigned int planegap) const
 {
   if(planegap >= fEfield.size())
-    throw cet::exception("LArProperties") << "requesting Electric field in a plane gap that is not defined\n";
+    throw cet::exception("LArPropertiesStandard") << "requesting Electric field in a plane gap that is not defined\n";
   
   return fEfield[planegap];
 }
 
 //------------------------------------------------------------------------------------//
-  double DetectorProperties::DriftVelocity(double efield, double temperature) const {
+  double DetectorPropertiesStandard::DriftVelocity(double efield, double temperature) const {
 
   // Drift Velocity as a function of Electric Field and LAr Temperature
   // from : W. Walkowiak, NIM A 449 (2000) 288-294
@@ -139,7 +139,7 @@ namespace dataprov{
     efield = Efield();
   //
   if(efield > 4.0)
-    mf::LogWarning("LArProperties") << "DriftVelocity Warning! : E-field value of "
+    mf::LogWarning("LArPropertiesStandard") << "DriftVelocity Warning! : E-field value of "
 				    << efield
 				    << " kV/cm is outside of range covered by drift"
 				    << " velocity parameterization. Returned value"
@@ -151,7 +151,7 @@ namespace dataprov{
     temperature = fLP->Temperature();
 
   if(temperature < 87.0 || temperature > 94.0)
-    mf::LogWarning("LArProperties") << "DriftVelocity Warning! : Temperature value of "
+    mf::LogWarning("LArPropertiesStandard") << "DriftVelocity Warning! : Temperature value of "
 				    << temperature
 				    << " K is outside of range covered by drift velocity"
 				    << " parameterization. Returned value may not be"
@@ -219,7 +219,7 @@ namespace dataprov{
   //  dQdX in electrons/cm, charge (amplitude or integral obtained) divided by
   //         effective pitch for a given 3D track.
   // returns dEdX in MeV/cm
-  double DetectorProperties::BirksCorrection(double dQdx) const
+  double DetectorPropertiesStandard::BirksCorrection(double dQdx) const
   {
     // Correction for charge quenching using parameterization from
     // S.Amoruso et al., NIM A 523 (2004) 275
@@ -237,7 +237,7 @@ namespace dataprov{
   
   //----------------------------------------------------------------------------------
   // Modified Box model correction 
-  double DetectorProperties::ModBoxCorrection(double dQdx) const
+  double DetectorPropertiesStandard::ModBoxCorrection(double dQdx) const
   {
     // Modified Box model correction has better behavior than the Birks
     // correction at high values of dQ/dx.
@@ -253,7 +253,7 @@ namespace dataprov{
   }
   
   //------------------------------------------------------------------------------------//
-  int  DetectorProperties::TriggerOffset()     const 
+  int  DetectorPropertiesStandard::TriggerOffset()     const 
   {
     if (fClocks!=0) throw cet::exception(__FUNCTION__) << "DetectorClocks is uninitialized!";
     return fTPCClock.Ticks(fClocks->TriggerOffsetTPC() * -1.);
@@ -274,7 +274,7 @@ namespace dataprov{
   // Take an X coordinate, and convert to a number of ticks, the
   // charge deposit occured at t=0
  
-  double DetectorProperties::ConvertXToTicks(double X, int p, int t, int c) const
+  double DetectorPropertiesStandard::ConvertXToTicks(double X, int p, int t, int c) const
   {
     return (X / (fXTicksCoefficient * fDriftDirection.at(c).at(t)) +  fXTicksOffsets.at(c).at(t).at(p) );
   }
@@ -285,17 +285,17 @@ namespace dataprov{
   // Take a cooridnate in ticks, and convert to an x position
   // assuming event deposit occured at t=0
  
-  double  DetectorProperties::ConvertTicksToX(double ticks, int p, int t, int c) const
+  double  DetectorPropertiesStandard::ConvertTicksToX(double ticks, int p, int t, int c) const
   {
     return (ticks - fXTicksOffsets.at(c).at(t).at(p)) * fXTicksCoefficient * fDriftDirection.at(c).at(t);  
   }
   
 
   //--------------------------------------------------------------------
-  void DetectorProperties::CheckIfConfigured()
+  void DetectorPropertiesStandard::CheckIfConfigured()
   {
     if (fGeo!=0) throw cet::exception(__FUNCTION__) << "Geometry is uninitialized!";
-    if (fLP!=0) throw cet::exception(__FUNCTION__) << "LArProperties is uninitialized!";
+    if (fLP!=0) throw cet::exception(__FUNCTION__) << "LArPropertiesStandard is uninitialized!";
     if (fClocks!=0) throw cet::exception(__FUNCTION__) << "DetectorClocks is uninitialized!";
   }
   
@@ -303,7 +303,7 @@ namespace dataprov{
   //--------------------------------------------------------------------
   // Recalculte x<-->ticks conversion parameters from detector constants
   
-  void DetectorProperties::CalculateXTicksParams()
+  void DetectorPropertiesStandard::CalculateXTicksParams()
   {
     CheckIfConfigured();
     
@@ -406,7 +406,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
   //--------------------------------------------------------------------
   // Get scale factor for x<-->ticks
 
-  double DetectorProperties::GetXTicksCoefficient(int t, int c) const
+  double DetectorPropertiesStandard::GetXTicksCoefficient(int t, int c) const
   {
     return fXTicksCoefficient * fDriftDirection.at(c).at(t);
   }
@@ -414,7 +414,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
   //--------------------------------------------------------------------
   // Get scale factor for x<-->ticks
 
-  double DetectorProperties::GetXTicksCoefficient() const
+  double DetectorPropertiesStandard::GetXTicksCoefficient() const
   {
     return fXTicksCoefficient;
   }
@@ -422,7 +422,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
   //--------------------------------------------------------------------
   //  Get offset for x<-->ticks
 
-  double DetectorProperties::GetXTicksOffset(int p, int t, int c) const
+  double DetectorPropertiesStandard::GetXTicksOffset(int p, int t, int c) const
   {
     return fXTicksOffsets.at(c).at(t).at(p);	
   }

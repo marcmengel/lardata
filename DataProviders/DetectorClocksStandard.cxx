@@ -1,7 +1,7 @@
-#include "DataProviders/DetectorClocks.h"
+#include "DataProviders/DetectorClocksStandard.h"
 
 //-------------------------------------------------------------------------
-dataprov::DetectorClocks::DetectorClocks()
+dataprov::DetectorClocksStandard::DetectorClocksStandard()
   : fConfigName(dataprov::kInheritConfigTypeMax,""),
     fConfigValue(dataprov::kInheritConfigTypeMax,0),
     fTrigModuleName(""),
@@ -30,7 +30,7 @@ dataprov::DetectorClocks::DetectorClocks()
 }
 
 //-------------------------------------------------------------------------
-dataprov::DetectorClocks::DetectorClocks(fhicl::ParameterSet const& pset)
+dataprov::DetectorClocksStandard::DetectorClocksStandard(fhicl::ParameterSet const& pset)
   : fConfigName(dataprov::kInheritConfigTypeMax,""),
     fConfigValue(dataprov::kInheritConfigTypeMax,0),
     fTrigModuleName(""),
@@ -62,13 +62,13 @@ dataprov::DetectorClocks::DetectorClocks(fhicl::ParameterSet const& pset)
 
 
 //------------------------------------------------------------------
-bool dataprov::DetectorClocks::Update(uint64_t ts)
+bool dataprov::DetectorClocksStandard::Update(uint64_t ts)
 {
   return true;
 }
 
 //------------------------------------------------------------------
-bool dataprov::DetectorClocks::Configure(fhicl::ParameterSet const& pset)
+bool dataprov::DetectorClocksStandard::Configure(fhicl::ParameterSet const& pset)
 {
 
   // Read fcl parameters
@@ -93,7 +93,7 @@ bool dataprov::DetectorClocks::Configure(fhicl::ParameterSet const& pset)
 }
 
 //-----------------------------------
-void dataprov::DetectorClocks::ApplyParams()
+void dataprov::DetectorClocksStandard::ApplyParams()
 //-----------------------------------
 {
 
@@ -108,7 +108,7 @@ void dataprov::DetectorClocks::ApplyParams()
 }
 
 //------------------------------------------------------------------------
-bool dataprov::DetectorClocks::IsRightConfig(const fhicl::ParameterSet& ps) const
+bool dataprov::DetectorClocksStandard::IsRightConfig(const fhicl::ParameterSet& ps) const
 //------------------------------------------------------------------------
 {
   std::string s;
@@ -123,7 +123,7 @@ bool dataprov::DetectorClocks::IsRightConfig(const fhicl::ParameterSet& ps) cons
 }
 
 //-----------------------------------------
-void dataprov::DetectorClocks::debugReport() const
+void dataprov::DetectorClocksStandard::debugReport() const
 //-----------------------------------------
 {
   std::cout << "fConfigValues contents: "<<std::endl;

@@ -1,80 +1,48 @@
 ////////////////////////////////////////////////////////////////////////
-// RunHistory.h
+// \file LArProperties.h
 //
-//  Data provider class for run history
+// \brief pure virtual base interface for run history
 //
-// jpaley@fnal.gov
-//
+// \author jpaley@fnal.gov
+// 
 ////////////////////////////////////////////////////////////////////////
-#ifndef DATAPROV_RUNHISTORY_H
-#define DATAPROV_RUNHISTORY_H
-
-#include <string>
-#include <vector>
-#include <map>
-
-#include "fhiclcpp/ParameterSet.h"
-#include "DataProviders/IRunHistory.h"
+#ifndef DATAPROV_IRUNHISTORY_H
+#define DATAPROV_IRUNHISTORY_H
 
 ///General LArSoft Utilities
 namespace dataprov {
 
-  class SubRun : public ISubRun {
-  public:
-    SubRun() : fTStart(0) {};
-    SubRun(SubRun const&) = delete;
-    virtual ~SubRun() {};
-    
-    virtual uint64_t TStart() const override { return fTStart; }
-    void SetTStart(uint64_t t) { fTStart = t; }
-    
-  private:
-    uint64_t fTStart;
+  enum RunType_t {
+    kUnknownRunType=0,
+    kProductionRun,
+    kCommissioningRun,
+    kTestRun,    
+    kPedestalRun,
+    kCalibrationRun,
+    kNRunType
   };
-    
-  class RunHistory : public IRunHistory {
+  
+  class SubRun {
   public:
-    RunHistory();
-    RunHistory(int runnum);
-    RunHistory(RunHistory const&) = delete;
-    virtual ~RunHistory();
-      
-    virtual bool   Update(uint64_t ts=0) = 0;
-       
-    virtual int RunNumber() const override{ return fRun; }
-    virtual int NSubruns() const override{ return fNSubruns; }
-    virtual int RunType() const override{ return fRunType; }
-    virtual std::string RunTypeAsString() const override;
-    virtual uint64_t TStart() const override { return fTStart; }
-    virtual uint64_t TStop()  const override { return fTStop; }
-    virtual uint64_t Duration() const override { return fTStop-fTStart; }
+    virtual ~SubRun() = default;
+    
+    virtual uint64_t TStart() const = 0;
+  };
+  
+  class RunHistory {
+  public:
+    virtual ~RunHistory() = default;
 
-    std::vector<std::string> Shifters() { return fShifter; }     
-      
-    void SetNSubruns(int nsr) { fNSubruns = nsr;}
-    void SetRunType(int rt) { fRunType = rt; }
-    void SetDetId(int id) { fDetId = id; }
-    void SetTStart(uint64_t t) { fTStart = t; }
-    void SetTStop(uint64_t t) { fTStop = t; }
-    void AddShifter(std::string sh) { fShifter.push_back(sh); }
-    void SetShifters(std::vector<std::string> sh) { fShifter = sh; }
-    void SetDetName(std::string dn) { fDetName = dn; }
+    virtual bool Update() = 0;
     
-  private:
-  protected:
-    int    fRun;
-    int    fNSubruns;
-    int    fRunType;
-    int    fDetId;
-    
-    uint64_t  fTStart;
-    uint64_t  fTStop;      
-    
-    std::vector<std::string> fShifter;
-    std::string fDetName;
-    
-    std::vector<SubRun> fSubrun;
+    virtual int RunNumber() const = 0;
+    virtual int NSubruns() const = 0; 
+    virtual int RunType() const = 0; 
+    virtual std::string RunTypeAsString() const = 0;
+    virtual uint64_t TStart() const = 0;
+    virtual uint64_t TStop()  const = 0;
+    virtual uint64_t Duration() const = 0;
     
   }; // class RunHistory
 } //namespace dataprov
-#endif // DATAPROV_RUNHISTORY_H
+#endif // RunHistory_H

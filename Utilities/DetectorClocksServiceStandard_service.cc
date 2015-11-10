@@ -1,25 +1,25 @@
-#include "Utilities/DetectorClocksService.h"
+#include "Utilities/DetectorClocksServiceStandard.h"
 #include "TFile.h"
 #include "art/Persistency/RootDB/SQLite3Wrapper.h"
 #include "fhiclcpp/make_ParameterSet.h"
 
 //-----------------------------------------------------------------------------------------
-util::DetectorClocksService::DetectorClocksService(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
+util::DetectorClocksServiceStandard::DetectorClocksServiceStandard(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
 {
   
   reconfigure(pset);
   
-  reg.sPreProcessEvent.watch (this, &DetectorClocksService::preProcessEvent);
-  reg.sPostOpenFile.watch    (this, &DetectorClocksService::postOpenFile);
-  reg.sPreBeginRun.watch     (this, &DetectorClocksService::preBeginRun);
+  reg.sPreProcessEvent.watch (this, &DetectorClocksServiceStandard::preProcessEvent);
+  reg.sPostOpenFile.watch    (this, &DetectorClocksServiceStandard::postOpenFile);
+  reg.sPreBeginRun.watch     (this, &DetectorClocksServiceStandard::preBeginRun);
   
-  fClocks.reset(new dataprov::DetectorClocks());
+  fClocks.reset(new dataprov::DetectorClocksStandard());
   this->reconfigure(pset);
   
 }
 
 //------------------------------------------------------------------
-void util::DetectorClocksService::reconfigure(fhicl::ParameterSet const& pset)
+void util::DetectorClocksServiceStandard::reconfigure(fhicl::ParameterSet const& pset)
 //------------------------------------------------------------------
 {
   fClocks->Configure(pset);
@@ -27,7 +27,7 @@ void util::DetectorClocksService::reconfigure(fhicl::ParameterSet const& pset)
 }
 
 //------------------------------------------------------------
-void util::DetectorClocksService::preProcessEvent(const art::Event& evt)
+void util::DetectorClocksServiceStandard::preProcessEvent(const art::Event& evt)
 //------------------------------------------------------------
 {
   art::Handle<std::vector<raw::Trigger> > trig_handle;
@@ -45,7 +45,7 @@ void util::DetectorClocksService::preProcessEvent(const art::Event& evt)
 
   if(trig_handle->size()>1)
     
-    throw cet::exception("DetectorClocksService::preProcessEvent")
+    throw cet::exception("DetectorClocksServiceStandard::preProcessEvent")
       << "Found " << trig_handle->size() << " triggers (only 1 trigger/event supported)\n";
   
   const art::Ptr<raw::Trigger> trig_ptr(trig_handle,0);
@@ -57,7 +57,7 @@ void util::DetectorClocksService::preProcessEvent(const art::Event& evt)
 }
 
 //------------------------------------------------------
-void util::DetectorClocksService::preBeginRun(art::Run const& run)
+void util::DetectorClocksServiceStandard::preBeginRun(art::Run const& run)
 //------------------------------------------------------
 {
 
@@ -69,7 +69,7 @@ void util::DetectorClocksService::preBeginRun(art::Run const& run)
 
 
 //---------------------------------------------------------------
-void util::DetectorClocksService::postOpenFile(const std::string& filename)
+void util::DetectorClocksServiceStandard::postOpenFile(const std::string& filename)
 //---------------------------------------------------------------
 {
 
@@ -158,5 +158,5 @@ void util::DetectorClocksService::postOpenFile(const std::string& filename)
 
 }
 
-DEFINE_ART_SERVICE(util::DetectorClocksService)
+DEFINE_ART_SERVICE_INTERFACE_IMPL(util::DetectorClocksServiceStandard, util::DetectorClocksService)
 
