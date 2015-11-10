@@ -2,7 +2,7 @@
 art_make( LIBRARY_NAME  AnalysisAlg
           LIB_LIBRARIES AnalysisBase
                         RecoBase
-                        DetectorPropertiesService_service
+                        DetectorPropertiesServiceStandard_service
 			Utilities
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}

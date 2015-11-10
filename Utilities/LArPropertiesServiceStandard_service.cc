@@ -9,7 +9,7 @@
 #include <iostream>
 
 // LArSoft includes
-#include "Utilities/LArPropertiesService.h"
+#include "Utilities/LArPropertiesServiceStandard.h"
 //#include "SimpleTypesAndConstants/PhysicalConstants.h"
 
 // ROOT includes
@@ -19,14 +19,16 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"
 //-----------------------------------------------
-util::LArPropertiesService::LArPropertiesService(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
+util::LArPropertiesServiceStandard::LArPropertiesServiceStandard(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
 {
+  fProp.reset(new dataprov::LArPropertiesStandard());
+
   this->reconfigure(pset);
-  reg.sPreBeginRun.watch(this, &LArPropertiesService::preBeginRun);
+  reg.sPreBeginRun.watch(this, &LArPropertiesServiceStandard::preBeginRun);
 }
 
 //----------------------------------------------
-void util::LArPropertiesService::preBeginRun(const art::Run& run)
+void util::LArPropertiesServiceStandard::preBeginRun(const art::Run& run)
 {
   fProp->Update(run.id().run());
 }
@@ -35,7 +37,7 @@ void util::LArPropertiesService::preBeginRun(const art::Run& run)
 
 //------------------------------------------------
 /// \todo these values should eventually come from a database
-void util::LArPropertiesService::reconfigure(fhicl::ParameterSet const& pset)
+void util::LArPropertiesServiceStandard::reconfigure(fhicl::ParameterSet const& pset)
 {
   fProp->Configure(pset);  
   return;
@@ -44,6 +46,6 @@ void util::LArPropertiesService::reconfigure(fhicl::ParameterSet const& pset)
 //------------------------------------------------
 namespace util{
  
-  DEFINE_ART_SERVICE_INTERFACE_IMPL(util::LArPropertiesService, util::ILArPropertiesService)
+  DEFINE_ART_SERVICE_INTERFACE_IMPL(util::LArPropertiesServiceStandard, util::LArPropertiesService)
 
 } // namespace util

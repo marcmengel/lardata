@@ -14,8 +14,8 @@
 
 #include "PxUtils.h"
 #include "Geometry/Geometry.h"
-#include "Utilities/ILArPropertiesService.h"
-#include "Utilities/IDetectorPropertiesService.h"
+#include "Utilities/LArPropertiesService.h"
+#include "Utilities/DetectorPropertiesService.h"
 #include "Utilities/UtilException.h"
 #include "time.h"
 
@@ -286,10 +286,10 @@ namespace util{
     */
 
     art::ServiceHandle<geo::Geometry> geom;
-    const dataprov::IDetectorProperties* detp;
-    const dataprov::ILArProperties* larp;
+    const dataprov::DetectorProperties* detp;
+    const dataprov::LArProperties* larp;
     /*
-    art::ServiceHandle<util::IDetectorPropertiesService> detp;
+    art::ServiceHandle<util::DetectorPropertiesService> detp;
     art::ServiceHandle<util::LArPropertiesService> larp;
     */
     

@@ -17,7 +17,7 @@ art_make( NO_PLUGINS
                         ${ROOT_BASIC_LIB_LIST}
         )
 
-simple_plugin(DetectorClocksService "service"
+simple_plugin(DetectorClocksServiceStandard "service"
               DataProviders
 	      RawData
 #              DatabaseUtil_service
@@ -53,7 +53,7 @@ simple_plugin(DatabaseUtil "service"
               BASENAME_ONLY
 )
 
-simple_plugin(DetectorPropertiesService "service"
+simple_plugin(DetectorPropertiesServiceStandard "service"
               DataProviders
 #              DatabaseUtil_service
               Geometry_service
@@ -92,7 +92,7 @@ simple_plugin(LArFFT "service"
               BASENAME_ONLY
 )
 
-simple_plugin(LArPropertiesService "service"
+simple_plugin(LArPropertiesServiceStandard "service"
 #              Utilities
 	      DataProviders
 #              DatabaseUtil_service

@@ -11,7 +11,7 @@
 #include <iostream>
 
 // LArSoft includes
-#include "DataProviders/RunHistory.h"
+#include "DataProviders/RunHistoryStandard.h"
 
 // ROOT includes
 #include "TMath.h"
@@ -22,24 +22,24 @@
 
 namespace dataprov {
   //-----------------------------------------------
-  RunHistory::RunHistory() :
+  RunHistoryStandard::RunHistoryStandard() :
     fRun(-1), fNSubruns(0), fRunType(kUnknownRunType)
   {
   }
   
   //-----------------------------------------------
-  RunHistory::RunHistory(int run)
+  RunHistoryStandard::RunHistoryStandard(int run)
   {
     fRun=run;
   }
   
   //------------------------------------------------
-  RunHistory::~RunHistory()
+  RunHistoryStandard::~RunHistoryStandard()
   {
   }
 
   //------------------------------------------------
-  bool RunHistory::Update(uint64_t ts) 
+  bool RunHistoryStandard::Update(uint64_t ts) 
   {
     if (ts == 0) return false;
 
@@ -47,7 +47,7 @@ namespace dataprov {
   }
 
   //------------------------------------------------
-  std::string RunHistory::RunTypeAsString() const
+  std::string RunHistoryStandard::RunTypeAsString() const
   {
     switch(fRunType) {
     case(kProductionRun):

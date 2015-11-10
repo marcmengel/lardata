@@ -3,8 +3,8 @@ art_make( LIBRARY_NAME  RecoObjects
           LIB_LIBRARIES AnalysisAlg
                         AnalysisBase
                         RecoBase
-                        LArPropertiesService_service
-                        DetectorPropertiesService_service
+                        LArPropertiesServiceStandard_service
+                        DetectorPropertiesServiceStandard_service
                         Geometry_service
                         Geometry
                         ${ART_FRAMEWORK_CORE}
