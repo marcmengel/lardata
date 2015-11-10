@@ -30,4 +30,8 @@ namespace util{
     }; // class IDetectorPropertiesService
 } //namespace utils
 DECLARE_ART_SERVICE_INTERFACE(util::IDetectorPropertiesService, LEGACY)
+
+// check that the requirements for util::IDetectorPropertiesService are satisfied
+template class lar::details::ServiceRequirementsChecker<util::IDetectorPropertiesService>;
+
 #endif // IDETPROPERTIES_SERVICE_H

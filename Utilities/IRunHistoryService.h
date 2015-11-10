@@ -30,4 +30,8 @@ namespace util{
     }; // class IRunHistoryService
 } //namespace utils
 DECLARE_ART_SERVICE_INTERFACE(util::IRunHistoryService, LEGACY)
+
+// check that the requirements for util::IRunHistoryService are satisfied
+template class lar::details::ServiceRequirementsChecker<util::IRunHistoryService>;
+
 #endif // IRUNHISTORY_SERVICE_H

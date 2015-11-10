@@ -30,4 +30,8 @@ namespace util{
     }; // class IDetectorClocksService
 } //namespace utils
 DECLARE_ART_SERVICE_INTERFACE(util::IDetectorClocksService, LEGACY)
+
+// check that the requirements for util::IDetectorClocksService are satisfied
+template class lar::details::ServiceRequirementsChecker<util::IDetectorClocksService>;
+
 #endif // IDETCLOCKS_SERVICE_H

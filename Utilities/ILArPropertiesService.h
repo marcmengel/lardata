@@ -30,4 +30,8 @@ namespace util{
     }; // class ILArPropertiesService
 } //namespace utils
 DECLARE_ART_SERVICE_INTERFACE(util::ILArPropertiesService, LEGACY)
+
+// check that the requirements for util::ILArPropertiesService are satisfied
+template class lar::details::ServiceRequirementsChecker<util::ILArPropertiesService>;
+
 #endif // ILARPROPERTIES_SERVICE_H
