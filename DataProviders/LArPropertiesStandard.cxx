@@ -41,7 +41,6 @@ dataprov::LArPropertiesStandard::~LArPropertiesStandard()
 bool dataprov::LArPropertiesStandard::Configure(fhicl::ParameterSet const& pset)
 {  
   this->SetTemperature      (pset.get< double >("Temperature"));
-  this->SetElectronlifetime (pset.get< double >("Electronlifetime"));
   this->SetRadiationLength  (pset.get< double >("RadiationLength" ));
   this->SetAtomicNumber     (pset.get< double >("AtomicNumber"));
   this->SetAtomicMass       (pset.get< double >("AtomicMass"));

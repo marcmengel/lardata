@@ -96,7 +96,6 @@ namespace dataprov {
     virtual std::map<std::string, std::map<double, double> > SurfaceReflectanceDiffuseFractions() const override;
 	
     void SetTemperature(double temp) { fTemperature = temp;}
-    void SetElectronlifetime(double lt) { fElectronlifetime = lt; }
     void SetRadiationLength(double rl) { fRadiationLength = rl; }
     void SetArgon39DecayRate(double r) { fArgon39DecayRate = r;}
     void SetAtomicNumber(double z) { fZ = z;}
@@ -153,7 +152,6 @@ namespace dataprov {
     bool fIsConfigured;
       
     double                         fTemperature;      ///< kelvin
-    double                         fElectronlifetime; ///< microseconds
     double                         fRadiationLength;  ///< g/cm^2
     double                         fArgon39DecayRate; ///<  decays per cm^3 per second
       
