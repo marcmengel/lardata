@@ -3,6 +3,8 @@ BEGIN_PROLOG
 # the "standard" values are supposed to be good for ArgoNeuT
 standard_detectorclocks:
 {
+  service_provider: "DetectorClocksServiceStandard"
+  
   TrigModuleName:    ""
   InheritClockConfig: true
   G4RefTime:         0     # G4 time [us] where electronics clock counting start

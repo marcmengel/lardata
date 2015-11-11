@@ -2,11 +2,10 @@ BEGIN_PROLOG
 
 standard_properties:
 {
+ service_provider: "LArPropertiesServiceStandard"
 
  # Drift properties 
- Efield:           [0.5,0.66,0.8 ]   #kV/cm
  Temperature:      91                #Kelvin
- Electronlifetime: 750               #microseconds
 
  # For following parameters, see http://pdg.lbl.gov/AtomicNuclearProperties/
  RadiationLength:  19.55   # g/cm^2

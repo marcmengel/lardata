@@ -6,5 +6,6 @@ BEGIN_PROLOG
 # lbne have different electronics simulations from argoneut
 
 argoneut_detproperties:   @local::standard_detproperties
+argoneut_detproperties.service_provider: "DetectorPropertiesServiceStandard"
 
 END_PROLOG

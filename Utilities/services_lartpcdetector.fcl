@@ -22,7 +22,7 @@
 #include "databaseutil.fcl"
 #include "backtracker.fcl"
 #include "seedservice.fcl"
-#include "timeservice.fcl"
+#include "detectorclocks.fcl"
 #include "channelstatus.fcl"
 
 BEGIN_PROLOG
@@ -31,13 +31,12 @@ lartpcdetector_services:
 {
   ExptGeoHelperInterface: @local::standard_geometry_helper
   Geometry:               @local::standard_geo
-  DetectorProperties:     @local::standard_detproperties
-  LArProperties:          @local::standard_properties
+  DetectorPropertiesService:     @local::standard_detproperties
+  LArPropertiesService:          @local::standard_properties
   LArFFT:                 @local::standard_larfft
-  DatabaseUtil:           @local::standard_database
   BackTracker:            @local::standard_backtracker
   SeedService:            @local::standard_seedservice
-  TimeService:            @local::standard_timeservice
+  DetectorClocksService:  @local::standard_detectorclocks
   IChannelStatusService:  @local::standard_channelstatus
 }
 

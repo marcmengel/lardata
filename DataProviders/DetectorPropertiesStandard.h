@@ -95,7 +95,7 @@ namespace dataprov{
       const dataprov::DetectorClocks* fClocks;
       const geo::GeometryCore* fGeo;
       
-      std::vector< double >          fEfield;           ///< kV/cm
+      std::vector< double >          fEfield;           ///< kV/cm (per plane)
       double                         fElectronlifetime; ///< microseconds
       double       fSamplingRate;      ///< in ns
       double 	   fElectronsToADC;    ///< conversion factor for # of ionization electrons to 1 ADC count
