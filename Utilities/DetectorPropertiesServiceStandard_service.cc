@@ -23,26 +23,29 @@
 namespace util{
 
   //--------------------------------------------------------------------
-  DetectorPropertiesServiceStandard::DetectorPropertiesServiceStandard(fhicl::ParameterSet const& pset, 
-					 art::ActivityRegistry &reg) 
+  DetectorPropertiesServiceStandard::DetectorPropertiesServiceStandard
+    (fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
   {
-    this->reconfigure(pset);
-
     // Register for callbacks.
 
     reg.sPostOpenFile.watch    (this, &DetectorPropertiesServiceStandard::postOpenFile);
     reg.sPreProcessEvent.watch (this, &DetectorPropertiesServiceStandard::preProcessEvent);
 
-    //    const geo::GeometryCore* geo = static_cast<const geo::GeometryCore*>(art::ServiceStandardHandle<geo::Geometry>());
-
-    geo::GeometryCore const* geo = static_cast<geo::GeometryCore const*>
- (&*(art::ServiceHandle<geo::Geometry>()));
+    // obtain the required dependency service providers and create our own
+    const geo::GeometryCore* geo = lar::providerFrom<geo::Geometry>();
     
     const dataprov::LArProperties* lp = lar::providerFrom<util::LArPropertiesService>();
     
     const dataprov::DetectorClocks* clks = lar::providerFrom<util::DetectorClocksService>();
     
-    fProp.reset(new dataprov::DetectorPropertiesStandard(pset,geo,lp,clks));
+    fProp = std::make_unique<dataprov::DetectorPropertiesStandard>(pset,geo,lp,clks);
+    
+    // at this point we need and expect the provider to be fully configured
+    fProp->CheckIfConfigured();
+    
+    // Save the parameter set.
+    fPS = pset;
+    
   }
 
   //--------------------------------------------------------------------

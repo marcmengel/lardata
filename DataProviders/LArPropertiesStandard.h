@@ -42,7 +42,7 @@ namespace dataprov {
     LArPropertiesStandard();
     LArPropertiesStandard(fhicl::ParameterSet const& pset);
     LArPropertiesStandard(LArPropertiesStandard const&) = delete;
-    virtual ~LArPropertiesStandard();
+    virtual ~LArPropertiesStandard() = default;
     
     bool   Configure(fhicl::ParameterSet const& pset);
     bool   Update(uint64_t ts=0);

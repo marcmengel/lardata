@@ -28,7 +28,7 @@ namespace dataprov{
 			 const dataprov::LArProperties* lp,
 			 const dataprov::DetectorClocks* c);
       DetectorPropertiesStandard(DetectorPropertiesStandard const&) = delete;
-      virtual ~DetectorPropertiesStandard();
+      virtual ~DetectorPropertiesStandard() = default;
       
       void Configure(fhicl::ParameterSet const& p);
       bool Update(uint64_t ts);
@@ -83,9 +83,10 @@ namespace dataprov{
 
       virtual bool         InheritNumberTimeSamples() const override { return fInheritNumberTimeSamples; }
       
-    private:
-
-      void CheckIfConfigured();
+      
+      /// Verifies that the provider is in a fully configured status
+      /// @throw cet::exception (category DetectorPropertiesStandard) if not ok
+      void CheckIfConfigured() const;
       
     protected:
             

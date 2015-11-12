@@ -47,12 +47,6 @@ namespace dataprov{
   }
   
   //--------------------------------------------------------------------
-  DetectorPropertiesStandard::~DetectorPropertiesStandard() 
-  {
-    
-  }
-
-  //--------------------------------------------------------------------
   bool DetectorPropertiesStandard::Update(uint64_t t) 
   {
 
@@ -73,15 +67,12 @@ namespace dataprov{
   //------------------------------------------------------------
   double DetectorPropertiesStandard::ConvertTDCToTicks(double tdc) const
   {
-    if (fClocks!=0) throw cet::exception(__FUNCTION__) << "DetectorClocks is uninitialized!";
-
     return fClocks->TPCTDC2Tick(tdc);
   }
   
   //--------------------------------------------------------------
   double DetectorPropertiesStandard::ConvertTicksToTDC(double ticks) const
   {
-    if (fClocks!=0) throw cet::exception(__FUNCTION__) << "DetectorClocks is uninitialized!";
     return fClocks->TPCTick2TDC(ticks);
   }
   
@@ -255,7 +246,6 @@ namespace dataprov{
   //------------------------------------------------------------------------------------//
   int  DetectorPropertiesStandard::TriggerOffset()     const 
   {
-    if (fClocks!=0) throw cet::exception(__FUNCTION__) << "DetectorClocks is uninitialized!";
     return fTPCClock.Ticks(fClocks->TriggerOffsetTPC() * -1.);
   }
   
@@ -292,11 +282,11 @@ namespace dataprov{
   
 
   //--------------------------------------------------------------------
-  void DetectorPropertiesStandard::CheckIfConfigured()
+  void DetectorPropertiesStandard::CheckIfConfigured() const
   {
-    if (fGeo!=0) throw cet::exception(__FUNCTION__) << "Geometry is uninitialized!";
-    if (fLP!=0) throw cet::exception(__FUNCTION__) << "LArPropertiesStandard is uninitialized!";
-    if (fClocks!=0) throw cet::exception(__FUNCTION__) << "DetectorClocks is uninitialized!";
+    if (!fGeo) throw cet::exception("DetectorPropertiesStandard") << "Geometry is uninitialized!";
+    if (!fLP) throw cet::exception("DetectorPropertiesStandard") << "LArProperties is uninitialized!";
+    if (!fClocks) throw cet::exception("DetectorPropertiesStandard") << "DetectorClocks is uninitialized!";
   }
   
   

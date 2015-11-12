@@ -4,17 +4,14 @@
 #include "fhiclcpp/make_ParameterSet.h"
 
 //-----------------------------------------------------------------------------------------
-util::DetectorClocksServiceStandard::DetectorClocksServiceStandard(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
+util::DetectorClocksServiceStandard::DetectorClocksServiceStandard
+  (fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
+  : fClocks(std::make_unique<dataprov::DetectorClocksStandard>(pset))
 {
-  
-  reconfigure(pset);
   
   reg.sPreProcessEvent.watch (this, &DetectorClocksServiceStandard::preProcessEvent);
   reg.sPostOpenFile.watch    (this, &DetectorClocksServiceStandard::postOpenFile);
   reg.sPreBeginRun.watch     (this, &DetectorClocksServiceStandard::preBeginRun);
-  
-  fClocks.reset(new dataprov::DetectorClocksStandard());
-  this->reconfigure(pset);
   
 }
 

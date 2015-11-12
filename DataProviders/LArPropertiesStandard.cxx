@@ -33,11 +33,6 @@ dataprov::LArPropertiesStandard::LArPropertiesStandard(fhicl::ParameterSet const
 }
 
 //------------------------------------------------
-dataprov::LArPropertiesStandard::~LArPropertiesStandard()
-{
-}
-
-//------------------------------------------------
 bool dataprov::LArPropertiesStandard::Configure(fhicl::ParameterSet const& pset)
 {  
   this->SetTemperature      (pset.get< double >("Temperature"));

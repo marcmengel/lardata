@@ -31,32 +31,13 @@ dataprov::DetectorClocksStandard::DetectorClocksStandard()
 
 //-------------------------------------------------------------------------
 dataprov::DetectorClocksStandard::DetectorClocksStandard(fhicl::ParameterSet const& pset)
-  : fConfigName(dataprov::kInheritConfigTypeMax,""),
-    fConfigValue(dataprov::kInheritConfigTypeMax,0),
-    fTrigModuleName(""),
-    fG4RefTime    (util::kDEFAULT_MC_CLOCK_T0),
-    fFramePeriod  (util::kDEFAULT_FRAME_PERIOD),
-    fTPCClock     (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_TPC),
-    fOpticalClock (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_OPTICAL),
-    fTriggerClock (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_TRIGGER),
-    fExternalClock(0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_EXTERNAL),
-    fTriggerOffsetTPC     (util::kDEFAULT_TRIG_OFFSET_TPC),
-    fTriggerTime  (0),
-    fBeamGateTime (0)
+  : DetectorClocksStandard()
 {
-  
-  fConfigName.at(dataprov::kG4RefTime)         = "G4RefTime";
-  fConfigName.at(dataprov::kTriggerOffsetTPC)  = "TriggerOffsetTPC";
-  fConfigName.at(dataprov::kFramePeriod)       = "FramePeriod";
-  fConfigName.at(dataprov::kClockSpeedTPC)     = "ClockSpeedTPC";
-  fConfigName.at(dataprov::kClockSpeedOptical) = "ClockSpeedOptical";
-  fConfigName.at(dataprov::kClockSpeedTrigger) = "ClockSpeedTrigger";
-  fConfigName.at(dataprov::kClockSpeedExternal) = "ClockSpeedExternal";
-  fConfigName.at(dataprov::kDefaultTrigTime)   = "DefaultTrigTime";
-  fConfigName.at(dataprov::kDefaultBeamTime)   = "DefaultBeamTime";
-  
-  fInheritClockConfig = false;
-  Configure(pset);
+  // In a constructor, the version of virtual method that is called
+  // is always the one specific of the class being constructed
+  // (the one mentioned in the name of the constructor itself).
+  // For clarity, we explicitly show that:
+  DetectorClocksStandard::Configure(pset);
 
 }
 
