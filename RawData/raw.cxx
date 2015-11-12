@@ -194,6 +194,8 @@ namespace raw {
       } 
     }
 
+
+
     adc.resize(2+nblocks+nblocks+zerosuppressedsize);
 
     adc[0] = adcsize; //fill first entry in adc with length of uncompressed vector
@@ -243,7 +245,8 @@ namespace raw {
       if(blockstartcheck==0){
 	if(adc_current_value>zerothresholdsigned){
 	  if(nblocks>0){
-	    if(i-nearestneighbor<=blockbegin[nblocks-1]+blocksize[nblocks-1]+1){
+	    if((i-nearestneighbor)<=(blockbegin[nblocks-1]+blocksize[nblocks-1]+1)){
+	  
 	      nblocks--;
 	      blocksize[nblocks] = i - blockbegin[nblocks] + 1;
 	      blockstartcheck = 1;
@@ -272,17 +275,23 @@ namespace raw {
 	    blocksize[nblocks]++;
 	  }
 	  //block has ended
-	  else if(std::abs(adc[i+1]) <= zerothresholdsigned || std::abs(adc[i+2]) <= zerothresholdsigned){  
-	    endofblockcheck = 0;
-	    blockstartcheck = 0;
-	    nblocks++;	    
+	  else if(i+2<adcsize){ //check if end of adc vector is near
+	    if(std::abs(adc[i+1]) <= zerothresholdsigned && std::abs(adc[i+2]) <= zerothresholdsigned){  
+	      endofblockcheck = 0;
+	      blockstartcheck = 0;
+	      nblocks++;	    
+	    }
 	  }
 	  
 	  
 	} // end else
       } // end if blockstartcheck == 1
     }// end loop over adc size
-    
+
+    if(blockstartcheck==1){ // we reached the end of the adc vector with the block still going
+      ++nblocks;
+    }
+
     for(int i = 0; i < nblocks; ++i)
       zerosuppressedsize += blocksize[i];
     
@@ -378,17 +387,22 @@ namespace raw {
 	    blocksize[nblocks]++;
 	  }
 	  //block has ended
-	  else if(ADCStickyCodeCheck(adc[i+1],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned || ADCStickyCodeCheck(adc[i+2],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned){  
-	    endofblockcheck = 0;
-	    blockstartcheck = 0;
-	    nblocks++;	    
-	  }
-	  
-	  
+	  else if(i+2<adcsize){ //check if end of adc vector is near
+	    if(ADCStickyCodeCheck(adc[i+1],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned && ADCStickyCodeCheck(adc[i+2],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned){  
+	      endofblockcheck = 0;
+	      blockstartcheck = 0;
+	      nblocks++;	    
+	    }
+	  }	  
 	} // end else
       } // end if blockstartcheck == 1
     }// end loop over adc size
     
+    if(blockstartcheck==1){ // we reached the end of the adc vector with the block still going
+      ++nblocks;
+    }
+
+
     for(int i = 0; i < nblocks; ++i)
       zerosuppressedsize += blocksize[i];
     
@@ -495,17 +509,23 @@ namespace raw {
 	    blocksize[nblocks]++;
 	  }
 	  //block has ended
-	  else if(std::abs(adc[i+1]) <= zerothresholdsigned || std::abs(adc[i+2]) <= zerothresholdsigned){  
-	    endofblockcheck = 0;
-	    blockstartcheck = 0;
-	    nblocks++;	    
+	  else  if(i+2<adcsize){ //check if end of adc vector is near
+	    if(std::abs(adc[i+1]) <= zerothresholdsigned && std::abs(adc[i+2]) <= zerothresholdsigned){  
+	      endofblockcheck = 0;
+	      blockstartcheck = 0;
+	      nblocks++;	    
+	    }
 	  }
-	  
 	  
 	} // end else
       } // end if blockstartcheck == 1
     }// end loop over adc size
     
+    if(blockstartcheck==1){ // we reached the end of the adc vector with the block still going
+      ++nblocks;
+    }
+
+
 
     for(int i = 0; i < nblocks; ++i)
       zerosuppressedsize += blocksize[i];
@@ -616,17 +636,24 @@ namespace raw {
 	    blocksize[nblocks]++;
 	  }
 	  //block has ended
-	  else if(ADCStickyCodeCheck(adc[i+1],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned || ADCStickyCodeCheck(adc[i+2],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned){  
-	    endofblockcheck = 0;
-	    blockstartcheck = 0;
-	    nblocks++;	    
+
+	  else  if(i+2<adcsize){ //check if end of adc vector is near
+	    if(ADCStickyCodeCheck(adc[i+1],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned && ADCStickyCodeCheck(adc[i+2],pedestal,fADCStickyCodeFeature) <= zerothresholdsigned){  
+	      endofblockcheck = 0;
+	      blockstartcheck = 0;
+	      nblocks++;	    
+	    }
 	  }
-	  
 	  
 	} // end else
       } // end if blockstartcheck == 1
     }// end loop over adc size
     
+    if(blockstartcheck==1){ // we reached the end of the adc vector with the block still going
+      ++nblocks;
+    }
+
+
 
     for(int i = 0; i < nblocks; ++i)
       zerosuppressedsize += blocksize[i];
