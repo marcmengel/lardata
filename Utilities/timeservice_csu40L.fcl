@@ -1,7 +1,9 @@
-#include "timeservice.fcl"
+# deprecated: include detectorclocks_csu40L.fcl directly instead
+
+#include "detectorclocks_csu40L.fcl"
 
 BEGIN_PROLOG
 
-csu40L_timeservice: @local::standard_timeservice
+csu40L_timeservice: @local::csu40L_detectorclocks
 
 END_PROLOG

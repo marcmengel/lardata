@@ -1,12 +1,10 @@
-#include "timeservice.fcl"
+# deprecated: include detectorclocks_bo.fcl directly instead
+
+#include "detectorclocks_bo.fcl"
 
 BEGIN_PROLOG
 
-bo_timeservice: @local::standard_timeservice
-bo_timeservice.ClockSpeedTPC: 2.528445 # 1 / 395.5 ns
-bo_timeservice.TriggerOffsetTPC: -40.  # us
-bo_timeservice.DefaultTrigTime:   40.
-bo_timeservice.DefaultBeamTime:   40.
-bo_timeservice.FramePeriod: 1619.968   # 4096 * 395.5 ns
+bo_timeservice: @local::bo_detectorclocks
 
 END_PROLOG
+
