@@ -33,7 +33,7 @@ void util::DetectorClocksServiceStandard::preProcessEvent(const art::Event& evt)
   std::vector<std::string> cfgNames = fClocks->ConfigNames();
   std::vector<double> cfgValues = fClocks->ConfigValues();
   
-  if(!trig_handle.isValid()) {
+  if(!trig_handle.isValid() || trig_handle->empty()) {
     // Trigger simulation has not run yet!
     fClocks->SetTriggerTime(cfgValues.at(dataprov::kDefaultTrigTime),
 			    cfgValues.at(dataprov::kDefaultBeamTime) );
