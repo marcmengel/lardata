@@ -246,8 +246,8 @@ std::map<double, double> dataprov::LArPropertiesStandard::SlowScintSpectrum() co
   if(fSlowScintSpectrum.size()!=fSlowScintEnergies.size()){
       throw cet::exception("Incorrect vector sizes in LArPropertiesStandard")
   << "The vectors specifying the slow scintillation spectrum are "
-  << " different sizes - " << fFastScintSpectrum.size()
-  << " " << fFastScintEnergies.size();
+  << " different sizes - " << fSlowScintSpectrum.size()
+  << " " << fSlowScintEnergies.size();
     }
 
   std::map<double, double> ToReturn;

@@ -110,7 +110,7 @@ namespace dataprov {
     void SetFastScintSpectrum(std::vector<double> s) { fFastScintSpectrum = s;}
     void SetFastScintEnergies(std::vector<double> s) { fFastScintEnergies = s;}
     void SetSlowScintSpectrum(std::vector<double> s) { fSlowScintSpectrum = s;}
-    void SetSlowScintEnergies(std::vector<double> s) { fSlowScintSpectrum = s;}
+    void SetSlowScintEnergies(std::vector<double> s) { fSlowScintEnergies = s;}
     void SetRIndexSpectrum(std::vector<double> s)    { fRIndexSpectrum = s;}
     void SetRIndexEnergies(std::vector<double> s)    { fRIndexEnergies = s;}
     void SetAbsLengthSpectrum(std::vector<double> s) { fAbsLengthSpectrum = s;}
