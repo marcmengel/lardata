@@ -8,4 +8,6 @@ BEGIN_PROLOG
 argoneut_detproperties:   @local::standard_detproperties
 argoneut_detproperties.service_provider: "DetectorPropertiesServiceStandard"
 
+argoneut_detproperties.Efield:      [0.481,0.700,0.890]  #(measured in ArgoNeut)
+
 END_PROLOG
