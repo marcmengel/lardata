@@ -130,7 +130,7 @@ namespace lris {
     // Make the Run and SubRun principals
     // this step is done once per run.  
     if (m_current < 1){
-      std::unique_ptr<sumdata::RunData> rundata(new sumdata::RunData(geo::kJP250L) );
+      std::unique_ptr<sumdata::RunData> rundata(new sumdata::RunData("jpl250l") );
       outR = principalMaker_.makeRunPrincipal(rn, tstamp);
       outSR = principalMaker_.makeSubRunPrincipal(rn,
 						  sn,
