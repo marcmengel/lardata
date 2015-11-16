@@ -67,6 +67,7 @@ add_subdirectory(RecoBaseArt) # art-dependent interface to RecoBase objects
 add_subdirectory(RecoObjects)
 add_subdirectory(Utilities)
 add_subdirectory(MCBase)
+add_subdirectory(DataProviders)
 
 # tests
 add_subdirectory(test)
