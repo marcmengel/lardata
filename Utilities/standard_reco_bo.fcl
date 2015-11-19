@@ -15,7 +15,7 @@ services:
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
                 @table::bo_services
-  IChannelStatusService: @local::bo_channelstatus
+  ChannelStatusService: @local::bo_channelstatus
 }
 
 

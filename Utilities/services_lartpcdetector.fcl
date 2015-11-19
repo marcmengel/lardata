@@ -37,7 +37,7 @@ lartpcdetector_services:
   BackTracker:            @local::standard_backtracker
   SeedService:            @local::standard_seedservice
   DetectorClocksService:  @local::standard_detectorclocks
-  IChannelStatusService:  @local::standard_channelstatus
+  ChannelStatusService:  @local::standard_channelstatus
 }
 
 # this should really not be here!!

@@ -25,7 +25,7 @@ argoneut_services:
  BackTracker:                   @local::argoneut_backtracker
  SeedService:                   @local::argoneut_seedservice
  DetectorClocksService:         @local::argoneut_detectorclocks
- IChannelStatusService:         @local::argoneut_channelstatus
+ ChannelStatusService:         @local::argoneut_channelstatus
 }
 
 argoneut_simulation_services:
@@ -42,7 +42,7 @@ argoneut_simulation_services:
  BackTracker:            @local::argoneut_backtracker
  SeedService:            @local::argoneut_seedservice
  DetectorClocksService:  @local::argoneut_detectorclocks
- IChannelStatusService:  @local::argoneut_channelstatus
+ ChannelStatusService:  @local::argoneut_channelstatus
 }
 
 
