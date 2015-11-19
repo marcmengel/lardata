@@ -1,6 +1,6 @@
 
 art_make( NO_PLUGINS
-          LIBRARY_NAME  DataProviders
+          LIBRARY_NAME  DetectorInfo
           LIB_LIBRARIES
 			Geometry
                         ${MF_MESSAGELOGGER}

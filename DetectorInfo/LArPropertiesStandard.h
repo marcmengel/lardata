@@ -11,7 +11,7 @@
 // Optical Properties:
 // bjpjones@mit.edu
 //
-// Separation of service from data provider class:
+// Separation of service from Detector info class:
 // jpaley@fnal.gov
 //
 ////////////////////////////////////////////////////////////////////////
@@ -22,10 +22,10 @@
 #include <vector>
 #include <map>
 
-#include "DataProviders/LArProperties.h"
+#include "DetectorInfo/LArProperties.h"
 #include "fhiclcpp/ParameterSet.h"
 
-namespace dataprov {
+namespace detinfo {
   /**
    * @brief Properties related to liquid argon environment in the detector
    *
@@ -223,5 +223,5 @@ namespace dataprov {
     */
     
   }; // class LArPropertiesStandard
-} //namespace dataprov
+} //namespace detinfo
 #endif // LARPROPERTIES_H

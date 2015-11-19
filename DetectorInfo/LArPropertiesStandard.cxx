@@ -10,7 +10,7 @@
 #include <iostream>
 
 // LArSoft includes
-#include "DataProviders/LArPropertiesStandard.h"
+#include "DetectorInfo/LArPropertiesStandard.h"
 #include "SimpleTypesAndConstants/PhysicalConstants.h"
 
 // ROOT includes
@@ -21,24 +21,24 @@
 #include "cetlib/exception.h"
 
 //-----------------------------------------------
-dataprov::LArPropertiesStandard::LArPropertiesStandard()
+detinfo::LArPropertiesStandard::LArPropertiesStandard()
 {
   fIsConfigured = false;
 }
 
 //-----------------------------------------------
-dataprov::LArPropertiesStandard::LArPropertiesStandard(fhicl::ParameterSet const& pset)
+detinfo::LArPropertiesStandard::LArPropertiesStandard(fhicl::ParameterSet const& pset)
 {
   fIsConfigured = this->Configure(pset);
 }
 
 //------------------------------------------------
-dataprov::LArPropertiesStandard::~LArPropertiesStandard()
+detinfo::LArPropertiesStandard::~LArPropertiesStandard()
 {
 }
 
 //------------------------------------------------
-bool dataprov::LArPropertiesStandard::Configure(fhicl::ParameterSet const& pset)
+bool detinfo::LArPropertiesStandard::Configure(fhicl::ParameterSet const& pset)
 {  
   this->SetTemperature      (pset.get< double >("Temperature"));
   this->SetElectronlifetime (pset.get< double >("Electronlifetime"));
@@ -103,7 +103,7 @@ bool dataprov::LArPropertiesStandard::Configure(fhicl::ParameterSet const& pset)
 }
 
 //------------------------------------------------
-bool dataprov::LArPropertiesStandard::Update(uint64_t ts) 
+bool detinfo::LArPropertiesStandard::Update(uint64_t ts) 
 {
   if (ts == 0) return false;
 
@@ -117,7 +117,7 @@ bool dataprov::LArPropertiesStandard::Update(uint64_t ts)
 // slope is between -6.2 and -6.1, intercept is 1928 kg/m^3
 // this parameterization will be good to better than 0.5%.
 // density is returned in g/cm^3
-double dataprov::LArPropertiesStandard::Density(double temperature) const
+double detinfo::LArPropertiesStandard::Density(double temperature) const
 {
   // Default temperature use internal value.
   if(temperature == 0.)
@@ -130,7 +130,7 @@ double dataprov::LArPropertiesStandard::Density(double temperature) const
 
 
 //------------------------------------------------------------------------------------//
-double dataprov::LArPropertiesStandard::Temperature() const
+double detinfo::LArPropertiesStandard::Temperature() const
 {
   return fTemperature;
 }
@@ -152,7 +152,7 @@ double dataprov::LArPropertiesStandard::Temperature() const
 // Material parameters (stored in larproperties.fcl) are taken from
 // pdg web site http://pdg.lbl.gov/AtomicNuclearProperties/
 //
-double dataprov::LArPropertiesStandard::Eloss(double mom, double mass, double tcut) const
+double detinfo::LArPropertiesStandard::Eloss(double mom, double mass, double tcut) const
 {
   // Some constants.
 
@@ -210,7 +210,7 @@ double dataprov::LArPropertiesStandard::Eloss(double mom, double mass, double tc
 //
 // Based on Bichsel formula referred to but not given in pdg.
 //
-double dataprov::LArPropertiesStandard::ElossVar(double mom, double mass) const
+double detinfo::LArPropertiesStandard::ElossVar(double mom, double mass) const
 {
   // Some constants.
 
@@ -230,7 +230,7 @@ double dataprov::LArPropertiesStandard::ElossVar(double mom, double mass) const
 }
 
 //---------------------------------------------------------------------------------
-std::map<double,double> dataprov::LArPropertiesStandard::FastScintSpectrum() const
+std::map<double,double> detinfo::LArPropertiesStandard::FastScintSpectrum() const
 {
   if(fFastScintSpectrum.size()!=fFastScintEnergies.size()){
     throw cet::exception("Incorrect vector sizes in LArPropertiesStandard")
@@ -247,7 +247,7 @@ std::map<double,double> dataprov::LArPropertiesStandard::FastScintSpectrum() con
 }
 
 //---------------------------------------------------------------------------------
-std::map<double, double> dataprov::LArPropertiesStandard::SlowScintSpectrum() const
+std::map<double, double> detinfo::LArPropertiesStandard::SlowScintSpectrum() const
 {
   if(fSlowScintSpectrum.size()!=fSlowScintEnergies.size()){
       throw cet::exception("Incorrect vector sizes in LArPropertiesStandard")
@@ -264,7 +264,7 @@ std::map<double, double> dataprov::LArPropertiesStandard::SlowScintSpectrum() co
 }
 
 //---------------------------------------------------------------------------------
-std::map<double, double> dataprov::LArPropertiesStandard::RIndexSpectrum() const
+std::map<double, double> detinfo::LArPropertiesStandard::RIndexSpectrum() const
 {
   if(fRIndexSpectrum.size()!=fRIndexEnergies.size()){
       throw cet::exception("Incorrect vector sizes in LArPropertiesStandard")
@@ -282,7 +282,7 @@ std::map<double, double> dataprov::LArPropertiesStandard::RIndexSpectrum() const
 
 
 //---------------------------------------------------------------------------------
-std::map<double, double> dataprov::LArPropertiesStandard::AbsLengthSpectrum() const
+std::map<double, double> detinfo::LArPropertiesStandard::AbsLengthSpectrum() const
 {
   if(fAbsLengthSpectrum.size()!=fAbsLengthEnergies.size()){
     throw cet::exception("Incorrect vector sizes in LArPropertiesStandard")
@@ -299,7 +299,7 @@ std::map<double, double> dataprov::LArPropertiesStandard::AbsLengthSpectrum() co
 }
 
 //---------------------------------------------------------------------------------
-std::map<double, double> dataprov::LArPropertiesStandard::RayleighSpectrum() const
+std::map<double, double> detinfo::LArPropertiesStandard::RayleighSpectrum() const
 {
   if(fRayleighSpectrum.size()!=fRayleighEnergies.size()){
     throw cet::exception("Incorrect vector sizes in LArPropertiesStandard")
@@ -316,7 +316,7 @@ std::map<double, double> dataprov::LArPropertiesStandard::RayleighSpectrum() con
 }
 
 //---------------------------------------------------------------------------------
-std::map<std::string, std::map<double,double> > dataprov::LArPropertiesStandard::SurfaceReflectances() const
+std::map<std::string, std::map<double,double> > detinfo::LArPropertiesStandard::SurfaceReflectances() const
 {
   std::map<std::string, std::map<double, double> > ToReturn;
 
@@ -340,7 +340,7 @@ std::map<std::string, std::map<double,double> > dataprov::LArPropertiesStandard:
 }
 
 //---------------------------------------------------------------------------------
-std::map<std::string, std::map<double,double> > dataprov::LArPropertiesStandard::SurfaceReflectanceDiffuseFractions() const
+std::map<std::string, std::map<double,double> > detinfo::LArPropertiesStandard::SurfaceReflectanceDiffuseFractions() const
 {
   std::map<std::string, std::map<double, double> > ToReturn;
 

@@ -6,11 +6,11 @@
 // \author jpaley@fnal.gov
 // 
 ////////////////////////////////////////////////////////////////////////
-#ifndef DATAPROV_IRUNHISTORY_H
-#define DATAPROV_IRUNHISTORY_H
+#ifndef DETINFO_IRUNHISTORY_H
+#define DETINFO_IRUNHISTORY_H
 
 ///General LArSoft Utilities
-namespace dataprov {
+namespace detinfo {
 
   enum RunType_t {
     kUnknownRunType=0,
@@ -44,5 +44,5 @@ namespace dataprov {
     virtual uint64_t Duration() const = 0;
     
   }; // class RunHistory
-} //namespace dataprov
+} //namespace detinfo
 #endif // RunHistory_H

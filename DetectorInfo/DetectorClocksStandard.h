@@ -10,15 +10,15 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-#ifndef DATAPROV_DETCLOCKSSTD_H
-#define DATAPROV_DETCLOCKSSTD_H
+#ifndef DETINFO_DETCLOCKSSTD_H
+#define DETINFO_DETCLOCKSSTD_H
 
 #include "fhiclcpp/ParameterSet.h"
 
-#include "DataProviders/DetectorClocks.h"
+#include "DetectorInfo/DetectorClocks.h"
 #include "RawData/TriggerData.h"
 
-namespace dataprov{
+namespace detinfo{
 
   class DetectorClocksStandard : public DetectorClocks {
 
@@ -248,7 +248,7 @@ namespace dataprov{
 
   }; // class DetectorClocksStandard
 
-} //namespace utils
+} //namespace detinfo
 
 
 #endif 

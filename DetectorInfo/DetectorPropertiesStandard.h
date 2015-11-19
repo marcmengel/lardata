@@ -5,19 +5,19 @@
 //
 // \author brebel@fnal.gov
 // 
-// Separation of service from data provider class:
+// Separation of service from Detector info class:
 // jpaley@fnal.gov
 ////////////////////////////////////////////////////////////////////////
-#ifndef DATAPROV_DETECTORPROPERTIESSTD_H
-#define DATAPROV_DETECTORPROPERTIESSTD_H
+#ifndef DETINFO_DETECTORPROPERTIESSTD_H
+#define DETINFO_DETECTORPROPERTIESSTD_H
 
 #include "fhiclcpp/ParameterSet.h"
-#include "DataProviders/LArProperties.h"
-#include "DataProviders/DetectorClocks.h"
-#include "DataProviders/DetectorProperties.h"
+#include "DetectorInfo/LArProperties.h"
+#include "DetectorInfo/DetectorClocks.h"
+#include "DetectorInfo/DetectorProperties.h"
 
 ///General LArSoft Utilities
-namespace dataprov{
+namespace detinfo{
   
   class DetectorPropertiesStandard : public DetectorProperties {
     public:
@@ -25,18 +25,18 @@ namespace dataprov{
       DetectorPropertiesStandard();
       DetectorPropertiesStandard(fhicl::ParameterSet const& pset, 
 			 const geo::GeometryCore* geo,
-			 const dataprov::LArProperties* lp,
-			 const dataprov::DetectorClocks* c);
+			 const detinfo::LArProperties* lp,
+			 const detinfo::DetectorClocks* c);
       DetectorPropertiesStandard(DetectorPropertiesStandard const&) = delete;
       virtual ~DetectorPropertiesStandard();
       
       void Configure(fhicl::ParameterSet const& p);
       bool Update(uint64_t ts);
-      bool UpdateClocks(const dataprov::DetectorClocks* clks);
+      bool UpdateClocks(const detinfo::DetectorClocks* clks);
 
       void SetGeometry(const geo::GeometryCore* g) { fGeo = g; }
-      void SetLArProperties(const dataprov::LArProperties* lp) { fLP = lp; }
-      void SetDetectorClocks(const dataprov::DetectorClocks* clks) { fClocks = clks; }
+      void SetLArProperties(const detinfo::LArProperties* lp) { fLP = lp; }
+      void SetDetectorClocks(const detinfo::DetectorClocks* clks) { fClocks = clks; }
 
       void SetNumberTimeSamples(unsigned int nsamp) { fNumberTimeSamples=nsamp;}
       // Accessors.
@@ -91,8 +91,8 @@ namespace dataprov{
             
       void         CalculateXTicksParams();
       
-      const dataprov::LArProperties* fLP;
-      const dataprov::DetectorClocks* fClocks;
+      const detinfo::LArProperties* fLP;
+      const detinfo::DetectorClocks* fClocks;
       const geo::GeometryCore* fGeo;
       
       std::vector< double >          fEfield;           ///< kV/cm
@@ -114,6 +114,6 @@ namespace dataprov{
 
       ::util::ElecClock fTPCClock;     ///< TPC electronics clock
     }; // class DetectorPropertiesStandard
-} //namespace dataprov
+} //namespace detinfo
 
-#endif // DATAPROV_DETECTOR_PROPERTIES_H
+#endif // DETINFO_DETECTOR_PROPERTIES_H

@@ -1,9 +1,9 @@
-#include "DataProviders/DetectorClocksStandard.h"
+#include "DetectorInfo/DetectorClocksStandard.h"
 
 //-------------------------------------------------------------------------
-dataprov::DetectorClocksStandard::DetectorClocksStandard()
-  : fConfigName(dataprov::kInheritConfigTypeMax,""),
-    fConfigValue(dataprov::kInheritConfigTypeMax,0),
+detinfo::DetectorClocksStandard::DetectorClocksStandard()
+  : fConfigName(detinfo::kInheritConfigTypeMax,""),
+    fConfigValue(detinfo::kInheritConfigTypeMax,0),
     fTrigModuleName(""),
     fG4RefTime    (util::kDEFAULT_MC_CLOCK_T0),
     fFramePeriod  (util::kDEFAULT_FRAME_PERIOD),
@@ -16,23 +16,23 @@ dataprov::DetectorClocksStandard::DetectorClocksStandard()
     fBeamGateTime (0)
 {
   
-  fConfigName.at(dataprov::kG4RefTime)         = "G4RefTime";
-  fConfigName.at(dataprov::kTriggerOffsetTPC)  = "TriggerOffsetTPC";
-  fConfigName.at(dataprov::kFramePeriod)       = "FramePeriod";
-  fConfigName.at(dataprov::kClockSpeedTPC)     = "ClockSpeedTPC";
-  fConfigName.at(dataprov::kClockSpeedOptical) = "ClockSpeedOptical";
-  fConfigName.at(dataprov::kClockSpeedTrigger) = "ClockSpeedTrigger";
-  fConfigName.at(dataprov::kClockSpeedExternal) = "ClockSpeedExternal";
-  fConfigName.at(dataprov::kDefaultTrigTime)   = "DefaultTrigTime";
-  fConfigName.at(dataprov::kDefaultBeamTime)   = "DefaultBeamTime";
+  fConfigName.at(detinfo::kG4RefTime)         = "G4RefTime";
+  fConfigName.at(detinfo::kTriggerOffsetTPC)  = "TriggerOffsetTPC";
+  fConfigName.at(detinfo::kFramePeriod)       = "FramePeriod";
+  fConfigName.at(detinfo::kClockSpeedTPC)     = "ClockSpeedTPC";
+  fConfigName.at(detinfo::kClockSpeedOptical) = "ClockSpeedOptical";
+  fConfigName.at(detinfo::kClockSpeedTrigger) = "ClockSpeedTrigger";
+  fConfigName.at(detinfo::kClockSpeedExternal) = "ClockSpeedExternal";
+  fConfigName.at(detinfo::kDefaultTrigTime)   = "DefaultTrigTime";
+  fConfigName.at(detinfo::kDefaultBeamTime)   = "DefaultBeamTime";
   
   fInheritClockConfig = false;
 }
 
 //-------------------------------------------------------------------------
-dataprov::DetectorClocksStandard::DetectorClocksStandard(fhicl::ParameterSet const& pset)
-  : fConfigName(dataprov::kInheritConfigTypeMax,""),
-    fConfigValue(dataprov::kInheritConfigTypeMax,0),
+detinfo::DetectorClocksStandard::DetectorClocksStandard(fhicl::ParameterSet const& pset)
+  : fConfigName(detinfo::kInheritConfigTypeMax,""),
+    fConfigValue(detinfo::kInheritConfigTypeMax,0),
     fTrigModuleName(""),
     fG4RefTime    (util::kDEFAULT_MC_CLOCK_T0),
     fFramePeriod  (util::kDEFAULT_FRAME_PERIOD),
@@ -45,15 +45,15 @@ dataprov::DetectorClocksStandard::DetectorClocksStandard(fhicl::ParameterSet con
     fBeamGateTime (0)
 {
   
-  fConfigName.at(dataprov::kG4RefTime)         = "G4RefTime";
-  fConfigName.at(dataprov::kTriggerOffsetTPC)  = "TriggerOffsetTPC";
-  fConfigName.at(dataprov::kFramePeriod)       = "FramePeriod";
-  fConfigName.at(dataprov::kClockSpeedTPC)     = "ClockSpeedTPC";
-  fConfigName.at(dataprov::kClockSpeedOptical) = "ClockSpeedOptical";
-  fConfigName.at(dataprov::kClockSpeedTrigger) = "ClockSpeedTrigger";
-  fConfigName.at(dataprov::kClockSpeedExternal) = "ClockSpeedExternal";
-  fConfigName.at(dataprov::kDefaultTrigTime)   = "DefaultTrigTime";
-  fConfigName.at(dataprov::kDefaultBeamTime)   = "DefaultBeamTime";
+  fConfigName.at(detinfo::kG4RefTime)         = "G4RefTime";
+  fConfigName.at(detinfo::kTriggerOffsetTPC)  = "TriggerOffsetTPC";
+  fConfigName.at(detinfo::kFramePeriod)       = "FramePeriod";
+  fConfigName.at(detinfo::kClockSpeedTPC)     = "ClockSpeedTPC";
+  fConfigName.at(detinfo::kClockSpeedOptical) = "ClockSpeedOptical";
+  fConfigName.at(detinfo::kClockSpeedTrigger) = "ClockSpeedTrigger";
+  fConfigName.at(detinfo::kClockSpeedExternal) = "ClockSpeedExternal";
+  fConfigName.at(detinfo::kDefaultTrigTime)   = "DefaultTrigTime";
+  fConfigName.at(detinfo::kDefaultBeamTime)   = "DefaultBeamTime";
   
   fInheritClockConfig = false;
   Configure(pset);
@@ -62,13 +62,13 @@ dataprov::DetectorClocksStandard::DetectorClocksStandard(fhicl::ParameterSet con
 
 
 //------------------------------------------------------------------
-bool dataprov::DetectorClocksStandard::Update(uint64_t ts)
+bool detinfo::DetectorClocksStandard::Update(uint64_t ts)
 {
   return true;
 }
 
 //------------------------------------------------------------------
-bool dataprov::DetectorClocksStandard::Configure(fhicl::ParameterSet const& pset)
+bool detinfo::DetectorClocksStandard::Configure(fhicl::ParameterSet const& pset)
 {
 
   // Read fcl parameters
@@ -93,7 +93,7 @@ bool dataprov::DetectorClocksStandard::Configure(fhicl::ParameterSet const& pset
 }
 
 //-----------------------------------
-void dataprov::DetectorClocksStandard::ApplyParams()
+void detinfo::DetectorClocksStandard::ApplyParams()
 //-----------------------------------
 {
 
@@ -108,7 +108,7 @@ void dataprov::DetectorClocksStandard::ApplyParams()
 }
 
 //------------------------------------------------------------------------
-bool dataprov::DetectorClocksStandard::IsRightConfig(const fhicl::ParameterSet& ps) const
+bool detinfo::DetectorClocksStandard::IsRightConfig(const fhicl::ParameterSet& ps) const
 //------------------------------------------------------------------------
 {
   std::string s;
@@ -123,7 +123,7 @@ bool dataprov::DetectorClocksStandard::IsRightConfig(const fhicl::ParameterSet& 
 }
 
 //-----------------------------------------
-void dataprov::DetectorClocksStandard::debugReport() const
+void detinfo::DetectorClocksStandard::debugReport() const
 //-----------------------------------------
 {
   std::cout << "fConfigValues contents: "<<std::endl;

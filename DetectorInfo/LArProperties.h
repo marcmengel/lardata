@@ -6,12 +6,12 @@
 // \author jpaley@fnal.gov
 // 
 ////////////////////////////////////////////////////////////////////////
-#ifndef DATAPROV_LARPROPERTIES_H
-#define DATAPROV_LARPROPERTIES_H
+#ifndef DETINFO_LARPROPERTIES_H
+#define DETINFO_LARPROPERTIES_H
 
 
 ///General LArSoft Utilities
-namespace dataprov{
+namespace detinfo{
   
   class LArProperties {
     public:
@@ -67,6 +67,6 @@ namespace dataprov{
       LArProperties() = default;
       
     }; // class LArProperties
-} //namespace dataprov
+} //namespace detinfo
 
-#endif // DATAPROV_ILARPROPERTIES_H
+#endif // DETINFO_ILARPROPERTIES_H

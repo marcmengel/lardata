@@ -6,12 +6,12 @@
 // \author jpaley@fnal.gov
 // 
 ////////////////////////////////////////////////////////////////////////
-#ifndef DATAPROV_IDETCLOCKS_H
-#define DATAPROV_IDETCLOCKS_H
+#ifndef DETINFO_IDETCLOCKS_H
+#define DETINFO_IDETCLOCKS_H
 
 #include "Utilities/ElecClock.h"
 
-namespace dataprov{
+namespace detinfo{
 
   enum InheritConfigType_t {
     kG4RefTime=0,
@@ -166,7 +166,7 @@ namespace dataprov{
 
   }; // class DetectorClocks
 
-} //namespace utils
+} //namespace detinfo
 
 
 #endif 

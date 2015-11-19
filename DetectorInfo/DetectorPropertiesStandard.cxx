@@ -2,7 +2,7 @@
 //
 //  \file DetectorProperties.cxx
 //
-// Separation of service from data provider class:
+// Separation of service from Detector info class:
 // jpaley@fnal.gov
 //
 ////////////////////////////////////////////////////////////////////////
@@ -11,7 +11,7 @@
 #include <cassert>
 
 // LArSoft includes
-#include "DataProviders/DetectorPropertiesStandard.h"
+#include "DetectorInfo/DetectorPropertiesStandard.h"
 #include "Geometry/Geometry.h"
 #include "Geometry/CryostatGeo.h"
 #include "Geometry/TPCGeo.h"
@@ -24,7 +24,7 @@
 #include "art/Persistency/RootDB/SQLite3Wrapper.h"
 #include "fhiclcpp/make_ParameterSet.h"
 
-namespace dataprov{
+namespace detinfo{
 
   //--------------------------------------------------------------------
   DetectorPropertiesStandard::DetectorPropertiesStandard() :
@@ -36,8 +36,8 @@ namespace dataprov{
   //--------------------------------------------------------------------
   DetectorPropertiesStandard::DetectorPropertiesStandard(fhicl::ParameterSet const& pset,
 					 const geo::GeometryCore* geo,
-					 const dataprov::LArProperties* lp,
-					 const dataprov::DetectorClocks* c):
+					 const detinfo::LArProperties* lp,
+					 const detinfo::DetectorClocks* c):
     fLP(lp), fClocks(c), fGeo(geo)
   {
     Configure(pset);
@@ -61,7 +61,7 @@ namespace dataprov{
   }
 
   //--------------------------------------------------------------------
-  bool DetectorPropertiesStandard::UpdateClocks(const dataprov::DetectorClocks* clks) 
+  bool DetectorPropertiesStandard::UpdateClocks(const detinfo::DetectorClocks* clks) 
   {
     fClocks = clks;
     

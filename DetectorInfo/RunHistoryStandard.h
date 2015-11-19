@@ -1,23 +1,23 @@
 ////////////////////////////////////////////////////////////////////////
 // RunHistoryStandard.h
 //
-//  Data provider class for run history
+//  Detector info class for run history
 //
 // jpaley@fnal.gov
 //
 ////////////////////////////////////////////////////////////////////////
-#ifndef DATAPROV_RUNHISTORY_H
-#define DATAPROV_RUNHISTORY_H
+#ifndef DETINFO_RUNHISTORY_H
+#define DETINFO_RUNHISTORY_H
 
 #include <string>
 #include <vector>
 #include <map>
 
 #include "fhiclcpp/ParameterSet.h"
-#include "DataProviders/RunHistory.h"
+#include "DetectorInfo/RunHistory.h"
 
 ///General LArSoft Utilities
-namespace dataprov {
+namespace detinfo {
 
   class SubRunStandard : public SubRun {
   public:
@@ -76,5 +76,5 @@ namespace dataprov {
     std::vector<SubRunStandard> fSubrun;
     
   }; // class RunHistoryStandard
-} //namespace dataprov
-#endif // DATAPROV_RUNHISTORY_H
+} //namespace detinfo
+#endif // DETINFO_RUNHISTORY_H

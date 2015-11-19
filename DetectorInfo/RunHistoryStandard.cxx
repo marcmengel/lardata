@@ -11,7 +11,7 @@
 #include <iostream>
 
 // LArSoft includes
-#include "DataProviders/RunHistoryStandard.h"
+#include "DetectorInfo/RunHistoryStandard.h"
 
 // ROOT includes
 #include "TMath.h"
@@ -20,7 +20,7 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"
 
-namespace dataprov {
+namespace detinfo {
   //-----------------------------------------------
   RunHistoryStandard::RunHistoryStandard() :
     fRun(-1), fNSubruns(0), fRunType(kUnknownRunType)

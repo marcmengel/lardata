@@ -6,14 +6,14 @@
 // \author jpaley@fnal.gov
 // 
 ////////////////////////////////////////////////////////////////////////
-#ifndef DATAPROV_IDETECTORPROPERTIES_H
-#define DATAPROV_IDETECTORPROPERTIES_H
+#ifndef DETINFO_IDETECTORPROPERTIES_H
+#define DETINFO_IDETECTORPROPERTIES_H
 
 #include "fhiclcpp/ParameterSet.h"
 #include "Geometry/Geometry.h"
 
 ///General LArSoft Utilities
-namespace dataprov{
+namespace detinfo{
   
   class DetectorProperties {
     public:
@@ -64,6 +64,6 @@ namespace dataprov{
       DetectorProperties() = default;
 
     }; // class DetectorProperties
-} //namespace dataprov
+} //namespace detinfo
 
-#endif // DATAPROV_IDETECTORPROPERTIES_H
+#endif // DETINFO_IDETECTORPROPERTIES_H
