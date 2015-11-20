@@ -67,15 +67,12 @@ namespace detinfo{
   //------------------------------------------------------------
   double DetectorPropertiesStandard::ConvertTDCToTicks(double tdc) const
   {
-    if (fClocks!=0) throw cet::exception(__FUNCTION__) << "DetectorClocks is uninitialized!";
-
     return fClocks->TPCTDC2Tick(tdc);
   }
   
   //--------------------------------------------------------------
   double DetectorPropertiesStandard::ConvertTicksToTDC(double ticks) const
   {
-    if (fClocks!=0) throw cet::exception(__FUNCTION__) << "DetectorClocks is uninitialized!";
     return fClocks->TPCTick2TDC(ticks);
   }
   
@@ -83,14 +80,11 @@ namespace detinfo{
   void DetectorPropertiesStandard::Configure(fhicl::ParameterSet const& p)
   {
     //fSamplingRate             = p.get< double        >("SamplingRate"     );
-    double d;
-    int    i;
-    bool   b;
-    if(p.get_if_present<double>("SamplingRate",d))
+    if(p.has_key("SamplingRate"))
       throw cet::exception(__FUNCTION__) << "SamplingRate is a deprecated fcl parameter for DetectorPropertiesStandard!";
-    if(p.get_if_present<int>("TriggerOffset",i))
+    if(p.has_key("TriggerOffset"))
       throw cet::exception(__FUNCTION__) << "TriggerOffset is a deprecated fcl parameter for DetectorPropertiesStandard!";
-    if(p.get_if_present<bool>("InheritTriggerOffset",b))
+    if(p.has_key("InheritTriggerOffset"))
       throw cet::exception(__FUNCTION__) << "InheritTriggerOffset is a deprecated fcl parameter for DetectorPropertiesStandard!";
     
     SetEfield(p.get< std::vector<double> >("Efield"));
@@ -249,7 +243,6 @@ namespace detinfo{
   //------------------------------------------------------------------------------------//
   int  DetectorPropertiesStandard::TriggerOffset()     const 
   {
-    if (fClocks!=0) throw cet::exception(__FUNCTION__) << "DetectorClocks is uninitialized!";
     return fTPCClock.Ticks(fClocks->TriggerOffsetTPC() * -1.);
   }
   
