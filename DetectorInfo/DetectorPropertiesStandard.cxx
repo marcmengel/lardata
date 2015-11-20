@@ -286,11 +286,11 @@ namespace detinfo{
   
 
   //--------------------------------------------------------------------
-  void DetectorPropertiesStandard::CheckIfConfigured()
+  void DetectorPropertiesStandard::CheckIfConfigured() const
   {
-    if (fGeo!=0) throw cet::exception(__FUNCTION__) << "Geometry is uninitialized!";
-    if (fLP!=0) throw cet::exception(__FUNCTION__) << "LArPropertiesStandard is uninitialized!";
-    if (fClocks!=0) throw cet::exception(__FUNCTION__) << "DetectorClocks is uninitialized!";
+    if (!fGeo) throw cet::exception(__FUNCTION__) << "Geometry is uninitialized!";
+    if (!fLP) throw cet::exception(__FUNCTION__) << "LArPropertiesStandard is uninitialized!";
+    if (!fClocks) throw cet::exception(__FUNCTION__) << "DetectorClocks is uninitialized!";
   }
   
   
