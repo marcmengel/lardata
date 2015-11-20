@@ -12,10 +12,10 @@
 #include "art/Framework/Core/ModuleMacros.h" 
 #include "art/Framework/Core/EDAnalyzer.h"
 
-#include "Utilities/LArPropertiesService.h"
-#include "Utilities/DetectorPropertiesService.h"
-#include "DataProviders/LArProperties.h"
-#include "DataProviders/DetectorProperties.h"
+#include "DetectorInfoServices/LArPropertiesService.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
+#include "DetectorInfo/LArProperties.h"
+#include "DetectorInfo/DetectorProperties.h"
 #include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 
 namespace util
@@ -55,8 +55,8 @@ namespace util
 
     // Get services.
 
-    dataprov::LArProperties const* larprop = lar::providerFrom<util::LArPropertiesService>();
-    dataprov::DetectorProperties const* detprop = lar::providerFrom<util::DetectorPropertiesService>();
+    detinfo::LArProperties const* larprop = lar::providerFrom<detinfo::LArPropertiesService>();
+    detinfo::DetectorProperties const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     // Test (default) accessors.
 

@@ -14,8 +14,8 @@
 
 #include "PxUtils.h"
 #include "Geometry/Geometry.h"
-#include "Utilities/LArPropertiesService.h"
-#include "Utilities/DetectorPropertiesService.h"
+#include "DetectorInfoServices/LArPropertiesService.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
 #include "Utilities/UtilException.h"
 #include "time.h"
 
@@ -286,11 +286,11 @@ namespace util{
     */
 
     art::ServiceHandle<geo::Geometry> geom;
-    const dataprov::DetectorProperties* detp;
-    const dataprov::LArProperties* larp;
+    const detinfo::DetectorProperties* detp;
+    const detinfo::LArProperties* larp;
     /*
-    art::ServiceHandle<util::DetectorPropertiesService> detp;
-    art::ServiceHandle<util::LArPropertiesService> larp;
+    art::ServiceHandle<detinfo::DetectorPropertiesService> detp;
+    art::ServiceHandle<detinfo::LArPropertiesService> larp;
     */
     
     std::vector< Double_t > vertangle;  //angle wrt to vertical

@@ -14,7 +14,7 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "art/Framework/Principal/Run.h"
-#include "DataProviders/RunHistory.h"
+#include "DetectorInfo/RunHistory.h"
 #include "Utilities/IRunHistoryService.h"
 
 ///General LArSoft Utilities
@@ -30,9 +30,9 @@ namespace util
 
     private:
 
-      std::unique_ptr<dataprov::RunHistory> fRH;
+      std::unique_ptr<detinfo::RunHistory> fRH;
 
     }; // class RunHistoryService
 } //namespace utils
-DECLARE_ART_SERVICE_INTERFACE_IMPL(util::RunHistoryService, util::IRunHistoryService, LEGACY)
+DECLARE_ART_SERVICE_INTERFACE_IMPL(detinfo::RunHistoryService, util::IRunHistoryService, LEGACY)
 #endif // LARPROPERTIES_SERVICE_H
