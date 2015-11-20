@@ -17,26 +17,6 @@ art_make( NO_PLUGINS
                         ${ROOT_BASIC_LIB_LIST}
         )
 
-simple_plugin(DetectorClocksServiceStandard "service"
-              DataProviders
-	      RawData
-#              DatabaseUtil_service
-	      ${ART_UTILITIES}
-              ${ART_FRAMEWORK_CORE}
-	      ${ART_FRAMEWORK_PRINCIPAL}
-	      ${ART_PERSISTENCY_ROOTDB}
-	      ${ART_PERSISTENCY_COMMON}
-	      ${ART_PERSISTENCY_PROVENANCE}
-	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
-	      ${MF_MESSAGELOGGER}
-	      ${MF_UTILITIES}
-	      ${FHICLCPP}
-	      ${CETLIB}
-	      ${SQLITE3}
-	      ${ROOT_BASIC_LIB_LIST}
-              BASENAME_ONLY
-)
-
 simple_plugin(DatabaseUtil "service"
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
@@ -52,21 +32,6 @@ simple_plugin(DatabaseUtil "service"
               ${ART_FRAMEWORK_SERVICES_REGISTRY}
               BASENAME_ONLY
 )
-
-simple_plugin(DetectorPropertiesServiceStandard "service"
-              DataProviders
-#              DatabaseUtil_service
-              Geometry_service
-              Geometry
-	      ${ART_PERSISTENCY_ROOTDB}
-	      ${SQLITE3}
-	      ${MF_MESSAGELOGGER}
-	      ${MF_UTILITIES}
-	      ${CETLIB}
-	      ${ROOT_BASIC_LIB_LIST}
-              BASENAME_ONLY
-)
-
 simple_plugin(FileCatalogMetadataExtras "service"
 	      ${ART_UTILITIES}
 	      ${ART_PERSISTENCY_ROOTDB}
@@ -89,17 +54,6 @@ simple_plugin(LArFFT "service"
 	      ${CETLIB}
 	      ${ROOT_FFTW}
 	      ${ROOT_BASIC_LIB_LIST}
-              BASENAME_ONLY
-)
-
-simple_plugin(LArPropertiesServiceStandard "service"
-#              Utilities
-	      DataProviders
-#              DatabaseUtil_service
-	      ${ART_UTILITIES}
-	      ${MF_MESSAGELOGGER}
-	      ${MF_UTILITIES}
-	      ${CETLIB}
               BASENAME_ONLY
 )
 

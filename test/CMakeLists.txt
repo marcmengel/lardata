@@ -12,6 +12,7 @@ add_subdirectory( RawData )
 add_subdirectory( RecoBase )
 add_subdirectory( RecoObjects )
 add_subdirectory( Utilities )
+add_subdirectory( DetectorInfoServices )
 
 # various integration tests
 
