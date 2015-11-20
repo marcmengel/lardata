@@ -47,12 +47,6 @@ namespace detinfo{
   }
   
   //--------------------------------------------------------------------
-  DetectorPropertiesStandard::~DetectorPropertiesStandard() 
-  {
-    
-  }
-
-  //--------------------------------------------------------------------
   bool DetectorPropertiesStandard::Update(uint64_t t) 
   {
 

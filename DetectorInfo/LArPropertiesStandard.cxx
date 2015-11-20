@@ -33,15 +33,9 @@ detinfo::LArPropertiesStandard::LArPropertiesStandard(fhicl::ParameterSet const&
 }
 
 //------------------------------------------------
-detinfo::LArPropertiesStandard::~LArPropertiesStandard()
-{
-}
-
-//------------------------------------------------
 bool detinfo::LArPropertiesStandard::Configure(fhicl::ParameterSet const& pset)
 {  
   this->SetTemperature      (pset.get< double >("Temperature"));
-  this->SetElectronlifetime (pset.get< double >("Electronlifetime"));
   this->SetRadiationLength  (pset.get< double >("RadiationLength" ));
   this->SetAtomicNumber     (pset.get< double >("AtomicNumber"));
   this->SetAtomicMass       (pset.get< double >("AtomicMass"));
@@ -252,8 +246,8 @@ std::map<double, double> detinfo::LArPropertiesStandard::SlowScintSpectrum() con
   if(fSlowScintSpectrum.size()!=fSlowScintEnergies.size()){
       throw cet::exception("Incorrect vector sizes in LArPropertiesStandard")
   << "The vectors specifying the slow scintillation spectrum are "
-  << " different sizes - " << fFastScintSpectrum.size()
-  << " " << fFastScintEnergies.size();
+  << " different sizes - " << fSlowScintSpectrum.size()
+  << " " << fSlowScintEnergies.size();
     }
 
   std::map<double, double> ToReturn;

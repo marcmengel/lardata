@@ -28,7 +28,7 @@ namespace detinfo{
 			 const detinfo::LArProperties* lp,
 			 const detinfo::DetectorClocks* c);
       DetectorPropertiesStandard(DetectorPropertiesStandard const&) = delete;
-      virtual ~DetectorPropertiesStandard();
+      virtual ~DetectorPropertiesStandard() = default;
       
       void Configure(fhicl::ParameterSet const& p);
       bool Update(uint64_t ts);
@@ -83,9 +83,10 @@ namespace detinfo{
 
       virtual bool         InheritNumberTimeSamples() const override { return fInheritNumberTimeSamples; }
       
-    private:
-
-      void CheckIfConfigured();
+      
+      /// Verifies that the provider is in a fully configured status
+      /// @throw cet::exception (category DetectorPropertiesStandard) if not ok
+      void CheckIfConfigured() const;
       
     protected:
             
@@ -95,7 +96,7 @@ namespace detinfo{
       const detinfo::DetectorClocks* fClocks;
       const geo::GeometryCore* fGeo;
       
-      std::vector< double >          fEfield;           ///< kV/cm
+      std::vector< double >          fEfield;           ///< kV/cm (per plane)
       double                         fElectronlifetime; ///< microseconds
       double       fSamplingRate;      ///< in ns
       double 	   fElectronsToADC;    ///< conversion factor for # of ionization electrons to 1 ADC count

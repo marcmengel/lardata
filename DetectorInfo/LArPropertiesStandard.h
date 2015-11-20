@@ -42,7 +42,7 @@ namespace detinfo {
     LArPropertiesStandard();
     LArPropertiesStandard(fhicl::ParameterSet const& pset);
     LArPropertiesStandard(LArPropertiesStandard const&) = delete;
-    virtual ~LArPropertiesStandard();
+    virtual ~LArPropertiesStandard() = default;
     
     bool   Configure(fhicl::ParameterSet const& pset);
     bool   Update(uint64_t ts=0);
@@ -96,7 +96,6 @@ namespace detinfo {
     virtual std::map<std::string, std::map<double, double> > SurfaceReflectanceDiffuseFractions() const override;
 	
     void SetTemperature(double temp) { fTemperature = temp;}
-    void SetElectronlifetime(double lt) { fElectronlifetime = lt; }
     void SetRadiationLength(double rl) { fRadiationLength = rl; }
     void SetArgon39DecayRate(double r) { fArgon39DecayRate = r;}
     void SetAtomicNumber(double z) { fZ = z;}
@@ -111,7 +110,7 @@ namespace detinfo {
     void SetFastScintSpectrum(std::vector<double> s) { fFastScintSpectrum = s;}
     void SetFastScintEnergies(std::vector<double> s) { fFastScintEnergies = s;}
     void SetSlowScintSpectrum(std::vector<double> s) { fSlowScintSpectrum = s;}
-    void SetSlowScintEnergies(std::vector<double> s) { fSlowScintSpectrum = s;}
+    void SetSlowScintEnergies(std::vector<double> s) { fSlowScintEnergies = s;}
     void SetRIndexSpectrum(std::vector<double> s)    { fRIndexSpectrum = s;}
     void SetRIndexEnergies(std::vector<double> s)    { fRIndexEnergies = s;}
     void SetAbsLengthSpectrum(std::vector<double> s) { fAbsLengthSpectrum = s;}
@@ -153,7 +152,6 @@ namespace detinfo {
     bool fIsConfigured;
       
     double                         fTemperature;      ///< kelvin
-    double                         fElectronlifetime; ///< microseconds
     double                         fRadiationLength;  ///< g/cm^2
     double                         fArgon39DecayRate; ///<  decays per cm^3 per second
       
