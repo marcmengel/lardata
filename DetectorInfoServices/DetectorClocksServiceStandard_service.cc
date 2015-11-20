@@ -1,12 +1,12 @@
-#include "Utilities/DetectorClocksServiceStandard.h"
+#include "DetectorInfoServices/DetectorClocksServiceStandard.h"
 #include "TFile.h"
 #include "art/Persistency/RootDB/SQLite3Wrapper.h"
 #include "fhiclcpp/make_ParameterSet.h"
 
 //-----------------------------------------------------------------------------------------
-util::DetectorClocksServiceStandard::DetectorClocksServiceStandard
+detinfo::DetectorClocksServiceStandard::DetectorClocksServiceStandard
   (fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
-  : fClocks(std::make_unique<dataprov::DetectorClocksStandard>(pset))
+  : fClocks(std::make_unique<detinfo::DetectorClocksStandard>(pset))
 {
   
   reg.sPreProcessEvent.watch (this, &DetectorClocksServiceStandard::preProcessEvent);
@@ -16,7 +16,7 @@ util::DetectorClocksServiceStandard::DetectorClocksServiceStandard
 }
 
 //------------------------------------------------------------------
-void util::DetectorClocksServiceStandard::reconfigure(fhicl::ParameterSet const& pset)
+void detinfo::DetectorClocksServiceStandard::reconfigure(fhicl::ParameterSet const& pset)
 //------------------------------------------------------------------
 {
   fClocks->Configure(pset);
@@ -24,7 +24,7 @@ void util::DetectorClocksServiceStandard::reconfigure(fhicl::ParameterSet const&
 }
 
 //------------------------------------------------------------
-void util::DetectorClocksServiceStandard::preProcessEvent(const art::Event& evt)
+void detinfo::DetectorClocksServiceStandard::preProcessEvent(const art::Event& evt)
 //------------------------------------------------------------
 {
   art::Handle<std::vector<raw::Trigger> > trig_handle;
@@ -35,8 +35,8 @@ void util::DetectorClocksServiceStandard::preProcessEvent(const art::Event& evt)
   
   if(!trig_handle.isValid() || trig_handle->empty()) {
     // Trigger simulation has not run yet!
-    fClocks->SetTriggerTime(cfgValues.at(dataprov::kDefaultTrigTime),
-			    cfgValues.at(dataprov::kDefaultBeamTime) );
+    fClocks->SetTriggerTime(cfgValues.at(detinfo::kDefaultTrigTime),
+			    cfgValues.at(detinfo::kDefaultBeamTime) );
     return;
   }
 
@@ -54,7 +54,7 @@ void util::DetectorClocksServiceStandard::preProcessEvent(const art::Event& evt)
 }
 
 //------------------------------------------------------
-void util::DetectorClocksServiceStandard::preBeginRun(art::Run const& run)
+void detinfo::DetectorClocksServiceStandard::preBeginRun(art::Run const& run)
 //------------------------------------------------------
 {
 
@@ -66,7 +66,7 @@ void util::DetectorClocksServiceStandard::preBeginRun(art::Run const& run)
 
 
 //---------------------------------------------------------------
-void util::DetectorClocksServiceStandard::postOpenFile(const std::string& filename)
+void detinfo::DetectorClocksServiceStandard::postOpenFile(const std::string& filename)
 //---------------------------------------------------------------
 {
 
@@ -91,8 +91,8 @@ void util::DetectorClocksServiceStandard::postOpenFile(const std::string& filena
       
       // Loop over all stored ParameterSets.
 
-      std::vector<size_t> config_count(dataprov::kInheritConfigTypeMax,0);
-      std::vector<double> config_value(dataprov::kInheritConfigTypeMax,0);
+      std::vector<size_t> config_count(detinfo::kInheritConfigTypeMax,0);
+      std::vector<double> config_value(detinfo::kInheritConfigTypeMax,0);
 
       sqlite3_stmt * stmt = 0;
       sqlite3_prepare_v2(sqliteDB, "SELECT PSetBlob from ParameterSets;", -1, &stmt, NULL);
@@ -104,7 +104,7 @@ void util::DetectorClocksServiceStandard::postOpenFile(const std::string& filena
 
 	if(!fClocks->IsRightConfig(ps)) continue;
 
-	for(size_t i=0; i<dataprov::kInheritConfigTypeMax; ++i) {
+	for(size_t i=0; i<detinfo::kInheritConfigTypeMax; ++i) {
 
 	  double value_from_file = ps.get<double>(cfgName.at(i).c_str());
 	  
@@ -127,7 +127,7 @@ void util::DetectorClocksServiceStandard::postOpenFile(const std::string& filena
 
       // Override parameters 
 
-      for(size_t i=0; i<dataprov::kInheritConfigTypeMax; ++i)
+      for(size_t i=0; i<detinfo::kInheritConfigTypeMax; ++i)
 
 	if(config_count.at(i) && cfgValue.at(i) != config_value.at(i)) {
 
@@ -155,5 +155,5 @@ void util::DetectorClocksServiceStandard::postOpenFile(const std::string& filena
 
 }
 
-DEFINE_ART_SERVICE_INTERFACE_IMPL(util::DetectorClocksServiceStandard, util::DetectorClocksService)
+DEFINE_ART_SERVICE_INTERFACE_IMPL(detinfo::DetectorClocksServiceStandard, detinfo::DetectorClocksService)
 

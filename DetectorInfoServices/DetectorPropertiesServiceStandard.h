@@ -1,24 +1,24 @@
 ////////////////////////////////////////////////////////////////////////
-// DetectorPropertiesService.h
+// DetectorPropertiesServiceStandard.h
 //
 // Service interface for DetectorProperties functions
 //
 //  jpaley@fnal.gov
 //
 ////////////////////////////////////////////////////////////////////////
-#ifndef DETPROPERTIES_SERVICE_H
-#define DETPROPERTIES_SERVICE_H
+#ifndef DETECTORPROPERTIESSERVICESTANDARD_H
+#define DETECTORPROPERTIESSERVICESTANDARD_H
 
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "art/Framework/Principal/Run.h"
-#include "DataProviders/DetectorPropertiesStandard.h"
-#include "Utilities/DetectorPropertiesService.h"
+#include "DetectorInfo/DetectorPropertiesStandard.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
 
 ///General LArSoft Utilities
-namespace util{
+namespace detinfo{
   class DetectorPropertiesServiceStandard : public DetectorPropertiesService {
 
     public:
@@ -33,12 +33,12 @@ namespace util{
       
     private:
 
-      std::unique_ptr<dataprov::DetectorPropertiesStandard> fProp;
+      std::unique_ptr<detinfo::DetectorPropertiesStandard> fProp;
       fhicl::ParameterSet   fPS;       ///< Original parameter set.
       
       bool  isDetectorPropertiesService(const fhicl::ParameterSet& ps);
       
     }; // class DetectorPropertiesService
-} //namespace utils
-DECLARE_ART_SERVICE_INTERFACE_IMPL(util::DetectorPropertiesServiceStandard, util::DetectorPropertiesService, LEGACY)
-#endif // DETPROPERTIES_SERVICE_H
+} //namespace detinfo
+DECLARE_ART_SERVICE_INTERFACE_IMPL(detinfo::DetectorPropertiesServiceStandard, detinfo::DetectorPropertiesService, LEGACY)
+#endif // DETECTORPROPERTIESSERVICESTANDARD_H

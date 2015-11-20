@@ -6,28 +6,28 @@
 //  jpaley@fnal.gov
 //
 ////////////////////////////////////////////////////////////////////////
-#ifndef IDETPROPERTIES_SERVICE_H
-#define IDETPROPERTIES_SERVICE_H
+#ifndef DETECTORPROPERTIESSERVICE_H
+#define DETECTORPROPERTIESSERVICE_H
 
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-#include "DataProviders/DetectorProperties.h"
+#include "DetectorInfo/DetectorProperties.h"
 #include "CoreUtils/ServiceUtil.h"
 
 ///General LArSoft Utilities
-namespace util{
+namespace detinfo{
   class DetectorPropertiesService {
 
     public:
-    typedef dataprov::DetectorProperties provider_type;
+    typedef detinfo::DetectorProperties provider_type;
 
     public:
       virtual ~DetectorPropertiesService() = default;
       
       virtual void   reconfigure(fhicl::ParameterSet const& pset) = 0;
-      virtual const  dataprov::DetectorProperties* provider() const = 0;
+      virtual const  detinfo::DetectorProperties* provider() const = 0;
             
     }; // class DetectorPropertiesService
-} //namespace utils
-DECLARE_ART_SERVICE_INTERFACE(util::DetectorPropertiesService, LEGACY)
-#endif // IDETPROPERTIES_SERVICE_H
+} //namespace detinfo
+DECLARE_ART_SERVICE_INTERFACE(detinfo::DetectorPropertiesService, LEGACY)
+#endif // DETECTORPROPERTIESSERVICE_H

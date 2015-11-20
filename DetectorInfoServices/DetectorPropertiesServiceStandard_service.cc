@@ -6,21 +6,21 @@
 // Framework includes
 
 // LArSoft includes
-#include "Utilities/DetectorPropertiesServiceStandard.h"
-#include "DataProviders/LArProperties.h"
+#include "DetectorInfoServices/DetectorPropertiesServiceStandard.h"
+#include "DetectorInfo/LArProperties.h"
 #include "Geometry/Geometry.h"
 #include "Geometry/CryostatGeo.h"
 #include "Geometry/TPCGeo.h"
 #include "Geometry/PlaneGeo.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "Utilities/LArPropertiesService.h"
-#include "Utilities/DetectorClocksService.h"
+#include "DetectorInfoServices/LArPropertiesService.h"
+#include "DetectorInfoServices/DetectorClocksService.h"
 
 // Art includes
 #include "art/Persistency/RootDB/SQLite3Wrapper.h"
 #include "fhiclcpp/make_ParameterSet.h"
 
-namespace util{
+namespace detinfo{
 
   //--------------------------------------------------------------------
   DetectorPropertiesServiceStandard::DetectorPropertiesServiceStandard
@@ -34,11 +34,11 @@ namespace util{
     // obtain the required dependency service providers and create our own
     const geo::GeometryCore* geo = lar::providerFrom<geo::Geometry>();
     
-    const dataprov::LArProperties* lp = lar::providerFrom<util::LArPropertiesService>();
+    const detinfo::LArProperties* lp = lar::providerFrom<detinfo::LArPropertiesService>();
     
-    const dataprov::DetectorClocks* clks = lar::providerFrom<util::DetectorClocksService>();
+    const detinfo::DetectorClocks* clks = lar::providerFrom<detinfo::DetectorClocksService>();
     
-    fProp = std::make_unique<dataprov::DetectorPropertiesStandard>(pset,geo,lp,clks);
+    fProp = std::make_unique<detinfo::DetectorPropertiesStandard>(pset,geo,lp,clks);
     
     // at this point we need and expect the provider to be fully configured
     fProp->CheckIfConfigured();
@@ -63,7 +63,7 @@ namespace util{
   void DetectorPropertiesServiceStandard::preProcessEvent(const art::Event& evt)
   {
     // Make sure TPC Clock is updated with TimeService (though in principle it shouldn't change
-    fProp->UpdateClocks(lar::providerFrom<util::DetectorClocksService>());
+    fProp->UpdateClocks(lar::providerFrom<detinfo::DetectorClocksService>());
   }
 
   //--------------------------------------------------------------------
@@ -192,10 +192,7 @@ namespace util{
     return result;
   }
 
-} // namespace
+} // namespace detinfo
 
-namespace util{
- 
-  DEFINE_ART_SERVICE_INTERFACE_IMPL(util::DetectorPropertiesServiceStandard, util::DetectorPropertiesService)
+DEFINE_ART_SERVICE_INTERFACE_IMPL(detinfo::DetectorPropertiesServiceStandard, detinfo::DetectorPropertiesService)
 
-} // namespace util

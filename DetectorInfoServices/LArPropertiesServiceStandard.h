@@ -1,24 +1,24 @@
 ////////////////////////////////////////////////////////////////////////
-// LArProperties_service.h
+// LArPropertiesServiceStandard.h
 //
 // Service interface for Utility LAr functions
 //
 //  jpaley@fnal.gov
 //
 ////////////////////////////////////////////////////////////////////////
-#ifndef LARPROPERTIES_SERVICE_H
-#define LARPROPERTIES_SERVICE_H
+#ifndef LARPROPERTIESSERVICESTANDARD_H
+#define LARPROPERTIESSERVICESTANDARD_H
 
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "art/Framework/Principal/Run.h"
-#include "DataProviders/LArPropertiesStandard.h"
-#include "Utilities/LArPropertiesService.h"
+#include "DetectorInfo/LArPropertiesStandard.h"
+#include "DetectorInfoServices/LArPropertiesService.h"
 
 ///General LArSoft Utilities
-namespace util{
+namespace detinfo{
   class LArPropertiesServiceStandard : public LArPropertiesService {
     public:
       LArPropertiesServiceStandard(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
@@ -30,9 +30,9 @@ namespace util{
 
     private:
 
-      std::unique_ptr<dataprov::LArPropertiesStandard> fProp;
+      std::unique_ptr<detinfo::LArPropertiesStandard> fProp;
 
     }; // class LArPropertiesServiceStandard
-} //namespace utils
-DECLARE_ART_SERVICE_INTERFACE_IMPL(util::LArPropertiesServiceStandard, util::LArPropertiesService, LEGACY)
-#endif // LARPROPERTIES_SERVICE_H
+} //namespace detinfo
+DECLARE_ART_SERVICE_INTERFACE_IMPL(detinfo::LArPropertiesServiceStandard, detinfo::LArPropertiesService, LEGACY)
+#endif // LARPROPERTIESSERVICESTANDARD_H

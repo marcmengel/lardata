@@ -1,13 +1,13 @@
 ////////////////////////////////////////////////////////////////////////
-// DetectorClocksService.h
+// DetectorClocksServiceStandard.h
 //
 // Service interface for Detector Clock functions
 //
 //  jpaley@fnal.gov
 //
 ////////////////////////////////////////////////////////////////////////
-#ifndef DETCLOCKS_SERVICE_H
-#define DETCLOCKS_SERVICE_H
+#ifndef DETECTORCLOCKSSERVICESTANDARD_H
+#define DETECTORCLOCKSSERVICESTANDARD_H
 
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
@@ -16,11 +16,11 @@
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/Event.h"
 
-#include "DataProviders/DetectorClocksStandard.h"
-#include "Utilities/DetectorClocksService.h"
+#include "DetectorInfo/DetectorClocksStandard.h"
+#include "DetectorInfoServices/DetectorClocksService.h"
 
 ///General LArSoft Utilities
-namespace util{
+namespace detinfo{
   class DetectorClocksServiceStandard : public DetectorClocksService {
   public:
     DetectorClocksServiceStandard(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
@@ -34,9 +34,9 @@ namespace util{
     
   private:
     
-    std::unique_ptr<dataprov::DetectorClocksStandard> fClocks;
+    std::unique_ptr<detinfo::DetectorClocksStandard> fClocks;
     
   };
-} //namespace utils
-DECLARE_ART_SERVICE_INTERFACE_IMPL(util::DetectorClocksServiceStandard, util::DetectorClocksService, LEGACY)
-#endif // LARPROPERTIES_SERVICE_H
+} //namespace detinfo
+DECLARE_ART_SERVICE_INTERFACE_IMPL(detinfo::DetectorClocksServiceStandard, detinfo::DetectorClocksService, LEGACY)
+#endif // DETECTORCLOCKSSERVICESTANDARD_H
