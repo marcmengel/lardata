@@ -13,6 +13,7 @@
 #include "Geometry/TPCGeo.h"
 #include "Geometry/PlaneGeo.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include "DetectorInfoServices/ServicePack.h" // lar::makeProviderPack()
 #include "DetectorInfoServices/LArPropertiesService.h"
 #include "DetectorInfoServices/DetectorClocksService.h"
 
@@ -30,7 +31,7 @@ namespace detinfo{
 
     reg.sPostOpenFile.watch    (this, &DetectorPropertiesServiceStandard::postOpenFile);
     reg.sPreProcessEvent.watch (this, &DetectorPropertiesServiceStandard::preProcessEvent);
-
+/*
     // obtain the required dependency service providers and create our own
     const geo::GeometryCore* geo = lar::providerFrom<geo::Geometry>();
     
@@ -39,6 +40,14 @@ namespace detinfo{
     const detinfo::DetectorClocks* clks = lar::providerFrom<detinfo::DetectorClocksService>();
     
     fProp = std::make_unique<detinfo::DetectorPropertiesStandard>(pset,geo,lp,clks);
+    */
+    fProp = std::make_unique<detinfo::DetectorPropertiesStandard>(pset,
+      lar::extractProviders<
+        geo::Geometry, 
+        detinfo::LArPropertiesService,
+        detinfo::DetectorClocksService
+        >()
+      );
     
     // at this point we need and expect the provider to be fully configured
     fProp->CheckIfConfigured();

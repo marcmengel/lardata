@@ -222,7 +222,7 @@ namespace lar {
     {
       static_assert(
         index_with_type<FindType, AmongTypes...>::value < sizeof...(AmongTypes),
-        "Specified type is not present"
+        "Required type is not present"
         );
     }; // index_with_type
     
