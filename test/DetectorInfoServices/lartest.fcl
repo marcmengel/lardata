@@ -1,10 +1,17 @@
-#include "services_microboone.fcl"
+#include "geometry.fcl"
+#include "detectorproperties.fcl"
+#include "larproperties.fcl"
+#include "detectorclocks.fcl"
 
 process_name: LArPropTest
 
 services:
 {
-  LArPropertiesService: @local::microboone_properties
+  ExptGeoHelperInterface:    @local::standard_geometry_helper
+  Geometry:                  @local::standard_geo
+  DetectorPropertiesService: @local::standard_detproperties
+  LArPropertiesService:      @local::standard_properties
+  DetectorClocksService:     @local::standard_detectorclocks
 }
 
 source:
