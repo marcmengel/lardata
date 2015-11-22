@@ -50,7 +50,12 @@ namespace lar {
      */
     template <typename FindType, typename... AmongTypes>
     struct index_with_type;
+
     
+    /// Implementation detail for the extraction constructor
+    template <typename DestPack, typename SourcePack, typename... ExtractProviders>
+    struct SetFrom;
+ 
   } // namespace details
   
   
@@ -83,6 +88,8 @@ namespace lar {
     static_assert(!details::has_duplicate_types<Providers...>::value,
       "Providers in ProviderPack are repeated");
     
+    using this_type = ProviderPack<Providers...>; ///< alias of this class
+    
     /// type used for stoage of the pointers
     using tuple_type = std::tuple<Providers const*...>;
     
@@ -94,6 +101,22 @@ namespace lar {
     ProviderPack(Providers const* ...provider_ptrs): providers(provider_ptrs...)
       {}
     
+    /**
+     * @brief Constructor: extracts the providers from anothe parameter pack
+     * @tparam OtherProviders list of the providers of the source provider pack
+     * @param from where to copy the information from
+     * 
+     * This constructor requires all the providers we need to be present
+     * in the source provider pack.
+     */
+    template<typename... OtherProviders>
+    ProviderPack(ProviderPack<OtherProviders...> const& from)
+      {
+        details::SetFrom
+          <this_type, ProviderPack<OtherProviders...>, Providers...>
+          (*this, from);
+      }
+
     /// Returns the provider with the specified type
     template <typename Provider>
     Provider const* get() const
@@ -204,8 +227,35 @@ namespace lar {
     }; // index_with_type
     
     //--------------------------------------------------------------------------
+    //--- SetFrom
+    //---
+    template <
+      typename DestPack, typename SourcePack,
+      typename FirstProvider, typename... OtherProviders
+      >
+    struct SetFrom<DestPack, SourcePack, FirstProvider, OtherProviders...> {
+      SetFrom(DestPack& pack, SourcePack const& from)
+        {
+          pack.set(from.template get<FirstProvider>());
+          SetFrom<DestPack, SourcePack, OtherProviders...>(pack, from);
+        }
+    }; // SetFrom<First, Others...>
     
+    template <typename DestPack, typename SourcePack>
+    struct SetFrom<DestPack, SourcePack> {
+      SetFrom(DestPack&, SourcePack const&) {}
+    };
+
+    //--------------------------------------------------------------------------
+
   } // namespace details
+  
+  
+  //----------------------------------------------------------------------------
+  //--- ProviderPack
+  //---
+ 
+  //----------------------------------------------------------------------------
   
 } // namespace lar
 

@@ -152,6 +152,11 @@ BOOST_AUTO_TEST_CASE(test_ProviderPack) {
   BOOST_CHECK(SP2.get<svc::ProviderA>() == nullptr);
   BOOST_CHECK(SP2.get<svc::ProviderB>() == nullptr);
   
+  // extraction constructor
+  lar::ProviderPack<svc::ProviderA, svc::ProviderB> SP3(SP1);
+  BOOST_CHECK_EQUAL(SP3.get<svc::ProviderA>(), SP1.get<svc::ProviderA>());
+  BOOST_CHECK_EQUAL(SP3.get<svc::ProviderB>(), SP1.get<svc::ProviderB>());
+  
   // multiple elements of the same type
   // should be a compilation error
 #if PROVIDERPACK_TEST_SKIP_COMPILATION_ERRORS
