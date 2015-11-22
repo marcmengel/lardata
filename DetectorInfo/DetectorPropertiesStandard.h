@@ -12,6 +12,8 @@
 #define DETINFO_DETECTORPROPERTIESSTD_H
 
 #include "fhiclcpp/ParameterSet.h"
+#include "Geometry/GeometryCore.h"
+#include "DetectorInfo/ProviderPack.h"
 #include "DetectorInfo/LArProperties.h"
 #include "DetectorInfo/DetectorClocks.h"
 #include "DetectorInfo/DetectorProperties.h"
@@ -21,19 +23,48 @@ namespace detinfo{
   
   class DetectorPropertiesStandard : public DetectorProperties {
     public:
+      /// List of service providers we depend on
+      using providers_type = lar::ProviderPack<
+        geo::GeometryCore,
+        detinfo::LArProperties,
+        detinfo::DetectorClocks
+        >;
 
       DetectorPropertiesStandard();
       DetectorPropertiesStandard(fhicl::ParameterSet const& pset, 
 			 const geo::GeometryCore* geo,
 			 const detinfo::LArProperties* lp,
 			 const detinfo::DetectorClocks* c);
+      /**
+       * @brief Constructs the provider and sets up the dependencies
+       * @param pset FHiCL parameter set for provider configuration
+       * @param providers pack of providers DetectorPropertiesStandard depends on
+       * @see Setup()
+       */
+      DetectorPropertiesStandard(fhicl::ParameterSet const& pset,
+                         providers_type providers);
       DetectorPropertiesStandard(DetectorPropertiesStandard const&) = delete;
       virtual ~DetectorPropertiesStandard() = default;
       
       void Configure(fhicl::ParameterSet const& p);
       bool Update(uint64_t ts);
       bool UpdateClocks(const detinfo::DetectorClocks* clks);
-
+      
+      /**
+       * @brief Sets all the providers at once
+       * @param providers the pack of service providers we depend on
+       * 
+       * Example:
+       *     
+       *     lar::DetectorPropertiesStandard::providers_type providers;
+       *     providers.set(lar::providerFrom<geo::Geometry>());
+       *     providers.set(lar::providerFrom<detinfo::LArPropertiesService>());
+       *     providers.set(lar::providerFrom<detinfo::DetectorClocksService>());
+       *     detprop->Setup(providers);
+       *
+       */
+      void Setup(providers_type providers);
+        
       void SetGeometry(const geo::GeometryCore* g) { fGeo = g; }
       void SetLArProperties(const detinfo::LArProperties* lp) { fLP = lp; }
       void SetDetectorClocks(const detinfo::DetectorClocks* clks) { fClocks = clks; }
@@ -92,6 +123,8 @@ namespace detinfo{
             
       void         CalculateXTicksParams();
       
+      // service providers we depend on;
+      // in principle could be replaced by a single providerpacl_type.
       const detinfo::LArProperties* fLP;
       const detinfo::DetectorClocks* fClocks;
       const geo::GeometryCore* fGeo;

@@ -32,7 +32,7 @@ namespace detinfo{
   {
 
   }
-    
+  
   //--------------------------------------------------------------------
   DetectorPropertiesStandard::DetectorPropertiesStandard(fhicl::ParameterSet const& pset,
 					 const geo::GeometryCore* geo,
@@ -45,6 +45,16 @@ namespace detinfo{
     fTPCClock = fClocks->TPCClock();
     
   }
+    
+  //--------------------------------------------------------------------
+  DetectorPropertiesStandard::DetectorPropertiesStandard(fhicl::ParameterSet const& pset,
+					 providers_type providers):
+    DetectorPropertiesStandard(pset,
+      providers.get<geo::GeometryCore>(),
+      providers.get<detinfo::LArProperties>(),
+      providers.get<detinfo::DetectorClocks>()
+      )
+    {}
   
   //--------------------------------------------------------------------
   bool DetectorPropertiesStandard::Update(uint64_t t) 
@@ -103,7 +113,15 @@ namespace detinfo{
     return;
   }
   
-  
+//------------------------------------------------------------------------------------//
+  void DetectorPropertiesStandard::Setup(providers_type providers) {
+    
+    SetGeometry(providers.get<geo::GeometryCore>());
+    SetLArProperties(providers.get<detinfo::LArProperties>());
+    SetDetectorClocks(providers.get<detinfo::DetectorClocks>());
+    
+  } // DetectorPropertiesStandard::Setup()
+        
 //------------------------------------------------------------------------------------//
   double DetectorPropertiesStandard::Efield(unsigned int planegap) const
 {
