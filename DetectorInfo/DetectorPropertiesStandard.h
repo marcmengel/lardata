@@ -145,7 +145,7 @@ namespace detinfo{
       std::vector<std::vector<std::vector<double> > > fXTicksOffsets;
       std::vector<std::vector<double> >               fDriftDirection;
 
-      ::util::ElecClock fTPCClock;     ///< TPC electronics clock
+      ::detinfo::ElecClock fTPCClock;     ///< TPC electronics clock
     }; // class DetectorPropertiesStandard
 } //namespace detinfo
 

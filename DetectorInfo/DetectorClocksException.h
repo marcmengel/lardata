@@ -17,7 +17,7 @@
 #include <string>
 #include <exception>
 
-namespace util {
+namespace detinfo {
   /**
      \class DetectorClocksException
      Simple exception class for DetectorClocks

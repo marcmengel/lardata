@@ -5,7 +5,7 @@
 #include <limits>
 #include <climits>
 
-namespace util {
+namespace detinfo {
 
   /// Maximum time in nano-second
   const double kTIME_MAX = std::numeric_limits<double>::max();

@@ -17,7 +17,7 @@
 #include "ClockConstants.h"
 #include "DetectorClocksException.h"
 #include <iostream>
-namespace util {
+namespace detinfo {
   /**
      \class ElecClock
      Electronics clock class which holds double precision time in second, 
@@ -35,7 +35,7 @@ namespace util {
 	fFramePeriod(frame_period),
 	fFrequency(frequency)
     { 
-      if( fFrequency <= 0 ) throw util::DetectorClocksException("Negative frequency is prohibited!"); 
+      if( fFrequency <= 0 ) throw detinfo::DetectorClocksException("Negative frequency is prohibited!"); 
     }
     
     /// Default destructor
