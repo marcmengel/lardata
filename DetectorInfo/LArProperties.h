@@ -9,6 +9,10 @@
 #ifndef DETINFO_LARPROPERTIES_H
 #define DETINFO_LARPROPERTIES_H
 
+// C/C++ standard libraries
+#include <map>
+#include <string>
+
 
 ///General LArSoft Utilities
 namespace detinfo{
