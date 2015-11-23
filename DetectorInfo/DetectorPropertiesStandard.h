@@ -73,7 +73,6 @@ namespace detinfo{
       // Accessors.
 
       virtual double Efield(unsigned int planegap=0) const override; ///< kV/cm
-      void SetEfield(std::vector<double> e) { fEfield = e;}
 
       virtual double DriftVelocity(double efield=0., double temperature=0.) const override;  ///< cm/us
       

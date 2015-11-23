@@ -21,7 +21,6 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // Art includes
-#include "art/Persistency/RootDB/SQLite3Wrapper.h"
 #include "fhiclcpp/make_ParameterSet.h"
 
 namespace detinfo{
@@ -97,7 +96,7 @@ namespace detinfo{
     if(p.has_key("InheritTriggerOffset"))
       throw cet::exception(__FUNCTION__) << "InheritTriggerOffset is a deprecated fcl parameter for DetectorPropertiesStandard!";
     
-    SetEfield(p.get< std::vector<double> >("Efield"));
+    fEfield                   = p.get< std::vector<double> >("Efield");
     fElectronlifetime         = p.get< double       >("Electronlifetime");
     fNumberTimeSamples        = p.get< unsigned int >("NumberTimeSamples");
     fElectronsToADC    	      = p.get< double 	    >("ElectronsToADC"   );
