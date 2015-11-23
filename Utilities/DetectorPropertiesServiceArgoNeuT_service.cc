@@ -1,13 +1,14 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//  \file DetectorProperties_service.cc
+//  \file DetectorPropertiesServiceArgoNeuT_service.cc
 //
 ////////////////////////////////////////////////////////////////////////
 // Framework includes
 
 // LArSoft includes
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/LArProperties.h"
+#include "Utilities/DetectorPropertiesServiceArgoNeuT.h"
+#include "DetectorInfoServices/LArPropertiesService.h"
+#include "DetectorInfoServices/DetectorClocksService.h"
 #include "Geometry/Geometry.h"
 #include "Geometry/CryostatGeo.h"
 #include "Geometry/TPCGeo.h"
@@ -17,56 +18,59 @@
 
 // Art includes
 #include "art/Persistency/RootDB/SQLite3Wrapper.h"
+#include "art/Utilities/Exception.h"
 #include "fhiclcpp/make_ParameterSet.h"
 
 namespace util{
 
   //--------------------------------------------------------------------
-  DetectorProperties::DetectorProperties(fhicl::ParameterSet const& pset, 
+  DetectorPropertiesServiceArgoNeuT::DetectorPropertiesServiceArgoNeuT(fhicl::ParameterSet const& pset, 
 					 art::ActivityRegistry &reg) 
     : fNumberTimeSamples(pset.get< unsigned int >("NumberTimeSamples"))
   {
+    fLP = dynamic_cast<util::LArPropertiesServiceArgoNeuT const*>
+      (lar::providerFrom<detinfo::LArPropertiesService>());
+    if (!fLP) {
+      // this legacy service works only coupled to the corresponding
+      // LArProperties legacy service:
+      throw art::Exception(art::errors::Configuration)
+        << "DetectorPropertiesServiceArgoNeuT service requires"
+        " LArPropertiesServiceArgoNeuT";
+    }
+    
     this->reconfigure(pset);
 
     // Register for callbacks.
 
-    reg.sPostOpenFile.watch    (this, &DetectorProperties::postOpenFile);
-    reg.sPreProcessEvent.watch (this, &DetectorProperties::preProcessEvent);
-  }
-
-  //--------------------------------------------------------------------
-  DetectorProperties::~DetectorProperties() 
-  {
-    
+    reg.sPostOpenFile.watch    (this, &DetectorPropertiesServiceArgoNeuT::postOpenFile);
+    reg.sPreProcessEvent.watch (this, &DetectorPropertiesServiceArgoNeuT::preProcessEvent);
   }
 
   //------------------------------------------------------------
-  double DetectorProperties::ConvertTDCToTicks(double tdc) const
+  double DetectorPropertiesServiceArgoNeuT::ConvertTDCToTicks(double tdc) const
   {
-    art::ServiceHandle<util::TimeService> ts;
-    return ts->TPCTDC2Tick(tdc);
+    return lar::providerFrom<detinfo::DetectorClocksService>()->TPCTDC2Tick(tdc);
   }
   
   //--------------------------------------------------------------
-  double DetectorProperties::ConvertTicksToTDC(double ticks) const
+  double DetectorPropertiesServiceArgoNeuT::ConvertTicksToTDC(double ticks) const
   {
-    art::ServiceHandle<util::TimeService> ts;
-    return ts->TPCTick2TDC(ticks);
+    return lar::providerFrom<detinfo::DetectorClocksService>()->TPCTick2TDC(ticks);
   }
 
   //--------------------------------------------------------------------
-  void DetectorProperties::reconfigure(fhicl::ParameterSet const& p)
+  void DetectorPropertiesServiceArgoNeuT::reconfigure(fhicl::ParameterSet const& p)
   {
     //fSamplingRate             = p.get< double        >("SamplingRate"     );
     double d;
     int    i;
     bool   b;
     if(p.get_if_present<double>("SamplingRate",d))
-      throw cet::exception(__FUNCTION__) << "SamplingRate is a deprecated fcl parameter for DetectorProperties!";
+      throw cet::exception(__FUNCTION__) << "SamplingRate is a deprecated fcl parameter for DetectorPropertiesServiceArgoNeuT!";
     if(p.get_if_present<int>("TriggerOffset",i))
-      throw cet::exception(__FUNCTION__) << "TriggerOffset is a deprecated fcl parameter for DetectorProperties!";
+      throw cet::exception(__FUNCTION__) << "TriggerOffset is a deprecated fcl parameter for DetectorPropertiesServiceArgoNeuT!";
     if(p.get_if_present<bool>("InheritTriggerOffset",b))
-      throw cet::exception(__FUNCTION__) << "InheritTriggerOffset is a deprecated fcl parameter for DetectorProperties!";
+      throw cet::exception(__FUNCTION__) << "InheritTriggerOffset is a deprecated fcl parameter for DetectorPropertiesServiceArgoNeuT!";
 
     fElectronsToADC    	      = p.get< double 	     >("ElectronsToADC"   );
     fNumberTimeSamples 	      = p.get< unsigned int >("NumberTimeSamples");
@@ -77,8 +81,7 @@ namespace util{
     fInheritNumberTimeSamples = p.get<bool           >("InheritNumberTimeSamples", false);
     fXTicksParamsLoaded = false;
 
-    art::ServiceHandle<util::TimeService> ts;
-    fTPCClock = ts->TPCClock();
+    fTPCClock = lar::providerFrom<detinfo::DetectorClocksService>()->TPCClock();
 
     // Save the parameter set.
     fPS = p;
@@ -87,28 +90,27 @@ namespace util{
   }
 
   //-------------------------------------------------------------
-  void DetectorProperties::preProcessEvent(const art::Event& evt)
+  void DetectorPropertiesServiceArgoNeuT::preProcessEvent(const art::Event& evt)
   {
-    // Make sure TPC Clock is updated with TimeService (though in principle it shouldn't change
-    art::ServiceHandle<util::TimeService> ts;
-    fTPCClock = ts->TPCClock();
+    // Make sure TPC Clock is updated with DetectorClocksService (though in principle it shouldn't change)
+    fTPCClock = lar::providerFrom<detinfo::DetectorClocksService>()->TPCClock();
   }
 
 //---------------------------------------------------------------------------------
-void DetectorProperties::checkDBstatus() const
+void DetectorPropertiesServiceArgoNeuT::checkDBstatus() const
 {
   bool fToughErrorTreatment= art::ServiceHandle<util::DatabaseUtil>()->ToughErrorTreatment();
   bool fShouldConnect =  art::ServiceHandle<util::DatabaseUtil>()->ShouldConnect();
   //Have not read from DB, should read and requested tough treatment
     if(!fAlreadyReadFromDB && fToughErrorTreatment && fShouldConnect )
-      throw cet::exception("DetectorProperties") << " Extracting values from DetectorProperties before they "
+      throw cet::exception("DetectorPropertiesServiceArgoNeuT") << " Extracting values from DetectorPropertiesServiceArgoNeuT before they "
               << " have been read in from database. \n "
               << "Set ToughErrorTreatment or ShouldConnect "
               << " to false in databaseutil.fcl if you want "
               << " to avoid this. \n";
    //Have not read from DB, should read and requested soft treatment
     else if(!fAlreadyReadFromDB && !fToughErrorTreatment && fShouldConnect )
-      mf::LogWarning("DetectorProperties") <<  "!!! Extracting values from DetectorProperties before they "
+      mf::LogWarning("DetectorPropertiesServiceArgoNeuT") <<  "!!! Extracting values from DetectorPropertiesServiceArgoNeuT before they "
               << " have been read in from the database. \n "
               << " You may not be using the correct values of "
               << " T0!"
@@ -120,10 +122,9 @@ void DetectorProperties::checkDBstatus() const
 }
 
 //------------------------------------------------------------------------------------//
-int  DetectorProperties::TriggerOffset()     const 
+int  DetectorPropertiesServiceArgoNeuT::TriggerOffset()     const 
 {
-  art::ServiceHandle<util::TimeService> ts;
-  return fTPCClock.Ticks(ts->TriggerOffsetTPC() * -1.);
+  return fTPCClock.Ticks(lar::providerFrom<detinfo::DetectorClocksService>()->TriggerOffsetTPC() * -1.);
 }
 
 
@@ -141,7 +142,7 @@ int  DetectorProperties::TriggerOffset()     const
   // Take an X coordinate, and convert to a number of ticks, the
   // charge deposit occured at t=0
  
-  double DetectorProperties::ConvertXToTicks(double X, int p, int t, int c)
+  double DetectorPropertiesServiceArgoNeuT::ConvertXToTicks(double X, int p, int t, int c) const
   {
     if(!fXTicksParamsLoaded) CalculateXTicksParams();
     return (X / (fXTicksCoefficient * fDriftDirection.at(c).at(t)) +  fXTicksOffsets.at(c).at(t).at(p) );
@@ -153,7 +154,7 @@ int  DetectorProperties::TriggerOffset()     const
   // Take a cooridnate in ticks, and convert to an x position
   // assuming event deposit occured at t=0
  
-  double  DetectorProperties::ConvertTicksToX(double ticks, int p, int t, int c)
+  double  DetectorPropertiesServiceArgoNeuT::ConvertTicksToX(double ticks, int p, int t, int c) const
   {
     if(!fXTicksParamsLoaded) CalculateXTicksParams();
     return (ticks - fXTicksOffsets.at(c).at(t).at(p)) * fXTicksCoefficient * fDriftDirection.at(c).at(t);  
@@ -163,15 +164,14 @@ int  DetectorProperties::TriggerOffset()     const
   //--------------------------------------------------------------------
   // Recalculte x<-->ticks conversion parameters from detector constants
 
-  void DetectorProperties::CalculateXTicksParams()
+  void DetectorPropertiesServiceArgoNeuT::CalculateXTicksParams() const
   {
-    art::ServiceHandle<util::LArProperties>      lrp;
     art::ServiceHandle<geo::Geometry>            geo;
 
     double samplingRate   = SamplingRate();
-    double efield         = lrp->Efield();
-    double temperature    = lrp->Temperature();
-    double driftVelocity  = lrp->DriftVelocity(efield, temperature);
+    double efield         = Efield();
+    double temperature    = fLP->Temperature();
+    double driftVelocity  = DriftVelocity(efield, temperature);
     
     fXTicksCoefficient    = 0.001 * driftVelocity * samplingRate;
 
@@ -204,8 +204,8 @@ int  DetectorProperties::TriggerOffset()     const
 	  double driftVelocitygap[3];
 	  double fXTicksCoefficientgap[3];
 	  for (int igap = 0; igap<3; ++igap){
-	    efieldgap[igap] = lrp->Efield(igap);
-	    driftVelocitygap[igap] = lrp->DriftVelocity(efieldgap[igap], temperature);
+	    efieldgap[igap] = Efield(igap);
+	    driftVelocitygap[igap] = DriftVelocity(efieldgap[igap], temperature);
 	    fXTicksCoefficientgap[igap] = 0.001 * driftVelocitygap[igap] * samplingRate;
 	  }
 	  
@@ -256,7 +256,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 	  else if(view == geo::kZ)
 	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetZ;
 	  else
-	    throw cet::exception("DetectorProperties") << "Bad view = "
+	    throw cet::exception("DetectorPropertiesServiceArgoNeuT") << "Bad view = "
 						       << view << "\n" ;
 	}	
       }
@@ -268,7 +268,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
   //--------------------------------------------------------------------
   // Get scale factor for x<-->ticks
 
-  double DetectorProperties::GetXTicksCoefficient(int t, int c)
+  double DetectorPropertiesServiceArgoNeuT::GetXTicksCoefficient(int t, int c) const
   {
     if(!fXTicksParamsLoaded) CalculateXTicksParams();
     return fXTicksCoefficient * fDriftDirection.at(c).at(t);
@@ -277,7 +277,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
   //--------------------------------------------------------------------
   // Get scale factor for x<-->ticks
 
-  double DetectorProperties::GetXTicksCoefficient()
+  double DetectorPropertiesServiceArgoNeuT::GetXTicksCoefficient() const
   {
     if(!fXTicksParamsLoaded) CalculateXTicksParams();
     return fXTicksCoefficient;
@@ -286,7 +286,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
   //--------------------------------------------------------------------
   //  Get offset for x<-->ticks
 
-  double DetectorProperties::GetXTicksOffset(int p, int t, int c) 
+  double DetectorPropertiesServiceArgoNeuT::GetXTicksOffset(int p, int t, int c) const
   {
     if(!fXTicksParamsLoaded) CalculateXTicksParams();
     return fXTicksOffsets.at(c).at(t).at(p);	
@@ -295,7 +295,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
   //--------------------------------------------------------------------
   //  Callback called after input file is opened.
 
-  void DetectorProperties::postOpenFile(const std::string& filename)
+  void DetectorPropertiesServiceArgoNeuT::postOpenFile(const std::string& filename)
   {
     // Use this method to figure out whether to inherit configuration
     // parameters from previous jobs.
@@ -304,7 +304,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
     // sqlite RootFileDB with process history (from MetaData tree).
     // Therefore, we use the approach of scanning every historical
     // parameter set in RootFileDB, and finding all parameter sets
-    // that appear to be DetectorProperties configurations.  If all
+    // that appear to be DetectorPropertiesServiceArgoNeuT configurations.  If all
     // historical parameter sets are in agreement about the value of
     // an inherited parameter, then we accept the historical value,
     // print a message, and override the configuration parameter.  In
@@ -346,9 +346,9 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 	while (sqlite3_step(stmt) == SQLITE_ROW) {
 	  fhicl::ParameterSet ps;
 	  fhicl::make_ParameterSet(reinterpret_cast<char const *>(sqlite3_column_text(stmt, 0)), ps);
-	  // Is this a DetectorProperties parameter set?
+	  // Is this a DetectorPropertiesServiceArgoNeuT parameter set?
 
-	  bool psok = isDetectorProperties(ps);
+	  bool psok = isDetectorPropertiesServiceArgoNeuT(ps);
 	  if(psok) {
 
 	    // Check NumberTimeSamples
@@ -362,7 +362,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 		if(nNumberTimeSamples == 0)
 		  iNumberTimeSamples = newNumberTimeSamples;
 		else if(newNumberTimeSamples != iNumberTimeSamples) {
-		  throw cet::exception("DetectorProperties")
+		  throw cet::exception("DetectorPropertiesServiceArgoNeuT")
 		    << "Historical values of NumberTimeSamples do not agree: "
 		    << iNumberTimeSamples << " " << newNumberTimeSamples << "\n" ;
 		}
@@ -378,7 +378,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 	if(fInheritNumberTimeSamples && 
 	   nNumberTimeSamples != 0 && 
 	   iNumberTimeSamples != fNumberTimeSamples) {
-	  mf::LogInfo("DetectorProperties")
+	  mf::LogInfo("DetectorPropertiesServiceArgoNeuT")
 	    << "Overriding configuration parameter NumberTimeSamples using historical value.\n"
 	    << "  Configured value:        " << fNumberTimeSamples << "\n"
 	    << "  Historical (used) value: " << iNumberTimeSamples << "\n";
@@ -396,12 +396,12 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
   }
 
   //--------------------------------------------------------------------
-  //  Determine whether a parameter set is a DetectorProperties configuration.
+  //  Determine whether a parameter set is a DetectorPropertiesServiceArgoNeuT configuration.
 
-  bool DetectorProperties::isDetectorProperties(const fhicl::ParameterSet& ps)
+  bool DetectorPropertiesServiceArgoNeuT::isDetectorPropertiesServiceArgoNeuT(const fhicl::ParameterSet& ps)
   {
     // This method uses heuristics to determine whether the parameter
-    // set passed as argument is a DetectorProperties configuration
+    // set passed as argument is a DetectorPropertiesServiceArgoNeuT configuration
     // parameter set.
 
     std::string s;
@@ -422,6 +422,6 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 
 namespace util{
  
-  DEFINE_ART_SERVICE(DetectorProperties)
+  DEFINE_ART_SERVICE(DetectorPropertiesServiceArgoNeuT)
 
 } // namespace util

@@ -46,6 +46,29 @@ simple_plugin(FileCatalogMetadataExtras "service"
               BASENAME_ONLY
 )
 
+simple_plugin(LArPropertiesServiceArgoNeuT "service"
+              DatabaseUtil_service
+              ${ART_UTILITIES}
+              ${MF_MESSAGELOGGER}
+              ${MF_UTILITIES}
+              ${CETLIB}
+              BASENAME_ONLY
+)
+
+simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
+              LArPropertiesServiceArgoNeuT_service
+              DatabaseUtil_service
+              Geometry_service
+              Geometry
+              ${ART_PERSISTENCY_ROOTDB}
+              ${SQLITE3}
+              ${MF_MESSAGELOGGER}
+              ${MF_UTILITIES}
+              ${CETLIB}
+              ${ROOT_BASIC_LIB_LIST}
+              BASENAME_ONLY
+)
+
 simple_plugin(LArFFT "service"
 	      ${ART_UTILITIES}
 	      ${MF_MESSAGELOGGER}

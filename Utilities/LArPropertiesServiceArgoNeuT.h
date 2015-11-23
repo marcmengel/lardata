@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////
-// LArProperties.h
+// LArPropertiesServiceArgoNeuT.h
 //
 // Utility LAr functions
 //
@@ -11,9 +11,20 @@
 // Optical Properties:
 // bjpjones@mit.edu
 //
+// From the original LArProperties.h ; this one preserves the dependency on
+// DatabaseUtil service and the ability to read information from a database
+// with direct DB connection.
+// For new experiments, an indirect connection should be used instead.
+// 
+// PLEASE DO NOT take this as a model to develop a service:
+// this is just a backward-compatible hack.
+//
 ////////////////////////////////////////////////////////////////////////
-#ifndef LARPROPERTIES_H
-#define LARPROPERTIES_H
+#ifndef LARPROPERTIESSERVICEARGONEUT_H
+#define LARPROPERTIESSERVICEARGONEUT_H
+
+#include "DetectorInfo/LArProperties.h"
+#include "DetectorInfoServices/LArPropertiesService.h"
 
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
@@ -35,70 +46,87 @@ namespace util{
      * aware of it. These properties petrain, so far, only the connection mode
      * and not any content of the databases themselves.
      */
-    class LArProperties {
+    class LArPropertiesServiceArgoNeuT
+      : public detinfo::LArProperties // implements provider interface
+      , public detinfo::LArPropertiesService // implements service interface
+    {
     public:
-      LArProperties(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
-      ~LArProperties();
+      
+      //------------------------------------------------------------------------
+      LArPropertiesServiceArgoNeuT(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
+      
+      //------------------------------------------------------------------------
+      //--- service interface
+      /// Type of service provider
+      using provider_type = LArPropertiesServiceArgoNeuT;
+      
+      virtual ~LArPropertiesServiceArgoNeuT() = default;
+      
+      virtual void   reconfigure(fhicl::ParameterSet const& pset);
+      virtual const  detinfo::LArProperties* provider() const { return this; }
+      
+      //------------------------------------------------------------------------
+      //--- service provider interface
+      
+      virtual double Density(double temperature=0.) const override;     ///< g/cm^3
+      virtual double Temperature()                  const override;     ///< kelvin
+      virtual double RadiationLength()              const override { return fRadiationLength; } ///< g/cm^2
+      virtual double Argon39DecayRate()             const override { return fArgon39DecayRate; } ///< decays per cm^3 per second
+      
+      /// Restricted mean dE/dx energy loss (MeV/cm).
+      virtual double Eloss(double mom, double mass, double tcut) const override;
 
-      void   reconfigure(fhicl::ParameterSet const& pset);
+      /// Energy loss fluctuation (sigma_E^2 / length in MeV^2/cm).
+      virtual double ElossVar(double mom, double mass) const override;
+      
+      virtual double ScintResolutionScale() const override { return fScintResolutionScale; }
+      virtual double ScintFastTimeConst()   const override { return fScintFastTimeConst;   } 
+      virtual double ScintSlowTimeConst()   const override { return fScintSlowTimeConst;   }
+      virtual double ScintBirksConstant()   const override { return fScintBirksConstant;   }
+      
+      virtual bool ScintByParticleType()    const override { return fScintByParticleType;  }
+      
+      virtual double ScintYield(bool prescale = false)         const override { return fScintYield * ScintPreScale(prescale);}
+      virtual double ScintPreScale(bool prescale = true)       const override { return (prescale ? fScintPreScale : 1);      }
+      virtual double ScintYieldRatio()                         const override { return fScintYieldRatio;                     }
+      
+      virtual double ProtonScintYield(bool prescale = false)   const override { return fProtonScintYield * ScintPreScale(prescale);  }
+      virtual double ProtonScintYieldRatio()                   const override { return fProtonScintYieldRatio;                       }
+      virtual double MuonScintYield(bool prescale = false)     const override { return fMuonScintYield * ScintPreScale(prescale);    }
+      virtual double MuonScintYieldRatio()                     const override { return fMuonScintYieldRatio;                         }
+      virtual double KaonScintYield(bool prescale = false)     const override { return fKaonScintYield * ScintPreScale(prescale);    }
+      virtual double KaonScintYieldRatio()                     const override { return fKaonScintYieldRatio;                         }
+      virtual double PionScintYield(bool prescale = false)     const override { return fPionScintYield * ScintPreScale(prescale);    }
+      virtual double PionScintYieldRatio()                     const override { return fPionScintYieldRatio;                         }
+      virtual double ElectronScintYield(bool prescale = false) const override { return fElectronScintYield * ScintPreScale(prescale);}
+      virtual double ElectronScintYieldRatio()                 const override { return fElectronScintYieldRatio;                     }
+      virtual double AlphaScintYield(bool prescale = false)    const override { return fAlphaScintYield * ScintPreScale(prescale);   }
+      virtual double AlphaScintYieldRatio()                    const override { return fAlphaScintYieldRatio;                        }
+      
+      virtual bool CerenkovLightEnabled()   const override { return fEnableCerenkovLight;  }
+      
+      virtual std::map<double, double>  SlowScintSpectrum() const override;
+      virtual std::map<double, double>  FastScintSpectrum() const override;
+      virtual std::map<double, double>  RIndexSpectrum()    const override;
+      virtual std::map<double, double>  AbsLengthSpectrum() const override;
+      virtual std::map<double, double>  RayleighSpectrum()  const override;
+      
+      virtual std::map<std::string, std::map<double, double> > SurfaceReflectances()                const override;
+      virtual std::map<std::string, std::map<double, double> > SurfaceReflectanceDiffuseFractions() const override;
+      
+      
+      //------------------------------------------------------------------------
 
-      double Density(double temperature=0.) const;                          ///< g/cm^3
+      // this stuff is moved to DetectorProperties
       double DriftVelocity(double efield=0., double temperature=0.) const;  ///< cm/us
-
+      double Efield(unsigned int planegap=0) const;                             ///< kV/cm
+      double ElectronLifetime() 	     const; 				///< microseconds
+      
       /// dQ/dX in electrons/cm, returns dE/dX in MeV/cm.
       double BirksCorrection(double dQdX) const;
       double ModBoxCorrection(double dQdX) const;
-
-      double Efield(unsigned int planegap=0) const;                             ///< kV/cm
-      double Temperature()                   const; 				///< kelvin	    
-      double ElectronLifetime() 	     const; 				///< microseconds
-      double RadiationLength()  	     const { return fRadiationLength; } ///< g/cm^2      
-
-      double Argon39DecayRate()              const { return fArgon39DecayRate; }  // decays per cm^3 per second
-
-      /// Restricted mean dE/dx energy loss (MeV/cm).
-      double Eloss(double mom, double mass, double tcut) const;
-
-      /// Energy loss fluctuation (sigma_E^2 / length in MeV^2/cm).
-      double ElossVar(double mom, double mass) const;
-
-      double ScintResolutionScale() const { return fScintResolutionScale; }
-      double ScintFastTimeConst()   const { return fScintFastTimeConst;   } 
-      double ScintSlowTimeConst()   const { return fScintSlowTimeConst;   }
-      double ScintBirksConstant()   const { return fScintBirksConstant;   }
-
-      bool ScintByParticleType()    const { return fScintByParticleType;  }
-
-      double ScintYield(bool prescale = false)         const { return fScintYield * ScintPreScale(prescale);}
-      double ScintPreScale(bool prescale = true)       const { return (prescale ? fScintPreScale : 1);      }
-      double ScintYieldRatio()                         const { return fScintYieldRatio;                     }
-
-      double ProtonScintYield(bool prescale = false)   const { return fProtonScintYield * ScintPreScale(prescale);  }
-      double ProtonScintYieldRatio()                   const { return fProtonScintYieldRatio;                       }
-      double MuonScintYield(bool prescale = false)     const { return fMuonScintYield * ScintPreScale(prescale);    }
-      double MuonScintYieldRatio()                     const { return fMuonScintYieldRatio;                         }
-      double KaonScintYield(bool prescale = false)     const { return fKaonScintYield * ScintPreScale(prescale);    }
-      double KaonScintYieldRatio()                     const { return fKaonScintYieldRatio;                         }
-      double PionScintYield(bool prescale = false)     const { return fPionScintYield * ScintPreScale(prescale);    }
-      double PionScintYieldRatio()                     const { return fPionScintYieldRatio;                         }
-      double ElectronScintYield(bool prescale = false) const { return fElectronScintYield * ScintPreScale(prescale);}
-      double ElectronScintYieldRatio()                 const { return fElectronScintYieldRatio;                     }
-      double AlphaScintYield(bool prescale = false)    const { return fAlphaScintYield * ScintPreScale(prescale);   }
-      double AlphaScintYieldRatio()                    const { return fAlphaScintYieldRatio;                        }
-
-      bool CerenkovLightEnabled()     const { return fEnableCerenkovLight;      }
-
       
-      std::map<double, double>  SlowScintSpectrum();   
-      std::map<double, double>  FastScintSpectrum();
-      std::map<double, double>  RIndexSpectrum();
-      std::map<double, double>  AbsLengthSpectrum();
-      std::map<double, double>  RayleighSpectrum();
-
-      std::map<std::string, std::map<double, double> > SurfaceReflectances();
-      std::map<std::string, std::map<double, double> > SurfaceReflectanceDiffuseFractions();
       
-
     private:
 
       void preBeginRun(art::Run const& run);
@@ -178,7 +206,11 @@ namespace util{
       
       DBsettingsClass DBsettings; ///< settings read from DB access
       
-    }; // class LArProperties
+    }; // class LArPropertiesServiceArgoNeuT
+    
+    /// type of provider name following LArSoft name convention
+    using LArPropertiesArgoNeuT = LArPropertiesServiceArgoNeuT;
+    
 } //namespace utils
-DECLARE_ART_SERVICE(util::LArProperties, LEGACY)
-#endif // LARPROPERTIES_H
+DECLARE_ART_SERVICE(util::LArPropertiesServiceArgoNeuT, LEGACY)
+#endif // LARPROPERTIESSERVICEARGONEUT_H

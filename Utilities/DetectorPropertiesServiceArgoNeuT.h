@@ -1,61 +1,108 @@
 ////////////////////////////////////////////////////////////////////////
-// \file DetectorProperties.h
+// \file DetectorPropertiesServiceArgoNeuT.h
 //
 // \brief service to contain information about detector electronics, etc
 //
 // \author brebel@fnal.gov
 //
+// From the original DetectorProperties.h ; this one preserves the dependency on
+// DatabaseUtil service and the ability to read information from a database
+// with direct DB connection.
+// For new experiments, an indirect connection should be used instead.
+// 
+// PLEASE DO NOT take this as a model to develop a service:
+// this is just a backward-compatible hack.
+//
 ////////////////////////////////////////////////////////////////////////
-#ifndef UTIL_DETECTORPROPERTIES_H
-#define UTIL_DETECTORPROPERTIES_H
+#ifndef UTIL_DETECTORPROPERTIESSERVICEARGONEUT_H
+#define UTIL_DETECTORPROPERTIESSERVICEARGONEUT_H
+
+#include "DetectorInfo/DetectorProperties.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
+#include "DetectorInfo/ElecClock.h"
+#include "Utilities/LArPropertiesServiceArgoNeuT.h"
 
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "SimpleTypesAndConstants/geo_types.h"
-#include "Utilities/TimeService.h"
 
 ///General LArSoft Utilities
 namespace util{
-    class DetectorProperties {
+    class DetectorPropertiesServiceArgoNeuT
+      : public detinfo::DetectorProperties // implements provider interface
+      , public detinfo::DetectorPropertiesService // implements service interface
+    {
     public:
 
-      DetectorProperties(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
-      ~DetectorProperties();
+      DetectorPropertiesServiceArgoNeuT(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
       
-      void reconfigure(fhicl::ParameterSet const& p);
+      //------------------------------------------------------------------------
+      //--- art service interface
+      
+      /// type of service provider, that is this very same
+      using provider_type = DetectorPropertiesServiceArgoNeuT;
 
-      // Accessors.
+      virtual void   reconfigure(fhicl::ParameterSet const& pset) override;
+      
+      /// Returns our service provider, that is this very same class
+      virtual const  detinfo::DetectorProperties* provider() const override
+        { return this; }
+      
+      //------------------------------------------------------------------------
+      //--- service provider interface
+      virtual double Efield(unsigned int planegap=0) const override ///< kV/cm
+        { return fLP->Efield(planegap); }
 
-      double       SamplingRate()      const { return fTPCClock.TickPeriod() * 1.e3; }
-      double       ElectronsToADC()    const { return fElectronsToADC; }
-      unsigned int NumberTimeSamples() const { return fNumberTimeSamples; }
-      unsigned int ReadOutWindowSize() const { return fReadOutWindowSize; }
-      int          TriggerOffset()     const;
-      double       TimeOffsetU()       const { return fTimeOffsetU; };
-      double       TimeOffsetV()       const { return fTimeOffsetV; };
-      double       TimeOffsetZ()       const { return fTimeOffsetZ; };
+      virtual double DriftVelocity(double efield=0., double temperature=0.) const override
+        { return fLP->DriftVelocity(efield, temperature); }
+      
+      /// dQ/dX in electrons/cm, returns dE/dX in MeV/cm.
+      virtual double BirksCorrection(double dQdX) const override
+        { return fLP->BirksCorrection(dQdX); }
 
-      double             ConvertXToTicks(double X, int p, int t, int c) ;
-      double             ConvertXToTicks(double X, geo::PlaneID const& planeid)
+      virtual double ModBoxCorrection(double dQdX) const override
+        { return fLP->ModBoxCorrection(dQdX); }
+
+      virtual double ElectronLifetime() const override
+        { return fLP->ElectronLifetime(); }
+      
+      virtual double       SamplingRate()      const override { return fTPCClock.TickPeriod() * 1.e3; }
+      virtual double       ElectronsToADC()    const override { return fElectronsToADC; }
+      virtual unsigned int NumberTimeSamples() const override { return fNumberTimeSamples; }
+      virtual unsigned int ReadOutWindowSize() const override { return fReadOutWindowSize; }
+      virtual int          TriggerOffset()     const override;
+      virtual double       TimeOffsetU()       const override { return fTimeOffsetU; }
+      virtual double       TimeOffsetV()       const override { return fTimeOffsetV; }
+      virtual double       TimeOffsetZ()       const override { return fTimeOffsetZ; }
+      
+      virtual double       ConvertXToTicks(double X, int p, int t, int c)             const override;
+      virtual double       ConvertXToTicks(double X, geo::PlaneID const& planeid)     const override
         { return ConvertXToTicks(X, planeid.Plane, planeid.TPC, planeid.Cryostat); }
-      double             ConvertTicksToX(double ticks, int p, int t, int c) ;
-      double             ConvertTicksToX(double ticks, geo::PlaneID const& planeid)
+      virtual double       ConvertTicksToX(double ticks, int p, int t, int c)         const override;
+      virtual double       ConvertTicksToX(double ticks, geo::PlaneID const& planeid) const override
         { return ConvertTicksToX(ticks, planeid.Plane, planeid.TPC, planeid.Cryostat); }
-
-      double             GetXTicksOffset(int p, int t, int c) ;
-      double             GetXTicksOffset(geo::PlaneID const& planeid)
+      
+      virtual double       GetXTicksOffset(int p, int t, int c)          const override;
+      virtual double       GetXTicksOffset(geo::PlaneID const& planeid)  const override
         { return GetXTicksOffset(planeid.Plane, planeid.TPC, planeid.Cryostat); }
-      double             GetXTicksCoefficient(int t, int c) ;
-      double             GetXTicksCoefficient(geo::TPCID const& tpcid)
+      virtual double       GetXTicksCoefficient(int t, int c)            const override;
+      virtual double       GetXTicksCoefficient(geo::TPCID const& tpcid) const override
         { return GetXTicksCoefficient(tpcid.TPC, tpcid.Cryostat); }
-      double             GetXTicksCoefficient() ;
-
+      virtual double       GetXTicksCoefficient() const override;
+      
       // The following methods convert between TDC counts (SimChannel time) and
       // ticks (RawDigit/Wire time).
-      double             ConvertTDCToTicks(double tdc) const;
-      double             ConvertTicksToTDC(double ticks) const;
+      virtual double       ConvertTDCToTicks(double tdc)   const override;
+      virtual double       ConvertTicksToTDC(double ticks) const override;
+
+      virtual bool         InheritNumberTimeSamples() const override { return fInheritNumberTimeSamples; }
+      
+      
+      //------------------------------------------------------------------------
+      
+      // Accessors.
 
     private:
 
@@ -66,9 +113,9 @@ namespace util{
 
       void         postOpenFile(std::string const& filename);
 
-      void         CalculateXTicksParams();
+      void         CalculateXTicksParams() const;
 
-      static bool  isDetectorProperties(const fhicl::ParameterSet& ps);
+      static bool  isDetectorPropertiesServiceArgoNeuT(const fhicl::ParameterSet& ps);
 
       double       fSamplingRate;      ///< in ns
       double 	   fElectronsToADC;    ///< conversion factor for # of ionization electrons to 1 ADC count
@@ -79,19 +126,23 @@ namespace util{
       double       fTimeOffsetZ;       ///< view
             
       bool         fInheritNumberTimeSamples; ///< Flag saying whether to inherit NumberTimeSamples
-      bool         fXTicksParamsLoaded;///<  calculations
+      mutable bool         fXTicksParamsLoaded;///<  calculations
 
-      double       fXTicksCoefficient; ///< Parameters for x<-->ticks
+      mutable double       fXTicksCoefficient; ///< Parameters for x<-->ticks
 
-      std::vector<std::vector<std::vector<double> > > fXTicksOffsets;
-      std::vector<std::vector<double> >               fDriftDirection;
+      mutable std::vector<std::vector<std::vector<double> > > fXTicksOffsets;
+      mutable std::vector<std::vector<double> >               fDriftDirection;
 
       fhicl::ParameterSet   fPS;       ///< Original parameter set.
 
       bool	   fAlreadyReadFromDB; ///< tests whether the values have alread been picked up from the Database
 
-      ::util::ElecClock fTPCClock;     ///< TPC electronics clock
-    }; // class DetectorProperties
+      detinfo::ElecClock fTPCClock;     ///< TPC electronics clock
+      
+      /// Pointer to the specific LArPropertiesServiceArgoNeuT service (provider)
+      util::LArPropertiesServiceArgoNeuT const* fLP;
+      
+    }; // class DetectorPropertiesServiceArgoNeuT
 } //namespace utils
-DECLARE_ART_SERVICE(util::DetectorProperties, LEGACY)
-#endif // UTIL_DETECTOR_PROPERTIES_H
+DECLARE_ART_SERVICE(util::DetectorPropertiesServiceArgoNeuT, LEGACY)
+#endif // UTIL_DETECTORPROPERTIESSERVICEARGONEUT_H

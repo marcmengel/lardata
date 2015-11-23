@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 //
-//  LArProperties_plugin
+//  LArPropertiesServiceArgoNeuT service implementation
 //
 ////////////////////////////////////////////////////////////////////////
 // Framework includes
@@ -10,7 +10,7 @@
 #include <iostream>
 
 // LArSoft includes
-#include "Utilities/LArProperties.h"
+#include "Utilities/LArPropertiesServiceArgoNeuT.h"
 #include "SimpleTypesAndConstants/PhysicalConstants.h"
 #include "Utilities/DatabaseUtil.h"
 
@@ -22,22 +22,17 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"
 //-----------------------------------------------
-util::LArProperties::LArProperties(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
+util::LArPropertiesServiceArgoNeuT::LArPropertiesServiceArgoNeuT(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
   : DBsettings() // reads information from DatabaseUtil service
    //fval(0),
  //fElectronlifetime(  ( )
 {
   this->reconfigure(pset);
-  reg.sPreBeginRun.watch(this, &LArProperties::preBeginRun);
-}
-
-//------------------------------------------------
-util::LArProperties::~LArProperties()
-{
+  reg.sPreBeginRun.watch(this, &LArPropertiesServiceArgoNeuT::preBeginRun);
 }
 
 //----------------------------------------------
-void util::LArProperties::preBeginRun(art::Run const& run)
+void util::LArPropertiesServiceArgoNeuT::preBeginRun(art::Run const& run)
 {
   int nrun = run.id().run();
   art::ServiceHandle<util::DatabaseUtil> DButil;
@@ -67,7 +62,7 @@ void util::LArProperties::preBeginRun(art::Run const& run)
 
 //------------------------------------------------
 /// \todo these values should eventually come from a database
-void util::LArProperties::reconfigure(fhicl::ParameterSet const& pset)
+void util::LArPropertiesServiceArgoNeuT::reconfigure(fhicl::ParameterSet const& pset)
 {
   fEfield            = pset.get< std::vector<double> >("Efield"          );
   fTemperature       = pset.get< double              >("Temperature"     );
@@ -137,7 +132,7 @@ void util::LArProperties::reconfigure(fhicl::ParameterSet const& pset)
 // slope is between -6.2 and -6.1, intercept is 1928 kg/m^3
 // this parameterization will be good to better than 0.5%.
 // density is returned in g/cm^3
-double util::LArProperties::Density(double temperature) const
+double util::LArPropertiesServiceArgoNeuT::Density(double temperature) const
 {
   // Default temperature use internal value.
   if(temperature == 0.)
@@ -150,7 +145,7 @@ double util::LArProperties::Density(double temperature) const
 
 
 //------------------------------------------------------------------------------------//
-double util::LArProperties::Efield(unsigned int planegap) const
+double util::LArPropertiesServiceArgoNeuT::Efield(unsigned int planegap) const
 {
   this->checkDBstatus();
 
@@ -161,14 +156,14 @@ double util::LArProperties::Efield(unsigned int planegap) const
 }
 
 //------------------------------------------------------------------------------------//
-double util::LArProperties::Temperature() const
+double util::LArPropertiesServiceArgoNeuT::Temperature() const
 {
   this->checkDBstatus();
   return fTemperature;
 }
 
 //------------------------------------------------------------------------------------//
-double util::LArProperties::ElectronLifetime() const
+double util::LArPropertiesServiceArgoNeuT::ElectronLifetime() const
 {
   this->checkDBstatus();
   return fElectronlifetime;
@@ -179,7 +174,7 @@ double util::LArProperties::ElectronLifetime() const
 
 
 //------------------------------------------------------------------------------------//
-double util::LArProperties::DriftVelocity(double efield, double temperature) const {
+double util::LArPropertiesServiceArgoNeuT::DriftVelocity(double efield, double temperature) const {
 
   // Drift Velocity as a function of Electric Field and LAr Temperature
   // from : W. Walkowiak, NIM A 449 (2000) 288-294
@@ -271,7 +266,7 @@ double util::LArProperties::DriftVelocity(double efield, double temperature) con
 // parameters:
 //  dQdX in electrons/cm, charge (amplitude or integral obtained) divided by effective pitch for a given 3D track.
 // returns dEdX in MeV/cm
-double util::LArProperties::BirksCorrection(double dQdx) const
+double util::LArPropertiesServiceArgoNeuT::BirksCorrection(double dQdx) const
 {
   // Correction for charge quenching using parameterization from
   // S.Amoruso et al., NIM A 523 (2004) 275
@@ -288,7 +283,7 @@ double util::LArProperties::BirksCorrection(double dQdx) const
 }
 
 // Modified Box model correction 
-double util::LArProperties::ModBoxCorrection(double dQdx) const
+double util::LArPropertiesServiceArgoNeuT::ModBoxCorrection(double dQdx) const
 {
   // Modified Box model correction has better behavior than the Birks
   // correction at high values of dQ/dx.
@@ -320,7 +315,7 @@ double util::LArProperties::ModBoxCorrection(double dQdx) const
 // Material parameters (stored in larproperties.fcl) are taken from
 // pdg web site http://pdg.lbl.gov/AtomicNuclearProperties/
 //
-double util::LArProperties::Eloss(double mom, double mass, double tcut) const
+double util::LArPropertiesServiceArgoNeuT::Eloss(double mom, double mass, double tcut) const
 {
   // Some constants.
 
@@ -378,7 +373,7 @@ double util::LArProperties::Eloss(double mom, double mass, double tcut) const
 //
 // Based on Bichsel formula referred to but not given in pdg.
 //
-double util::LArProperties::ElossVar(double mom, double mass) const
+double util::LArPropertiesServiceArgoNeuT::ElossVar(double mom, double mass) const
 {
   // Some constants.
 
@@ -398,7 +393,7 @@ double util::LArProperties::ElossVar(double mom, double mass) const
 }
 
 //---------------------------------------------------------------------------------
-void util::LArProperties::checkDBstatus() const
+void util::LArPropertiesServiceArgoNeuT::checkDBstatus() const
 {
   
   // if we don't have any business with DBs, we have already wasted enough time
@@ -425,11 +420,11 @@ void util::LArProperties::checkDBstatus() const
             << " Database originating values in BeginJob()s or constructors."
             << " You have been warned !!! \n ";
   }
-} // util::LArProperties::checkDBstatus()
+} // util::LArPropertiesServiceArgoNeuT::checkDBstatus()
 
 
 //---------------------------------------------------------------------------------
-std::map<double,double> util::LArProperties::FastScintSpectrum()
+std::map<double,double> util::LArPropertiesServiceArgoNeuT::FastScintSpectrum() const
 {
   if(fFastScintSpectrum.size()!=fFastScintEnergies.size()){
     throw cet::exception("Incorrect vector sizes in LArProperties")
@@ -446,7 +441,7 @@ std::map<double,double> util::LArProperties::FastScintSpectrum()
 }
 
 //---------------------------------------------------------------------------------
-std::map<double, double> util::LArProperties::SlowScintSpectrum()
+std::map<double, double> util::LArPropertiesServiceArgoNeuT::SlowScintSpectrum() const
 {
   if(fSlowScintSpectrum.size()!=fSlowScintEnergies.size()){
       throw cet::exception("Incorrect vector sizes in LArProperties")
@@ -463,7 +458,7 @@ std::map<double, double> util::LArProperties::SlowScintSpectrum()
 }
 
 //---------------------------------------------------------------------------------
-std::map<double, double> util::LArProperties::RIndexSpectrum()
+std::map<double, double> util::LArPropertiesServiceArgoNeuT::RIndexSpectrum() const
 {
   if(fRIndexSpectrum.size()!=fRIndexEnergies.size()){
       throw cet::exception("Incorrect vector sizes in LArProperties")
@@ -481,7 +476,7 @@ std::map<double, double> util::LArProperties::RIndexSpectrum()
 
 
 //---------------------------------------------------------------------------------
-std::map<double, double> util::LArProperties::AbsLengthSpectrum()
+std::map<double, double> util::LArPropertiesServiceArgoNeuT::AbsLengthSpectrum() const
 {
   if(fAbsLengthSpectrum.size()!=fAbsLengthEnergies.size()){
     throw cet::exception("Incorrect vector sizes in LArProperties")
@@ -498,7 +493,7 @@ std::map<double, double> util::LArProperties::AbsLengthSpectrum()
 }
 
 //---------------------------------------------------------------------------------
-std::map<double, double> util::LArProperties::RayleighSpectrum()
+std::map<double, double> util::LArPropertiesServiceArgoNeuT::RayleighSpectrum() const
 {
   if(fRayleighSpectrum.size()!=fRayleighEnergies.size()){
     throw cet::exception("Incorrect vector sizes in LArProperties")
@@ -515,7 +510,7 @@ std::map<double, double> util::LArProperties::RayleighSpectrum()
 }
 
 //---------------------------------------------------------------------------------
-std::map<std::string, std::map<double,double> > util::LArProperties::SurfaceReflectances()
+std::map<std::string, std::map<double,double> > util::LArPropertiesServiceArgoNeuT::SurfaceReflectances() const
 {
   std::map<std::string, std::map<double, double> > ToReturn;
 
@@ -539,17 +534,17 @@ std::map<std::string, std::map<double,double> > util::LArProperties::SurfaceRefl
 }
 
 //---------------------------------------------------------------------------------
-std::map<std::string, std::map<double,double> > util::LArProperties::SurfaceReflectanceDiffuseFractions()
+std::map<std::string, std::map<double,double> > util::LArPropertiesServiceArgoNeuT::SurfaceReflectanceDiffuseFractions() const
 {
   std::map<std::string, std::map<double, double> > ToReturn;
 
   if(fReflectiveSurfaceNames.size()!=fReflectiveSurfaceDiffuseFractions.size()){
-    throw cet::exception("Incorrect vector sizes in LArProperties")
+    throw cet::exception("Incorrect vector sizes in LArPropertiesServiceArgoNeuT")
       << "The vectors specifying the surface reflectivities do not have consistent sizes";
   }
   for(size_t i=0; i!=fReflectiveSurfaceNames.size(); ++i){
     if(fReflectiveSurfaceEnergies.size()!=fReflectiveSurfaceDiffuseFractions.at(i).size()){
-      throw cet::exception("Incorrect vector sizes in LArProperties")
+      throw cet::exception("Incorrect vector sizes in LArPropertiesServiceArgoNeuT")
   << "The vectors specifying the surface reflectivities do not have consistent sizes";
 
     }
@@ -563,11 +558,11 @@ std::map<std::string, std::map<double,double> > util::LArProperties::SurfaceRefl
 
 
 //---------------------------------------------------------------------------------
-util::LArProperties::DBsettingsClass::DBsettingsClass() {
+util::LArPropertiesServiceArgoNeuT::DBsettingsClass::DBsettingsClass() {
   auto const& DButil = *art::ServiceHandle<util::DatabaseUtil>();
   ToughErrorTreatment= DButil.ToughErrorTreatment();
   ShouldConnect = DButil.ShouldConnect();
-} // util::LArProperties::DBsettingsClass::DBsettingsClass()
+} // util::LArPropertiesServiceArgoNeuT::DBsettingsClass::DBsettingsClass()
 
 
 //---------------------------------------------------------------------------------
@@ -575,6 +570,6 @@ util::LArProperties::DBsettingsClass::DBsettingsClass() {
 
 namespace util{
  
-  DEFINE_ART_SERVICE(LArProperties)
+  DEFINE_ART_SERVICE(LArPropertiesServiceArgoNeuT)
 
 } // namespace util
