@@ -13,7 +13,7 @@
 #include "Geometry/TPCGeo.h"
 #include "Geometry/PlaneGeo.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "DetectorInfoServices/ServicePack.h" // lar::makeProviderPack()
+#include "DetectorInfoServices/ServicePack.h" // lar::extractProviders()
 #include "DetectorInfoServices/LArPropertiesService.h"
 #include "DetectorInfoServices/DetectorClocksService.h"
 

@@ -1,0 +1,57 @@
+#
+# File:    servicepacktest.fcl
+# Purpose: run ServicePack art-based tests
+# Author:  Gianluca Petrillo (petrillo@fnal.gov)
+# Date:    November 23, 2015
+# Version: 1.0
+# 
+# Description:
+# Runs ServicePack art-based tests on "standard" LArTPC detector configuration.
+# 
+# Service dependencies:
+#  * Geometry
+#  * LArPropertiesService
+#  * DetectorClocksService
+#  * DetectorPropertiesService
+#
+# History:
+# 20151123 (petrillo@fnal.gov) [v1.0]
+#   original version
+#
+
+#include "geometry_lartpcdetector.fcl"
+#include "detectorproperties_lartpcdetector.fcl"
+#include "larproperties_lartpcdetector.fcl"
+#include "detectorclocks_lartpcdetector.fcl"
+
+process_name: ServicePackTest
+
+
+services: {
+  ExptGeoHelperInterface:    @local::lartpcdetector_geometry_helper # geometry_lartpcdetector.fcl
+  Geometry:                  @local::lartpcdetector_geometry        # geometry_lartpcdetector.fcl
+  LArPropertiesService:      @local::lartpcdetector_properties      # larproperties_lartpcdetector.fcl
+  DetectorClocksService:     @local::lartpcdetector_detectorclocks  # detectorclocks_lartpcdetector.fcl
+  DetectorPropertiesService: @local::lartpcdetector_detproperties   # detectorproperties_lartpcdetector.fcl
+} # services
+
+
+source: {
+  module_type: EmptyEvent
+  maxEvents:   0       # Number of events to create
+} # source
+
+
+physics: {
+  
+  analyzers: {
+    sptest: { module_type: "ServicePackTest" }
+  }
+  
+  #define the path for analyzer modules, order does not matter.
+  tests:  [ sptest ]
+  
+  trigger_paths: [ ]
+  end_paths:     [ tests ]
+  
+} # physics
