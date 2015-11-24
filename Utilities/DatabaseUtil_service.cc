@@ -371,6 +371,7 @@ namespace util {
       fChannelMap.insert( p );
       fChannelReverseMap.insert( std::pair< UBLArSoftCh_t, UBDaqID >( larsoft_chan, daq_id ) );
     }
+    this->DisConnect();
   }// end of LoadUBChannelMap
 
   UBChannelMap_t DatabaseUtil::GetUBChannelMap( int data_taking_timestamp, int swizzling_timestamp ) {
