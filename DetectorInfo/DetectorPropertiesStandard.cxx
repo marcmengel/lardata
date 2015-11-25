@@ -233,9 +233,9 @@ namespace detinfo{
     double  K3t    = util::kRecombk;                     // in KV/cm*(g/cm^2)/MeV
     double  rho    = fLP->Density();                    // LAr density in g/cm^3
     double Wion    = 1000./util::kGeVToElectrons;        // 23.6 eV = 1e, Wion in MeV/e
-    double Efield  = this->Efield();                     // Electric Field in the drift region in KV/cm
+    double E_field  = Efield();                           // Electric Field in the drift region in KV/cm
     K3t           /= rho;                                // KV/MeV
-    double dEdx    = dQdx/(A3t/Wion-K3t/Efield*dQdx);    //MeV/cm
+    double dEdx    = dQdx/(A3t/Wion-K3t/E_field*dQdx);    //MeV/cm
     
     return dEdx;
   }  
@@ -248,8 +248,8 @@ namespace detinfo{
     // correction at high values of dQ/dx.
     double  rho    = fLP->Density();                    // LAr density in g/cm^3
     double Wion    = 1000./util::kGeVToElectrons;        // 23.6 eV = 1e, Wion in MeV/e
-    double Efield  = this->Efield();                     // Electric Field in the drift region in KV/cm
-    double Beta    = util::kModBoxB / (rho * Efield);
+    double E_field  = Efield();                           // Electric Field in the drift region in KV/cm
+    double Beta    = util::kModBoxB / (rho * E_field);
     double Alpha   = util::kModBoxA;
     double dEdx = (exp(Beta * Wion * dQdx ) - Alpha) / Beta;
     
