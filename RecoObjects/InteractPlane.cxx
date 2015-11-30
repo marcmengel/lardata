@@ -12,6 +12,7 @@
 #include "RecoObjects/InteractPlane.h"
 #include "RecoObjects/SurfPlane.h"
 #include "DetectorInfoServices/LArPropertiesService.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
 #include "cetlib/exception.h"
 
 namespace trkf {
@@ -71,6 +72,7 @@ namespace trkf {
     // Get LAr service.
 
     auto const * larprop = lar::providerFrom<detinfo::LArPropertiesService>();
+    auto const * detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     // Make sure we are on a plane surface (throw exception if not).
 
@@ -103,14 +105,14 @@ namespace trkf {
     double e2 = p2 + mass*mass;
     double e = std::sqrt(e2);
     double t = e - mass;
-    double dedx = 0.001 * larprop->Eloss(p, mass, getTcut());
+    double dedx = 0.001 * detprop->Eloss(p, mass, getTcut());
     double range = t / dedx;
     if(range > 100.)
       range = 100.;
 
     // Calculate the radiation length in cm.
 
-    double x0 = larprop->RadiationLength() / larprop->Density();
+    double x0 = larprop->RadiationLength() / detprop->Density();
 
     // Calculate projected rms scattering angle.
     // Use the estimted range in the logarithm factor.
@@ -134,7 +136,7 @@ namespace trkf {
 
     // Calculate energy loss fluctuations.
 
-    double evar = 1.e-6 * larprop->ElossVar(p, mass) * std::abs(s); // E variance (GeV^2).
+    double evar = 1.e-6 * detprop->ElossVar(p, mass) * std::abs(s); // E variance (GeV^2).
     double pinvvar = evar * e2 / (p2*p2*p2);                        // Inv. p variance (1/GeV^2)
 
     // Fill elements of noise matrix.

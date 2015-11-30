@@ -60,22 +60,22 @@ namespace util
 
     // Test (default) accessors.
 
-    std::cout << "Density = " << larprop->Density() << " g/cm^3" << std::endl;
+    std::cout << "Density = " << detprop->Density() << " g/cm^3" << std::endl;
     std::cout << "Drift velocity = " << detprop->DriftVelocity() << " cm/usec" << std::endl;
     std::cout << "Efield = " << detprop->Efield() << " kV/cm" << std::endl;
-    std::cout << "Temperature = " << larprop->Temperature() << " Kelvin" << std::endl;
+    std::cout << "Temperature = " << detprop->Temperature() << " Kelvin" << std::endl;
     std::cout << "Electron lifetime = " << detprop->ElectronLifetime() << " usec" << std::endl;
     std::cout << "Radiation Length = " << larprop->RadiationLength() << " g/cm^2" << std::endl;
-    std::cout << "Radiation Length = " << larprop->RadiationLength()/larprop->Density()
+    std::cout << "Radiation Length = " << larprop->RadiationLength()/detprop->Density()
 	      << " cm" << std::endl;
 
     // Make sure default values are acting correctly.
 
-    assert(larprop->Density() == larprop->Density(larprop->Temperature()));
-    assert(larprop->Density() != larprop->Density(larprop->Temperature()+0.1));
+    assert(detprop->Density() == detprop->Density(detprop->Temperature()));
+    assert(detprop->Density() != detprop->Density(detprop->Temperature()+0.1));
     assert(detprop->DriftVelocity() == detprop->DriftVelocity(detprop->Efield()));
     assert(detprop->DriftVelocity() == detprop->DriftVelocity(detprop->Efield(),
-							      larprop->Temperature()));
+							      detprop->Temperature()));
 
     // Drift velocity vs. electric field.
 
@@ -122,8 +122,8 @@ namespace util
 
 	// Calculate restricted and unrestricted dE/dx.
 
-	double dedxr = larprop->Eloss(p, mass, 0.05) / larprop->Density();  // Restricted.
-	double dedx = larprop->Eloss(p, mass, 0.) / larprop->Density();     // Unrestricted.
+	double dedxr = detprop->Eloss(p, mass, 0.05) / detprop->Density();  // Restricted.
+	double dedx = detprop->Eloss(p, mass, 0.) / detprop->Density();     // Unrestricted.
 	std::cout << std::setw(10) << t 
 		  << std::setw(10) << 1000.*p 
 		  << std::setw(10) << dedx 

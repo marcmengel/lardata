@@ -68,16 +68,16 @@ namespace util{
       //------------------------------------------------------------------------
       //--- service provider interface
       
-      virtual double Density(double temperature=0.) const override;     ///< g/cm^3
-      virtual double Temperature()                  const override;     ///< kelvin
+      /// Ar atomic number
+      virtual double AtomicNumber() const override { return fZ; }
+      /// Ar atomic mass (g/mol)
+      virtual double AtomicMass() const override { return fA; }
+      /// Ar mean excitation energy (eV)
+      virtual double ExcitationEnergy() const override { return fI; }
+      
       virtual double RadiationLength()              const override { return fRadiationLength; } ///< g/cm^2
       virtual double Argon39DecayRate()             const override { return fArgon39DecayRate; } ///< decays per cm^3 per second
       
-      /// Restricted mean dE/dx energy loss (MeV/cm).
-      virtual double Eloss(double mom, double mass, double tcut) const override;
-
-      /// Energy loss fluctuation (sigma_E^2 / length in MeV^2/cm).
-      virtual double ElossVar(double mom, double mass) const override;
       
       virtual double ScintResolutionScale() const override { return fScintResolutionScale; }
       virtual double ScintFastTimeConst()   const override { return fScintFastTimeConst;   } 
@@ -121,6 +121,14 @@ namespace util{
       double DriftVelocity(double efield=0., double temperature=0.) const;  ///< cm/us
       double Efield(unsigned int planegap=0) const;                             ///< kV/cm
       double ElectronLifetime() 	     const; 				///< microseconds
+      double Density(double temperature=0.) const;     ///< g/cm^3
+      double Temperature()                  const;     ///< kelvin
+      
+      /// Restricted mean dE/dx energy loss (MeV/cm).
+      double Eloss(double mom, double mass, double tcut) const;
+
+      /// Energy loss fluctuation (sigma_E^2 / length in MeV^2/cm).
+      double ElossVar(double mom, double mass) const;
       
       /// dQ/dX in electrons/cm, returns dE/dX in MeV/cm.
       double BirksCorrection(double dQdX) const;

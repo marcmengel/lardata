@@ -20,10 +20,7 @@
 #include "time.h"
 
 #include "RecoBase/Hit.h"
-#include "Geometry/CryostatGeo.h"
-#include "Geometry/PlaneGeo.h"
-#include "Geometry/WireGeo.h"
-#include "Geometry/TPCGeo.h"
+#include "Geometry/GeometryCore.h"
 #include "SimpleTypesAndConstants/geo_types.h"
 #include "art/Persistency/Common/Ptr.h" 
 
@@ -282,12 +279,10 @@ namespace util{
     /*
      larutil::Geometry* geom;
      larutil::DetectorProperties* detp;
-     larutil::LArProperties* larp;
     */
 
-    art::ServiceHandle<geo::Geometry> geom;
+    const geo::GeometryCore* geom;
     const detinfo::DetectorProperties* detp;
-    const detinfo::LArProperties* larp;
     /*
     art::ServiceHandle<detinfo::DetectorPropertiesService> detp;
     art::ServiceHandle<detinfo::LArPropertiesService> larp;

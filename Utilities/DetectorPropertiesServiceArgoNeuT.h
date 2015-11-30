@@ -68,6 +68,19 @@ namespace util{
       virtual double ElectronLifetime() const override
         { return fLP->ElectronLifetime(); }
       
+      virtual double Temperature() const override
+        { return fLP->Temperature(); }
+      
+      virtual double Density(double temperature) const override
+        { return fLP->Density(temperature); }
+      virtual double Density() const { return Density(Temperature()); }
+
+      virtual double Eloss(double mom, double mass, double tcut) const override
+        { return fLP->Eloss(mom, mass, tcut); }
+      
+      virtual double ElossVar(double mom, double mass) const override
+        { return fLP->ElossVar(mom, mass); }
+      
       virtual double       SamplingRate()      const override { return fTPCClock.TickPeriod() * 1.e3; }
       virtual double       ElectronsToADC()    const override { return fElectronsToADC; }
       virtual unsigned int NumberTimeSamples() const override { return fNumberTimeSamples; }

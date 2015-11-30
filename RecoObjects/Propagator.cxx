@@ -10,7 +10,7 @@
 
 #include "RecoObjects/Propagator.h"
 #include "RecoObjects/SurfXYZPlane.h"
-#include "DetectorInfoServices/LArPropertiesService.h"
+#include "DetectorInfoServices/DetectorPropertiesService.h"
 #include "cetlib/exception.h"
 
 namespace trkf {
@@ -80,7 +80,7 @@ namespace trkf {
 
       // Get LAr service.
 
-      auto const * larprop = lar::providerFrom<detinfo::LArPropertiesService>();
+      auto const * detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
       // Initialize propagation matrix to unit matrix (if specified).
 
@@ -138,7 +138,7 @@ namespace trkf {
 	double p = 1./std::abs(pinv);
 	double e = std::hypot(p, mass);
 	double t = p*p / (e + mass);
-	double dedx = 0.001 * larprop->Eloss(p, mass, fTcut);
+	double dedx = 0.001 * detprop->Eloss(p, mass, fTcut);
 	double smax = 0.1 * t / dedx;
 	if (smax <= 0.)
 	  throw cet::exception("Propagator") << __func__ << ": maximum step " << smax << "\n";
@@ -471,17 +471,17 @@ namespace trkf {
 
     // Get LAr service.
 
-    auto const * larprop = lar::providerFrom<detinfo::LArPropertiesService>();
+    auto const * detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     // Calculate final energy.
 
     double p1 = 1./std::abs(pinv);
     double e1 = std::hypot(p1, mass);
-    double de = -0.001 * s * larprop->Eloss(p1, mass, fTcut);
+    double de = -0.001 * s * detprop->Eloss(p1, mass, fTcut);
     double emid = e1 + 0.5 * de;
     if(emid > mass) {
       double pmid = std::sqrt(emid*emid - mass*mass);
-      double e2 = e1 - 0.001 * s * larprop->Eloss(pmid, mass, fTcut);
+      double e2 = e1 - 0.001 * s * detprop->Eloss(pmid, mass, fTcut);
       if(e2 > mass) {
 	double p2 = std::sqrt(e2*e2 - mass*mass);
 	double pinv2 = 1./p2;
