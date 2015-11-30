@@ -3,6 +3,5 @@
 BEGIN_PROLOG
 
 bo_properties:                  @local::standard_properties
-bo_properties.Temperature:    88.3 #estimated by Alan Hahn
 
 END_PROLOG

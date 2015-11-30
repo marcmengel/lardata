@@ -3,6 +3,5 @@
 BEGIN_PROLOG
 
 lartpcdetector_properties:                  @local::standard_properties
-lartpcdetector_properties.Temperature:      87
 
 END_PROLOG

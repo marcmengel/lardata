@@ -4,6 +4,5 @@ BEGIN_PROLOG
 
 argoneut_properties:             @local::standard_properties
 argoneut_properties.service_provider: "LArPropertiesServiceArgoNeuT"
-argoneut_properties.Temperature: 88.4  #(measured in ArgoNeut)
 
 END_PROLOG

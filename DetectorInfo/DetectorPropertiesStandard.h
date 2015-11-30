@@ -82,6 +82,50 @@ namespace detinfo{
 
       virtual double ElectronLifetime() const override { return fElectronlifetime; }   //< microseconds
       
+      
+      /**
+       * @brief Returns argon density at a given temperature
+       * @param temperature the temperature in kelvin
+       * @return argon density in g/cm^3
+       * 
+       * Density is nearly a linear function of temperature.
+       * See the NIST tables for details
+       * Slope is between -6.2 and -6.1, intercept is 1928 kg/m^3.
+       * This parameterization will be good to better than 0.5%.
+       */
+      virtual double Density(double temperature) const override;                          ///< g/cm^3
+      
+      // need to provide a definition, since the override above hides the inherited one
+      virtual double Density() const override { return Density(Temperature()); }
+      
+      /// In kelvin.
+      virtual double Temperature()                   const override { return fTemperature; }
+      
+      /**
+       * @brief Restricted mean energy loss (dE/dx)
+       * @param mom  momentum of incident particle [GeV/c]
+       * @param mass mass of incident particle [GeV/c^2]
+       * @param tcut maximum kinetic energy of delta rays [MeV]; 0 for unlimited
+       * @return the restricted mean energy loss (dE/dx) in units of MeV/cm
+       *
+       * Returned value is always positive.
+       * For unrestricted mean energy loss, set tcut = 0 (special case),
+       * or tcut large.
+       * 
+       * Based on Bethe-Bloch formula as contained in particle data book.
+       * Material parameters are from the configuration.
+       */
+      virtual double Eloss(double mom, double mass, double tcut) const override;
+      
+      /**
+       * @brief Energy loss fluctuation (@f$ \sigma_{E}^2 / x @f$)
+       * @param mom  momentum of incident particle in [GeV/c]
+       * @return energy loss fluctuation in MeV^2/cm
+       *
+       * Based on Bichsel formula referred to but not given in pdg.
+       */
+      virtual double ElossVar(double mom, double mass) const override;
+
       virtual double       SamplingRate()      const override { return fTPCClock.TickPeriod() * 1.e3; }
       virtual double       ElectronsToADC()    const override { return fElectronsToADC; }
       virtual unsigned int NumberTimeSamples() const override { return fNumberTimeSamples; }
@@ -119,7 +163,16 @@ namespace detinfo{
       void CheckIfConfigured() const;
       
     protected:
-            
+      
+      /// Parameters for Sternheimer density effect corrections
+      struct SternheimerParameters_t {
+        double a;               ///< parameter a
+        double k;               ///< parameter k
+        double x0;              ///< parameter x0
+        double x1;              ///< parameter x1
+        double cbar;            ///< parameter Cbar
+      }; //  SternheimerParameters_t
+      
       void         CalculateXTicksParams();
       
       // service providers we depend on;
@@ -128,8 +181,9 @@ namespace detinfo{
       const detinfo::DetectorClocks* fClocks;
       const geo::GeometryCore* fGeo;
       
-      std::vector< double >          fEfield;           ///< kV/cm (per plane)
+      std::vector< double >          fEfield;           ///< kV/cm (per inter-plane volume)
       double                         fElectronlifetime; ///< microseconds
+      double                         fTemperature;      ///< kelvin
       double       fSamplingRate;      ///< in ns
       double 	   fElectronsToADC;    ///< conversion factor for # of ionization electrons to 1 ADC count
       unsigned int fNumberTimeSamples; ///< number of clock ticks per event
@@ -137,7 +191,9 @@ namespace detinfo{
       double       fTimeOffsetU;       ///< time offsets to convert spacepoint
       double       fTimeOffsetV;       ///< coordinates to hit times on each
       double       fTimeOffsetZ;       ///< view
-            
+      
+      SternheimerParameters_t fSternheimerParameters; ///< Sternheimer parameters
+      
       bool         fInheritNumberTimeSamples; ///< Flag saying whether to inherit NumberTimeSamples
 
       double       fXTicksCoefficient; ///< Parameters for x<-->ticks

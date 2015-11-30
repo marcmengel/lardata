@@ -23,6 +23,13 @@
 // Art includes
 #include "fhiclcpp/make_ParameterSet.h"
 
+namespace {
+  
+  template <typename T>
+  inline T sqr(T v) { return v*v; }
+  
+} // local namespace
+
 namespace detinfo{
 
   //--------------------------------------------------------------------
@@ -98,6 +105,7 @@ namespace detinfo{
     
     fEfield                   = p.get< std::vector<double> >("Efield");
     fElectronlifetime         = p.get< double       >("Electronlifetime");
+    fTemperature              = p.get< double       >("Temperature");
     fNumberTimeSamples        = p.get< unsigned int >("NumberTimeSamples");
     fElectronsToADC    	      = p.get< double 	    >("ElectronsToADC"   );
     fNumberTimeSamples 	      = p.get< unsigned int >("NumberTimeSamples");
@@ -106,13 +114,19 @@ namespace detinfo{
     fTimeOffsetV       	      = p.get< double 	    >("TimeOffsetV"      );
     fTimeOffsetZ       	      = p.get< double 	    >("TimeOffsetZ"      );
     fInheritNumberTimeSamples = p.get<bool          >("InheritNumberTimeSamples", false);
+    
+    fSternheimerParameters.a    = p.get< double >("SternheimerA");
+    fSternheimerParameters.k    = p.get< double >("SternheimerK");
+    fSternheimerParameters.x0   = p.get< double >("SternheimerX0");
+    fSternheimerParameters.x1   = p.get< double >("SternheimerX1");
+    fSternheimerParameters.cbar = p.get< double >("SternheimerCbar");
 
     CalculateXTicksParams();
     
     return;
   }
   
-//------------------------------------------------------------------------------------//
+  //------------------------------------------------------------------------------------//
   void DetectorPropertiesStandard::Setup(providers_type providers) {
     
     SetGeometry(providers.get<geo::GeometryCore>());
@@ -120,17 +134,119 @@ namespace detinfo{
     SetDetectorClocks(providers.get<detinfo::DetectorClocks>());
     
   } // DetectorPropertiesStandard::Setup()
-        
-//------------------------------------------------------------------------------------//
-  double DetectorPropertiesStandard::Efield(unsigned int planegap) const
-{
-  if(planegap >= fEfield.size())
-    throw cet::exception("LArPropertiesStandard") << "requesting Electric field in a plane gap that is not defined\n";
   
-  return fEfield[planegap];
-}
+  
+  //------------------------------------------------------------------------------------//
+  double DetectorPropertiesStandard::Efield(unsigned int planegap) const
+  {
+    if(planegap >= fEfield.size())
+      throw cet::exception("DetectorPropertiesStandard") << "requesting Electric field in a plane gap that is not defined\n";
+    
+    return fEfield[planegap];
+  }
+  
+  
+  //------------------------------------------------
+  double DetectorPropertiesStandard::Density(double temperature) const
+  {
+    // Default temperature use internal value.
+    if(temperature == 0.)
+      temperature = Temperature();
+  
+    double density = -0.00615*temperature + 1.928;
+  
+    return density;
+  } // DetectorPropertiesStandard::Density()
+  
+  
+  //----------------------------------------------------------------------------------
+  // Restricted mean energy loss (dE/dx) in units of MeV/cm.
+  //
+  // For unrestricted mean energy loss, set tcut = 0, or tcut large.
+  //
+  // Arguments:
+  //
+  // mom  - Momentum of incident particle in GeV/c.
+  // mass - Mass of incident particle in GeV/c^2.
+  // tcut - Maximum kinetic energy of delta rays (MeV).
+  //
+  // Returned value is positive.
+  //
+  // Based on Bethe-Bloch formula as contained in particle data book.
+  // Material parameters (stored in larproperties.fcl) are taken from
+  // pdg web site http://pdg.lbl.gov/AtomicNuclearProperties/
+  //
+  double DetectorPropertiesStandard::Eloss(double mom, double mass, double tcut) const
+  {
+    // Some constants.
+  
+    double K = 0.307075;     // 4 pi N_A r_e^2 m_e c^2 (MeV cm^2/mol).
+    double me = 0.510998918; // Electron mass (MeV/c^2).
+  
+    // Calculate kinematic quantities.
+  
+    double bg = mom / mass;           // beta*gamma.
+    double gamma = sqrt(1. + bg*bg);  // gamma.
+    double beta = bg / gamma;         // beta (velocity).
+    double mer = 0.001 * me / mass;   // electron mass / mass of incident particle.
+    double tmax = 2.*me* bg*bg / (1. + 2.*gamma*mer + mer*mer);  // Maximum delta ray energy (MeV).
+  
+    // Make sure tcut does not exceed tmax.
+  
+    if(tcut == 0. || tcut > tmax)
+      tcut = tmax;
+  
+    // Calculate density effect correction (delta).
+  
+    double x = std::log10(bg);
+    double delta = 0.;
+    if(x >= fSternheimerParameters.x0) {
+      delta = 2. * std::log(10.) * x - fSternheimerParameters.cbar;
+      if(x < fSternheimerParameters.x1)
+        delta += fSternheimerParameters.a * std::pow(fSternheimerParameters.x1 - x, fSternheimerParameters.k);
+    }
+  
+    // Calculate stopping number.
+  
+    double B = 0.5 * std::log(2.*me*bg*bg*tcut / (1.e-12 * sqr(fLP->ExcitationEnergy())))
+      - 0.5 * beta*beta * (1. + tcut / tmax) - 0.5 * delta;
+  
+    // Don't let the stopping number become negative.
+  
+    if(B < 1.)
+      B = 1.;
+  
+    // Calculate dE/dx.
+  
+    double dedx = Density() * K*fLP->AtomicNumber()*B / (fLP->AtomicMass() * beta*beta);
+  
+    // Done.
+  
+    return dedx;
+  } // DetectorPropertiesStandard::Eloss()
+  
+  //----------------------------------------------------------------------------------
+  double DetectorPropertiesStandard::ElossVar(double mom, double mass) const
+  {
+    // Some constants.
+  
+    double K = 0.307075;     // 4 pi N_A r_e^2 m_e c^2 (MeV cm^2/mol).
+    double me = 0.510998918; // Electron mass (MeV/c^2).
+  
+    // Calculate kinematic quantities.
+  
+    double bg = mom / mass;          // beta*gamma.
+    double gamma2 = 1. + bg*bg;      // gamma^2.
+    double beta2 = bg*bg / gamma2;   // beta^2.
+  
+    // Calculate final result.
+  
+    double result = gamma2 * (1. - 0.5 * beta2) * me * (fLP->AtomicNumber() / fLP->AtomicMass()) * K * Density();
+    return result;
+  } // DetectorPropertiesStandard::ElossVar()
 
-//------------------------------------------------------------------------------------//
+
+  //------------------------------------------------------------------------------------//
   double DetectorPropertiesStandard::DriftVelocity(double efield, double temperature) const {
 
   // Drift Velocity as a function of Electric Field and LAr Temperature
@@ -144,7 +260,7 @@ namespace detinfo{
     efield = Efield();
   //
   if(efield > 4.0)
-    mf::LogWarning("LArPropertiesStandard") << "DriftVelocity Warning! : E-field value of "
+    mf::LogWarning("DetectorPropertiesStandard") << "DriftVelocity Warning! : E-field value of "
 				    << efield
 				    << " kV/cm is outside of range covered by drift"
 				    << " velocity parameterization. Returned value"
@@ -153,10 +269,10 @@ namespace detinfo{
 
   // Default temperature use internal value.
   if(temperature == 0.)
-    temperature = fLP->Temperature();
+    temperature = Temperature();
 
   if(temperature < 87.0 || temperature > 94.0)
-    mf::LogWarning("LArPropertiesStandard") << "DriftVelocity Warning! : Temperature value of "
+    mf::LogWarning("DetectorPropertiesStandard") << "DriftVelocity Warning! : Temperature value of "
 				    << temperature
 				    << " K is outside of range covered by drift velocity"
 				    << " parameterization. Returned value may not be"
@@ -231,7 +347,7 @@ namespace detinfo{
     
     double  A3t    = util::kRecombA;
     double  K3t    = util::kRecombk;                     // in KV/cm*(g/cm^2)/MeV
-    double  rho    = fLP->Density();                    // LAr density in g/cm^3
+    double  rho    = Density();                    // LAr density in g/cm^3
     double Wion    = 1000./util::kGeVToElectrons;        // 23.6 eV = 1e, Wion in MeV/e
     double E_field  = Efield();                           // Electric Field in the drift region in KV/cm
     K3t           /= rho;                                // KV/MeV
@@ -246,7 +362,7 @@ namespace detinfo{
   {
     // Modified Box model correction has better behavior than the Birks
     // correction at high values of dQ/dx.
-    double  rho    = fLP->Density();                    // LAr density in g/cm^3
+    double  rho    = Density();                    // LAr density in g/cm^3
     double Wion    = 1000./util::kGeVToElectrons;        // 23.6 eV = 1e, Wion in MeV/e
     double E_field  = Efield();                           // Electric Field in the drift region in KV/cm
     double Beta    = util::kModBoxB / (rho * E_field);
@@ -313,7 +429,7 @@ namespace detinfo{
     
     double samplingRate   = SamplingRate();
     double efield         = Efield();
-    double temperature    = fLP->Temperature();
+    double temperature    = Temperature();
     double driftVelocity  = DriftVelocity(efield, temperature);
     
     fXTicksCoefficient    = 0.001 * driftVelocity * samplingRate;

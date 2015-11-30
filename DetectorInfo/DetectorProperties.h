@@ -34,6 +34,37 @@ namespace detinfo{
 
       virtual double ElectronLifetime() const = 0;
       
+      /**
+       * @brief Returns argon density at a given temperature
+       * @param temperature the temperature in kelvin
+       * @return argon density in g/cm^3
+       */
+      virtual double Density(double temperature) const = 0;
+      virtual double Temperature() const = 0;
+
+      /**
+       * @brief Restricted mean energy loss (@f$ dE/dx @f$)
+       * @param mom  momentum of incident particle [GeV/c]
+       * @param mass mass of incident particle [GeV/c^2]
+       * @param tcut maximum kinetic energy of delta rays [MeV]; 0 for unlimited
+       * @return the restricted mean energy loss (dE/dx) in units of MeV/cm
+       *
+       * Returned value is always positive.
+       * For unrestricted mean energy loss, set tcut = 0 (special case),
+       * or tcut large.
+       */
+      virtual double Eloss(double mom, double mass, double tcut) const = 0;
+      
+      /**
+       * @brief Energy loss fluctuation (@f$ \sigma_{E}^2 / x @f$)
+       * @param mom  momentum of incident particle in [GeV/c]
+       * @return energy loss fluctuation in MeV^2/cm
+       */
+      virtual double ElossVar(double mom, double mass) const = 0;
+      
+      /// Returns argon density at the temperature from Temperature()
+      virtual double Density() const { return Density(Temperature()); }
+      
       virtual double       SamplingRate()      const = 0;
       virtual double       ElectronsToADC()    const = 0;
       virtual unsigned int NumberTimeSamples() const = 0;

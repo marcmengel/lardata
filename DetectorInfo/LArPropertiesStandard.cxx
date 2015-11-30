@@ -35,16 +35,10 @@ detinfo::LArPropertiesStandard::LArPropertiesStandard(fhicl::ParameterSet const&
 //------------------------------------------------
 bool detinfo::LArPropertiesStandard::Configure(fhicl::ParameterSet const& pset)
 {  
-  this->SetTemperature      (pset.get< double >("Temperature"));
   this->SetRadiationLength  (pset.get< double >("RadiationLength" ));
   this->SetAtomicNumber     (pset.get< double >("AtomicNumber"));
   this->SetAtomicMass       (pset.get< double >("AtomicMass"));
   this->SetMeanExcitationEnergy (pset.get< double >("ExcitationEnergy"));
-  this->SetSa               (pset.get< double >("SternheimerA"));
-  this->SetSk               (pset.get< double >("SternheimerK"));
-  this->SetSx0              (pset.get< double >("SternheimerX0"));
-  this->SetSx1              (pset.get< double >("SternheimerX1"));
-  this->SetScbar            (pset.get< double >("SternheimerCbar"));
 
   this->SetArgon39DecayRate  (pset.get< double >("Argon39DecayRate"));
 
@@ -102,125 +96,6 @@ bool detinfo::LArPropertiesStandard::Update(uint64_t ts)
   if (ts == 0) return false;
 
   return true;
-}
-
-//------------------------------------------------
-// temperature is assumed to be in degrees Kelvin
-// density is nearly a linear function of temperature.  
-// See the NIST tables for details
-// slope is between -6.2 and -6.1, intercept is 1928 kg/m^3
-// this parameterization will be good to better than 0.5%.
-// density is returned in g/cm^3
-double detinfo::LArPropertiesStandard::Density(double temperature) const
-{
-  // Default temperature use internal value.
-  if(temperature == 0.)
-    temperature = Temperature();
-
-  double density = -0.00615*temperature + 1.928;
-
-  return density;
-}
-
-
-//------------------------------------------------------------------------------------//
-double detinfo::LArPropertiesStandard::Temperature() const
-{
-  return fTemperature;
-}
-
-//----------------------------------------------------------------------------------
-// Restricted mean energy loss (dE/dx) in units of MeV/cm.
-//
-// For unrestricted mean energy loss, set tcut = 0, or tcut large.
-//
-// Arguments:
-//
-// mom  - Momentum of incident particle in GeV/c.
-// mass - Mass of incident particle in GeV/c^2.
-// tcut - Maximum kinetic energy of delta rays (MeV).
-//
-// Returned value is positive.
-//
-// Based on Bethe-Bloch formula as contained in particle data book.
-// Material parameters (stored in larproperties.fcl) are taken from
-// pdg web site http://pdg.lbl.gov/AtomicNuclearProperties/
-//
-double detinfo::LArPropertiesStandard::Eloss(double mom, double mass, double tcut) const
-{
-  // Some constants.
-
-  double K = 0.307075;     // 4 pi N_A r_e^2 m_e c^2 (MeV cm^2/mol).
-  double me = 0.510998918; // Electron mass (MeV/c^2).
-
-  // Calculate kinematic quantities.
-
-  double bg = mom / mass;           // beta*gamma.
-  double gamma = sqrt(1. + bg*bg);  // gamma.
-  double beta = bg / gamma;         // beta (velocity).
-  double mer = 0.001 * me / mass;   // electron mass / mass of incident particle.
-  double tmax = 2.*me* bg*bg / (1. + 2.*gamma*mer + mer*mer);  // Maximum delta ray energy (MeV).
-
-  // Make sure tcut does not exceed tmax.
-
-  if(tcut == 0. || tcut > tmax)
-    tcut = tmax;
-
-  // Calculate density effect correction (delta).
-
-  double x = std::log10(bg);
-  double delta = 0.;
-  if(x >= fSx0) {
-    delta = 2. * std::log(10.) * x - fScbar;
-    if(x < fSx1)
-      delta += fSa * std::pow(fSx1 - x, fSk);
-  }
-
-  // Calculate stopping number.
-
-  double B = 0.5 * std::log(2.*me*bg*bg*tcut / (1.e-12 * fI*fI))
-    - 0.5 * beta*beta * (1. + tcut / tmax) - 0.5 * delta;
-
-  // Don't let the stopping number become negative.
-
-  if(B < 1.)
-    B = 1.;
-
-  // Calculate dE/dx.
-
-  double dedx = Density() * K*fZ*B / (fA * beta*beta);
-
-  // Done.
-
-  return dedx;
-}
-
-//----------------------------------------------------------------------------------
-// Energy loss fluctuation (sigma_E^2 / length in MeV^2/cm).
-//
-// Arguments:
-//
-// mom  - Momentum of incident particle in GeV/c.
-//
-// Based on Bichsel formula referred to but not given in pdg.
-//
-double detinfo::LArPropertiesStandard::ElossVar(double mom, double mass) const
-{
-  // Some constants.
-
-  double K = 0.307075;     // 4 pi N_A r_e^2 m_e c^2 (MeV cm^2/mol).
-  double me = 0.510998918; // Electron mass (MeV/c^2).
-
-  // Calculate kinematic quantities.
-
-  double bg = mom / mass;          // beta*gamma.
-  double gamma2 = 1. + bg*bg;      // gamma^2.
-  double beta2 = bg*bg / gamma2;   // beta^2.
-
-  // Calculate final result.
-
-  double result = gamma2 * (1. - 0.5 * beta2) * me * (fZ / fA) * K * Density();
-  return result;
 }
 
 //---------------------------------------------------------------------------------

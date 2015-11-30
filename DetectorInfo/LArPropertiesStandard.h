@@ -47,19 +47,17 @@ namespace detinfo {
     bool   Configure(fhicl::ParameterSet const& pset);
     bool   Update(uint64_t ts=0);
     
-    virtual double Density(double temperature=0.) const override;                          ///< g/cm^3
-    
-    virtual double Temperature()                   const override; 				///< kelvin	    
     virtual double RadiationLength()  	     const override { return fRadiationLength; } ///< g/cm^2      
     
     virtual double Argon39DecayRate()              const override { return fArgon39DecayRate; }  // decays per cm^3 per second
+
+    /// Ar atomic number
+    virtual double AtomicNumber() const override { return fZ; }
+    /// Ar atomic mass (g/mol)
+    virtual double AtomicMass() const override { return fA; }
+    /// Ar mean excitation energy (eV)
+    virtual double ExcitationEnergy() const override { return fI; }
     
-    /// Restricted mean dE/dx energy loss (MeV/cm).
-    virtual double Eloss(double mom, double mass, double tcut) const override;
-    
- /// Energy loss fluctuation (sigma_E^2 / length in MeV^2/cm).
-    virtual double ElossVar(double mom, double mass) const override;
-	
     virtual double ScintResolutionScale() const override { return fScintResolutionScale; }
     virtual double ScintFastTimeConst()   const override { return fScintFastTimeConst;   } 
     virtual double ScintSlowTimeConst()   const override { return fScintSlowTimeConst;   }
@@ -95,17 +93,11 @@ namespace detinfo {
     virtual std::map<std::string, std::map<double, double> > SurfaceReflectances() const override;
     virtual std::map<std::string, std::map<double, double> > SurfaceReflectanceDiffuseFractions() const override;
 	
-    void SetTemperature(double temp) { fTemperature = temp;}
     void SetRadiationLength(double rl) { fRadiationLength = rl; }
     void SetArgon39DecayRate(double r) { fArgon39DecayRate = r;}
     void SetAtomicNumber(double z) { fZ = z;}
     void SetAtomicMass(double a) { fA = a;}
     void SetMeanExcitationEnergy(double e) { fI = e;}
-    void SetSa(double s) { fSa = s;}
-    void SetSk(double s) { fSk = s;}
-    void SetSx0(double s) { fSx0 = s;}
-    void SetSx1(double s) { fSx1 = s;}
-    void SetScbar(double s) { fScbar = s;}
 
     void SetFastScintSpectrum(std::vector<double> s) { fFastScintSpectrum = s;}
     void SetFastScintEnergies(std::vector<double> s) { fFastScintEnergies = s;}
@@ -151,7 +143,6 @@ namespace detinfo {
 
     bool fIsConfigured;
       
-    double                         fTemperature;      ///< kelvin
     double                         fRadiationLength;  ///< g/cm^2
     double                         fArgon39DecayRate; ///<  decays per cm^3 per second
       
@@ -160,11 +151,6 @@ namespace detinfo {
     double fZ;                ///< Ar atomic number
     double fA;                ///< Ar atomic mass (g/mol)
     double fI;                ///< Ar mean excitation energy (eV)
-    double fSa;               ///< Sternheimer parameter a
-    double fSk;               ///< Sternheimer parameter k
-    double fSx0;              ///< Sternheimer parameter x0
-    double fSx1;              ///< Sternheimer parameter x1
-    double fScbar;            ///< Sternheimer parameter Cbar
 
 
     // Optical parameters for LAr

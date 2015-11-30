@@ -9,6 +9,7 @@ lartpcdetector_detproperties:                   @local::standard_detproperties
 # lartpcdetector_detproperties.Electronlifetime: 3.0e6
 lartpcdetector_detproperties.Electronlifetime: 3.0e3 
 lartpcdetector_detproperties.Efield:           [0.5,0.666,0.8]  # (predicted for microBooNE)
+lartpcdetector_detproperties.Temperature:      87
 
 lartpcdetector_detproperties.ElectronsToADC:    6.8906513e-3 # 1fC = 43.008 ADC counts for MicroBooNE  
 lartpcdetector_detproperties.NumberTimeSamples: 9600

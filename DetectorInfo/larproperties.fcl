@@ -4,19 +4,11 @@ standard_properties:
 {
  service_provider: "LArPropertiesServiceStandard"
 
- # Drift properties 
- Temperature:      91                #Kelvin
-
  # For following parameters, see http://pdg.lbl.gov/AtomicNuclearProperties/
  RadiationLength:  19.55   # g/cm^2
  AtomicNumber:     18      # Ar atomic number.
  AtomicMass:       39.948  # Ar atomic mass (g/mol).
  ExcitationEnergy: 188.0   # Ar mean excitation energy (eV).
- SternheimerA:     0.1956  # Ar Sternheimer parameter a.
- SternheimerK:     3.0000  # Ar Sternheimer parameter k.
- SternheimerX0:    0.2000  # Ar Sternheimer parameter x0.
- SternheimerX1:    3.0000  # Ar Sternheimer parameter x0.
- SternheimerCbar:  5.2146  # Ar Sternheimer parameter Cbar.
 
 # realistic Argon 39 decays
 # Argon39DecayRate: 0.00141 # decays per cm^3 per second.  Assumes 1.01 Bq/kg and a density of 1.396 g/cc
