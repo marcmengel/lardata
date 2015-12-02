@@ -71,9 +71,8 @@ int main(int argc, char const** argv) {
   }
   
   // second argument: path of the parameter set for geometry test configuration
-  // (optional; default: "physics.analysers.geotest")
-  config.SetMainTesterParameterSetPath
-    ((++iParam < argc)? argv[iParam]: "physics.analyzers.larptest");
+  // (optional; default does not have any tester)
+  if (++iParam < argc) config.SetMainTesterParameterSetPath(argv[iParam]);
   
   // third argument: path of the parameter set for LArProperties configuration
   // (optional; default: "services.LArProperties" from the inherited object)

@@ -75,11 +75,11 @@ namespace testing {
     
     /// @{
     /// @name Access to configuration
-    /// FHiCL path for the geometry configuration
+    /// FHiCL path for LArProperties configuration
     std::string LArPropertiesParameterSetPath() const
       { return ServiceParameterSetPath(LArPropertiesServiceName()); }
     
-    /// A string describing the default parameter set to configure geometry
+    /// A string describing the default parameter set to configure LArProperties
     std::string DefaultLArPropertiesConfiguration() const
       { return DefaultServiceConfiguration(LArPropertiesServiceName()); }
     ///@}
@@ -99,7 +99,6 @@ namespace testing {
       { return "LArPropertiesService"; }
     
       protected:
-    std::string larp_pset; ///< FHiCL path to geometry configuration
     
     /// Initialize with some default values
     void LocalInit()
@@ -126,8 +125,8 @@ namespace testing {
    * - TesterParameters() method returning the configuration for the test
    * 
    * This class or a derived one can be used as global fixture for unit tests
-   * that require the presence of geometry (in the form of geo::GeometryCore
-   * instance).
+   * that require the presence of LArProperties (in the form of
+   * detinfo::LArProperties instance).
    * 
    * Unfortunately Boost does not give any control on the initialization of the
    * object, so everything must be ready to go as hard coded.
@@ -140,10 +139,10 @@ namespace testing {
    * - `std::string ApplicationName()`: the application name
    * - `std::string ConfigurationPath()`: path to the configuration file
    * - `std::string LArPropertiesParameterSetPath()`: FHiCL path to the
-   *   configuration of the geometry; in art is
+   *   configuration of LArProperties; in art is
    *   `"services.LArPropertiesService"`
    * - `std::string TesterParameterSetPath()`: FHiCL path to the configuration
-   *   of the geometry
+   *   of the specified test
    * - `std::string DefaultLArPropertiesConfiguration()` returning a FHiCL
    *   string to be parsed to extract the default LArProperties configuration
    *   (if such a thing exists)
@@ -164,7 +163,7 @@ namespace testing {
    */
   template <typename ConfigurationClass>
   class LArPropertiesTesterEnvironment:
-    public TesterEnvironment<ConfigurationClass>
+    virtual public TesterEnvironment<ConfigurationClass>
   {
     /// Base class
     using TesterEnvironment_t = TesterEnvironment<ConfigurationClass>;
@@ -225,7 +224,7 @@ namespace testing {
     static detinfo::LArProperties const* GlobalLArProperties()
       { return &LArpResources_t::Resource(); }
     
-    /// Returns the current global geometry instance (may be nullptr if none)
+    /// Returns the current global LArProperties instance (nullptr if none)
     static SharedLArpPtr_t SharedGlobalLArProperties()
       { return LArpResources_t::ShareResource(); }
     
@@ -254,7 +253,7 @@ namespace testing {
     
       private:
     
-    SharedLArpPtr_t larp; ///< pointer to the geometry
+    SharedLArpPtr_t larp; ///< pointer to LArProperties provider
     
   }; // class LArPropertiesTesterEnvironment<>
   
@@ -306,7 +305,7 @@ namespace testing {
     // (in this case, it becomes co-owner)
     SharedLArpPtr_t my_old_larp = larp;
     larp = new_larp;
-    // if the global geometry is already the one we register, don't bother
+    // if the global service is already the one we register, don't bother
     if (SharedGlobalLArProperties() != new_larp)
       LArpResources_t::ReplaceDefaultSharedResource(my_old_larp, new_larp);
   } // LArPropertiesTesterEnvironment<>::RegisterLArProperties()
@@ -326,7 +325,7 @@ namespace testing {
     TesterEnvironment_t::Setup();
     
     //
-    // set up the geometry
+    // set up LArProperties service
     //
     SetupLArProperties();
     
