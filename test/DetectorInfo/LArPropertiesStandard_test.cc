@@ -44,12 +44,12 @@ using LArPropertiesStandardTestEnvironment
  * @throw cet::exception most of error situations throw
  * 
  * The arguments in argv are:
- * 0. name of the executable ("Geometry_test")
- * 1. path to the FHiCL configuration file
- * 2. FHiCL path to the configuration of the geometry test
- *    (default: physics.analysers.geotest)
- * 3. FHiCL path to the configuration of the geometry
- *    (default: services.Geometry)
+ * 0. name of the executable ("LArPropertiesStandard_test")
+ * 1. (mandatory) path to the FHiCL configuration file
+ * 2. FHiCL path to the configuration of the test
+ *    (default: physics.analyzers.larptest)
+ * 3. FHiCL path to the configuration of LArProperties service
+ *    (default: services.LArPropertiesService)
  * 
  */
 //------------------------------------------------------------------------------
@@ -64,6 +64,11 @@ int main(int argc, char const** argv) {
   
   // first argument: configuration file (mandatory)
   if (++iParam < argc) config.SetConfigurationPath(argv[iParam]);
+  else {
+    std::cerr << "FHiCL configuration file path required as first argument!"
+      << std::endl;
+    return 1;
+  }
   
   // second argument: path of the parameter set for geometry test configuration
   // (optional; default: "physics.analysers.geotest")
@@ -74,10 +79,45 @@ int main(int argc, char const** argv) {
   // (optional; default: "services.LArProperties" from the inherited object)
   if (++iParam < argc) config.SetLArPropertiesParameterSetPath(argv[iParam]);
   
+  
+  unsigned int nErrors = 0 /* Tester.Run() */ ;
+  
   //
   // testing environment setup
   //
   LArPropertiesStandardTestEnvironment TestEnvironment(config);
+  
+  // this test is only for LArPropertiesStandard...
+  fhicl::ParameterSet const LArPropertiesConfig
+    = TestEnvironment.ServiceParameters("LArPropertiesService");
+  std::string ServiceProviderPath;
+  if (LArPropertiesConfig.get_if_present
+    ("service_provider", ServiceProviderPath)
+    )
+  {
+    std::string ServiceProviderName = ServiceProviderPath;
+    size_t iSlash = ServiceProviderPath.rfind('/');
+    if (iSlash != std::string::npos)
+      ServiceProviderName.erase(0, iSlash + 1);
+    
+    if (ServiceProviderName == "LArPropertiesServiceStandard") {
+      mf::LogInfo("larp_test")
+        << "Verified service implementation specification: '"
+        << ServiceProviderPath << "'";
+    }
+    else {
+      mf::LogError("larp_test")
+        << "This test uses a LArPropertiesStandard provider.\n"
+        "Your configuration specifies a '" << ServiceProviderPath
+        << "' service implementation that is not known to use that provider.";
+      ++nErrors;
+    }
+  }
+  else {
+    mf::LogError("larp_test")
+      << "Service configuration does not specify the service provider!";
+    ++nErrors;
+  }
   
   //
   // run the test algorithm
@@ -95,7 +135,6 @@ int main(int argc, char const** argv) {
     << "The atomic number of liquid argon is "
     << TestEnvironment.LArProperties()->AtomicNumber()
     ;
-  unsigned int nErrors = 0 /* Tester.Run() */ ;
   
   // 4. And finally we cross fingers.
   if (nErrors > 0) {
