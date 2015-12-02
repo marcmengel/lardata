@@ -11,6 +11,7 @@
 
 // LArSoft includes
 #include "DetectorInfo/LArPropertiesStandard.h"
+#include "DetectorInfo/ProviderUtil.h" // lar::IgnorableProviderConfigKeys()
 #include "SimpleTypesAndConstants/PhysicalConstants.h"
 
 // ROOT includes
@@ -19,6 +20,8 @@
 // Framework includes
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"
+#include "fhiclcpp/types/detail/validationException.h"
+#include "fhiclcpp/types/detail/validate_ParameterSet.h" // also fhiclcpp::detail::fillMissingKeysMsg()
 
 //-----------------------------------------------
 detinfo::LArPropertiesStandard::LArPropertiesStandard()
@@ -32,6 +35,7 @@ detinfo::LArPropertiesStandard::LArPropertiesStandard(fhicl::ParameterSet const&
   fIsConfigured = this->Configure(pset);
 }
 
+#if 0
 //------------------------------------------------
 bool detinfo::LArPropertiesStandard::Configure(fhicl::ParameterSet const& pset)
 {  
@@ -86,6 +90,135 @@ bool detinfo::LArPropertiesStandard::Configure(fhicl::ParameterSet const& pset)
 
   fIsConfigured = true;
 
+
+  return true;
+}
+#endif // 0
+
+//------------------------------------------------
+bool detinfo::LArPropertiesStandard::Configure(fhicl::ParameterSet const& pset)
+{
+  // we need to know whether we require the additional ScintByParticleType parameters:
+  const bool bScintByParticleType = pset.get<bool>("ScintByParticleType", false);
+  
+  std::set<std::string> ignorable_keys = lar::IgnorableProviderConfigKeys();
+  
+#if DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM
+  // validation happens here:
+  fhicl::Table<Configuration_t> config_table { pset, lar::IgnorableProviderConfigKeys() };
+  Configuration_t const& config = config_table();
+  
+  if(bScintByParticleType) {
+    double value;
+    std::string errmsg;
+    if (config.ProtonScintYield(value)) SetProtonScintYield(value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.ProtonScintYield       .key() });
+    if (config.ProtonScintYieldRatio  (value)) SetProtonScintYieldRatio  (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.ProtonScintYieldRatio  .key() });
+    if (config.MuonScintYield         (value)) SetMuonScintYield         (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.MuonScintYield         .key() });
+    if (config.MuonScintYieldRatio    (value)) SetMuonScintYieldRatio    (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.MuonScintYieldRatio    .key() });
+    if (config.PionScintYield         (value)) SetPionScintYield         (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.PionScintYield         .key() });
+    if (config.PionScintYieldRatio    (value)) SetPionScintYieldRatio    (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.PionScintYieldRatio    .key() });
+    if (config.KaonScintYield         (value)) SetKaonScintYield         (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.KaonScintYield         .key() });
+    if (config.KaonScintYieldRatio    (value)) SetKaonScintYieldRatio    (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.KaonScintYieldRatio    .key() });
+    if (config.ElectronScintYield     (value)) SetElectronScintYield     (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.ElectronScintYield     .key() });
+    if (config.ElectronScintYieldRatio(value)) SetElectronScintYieldRatio(value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.ElectronScintYieldRatio.key() });
+    if (config.AlphaScintYield        (value)) SetAlphaScintYield        (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.AlphaScintYield        .key() });
+    if (config.AlphaScintYieldRatio   (value)) SetAlphaScintYieldRatio   (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.AlphaScintYieldRatio   .key() });
+    if (!errmsg.empty()) {
+      throw fhicl::detail::validationException((
+        "[these parameters are REQUIRED when ScintByParticleType is true; the list may be incomplete]\n"
+        + errmsg
+        ).c_str());
+    } // if missing parameters
+  } // if bScintByParticleType
+  
+  // read parameters
+#else // !DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM
+  
+  if (!bScintByParticleType) { // ignore the following keys
+    ConfigWithScintByType_t config; // to get the keys
+    ignorable_keys.insert(config.ProtonScintYield       .key());
+    ignorable_keys.insert(config.ProtonScintYieldRatio  .key());
+    ignorable_keys.insert(config.MuonScintYield         .key());
+    ignorable_keys.insert(config.MuonScintYieldRatio    .key());
+    ignorable_keys.insert(config.PionScintYield         .key());
+    ignorable_keys.insert(config.PionScintYieldRatio    .key());
+    ignorable_keys.insert(config.KaonScintYield         .key());
+    ignorable_keys.insert(config.KaonScintYieldRatio    .key());
+    ignorable_keys.insert(config.ElectronScintYield     .key());
+    ignorable_keys.insert(config.ElectronScintYieldRatio.key());
+    ignorable_keys.insert(config.AlphaScintYield        .key());
+    ignorable_keys.insert(config.AlphaScintYieldRatio   .key());
+  } // if !bScintByParticleType
+  
+  // validation happens here:
+  fhicl::Table<ConfigWithScintByType_t> config_table { pset, ignorable_keys };
+  
+  // read parameters
+  ConfigWithScintByType_t const& config = config_table();
+  if (bScintByParticleType) {
+    SetProtonScintYield       (config.ProtonScintYield       ());
+    SetProtonScintYieldRatio  (config.ProtonScintYieldRatio  ());
+    SetMuonScintYield         (config.MuonScintYield         ());
+    SetMuonScintYieldRatio    (config.MuonScintYieldRatio    ());
+    SetPionScintYield         (config.PionScintYield         ());
+    SetPionScintYieldRatio    (config.PionScintYieldRatio    ());
+    SetKaonScintYield         (config.KaonScintYield         ());
+    SetKaonScintYieldRatio    (config.KaonScintYieldRatio    ());
+    SetElectronScintYield     (config.ElectronScintYield     ());
+    SetElectronScintYieldRatio(config.ElectronScintYieldRatio());
+    SetAlphaScintYield        (config.AlphaScintYield        ());
+    SetAlphaScintYieldRatio   (config.AlphaScintYieldRatio   ());
+  } // if ScintByParticleType
+#endif // DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM??
+  
+  SetRadiationLength      (config.RadiationLength());
+  
+  SetAtomicNumber         (config.AtomicNumber());
+  SetAtomicMass           (config.AtomicMass());
+  SetMeanExcitationEnergy (config.MeanExcitationEnergy());
+
+  SetArgon39DecayRate     (config.Argon39DecayRate());
+
+  SetFastScintEnergies(config.FastScintEnergies());
+  SetFastScintSpectrum(config.FastScintSpectrum());
+  SetSlowScintEnergies(config.SlowScintEnergies());
+  SetSlowScintSpectrum(config.SlowScintSpectrum());
+  SetAbsLengthEnergies(config.AbsLengthEnergies());
+  SetAbsLengthSpectrum(config.AbsLengthSpectrum());
+  SetRIndexEnergies   (config.RIndexEnergies   ());
+  SetRIndexSpectrum   (config.RIndexSpectrum   ());
+  SetRayleighEnergies (config.RayleighEnergies ());
+  SetRayleighSpectrum (config.RayleighSpectrum ());
+
+  SetScintResolutionScale(config.ScintResolutionScale());
+  SetScintFastTimeConst  (config.ScintFastTimeConst  ());
+  SetScintSlowTimeConst  (config.ScintSlowTimeConst  ());
+  SetScintBirksConstant  (config.ScintBirksConstant  ());
+  SetScintYield          (config.ScintYield          ());
+  SetScintPreScale       (config.ScintPreScale       ());
+  SetScintYieldRatio     (config.ScintYieldRatio     ());
+  SetScintByParticleType (config.ScintByParticleType ());
+
+  SetEnableCerenkovLight(config.EnableCerenkovLight());
+  
+  SetReflectiveSurfaceNames           (config.ReflectiveSurfaceNames());
+  SetReflectiveSurfaceEnergies        (config.ReflectiveSurfaceEnergies());
+  SetReflectiveSurfaceReflectances    (config.ReflectiveSurfaceReflectances());
+  SetReflectiveSurfaceDiffuseFractions(config.ReflectiveSurfaceDiffuseFractions());
+  
+  fIsConfigured = true;
 
   return true;
 }
