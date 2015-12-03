@@ -44,12 +44,30 @@ cet_test( LArPropertiesServiceBo_test
   TEST_ARGS --rethrow-all --config ./larservicetest_bo.fcl
 )
 
-cet_test( LArPropertiesServiceArgoNeuT_test
+# ------------------------------------------------------------------------------
+# ---  DetectorProperties service
+# ---
+cet_test( DetectorPropertiesServiceStandard_test
   HANDBUILT
-  DATAFILES larservicetest_argoneut.fcl
+  DATAFILES detectorpropertiesservicetest_standard.fcl
   TEST_EXEC lar
-  TEST_ARGS --rethrow-all --config ./larservicetest_argoneut.fcl
+  TEST_ARGS --rethrow-all --config ./detectorpropertiesservicetest_standard.fcl
 )
+
+cet_test( DetectorPropertiesServiceLArTPCdetector_test
+  HANDBUILT
+  DATAFILES detectorpropertiesservicetest_lartpcdetector.fcl
+  TEST_EXEC lar
+  TEST_ARGS --rethrow-all --config ./detectorpropertiesservicetest_lartpcdetector.fcl
+)
+
+cet_test( DetectorPropertiesServiceBo_test
+  HANDBUILT
+  DATAFILES detectorpropertiesservicetest_bo.fcl
+  TEST_EXEC lar
+  TEST_ARGS --rethrow-all --config ./detectorpropertiesservicetest_bo.fcl
+)
+
 # ------------------------------------------------------------------------------
 
 

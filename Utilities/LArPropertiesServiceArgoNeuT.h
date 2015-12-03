@@ -220,5 +220,5 @@ namespace util{
     using LArPropertiesArgoNeuT = LArPropertiesServiceArgoNeuT;
     
 } //namespace utils
-DECLARE_ART_SERVICE(util::LArPropertiesServiceArgoNeuT, LEGACY)
+DECLARE_ART_SERVICE_INTERFACE_IMPL(util::LArPropertiesServiceArgoNeuT, detinfo::LArPropertiesService, LEGACY)
 #endif // LARPROPERTIESSERVICEARGONEUT_H

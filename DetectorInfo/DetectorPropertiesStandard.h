@@ -11,12 +11,20 @@
 #ifndef DETINFO_DETECTORPROPERTIESSTD_H
 #define DETINFO_DETECTORPROPERTIESSTD_H
 
-#include "fhiclcpp/ParameterSet.h"
+// LArSoft libraries
 #include "Geometry/GeometryCore.h"
 #include "DetectorInfo/ProviderPack.h"
 #include "DetectorInfo/LArProperties.h"
 #include "DetectorInfo/DetectorClocks.h"
 #include "DetectorInfo/DetectorProperties.h"
+
+// framework libraries
+#include "fhiclcpp/ParameterSet.h"
+#include "fhiclcpp/types/Sequence.h"
+#include "fhiclcpp/types/Table.h"
+
+// C/C++ standard libraries
+#include <set>
 
 ///General LArSoft Utilities
 namespace detinfo{
@@ -29,12 +37,84 @@ namespace detinfo{
         detinfo::LArProperties,
         detinfo::DetectorClocks
         >;
-
+       
+      /// Structure for configuration parameters
+      struct Configuration_t {
+        using Name = fhicl::Name;
+        using Comment = fhicl::Comment;
+        
+        fhicl::Sequence<double> Efield { Name("Efield"), Comment(
+          "electric field in front of each wire plane (the last one is the big one!) [kV/cm]")
+          };
+    
+        fhicl::Atom<double      > Electronlifetime         {
+          Name("Electronlifetime"        ),
+          Comment("electron lifetime in liquid argon [us]")
+        };
+        fhicl::Atom<double      > Temperature              {
+          Name("Temperature"             ),
+          Comment("argon temperature [K]")
+        };
+        fhicl::Atom<double      > ElectronsToADC           {
+          Name("ElectronsToADC"          ),
+          Comment("conversion factor: (ADC counts)/(ionization electrons)")
+        };
+        fhicl::Atom<unsigned int> NumberTimeSamples        {
+          Name("NumberTimeSamples"       ),
+          Comment("number of TPC readout TDC clock ticks per event")
+        };
+        fhicl::Atom<unsigned int> ReadOutWindowSize        {
+          Name("ReadOutWindowSize"       ),
+          Comment("number of TPC readout TDC clock ticks per readout window")
+        };
+        fhicl::Atom<double      > TimeOffsetU              {
+          Name("TimeOffsetU"             ),
+          Comment("tick offset subtracted to to convert spacepoint coordinates to hit times on view U")
+        };
+        fhicl::Atom<double      > TimeOffsetV              {
+          Name("TimeOffsetV"             ),
+          Comment("tick offset subtracted to to convert spacepoint coordinates to hit times on view V")
+        };
+        fhicl::Atom<double      > TimeOffsetZ              {
+          Name("TimeOffsetZ"             ),
+          Comment("tick offset subtracted to to convert spacepoint coordinates to hit times on view Z")
+        };
+        fhicl::Atom<bool        > InheritNumberTimeSamples {
+          Name("InheritNumberTimeSamples"),
+          Comment(""),
+          false /* default value */
+        };
+        
+        fhicl::Atom<double      > SternheimerA             {
+          Name("SternheimerA"),
+          Comment("parameter a of Sternheimer correction delta = 2log(10) x - cbar + { a (x1-x)^k } theta(x1-x), x = log10(p/m)")
+        };
+        fhicl::Atom<double      > SternheimerK             {
+          Name("SternheimerK"),
+          Comment("parameter k of Sternheimer correction delta = 2log(10) x - cbar + { a (x_1-x)^k } theta(x1-x), x = log10(p/m)")
+        };
+        fhicl::Atom<double      > SternheimerX0            {
+          Name("SternheimerX0"),
+          Comment("minimum x = log10(p/m) for the application of Sternheimer correction")
+        };
+        fhicl::Atom<double      > SternheimerX1            {
+          Name("SternheimerX1"),
+          Comment("parameter x_1 of Sternheimer correction delta = 2log(10) x - cbar + { a (x_1-x)^k } theta(x1-x), x = log10(p/m)")
+        };
+        fhicl::Atom<double      > SternheimerCbar             {
+          Name("SternheimerCbar"),
+          Comment("parameter cbar of Sternheimer correction delta = 2log(10) x - cbar + { a (x_1-x)^k } theta(x1-x), x = log10(p/m)")
+        };
+      
+      }; // Configuration_t
+ 
       DetectorPropertiesStandard();
       DetectorPropertiesStandard(fhicl::ParameterSet const& pset, 
 			 const geo::GeometryCore* geo,
 			 const detinfo::LArProperties* lp,
-			 const detinfo::DetectorClocks* c);
+			 const detinfo::DetectorClocks* c,
+			 std::set<std::string> ignore_params = {}
+			 );
       /**
        * @brief Constructs the provider and sets up the dependencies
        * @param pset FHiCL parameter set for provider configuration
@@ -42,11 +122,22 @@ namespace detinfo{
        * @see Setup()
        */
       DetectorPropertiesStandard(fhicl::ParameterSet const& pset,
-                         providers_type providers);
+                         providers_type providers,
+                         std::set<std::string> ignore_params = {});
       DetectorPropertiesStandard(DetectorPropertiesStandard const&) = delete;
       virtual ~DetectorPropertiesStandard() = default;
       
-      void Configure(fhicl::ParameterSet const& p);
+      /**
+       * @brief Configures the provider
+       * @param p configuration parameter set
+       * @param ignore_params parameters to be ignored (optional)
+       * 
+       * This method will validate the parameter set (except for the parameters
+       * it's explicitly told to ignore) and extract the useful information out
+       * of it.
+       */
+      void Configure
+        (fhicl::ParameterSet const& p, std::set<std::string> ignore_params = {});
       bool Update(uint64_t ts);
       bool UpdateClocks(const detinfo::DetectorClocks* clks);
       
@@ -164,6 +255,7 @@ namespace detinfo{
       
     protected:
       
+     
       /// Parameters for Sternheimer density effect corrections
       struct SternheimerParameters_t {
         double a;               ///< parameter a
@@ -188,9 +280,9 @@ namespace detinfo{
       double 	   fElectronsToADC;    ///< conversion factor for # of ionization electrons to 1 ADC count
       unsigned int fNumberTimeSamples; ///< number of clock ticks per event
       unsigned int fReadOutWindowSize; ///< number of clock ticks per readout window
-      double       fTimeOffsetU;       ///< time offsets to convert spacepoint
-      double       fTimeOffsetV;       ///< coordinates to hit times on each
-      double       fTimeOffsetZ;       ///< view
+      double       fTimeOffsetU;       ///< time offset to convert spacepoint coordinates to hit times on view U
+      double       fTimeOffsetV;       ///< time offset to convert spacepoint coordinates to hit times on view V
+      double       fTimeOffsetZ;       ///< time offset to convert spacepoint coordinates to hit times on view Z
       
       SternheimerParameters_t fSternheimerParameters; ///< Sternheimer parameters
       

@@ -21,18 +21,21 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"
 #include "fhiclcpp/types/detail/validationException.h"
-#include "fhiclcpp/types/detail/validate_ParameterSet.h" // also fhiclcpp::detail::fillMissingKeysMsg()
+#include "fhiclcpp/types/detail/validate_ParameterSet.h" // fhiclcpp::detail::fillMissingKeysMsg()
 
 //-----------------------------------------------
 detinfo::LArPropertiesStandard::LArPropertiesStandard()
+  : fIsConfigured(false)
 {
-  fIsConfigured = false;
 }
 
 //-----------------------------------------------
-detinfo::LArPropertiesStandard::LArPropertiesStandard(fhicl::ParameterSet const& pset)
+detinfo::LArPropertiesStandard::LArPropertiesStandard(
+  fhicl::ParameterSet const& pset,
+  std::set<std::string> ignore_params /* = {} */
+): LArPropertiesStandard()
 {
-  fIsConfigured = this->Configure(pset);
+  this->Configure(pset, ignore_params);
 }
 
 #if 0
@@ -96,12 +99,15 @@ bool detinfo::LArPropertiesStandard::Configure(fhicl::ParameterSet const& pset)
 #endif // 0
 
 //------------------------------------------------
-bool detinfo::LArPropertiesStandard::Configure(fhicl::ParameterSet const& pset)
-{
+bool detinfo::LArPropertiesStandard::Configure(
+  fhicl::ParameterSet const& pset,
+  std::set<std::string> ignore_params /* = {} */
+) {
   // we need to know whether we require the additional ScintByParticleType parameters:
   const bool bScintByParticleType = pset.get<bool>("ScintByParticleType", false);
   
   std::set<std::string> ignorable_keys = lar::IgnorableProviderConfigKeys();
+  ignorable_keys.insert(ignore_params.begin(), ignore_params.end());
   
 #if DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM
   // validation happens here:

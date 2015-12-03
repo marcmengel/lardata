@@ -32,7 +32,7 @@ namespace lar {
    * This implementation includes:
    * * art framework service keywords
    */
-  std::set<std::string> const& IgnorableProviderConfigKeys()
+  inline std::set<std::string> const& IgnorableProviderConfigKeys()
     {
       static std::set<std::string> const ignorable {
         "service_type",     // added by art: service name (possibly interface)

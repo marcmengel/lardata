@@ -22,6 +22,10 @@ namespace detinfo{
   class DetectorPropertiesServiceStandard : public DetectorPropertiesService {
 
     public:
+      
+      // this enables art to print the configuration help:
+      using Parameters = art::ServiceTable<detinfo::DetectorPropertiesStandard::Configuration_t>;
+      
       DetectorPropertiesServiceStandard(fhicl::ParameterSet const& pset,
 				art::ActivityRegistry& reg);
 

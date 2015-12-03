@@ -15,7 +15,6 @@ BEGIN_PROLOG
 
 argoneut_services:
 {
-<<<<<<< HEAD
  ExptGeoHelperInterface:        @local::argoneut_geometry_helper
  Geometry:                      @local::argoneut_geo
  DetectorPropertiesService:     @local::argoneut_detproperties

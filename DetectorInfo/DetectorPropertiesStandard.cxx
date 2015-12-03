@@ -12,6 +12,7 @@
 
 // LArSoft includes
 #include "DetectorInfo/DetectorPropertiesStandard.h"
+#include "DetectorInfo/ProviderUtil.h" // lar::IgnorableProviderConfigKeys()
 #include "Geometry/Geometry.h"
 #include "Geometry/CryostatGeo.h"
 #include "Geometry/TPCGeo.h"
@@ -43,10 +44,12 @@ namespace detinfo{
   DetectorPropertiesStandard::DetectorPropertiesStandard(fhicl::ParameterSet const& pset,
 					 const geo::GeometryCore* geo,
 					 const detinfo::LArProperties* lp,
-					 const detinfo::DetectorClocks* c):
+					 const detinfo::DetectorClocks* c,
+					 std::set<std::string> ignore_params /* = {} */
+					 ):
     fLP(lp), fClocks(c), fGeo(geo)
   {
-    Configure(pset);
+    Configure(pset, ignore_params);
     
     fTPCClock = fClocks->TPCClock();
     
@@ -54,11 +57,14 @@ namespace detinfo{
     
   //--------------------------------------------------------------------
   DetectorPropertiesStandard::DetectorPropertiesStandard(fhicl::ParameterSet const& pset,
-					 providers_type providers):
+					 providers_type providers,
+					 std::set<std::string> ignore_params /* = {} */
+					 ):
     DetectorPropertiesStandard(pset,
       providers.get<geo::GeometryCore>(),
       providers.get<detinfo::LArProperties>(),
-      providers.get<detinfo::DetectorClocks>()
+      providers.get<detinfo::DetectorClocks>(),
+      ignore_params
       )
     {}
   
@@ -92,6 +98,7 @@ namespace detinfo{
     return fClocks->TPCTick2TDC(ticks);
   }
   
+#if 0
   //--------------------------------------------------------------------
   void DetectorPropertiesStandard::Configure(fhicl::ParameterSet const& p)
   {
@@ -106,7 +113,6 @@ namespace detinfo{
     fEfield                   = p.get< std::vector<double> >("Efield");
     fElectronlifetime         = p.get< double       >("Electronlifetime");
     fTemperature              = p.get< double       >("Temperature");
-    fNumberTimeSamples        = p.get< unsigned int >("NumberTimeSamples");
     fElectronsToADC    	      = p.get< double 	    >("ElectronsToADC"   );
     fNumberTimeSamples 	      = p.get< unsigned int >("NumberTimeSamples");
     fReadOutWindowSize 	      = p.get< unsigned int >("ReadOutWindowSize");
@@ -125,6 +131,40 @@ namespace detinfo{
     
     return;
   }
+#endif // 0
+  
+  //--------------------------------------------------------------------
+  void DetectorPropertiesStandard::Configure(
+    fhicl::ParameterSet const& p, std::set<std::string> ignore_params /* = {} */
+  ) {
+    
+    std::set<std::string> ignorable_keys = lar::IgnorableProviderConfigKeys();
+    ignorable_keys.insert(ignore_params.begin(), ignore_params.end());
+    
+    // parses and validates the parameter set:
+    fhicl::Table<Configuration_t> config_table { p, ignorable_keys };
+    Configuration_t const& config = config_table();
+    
+    fEfield                     = config.Efield();
+    fElectronlifetime           = config.Electronlifetime();
+    fTemperature                = config.Temperature();
+    fElectronsToADC             = config.ElectronsToADC();
+    fNumberTimeSamples          = config.NumberTimeSamples();
+    fReadOutWindowSize          = config.ReadOutWindowSize();
+    fTimeOffsetU                = config.TimeOffsetU();
+    fTimeOffsetV                = config.TimeOffsetV();
+    fTimeOffsetZ                = config.TimeOffsetZ();
+    fInheritNumberTimeSamples   = config.InheritNumberTimeSamples();
+    
+    fSternheimerParameters.a    = config.SternheimerA();
+    fSternheimerParameters.k    = config.SternheimerK();
+    fSternheimerParameters.x0   = config.SternheimerX0();
+    fSternheimerParameters.x1   = config.SternheimerX1();
+    fSternheimerParameters.cbar = config.SternheimerCbar();
+
+    CalculateXTicksParams();
+    
+  } // DetectorPropertiesStandard::Configure()
   
   //------------------------------------------------------------------------------------//
   void DetectorPropertiesStandard::Setup(providers_type providers) {

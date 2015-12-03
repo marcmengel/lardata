@@ -17,6 +17,28 @@ cet_test(timingreference_test HANDBUILT
   OPTIONAL_GROUPS ONLY_SLF
 )
 
+# ------------------------------------------------------------------------------
+# ---  LArPropertiesServiceArgoNeuT service
+# ---
+cet_test( LArPropertiesServiceArgoNeuT_test
+  HANDBUILT
+  DATAFILES larservicetest_argoneut.fcl
+  TEST_EXEC lar
+  TEST_ARGS --rethrow-all --config ./larservicetest_argoneut.fcl
+)
+# ------------------------------------------------------------------------------
+# ---  DetectorPropertiesServiceArgoNeuT service
+# ---
+cet_test( DetectorPropertiesServiceArgoNeuT_test
+  HANDBUILT
+  DATAFILES detectorpropertiesservicetest_argoneut.fcl
+  TEST_EXEC lar
+  TEST_ARGS --rethrow-all --config ./detectorpropertiesservicetest_argoneut.fcl
+)
+# ------------------------------------------------------------------------------
+
+
 install_headers()
 install_fhicl()
 install_source()
+

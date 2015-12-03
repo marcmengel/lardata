@@ -40,6 +40,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
 
 
@@ -58,11 +59,22 @@ namespace detinfo {
   class LArPropertiesStandard : public LArProperties {
       public:
     LArPropertiesStandard();
-    LArPropertiesStandard(fhicl::ParameterSet const& pset);
+    explicit LArPropertiesStandard
+      (fhicl::ParameterSet const& pset, std::set<std::string> ignore_params = {});
     LArPropertiesStandard(LArPropertiesStandard const&) = delete;
     virtual ~LArPropertiesStandard() = default;
     
-    bool   Configure(fhicl::ParameterSet const& pset);
+    /**
+     * @brief Configures the provider
+     * @param p configuration parameter set
+     * @param ignore_params parameters to be ignored (optional)
+     * 
+     * This method will validate the parameter set (except for the parameters
+     * it's explicitly told to ignore) and extract the useful information out
+     * of it.
+     */
+    bool   Configure
+      (fhicl::ParameterSet const& pset, std::set<std::string> ignore_params = {});
     bool   Update(uint64_t ts=0);
     
     virtual double RadiationLength()  	     const override { return fRadiationLength; } ///< g/cm^2      

@@ -422,6 +422,6 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 
 namespace util{
  
-  DEFINE_ART_SERVICE(DetectorPropertiesServiceArgoNeuT)
+  DEFINE_ART_SERVICE_INTERFACE_IMPL(DetectorPropertiesServiceArgoNeuT, detinfo::DetectorPropertiesService)
 
 } // namespace util

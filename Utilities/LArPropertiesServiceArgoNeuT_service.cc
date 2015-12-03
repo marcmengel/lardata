@@ -570,6 +570,6 @@ util::LArPropertiesServiceArgoNeuT::DBsettingsClass::DBsettingsClass() {
 
 namespace util{
  
-  DEFINE_ART_SERVICE(LArPropertiesServiceArgoNeuT)
+  DEFINE_ART_SERVICE_INTERFACE_IMPL(LArPropertiesServiceArgoNeuT, detinfo::LArPropertiesService)
 
 } // namespace util
