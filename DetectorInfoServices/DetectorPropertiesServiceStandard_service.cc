@@ -26,6 +26,7 @@ namespace detinfo{
   //--------------------------------------------------------------------
   DetectorPropertiesServiceStandard::DetectorPropertiesServiceStandard
     (fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
+    : fInheritNumberTimeSamples(pset.get<bool>("InheritNumberTimeSamples", false))
   {
     // Register for callbacks.
 
@@ -46,7 +47,8 @@ namespace detinfo{
         geo::Geometry, 
         detinfo::LArPropertiesService,
         detinfo::DetectorClocksService
-        >()
+        >(),
+        std::set<std::string>({ "InheritNumberTimeSamples" })
       );
     
     // at this point we need and expect the provider to be fully configured
@@ -60,7 +62,7 @@ namespace detinfo{
   //--------------------------------------------------------------------
   void DetectorPropertiesServiceStandard::reconfigure(fhicl::ParameterSet const& p)
   {
-    fProp->Configure(p);
+    fProp->Configure(p, { "InheritNumberTimeSamples" });
     
     // Save the parameter set.
     fPS = p;
@@ -104,7 +106,7 @@ namespace detinfo{
 
     // Don't do anything if no parameters are supposed to be inherited.
 
-    if(!fProp->InheritNumberTimeSamples()) return;
+    if(!fInheritNumberTimeSamples) return;
 
     // The only way to access art service metadata from the input file
     // is to open it as a separate TFile object.  Do that now.
@@ -130,7 +132,7 @@ namespace detinfo{
 	  fhicl::make_ParameterSet(reinterpret_cast<char const *>(sqlite3_column_text(stmt, 0)), ps);
 	  // Is this a DetectorPropertiesService parameter set?
 
-	  bool psok = isDetectorPropertiesService(ps);
+	  bool psok = isDetectorPropertiesServiceStandard(ps);
 	  if(psok) {
 
 	    // Check NumberTimeSamples
@@ -181,12 +183,19 @@ namespace detinfo{
   //--------------------------------------------------------------------
   //  Determine whether a parameter set is a DetectorPropertiesService configuration.
   
-  bool DetectorPropertiesServiceStandard::isDetectorPropertiesService(const fhicl::ParameterSet& ps)
+  bool DetectorPropertiesServiceStandard::isDetectorPropertiesServiceStandard
+    (const fhicl::ParameterSet& ps) const
   {
     // This method uses heuristics to determine whether the parameter
     // set passed as argument is a DetectorPropertiesService configuration
     // parameter set.
     
+    return 
+         (ps.get<std::string>("service_type", "") == "DetectorPropertiesService")
+      && (ps.get<std::string>("service_provider", "") == "DetectorPropertiesServiceStandard")
+      ;
+#if 0
+    // old heuristics here:
     std::string s;
     double d;
     int i;
@@ -199,6 +208,7 @@ namespace detinfo{
     result = result && ps.get_if_present("ReadOutWindowSize", u);
 
     return result;
+#endif // 0
   }
 
 } // namespace detinfo

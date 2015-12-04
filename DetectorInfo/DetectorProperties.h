@@ -89,8 +89,6 @@ namespace detinfo{
       virtual double       ConvertTDCToTicks(double tdc) const = 0;
       virtual double       ConvertTicksToTDC(double ticks) const = 0;
 
-      virtual bool         InheritNumberTimeSamples() const = 0;
-
     protected:
       DetectorProperties() = default;
 

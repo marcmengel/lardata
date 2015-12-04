@@ -22,6 +22,7 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "fhiclcpp/types/Sequence.h"
 #include "fhiclcpp/types/Table.h"
+#include "fhiclcpp/types/Atom.h"
 
 // C/C++ standard libraries
 #include <set>
@@ -78,11 +79,6 @@ namespace detinfo{
         fhicl::Atom<double      > TimeOffsetZ              {
           Name("TimeOffsetZ"             ),
           Comment("tick offset subtracted to to convert spacepoint coordinates to hit times on view Z")
-        };
-        fhicl::Atom<bool        > InheritNumberTimeSamples {
-          Name("InheritNumberTimeSamples"),
-          Comment(""),
-          false /* default value */
         };
         
         fhicl::Atom<double      > SternheimerA             {
@@ -245,8 +241,6 @@ namespace detinfo{
       // ticks (RawDigit/Wire time).
       virtual double       ConvertTDCToTicks(double tdc) const override;
       virtual double       ConvertTicksToTDC(double ticks) const override;
-
-      virtual bool         InheritNumberTimeSamples() const override { return fInheritNumberTimeSamples; }
       
       
       /// Verifies that the provider is in a fully configured status
@@ -286,8 +280,6 @@ namespace detinfo{
       
       SternheimerParameters_t fSternheimerParameters; ///< Sternheimer parameters
       
-      bool         fInheritNumberTimeSamples; ///< Flag saying whether to inherit NumberTimeSamples
-
       double       fXTicksCoefficient; ///< Parameters for x<-->ticks
 
       std::vector<std::vector<std::vector<double> > > fXTicksOffsets;

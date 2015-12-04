@@ -154,7 +154,6 @@ namespace detinfo{
     fTimeOffsetU                = config.TimeOffsetU();
     fTimeOffsetV                = config.TimeOffsetV();
     fTimeOffsetZ                = config.TimeOffsetZ();
-    fInheritNumberTimeSamples   = config.InheritNumberTimeSamples();
     
     fSternheimerParameters.a    = config.SternheimerA();
     fSternheimerParameters.k    = config.SternheimerK();

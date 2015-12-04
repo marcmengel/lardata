@@ -109,8 +109,6 @@ namespace util{
       // ticks (RawDigit/Wire time).
       virtual double       ConvertTDCToTicks(double tdc)   const override;
       virtual double       ConvertTicksToTDC(double ticks) const override;
-
-      virtual bool         InheritNumberTimeSamples() const override { return fInheritNumberTimeSamples; }
       
       
       //------------------------------------------------------------------------
