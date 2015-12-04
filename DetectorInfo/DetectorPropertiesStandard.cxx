@@ -49,7 +49,7 @@ namespace detinfo{
 					 ):
     fLP(lp), fClocks(c), fGeo(geo)
   {
-    Configure(pset, ignore_params);
+    ValidateAndConfigure(pset, ignore_params);
     
     fTPCClock = fClocks->TPCClock();
     
@@ -134,16 +134,7 @@ namespace detinfo{
 #endif // 0
   
   //--------------------------------------------------------------------
-  void DetectorPropertiesStandard::Configure(
-    fhicl::ParameterSet const& p, std::set<std::string> ignore_params /* = {} */
-  ) {
-    
-    std::set<std::string> ignorable_keys = lar::IgnorableProviderConfigKeys();
-    ignorable_keys.insert(ignore_params.begin(), ignore_params.end());
-    
-    // parses and validates the parameter set:
-    fhicl::Table<Configuration_t> config_table { p, ignorable_keys };
-    Configuration_t const& config = config_table();
+  void DetectorPropertiesStandard::Configure(Configuration_t const& config) {
     
     fEfield                     = config.Efield();
     fElectronlifetime           = config.Electronlifetime();
@@ -164,6 +155,30 @@ namespace detinfo{
     CalculateXTicksParams();
     
   } // DetectorPropertiesStandard::Configure()
+  
+  //--------------------------------------------------------------------
+  DetectorPropertiesStandard::Configuration_t
+  DetectorPropertiesStandard::ValidateConfiguration(
+    fhicl::ParameterSet const& p, std::set<std::string> ignore_params /* = {} */
+  ) {
+    
+    std::set<std::string> ignorable_keys = lar::IgnorableProviderConfigKeys();
+    ignorable_keys.insert(ignore_params.begin(), ignore_params.end());
+    
+    // parses and validates the parameter set:
+    fhicl::Table<Configuration_t> config_table { p, ignorable_keys };
+    
+    return std::move(config_table());
+    
+  } // DetectorPropertiesStandard::ValidateConfiguration()
+  
+  //--------------------------------------------------------------------
+  void DetectorPropertiesStandard::ValidateAndConfigure(
+    fhicl::ParameterSet const& p, std::set<std::string> ignore_params /* = {} */
+  ) {
+    Configure(ValidateConfiguration(p, ignore_params));
+  } // ValidateAndConfigure()
+  
   
   //------------------------------------------------------------------------------------//
   void DetectorPropertiesStandard::Setup(providers_type providers) {

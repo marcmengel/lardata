@@ -124,7 +124,7 @@ namespace detinfo{
       virtual ~DetectorPropertiesStandard() = default;
       
       /**
-       * @brief Configures the provider
+       * @brief Configures the provider, first validating the configuration
        * @param p configuration parameter set
        * @param ignore_params parameters to be ignored (optional)
        * 
@@ -132,8 +132,28 @@ namespace detinfo{
        * it's explicitly told to ignore) and extract the useful information out
        * of it.
        */
-      void Configure
+      void ValidateAndConfigure
         (fhicl::ParameterSet const& p, std::set<std::string> ignore_params = {});
+
+      
+      /// Extracts the relevant configuration from the specified object
+      void Configure(Configuration_t const& config);
+      
+      /**
+       * @brief Validates the specified configuration
+       * @param p configuration parameter set
+       * @param ignore_params parameters to be ignored (optional)
+       * @return a parsed configuration object
+       * @see ValidateAndConfigure(), Configure()
+       * 
+       * This method will validate the parameter set (except for the parameters
+       * it's explicitly told to ignore) and it returns an object ready to
+       * be used with Configure().
+       */
+      Configuration_t ValidateConfiguration
+        (fhicl::ParameterSet const& p, std::set<std::string> ignore_params = {})
+        ;
+
       bool Update(uint64_t ts);
       bool UpdateClocks(const detinfo::DetectorClocks* clks);
       

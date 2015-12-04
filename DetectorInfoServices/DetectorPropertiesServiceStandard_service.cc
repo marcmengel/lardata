@@ -62,7 +62,7 @@ namespace detinfo{
   //--------------------------------------------------------------------
   void DetectorPropertiesServiceStandard::reconfigure(fhicl::ParameterSet const& p)
   {
-    fProp->Configure(p, { "InheritNumberTimeSamples" });
+    fProp->ValidateAndConfigure(p, { "InheritNumberTimeSamples" });
     
     // Save the parameter set.
     fPS = p;
