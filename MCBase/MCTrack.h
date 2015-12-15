@@ -44,6 +44,8 @@ namespace sim{
     const std::string&  Process  () const { return fProcess;  }
     const MCStep&       Start    () const { return fStart;    }
     const MCStep&       End      () const { return fEnd;      }
+    const std::vector< std::vector<double> >& dQdx() const{ return fdQdx;}  // dQdx[# of MCSteps][# of plane]
+    const std::vector<double>& dEdx() const {return fdEdx;} // dEdx[# of MCSteps]
 
     int                MotherPdgCode () const { return fMotherPDGCode; }
     unsigned int       MotherTrackID () const { return fMotherTrackID; }
@@ -63,6 +65,9 @@ namespace sim{
     void Process       ( std::string name ) { fProcess = name; }
     void Start         ( const MCStep s   ) { fStart   = s;    }
     void End           ( const MCStep s   ) { fEnd     = s;    }
+    void dEdx          ( const std::vector<double> s) { fdEdx = s;}
+    void dQdx          ( const std::vector<std::vector<double> > s) { fdQdx = s;}
+
 
     void MotherPdgCode ( int id               ) { fMotherPDGCode = id; }
     void MotherTrackID ( unsigned int id      ) { fMotherTrackID = id; }
@@ -86,6 +91,8 @@ namespace sim{
     std::string    fProcess; ///< G4 creation process of this track particle
     MCStep         fStart;   ///< G4 start position/momentum of this track particle
     MCStep         fEnd;     ///< G4 end position/momentum of this track particle
+    std::vector<std::vector<double> > fdQdx; //< the G4 electron yeild at each wire plane between each step
+    std::vector<double> fdEdx;//< the G4 energy loss between each step
 
     int            fMotherPDGCode; ///< This particle's mother's PDG code
     unsigned int   fMotherTrackID; ///< This particle's mother's G4 track ID
