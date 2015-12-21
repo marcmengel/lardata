@@ -10,9 +10,9 @@
 #include <iostream>
 
 // LArSoft includes
-#include "Utilities/LArPropertiesServiceArgoNeuT.h"
-#include "SimpleTypesAndConstants/PhysicalConstants.h"
-#include "Utilities/DatabaseUtil.h"
+#include "lardata/Utilities/LArPropertiesServiceArgoNeuT.h"
+#include "larcore/SimpleTypesAndConstants/PhysicalConstants.h"
+#include "lardata/Utilities/DatabaseUtil.h"
 
 // ROOT includes
 #include "TMath.h"

@@ -12,11 +12,11 @@
 #include "art/Framework/Core/ModuleMacros.h" 
 #include "art/Framework/Core/EDAnalyzer.h"
 
-#include "DetectorInfoServices/LArPropertiesService.h"
-#include "DetectorInfoServices/DetectorPropertiesService.h"
-#include "DetectorInfo/LArProperties.h"
-#include "DetectorInfo/DetectorProperties.h"
-#include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfo/LArProperties.h"
+#include "lardata/DetectorInfo/DetectorProperties.h"
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 
 namespace util
 {

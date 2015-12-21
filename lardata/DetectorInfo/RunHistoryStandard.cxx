@@ -11,7 +11,7 @@
 #include <iostream>
 
 // LArSoft includes
-#include "DetectorInfo/RunHistoryStandard.h"
+#include "lardata/DetectorInfo/RunHistoryStandard.h"
 
 // ROOT includes
 #include "TMath.h"

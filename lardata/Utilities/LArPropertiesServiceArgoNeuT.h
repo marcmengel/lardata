@@ -23,8 +23,8 @@
 #ifndef LARPROPERTIESSERVICEARGONEUT_H
 #define LARPROPERTIESSERVICEARGONEUT_H
 
-#include "DetectorInfo/LArProperties.h"
-#include "DetectorInfoServices/LArPropertiesService.h"
+#include "lardata/DetectorInfo/LArProperties.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
 
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"

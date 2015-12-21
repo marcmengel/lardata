@@ -15,12 +15,12 @@ simple_plugin(DetectorClocksServiceStandard "service"
 	      ${CETLIB}
 	      ${SQLITE3}
 	      ${ROOT_BASIC_LIB_LIST}
-              BASENAME_ONLY
+              
 )
 
 simple_plugin(DetectorPropertiesServiceStandard "service"
               DetectorInfo
-              Geometry_service
+              larcore_Geometry_Geometry_service
               Geometry
 	      ${ART_PERSISTENCY_ROOTDB}
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -29,7 +29,7 @@ simple_plugin(DetectorPropertiesServiceStandard "service"
 	      ${MF_UTILITIES}
 	      ${CETLIB}
 	      ${ROOT_BASIC_LIB_LIST}
-              BASENAME_ONLY
+              
 )
 
 simple_plugin(LArPropertiesServiceStandard "service"
@@ -39,7 +39,7 @@ simple_plugin(LArPropertiesServiceStandard "service"
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
 	      ${CETLIB}
-              BASENAME_ONLY
+              
 )
 
 install_headers()

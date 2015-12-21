@@ -13,7 +13,7 @@
 #ifndef PROPYZPLANE_H
 #define PROPYZPLANE_H
 
-#include "RecoObjects/Propagator.h"
+#include "lardata/RecoObjects/Propagator.h"
 
 namespace trkf {
 

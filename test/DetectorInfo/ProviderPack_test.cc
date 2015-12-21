@@ -28,7 +28,7 @@
 #include <boost/test/test_tools.hpp> // BOOST_CHECK(), BOOST_CHECK_EQUAL()
 
 // LArSoft libraries
-#include "DetectorInfo/ProviderPack.h"
+#include "lardata/DetectorInfo/ProviderPack.h"
 
 // C/C++ standard libraries
 #include <string>

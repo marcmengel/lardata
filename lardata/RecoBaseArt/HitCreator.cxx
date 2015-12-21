@@ -8,7 +8,7 @@
  * ****************************************************************************/
 
 // declaration header
-#include "RecoBaseArt/HitCreator.h"
+#include "lardata/RecoBaseArt/HitCreator.h"
 
 // C/C++ standard library
 #include <utility> // std::move()
@@ -24,11 +24,11 @@
 #include "art/Persistency/Common/EDProductGetter.h"
 
 // LArSoft libraries
-#include "Geometry/Geometry.h"
+#include "larcore/Geometry/Geometry.h"
 // #include "RawData/RawDigit.h"
-#include "RecoBase/Wire.h"
-#include "RecoBase/Hit.h"
-#include "Utilities/MakeIndex.h"
+#include "lardata/RecoBase/Wire.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/Utilities/MakeIndex.h"
 
 
 namespace {

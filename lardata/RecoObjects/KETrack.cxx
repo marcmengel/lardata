@@ -9,7 +9,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
-#include "RecoObjects/KETrack.h"
+#include "lardata/RecoObjects/KETrack.h"
 #include "cetlib/exception.h"
 
 namespace trkf {

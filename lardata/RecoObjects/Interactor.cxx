@@ -8,7 +8,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "RecoObjects/Interactor.h"
+#include "lardata/RecoObjects/Interactor.h"
 
 namespace trkf {
 

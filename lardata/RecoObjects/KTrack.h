@@ -24,8 +24,8 @@
 
 #include <ostream>
 #include <memory>
-#include "RecoObjects/KalmanLinearAlgebra.h"
-#include "RecoObjects/Surface.h"
+#include "lardata/RecoObjects/KalmanLinearAlgebra.h"
+#include "lardata/RecoObjects/Surface.h"
 
 namespace trkf {
 

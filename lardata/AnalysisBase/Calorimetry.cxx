@@ -6,7 +6,7 @@
 // \author brebel@fnal.gov, tjyang@fnal.gov
 ////////////////////////////////////////////////////////////////////////
 
-#include "AnalysisBase/Calorimetry.h"
+#include "lardata/AnalysisBase/Calorimetry.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 namespace anab{

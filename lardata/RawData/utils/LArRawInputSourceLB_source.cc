@@ -6,7 +6,7 @@
 
 #include "art/Framework/Core/InputSourceMacros.h"
 #include "art/Framework/IO/Sources/Source.h"
-#include "RawData/utils/LArRawInputDriverLongBo.h"
+#include "lardata/RawData/utils/LArRawInputDriverLongBo.h"
 
 namespace lris {
   typedef art::Source<LArRawInputDriverLongBo> LArRawInputSourceLB;

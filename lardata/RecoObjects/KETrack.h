@@ -21,7 +21,7 @@
 #ifndef KETRACK_H
 #define KETRACK_H
 
-#include "RecoObjects/KTrack.h"
+#include "lardata/RecoObjects/KTrack.h"
 #include "boost/optional.hpp"
 
 namespace trkf {

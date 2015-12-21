@@ -71,7 +71,7 @@
 #ifndef SURFYZLINE_H
 #define SURFYZLINE_H
 
-#include "RecoObjects/SurfLine.h"
+#include "lardata/RecoObjects/SurfLine.h"
 
 namespace trkf {
 

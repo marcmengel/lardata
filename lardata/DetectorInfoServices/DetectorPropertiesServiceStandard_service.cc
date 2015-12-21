@@ -6,16 +6,16 @@
 // Framework includes
 
 // LArSoft includes
-#include "DetectorInfoServices/DetectorPropertiesServiceStandard.h"
-#include "DetectorInfo/LArProperties.h"
-#include "Geometry/Geometry.h"
-#include "Geometry/CryostatGeo.h"
-#include "Geometry/TPCGeo.h"
-#include "Geometry/PlaneGeo.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesServiceStandard.h"
+#include "lardata/DetectorInfo/LArProperties.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/CryostatGeo.h"
+#include "larcore/Geometry/TPCGeo.h"
+#include "larcore/Geometry/PlaneGeo.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "DetectorInfoServices/ServicePack.h" // lar::extractProviders()
-#include "DetectorInfoServices/LArPropertiesService.h"
-#include "DetectorInfoServices/DetectorClocksService.h"
+#include "lardata/DetectorInfoServices/ServicePack.h" // lar::extractProviders()
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
 // Art includes
 #include "art/Persistency/RootDB/SQLite3Wrapper.h"

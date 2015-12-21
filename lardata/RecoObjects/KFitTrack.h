@@ -29,7 +29,7 @@
 #ifndef KFITTRACK_H
 #define KFITTRACK_H
 
-#include "RecoObjects/KETrack.h"
+#include "lardata/RecoObjects/KETrack.h"
 
 namespace trkf {
 

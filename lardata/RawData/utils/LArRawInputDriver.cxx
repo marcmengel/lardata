@@ -6,12 +6,12 @@
 /// \author  brebel@fnal.gov, soderber@fnal.gov
 ////////////////////////////////////////////////////////////////////////
 
-#include "RawData/utils/LArRawInputDriver.h"
+#include "lardata/RawData/utils/LArRawInputDriver.h"
 
-#include "RawData/RawDigit.h"
-#include "RawData/DAQHeader.h"
-#include "Geometry/Geometry.h"
-#include "SummaryData/RunData.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/DAQHeader.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/SummaryData/RunData.h"
 
 #include "art/Framework/IO/Sources/put_product_in_principal.h"
 #include "art/Utilities/Exception.h"

@@ -9,7 +9,7 @@
 #include <iostream>
 
 // LArSoft includes
-#include "DetectorInfoServices/LArPropertiesServiceStandard.h"
+#include "lardata/DetectorInfoServices/LArPropertiesServiceStandard.h"
 //#include "SimpleTypesAndConstants/PhysicalConstants.h"
 
 // ROOT includes

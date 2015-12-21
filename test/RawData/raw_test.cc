@@ -40,8 +40,8 @@
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // LArSoft libraries
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::Compress_t
-#include "RawData/raw.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::Compress_t
+#include "lardata/RawData/raw.h"
 
 
 /// The seed for the default random engine

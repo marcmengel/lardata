@@ -10,7 +10,7 @@
 
 #include <cmath>
 #include "cetlib/exception.h"
-#include "Utilities/SignalShaping.h"
+#include "lardata/Utilities/SignalShaping.h"
 
 
 //----------------------------------------------------------------------

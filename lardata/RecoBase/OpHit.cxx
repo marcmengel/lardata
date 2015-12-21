@@ -8,7 +8,7 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-#include "RecoBase/OpHit.h"
+#include "lardata/RecoBase/OpHit.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 namespace recob{

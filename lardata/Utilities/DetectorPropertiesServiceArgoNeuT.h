@@ -17,16 +17,16 @@
 #ifndef UTIL_DETECTORPROPERTIESSERVICEARGONEUT_H
 #define UTIL_DETECTORPROPERTIESSERVICEARGONEUT_H
 
-#include "DetectorInfo/DetectorProperties.h"
-#include "DetectorInfoServices/DetectorPropertiesService.h"
-#include "DetectorInfo/ElecClock.h"
-#include "Utilities/LArPropertiesServiceArgoNeuT.h"
+#include "lardata/DetectorInfo/DetectorProperties.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfo/ElecClock.h"
+#include "lardata/Utilities/LArPropertiesServiceArgoNeuT.h"
 
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-#include "SimpleTypesAndConstants/geo_types.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
 
 ///General LArSoft Utilities
 namespace util{

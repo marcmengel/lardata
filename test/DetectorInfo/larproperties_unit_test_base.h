@@ -22,7 +22,7 @@
 #define TEST_LARPROPERTIES_UNIT_TEST_BASE_H
 
 // LArSoft libraries
-#include "DetectorInfo/LArProperties.h"
+#include "lardata/DetectorInfo/LArProperties.h"
 #include "test/Geometry/unit_test_base.h"
 
 // utility libraries

@@ -6,7 +6,7 @@
 // \author lockwitz@fnal.gov
 ////////////////////////////////////////////////////////////////////////
 
-#include "AnalysisBase/CosmicTag.h"
+#include "lardata/AnalysisBase/CosmicTag.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 namespace anab{

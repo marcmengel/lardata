@@ -8,7 +8,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "RecoObjects/KHitGroup.h"
+#include "lardata/RecoObjects/KHitGroup.h"
 #include "cetlib/exception.h"
 
 namespace trkf {

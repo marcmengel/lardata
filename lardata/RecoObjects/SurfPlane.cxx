@@ -9,7 +9,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
-#include "RecoObjects/SurfPlane.h"
+#include "lardata/RecoObjects/SurfPlane.h"
 
 namespace trkf {
 

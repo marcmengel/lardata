@@ -10,12 +10,12 @@
 
 #include <map>
 
-#include "RecoObjects/KHitContainerWireLine.h"
+#include "lardata/RecoObjects/KHitContainerWireLine.h"
 
 #include "cetlib/exception.h"
 
-#include "RecoObjects/KHitWireLine.h"
-#include "Geometry/Geometry.h"
+#include "lardata/RecoObjects/KHitWireLine.h"
+#include "larcore/Geometry/Geometry.h"
 
 namespace trkf {
 

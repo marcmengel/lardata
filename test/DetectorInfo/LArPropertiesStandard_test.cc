@@ -9,7 +9,7 @@
 #include "test/DetectorInfo/larproperties_unit_test_base.h"
 
 // LArSoft libraries
-#include "DetectorInfo/LArPropertiesStandard.h"
+#include "lardata/DetectorInfo/LArPropertiesStandard.h"
 
 //------------------------------------------------------------------------------
 //---  The test environment

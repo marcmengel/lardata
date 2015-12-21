@@ -9,8 +9,8 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
-#include "RecoObjects/InteractGeneral.h"
-#include "RecoObjects/SurfXYZPlane.h"
+#include "lardata/RecoObjects/InteractGeneral.h"
+#include "lardata/RecoObjects/SurfXYZPlane.h"
 #include "cetlib/exception.h"
 
 namespace trkf {

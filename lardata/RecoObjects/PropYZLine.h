@@ -13,7 +13,7 @@
 #ifndef PROPYZLINE_H
 #define PROPYZLINE_H
 
-#include "RecoObjects/Propagator.h"
+#include "lardata/RecoObjects/Propagator.h"
 
 namespace trkf {
 

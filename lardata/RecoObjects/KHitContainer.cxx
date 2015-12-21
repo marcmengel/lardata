@@ -8,7 +8,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "RecoObjects/KHitContainer.h"
+#include "lardata/RecoObjects/KHitContainer.h"
 
 #include "cetlib/exception.h"
 

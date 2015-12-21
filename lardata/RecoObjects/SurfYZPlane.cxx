@@ -9,7 +9,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
-#include "RecoObjects/SurfYZPlane.h"
+#include "lardata/RecoObjects/SurfYZPlane.h"
 #include "cetlib/exception.h"
 #include "TVector2.h"
 

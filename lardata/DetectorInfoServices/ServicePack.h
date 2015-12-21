@@ -10,8 +10,8 @@
 #define DETECTORINFOSERVICE_SERVICEPACK_H 1
 
 // LArSoft libraries
-#include "DetectorInfo/ProviderPack.h"
-#include "CoreUtils/ServiceUtil.h" // lar::providerFrom()
+#include "lardata/DetectorInfo/ProviderPack.h"
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom()
 
 
 namespace lar {

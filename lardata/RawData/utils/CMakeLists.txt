@@ -50,7 +50,7 @@ simple_plugin(LArRawInputSource "source"
   ${ART_PERSISTENCY_PROVENANCE}
   ${ART_UTILITIES}
   ${MF_MESSAGELOGGER}
-  BASENAME_ONLY
+  
 )
 
 install_headers()

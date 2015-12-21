@@ -8,7 +8,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "RecoObjects/KHitsTrack.h"
+#include "lardata/RecoObjects/KHitsTrack.h"
 
 namespace trkf {
 

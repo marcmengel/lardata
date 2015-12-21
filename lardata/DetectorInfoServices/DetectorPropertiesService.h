@@ -11,8 +11,8 @@
 
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-#include "DetectorInfo/DetectorProperties.h"
-#include "CoreUtils/ServiceUtil.h"
+#include "lardata/DetectorInfo/DetectorProperties.h"
+#include "larcore/CoreUtils/ServiceUtil.h"
 
 ///General LArSoft Utilities
 namespace detinfo{

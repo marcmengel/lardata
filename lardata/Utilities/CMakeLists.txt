@@ -2,7 +2,7 @@
 art_make( NO_PLUGINS
           LIBRARY_NAME  Utilities
           LIB_LIBRARIES 
-                        LArFFT_service
+                        lardata_Utilities_LArFFT_service
                         RecoBase
                         Geometry
                         ${ART_FRAMEWORK_CORE}
@@ -30,7 +30,7 @@ simple_plugin(DatabaseUtil "service"
               ${ART_PERSISTENCY_COMMON}
               ${ART_PERSISTENCY_PROVENANCE}
               ${ART_FRAMEWORK_SERVICES_REGISTRY}
-              BASENAME_ONLY
+              
 )
 simple_plugin(FileCatalogMetadataExtras "service"
 	      ${ART_UTILITIES}
@@ -43,22 +43,22 @@ simple_plugin(FileCatalogMetadataExtras "service"
 	      ${MF_UTILITIES}
 	      ${CETLIB}
 	      ${ROOT_BASIC_LIB_LIST}
-              BASENAME_ONLY
+              
 )
 
 simple_plugin(LArPropertiesServiceArgoNeuT "service"
-              DatabaseUtil_service
+              lardata_Utilities_DatabaseUtil_service
               ${ART_UTILITIES}
               ${MF_MESSAGELOGGER}
               ${MF_UTILITIES}
               ${CETLIB}
-              BASENAME_ONLY
+              
 )
 
 simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
-              LArPropertiesServiceArgoNeuT_service
-              DatabaseUtil_service
-              Geometry_service
+              lardata_Utilities_LArPropertiesServiceArgoNeuT_service
+              lardata_Utilities_DatabaseUtil_service
+              larcore_Geometry_Geometry_service
               Geometry
               ${ART_PERSISTENCY_ROOTDB}
               ${SQLITE3}
@@ -66,7 +66,7 @@ simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
               ${MF_UTILITIES}
               ${CETLIB}
               ${ROOT_BASIC_LIB_LIST}
-              BASENAME_ONLY
+              
 )
 
 simple_plugin(LArFFT "service"
@@ -77,7 +77,7 @@ simple_plugin(LArFFT "service"
 	      ${CETLIB}
 	      ${ROOT_FFTW}
 	      ${ROOT_BASIC_LIB_LIST}
-              BASENAME_ONLY
+              
 )
 
 simple_plugin(MemoryPeakReporter "service"
@@ -89,7 +89,7 @@ simple_plugin(MemoryPeakReporter "service"
               ${MF_UTILITIES}
               ${FHICLCPP}
               ${CETLIB}
-              BASENAME_ONLY
+              
 )
 
 simple_plugin(ComputePi "module"
@@ -98,7 +98,7 @@ simple_plugin(ComputePi "module"
               ${MF_UTILITIES}
               ${FHICLCPP}
               ${CETLIB}
-              BASENAME_ONLY
+              
 )
 
 install_headers()

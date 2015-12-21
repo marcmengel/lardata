@@ -7,16 +7,16 @@
  */
 
 // LArSoft libraries
-#include "DetectorInfoServices/LArPropertiesService.h"
-#include "DetectorInfoServices/DetectorPropertiesService.h"
-#include "DetectorInfoServices/DetectorClocksService.h"
-#include "DetectorInfoServices/ServicePack.h" // lar::providerFrom<>()
-#include "DetectorInfo/LArProperties.h"
-#include "DetectorInfo/DetectorProperties.h"
-#include "DetectorInfo/DetectorClocks.h"
-#include "Geometry/Geometry.h"
-#include "Geometry/GeometryCore.h"
-#include "CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "lardata/DetectorInfoServices/ServicePack.h" // lar::providerFrom<>()
+#include "lardata/DetectorInfo/LArProperties.h"
+#include "lardata/DetectorInfo/DetectorProperties.h"
+#include "lardata/DetectorInfo/DetectorClocks.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/GeometryCore.h"
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 
 // framework libraries
 #include "art/Framework/Core/ModuleMacros.h" 

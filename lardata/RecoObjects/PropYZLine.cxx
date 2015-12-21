@@ -9,11 +9,11 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
-#include "RecoObjects/PropYZLine.h"
-#include "RecoObjects/SurfYZLine.h"
-#include "RecoObjects/SurfYZPlane.h"
-#include "RecoObjects/SurfXYZPlane.h"
-#include "RecoObjects/InteractGeneral.h"
+#include "lardata/RecoObjects/PropYZLine.h"
+#include "lardata/RecoObjects/SurfYZLine.h"
+#include "lardata/RecoObjects/SurfYZPlane.h"
+#include "lardata/RecoObjects/SurfXYZPlane.h"
+#include "lardata/RecoObjects/InteractGeneral.h"
 #include "cetlib/exception.h"
 
 namespace trkf {

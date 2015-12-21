@@ -46,7 +46,7 @@
 #ifndef KHITMULTI_H
 #define KHITMULTI_H
 
-#include "RecoObjects/KHit.h"
+#include "lardata/RecoObjects/KHit.h"
 
 namespace trkf {
 

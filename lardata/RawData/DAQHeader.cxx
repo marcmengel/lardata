@@ -7,7 +7,7 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-#include "RawData/DAQHeader.h"
+#include "lardata/RawData/DAQHeader.h"
 #include <string>
 #include <iostream>
 

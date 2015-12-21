@@ -16,7 +16,7 @@
 #ifndef INTERACTPLANE_H
 #define INTERACTPLANE_H
 
-#include "RecoObjects/Interactor.h"
+#include "lardata/RecoObjects/Interactor.h"
 
 namespace trkf {
 

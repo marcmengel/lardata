@@ -8,11 +8,11 @@
 ////////////////////////////////////////////////////////////////////////
 
 
-#include "Utilities/GeometryUtilities.h"
-#include "Geometry/CryostatGeo.h"
-#include "Geometry/PlaneGeo.h"
-#include "Geometry/WireGeo.h"
-#include "Geometry/TPCGeo.h"
+#include "lardata/Utilities/GeometryUtilities.h"
+#include "larcore/Geometry/CryostatGeo.h"
+#include "larcore/Geometry/PlaneGeo.h"
+#include "larcore/Geometry/WireGeo.h"
+#include "larcore/Geometry/TPCGeo.h"
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 //#include "PxHitConverter.h"
 

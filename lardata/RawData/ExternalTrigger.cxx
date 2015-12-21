@@ -7,7 +7,7 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-#include "RawData/ExternalTrigger.h"
+#include "lardata/RawData/ExternalTrigger.h"
 #include <string>
 #include <iostream>
 

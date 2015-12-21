@@ -13,15 +13,15 @@
 #include <TLorentzVector.h>
 
 #include "PxUtils.h"
-#include "Geometry/Geometry.h"
-#include "DetectorInfoServices/LArPropertiesService.h"
-#include "DetectorInfoServices/DetectorPropertiesService.h"
-#include "Utilities/UtilException.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/Utilities/UtilException.h"
 #include "time.h"
 
-#include "RecoBase/Hit.h"
-#include "Geometry/GeometryCore.h"
-#include "SimpleTypesAndConstants/geo_types.h"
+#include "lardata/RecoBase/Hit.h"
+#include "larcore/Geometry/GeometryCore.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
 #include "art/Persistency/Common/Ptr.h" 
 
 #include <climits>

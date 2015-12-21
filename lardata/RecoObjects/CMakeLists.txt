@@ -3,7 +3,7 @@ art_make( LIBRARY_NAME  RecoObjects
           LIB_LIBRARIES AnalysisAlg
                         AnalysisBase
                         RecoBase
-                        Geometry_service
+                        larcore_Geometry_Geometry_service
                         Geometry
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}

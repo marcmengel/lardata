@@ -25,7 +25,7 @@
 #define DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM 0
 
 // LArSoft libraries
-#include "DetectorInfo/LArProperties.h"
+#include "lardata/DetectorInfo/LArProperties.h"
 
 // FHiCL libraries
 #include "fhiclcpp/ParameterSet.h"

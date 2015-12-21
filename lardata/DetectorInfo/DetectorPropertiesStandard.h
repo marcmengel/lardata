@@ -12,11 +12,11 @@
 #define DETINFO_DETECTORPROPERTIESSTD_H
 
 // LArSoft libraries
-#include "Geometry/GeometryCore.h"
-#include "DetectorInfo/ProviderPack.h"
-#include "DetectorInfo/LArProperties.h"
-#include "DetectorInfo/DetectorClocks.h"
-#include "DetectorInfo/DetectorProperties.h"
+#include "larcore/Geometry/GeometryCore.h"
+#include "lardata/DetectorInfo/ProviderPack.h"
+#include "lardata/DetectorInfo/LArProperties.h"
+#include "lardata/DetectorInfo/DetectorClocks.h"
+#include "lardata/DetectorInfo/DetectorProperties.h"
 
 // framework libraries
 #include "fhiclcpp/ParameterSet.h"

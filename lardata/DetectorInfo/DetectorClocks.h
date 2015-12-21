@@ -9,7 +9,7 @@
 #ifndef DETINFO_IDETCLOCKS_H
 #define DETINFO_IDETCLOCKS_H
 
-#include "DetectorInfo/ElecClock.h"
+#include "lardata/DetectorInfo/ElecClock.h"
 
 namespace detinfo{
 

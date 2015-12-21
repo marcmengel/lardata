@@ -35,9 +35,9 @@
 #include <boost/test/floating_point_comparison.hpp> // BOOST_CHECK_CLOSE()
 
 // LArSoft libraries
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t, raw::TDCtick_t
-#include "SimpleTypesAndConstants/geo_types.h" // geo::View_t
-#include "RecoBase/Hit.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t, raw::TDCtick_t
+#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t
+#include "lardata/RecoBase/Hit.h"
 
 
 

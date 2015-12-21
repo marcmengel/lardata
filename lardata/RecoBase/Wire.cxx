@@ -6,7 +6,7 @@
  * 
  * ****************************************************************************/
 
-#include "RecoBase/Wire.h"
+#include "lardata/RecoBase/Wire.h"
 
 // C/C++ standard libraries
 #include <utility> // std::move()

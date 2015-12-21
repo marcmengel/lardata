@@ -10,9 +10,9 @@
 #include <iostream>
 
 // LArSoft includes
-#include "DetectorInfo/LArPropertiesStandard.h"
-#include "DetectorInfo/ProviderUtil.h" // lar::IgnorableProviderConfigKeys()
-#include "SimpleTypesAndConstants/PhysicalConstants.h"
+#include "lardata/DetectorInfo/LArPropertiesStandard.h"
+#include "lardata/DetectorInfo/ProviderUtil.h" // lar::IgnorableProviderConfigKeys()
+#include "larcore/SimpleTypesAndConstants/PhysicalConstants.h"
 
 // ROOT includes
 #include "TMath.h"
@@ -20,8 +20,8 @@
 // Framework includes
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"
-#include "fhiclcpp/types/detail/validationException.h"
-#include "fhiclcpp/types/detail/validate_ParameterSet.h" // fhiclcpp::detail::fillMissingKeysMsg()
+//#include "fhiclcpp/types/detail/validationException.h"
+//#include "fhiclcpp/types/detail/validate_ParameterSet.h" // fhiclcpp::detail::fillMissingKeysMsg()
 
 //-----------------------------------------------
 detinfo::LArPropertiesStandard::LArPropertiesStandard()

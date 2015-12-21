@@ -17,8 +17,8 @@
 
 
 #ifndef __GCCXML__
-#include "SimpleTypesAndConstants/geo_types.h"
-#include "SimpleTypesAndConstants/PhysicalConstants.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcore/SimpleTypesAndConstants/PhysicalConstants.h"
 #include <iosfwd>
 #endif
 

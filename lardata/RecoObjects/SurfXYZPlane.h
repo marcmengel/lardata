@@ -76,7 +76,7 @@
 #ifndef SURFXYZPLANE_H
 #define SURFXYZPLANE_H
 
-#include "RecoObjects/SurfPlane.h"
+#include "lardata/RecoObjects/SurfPlane.h"
 
 namespace trkf {
 

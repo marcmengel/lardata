@@ -9,10 +9,10 @@
 ////////////////////////////////////////////////////////////////////////
 #include <stdint.h>
 
-#include "RecoObjects/KHitWireLine.h"
-#include "RecoObjects/SurfWireLine.h"
-#include "Geometry/Geometry.h"
-#include "DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/RecoObjects/KHitWireLine.h"
+#include "lardata/RecoObjects/SurfWireLine.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "cetlib/exception.h"
 
 namespace trkf {

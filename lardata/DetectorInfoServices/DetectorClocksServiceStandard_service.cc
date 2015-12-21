@@ -1,4 +1,4 @@
-#include "DetectorInfoServices/DetectorClocksServiceStandard.h"
+#include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h"
 #include "TFile.h"
 #include "art/Persistency/RootDB/SQLite3Wrapper.h"
 #include "fhiclcpp/make_ParameterSet.h"

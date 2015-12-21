@@ -14,8 +14,8 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "art/Framework/Principal/Run.h"
-#include "DetectorInfo/LArPropertiesStandard.h"
-#include "DetectorInfoServices/LArPropertiesService.h"
+#include "lardata/DetectorInfo/LArPropertiesStandard.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
 
 ///General LArSoft Utilities
 namespace detinfo{

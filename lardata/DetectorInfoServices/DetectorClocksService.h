@@ -11,8 +11,8 @@
 
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-#include "DetectorInfo/DetectorClocks.h"
-#include "CoreUtils/ServiceUtil.h"
+#include "lardata/DetectorInfo/DetectorClocks.h"
+#include "larcore/CoreUtils/ServiceUtil.h"
 
 ///General LArSoft Utilities
 namespace detinfo{

@@ -64,7 +64,7 @@
 #ifndef KHIT_H
 #define KHIT_H
 
-#include "RecoObjects/KHitBase.h"
+#include "lardata/RecoObjects/KHitBase.h"
 #include "cetlib/exception.h"
 
 namespace trkf {

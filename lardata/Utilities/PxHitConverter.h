@@ -14,13 +14,13 @@
 //#include <TLorentzVector.h>
 
 #include "PxUtils.h"
-#include "Geometry/Geometry.h"
-#include "Utilities/GeometryUtilities.h"
-#include "Utilities/UtilException.h"
-#include "Utilities/Dereference.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/Utilities/GeometryUtilities.h"
+#include "lardata/Utilities/UtilException.h"
+#include "lardata/Utilities/Dereference.h"
 //#include "time.h"
 
-#include "RecoBase/Hit.h"
+#include "lardata/RecoBase/Hit.h"
 //#include "Geometry/CryostatGeo.h"
 //#include "Geometry/PlaneGeo.h"
 //#include "Geometry/WireGeo.h"
