@@ -24,6 +24,7 @@ simple_plugin(DetectorPropertiesServiceStandard "service"
               Geometry
 	      ${ART_PERSISTENCY_ROOTDB}
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
+	      ${ART_UTILITIES}
 	      ${SQLITE3}
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
