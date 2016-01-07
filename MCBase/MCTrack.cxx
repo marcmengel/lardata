@@ -31,6 +31,9 @@ namespace sim {
 
     fStart = invalid_step;
     fEnd   = invalid_step;
+    
+    fdEdx.clear();
+    fdQdx.clear();
 
     fMotherStart = invalid_step;
     fMotherEnd   = invalid_step;
