@@ -8,6 +8,11 @@
 <!--  for all objects that are data members of those objects.                         -->
 
 <lcgdict>
+
+<!-- support classes (e.g., elements of data product classes) -->
+ <class name="std::map<std::basic_string<char>,double > " />
+ <class name="std::vector<std::map<std::basic_string<char>,double > >" />
+
  <class name="anab::Calorimetry"           ClassVersion="15"                           >
   <version ClassVersion="15" checksum="2095251371"/>
   <version ClassVersion="14" checksum="1421274164"/>
@@ -19,6 +24,7 @@
   <version ClassVersion="13" checksum="3664244500"/>
   <version ClassVersion="12" checksum="1769449101"/>
  </class>
+ <class name="anab::MVAResult"/>
  <class name="anab::FlashMatch"            ClassVersion="13"                           >
   <version ClassVersion="13" checksum="4254447866"/>
   <version ClassVersion="12" checksum="2992884177"/>
@@ -36,11 +42,13 @@
  </class>
  <class name="std::vector<anab::Calorimetry>"                                          />
  <class name="std::vector<anab::ParticleID>"                                           />
+ <class name="std::vector<anab::MVAResult>"                                            />
  <class name="std::vector<anab::FlashMatch>"                                           />
  <class name="std::vector<anab::CosmicTag>"                                            />
  <class name="std::vector<anab::T0>"                                                   />
  <class name="art::Ptr<anab::Calorimetry>"                                   	       />
- <class name="art::Ptr<anab::ParticleID>"                                   	       />
+ <class name="art::Ptr<anab::ParticleID>"                                              />
+ <class name="art::Ptr<anab::MVAResult>"                                               />
  <class name="art::Ptr<anab::FlashMatch>"                                   	       />
  <class name="art::Ptr<anab::CosmicTag>"                                   	       />
  <class name="art::Ptr<anab::T0>"                                                      />
@@ -49,7 +57,8 @@
  <class name="std::pair< art::Ptr<recob::Shower>,      art::Ptr<anab::Calorimetry> >"   />
  <class name="std::pair< art::Ptr<anab::Calorimetry>, art::Ptr<recob::Shower>      >"   /> 
  <class name="std::pair< art::Ptr<recob::Track>,      art::Ptr<anab::ParticleID> >"    />
- <class name="std::pair< art::Ptr<anab::ParticleID>, art::Ptr<recob::Track>      >"    /> 
+ <class name="std::pair< art::Ptr<anab::ParticleID>, art::Ptr<recob::Track>      >"    />
+ <class name="std::pair< art::Ptr<recob::Track>,     art::Ptr<anab::MVAResult>      >" /> 
  <class name="std::pair< art::Ptr<anab::FlashMatch>, art::Ptr<recob::Track>      >"    />  
  <class name="std::pair< art::Ptr<anab::FlashMatch>, art::Ptr<recob::OpFlash>      >"    />  
  <class name="std::pair< art::Ptr<recob::OpFlash>, art::Ptr<anab::FlashMatch>      >"    />  
@@ -74,6 +83,8 @@
  <class name="art::Assns<anab::Calorimetry, recob::Shower,       void>"	               />
  <class name="art::Assns<recob::Track,      anab::ParticleID,  void>"	               />
  <class name="art::Assns<anab::ParticleID, recob::Track,       void>"	               />
+ <class name="art::Assns<recob::Track,       anab::MVAResult,     void>"               />
+ <class name="art::Assns<anab::MVAResult,    recob::Track,        void>"               />
  <class name="art::Assns<anab::FlashMatch, recob::Track,       void>"	               />
  <class name="art::Assns<anab::FlashMatch, recob::OpFlash,       void>"	               />
  <class name="art::Assns<recob::Track,     anab::FlashMatch,   void>"	               />
@@ -108,6 +119,9 @@
  <class name="art::Wrapper< std::vector<anab::ParticleID>      	>"	               />
  <class name="art::Wrapper<art::Assns<recob::Track,      anab::ParticleID,  void> >"   />
  <class name="art::Wrapper<art::Assns<anab::ParticleID,  recob::Track,       void> >"   />
+ <class name="art::Wrapper< std::vector<anab::MVAResult> >"                          />
+ <class name="art::Wrapper< art::Assns<recob::Track,     anab::MVAResult,   void> >"   />
+ <class name="art::Wrapper< art::Assns<anab::MVAResult,  recob::Track,     void> >"    />
  <class name="art::Wrapper< std::vector<anab::FlashMatch>       	>"	       />
  <class name="art::Wrapper<art::Assns<anab::FlashMatch, recob::OpFlash,  void> >"  />
  <class name="art::Wrapper<art::Assns<anab::FlashMatch,  recob::Track,       void> >"  />
