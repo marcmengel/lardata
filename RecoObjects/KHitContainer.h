@@ -49,6 +49,8 @@
 #include "RecoObjects/KHitGroup.h"
 #include "RecoObjects/KTrack.h"
 #include "RecoObjects/Propagator.h"
+#include "art/Persistency/Common/PtrVector.h"
+#include "RecoBase/Hit.h"
 
 namespace trkf {
 
@@ -62,6 +64,7 @@ namespace trkf {
     /// Destructor.
     virtual ~KHitContainer();
 
+    virtual void fill(const art::PtrVector<recob::Hit>& hits, int only_plane) = 0;
     // Const Accessors.
 
     const std::list<KHitGroup>& getSorted() const {return fSorted;}       ///< Sorted list.
