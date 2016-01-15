@@ -3,8 +3,8 @@
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( $ENV{NUTOOLS_INC} )
 
-art_make( LIBRARY_NAME  RawData
-          LIB_LIBRARIES SummaryData
+art_make( 
+          LIB_LIBRARIES larcore_SummaryData
 	                ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
 			${ART_PERSISTENCY_PROVENANCE}

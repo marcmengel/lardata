@@ -1,7 +1,7 @@
 
 simple_plugin(DetectorClocksServiceStandard "service"
-              DetectorInfo
-	      RawData
+              lardata_DetectorInfo
+	      lardata_RawData
 	      ${ART_UTILITIES}
               ${ART_FRAMEWORK_CORE}
 	      ${ART_FRAMEWORK_PRINCIPAL}
@@ -19,9 +19,9 @@ simple_plugin(DetectorClocksServiceStandard "service"
 )
 
 simple_plugin(DetectorPropertiesServiceStandard "service"
-              DetectorInfo
+              lardata_DetectorInfo
               larcore_Geometry_Geometry_service
-              Geometry
+              larcore_Geometry
 	      ${ART_PERSISTENCY_ROOTDB}
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
 	      ${ART_UTILITIES}
@@ -34,7 +34,7 @@ simple_plugin(DetectorPropertiesServiceStandard "service"
 )
 
 simple_plugin(LArPropertiesServiceStandard "service"
-	      DetectorInfo
+	      lardata_DetectorInfo
 	      ${ART_UTILITIES}
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
 	      ${MF_MESSAGELOGGER}

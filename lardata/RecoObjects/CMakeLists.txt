@@ -1,10 +1,10 @@
 
-art_make( LIBRARY_NAME  RecoObjects
-          LIB_LIBRARIES AnalysisAlg
-                        AnalysisBase
-                        RecoBase
+art_make( 
+          LIB_LIBRARIES lardata_AnalysisAlg
+                        lardata_AnalysisBase
+                        lardata_RecoBase
                         larcore_Geometry_Geometry_service
-                        Geometry
+                        larcore_Geometry
                         ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
 			${ART_FRAMEWORK_SERVICES_REGISTRY}

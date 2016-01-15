@@ -1,6 +1,6 @@
 
 art_make( 
-	  LIBRARY_NAME     MCBase
+	  
           LIB_LIBRARIES
 			SimulationBase
 			${ROOT_BASIC_LIB_LIST}

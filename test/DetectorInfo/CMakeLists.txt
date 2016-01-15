@@ -2,7 +2,7 @@ cet_test( ProviderPack_test USE_BOOST_UNIT )
 
 cet_test( LArPropertiesStandard_test
   LIBRARIES
-    DetectorInfo
+    lardata_DetectorInfo
   DATAFILES lartest_standard.fcl
   TEST_ARGS ./lartest_standard.fcl
 )

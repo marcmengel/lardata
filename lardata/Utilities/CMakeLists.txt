@@ -1,10 +1,10 @@
 
 art_make( NO_PLUGINS
-          LIBRARY_NAME  Utilities
+          
           LIB_LIBRARIES 
                         lardata_Utilities_LArFFT_service
-                        RecoBase
-                        Geometry
+                        lardata_RecoBase
+                        larcore_Geometry
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -59,7 +59,7 @@ simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
               lardata_Utilities_LArPropertiesServiceArgoNeuT_service
               lardata_Utilities_DatabaseUtil_service
               larcore_Geometry_Geometry_service
-              Geometry
+              larcore_Geometry
               ${ART_PERSISTENCY_ROOTDB}
               ${SQLITE3}
               ${MF_MESSAGELOGGER}
