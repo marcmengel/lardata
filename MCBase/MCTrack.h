@@ -91,8 +91,8 @@ namespace sim{
     std::string    fProcess; ///< G4 creation process of this track particle
     MCStep         fStart;   ///< G4 start position/momentum of this track particle
     MCStep         fEnd;     ///< G4 end position/momentum of this track particle
-    std::vector<std::vector<double> > fdQdx; //< the G4 electron yeild at each wire plane between each step
-    std::vector<double> fdEdx;//< the G4 energy loss between each step
+    std::vector<std::vector<double> > fdQdx; //< the G4 electron yeild per plane between each step // [N Plane][MCSteps - 1]
+    std::vector<double> fdEdx;//< the G4 "ionization" energy loss between each step // [MCSteps - 1]
 
     int            fMotherPDGCode; ///< This particle's mother's PDG code
     unsigned int   fMotherTrackID; ///< This particle's mother's G4 track ID
