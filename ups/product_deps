@@ -7,7 +7,7 @@ fcldir product_dir job
 #
 product         version
 larcore		v04_25_00
-nutools		v1_20_01
+nutools		v1_20_03
 
 gcc		v4_9_3
 
