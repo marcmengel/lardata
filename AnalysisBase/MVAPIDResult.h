@@ -1,5 +1,5 @@
-#ifndef MVARESULT_H
-#define MVARESULT_H
+#ifndef MVAPIDRESULT_H
+#define MVAPIDRESULT_H
 
 #include <vector>
 #include <map>
@@ -7,7 +7,7 @@
 
 namespace anab {
 
-struct MVAResult {
+struct MVAPIDResult {
 
   float evalRatio;
   float concentration;
@@ -19,13 +19,13 @@ struct MVAResult {
   float nSpacePoints;
   unsigned int trackID;
 
-  friend bool           operator <  (const MVAResult & a, const MVAResult & b);
+  friend bool           operator <  (const MVAPIDResult & a, const MVAPIDResult & b);
 
   std::map<std::string,double> mvaOutput; 
 
 };
 
-bool operator < (const MVAResult & a, const MVAResult & b)
+bool operator < (const MVAPIDResult & a, const MVAPIDResult & b)
   {
     return a.nSpacePoints<b.nSpacePoints;
   } 
