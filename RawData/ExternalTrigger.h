@@ -23,21 +23,21 @@ namespace raw {
     private:
 
       unsigned int   fTrigID;
-      int64_t        fTrigTime;
+      uint64_t       fTrigTime;
 
 #ifndef __GCCXML__
 
   public:
 
-      ExternalTrigger(unsigned int trigid, int64_t trigtime);
+      ExternalTrigger(unsigned int trigid, uint64_t trigtime);
 
       // Set Methods
       void             SetTrigID(unsigned int i);
-      void             SetTrigTime(int64_t i);
+      void             SetTrigTime(uint64_t i);
 
       // Get Methods
       unsigned int     GetTrigID()          const;
-      int64_t          GetTrigTime()          const;
+      uint64_t         GetTrigTime()          const;
      
 #endif
     };
@@ -46,9 +46,9 @@ namespace raw {
 #ifndef __GCCXML__
 
 inline void           raw::ExternalTrigger::SetTrigID(unsigned int i)    { fTrigID = i;      }
-inline void           raw::ExternalTrigger::SetTrigTime(int64_t i)       { fTrigTime = i;    }
+inline void           raw::ExternalTrigger::SetTrigTime(uint64_t i)      { fTrigTime = i;    }
 inline unsigned int   raw::ExternalTrigger::GetTrigID()           const  { return fTrigID;   }  
-inline int64_t        raw::ExternalTrigger::GetTrigTime()         const  { return fTrigTime; }  
+inline uint64_t        raw::ExternalTrigger::GetTrigTime()        const  { return fTrigTime; }  
 
 #endif
 
