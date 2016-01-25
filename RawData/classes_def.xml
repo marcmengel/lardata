@@ -30,7 +30,8 @@
  <class name="raw::OpDetWaveform 	  " ClassVersion="13"  >
   <version ClassVersion="13" checksum="1572518718"/>
  </class> 
- <class name="raw::ExternalTrigger" ClassVersion="10"           >
+ <class name="raw::ExternalTrigger" ClassVersion="11"           >
+  <version ClassVersion="11" checksum="193660131"/>
   <version ClassVersion="10" checksum="3590754331"/>
  </class>
  <class name="raw::Trigger" ClassVersion="11"                   >
