@@ -16,40 +16,44 @@
 
 namespace raw {
 
+  typedef int64_t TriggerTimeStamp_t; ///< type of trigger time stamp
+
   class ExternalTrigger {
     public:
       ExternalTrigger(); // Default constructor
 
     private:
 
-      unsigned int   fTrigID;
-      uint64_t       fTrigTime;
+      unsigned int       fTrigID;
+      TriggerTimeStamp_t fTrigTime;
 
 #ifndef __GCCXML__
 
   public:
 
-      ExternalTrigger(unsigned int trigid, uint64_t trigtime);
+      ExternalTrigger(unsigned int trigid, TriggerTimeStamp_t trigtime);
 
       // Set Methods
       void             SetTrigID(unsigned int i);
-      void             SetTrigTime(uint64_t i);
+      void             SetTrigTime(TriggerTimeStamp_t i);
 
       // Get Methods
-      unsigned int     GetTrigID()          const;
-      uint64_t         GetTrigTime()          const;
+      unsigned int       GetTrigID()   const;
+      TriggerTimeStamp_t GetTrigTime() const;
      
 #endif
     };
+
 }
 
 #ifndef __GCCXML__
 
-inline void           raw::ExternalTrigger::SetTrigID(unsigned int i)    { fTrigID = i;      }
-inline void           raw::ExternalTrigger::SetTrigTime(uint64_t i)      { fTrigTime = i;    }
-inline unsigned int   raw::ExternalTrigger::GetTrigID()           const  { return fTrigID;   }  
-inline uint64_t        raw::ExternalTrigger::GetTrigTime()        const  { return fTrigTime; }  
-
+namespace raw{
+  inline void               ExternalTrigger::SetTrigID(unsigned int i)         { fTrigID = i;      }
+  inline void               ExternalTrigger::SetTrigTime(TriggerTimeStamp_t i) { fTrigTime = i;    }
+  inline unsigned int       ExternalTrigger::GetTrigID()    const  { return fTrigID;   }  
+  inline TriggerTimeStamp_t ExternalTrigger::GetTrigTime()  const  { return fTrigTime; }
+}
 #endif
 
 #endif // EXTERNALTRIGGER_H
