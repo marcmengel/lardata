@@ -16,7 +16,7 @@
 
 namespace raw {
 
-  typedef int64_t TriggerTimeStamp_t; ///< type of trigger time stamp
+  typedef long long TriggerTimeStamp_t; ///< type of trigger time stamp
 
   class ExternalTrigger {
     public:
