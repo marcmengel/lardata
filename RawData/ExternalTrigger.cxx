@@ -21,7 +21,7 @@ namespace raw{
   }
 
   //----------------------------------------------------------------------
-  ExternalTrigger::ExternalTrigger(unsigned int trigid, unsigned int trigtime) 
+  ExternalTrigger::ExternalTrigger(unsigned int trigid, TriggerTimeStamp_t trigtime) 
     : fTrigID(trigid)
     , fTrigTime(trigtime)
   {
