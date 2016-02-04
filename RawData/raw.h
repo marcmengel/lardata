@@ -19,7 +19,7 @@ namespace raw{
 
   void Uncompress(const std::vector<short>& adc, 
                   std::vector<short>      &uncompressed, 
-		  int       &pedestal,
+		  int       pedestal,
                   raw::Compress_t          compress);
 
   void Compress(std::vector<short> &adc, 
@@ -32,7 +32,7 @@ namespace raw{
   void Compress(std::vector<short> &adc, 
                 raw::Compress_t     compress, 
                 unsigned int       &zerothreshold, 
-	        int       &pedestal,
+	        int       pedestal,
                 int &nearestneighbor,
 		bool fADCStickyCodeFeature=false);
 
@@ -52,7 +52,7 @@ namespace raw{
 		std::vector<short> &adc, 
                 raw::Compress_t     compress, 
                 unsigned int       &zerothreshold,
-		int       &pedestal,
+		int       pedestal,
                 int &nearestneighbor,
 		bool fADCStickyCodeFeature=false);
 
@@ -67,7 +67,7 @@ namespace raw{
 
   void ZeroSuppression(std::vector<short> &adc, 
                        unsigned int       &zerothreshold,
-		       int       &pedestal,
+		       int       pedestal,
                        int                &nearestneighbor,
 		       bool fADCStickyCodeFeature=false);
 
@@ -83,7 +83,7 @@ namespace raw{
   void ZeroSuppression(const boost::circular_buffer<std::vector<short>> &adcvec_neighbors,
 		       std::vector<short> &adc,
                        unsigned int       &zerothreshold, 
-		       int       &pedestal,
+		       int       pedestal,
                        int                &nearestneighbor,
 		       bool fADCStickyCodeFeature=false);
 
@@ -93,12 +93,12 @@ namespace raw{
 
   void ZeroUnsuppression(const std::vector<short>& adc, 
                          std::vector<short>      &uncompressed,
-			 int       &pedestal);
+			 int       pedestal);
 
   const unsigned int onemask = 0x003f; // Unsigned int ending in 111111 used to select 6 LSBs with bitwise AND
 
-  int ADCStickyCodeCheck(const short &adc_current_value, // Function to check if ADC value may be ADC sticky code in DUNE35t data
-			 const int   &pedestal,
+  int ADCStickyCodeCheck(const short adc_current_value, // Function to check if ADC value may be ADC sticky code in DUNE35t data
+			 const int   pedestal,
 			 bool fADCStickyCodeFeature);
 
 } // namespace raw

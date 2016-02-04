@@ -110,7 +110,7 @@ namespace raw {
   void Compress(std::vector<short> &adc, 
 		raw::Compress_t     compress, 
 		unsigned int       &zerothreshold, 
-		int               &pedestal,
+		int               pedestal,
 		int                &nearestneighbor,
 		bool              fADCStickyCodeFeature)
   { 
@@ -131,7 +131,7 @@ namespace raw {
 		std::vector<short> &adc,
 		raw::Compress_t     compress, 
 		unsigned int       &zerothreshold, 
-		int               &pedestal,
+		int               pedestal,
 		int                &nearestneighbor,
 		bool              fADCStickyCodeFeature)
   { 
@@ -333,7 +333,7 @@ namespace raw {
   // after subtracting pedestal value
   void ZeroSuppression(std::vector<short> &adc, 
 		       unsigned int       &zerothreshold, 
-		       int               &pedestal,
+		       int               pedestal,
 		       int                &nearestneighbor,
 		       bool              fADCStickyCodeFeature)
   {
@@ -570,7 +570,7 @@ namespace raw {
   void ZeroSuppression(const boost::circular_buffer<std::vector<short>> &adcvec_neighbors,
 		       std::vector<short> &adc, 
 		       unsigned int       &zerothreshold, 
-		       int               &pedestal,
+		       int               pedestal,
 		       int                &nearestneighbor,
 		       bool              fADCStickyCodeFeature)
   {
@@ -724,7 +724,7 @@ namespace raw {
   // Reverse zero suppression function with pedestal re-addition
   void ZeroUnsuppression(const std::vector<short>& adc, 
 			 std::vector<short>      &uncompressed,
-			 int               &pedestal)
+			 int               pedestal)
   {
     const int lengthofadc = adc[0];
     const int nblocks = adc[1];
@@ -762,8 +762,9 @@ namespace raw {
       ZeroUnsuppression(adc, uncompressed);
     }
     else if(compress == raw::kZeroHuffman){
-      UncompressHuffman(adc, uncompressed);
-      ZeroUnsuppression(adc, uncompressed);
+      std::vector<short> tmp(2*adc[0]);
+      UncompressHuffman(adc, tmp);
+      ZeroUnsuppression(tmp, uncompressed);
     }
     else if(compress == raw::kNone){
       for(unsigned int i = 0; i < adc.size(); ++i) uncompressed[i] = adc[i];
@@ -780,7 +781,7 @@ namespace raw {
   // if the compression type is kNone, copy the adc vector into the uncompressed vector
   void Uncompress(const std::vector<short>& adc, 
 		  std::vector<short>      &uncompressed, 
-		  int               &pedestal,
+		  int               pedestal,
 		  raw::Compress_t          compress)
   {
     if(compress == raw::kHuffman) UncompressHuffman(adc, uncompressed);
@@ -788,8 +789,9 @@ namespace raw {
       ZeroUnsuppression(adc, uncompressed, pedestal);
     }
     else if(compress == raw::kZeroHuffman){
-      UncompressHuffman(adc, uncompressed);
-      ZeroUnsuppression(adc, uncompressed, pedestal);
+      std::vector<short> tmp(2*adc[0]);
+      UncompressHuffman(adc, tmp);
+      ZeroUnsuppression(tmp, uncompressed, pedestal);
     }
     else if(compress == raw::kNone){
       for(unsigned int i = 0; i < adc.size(); ++i) uncompressed[i] = adc[i];
@@ -1153,8 +1155,8 @@ namespace raw {
   //--------------------------------------------------------
   // need to decrement the bit you are looking at to determine the deltas as that is how
   // the bits are set
-  int ADCStickyCodeCheck(const short &adc_value,
-			 const int &pedestal,
+  int ADCStickyCodeCheck(const short adc_value,
+			 const int pedestal,
 			 bool fADCStickyCodeFeature){
 
     int adc_return_value = std::abs(adc_value - pedestal);
