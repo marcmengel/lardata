@@ -6,7 +6,7 @@
 // \author brebel@fnal.gov, tjyang@fnal.gov
 ////////////////////////////////////////////////////////////////////////
 
-#include "AnalysisBase/ParticleID.h"
+#include "lardata/AnalysisBase/ParticleID.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 namespace anab{

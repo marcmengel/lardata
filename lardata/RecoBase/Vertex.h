@@ -13,7 +13,7 @@
 #ifndef __GCCXML__
 #include <iosfwd>
 
-#include "SimpleTypesAndConstants/PhysicalConstants.h"
+#include "larcore/SimpleTypesAndConstants/PhysicalConstants.h"
 #endif
 
 namespace recob {

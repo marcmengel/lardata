@@ -22,9 +22,9 @@
 #include "art/Persistency/Provenance/ProductID.h"
 
 // LArSoft libraries
-#include "RawData/RawDigit.h"
-#include "RecoBase/Wire.h"
-#include "RecoBase/Hit.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RecoBase/Wire.h"
+#include "lardata/RecoBase/Hit.h"
 
 
 // declaration of some heavy art stuff

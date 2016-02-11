@@ -1,9 +1,9 @@
 
-art_make( LIBRARY_NAME  RecoBaseArt
-          LIB_LIBRARIES RawData
-                        RecoBase
-                        Geometry
-                        Geometry_service
+art_make( 
+          LIB_LIBRARIES lardata_RawData
+                        lardata_RecoBase
+                        larcore_Geometry
+                        larcore_Geometry_Geometry_service
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}

@@ -50,9 +50,9 @@
 #define KHITBASE_H
 
 #include <ostream>
-#include "RecoObjects/Surface.h"
-#include "RecoObjects/KETrack.h"
-#include "RecoObjects/Propagator.h"
+#include "lardata/RecoObjects/Surface.h"
+#include "lardata/RecoObjects/KETrack.h"
+#include "lardata/RecoObjects/Propagator.h"
 
 namespace trkf {
 

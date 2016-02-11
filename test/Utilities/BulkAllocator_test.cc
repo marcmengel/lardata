@@ -31,7 +31,7 @@
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // LArSoft libraries
-#include "Utilities/BulkAllocator.h"
+#include "lardata/Utilities/BulkAllocator.h"
 
 
 /// The seed for the default random engine

@@ -30,7 +30,7 @@
 #define KHITGROUP_H
 
 #include <vector>
-#include "RecoObjects/KHitBase.h"
+#include "lardata/RecoObjects/KHitBase.h"
 
 namespace trkf {
 

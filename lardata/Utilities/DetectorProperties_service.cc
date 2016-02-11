@@ -6,13 +6,13 @@
 // Framework includes
 
 // LArSoft includes
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/LArProperties.h"
-#include "Geometry/Geometry.h"
-#include "Geometry/CryostatGeo.h"
-#include "Geometry/TPCGeo.h"
-#include "Geometry/PlaneGeo.h"
-#include "Utilities/DatabaseUtil.h"
+#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/Utilities/LArProperties.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/CryostatGeo.h"
+#include "larcore/Geometry/TPCGeo.h"
+#include "larcore/Geometry/PlaneGeo.h"
+#include "lardata/Utilities/DatabaseUtil.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // Art includes

@@ -1,4 +1,4 @@
-#include "DetectorInfo/DetectorClocksStandard.h"
+#include "lardata/DetectorInfo/DetectorClocksStandard.h"
 
 //-------------------------------------------------------------------------
 detinfo::DetectorClocksStandard::DetectorClocksStandard()

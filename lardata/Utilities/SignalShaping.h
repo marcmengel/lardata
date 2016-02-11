@@ -60,7 +60,7 @@
 #include "TComplex.h"
 
 #include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "Utilities/LArFFT.h"
+#include "lardata/Utilities/LArFFT.h"
 
 namespace util {
 

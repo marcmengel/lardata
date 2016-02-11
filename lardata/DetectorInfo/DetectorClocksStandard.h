@@ -15,8 +15,8 @@
 
 #include "fhiclcpp/ParameterSet.h"
 
-#include "DetectorInfo/DetectorClocks.h"
-#include "RawData/TriggerData.h"
+#include "lardata/DetectorInfo/DetectorClocks.h"
+#include "lardata/RawData/TriggerData.h"
 
 namespace detinfo{
 

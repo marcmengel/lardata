@@ -11,12 +11,12 @@
 #include <cassert>
 
 // LArSoft includes
-#include "DetectorInfo/DetectorPropertiesStandard.h"
-#include "Geometry/Geometry.h"
-#include "Geometry/CryostatGeo.h"
-#include "Geometry/TPCGeo.h"
-#include "Geometry/PlaneGeo.h"
-#include "SimpleTypesAndConstants/PhysicalConstants.h"
+#include "lardata/DetectorInfo/DetectorPropertiesStandard.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/CryostatGeo.h"
+#include "larcore/Geometry/TPCGeo.h"
+#include "larcore/Geometry/PlaneGeo.h"
+#include "larcore/SimpleTypesAndConstants/PhysicalConstants.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
 

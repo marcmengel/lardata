@@ -44,7 +44,7 @@
 #define SURFACE_H
 
 #include <ostream>
-#include "RecoObjects/KalmanLinearAlgebra.h"
+#include "lardata/RecoObjects/KalmanLinearAlgebra.h"
 
 namespace trkf {
 

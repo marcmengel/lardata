@@ -13,7 +13,7 @@
 #include <iosfwd>
 #include <iostream>
 #include <iomanip>
-#include "SimpleTypesAndConstants/geo_types.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
 
 namespace anab {
 

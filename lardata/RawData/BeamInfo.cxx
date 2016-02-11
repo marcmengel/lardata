@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "RawData/BeamInfo.h"
+#include "lardata/RawData/BeamInfo.h"
 #include <string.h>
 #include <time.h>
 #include <cmath>

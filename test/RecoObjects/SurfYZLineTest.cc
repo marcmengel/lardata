@@ -10,8 +10,8 @@
 
 #include <iostream>
 #include <cmath>
-#include "RecoObjects/SurfYZLine.h"
-#include "RecoObjects/KalmanLinearAlgebra.h"
+#include "lardata/RecoObjects/SurfYZLine.h"
+#include "lardata/RecoObjects/KalmanLinearAlgebra.h"
 #include "cetlib/exception.h"
 
 struct SurfYZLineTestFixture

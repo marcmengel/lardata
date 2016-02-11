@@ -1,7 +1,7 @@
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
-art_make(BASENAME_ONLY
-         LIBRARY_NAME OpticalDetectorData
+art_make(
+         
          LIB_LIBRARIES
         )
 

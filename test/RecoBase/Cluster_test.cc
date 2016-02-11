@@ -33,8 +33,8 @@
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // LArSoft libraries
-#include "SimpleTypesAndConstants/geo_types.h" // geo::View_t
-#include "RecoBase/Cluster.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t
+#include "lardata/RecoBase/Cluster.h"
 
 
 

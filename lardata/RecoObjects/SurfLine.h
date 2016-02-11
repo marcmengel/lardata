@@ -51,7 +51,7 @@
 #define SURFLINE_H
 
 #include <ostream>
-#include "RecoObjects/Surface.h"
+#include "lardata/RecoObjects/Surface.h"
 
 namespace trkf {
 

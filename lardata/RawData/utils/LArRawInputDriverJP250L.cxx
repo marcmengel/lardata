@@ -6,12 +6,12 @@
 /// \author  eito@post.kek.jp, brebel@fnal.gov
 ////////////////////////////////////////////////////////////////////////
 
-#include "RawData/utils/LArRawInputDriverJP250L.h"
+#include "lardata/RawData/utils/LArRawInputDriverJP250L.h"
 
-#include "RawData/DAQHeader.h"
-#include "RawData/RawDigit.h"
-#include "Geometry/Geometry.h"
-#include "SummaryData/RunData.h"
+#include "lardata/RawData/DAQHeader.h"
+#include "lardata/RawData/RawDigit.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/SummaryData/RunData.h"
 
 #include "art/Framework/IO/Sources/put_product_in_principal.h"
 #include "art/Utilities/Exception.h"

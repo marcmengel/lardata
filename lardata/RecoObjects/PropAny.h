@@ -15,10 +15,10 @@
 #ifndef PROPANY_H
 #define PROPANY_H
 
-#include "RecoObjects/Propagator.h"
-#include "RecoObjects/PropYZLine.h"
-#include "RecoObjects/PropYZPlane.h"
-#include "RecoObjects/PropXYZPlane.h"
+#include "lardata/RecoObjects/Propagator.h"
+#include "lardata/RecoObjects/PropYZLine.h"
+#include "lardata/RecoObjects/PropYZPlane.h"
+#include "lardata/RecoObjects/PropXYZPlane.h"
 
 namespace trkf {
 

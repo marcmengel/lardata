@@ -1,6 +1,6 @@
 
-art_make( BASENAME_ONLY
-	  LIBRARY_NAME     MCBase
+art_make( 
+	  
           LIB_LIBRARIES
 			SimulationBase
 			${ROOT_BASIC_LIB_LIST}

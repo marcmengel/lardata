@@ -12,7 +12,7 @@
 #include "art/Framework/Core/ModuleMacros.h" 
 #include "art/Framework/Core/EDAnalyzer.h"
 
-#include "Utilities/LArProperties.h"
+#include "lardata/Utilities/LArProperties.h"
 
 namespace util
 {

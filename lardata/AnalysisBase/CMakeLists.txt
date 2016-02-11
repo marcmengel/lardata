@@ -1,5 +1,5 @@
 
-art_make( LIBRARY_NAME  AnalysisBase
+art_make( 
           LIB_LIBRARIES ${ART_FRAMEWORK_CORE}
 			${ART_FRAMEWORK_PRINCIPAL}
 			${ART_PERSISTENCY_PROVENANCE}

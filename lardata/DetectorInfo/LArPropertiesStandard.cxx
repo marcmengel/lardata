@@ -10,8 +10,8 @@
 #include <iostream>
 
 // LArSoft includes
-#include "DetectorInfo/LArPropertiesStandard.h"
-#include "SimpleTypesAndConstants/PhysicalConstants.h"
+#include "lardata/DetectorInfo/LArPropertiesStandard.h"
+#include "larcore/SimpleTypesAndConstants/PhysicalConstants.h"
 
 // ROOT includes
 #include "TMath.h"

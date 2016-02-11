@@ -10,7 +10,7 @@
 
 #include <cmath>
 #include <cstdlib>
-#include "RecoObjects/KTrack.h"
+#include "lardata/RecoObjects/KTrack.h"
 #include "cetlib/exception.h"
 
 // Define some particle masses here.

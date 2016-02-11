@@ -9,9 +9,9 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
-#include "RecoObjects/InteractPlane.h"
-#include "RecoObjects/SurfPlane.h"
-#include "Utilities/LArProperties.h"
+#include "lardata/RecoObjects/InteractPlane.h"
+#include "lardata/RecoObjects/SurfPlane.h"
+#include "lardata/Utilities/LArProperties.h"
 #include "cetlib/exception.h"
 
 namespace trkf {

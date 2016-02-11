@@ -39,7 +39,7 @@
 #ifndef SURFYZPLANE_H
 #define SURFYZPLANE_H
 
-#include "RecoObjects/SurfPlane.h"
+#include "lardata/RecoObjects/SurfPlane.h"
 
 namespace trkf {
 

@@ -10,8 +10,8 @@
 #include <iostream>
 #include <iomanip>
 
-#include "RecoObjects/Cluster3D.h"
-#include "RecoBase/Hit.h"
+#include "lardata/RecoObjects/Cluster3D.h"
+#include "lardata/RecoBase/Hit.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
 

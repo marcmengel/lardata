@@ -16,8 +16,8 @@
 #ifndef KHITCONTAINERWIRELINE_H
 #define KHITCONTAINERWIRELINE_H
 
-#include "RecoObjects/KHitContainer.h"
-#include "RecoBase/Hit.h"
+#include "lardata/RecoObjects/KHitContainer.h"
+#include "lardata/RecoBase/Hit.h"
 #include "art/Persistency/Common/PtrVector.h"
 
 namespace trkf {

@@ -8,9 +8,9 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "RecoObjects/SurfWireLine.h"
-#include "Geometry/Geometry.h"
-#include "Geometry/WireGeo.h"
+#include "lardata/RecoObjects/SurfWireLine.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/WireGeo.h"
 #include "TMath.h"
 
 namespace trkf {

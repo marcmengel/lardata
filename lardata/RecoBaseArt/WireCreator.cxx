@@ -8,7 +8,7 @@
  * ****************************************************************************/
 
 // declaration header
-#include "RecoBaseArt/WireCreator.h"
+#include "lardata/RecoBaseArt/WireCreator.h"
 
 // C/C++ standard library
 #include <utility> // std::move()
@@ -17,9 +17,9 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 
 // LArSoft libraries
-#include "Geometry/Geometry.h"
-#include "RawData/RawDigit.h"
-#include "RecoBase/Wire.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RecoBase/Wire.h"
 
 
 /// Reconstruction base classes

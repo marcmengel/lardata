@@ -21,7 +21,7 @@
 #endif
 
 // LArSoft libraries
-#include "SimpleTypesAndConstants/geo_types.h" // geo::PlaneID, geo::View_t
+#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::PlaneID, geo::View_t
 
 
 namespace recob {

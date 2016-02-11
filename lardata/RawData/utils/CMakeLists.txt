@@ -1,9 +1,9 @@
 
 art_make( NO_PLUGINS
-          LIBRARY_NAME  RawData_utils
+          
 	  EXCLUDE LArRawInputDriverUBooNE.cxx
-          LIB_LIBRARIES RawData
-                        SummaryData
+          LIB_LIBRARIES lardata_RawData
+                        larcore_SummaryData
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_IO_SOURCES}
 			${ART_FRAMEWORK_PRINCIPAL}
@@ -42,15 +42,15 @@ art_make( NO_PLUGINS
         )
 
 simple_plugin(LArRawInputSource "source"
-  RawData
-  RawData_utils
+  lardata_RawData
+  lardata_RawData_utils
   ${ART_FRAMEWORK_CORE}
   ${ART_FRAMEWORK_IO_SOURCES}
   ${ART_FRAMEWORK_PRINCIPAL}
   ${ART_PERSISTENCY_PROVENANCE}
   ${ART_UTILITIES}
   ${MF_MESSAGELOGGER}
-  BASENAME_ONLY
+  
 )
 
 install_headers()

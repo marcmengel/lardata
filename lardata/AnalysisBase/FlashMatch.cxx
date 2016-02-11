@@ -6,7 +6,7 @@
 // \author bjpjones@mit.edu
 ////////////////////////////////////////////////////////////////////////
 
-#include "AnalysisBase/FlashMatch.h"
+#include "lardata/AnalysisBase/FlashMatch.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 namespace anab{

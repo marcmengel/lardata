@@ -15,8 +15,8 @@
 #ifndef SURFWIREX_H
 #define SURFWIREX_H
 
-#include "SimpleTypesAndConstants/geo_types.h"
-#include "RecoObjects/SurfYZPlane.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "lardata/RecoObjects/SurfYZPlane.h"
 
 namespace trkf {
 

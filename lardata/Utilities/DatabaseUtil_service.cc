@@ -11,7 +11,7 @@
 //#include <libpq-fe.h>
 
 // LArSoft includes
-#include "Utilities/DatabaseUtil.h"
+#include "lardata/Utilities/DatabaseUtil.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"
 

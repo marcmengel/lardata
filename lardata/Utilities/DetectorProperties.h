@@ -13,8 +13,8 @@
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-#include "SimpleTypesAndConstants/geo_types.h"
-#include "Utilities/TimeService.h"
+#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "lardata/Utilities/TimeService.h"
 
 ///General LArSoft Utilities
 namespace util{

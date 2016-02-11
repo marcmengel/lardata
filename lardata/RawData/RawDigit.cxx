@@ -8,7 +8,7 @@
  * 
  * ****************************************************************************/
 
-#include "RawData/RawDigit.h"
+#include "lardata/RawData/RawDigit.h"
 
 // C/C++ standard libraries
 #include <utility> // std::move()

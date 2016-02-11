@@ -7,7 +7,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include "RecoBase/PFParticle.h"
+#include "lardata/RecoBase/PFParticle.h"
 
 #include <utility>
 #include <iomanip>

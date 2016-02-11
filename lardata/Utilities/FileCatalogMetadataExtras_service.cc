@@ -10,7 +10,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include "Utilities/FileCatalogMetadataExtras.h"
+#include "lardata/Utilities/FileCatalogMetadataExtras.h"
 #include "art/Framework/Services/System/FileCatalogMetadata.h"
 #include "art/Utilities/OutputFileInfo.h"
 #include "art/Persistency/RootDB/SQLite3Wrapper.h"

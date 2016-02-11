@@ -16,8 +16,8 @@
 #ifndef INTERACTGENERAL_H
 #define INTERACTGENERAL_H
 
-#include "RecoObjects/InteractPlane.h"
-#include "RecoObjects/PropAny.h"
+#include "lardata/RecoObjects/InteractPlane.h"
+#include "lardata/RecoObjects/PropAny.h"
 
 namespace trkf {
 

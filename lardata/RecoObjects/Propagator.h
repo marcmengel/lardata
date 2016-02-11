@@ -77,9 +77,9 @@
 #define PROPAGATOR_H
 
 #include <memory>
-#include "RecoObjects/KalmanLinearAlgebra.h"
-#include "RecoObjects/KETrack.h"
-#include "RecoObjects/Interactor.h"
+#include "lardata/RecoObjects/KalmanLinearAlgebra.h"
+#include "lardata/RecoObjects/KETrack.h"
+#include "lardata/RecoObjects/Interactor.h"
 #include "boost/optional.hpp"
 
 namespace trkf {

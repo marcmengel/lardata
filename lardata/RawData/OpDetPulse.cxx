@@ -11,7 +11,7 @@
 // 
 ////////////////////////////////////////////////////////////////////////
 
-#include "RawData/OpDetPulse.h"
+#include "lardata/RawData/OpDetPulse.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 

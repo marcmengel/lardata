@@ -16,7 +16,7 @@
 
 #include <iostream>
 #include "ElecClock.h"
-#include "RawData/TriggerData.h"
+#include "lardata/RawData/TriggerData.h"
 
 namespace util {
   /**

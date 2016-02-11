@@ -19,22 +19,22 @@
 #include "art/Persistency/Common/Wrapper.h"
 #include "art/Persistency/Common/Assns.h"
 
-#include "AnalysisBase/Calorimetry.h"
-#include "AnalysisBase/ParticleID.h"
-#include "AnalysisBase/MVAPIDResult.h"
-#include "AnalysisBase/FlashMatch.h"
-#include "AnalysisBase/CosmicTag.h"
-#include "AnalysisBase/T0.h"
+#include "lardata/AnalysisBase/Calorimetry.h"
+#include "lardata/AnalysisBase/ParticleID.h"
+#include "lardata/AnalysisBase/MVAPIDResult.h"
+#include "lardata/AnalysisBase/FlashMatch.h"
+#include "lardata/AnalysisBase/CosmicTag.h"
+#include "lardata/AnalysisBase/T0.h"
 
-#include "RecoBase/OpFlash.h"
-#include "RecoBase/PFParticle.h"
-#include "RecoBase/Track.h"
-#include "RecoBase/PCAxis.h"
-#include "RecoBase/Hit.h"
-#include "RecoBase/Shower.h"
-#include "RecoBase/Cluster.h"
+#include "lardata/RecoBase/OpFlash.h"
+#include "lardata/RecoBase/PFParticle.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/RecoBase/PCAxis.h"
+#include "lardata/RecoBase/Hit.h"
+#include "lardata/RecoBase/Shower.h"
+#include "lardata/RecoBase/Cluster.h"
 
-#include "RawData/ExternalTrigger.h"
+#include "lardata/RawData/ExternalTrigger.h"
 
 
 // make dummy variables of the PtrVector types so that we are

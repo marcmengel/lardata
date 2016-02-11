@@ -22,7 +22,7 @@
 #include <vector>
 #include <map>
 
-#include "DetectorInfo/LArProperties.h"
+#include "lardata/DetectorInfo/LArProperties.h"
 #include "fhiclcpp/ParameterSet.h"
 
 namespace detinfo {

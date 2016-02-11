@@ -30,9 +30,9 @@
 #include "art/Persistency/Common/Ptr.h"
 #include "art/Persistency/Common/PtrVector.h"
 
-#include "RecoObjects/KHitTrack.h"
-#include "RecoBase/Track.h"
-#include "RecoBase/Hit.h"
+#include "lardata/RecoObjects/KHitTrack.h"
+#include "lardata/RecoBase/Track.h"
+#include "lardata/RecoBase/Hit.h"
 
 namespace trkf {
 

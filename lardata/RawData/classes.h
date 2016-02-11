@@ -18,14 +18,14 @@
 
 #include "art/Persistency/Common/Wrapper.h"
 
-#include "RawData/DAQHeader.h"
-#include "RawData/RawDigit.h"
-#include "RawData/OpDetPulse.h"
-#include "RawData/AuxDetDigit.h"
-#include "RawData/BeamInfo.h"
-#include "RawData/ExternalTrigger.h"
-#include "RawData/TriggerData.h"
-#include "RawData/OpDetWaveform.h"
+#include "lardata/RawData/DAQHeader.h"
+#include "lardata/RawData/RawDigit.h"
+#include "lardata/RawData/OpDetPulse.h"
+#include "lardata/RawData/AuxDetDigit.h"
+#include "lardata/RawData/BeamInfo.h"
+#include "lardata/RawData/ExternalTrigger.h"
+#include "lardata/RawData/TriggerData.h"
+#include "lardata/RawData/OpDetWaveform.h"
 
 //
 // Only include objects that we would like to be able to put into the event.

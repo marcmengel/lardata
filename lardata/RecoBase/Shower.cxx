@@ -7,7 +7,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include "RecoBase/Shower.h"
+#include "lardata/RecoBase/Shower.h"
 
 #include <iomanip>
 #include <iostream>

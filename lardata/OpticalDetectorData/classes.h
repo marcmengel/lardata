@@ -2,12 +2,12 @@
 // package. Also see classes_def.xml.
 
 #include "art/Persistency/Common/Wrapper.h"
-#include "OpticalDetectorData/OpticalTypes.h"
-#include "OpticalDetectorData/ChannelData.h"
-#include "OpticalDetectorData/ChannelDataGroup.h"
-#include "OpticalDetectorData/FIFOChannel.h"
-#include "OpticalDetectorData/PMTTrigger.h"
-#include "OpticalDetectorData/OpticalRawDigit.h"
+#include "lardata/OpticalDetectorData/OpticalTypes.h"
+#include "lardata/OpticalDetectorData/ChannelData.h"
+#include "lardata/OpticalDetectorData/ChannelDataGroup.h"
+#include "lardata/OpticalDetectorData/FIFOChannel.h"
+#include "lardata/OpticalDetectorData/PMTTrigger.h"
+#include "lardata/OpticalDetectorData/OpticalRawDigit.h"
 
 //
 // Only include objects that we would like to be able to put into the event.

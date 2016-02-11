@@ -19,8 +19,8 @@
 #ifndef INTERACTOR_H
 #define INTERACTOR_H
 
-#include "RecoObjects/KalmanLinearAlgebra.h"
-#include "RecoObjects/KTrack.h"
+#include "lardata/RecoObjects/KalmanLinearAlgebra.h"
+#include "lardata/RecoObjects/KTrack.h"
 
 namespace trkf {
 

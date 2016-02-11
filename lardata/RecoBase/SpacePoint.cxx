@@ -6,7 +6,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include "RecoBase/SpacePoint.h"
+#include "lardata/RecoBase/SpacePoint.h"
 
 #include <iomanip>
 #include <iostream>

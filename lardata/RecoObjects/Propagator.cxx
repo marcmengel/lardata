@@ -8,9 +8,9 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "RecoObjects/Propagator.h"
-#include "RecoObjects/SurfXYZPlane.h"
-#include "Utilities/LArProperties.h"
+#include "lardata/RecoObjects/Propagator.h"
+#include "lardata/RecoObjects/SurfXYZPlane.h"
+#include "lardata/Utilities/LArProperties.h"
 #include "cetlib/exception.h"
 
 namespace trkf {

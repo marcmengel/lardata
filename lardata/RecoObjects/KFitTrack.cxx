@@ -8,7 +8,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "RecoObjects/KFitTrack.h"
+#include "lardata/RecoObjects/KFitTrack.h"
 #include "cetlib/exception.h"
 
 namespace trkf {

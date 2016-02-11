@@ -9,7 +9,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
-#include "RecoObjects/SurfLine.h"
+#include "lardata/RecoObjects/SurfLine.h"
 
 namespace trkf {
 

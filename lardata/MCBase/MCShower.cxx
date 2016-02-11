@@ -1,4 +1,4 @@
-#include "MCBase/MCShower.h"
+#include "lardata/MCBase/MCShower.h"
 
 #include <stdexcept> // std::out_of_range
 #include <string> // std::out_of_range

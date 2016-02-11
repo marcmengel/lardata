@@ -16,7 +16,7 @@
 #define MCSHOWER_H
 
 // LArSoft libraries
-#include "MCBase/MCStep.h"
+#include "lardata/MCBase/MCStep.h"
 
 // Supporting tools
 #include "SimulationBase/MCTruth.h"

@@ -12,9 +12,9 @@
 #define DETINFO_DETECTORPROPERTIESSTD_H
 
 #include "fhiclcpp/ParameterSet.h"
-#include "DetectorInfo/LArProperties.h"
-#include "DetectorInfo/DetectorClocks.h"
-#include "DetectorInfo/DetectorProperties.h"
+#include "lardata/DetectorInfo/LArProperties.h"
+#include "lardata/DetectorInfo/DetectorClocks.h"
+#include "lardata/DetectorInfo/DetectorProperties.h"
 
 ///General LArSoft Utilities
 namespace detinfo{

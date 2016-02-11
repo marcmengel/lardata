@@ -10,8 +10,8 @@
 #define optdata_ChannelDataGroup_h
 
 // LArSoft includes
-#include "OpticalDetectorData/OpticalTypes.h"
-#include "OpticalDetectorData/ChannelData.h"
+#include "lardata/OpticalDetectorData/OpticalTypes.h"
+#include "lardata/OpticalDetectorData/ChannelData.h"
 
 // C++ includes
 #include <vector>

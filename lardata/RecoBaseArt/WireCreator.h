@@ -14,10 +14,10 @@
 #include <utility> // std::move()
 
 // LArSoft libraries
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
-#include "SimpleTypesAndConstants/geo_types.h" // geo::View_t
-#include "RecoBase/Wire.h"
-#include "RawData/RawDigit.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t
+#include "lardata/RecoBase/Wire.h"
+#include "lardata/RawData/RawDigit.h"
 
 
 /// Reconstruction base classes
