@@ -24,6 +24,8 @@ namespace calo{
   CalorimetryAlg::CalorimetryAlg(fhicl::ParameterSet const& pset) 
   {
      this->reconfigure( pset);
+
+     detprop = art::ServiceHandle<detinfo::DetectorPropertiesService>()->provider();
   }
 
   //--------------------------------------------------------------------
@@ -113,9 +115,9 @@ namespace calo{
   {
     dQdx_e *= LifetimeCorrection(time, T0);   // Lifetime Correction (dQdx_e in e/cm)
     if(fUseModBox) {
-      return LArProp->ModBoxCorrection(dQdx_e);
+      return detprop->ModBoxCorrection(dQdx_e);
     } else {
-      return LArProp->BirksCorrection(dQdx_e);
+      return detprop->BirksCorrection(dQdx_e);
     }
   }
   
@@ -133,7 +135,7 @@ namespace calo{
     t -= presamplings;
     time = t * timetick - T0*1e-3;  //  (in microsec)
     
-    double tau = LArProp->ElectronLifetime();
+    double tau = detprop->ElectronLifetime();
     
     double correction = exp(time/tau);
     return correction;

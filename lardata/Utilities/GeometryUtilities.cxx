@@ -8,7 +8,11 @@
 ////////////////////////////////////////////////////////////////////////
 
 
-#include "GeometryUtilities.h"
+#include "lardata/Utilities/GeometryUtilities.h"
+#include "larcore/Geometry/CryostatGeo.h"
+#include "larcore/Geometry/PlaneGeo.h"
+#include "larcore/Geometry/WireGeo.h"
+#include "larcore/Geometry/TPCGeo.h"
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 //#include "PxHitConverter.h"
 
@@ -31,7 +35,9 @@ namespace util{
   GeometryUtilities::GeometryUtilities() 
   {
     //_name = "GeometryUtilities";
-
+    geom = lar::providerFrom<geo::Geometry>();
+    detp = lar::providerFrom<detinfo::DetectorPropertiesService>();
+ 
     Reconfigure();
   }
 
@@ -40,7 +46,6 @@ namespace util{
     /*
     geom = (util::Geometry*)(util::Geometry::GetME());
     detp = (util::DetectorProperties*)(util::DetectorProperties::GetME());
-    larp = (util::LArProperties*)(util::LArProperties::GetME());
     */
 
     fNPlanes = geom->Nplanes();
@@ -51,7 +56,7 @@ namespace util{
         
     fWirePitch = geom->WirePitch(0,1,0);
     fTimeTick=detp->SamplingRate()/1000.; 
-    fDriftVelocity=larp->DriftVelocity(larp->Efield(),larp->Temperature());
+    fDriftVelocity=detp->DriftVelocity(detp->Efield(),detp->Temperature());
     
     fWiretoCm=fWirePitch;
     fTimetoCm=fTimeTick*fDriftVelocity;

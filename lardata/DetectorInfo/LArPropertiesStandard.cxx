@@ -11,6 +11,7 @@
 
 // LArSoft includes
 #include "lardata/DetectorInfo/LArPropertiesStandard.h"
+#include "lardata/DetectorInfo/ProviderUtil.h" // lar::IgnorableProviderConfigKeys()
 #include "larcore/SimpleTypesAndConstants/PhysicalConstants.h"
 
 // ROOT includes
@@ -19,38 +20,32 @@
 // Framework includes
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"
+//#include "fhiclcpp/types/detail/validationException.h"
+//#include "fhiclcpp/types/detail/validate_ParameterSet.h" // fhiclcpp::detail::fillMissingKeysMsg()
 
 //-----------------------------------------------
 detinfo::LArPropertiesStandard::LArPropertiesStandard()
+  : fIsConfigured(false)
 {
-  fIsConfigured = false;
 }
 
 //-----------------------------------------------
-detinfo::LArPropertiesStandard::LArPropertiesStandard(fhicl::ParameterSet const& pset)
+detinfo::LArPropertiesStandard::LArPropertiesStandard(
+  fhicl::ParameterSet const& pset,
+  std::set<std::string> ignore_params /* = {} */
+): LArPropertiesStandard()
 {
-  fIsConfigured = this->Configure(pset);
+  this->Configure(pset, ignore_params);
 }
 
-//------------------------------------------------
-detinfo::LArPropertiesStandard::~LArPropertiesStandard()
-{
-}
-
+#if 0
 //------------------------------------------------
 bool detinfo::LArPropertiesStandard::Configure(fhicl::ParameterSet const& pset)
 {  
-  this->SetTemperature      (pset.get< double >("Temperature"));
-  this->SetElectronlifetime (pset.get< double >("Electronlifetime"));
   this->SetRadiationLength  (pset.get< double >("RadiationLength" ));
   this->SetAtomicNumber     (pset.get< double >("AtomicNumber"));
   this->SetAtomicMass       (pset.get< double >("AtomicMass"));
   this->SetMeanExcitationEnergy (pset.get< double >("ExcitationEnergy"));
-  this->SetSa               (pset.get< double >("SternheimerA"));
-  this->SetSk               (pset.get< double >("SternheimerK"));
-  this->SetSx0              (pset.get< double >("SternheimerX0"));
-  this->SetSx1              (pset.get< double >("SternheimerX1"));
-  this->SetScbar            (pset.get< double >("SternheimerCbar"));
 
   this->SetArgon39DecayRate  (pset.get< double >("Argon39DecayRate"));
 
@@ -101,6 +96,138 @@ bool detinfo::LArPropertiesStandard::Configure(fhicl::ParameterSet const& pset)
 
   return true;
 }
+#endif // 0
+
+//------------------------------------------------
+bool detinfo::LArPropertiesStandard::Configure(
+  fhicl::ParameterSet const& pset,
+  std::set<std::string> ignore_params /* = {} */
+) {
+  // we need to know whether we require the additional ScintByParticleType parameters:
+  const bool bScintByParticleType = pset.get<bool>("ScintByParticleType", false);
+  
+  std::set<std::string> ignorable_keys = lar::IgnorableProviderConfigKeys();
+  ignorable_keys.insert(ignore_params.begin(), ignore_params.end());
+  
+#if DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM
+  // validation happens here:
+  fhicl::Table<Configuration_t> config_table { pset, lar::IgnorableProviderConfigKeys() };
+  Configuration_t const& config = config_table();
+  
+  if(bScintByParticleType) {
+    double value;
+    std::string errmsg;
+    if (config.ProtonScintYield(value)) SetProtonScintYield(value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.ProtonScintYield       .key() });
+    if (config.ProtonScintYieldRatio  (value)) SetProtonScintYieldRatio  (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.ProtonScintYieldRatio  .key() });
+    if (config.MuonScintYield         (value)) SetMuonScintYield         (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.MuonScintYield         .key() });
+    if (config.MuonScintYieldRatio    (value)) SetMuonScintYieldRatio    (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.MuonScintYieldRatio    .key() });
+    if (config.PionScintYield         (value)) SetPionScintYield         (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.PionScintYield         .key() });
+    if (config.PionScintYieldRatio    (value)) SetPionScintYieldRatio    (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.PionScintYieldRatio    .key() });
+    if (config.KaonScintYield         (value)) SetKaonScintYield         (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.KaonScintYield         .key() });
+    if (config.KaonScintYieldRatio    (value)) SetKaonScintYieldRatio    (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.KaonScintYieldRatio    .key() });
+    if (config.ElectronScintYield     (value)) SetElectronScintYield     (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.ElectronScintYield     .key() });
+    if (config.ElectronScintYieldRatio(value)) SetElectronScintYieldRatio(value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.ElectronScintYieldRatio.key() });
+    if (config.AlphaScintYield        (value)) SetAlphaScintYield        (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.AlphaScintYield        .key() });
+    if (config.AlphaScintYieldRatio   (value)) SetAlphaScintYieldRatio   (value);
+    else errmsg += fhicl::detail::fillMissingKeysMsg(&config_table, { config.AlphaScintYieldRatio   .key() });
+    if (!errmsg.empty()) {
+      throw fhicl::detail::validationException((
+        "[these parameters are REQUIRED when ScintByParticleType is true; the list may be incomplete]\n"
+        + errmsg
+        ).c_str());
+    } // if missing parameters
+  } // if bScintByParticleType
+  
+  // read parameters
+#else // !DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM
+  
+  if (!bScintByParticleType) { // ignore the following keys
+    ConfigWithScintByType_t config; // to get the keys
+    ignorable_keys.insert(config.ProtonScintYield       .key());
+    ignorable_keys.insert(config.ProtonScintYieldRatio  .key());
+    ignorable_keys.insert(config.MuonScintYield         .key());
+    ignorable_keys.insert(config.MuonScintYieldRatio    .key());
+    ignorable_keys.insert(config.PionScintYield         .key());
+    ignorable_keys.insert(config.PionScintYieldRatio    .key());
+    ignorable_keys.insert(config.KaonScintYield         .key());
+    ignorable_keys.insert(config.KaonScintYieldRatio    .key());
+    ignorable_keys.insert(config.ElectronScintYield     .key());
+    ignorable_keys.insert(config.ElectronScintYieldRatio.key());
+    ignorable_keys.insert(config.AlphaScintYield        .key());
+    ignorable_keys.insert(config.AlphaScintYieldRatio   .key());
+  } // if !bScintByParticleType
+  
+  // validation happens here:
+  fhicl::Table<ConfigWithScintByType_t> config_table { pset, ignorable_keys };
+  
+  // read parameters
+  ConfigWithScintByType_t const& config = config_table();
+  if (bScintByParticleType) {
+    SetProtonScintYield       (config.ProtonScintYield       ());
+    SetProtonScintYieldRatio  (config.ProtonScintYieldRatio  ());
+    SetMuonScintYield         (config.MuonScintYield         ());
+    SetMuonScintYieldRatio    (config.MuonScintYieldRatio    ());
+    SetPionScintYield         (config.PionScintYield         ());
+    SetPionScintYieldRatio    (config.PionScintYieldRatio    ());
+    SetKaonScintYield         (config.KaonScintYield         ());
+    SetKaonScintYieldRatio    (config.KaonScintYieldRatio    ());
+    SetElectronScintYield     (config.ElectronScintYield     ());
+    SetElectronScintYieldRatio(config.ElectronScintYieldRatio());
+    SetAlphaScintYield        (config.AlphaScintYield        ());
+    SetAlphaScintYieldRatio   (config.AlphaScintYieldRatio   ());
+  } // if ScintByParticleType
+#endif // DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM??
+  
+  SetRadiationLength      (config.RadiationLength());
+  
+  SetAtomicNumber         (config.AtomicNumber());
+  SetAtomicMass           (config.AtomicMass());
+  SetMeanExcitationEnergy (config.MeanExcitationEnergy());
+
+  SetArgon39DecayRate     (config.Argon39DecayRate());
+
+  SetFastScintEnergies(config.FastScintEnergies());
+  SetFastScintSpectrum(config.FastScintSpectrum());
+  SetSlowScintEnergies(config.SlowScintEnergies());
+  SetSlowScintSpectrum(config.SlowScintSpectrum());
+  SetAbsLengthEnergies(config.AbsLengthEnergies());
+  SetAbsLengthSpectrum(config.AbsLengthSpectrum());
+  SetRIndexEnergies   (config.RIndexEnergies   ());
+  SetRIndexSpectrum   (config.RIndexSpectrum   ());
+  SetRayleighEnergies (config.RayleighEnergies ());
+  SetRayleighSpectrum (config.RayleighSpectrum ());
+
+  SetScintResolutionScale(config.ScintResolutionScale());
+  SetScintFastTimeConst  (config.ScintFastTimeConst  ());
+  SetScintSlowTimeConst  (config.ScintSlowTimeConst  ());
+  SetScintBirksConstant  (config.ScintBirksConstant  ());
+  SetScintYield          (config.ScintYield          ());
+  SetScintPreScale       (config.ScintPreScale       ());
+  SetScintYieldRatio     (config.ScintYieldRatio     ());
+  SetScintByParticleType (config.ScintByParticleType ());
+
+  SetEnableCerenkovLight(config.EnableCerenkovLight());
+  
+  SetReflectiveSurfaceNames           (config.ReflectiveSurfaceNames());
+  SetReflectiveSurfaceEnergies        (config.ReflectiveSurfaceEnergies());
+  SetReflectiveSurfaceReflectances    (config.ReflectiveSurfaceReflectances());
+  SetReflectiveSurfaceDiffuseFractions(config.ReflectiveSurfaceDiffuseFractions());
+  
+  fIsConfigured = true;
+
+  return true;
+}
 
 //------------------------------------------------
 bool detinfo::LArPropertiesStandard::Update(uint64_t ts) 
@@ -108,125 +235,6 @@ bool detinfo::LArPropertiesStandard::Update(uint64_t ts)
   if (ts == 0) return false;
 
   return true;
-}
-
-//------------------------------------------------
-// temperature is assumed to be in degrees Kelvin
-// density is nearly a linear function of temperature.  
-// See the NIST tables for details
-// slope is between -6.2 and -6.1, intercept is 1928 kg/m^3
-// this parameterization will be good to better than 0.5%.
-// density is returned in g/cm^3
-double detinfo::LArPropertiesStandard::Density(double temperature) const
-{
-  // Default temperature use internal value.
-  if(temperature == 0.)
-    temperature = Temperature();
-
-  double density = -0.00615*temperature + 1.928;
-
-  return density;
-}
-
-
-//------------------------------------------------------------------------------------//
-double detinfo::LArPropertiesStandard::Temperature() const
-{
-  return fTemperature;
-}
-
-//----------------------------------------------------------------------------------
-// Restricted mean energy loss (dE/dx) in units of MeV/cm.
-//
-// For unrestricted mean energy loss, set tcut = 0, or tcut large.
-//
-// Arguments:
-//
-// mom  - Momentum of incident particle in GeV/c.
-// mass - Mass of incident particle in GeV/c^2.
-// tcut - Maximum kinetic energy of delta rays (MeV).
-//
-// Returned value is positive.
-//
-// Based on Bethe-Bloch formula as contained in particle data book.
-// Material parameters (stored in larproperties.fcl) are taken from
-// pdg web site http://pdg.lbl.gov/AtomicNuclearProperties/
-//
-double detinfo::LArPropertiesStandard::Eloss(double mom, double mass, double tcut) const
-{
-  // Some constants.
-
-  double K = 0.307075;     // 4 pi N_A r_e^2 m_e c^2 (MeV cm^2/mol).
-  double me = 0.510998918; // Electron mass (MeV/c^2).
-
-  // Calculate kinematic quantities.
-
-  double bg = mom / mass;           // beta*gamma.
-  double gamma = sqrt(1. + bg*bg);  // gamma.
-  double beta = bg / gamma;         // beta (velocity).
-  double mer = 0.001 * me / mass;   // electron mass / mass of incident particle.
-  double tmax = 2.*me* bg*bg / (1. + 2.*gamma*mer + mer*mer);  // Maximum delta ray energy (MeV).
-
-  // Make sure tcut does not exceed tmax.
-
-  if(tcut == 0. || tcut > tmax)
-    tcut = tmax;
-
-  // Calculate density effect correction (delta).
-
-  double x = std::log10(bg);
-  double delta = 0.;
-  if(x >= fSx0) {
-    delta = 2. * std::log(10.) * x - fScbar;
-    if(x < fSx1)
-      delta += fSa * std::pow(fSx1 - x, fSk);
-  }
-
-  // Calculate stopping number.
-
-  double B = 0.5 * std::log(2.*me*bg*bg*tcut / (1.e-12 * fI*fI))
-    - 0.5 * beta*beta * (1. + tcut / tmax) - 0.5 * delta;
-
-  // Don't let the stopping number become negative.
-
-  if(B < 1.)
-    B = 1.;
-
-  // Calculate dE/dx.
-
-  double dedx = Density() * K*fZ*B / (fA * beta*beta);
-
-  // Done.
-
-  return dedx;
-}
-
-//----------------------------------------------------------------------------------
-// Energy loss fluctuation (sigma_E^2 / length in MeV^2/cm).
-//
-// Arguments:
-//
-// mom  - Momentum of incident particle in GeV/c.
-//
-// Based on Bichsel formula referred to but not given in pdg.
-//
-double detinfo::LArPropertiesStandard::ElossVar(double mom, double mass) const
-{
-  // Some constants.
-
-  double K = 0.307075;     // 4 pi N_A r_e^2 m_e c^2 (MeV cm^2/mol).
-  double me = 0.510998918; // Electron mass (MeV/c^2).
-
-  // Calculate kinematic quantities.
-
-  double bg = mom / mass;          // beta*gamma.
-  double gamma2 = 1. + bg*bg;      // gamma^2.
-  double beta2 = bg*bg / gamma2;   // beta^2.
-
-  // Calculate final result.
-
-  double result = gamma2 * (1. - 0.5 * beta2) * me * (fZ / fA) * K * Density();
-  return result;
 }
 
 //---------------------------------------------------------------------------------
@@ -252,8 +260,8 @@ std::map<double, double> detinfo::LArPropertiesStandard::SlowScintSpectrum() con
   if(fSlowScintSpectrum.size()!=fSlowScintEnergies.size()){
       throw cet::exception("Incorrect vector sizes in LArPropertiesStandard")
   << "The vectors specifying the slow scintillation spectrum are "
-  << " different sizes - " << fFastScintSpectrum.size()
-  << " " << fFastScintEnergies.size();
+  << " different sizes - " << fSlowScintSpectrum.size()
+  << " " << fSlowScintEnergies.size();
     }
 
   std::map<double, double> ToReturn;

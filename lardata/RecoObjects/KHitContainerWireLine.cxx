@@ -15,8 +15,6 @@
 #include "cetlib/exception.h"
 
 #include "lardata/RecoObjects/KHitWireLine.h"
-#include "lardata/Utilities/LArProperties.h"
-#include "lardata/Utilities/DetectorProperties.h"
 #include "larcore/Geometry/Geometry.h"
 
 namespace trkf {
@@ -45,8 +43,6 @@ namespace trkf {
     // Get services.
 
     art::ServiceHandle<geo::Geometry> geom;
-    art::ServiceHandle<util::LArProperties> larprop;
-    art::ServiceHandle<util::DetectorProperties> detprop;
 
     // Loop over hits.
 

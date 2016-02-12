@@ -5,13 +5,13 @@ detinfo::DetectorClocksStandard::DetectorClocksStandard()
   : fConfigName(detinfo::kInheritConfigTypeMax,""),
     fConfigValue(detinfo::kInheritConfigTypeMax,0),
     fTrigModuleName(""),
-    fG4RefTime    (util::kDEFAULT_MC_CLOCK_T0),
-    fFramePeriod  (util::kDEFAULT_FRAME_PERIOD),
-    fTPCClock     (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_TPC),
-    fOpticalClock (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_OPTICAL),
-    fTriggerClock (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_TRIGGER),
-    fExternalClock(0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_EXTERNAL),
-    fTriggerOffsetTPC     (util::kDEFAULT_TRIG_OFFSET_TPC),
+    fG4RefTime    (detinfo::kDEFAULT_MC_CLOCK_T0),
+    fFramePeriod  (detinfo::kDEFAULT_FRAME_PERIOD),
+    fTPCClock     (0,detinfo::kDEFAULT_FRAME_PERIOD,detinfo::kDEFAULT_FREQUENCY_TPC),
+    fOpticalClock (0,detinfo::kDEFAULT_FRAME_PERIOD,detinfo::kDEFAULT_FREQUENCY_OPTICAL),
+    fTriggerClock (0,detinfo::kDEFAULT_FRAME_PERIOD,detinfo::kDEFAULT_FREQUENCY_TRIGGER),
+    fExternalClock(0,detinfo::kDEFAULT_FRAME_PERIOD,detinfo::kDEFAULT_FREQUENCY_EXTERNAL),
+    fTriggerOffsetTPC     (detinfo::kDEFAULT_TRIG_OFFSET_TPC),
     fTriggerTime  (0),
     fBeamGateTime (0)
 {
@@ -31,32 +31,13 @@ detinfo::DetectorClocksStandard::DetectorClocksStandard()
 
 //-------------------------------------------------------------------------
 detinfo::DetectorClocksStandard::DetectorClocksStandard(fhicl::ParameterSet const& pset)
-  : fConfigName(detinfo::kInheritConfigTypeMax,""),
-    fConfigValue(detinfo::kInheritConfigTypeMax,0),
-    fTrigModuleName(""),
-    fG4RefTime    (util::kDEFAULT_MC_CLOCK_T0),
-    fFramePeriod  (util::kDEFAULT_FRAME_PERIOD),
-    fTPCClock     (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_TPC),
-    fOpticalClock (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_OPTICAL),
-    fTriggerClock (0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_TRIGGER),
-    fExternalClock(0,util::kDEFAULT_FRAME_PERIOD,util::kDEFAULT_FREQUENCY_EXTERNAL),
-    fTriggerOffsetTPC     (util::kDEFAULT_TRIG_OFFSET_TPC),
-    fTriggerTime  (0),
-    fBeamGateTime (0)
+  : DetectorClocksStandard()
 {
-  
-  fConfigName.at(detinfo::kG4RefTime)         = "G4RefTime";
-  fConfigName.at(detinfo::kTriggerOffsetTPC)  = "TriggerOffsetTPC";
-  fConfigName.at(detinfo::kFramePeriod)       = "FramePeriod";
-  fConfigName.at(detinfo::kClockSpeedTPC)     = "ClockSpeedTPC";
-  fConfigName.at(detinfo::kClockSpeedOptical) = "ClockSpeedOptical";
-  fConfigName.at(detinfo::kClockSpeedTrigger) = "ClockSpeedTrigger";
-  fConfigName.at(detinfo::kClockSpeedExternal) = "ClockSpeedExternal";
-  fConfigName.at(detinfo::kDefaultTrigTime)   = "DefaultTrigTime";
-  fConfigName.at(detinfo::kDefaultBeamTime)   = "DefaultBeamTime";
-  
-  fInheritClockConfig = false;
-  Configure(pset);
+  // In a constructor, the version of virtual method that is called
+  // is always the one specific of the class being constructed
+  // (the one mentioned in the name of the constructor itself).
+  // For clarity, we explicitly show that:
+  DetectorClocksStandard::Configure(pset);
 
 }
 
@@ -101,9 +82,9 @@ void detinfo::DetectorClocksStandard::ApplyParams()
   fFramePeriod = fConfigValue.at(kFramePeriod);
   fTriggerOffsetTPC = fConfigValue.at(kTriggerOffsetTPC);
 
-  fTPCClock     = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedTPC     ) );
-  fOpticalClock = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedOptical ) );
-  fTriggerClock = ::util::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedTrigger ) );
+  fTPCClock     = ::detinfo::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedTPC     ) );
+  fOpticalClock = ::detinfo::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedOptical ) );
+  fTriggerClock = ::detinfo::ElecClock( fTriggerTime, fFramePeriod, fConfigValue.at( kClockSpeedTrigger ) );
 
 }
 

@@ -71,65 +71,65 @@ namespace detinfo{
     // Getters of TPC ElecClock
     //
     /// Borrow a const TPC clock with time set to Trigger time [us]
-    virtual const ::util::ElecClock& TPCClock() const
+    virtual const ::detinfo::ElecClock& TPCClock() const
     { return fTPCClock; }
 
     /// Create a TPC clock for a given time [us] from clock counting start
-    virtual ::util::ElecClock TPCClock(double time) const 
-	{ return ::util::ElecClock(time,fTPCClock.FramePeriod(),fTPCClock.Frequency());}
+    virtual ::detinfo::ElecClock TPCClock(double time) const 
+	{ return ::detinfo::ElecClock(time,fTPCClock.FramePeriod(),fTPCClock.Frequency());}
 
     /// Create a TPC clock for a given sample/frame number in TPC clock frequency
-    util::ElecClock TPCClock(unsigned int sample,
+    detinfo::ElecClock TPCClock(unsigned int sample,
 		       unsigned int frame) const
-      { util::ElecClock clock = TPCClock(); clock.SetTime(sample,frame); return clock; }
+      { detinfo::ElecClock clock = TPCClock(); clock.SetTime(sample,frame); return clock; }
     
     //
     // Getters of Optical ElecClock
     //
     /// Borrow a const Optical clock with time set to Trigger time [us]
-    virtual const util::ElecClock& OpticalClock() const
+    virtual const detinfo::ElecClock& OpticalClock() const
     { return fOpticalClock; }
 
     /// Create a Optical clock for a given time [us] from clock counting start
-    virtual util::ElecClock OpticalClock(double time) const 
-      { return util::ElecClock(time,fOpticalClock.FramePeriod(),fOpticalClock.Frequency());}
+    virtual detinfo::ElecClock OpticalClock(double time) const 
+      { return detinfo::ElecClock(time,fOpticalClock.FramePeriod(),fOpticalClock.Frequency());}
 
     /// Create a Optical clock for a given sample/frame number in Optical clock frequency
-    virtual util::ElecClock OpticalClock(unsigned int sample,
+    virtual detinfo::ElecClock OpticalClock(unsigned int sample,
 			   unsigned int frame) const
-    { util::ElecClock clock = OpticalClock(); clock.SetTime(sample,frame); return clock; }
+    { detinfo::ElecClock clock = OpticalClock(); clock.SetTime(sample,frame); return clock; }
 
     //
     // Getters of Trigger ElecClock
     //
     /// Borrow a const Trigger clock with time set to Trigger time [us]
-    virtual const util::ElecClock& TriggerClock() const
+    virtual const detinfo::ElecClock& TriggerClock() const
     { return fTriggerClock; }
 
     /// Create a Trigger clock for a given time [us] from clock counting start    
-    virtual util::ElecClock TriggerClock(double time) const 
-    { return util::ElecClock(time,fTriggerClock.FramePeriod(),fTriggerClock.Frequency());}
+    virtual detinfo::ElecClock TriggerClock(double time) const 
+    { return detinfo::ElecClock(time,fTriggerClock.FramePeriod(),fTriggerClock.Frequency());}
 
     /// Create a Trigger clock for a given sample/frame number in Trigger clock frequency
-    virtual util::ElecClock TriggerClock(unsigned int sample,
+    virtual detinfo::ElecClock TriggerClock(unsigned int sample,
 			   unsigned int frame) const
-    { util::ElecClock clock = TriggerClock(); clock.SetTime(sample,frame); return clock; }
+    { detinfo::ElecClock clock = TriggerClock(); clock.SetTime(sample,frame); return clock; }
 
     //
     // Getters of External ElecClock
     //
     /// Borrow a const Trigger clock with time set to External Time [us]
-    virtual const util::ElecClock& ExternalClock() const
+    virtual const detinfo::ElecClock& ExternalClock() const
     { return fExternalClock; }
 
     /// Create a External clock for a given time [us] from clock counting start
-    virtual util::ElecClock ExternalClock(double time) const
-      { return util::ElecClock(time,fExternalClock.FramePeriod(),fTriggerClock.Frequency());}
+    virtual detinfo::ElecClock ExternalClock(double time) const
+      { return detinfo::ElecClock(time,fExternalClock.FramePeriod(),fTriggerClock.Frequency());}
     
     /// Create a External clock for a given sample/frame number in External clock frequency
-    virtual util::ElecClock ExternalClock(unsigned int sample,
+    virtual detinfo::ElecClock ExternalClock(unsigned int sample,
 				  unsigned int frame) const
-      { util::ElecClock clock = ExternalClock(); clock.SetTime(sample,frame); return clock; }
+      { detinfo::ElecClock clock = ExternalClock(); clock.SetTime(sample,frame); return clock; }
     
     //
     // Getters for time [us] w.r.t. trigger given information from waveform
@@ -226,16 +226,16 @@ namespace detinfo{
     double fFramePeriod;
 
     /// TPC clock
-    ::util::ElecClock fTPCClock;
+    ::detinfo::ElecClock fTPCClock;
 
     /// Optical clock
-    ::util::ElecClock fOpticalClock;
+    ::detinfo::ElecClock fOpticalClock;
 
     /// Trigger clock
-    ::util::ElecClock fTriggerClock;
+    ::detinfo::ElecClock fTriggerClock;
 
     /// External clock
-    ::util::ElecClock fExternalClock;
+    ::detinfo::ElecClock fExternalClock;
 
     /// Time offset from trigger to TPC readout start
     double fTriggerOffsetTPC;

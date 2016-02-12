@@ -3,8 +3,6 @@ art_make(
           LIB_LIBRARIES lardata_AnalysisAlg
                         lardata_AnalysisBase
                         lardata_RecoBase
-                        lardata_Utilities_LArProperties_service
-                        lardata_Utilities_DetectorProperties_service
                         larcore_Geometry_Geometry_service
                         larcore_Geometry
                         ${ART_FRAMEWORK_CORE}

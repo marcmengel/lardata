@@ -15,15 +15,34 @@
 // jpaley@fnal.gov
 //
 ////////////////////////////////////////////////////////////////////////
-#ifndef LARPROPERTIESSTD_H
-#define LARPROPERTIESSTD_H
+#ifndef DETECTORINFO_LARPROPERTIESSTANDARD_H
+#define DETECTORINFO_LARPROPERTIESSTANDARD_H
 
+//
+// This flag is for temporary code to work around the missing OptionalAtom
+// feature in older fhiclcpp
+//
+#define DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM 0
+
+// LArSoft libraries
+#include "lardata/DetectorInfo/LArProperties.h"
+
+// FHiCL libraries
+#include "fhiclcpp/ParameterSet.h"
+#include "fhiclcpp/types/Atom.h"
+#if DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM
+#	include "fhiclcpp/types/OptionalAtom.h"
+#endif
+#include "fhiclcpp/types/Sequence.h"
+#include "fhiclcpp/types/Table.h"
+
+// C/C++ standard libraries
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
 
-#include "lardata/DetectorInfo/LArProperties.h"
-#include "fhiclcpp/ParameterSet.h"
+
 
 namespace detinfo {
   /**
@@ -40,26 +59,35 @@ namespace detinfo {
   class LArPropertiesStandard : public LArProperties {
       public:
     LArPropertiesStandard();
-    LArPropertiesStandard(fhicl::ParameterSet const& pset);
+    explicit LArPropertiesStandard
+      (fhicl::ParameterSet const& pset, std::set<std::string> ignore_params = {});
     LArPropertiesStandard(LArPropertiesStandard const&) = delete;
-    virtual ~LArPropertiesStandard();
+    virtual ~LArPropertiesStandard() = default;
     
-    bool   Configure(fhicl::ParameterSet const& pset);
+    /**
+     * @brief Configures the provider
+     * @param p configuration parameter set
+     * @param ignore_params parameters to be ignored (optional)
+     * 
+     * This method will validate the parameter set (except for the parameters
+     * it's explicitly told to ignore) and extract the useful information out
+     * of it.
+     */
+    bool   Configure
+      (fhicl::ParameterSet const& pset, std::set<std::string> ignore_params = {});
     bool   Update(uint64_t ts=0);
     
-    virtual double Density(double temperature=0.) const override;                          ///< g/cm^3
-    
-    virtual double Temperature()                   const override; 				///< kelvin	    
     virtual double RadiationLength()  	     const override { return fRadiationLength; } ///< g/cm^2      
     
     virtual double Argon39DecayRate()              const override { return fArgon39DecayRate; }  // decays per cm^3 per second
+
+    /// Ar atomic number
+    virtual double AtomicNumber() const override { return fZ; }
+    /// Ar atomic mass (g/mol)
+    virtual double AtomicMass() const override { return fA; }
+    /// Ar mean excitation energy (eV)
+    virtual double ExcitationEnergy() const override { return fI; }
     
-    /// Restricted mean dE/dx energy loss (MeV/cm).
-    virtual double Eloss(double mom, double mass, double tcut) const override;
-    
- /// Energy loss fluctuation (sigma_E^2 / length in MeV^2/cm).
-    virtual double ElossVar(double mom, double mass) const override;
-	
     virtual double ScintResolutionScale() const override { return fScintResolutionScale; }
     virtual double ScintFastTimeConst()   const override { return fScintFastTimeConst;   } 
     virtual double ScintSlowTimeConst()   const override { return fScintSlowTimeConst;   }
@@ -95,23 +123,16 @@ namespace detinfo {
     virtual std::map<std::string, std::map<double, double> > SurfaceReflectances() const override;
     virtual std::map<std::string, std::map<double, double> > SurfaceReflectanceDiffuseFractions() const override;
 	
-    void SetTemperature(double temp) { fTemperature = temp;}
-    void SetElectronlifetime(double lt) { fElectronlifetime = lt; }
     void SetRadiationLength(double rl) { fRadiationLength = rl; }
     void SetArgon39DecayRate(double r) { fArgon39DecayRate = r;}
     void SetAtomicNumber(double z) { fZ = z;}
     void SetAtomicMass(double a) { fA = a;}
     void SetMeanExcitationEnergy(double e) { fI = e;}
-    void SetSa(double s) { fSa = s;}
-    void SetSk(double s) { fSk = s;}
-    void SetSx0(double s) { fSx0 = s;}
-    void SetSx1(double s) { fSx1 = s;}
-    void SetScbar(double s) { fScbar = s;}
 
     void SetFastScintSpectrum(std::vector<double> s) { fFastScintSpectrum = s;}
     void SetFastScintEnergies(std::vector<double> s) { fFastScintEnergies = s;}
     void SetSlowScintSpectrum(std::vector<double> s) { fSlowScintSpectrum = s;}
-    void SetSlowScintEnergies(std::vector<double> s) { fSlowScintSpectrum = s;}
+    void SetSlowScintEnergies(std::vector<double> s) { fSlowScintEnergies = s;}
     void SetRIndexSpectrum(std::vector<double> s)    { fRIndexSpectrum = s;}
     void SetRIndexEnergies(std::vector<double> s)    { fRIndexEnergies = s;}
     void SetAbsLengthSpectrum(std::vector<double> s) { fAbsLengthSpectrum = s;}
@@ -149,11 +170,119 @@ namespace detinfo {
 
   private:
   protected:
-
+    
+    /// structure with all configuration parameters
+    struct Configuration_t {
+      using Name = fhicl::Name;
+      using Comment = fhicl::Comment;
+      
+      fhicl::Atom<double> RadiationLength
+        { Name("RadiationLength" ), Comment("radiation length [g/cm^2]") };
+      fhicl::Atom<double> AtomicNumber
+        { Name("AtomicNumber"    ), Comment("atomic number (yes, yes, it's 18...)") };
+      fhicl::Atom<double> AtomicMass
+        { Name("AtomicMass"      ), Comment("atomic mass [g/mol]") };
+      fhicl::Atom<double> MeanExcitationEnergy
+        { Name("ExcitationEnergy"), Comment("mean excitation energy [eV]") };
+      
+      fhicl::Atom<double> Argon39DecayRate
+        { Name("Argon39DecayRate"), Comment("decays/(cm^3 s)") };
+      
+      // scintillation parameters
+      fhicl::Sequence<double> FastScintEnergies { Name("FastScintEnergies"), Comment("") };
+      fhicl::Sequence<double> FastScintSpectrum { Name("FastScintSpectrum"), Comment("") };
+      fhicl::Sequence<double> SlowScintEnergies { Name("SlowScintEnergies"), Comment("") };
+      fhicl::Sequence<double> SlowScintSpectrum { Name("SlowScintSpectrum"), Comment("") };
+      fhicl::Sequence<double> AbsLengthEnergies { Name("AbsLengthEnergies"), Comment("") };
+      fhicl::Sequence<double> AbsLengthSpectrum { Name("AbsLengthSpectrum"), Comment("") };
+      fhicl::Sequence<double> RIndexEnergies    { Name("RIndexEnergies"   ), Comment("") };
+      fhicl::Sequence<double> RIndexSpectrum    { Name("RIndexSpectrum"   ), Comment("") };
+      fhicl::Sequence<double> RayleighEnergies  { Name("RayleighEnergies" ), Comment("") };
+      fhicl::Sequence<double> RayleighSpectrum  { Name("RayleighSpectrum" ), Comment("") };
+      
+      fhicl::Atom<double> ScintResolutionScale { Name("ScintResolutionScale"), Comment("") };
+      fhicl::Atom<double> ScintFastTimeConst   { Name("ScintFastTimeConst"  ), Comment("") };
+      fhicl::Atom<double> ScintSlowTimeConst   { Name("ScintSlowTimeConst"  ), Comment("") };
+      fhicl::Atom<double> ScintBirksConstant   { Name("ScintBirksConstant"  ), Comment("") };
+      fhicl::Atom<double> ScintYield           { Name("ScintYield"          ), Comment("") };
+      fhicl::Atom<double> ScintPreScale        { Name("ScintPreScale"       ), Comment("") };
+      fhicl::Atom<double> ScintYieldRatio      { Name("ScintYieldRatio"     ), Comment("") };
+      fhicl::Atom<bool  > ScintByParticleType  { Name("ScintByParticleType" ), Comment("") };
+#if DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM
+      fhicl::OptionalAtom<double> ProtonScintYield
+        { Name("ProtonScintYield"       ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::OptionalAtom<double> ProtonScintYieldRatio
+        { Name("ProtonScintYieldRatio"  ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::OptionalAtom<double> MuonScintYield
+        { Name("MuonScintYield"         ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::OptionalAtom<double> MuonScintYieldRatio
+        { Name("MuonScintYieldRatio"    ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::OptionalAtom<double> PionScintYield
+        { Name("PionScintYield"         ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::OptionalAtom<double> PionScintYieldRatio
+        { Name("PionScintYieldRatio"    ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::OptionalAtom<double> KaonScintYield
+        { Name("KaonScintYield"         ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::OptionalAtom<double> KaonScintYieldRatio
+        { Name("KaonScintYieldRatio"    ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::OptionalAtom<double> ElectronScintYield
+        { Name("ElectronScintYield"     ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::OptionalAtom<double> ElectronScintYieldRatio
+        { Name("ElectronScintYieldRatio"), Comment("(only if ScintByParticleType is true)") };
+      fhicl::OptionalAtom<double> AlphaScintYield
+        { Name("AlphaScintYield"        ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::OptionalAtom<double> AlphaScintYieldRatio
+        { Name("AlphaScintYieldRatio"   ), Comment("(only if ScintByParticleType is true)") };
+#endif // DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM?
+      
+      fhicl::Atom<bool  > EnableCerenkovLight  { Name("EnableCerenkovLight" ), Comment("") };
+      
+      fhicl::Sequence<std::string> ReflectiveSurfaceNames
+        { Name("ReflectiveSurfaceNames"),            Comment("") };
+      fhicl::Sequence<double> ReflectiveSurfaceEnergies
+        { Name("ReflectiveSurfaceEnergies"),         Comment("") };
+      fhicl::Sequence<fhicl::Sequence<double>> ReflectiveSurfaceReflectances
+        { Name("ReflectiveSurfaceReflectances"),     Comment("") };
+      fhicl::Sequence<fhicl::Sequence<double>> ReflectiveSurfaceDiffuseFractions
+        { Name("ReflectiveSurfaceDiffuseFractions"), Comment("") };
+      
+    }; // Configuration_t
+    
+#if !DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM
+    /// structure with all configuration parameters
+    struct ConfigWithScintByType_t: public Configuration_t {
+      
+      fhicl::Atom<double> ProtonScintYield
+        { Name("ProtonScintYield"       ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::Atom<double> ProtonScintYieldRatio
+        { Name("ProtonScintYieldRatio"  ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::Atom<double> MuonScintYield
+        { Name("MuonScintYield"         ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::Atom<double> MuonScintYieldRatio
+        { Name("MuonScintYieldRatio"    ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::Atom<double> PionScintYield
+        { Name("PionScintYield"         ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::Atom<double> PionScintYieldRatio
+        { Name("PionScintYieldRatio"    ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::Atom<double> KaonScintYield
+        { Name("KaonScintYield"         ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::Atom<double> KaonScintYieldRatio
+        { Name("KaonScintYieldRatio"    ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::Atom<double> ElectronScintYield
+        { Name("ElectronScintYield"     ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::Atom<double> ElectronScintYieldRatio
+        { Name("ElectronScintYieldRatio"), Comment("(only if ScintByParticleType is true)") };
+      fhicl::Atom<double> AlphaScintYield
+        { Name("AlphaScintYield"        ), Comment("(only if ScintByParticleType is true)") };
+      fhicl::Atom<double> AlphaScintYieldRatio
+        { Name("AlphaScintYieldRatio"   ), Comment("(only if ScintByParticleType is true)") };
+      
+    }; // ConfigWithScintByType_t
+#endif // !DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM?
+    
+    
     bool fIsConfigured;
       
-    double                         fTemperature;      ///< kelvin
-    double                         fElectronlifetime; ///< microseconds
     double                         fRadiationLength;  ///< g/cm^2
     double                         fArgon39DecayRate; ///<  decays per cm^3 per second
       
@@ -162,11 +291,6 @@ namespace detinfo {
     double fZ;                ///< Ar atomic number
     double fA;                ///< Ar atomic mass (g/mol)
     double fI;                ///< Ar mean excitation energy (eV)
-    double fSa;               ///< Sternheimer parameter a
-    double fSk;               ///< Sternheimer parameter k
-    double fSx0;              ///< Sternheimer parameter x0
-    double fSx1;              ///< Sternheimer parameter x1
-    double fScbar;            ///< Sternheimer parameter Cbar
 
 
     // Optical parameters for LAr
@@ -221,6 +345,14 @@ namespace detinfo {
       
 	    DBsettingsClass DBsettings; ///< settings read from DB access
     */
+    
+  public:
+    // expose the configuration object for framework service
+#if DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM
+    using ConfigurationParameters_t = Configuration_t;
+#else // !DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM?
+    using ConfigurationParameters_t = ConfigWithScintByType_t;
+#endif // !DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM?
     
   }; // class LArPropertiesStandard
 } //namespace detinfo

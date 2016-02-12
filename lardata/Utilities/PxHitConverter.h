@@ -15,7 +15,6 @@
 
 #include "PxUtils.h"
 #include "larcore/Geometry/Geometry.h"
-//#include "Utilities/LArProperties.h"
 #include "lardata/Utilities/GeometryUtilities.h"
 #include "lardata/Utilities/UtilException.h"
 #include "lardata/Utilities/Dereference.h"

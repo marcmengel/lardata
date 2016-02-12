@@ -14,16 +14,13 @@
 
 #include "PxUtils.h"
 #include "larcore/Geometry/Geometry.h"
-#include "lardata/Utilities/LArProperties.h"
-#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/Utilities/UtilException.h"
 #include "time.h"
 
 #include "lardata/RecoBase/Hit.h"
-#include "larcore/Geometry/CryostatGeo.h"
-#include "larcore/Geometry/PlaneGeo.h"
-#include "larcore/Geometry/WireGeo.h"
-#include "larcore/Geometry/TPCGeo.h"
+#include "larcore/Geometry/GeometryCore.h"
 #include "larcore/SimpleTypesAndConstants/geo_types.h"
 #include "art/Persistency/Common/Ptr.h" 
 
@@ -282,12 +279,14 @@ namespace util{
     /*
      larutil::Geometry* geom;
      larutil::DetectorProperties* detp;
-     larutil::LArProperties* larp;
     */
- 
-    art::ServiceHandle<geo::Geometry> geom;
-    art::ServiceHandle<util::DetectorProperties> detp;
-    art::ServiceHandle<util::LArProperties> larp;
+
+    const geo::GeometryCore* geom;
+    const detinfo::DetectorProperties* detp;
+    /*
+    art::ServiceHandle<detinfo::DetectorPropertiesService> detp;
+    art::ServiceHandle<detinfo::LArPropertiesService> larp;
+    */
     
     std::vector< Double_t > vertangle;  //angle wrt to vertical
     Double_t fWirePitch;

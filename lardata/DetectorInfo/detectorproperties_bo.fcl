@@ -1,0 +1,18 @@
+#include "detectorproperties.fcl"
+
+BEGIN_PROLOG
+
+bo_detproperties:             @local::standard_detproperties
+bo_detproperties.Temperature:    88.3 #estimated by Alan Hahn
+bo_detproperties.Electronlifetime: 3.0e3
+bo_detproperties.Efield:      [0.375,0.538,0.692]  #for HV=75kV, V_A=0, V_B=+350 V, V_C=+800 V, spacing between wire planes is 6.5+-0.3 mm
+#  comment the next three lines for Short-Bo data
+#bo_detproperties.SamplingRate:      395.5        # in ns         
+bo_detproperties.NumberTimeSamples: 4096         # ticks of the clock per readout frame
+bo_detproperties.ReadOutWindowSize: 4096
+#bo_detproperties.TriggerOffset:     101          # 40 us
+bo_detproperties.TimeOffsetU: -15.
+bo_detproperties.TimeOffsetV: -15.
+bo_detproperties.TimeOffsetZ: 0
+
+END_PROLOG

@@ -9,7 +9,7 @@
 #ifndef DETINFO_IDETCLOCKS_H
 #define DETINFO_IDETCLOCKS_H
 
-#include "lardata/Utilities/ElecClock.h"
+#include "lardata/DetectorInfo/ElecClock.h"
 
 namespace detinfo{
 
@@ -53,48 +53,48 @@ namespace detinfo{
     // Getters of TPC ElecClock
     //
     /// Borrow a const TPC clock with time set to Trigger time [us]
-    virtual const ::util::ElecClock& TPCClock() const = 0;
+    virtual const ::detinfo::ElecClock& TPCClock() const = 0;
 
     /// Create a TPC clock for a given time [us] from clock counting start
-    virtual ::util::ElecClock TPCClock(double time) const = 0; 
+    virtual ::detinfo::ElecClock TPCClock(double time) const = 0; 
 
     /// Create a TPC clock for a given sample/frame number in TPC clock frequency
-    virtual util::ElecClock TPCClock(unsigned int sample,unsigned int frame) const = 0;
+    virtual detinfo::ElecClock TPCClock(unsigned int sample,unsigned int frame) const = 0;
     //
     // Getters of Optical ElecClock
     //
     /// Borrow a const Optical clock with time set to Trigger time [us]
-    virtual const util::ElecClock& OpticalClock() const = 0;
+    virtual const detinfo::ElecClock& OpticalClock() const = 0;
 
     /// Create a Optical clock for a given time [us] from clock counting start
-    virtual util::ElecClock OpticalClock(double time) const = 0;
+    virtual detinfo::ElecClock OpticalClock(double time) const = 0;
 
     /// Create a Optical clock for a given sample/frame number in Optical clock frequency
-    virtual util::ElecClock OpticalClock(unsigned int sample, unsigned int frame) const = 0;
+    virtual detinfo::ElecClock OpticalClock(unsigned int sample, unsigned int frame) const = 0;
       
     //
     // Getters of Trigger ElecClock
     //
     /// Borrow a const Trigger clock with time set to Trigger time [us]
-    virtual const util::ElecClock& TriggerClock() const = 0;
+    virtual const detinfo::ElecClock& TriggerClock() const = 0;
 
     /// Create a Trigger clock for a given time [us] from clock counting start    
-    virtual util::ElecClock TriggerClock(double time) const = 0;
+    virtual detinfo::ElecClock TriggerClock(double time) const = 0;
 
     /// Create a Trigger clock for a given sample/frame number in Trigger clock frequency
-    virtual util::ElecClock TriggerClock(unsigned int sample, unsigned int frame) const = 0;
+    virtual detinfo::ElecClock TriggerClock(unsigned int sample, unsigned int frame) const = 0;
 
     //
     // Getters of External ElecClock
     //
     /// Borrow a const Trigger clock with time set to External Time [us]
-    virtual const util::ElecClock& ExternalClock() const = 0;
+    virtual const detinfo::ElecClock& ExternalClock() const = 0;
 
     /// Create a External clock for a given time [us] from clock counting start
-    virtual util::ElecClock ExternalClock(double time) const = 0;
+    virtual detinfo::ElecClock ExternalClock(double time) const = 0;
     
     /// Create a External clock for a given sample/frame number in External clock frequency
-    virtual util::ElecClock ExternalClock(unsigned int sample, unsigned int frame) const = 0;
+    virtual detinfo::ElecClock ExternalClock(unsigned int sample, unsigned int frame) const = 0;
         
     //
     // Getters for time [us] w.r.t. trigger given information from waveform

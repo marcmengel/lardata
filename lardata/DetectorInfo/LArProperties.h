@@ -9,6 +9,10 @@
 #ifndef DETINFO_LARPROPERTIES_H
 #define DETINFO_LARPROPERTIES_H
 
+// C/C++ standard libraries
+#include <map>
+#include <string>
+
 
 ///General LArSoft Utilities
 namespace detinfo{
@@ -22,13 +26,16 @@ namespace detinfo{
       LArProperties& operator = (LArProperties &&) = delete;
       virtual ~LArProperties() = default;
       
-      virtual double Density(double temperature=0.) const = 0;    
-      virtual double Temperature()                  const = 0;
       virtual double RadiationLength()  	    const = 0;    
       virtual double Argon39DecayRate()             const = 0;
-      virtual double Eloss(double mom, double mass, double tcut) const = 0;
-      virtual double ElossVar(double mom, double mass) const = 0;
-	
+      
+      /// Atomic number of the liquid
+      virtual double AtomicNumber() const = 0;
+      /// Atomic mass of the liquid (g/mol)
+      virtual double AtomicMass() const = 0;
+      /// Mean excitation energy of the liquid (eV)
+      virtual double ExcitationEnergy() const = 0;
+      
       virtual double ScintResolutionScale() const = 0;
       virtual double ScintFastTimeConst()   const = 0;
       virtual double ScintSlowTimeConst()   const = 0; 

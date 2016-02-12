@@ -19,7 +19,7 @@ extern "C" {
 #include <sys/stat.h>
 }
 #include "lardata/Utilities/LArFFT.h"
-#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 
 //-----------------------------------------------
@@ -32,7 +32,7 @@ util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& /* 
   // Default to the readout window size if the user didn't input
   // a specific size
   if(fSize <= 0) 
-    fSize = art::ServiceHandle<util::DetectorProperties>()->ReadOutWindowSize();
+    fSize = art::ServiceHandle<detinfo::DetectorPropertiesService>()->provider()->ReadOutWindowSize();
 
   InitializeFFT();
 }
