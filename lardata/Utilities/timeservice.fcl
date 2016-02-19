@@ -1,0 +1,9 @@
+# deprecated: include detectorclocks.fcl directly instead
+
+#include "detectorclocks.fcl"
+
+BEGIN_PROLOG
+
+standard_timeservice: @local::standard_detectorclocks
+
+END_PROLOG

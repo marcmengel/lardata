@@ -7,7 +7,7 @@
 #include <iostream>
 #include <cassert>
 #include <cmath>
-#include "RecoObjects/KalmanLinearAlgebra.h"
+#include "lardata/RecoObjects/KalmanLinearAlgebra.h"
 #include "boost/numeric/ublas/io.hpp"
 
 int main()

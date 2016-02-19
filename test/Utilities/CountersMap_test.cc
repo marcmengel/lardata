@@ -32,7 +32,7 @@
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // LArSoft libraries
-#include "Utilities/CountersMap.h"
+#include "lardata/Utilities/CountersMap.h"
 
 
 /// The seed for the default random engine

@@ -28,7 +28,7 @@
 #include <boost/test/floating_point_comparison.hpp> // BOOST_CHECK_CLOSE()
 
 // library to be tested:
-#include "Utilities/Dereference.h"
+#include "lardata/Utilities/Dereference.h"
 
 
 //------------------------------------------------------------------------------

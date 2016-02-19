@@ -1,0 +1,53 @@
+#
+# File:    lartpcdetector_services.fcl
+# Purpose: collect service configurations for a "generic" LArTPC detector
+# Author:  Gianluca Petrillo (petrillo@fnal.gov)
+# Date:    October 2nd, 2015
+# Version: 1.0
+# 
+# This is a collection of services that should work for our testing geometry,
+# the "LArTPC detector" geometry.
+# 
+# Changes:
+# 20151002 (petrillo@fnal.gov) [v1.0]
+#   original version
+#
+
+#include "geometry.fcl"
+#include "detectorproperties.fcl"
+#include "larproperties.fcl"
+#include "larfft.fcl"
+#include "simulationservices.fcl"
+#include "magfield.fcl"
+#include "databaseutil.fcl"
+#include "backtracker.fcl"
+#include "seedservice.fcl"
+#include "detectorclocks.fcl"
+#include "channelstatus.fcl"
+
+BEGIN_PROLOG
+
+lartpcdetector_services:
+{
+  ExptGeoHelperInterface: @local::standard_geometry_helper
+  Geometry:               @local::standard_geo
+  DetectorPropertiesService:     @local::standard_detproperties
+  LArPropertiesService:          @local::standard_properties
+  LArFFT:                 @local::standard_larfft
+  BackTracker:            @local::standard_backtracker
+  SeedService:            @local::standard_seedservice
+  DetectorClocksService:  @local::standard_detectorclocks
+  ChannelStatusService:  @local::standard_channelstatus
+}
+
+# this should really not be here!!
+lartpcdetector_simulation_services:
+{
+                          @table::lartpcdetector_services
+  LArG4Parameters:        @local::argoneut_largeantparameters
+  LArVoxelCalculator:     @local::argoneut_larvoxelcalculator
+  MagneticField:          @local::no_mag
+}
+
+
+END_PROLOG

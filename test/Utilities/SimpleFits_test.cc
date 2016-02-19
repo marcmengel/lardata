@@ -40,7 +40,7 @@
 #include <boost/test/floating_point_comparison.hpp> // BOOST_CHECK_CLOSE()
 
 // LArSoft libraries
-#include "Utilities/SimpleFits.h"
+#include "lardata/Utilities/SimpleFits.h"
 
 
 //==============================================================================

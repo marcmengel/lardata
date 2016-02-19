@@ -32,7 +32,7 @@
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // LArSoft libraries
-#include "Utilities/NestedIterator.h"
+#include "lardata/Utilities/NestedIterator.h"
 
 
 /// The seed for the default random engine

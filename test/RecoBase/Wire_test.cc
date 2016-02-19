@@ -34,10 +34,10 @@
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // LArSoft libraries
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
-#include "SimpleTypesAndConstants/geo_types.h" // geo::View_t
-#include "Utilities/sparse_vector.h"
-#include "RecoBase/Wire.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t
+#include "lardata/Utilities/sparse_vector.h"
+#include "lardata/RecoBase/Wire.h"
 
 
 

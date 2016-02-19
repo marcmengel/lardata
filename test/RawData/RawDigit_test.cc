@@ -34,10 +34,10 @@
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // LArSoft libraries
-#include "SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
-#include "SimpleTypesAndConstants/geo_types.h" // geo::View_t
-#include "RawData/raw.h"
-#include "RawData/RawDigit.h"
+#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t
+#include "lardata/RawData/raw.h"
+#include "lardata/RawData/RawDigit.h"
 
 
 

@@ -6,9 +6,9 @@
 
 #include <iostream>
 #include <cassert>
-#include "RecoObjects/KTrack.h"
-#include "RecoObjects/KETrack.h"
-#include "RecoObjects/KFitTrack.h"
+#include "lardata/RecoObjects/KTrack.h"
+#include "lardata/RecoObjects/KETrack.h"
+#include "lardata/RecoObjects/KFitTrack.h"
 
 int main()
 {

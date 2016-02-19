@@ -1,7 +1,0 @@
-#include "timeservice.fcl"
-
-BEGIN_PROLOG
-
-csu40L_timeservice: @local::standard_timeservice
-
-END_PROLOG

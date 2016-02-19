@@ -1,0 +1,29 @@
+BEGIN_PROLOG
+
+standard_detproperties :
+{
+ service_provider: "DetectorPropertiesServiceStandard"
+
+ # Drift properties 
+ Temperature:      91                #Kelvin
+ Efield:           [0.5,0.66,0.8 ]   #kV/cm
+ Electronlifetime: 750               #microseconds
+ 
+ SternheimerA:     0.1956  # Ar Sternheimer parameter a.
+ SternheimerK:     3.0000  # Ar Sternheimer parameter k.
+ SternheimerX0:    0.2000  # Ar Sternheimer parameter x0.
+ SternheimerX1:    3.0000  # Ar Sternheimer parameter x0.
+ SternheimerCbar:  5.2146  # Ar Sternheimer parameter Cbar.
+ 
+ ElectronsToADC:    1.208041e-3  # in ADC/e; 6241.5 electrons = 1fC = 7.54 ADC counts for ArgoNeuT
+ NumberTimeSamples: 2048         # ticks of the clock per readout frame
+ TimeOffsetU:       -5.193
+ TimeOffsetV:       0.585
+ TimeOffsetZ:       0
+ ReadOutWindowSize: 2048
+}
+
+# be sure to make the necessary changes when microboone and
+# lbne have different electronics simulations from argoneut
+
+END_PROLOG

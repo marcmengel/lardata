@@ -1,0 +1,12 @@
+#include "detectorclocks.fcl"
+
+BEGIN_PROLOG
+
+bo_detectorclocks: @local::standard_detectorclocks
+bo_detectorclocks.ClockSpeedTPC: 2.528445 # 1 / 395.5 ns
+bo_detectorclocks.TriggerOffsetTPC: -40.  # us
+bo_detectorclocks.DefaultTrigTime:   40.
+bo_detectorclocks.DefaultBeamTime:   40.
+bo_detectorclocks.FramePeriod: 1619.968   # 4096 * 395.5 ns
+
+END_PROLOG

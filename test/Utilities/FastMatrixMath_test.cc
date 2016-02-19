@@ -42,7 +42,7 @@
 #include <boost/test/floating_point_comparison.hpp> // BOOST_CHECK_CLOSE()
 
 // LArSoft libraries
-#include "Utilities/FastMatrixMathHelper.h"
+#include "lardata/Utilities/FastMatrixMathHelper.h"
 
 
 //==============================================================================

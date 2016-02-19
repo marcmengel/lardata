@@ -1,0 +1,48 @@
+#include "geometry_argoneut.fcl"
+#include "detectorproperties_argoneut.fcl"
+#include "larproperties_argoneut.fcl"
+#include "larfft_argoneut.fcl"
+#include "messageservice.fcl"
+#include "simulationservices_argoneut.fcl"
+#include "magfield.fcl"
+#include "databaseutil_argoneut.fcl"
+#include "backtracker.fcl"
+#include "seedservice_argoneut.fcl"
+#include "detectorclocks_argoneut.fcl"
+#include "channelstatus_argoneut.fcl"
+
+BEGIN_PROLOG
+
+argoneut_services:
+{
+ ExptGeoHelperInterface:        @local::argoneut_geometry_helper
+ Geometry:                      @local::argoneut_geo
+ DetectorPropertiesService:     @local::argoneut_detproperties
+ LArPropertiesService:          @local::argoneut_properties
+ LArFFT:                        @local::argoneut_larfft
+ DatabaseUtil:                  @local::argoneut_database
+ BackTracker:                   @local::argoneut_backtracker
+ SeedService:                   @local::argoneut_seedservice
+ DetectorClocksService:         @local::argoneut_detectorclocks
+ ChannelStatusService:         @local::argoneut_channelstatus
+}
+
+argoneut_simulation_services:
+{
+ LArG4Parameters:        @local::argoneut_largeantparameters
+ LArVoxelCalculator:     @local::argoneut_larvoxelcalculator
+ MagneticField:          @local::no_mag
+ ExptGeoHelperInterface: @local::argoneut_geometry_helper
+ Geometry:               @local::argoneut_geo
+ DetectorPropertiesService:     @local::argoneut_detproperties
+ LArPropertiesService:          @local::argoneut_properties
+ LArFFT:                 @local::argoneut_larfft
+ DatabaseUtil:           @local::argoneut_database
+ BackTracker:            @local::argoneut_backtracker
+ SeedService:            @local::argoneut_seedservice
+ DetectorClocksService:  @local::argoneut_detectorclocks
+ ChannelStatusService:  @local::argoneut_channelstatus
+}
+
+
+END_PROLOG

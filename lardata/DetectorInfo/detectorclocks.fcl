@@ -1,0 +1,21 @@
+BEGIN_PROLOG
+
+# the "standard" values are supposed to be good for ArgoNeuT
+standard_detectorclocks:
+{
+  service_provider: "DetectorClocksServiceStandard"
+  
+  TrigModuleName:    ""
+  InheritClockConfig: true
+  G4RefTime:         0     # G4 time [us] where electronics clock counting start
+  TriggerOffsetTPC:  0     # Time offset for TPC readout start time w.r.t. trigger [us]
+  FramePeriod:       405.504 # Frame period [us]; 2048 * 198 ns
+  ClockSpeedTPC:     5.0505  # TPC clock speed in MHz; 1 / 198.0 ns
+  ClockSpeedOptical: 64    # Optical clock speed in MHz
+  ClockSpeedTrigger: 16    # Trigger clock speed in MHz
+  ClockSpeedExternal:31.25 # External clock speed in MHz
+  DefaultTrigTime:   0     # Default trigger time in electronics clock [us]
+  DefaultBeamTime:   0     # Default beam gate time in electronics clock [us]
+}
+
+END_PROLOG
