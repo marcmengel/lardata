@@ -46,11 +46,11 @@
 #define KHITCONTAINER_H
 
 #include <list>
-#include "RecoObjects/KHitGroup.h"
-#include "RecoObjects/KTrack.h"
-#include "RecoObjects/Propagator.h"
+#include "lardata/RecoObjects/KHitGroup.h"
+#include "lardata/RecoObjects/KTrack.h"
+#include "lardata/RecoObjects/Propagator.h"
 #include "art/Persistency/Common/PtrVector.h"
-#include "RecoBase/Hit.h"
+#include "lardata/RecoBase/Hit.h"
 
 
 namespace trkf {
