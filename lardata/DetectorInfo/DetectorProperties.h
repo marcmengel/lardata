@@ -40,6 +40,8 @@ namespace detinfo{
        * But only two of them are instrumented and read, that are called
        * "readout plane 0" and "readout plane 1", but effectively correspond to
        * planegap 1 and 2.
+       * 
+       * Note that all TPCs are assumed to have the same electric field values.
        */
       virtual double Efield(unsigned int planegap=0) const = 0;
 
