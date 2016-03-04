@@ -13,6 +13,24 @@
 
 namespace raw{
 
+  /**
+   * @brief Uncompresses a raw data buffer
+   * @param adc compressed buffer
+   * @param uncompressed buffer to be filled with uncompressed data
+   * @param compress type of compression in the adc buffer
+   *
+   * This function dispatches the uncompression to the correct uncompress
+   * function according to compression type in compress.
+   *
+   * The uncompressed buffer *must* be already allocated with enough space
+   * to store the full inflated adc data. Uncompressing raw::RawDigit can
+   * be done as follows:
+   *     
+   *     std::vector<ADC_t> uncompressed(digit.Samples(), 0);
+   *     raw::Uncompress(digit.ADC(), uncompressed, digit.ADC());
+   *     
+   *
+   */ 
   void Uncompress(const std::vector<short>& adc, 
                   std::vector<short>      &uncompressed, 
                   raw::Compress_t          compress);
@@ -36,6 +54,18 @@ namespace raw{
                 int &nearestneighbor,
 		bool fADCStickyCodeFeature=false);
 
+  /**
+   * @brief Compresses a raw data buffer
+   * @param adc buffer with uncompressed data
+   * @param compress type of compression to be applied
+   *
+   * This function dispatches the compression to the function appropriate
+   * for the specified compression type.
+   * The resulting compressed data replaces the input buffer content, which is lost.
+   * Compression is expected to reduce the size of the data, so that there is
+   * in principle no need for reallocation of the input buffer, adc, to store
+   * the result.
+   */ 
   void Compress(std::vector<short> &adc, 
                 raw::Compress_t     compress);
   void Compress(std::vector<short> &adc, 
