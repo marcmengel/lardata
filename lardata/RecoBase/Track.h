@@ -70,9 +70,9 @@ namespace recob {
     void            Direction(double *dcosStart,
 			      double *dcosEnd)                 const;
     /*
-     * The following methods have been moved into larreco/RecoAlg/TrackUtils.h:
-     * - ProjectedLength() has become lar::TrackProjectedLength()
-     * - PitchInView() has become lar::TrackPitchInView()
+     * The following methods have been moved into lardata/RecoBaseArt/TrackUtils.h:
+     * - ProjectedLength() has become lar::utils::TrackProjectedLength()
+     * - PitchInView() has become lar::utils::TrackPitchInView()
      */
 //    double          ProjectedLength(geo::View_t view)          const;
 //    double          PitchInView(geo::View_t view,
