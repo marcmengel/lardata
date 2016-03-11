@@ -24,7 +24,26 @@ namespace detinfo{
       DetectorProperties& operator = (DetectorProperties &&) = delete;
       virtual ~DetectorProperties() = default;
       
-      virtual double Efield(unsigned int planegap=0) const = 0; ///< kV/cm
+      /**
+       * @brief Returns the nominal electric field in the specified volume
+       * @param planegap volume specification (default: 0, the big drift volume)
+       * @return electric field in the volume, in kV/cm
+       *
+       * The electric field is "nominal", i.e., a completely uniform field is
+       * assumed.
+       * 
+       * The planegap argument identifies which volume to return the field value
+       * for. The relation between planegap and readout plane is not perfectly
+       * formalized yet. In general, a good rule is that planegap N describes
+       * the volume on the cathode side of wire plane N. This rule is formally
+       * valid also for ArgoNeuT/LArIAT, where three wire planes are present.
+       * But only two of them are instrumented and read, that are called
+       * "readout plane 0" and "readout plane 1", but effectively correspond to
+       * planegap 1 and 2.
+       * 
+       * Note that all TPCs are assumed to have the same electric field values.
+       */
+      virtual double Efield(unsigned int planegap=0) const = 0;
 
       virtual double DriftVelocity(double efield=0., double temperature=0.) const = 0;
       
