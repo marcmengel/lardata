@@ -1,20 +1,12 @@
 
 # for classes_def.xml!!
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( $ENV{NUTOOLS_INC} )
 
 art_make( 
-          LIB_LIBRARIES larcore_SummaryData
-	                ${ART_FRAMEWORK_CORE}
-			${ART_FRAMEWORK_PRINCIPAL}
-			${ART_PERSISTENCY_PROVENANCE}
-			${ART_UTILITIES}
+          LIB_LIBRARIES ${ART_PERSISTENCY_COMMON}
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 			${CETLIB}
-                        ${Boost_SYSTEM_LIBRARY}
-			${ROOT_BASIC_LIB_LIST}
-                        ${ROOT_EG}
         )
 
 
