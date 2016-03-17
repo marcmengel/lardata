@@ -1,6 +1,7 @@
 <lcgdict>
 
-<class name="sim::MCHit" ClassVersion="10" >
+<class name="sim::MCHit" ClassVersion="11" >
+ <version ClassVersion="11" checksum="3435498997"/>
  <version ClassVersion="10" checksum="2619511005"/>
 </class>
 <class name="sim::MCWire" ClassVersion="10" >

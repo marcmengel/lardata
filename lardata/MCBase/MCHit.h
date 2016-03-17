@@ -3,7 +3,6 @@
 #define MCHIT_H
 
 // C++ includes
-#include <vector>
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -25,10 +24,11 @@ namespace sim {
     /// Method to reset
     void Reset()
     {
-      fSignalTime = fSignalWidth = ::sim::kINVALID_DOUBLE;
-      fPeakAmp = fCharge =  ::sim::kINVALID_DOUBLE;
-      fPartVertex.resize(3, ::sim::kINVALID_DOUBLE);
-      fPartEnergy  =  ::sim::kINVALID_DOUBLE;
+      fSignalTime = fSignalWidth = ::sim::kINVALID_FLOAT;
+      fPeakAmp = fCharge =  ::sim::kINVALID_FLOAT;
+      for(int i=0; i<3; ++i)
+	fPartVertex[i] = ::sim::kINVALID_FLOAT;
+      fPartEnergy  =  ::sim::kINVALID_FLOAT;
       fPartTrackId =  ::sim::kINVALID_INT;
     }
 
@@ -37,68 +37,59 @@ namespace sim {
     //
     // MCHit core information
     //
-    double fSignalTime;  ///< where peak resides in waveform ticks
-    double fSignalWidth; ///< width (1sigma) in waveform ticks
+    float fSignalTime;     ///< where peak resides in waveform ticks
+    float fSignalWidth;    ///< width (1sigma) in waveform ticks
 
-    double fPeakAmp; ///< Peak amplitude (ADC)
-    double fCharge;  ///< Charge sum (ADC integral over MCWire)
+    float fPeakAmp;        ///< Peak amplitude (ADC)
+    float fCharge;         ///< Charge sum (ADC integral over MCWire)
 
     // 
     // Particle information that caused this MCHit
     //
 
-    std::vector<double> fPartVertex; ///< particle vertex (x,y,z) information
-    double fPartEnergy;              ///< particle energy deposition (dE) in MeV
-    int fPartTrackId;                ///< particle G4 Track ID
+    float fPartVertex[3];  ///< particle vertex (x,y,z) information
+    float fPartEnergy;     ///< particle energy deposition (dE) in MeV
+    int fPartTrackId;      ///< particle G4 Track ID
 
 #ifndef __GCCXML__
 
   public:
     
     /// Setter function for charge/amplitude
-    void SetCharge(double qsum, double amp) { fCharge=qsum; fPeakAmp=amp; }
+    void SetCharge(float qsum, float amp) { fCharge=qsum; fPeakAmp=amp; }
 
     /// Setter function for time
-    void SetTime(const double peak, const double width)
+    void SetTime(const float peak, const float width)
     {
       fSignalTime = peak;
       fSignalWidth = width;
     }
 
     /// Setter function for partile info
-    void SetParticleInfo(const std::vector<double>& vtx, 
-			 const double energy,
+    void SetParticleInfo(const float vtx[], 
+			 const float energy,
 			 const int trackId)
     {
-      if(vtx.size()!=fPartVertex.size()) {
-
-	std::ostringstream msg;
-	msg << "<<" << __FUNCTION__ << ">>"  << " Invalid particle vtx length "
-	    << vtx.size() << " != " << fPartVertex.size() << std::endl;
-	
-	throw ::sim::MCBaseException(msg.str());
-
-      }
-
-      for(size_t i=0; i<fPartVertex.size(); ++i) fPartVertex.at(i) = vtx.at(i);
+      for(size_t i=0; i<3; ++i)
+	fPartVertex[i] = vtx[i];
       fPartEnergy  = energy;
       fPartTrackId = trackId;
     }
 
     /// Getter for start time
-    double PeakTime()  const { return fSignalTime; }
+    float PeakTime()  const { return fSignalTime; }
 
     /// Getter for start time
-    double PeakWidth()  const { return fSignalWidth; }
+    float PeakWidth()  const { return fSignalWidth; }
 
     /// Getter for "charge"
-    double Charge(bool max=false) const { return ( max ? fPeakAmp : fCharge ); }
+    float Charge(bool max=false) const { return ( max ? fPeakAmp : fCharge ); }
 
     /// Getter for particle vertex
-    const std::vector<double>& PartVertex() const { return fPartVertex; }
+    const float* PartVertex() const { return fPartVertex; }
 
     /// Getter for particle energy
-    double PartEnergy() const { return fPartEnergy; }
+    float PartEnergy() const { return fPartEnergy; }
 
     /// Getter for track ID
     int PartTrackId() const { return fPartTrackId; }
@@ -107,7 +98,7 @@ namespace sim {
     inline bool operator< ( const MCHit& rhs ) const { return fSignalTime < rhs.fSignalTime; }
 
     /// For sorting with generic time
-    inline bool operator< ( const double& rhs) const { return fSignalTime < rhs; }
+    inline bool operator< ( const float& rhs) const { return fSignalTime < rhs; }
 
 #endif
   };
