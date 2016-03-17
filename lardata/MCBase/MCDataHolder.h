@@ -2,7 +2,7 @@
 #define MCDATAHOLDER_H
 
 #include <algorithm>
-#include <vector>
+#include <array>
 #include "MCLimits.h"
 
 namespace sim {
@@ -16,33 +16,33 @@ namespace sim {
 
   protected:
 
-    std::vector<double> fVertex;
-    double              fEnergy;
+    std::array<float,3> fVertex;
+    float               fEnergy;
     unsigned int        fTrackId;
 
   public:
 
     void Reset()
     {
-      fVertex.resize(3,::sim::kINVALID_DOUBLE);
-      fEnergy   = ::sim::kINVALID_DOUBLE;
+      fVertex.fill(::sim::kINVALID_FLOAT);
+      fEnergy   = ::sim::kINVALID_FLOAT;
       fTrackId  = ::sim::kINVALID_UINT;
     }
 
-    void SetVertex(double x, double y, double z)
+    void SetVertex(float x, float y, float z)
     {
       fVertex.at(0) = x;
       fVertex.at(1) = y;
       fVertex.at(2) = z;
     }
 
-    void SetEnergy(double e) { fEnergy = e; }
+    void SetEnergy(float e) { fEnergy = e; }
 
     void SetTrackId(unsigned int id) { fTrackId = id; }
 
-    const std::vector<double>& Vertex() const { return fVertex; }
+    const std::array<float,3>& Vertex() const { return fVertex; }
     
-    double Energy() const { return fEnergy; }
+    float Energy() const { return fEnergy; }
 
     unsigned int TrackId() const { return fTrackId; }
 
