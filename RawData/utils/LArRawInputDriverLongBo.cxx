@@ -325,7 +325,7 @@ namespace lris {
 
     if (firstEventInRun)
       {
-	std::unique_ptr<sumdata::RunData> rundata(new sumdata::RunData(geo::kBo) );
+	std::unique_ptr<sumdata::RunData> rundata(new sumdata::RunData("bo") );
         currentSubRunID_ = art::SubRunID(rn, 1);
         outR = principalMaker_.makeRunPrincipal(rn, tstamp);
         outSR = principalMaker_.makeSubRunPrincipal(rn,

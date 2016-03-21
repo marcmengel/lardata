@@ -21,6 +21,7 @@
 
 #include "AnalysisBase/Calorimetry.h"
 #include "AnalysisBase/ParticleID.h"
+#include "AnalysisBase/MVAPIDResult.h"
 #include "AnalysisBase/FlashMatch.h"
 #include "AnalysisBase/CosmicTag.h"
 #include "AnalysisBase/T0.h"
@@ -46,6 +47,7 @@ namespace {
   art::PtrVector<anab::Calorimetry> cpv;
   art::PtrVector<anab::ParticleID>  ppv;
   art::PtrVector<anab::FlashMatch>  fmv;
+  art::PtrVector<anab::MVAPIDResult>   mvapidrespv;
 }
 
 //
@@ -55,12 +57,14 @@ namespace {
 
 template class std::vector<anab::Calorimetry>;
 template class std::vector<anab::ParticleID>;
+template class std::vector<anab::MVAPIDResult>;
 template class std::vector<anab::FlashMatch>;
 template class std::vector<anab::CosmicTag>;
 template class std::vector<anab::T0>;
 
 template class art::Ptr<anab::Calorimetry>;
 template class art::Ptr<anab::ParticleID>;
+template class art::Ptr<anab::MVAPIDResult>;
 template class art::Ptr<anab::FlashMatch>;
 template class art::Ptr<anab::CosmicTag>;
 template class art::Ptr<anab::T0>;
@@ -71,6 +75,7 @@ template class std::pair< art::Ptr<anab::Calorimetry>, art::Ptr<recob::Shower>  
 template class std::pair< art::Ptr<recob::Shower>,     art::Ptr<anab::Calorimetry>   >;
 template class std::pair< art::Ptr<anab::ParticleID>,  art::Ptr<recob::Track>        >;
 template class std::pair< art::Ptr<recob::Track>,      art::Ptr<anab::ParticleID>    >;
+template class std::pair< art::Ptr<recob::Track>,      art::Ptr<anab::MVAPIDResult>     >;
 template class std::pair< art::Ptr<anab::FlashMatch>,  art::Ptr<recob::OpFlash>      >;
 template class std::pair< art::Ptr<recob::OpFlash>,    art::Ptr<anab::FlashMatch>    >;
 template class std::pair< art::Ptr<anab::FlashMatch>,  art::Ptr<recob::Track>        >;
@@ -106,6 +111,9 @@ template class art::Assns<anab::Calorimetry, recob::Shower,    	void>;
 template class art::Assns<recob::Shower,     anab::Calorimetry, void>;
 template class art::Assns<anab::ParticleID,  recob::Track,     	void>;
 template class art::Assns<recob::Track,      anab::ParticleID,  void>;
+template class art::Assns<anab::MVAPIDResult,   recob::Track,   void>;
+template class art::Assns<recob::Track,      anab::MVAPIDResult,void>;
+
 template class art::Assns<recob::Track,      anab::FlashMatch,  void>;
 template class art::Assns<recob::OpFlash,    anab::FlashMatch,  void>;
 template class art::Assns<anab::FlashMatch,  recob::Track,      void>;
@@ -140,6 +148,8 @@ template class art::Wrapper< art::Assns<anab::Calorimetry, recob::Shower,     vo
 template class art::Wrapper< art::Assns<recob::Shower,     anab::Calorimetry, void> >;
 template class art::Wrapper< art::Assns<anab::ParticleID,  recob::Track,      void> >;
 template class art::Wrapper< art::Assns<recob::Track,      anab::ParticleID,  void> >;
+template class art::Wrapper< art::Assns<anab::MVAPIDResult,   recob::Track,   void> >;
+template class art::Wrapper< art::Assns<recob::Track,      anab::MVAPIDResult,void> >;
 template class art::Wrapper< art::Assns<recob::Track,      anab::FlashMatch,  void> >;
 template class art::Wrapper< art::Assns<recob::OpFlash,    anab::FlashMatch,  void> >;
 template class art::Wrapper< art::Assns<anab::FlashMatch,  recob::Track,      void> >;
@@ -169,8 +179,12 @@ template class art::Wrapper< art::Assns<raw::ExternalTrigger, anab::T0,       vo
 template class art::Wrapper< art::Assns<anab::T0,          recob::OpFlash,    void> >;
 template class art::Wrapper< art::Assns<recob::OpFlash,    anab::T0,          void> >;
 
+template class art::Wrapper< std::vector<anab::MVAPIDResult>   >;
 template class art::Wrapper< std::vector<anab::Calorimetry>    >;
 template class art::Wrapper< std::vector<anab::ParticleID>     >;
 template class art::Wrapper< std::vector<anab::FlashMatch>     >;
 template class art::Wrapper< std::vector<anab::CosmicTag>      >;
 template class art::Wrapper< std::vector<anab::T0>             >;
+
+template class std::map<std::basic_string<char>,double >;
+template class std::vector<std::map<std::basic_string<char>,double> >;

@@ -42,6 +42,7 @@ namespace sim {
     
     fDaughterTrackID.clear();
     fPlaneCharge.clear();
+    fdEdx = kINVALID_DOUBLE;
     fdQdx.clear();
   }
 

@@ -12,8 +12,11 @@
 #include <vector>
 #include <iosfwd>
 #include <time.h>
+#include <stdint.h>
 
 namespace raw {
+
+  typedef long long TriggerTimeStamp_t; ///< type of trigger time stamp
 
   class ExternalTrigger {
     public:
@@ -21,34 +24,36 @@ namespace raw {
 
     private:
 
-      unsigned int   fTrigID;
-      unsigned int   fTrigTime;
+      unsigned int       fTrigID;
+      TriggerTimeStamp_t fTrigTime;
 
 #ifndef __GCCXML__
 
   public:
 
-      ExternalTrigger(unsigned int trigid, unsigned int trigtime);
+      ExternalTrigger(unsigned int trigid, TriggerTimeStamp_t trigtime);
 
       // Set Methods
       void             SetTrigID(unsigned int i);
-      void             SetTrigTime(unsigned int i);
+      void             SetTrigTime(TriggerTimeStamp_t i);
 
       // Get Methods
-      unsigned int     GetTrigID()          const;
-      unsigned int     GetTrigTime()          const;
+      unsigned int       GetTrigID()   const;
+      TriggerTimeStamp_t GetTrigTime() const;
      
 #endif
     };
+
 }
 
 #ifndef __GCCXML__
 
-inline void           raw::ExternalTrigger::SetTrigID(unsigned int i)    { fTrigID = i;      }
-inline void           raw::ExternalTrigger::SetTrigTime(unsigned int i)  { fTrigTime = i;    }
-inline unsigned int   raw::ExternalTrigger::GetTrigID()           const  { return fTrigID;   }  
-inline unsigned int   raw::ExternalTrigger::GetTrigTime()         const  { return fTrigTime; }  
-
+namespace raw{
+  inline void               ExternalTrigger::SetTrigID(unsigned int i)         { fTrigID = i;      }
+  inline void               ExternalTrigger::SetTrigTime(TriggerTimeStamp_t i) { fTrigTime = i;    }
+  inline unsigned int       ExternalTrigger::GetTrigID()    const  { return fTrigID;   }  
+  inline TriggerTimeStamp_t ExternalTrigger::GetTrigTime()  const  { return fTrigTime; }
+}
 #endif
 
 #endif // EXTERNALTRIGGER_H

@@ -64,7 +64,7 @@ private:
 #ifndef __GCCXML__
 
 inline int    recob::OpHit::OpChannel()      const { return fOpChannel;      }
-unsigned short recob::OpHit::Frame()         const { return fFrame;          }
+inline unsigned short recob::OpHit::Frame()  const { return fFrame;          }
 inline double recob::OpHit::PeakTime()       const { return fPeakTime;       }
 inline double recob::OpHit::PeakTimeAbs()    const { return fPeakTimeAbs;    }
 inline double recob::OpHit::Width()          const { return fWidth;          }
