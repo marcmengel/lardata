@@ -49,6 +49,9 @@
 #include "lardata/RecoObjects/KHitGroup.h"
 #include "lardata/RecoObjects/KTrack.h"
 #include "lardata/RecoObjects/Propagator.h"
+#include "art/Persistency/Common/PtrVector.h"
+#include "lardata/RecoBase/Hit.h"
+
 
 namespace trkf {
 
@@ -62,6 +65,7 @@ namespace trkf {
     /// Destructor.
     virtual ~KHitContainer();
 
+    virtual void fill(const art::PtrVector<recob::Hit>& hits, int only_plane) = 0;
     // Const Accessors.
 
     const std::list<KHitGroup>& getSorted() const {return fSorted;}       ///< Sorted list.

@@ -33,7 +33,7 @@ namespace trkf {
     virtual ~KHitContainerWireLine();
 
     /// Fill container.
-    void fill(const art::PtrVector<recob::Hit>& hits, int only_plane);
+    void fill(const art::PtrVector<recob::Hit>& hits, int only_plane) override;
   };
 }
 
