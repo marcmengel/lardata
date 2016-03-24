@@ -33,7 +33,8 @@ namespace anab {
     kOutsideDrift_Partial=100,
     kOutsideDrift_Complete,
     kFlash_BeamIncompatible=200,
-    kFlash_Match=300
+    kFlash_Match=300,
+    kNotIsolated=500
   } CosmicTagID_t;
 
   class CosmicTag{

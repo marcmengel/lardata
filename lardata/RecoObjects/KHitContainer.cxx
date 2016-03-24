@@ -22,6 +22,9 @@ namespace trkf {
   KHitContainer::~KHitContainer()
   {}
 
+ void fill(const art::PtrVector<recob::Hit>& hits, int only_plane)
+    {}
+
   /// Clear all lists.
   void KHitContainer::clear()
   {
