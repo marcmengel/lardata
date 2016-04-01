@@ -14,9 +14,10 @@
   <version ClassVersion="13" checksum="786471469"/>
   <version ClassVersion="12" checksum="4132299299"/>
  </class>
- <class name="raw::RawDigit   	  " ClassVersion="13"           >
+ <class name="raw::RawDigit   	  " ClassVersion="14"           >
   <version ClassVersion="12" checksum="160151695"/>
   <version ClassVersion="13" checksum="412021819"/>
+  <version ClassVersion="14" checksum="3868251406"/>
  </class>
  <class name="raw::AuxDetDigit	  " ClassVersion="13"           >
   <version ClassVersion="13" checksum="3822054512" />

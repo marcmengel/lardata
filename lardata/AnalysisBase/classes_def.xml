@@ -13,7 +13,8 @@
  <class name="std::map<std::basic_string<char>,double > " />
  <class name="std::vector<std::map<std::basic_string<char>,double > >" />
 
- <class name="anab::Calorimetry"           ClassVersion="15"                           >
+ <class name="anab::Calorimetry"           ClassVersion="16"                           >
+  <version ClassVersion="16" checksum="2995599306"/>
   <version ClassVersion="15" checksum="2095251371"/>
   <version ClassVersion="14" checksum="1421274164"/>
   <version ClassVersion="13" checksum="2889632995"/>
@@ -29,7 +30,8 @@
   <version ClassVersion="13" checksum="4254447866"/>
   <version ClassVersion="12" checksum="2992884177"/>
  </class>
- <class name="anab::CosmicTag"            ClassVersion="2"                           >
+ <class name="anab::CosmicTag"            ClassVersion="3"                           >
+  <version ClassVersion="3" checksum="1439180793"/>
   <version ClassVersion="2" checksum="1434160808"/>
   <version ClassVersion="-1" checksum="1434160808"/>
  </class>

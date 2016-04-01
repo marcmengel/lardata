@@ -40,13 +40,15 @@
  <class name="lar::sparse_vector<float>"                                  />
  
  <!-- data product classes -->
- <class name="recob::Cluster"          ClassVersion="15"                   >
+ <class name="recob::Cluster"          ClassVersion="16"                   >
+  <version ClassVersion="16" checksum="1223880123"/>
   <version ClassVersion="15" checksum="3137006571"/>
   <version ClassVersion="14" checksum="2461492145"/>
   <version ClassVersion="13" checksum="3306685703"/>
   <version ClassVersion="12" checksum="1302402512"/>
  </class>
- <class name="recob::Hit"              ClassVersion="15"                   >
+ <class name="recob::Hit"              ClassVersion="16"                   >
+  <version ClassVersion="16" checksum="3524685965"/>
   <version ClassVersion="15" checksum="3889929631"/>
   <version ClassVersion="14" checksum="1206393973"/>
   <version ClassVersion="13" checksum="2260253886"/>
@@ -71,10 +73,12 @@
  <class name="recob::Seed"             ClassVersion="12"                   >
   <version ClassVersion="12" checksum="435078304"/>
  </class>
- <class name="recob::EndPoint2D"       ClassVersion="13"                   >
+ <class name="recob::EndPoint2D"       ClassVersion="14"                   >
+  <version ClassVersion="14" checksum="2603357711"/>
   <version ClassVersion="13" checksum="595254911"/>
  </class>
- <class name="recob::Wire"             ClassVersion="18"                   >
+ <class name="recob::Wire"             ClassVersion="19"                   >
+  <version ClassVersion="19" checksum="1560514318"/>
   <version ClassVersion="18" checksum="2134690102"/>
   <version ClassVersion="17" checksum="4245857386"/>
   <version ClassVersion="16" checksum="2920613755"/>
