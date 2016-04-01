@@ -4,9 +4,10 @@
 
 
 <lcgdict>
- <class name="std::vector<optdata::ADC_Count_t>"                       /> 
- <class name="art::Wrapper< std::vector<optdata::ADC_Count_t> >"       /> 
- <class name="std::pair< optdata::TimeSlice_t, optdata::TimeSlice_t >" />
+<!-- optdata::ADC_Count_t and optdata::TimeSlice_t, are both unsigned short   -->
+<!-- <class name="std::vector<optdata::ADC_Count_t>"                       />  -->
+<!-- <class name="art::Wrapper< std::vector<optdata::ADC_Count_t> >"       />  -->
+<!-- <class name="std::pair< optdata::TimeSlice_t, optdata::TimeSlice_t >" />  -->
  <class name="std::vector< std::pair< optdata::TimeSlice_t, optdata::TimeSlice_t > >" />
  <class name="art::Wrapper< std::vector< std::pair< optdata::TimeSlice_t, optdata::TimeSlice_t > > >" />
  <class name="optdata::ChannelData"        ClassVersion="10"           > 
