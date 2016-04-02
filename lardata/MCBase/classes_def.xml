@@ -51,4 +51,19 @@
 <class name="art::Wrapper< std::vector<sim::MCTrack> >" />
 
 
+<ioread 
+  version="[10]" 
+  sourceClass="sim::MCHit" 
+  source="std::vector<double> fPartVertex" 
+  targetClass="sim::MCHit" 
+  target="fPartVertex" 
+  include="vector;lardata/MCBase/MCHit.h">
+  <![CDATA[
+    fPartVertex[0] = (onfile.fPartVertex.size() > 0 ? onfile.fPartVertex[0] : 0.);
+    fPartVertex[1] = (onfile.fPartVertex.size() > 1 ? onfile.fPartVertex[1] : 0.);
+    fPartVertex[2] = (onfile.fPartVertex.size() > 2 ? onfile.fPartVertex[2] : 0.);
+  ]]>
+</ioread> 
+
+
 </lcgdict>
