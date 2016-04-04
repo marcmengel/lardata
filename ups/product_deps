@@ -4,7 +4,6 @@ parent	lardata	v05_07_00
 defaultqual	e9
 #
 fcldir product_dir job
-rootpath
 #
 product         version
 larcore		v05_06_00
@@ -12,7 +11,7 @@ nutools		v1_25_00
 
 gcc		v4_9_3
 
-cetbuildtools	v4_19_03	-	only_for_build
+cetbuildtools	v4_19_04	-	only_for_build
 end_product_list
 
   
