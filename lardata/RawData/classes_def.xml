@@ -42,6 +42,7 @@
   <version ClassVersion="11" checksum="2734695139"/>
   <version ClassVersion="10" checksum="3347706756"/>
  </class>
+ <enum name="raw::_compress"                                    />
  <class name="std::vector<raw::BeamInfo>       "                />
  <class name="std::vector<raw::DAQHeader>      "                />
  <class name="std::vector<raw::RawDigit>       "                />

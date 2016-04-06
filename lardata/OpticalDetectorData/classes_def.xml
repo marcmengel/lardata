@@ -42,4 +42,5 @@
  </class>
  <class name="std::vector<optdata::OpticalRawDigit>"                   /> 
  <class name="art::Wrapper< std::vector<optdata::OpticalRawDigit> >"   /> 
+ <enum  name="optdata::_optical_category_t"                            />
 </lcgdict>
