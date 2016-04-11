@@ -42,6 +42,7 @@
   <version ClassVersion="12" checksum="1711426196"/>
   <version ClassVersion="11" checksum="2353091006"/>
  </class>
+ <enum name="anab::cosmic_tag_id"                                                      />
  <class name="std::vector<anab::Calorimetry>"                                          />
  <class name="std::vector<anab::ParticleID>"                                           />
  <class name="std::vector<anab::MVAPIDResult>"                                         />
