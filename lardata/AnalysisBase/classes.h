@@ -37,14 +37,13 @@
 #include "lardata/RawData/ExternalTrigger.h"
 
 
-// make dummy variables of the PtrVector types so that we are
-// sure to generate the dictionaries for them
+// perform template instantiations
 namespace {
   art::PtrVector<recob::PFParticle> pfpv;
-  art::PtrVector<recob::Track>      tpv;
+  art::PtrVector<recob::Track>      tpv2;
   art::PtrVector<recob::PCAxis>     pcpv;
   art::PtrVector<recob::OpFlash>    flv;
-  art::PtrVector<anab::Calorimetry> cpv;
+  art::PtrVector<anab::Calorimetry> cpv2;
   art::PtrVector<anab::ParticleID>  ppv;
   art::PtrVector<anab::FlashMatch>  fmv;
   art::PtrVector<anab::MVAPIDResult>   mvapidrespv;

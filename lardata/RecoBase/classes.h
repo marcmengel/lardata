@@ -35,16 +35,15 @@
 #include "lardata/RecoBase/TrackHitMeta.h"
 
 
-// make dummy variables of the PtrVector types so that we are
-// sure to generate the dictionaries for them
+// perform template instantiations
 namespace {
   art::PtrVector<recob::Hit>        hitpv;
   art::PtrVector<recob::Event>      epv;
-  art::PtrVector<recob::Cluster>    cpv;
+  art::PtrVector<recob::Cluster>    cpv1;
   art::PtrVector<recob::Seed>       sepv;
   art::PtrVector<recob::Shower>     spv;
   art::PtrVector<recob::SpacePoint> sppv;
-  art::PtrVector<recob::Track>      tpv;
+  art::PtrVector<recob::Track>      tpv1;
   art::PtrVector<recob::Vertex>     vpv;
   art::PtrVector<recob::OpHit>      opv;
   art::PtrVector<recob::OpFlash>    fpv;
