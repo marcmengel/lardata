@@ -38,6 +38,12 @@
   <version ClassVersion="11" checksum="363582492"/>
  </class>
  <class name="lar::sparse_vector<float>"                                  />
+ <enum name="geo::coordinates"                                            />
+ <enum name="geo::_plane_proj"                                            />
+ <enum name="geo::_plane_orient"                                          />
+ <enum name="geo::_plane_sigtype"                                         />
+ <enum name="geo::driftdir"                                               />
+
  
  <!-- data product classes -->
  <class name="recob::Cluster"          ClassVersion="16"                   >
@@ -171,6 +177,7 @@
  <class name="std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::PFParticle> >" />
  <class name="std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::SpacePoint> >" />
  <class name="std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::Track>      >" />
+ <class name="std::pair< art::Ptr<recob::Track>,      art::Ptr<recob::Shower>     >" />
  <class name="std::pair< art::Ptr<recob::Shower>,     art::Ptr<recob::Vertex>     >" />
  <class name="std::pair< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Hit>        >" />
  <class name="std::pair< art::Ptr<recob::SpacePoint>, art::Ptr<recob::Cluster>    >" />
@@ -231,6 +238,7 @@
  <class name="art::Assns<recob::Shower,     recob::PFParticle, void>"           />
  <class name="art::Assns<recob::Shower,     recob::SpacePoint, void>"           />
  <class name="art::Assns<recob::Shower,     recob::Track,      void>"           />
+ <class name="art::Assns<recob::Track,      recob::Shower,     void>"           />
  <class name="art::Assns<recob::Shower,     recob::Vertex,     void>"           />
  <class name="art::Assns<recob::SpacePoint, recob::Hit,        void>"           />
  <class name="art::Assns<recob::SpacePoint, recob::Cluster,    void>"           />
@@ -241,12 +249,16 @@
  <class name="art::Assns<recob::Track,      recob::Hit,        void>"           />
  <class name="art::Assns<recob::Track,      recob::Hit,        unsigned int>"   />
  <class name="art::Assns<recob::Track,      recob::Hit,        recob::TrackHitMeta>" />
+ <class name="art::Assns<recob::Hit,        recob::Track,      recob::TrackHitMeta>" />
  <class name="art::Assns<recob::Track,      recob::PFParticle, void>"           />
  <class name="art::Assns<recob::Track,      recob::SpacePoint, void>"           />
  <class name="art::Assns<recob::Track,      recob::Vertex,     void>"           />
  <class name="art::Assns<recob::OpFlash,    recob::OpHit,      void>"           />
  <class name="art::Assns<recob::OpFlash,    recob::Track,      void>"           />
  <class name="art::Assns<recob::OpFlash,    recob::Cluster,    void>"           />
+ <class name="art::Assns<recob::OpHit,      recob::OpFlash,    void>"           />
+ <class name="art::Assns<recob::Track,      recob::OpFlash,    void>"           />
+ <class name="art::Assns<recob::Cluster,    recob::OpFlash,    void>"           />
  <class name="art::Assns<recob::Vertex,     recob::Cluster,    void>"           />
  <class name="art::Assns<recob::Vertex,     recob::Cluster,    unsigned short>" />
  <class name="art::Assns<recob::Vertex,     recob::Event,      void>"           />
@@ -337,6 +349,7 @@
  <class name="art::Wrapper< art::Assns<recob::Shower,     recob::PFParticle, void          > >" />
  <class name="art::Wrapper< art::Assns<recob::Shower,     recob::SpacePoint, void          > >" />
  <class name="art::Wrapper< art::Assns<recob::Shower,     recob::Track,      void          > >" />
+ <class name="art::Wrapper< art::Assns<recob::Track,      recob::Shower,     void          > >" />
  <class name="art::Wrapper< art::Assns<recob::Shower,     recob::Vertex,     void          > >" />
  <class name="art::Wrapper< art::Assns<recob::SpacePoint, recob::Hit,        void          > >" />
  <class name="art::Wrapper< art::Assns<recob::SpacePoint, recob::Cluster,    void          > >" />
@@ -347,12 +360,16 @@
  <class name="art::Wrapper< art::Assns<recob::Track,      recob::Hit,        void          > >" />
  <class name="art::Wrapper< art::Assns<recob::Track,      recob::Hit,        unsigned int  > >" />
  <class name="art::Wrapper< art::Assns<recob::Track,      recob::Hit,        recob::TrackHitMeta > >" />
+ <class name="art::Wrapper< art::Assns<recob::Hit,        recob::Track,      recob::TrackHitMeta > >" />
  <class name="art::Wrapper< art::Assns<recob::Track,      recob::PFParticle, void          > >" />
  <class name="art::Wrapper< art::Assns<recob::Track,      recob::SpacePoint, void          > >" />
  <class name="art::Wrapper< art::Assns<recob::Track,      recob::Vertex,     void          > >" />
  <class name="art::Wrapper< art::Assns<recob::OpFlash,    recob::Track,      void          > >" />
  <class name="art::Wrapper< art::Assns<recob::OpFlash,    recob::OpHit,      void          > >" />
  <class name="art::Wrapper< art::Assns<recob::OpFlash,    recob::Cluster,    void          > >" />
+ <class name="art::Wrapper< art::Assns<recob::Track,      recob::OpFlash,    void          > >" />
+ <class name="art::Wrapper< art::Assns<recob::OpHit,      recob::OpFlash,    void          > >" />
+ <class name="art::Wrapper< art::Assns<recob::Cluster,    recob::OpFlash,    void          > >" />
  <class name="art::Wrapper< art::Assns<recob::Vertex,     recob::Cluster,    void          > >" />
  <class name="art::Wrapper< art::Assns<recob::Vertex,     recob::Cluster,    unsigned short> >" />
  <class name="art::Wrapper< art::Assns<recob::Vertex,     recob::Hit,        void          > >" />
