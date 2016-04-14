@@ -22,6 +22,11 @@ e9:opt           e9:opt           e9:opt	-nq-
 e9:prof          e9:prof          e9:prof	-nq-
 end_qualifier_list
 
+table_fragment_begin
+    # this is temporary until boost defines ROOT_INCLUDE_PATH
+    pathPrepend(ROOT_INCLUDE_PATH, ${BOOST_INC})
+table_fragment_end
+
 # Preserve tabs and formatting in emacs and vi / vim:
 
 ### Local Variables:
