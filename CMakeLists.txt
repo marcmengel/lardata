@@ -44,7 +44,7 @@ cet_report_compiler_flags()
 find_ups_product( larcore v1_00_00 )
 find_ups_product( nutools v1_00_00 )
 find_ups_product( postgresql v9_1_5 )
-find_ups_product( cetbuildtools v4_09_00 )
+find_ups_boost( v1_53_0 )
 
 #  Find all the libraries needed by our dependent CMakeList.txt files
 cet_find_library( SIMULATIONBASE      NAMES SimulationBase      PATHS ENV NUTOOLS_LIB NO_DEFAULT_PATH )
