@@ -23,7 +23,7 @@
 
 // LArSoft libraries
 #include "lardata/DetectorInfo/LArProperties.h"
-#include "test/Geometry/unit_test_base.h"
+#include "larcore/TestUtils/unit_test_base.h"
 
 // utility libraries
 #include "fhiclcpp/ParameterSet.h"
