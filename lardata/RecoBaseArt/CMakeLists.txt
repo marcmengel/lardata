@@ -17,6 +17,8 @@ art_make(
                         ${Boost_SYSTEM_LIBRARY}
         )
 
+add_subdirectory(Dumpers)
+
 install_headers()
 install_fhicl()
 install_source()
