@@ -553,31 +553,31 @@ namespace recob {
       (PFParticles, evt, fInputTag);
     
     size_t const nParticles = PFParticles->size();
-    mf::LogInfo(fOutputCategory)
-      << "The event contains " << nParticles << " particles from '"
+    mf::LogVerbatim(fOutputCategory) << "Event " << evt.id()
+      << " contains " << nParticles << " particles from '"
       << fInputTag.encode() << "'";
     
     // prepare the dumper
     ParticleDumper dumper(*PFParticles);
     if (ParticleVertices.isValid()) dumper.SetVertices(&ParticleVertices);
-    else mf::LogWarning("DumpPFParticles") << "vertex information not available";
+    else mf::LogPrint("DumpPFParticles") << "WARNING: vertex information not available";
     if (ParticleTracks.isValid()) dumper.SetTracks(&ParticleTracks);
-    else mf::LogWarning("DumpPFParticles") << "track information not available";
+    else mf::LogPrint("DumpPFParticles") << "WARNING: track information not available";
     if (ParticleClusters.isValid()) dumper.SetClusters(&ParticleClusters);
-    else mf::LogWarning("DumpPFParticles") << "cluster information not available";
+    else mf::LogPrint("DumpPFParticles") << "WARNING: cluster information not available";
     if (ParticleSeeds.isValid()) dumper.SetSeeds(&ParticleSeeds);
-    else mf::LogWarning("DumpPFParticles") << "seed information not avaialble";
+    else mf::LogPrint("DumpPFParticles") << "WARNING: seed information not avaialble";
     if (ParticleSpacePoints.isValid())
       dumper.SetSpacePoints(&ParticleSpacePoints);
     else {
-      mf::LogWarning("DumpPFParticles")
-        << "space point information not available";
+      mf::LogPrint("DumpPFParticles")
+        << "WARNING: space point information not available";
     }
     if (ParticlePCAxes.isValid())
       dumper.SetPCAxes(&ParticlePCAxes);
     else {
-      mf::LogWarning("DumpPFParticles")
-        << "principal component axis not available";
+      mf::LogPrint("DumpPFParticles")
+        << "WARNING: principal component axis not available";
     }
     
     dumper.DumpAllParticles(mf::LogVerbatim(fOutputCategory), "  ");
