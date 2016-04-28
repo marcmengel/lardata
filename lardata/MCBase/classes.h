@@ -4,12 +4,12 @@
   Once diffusion is correctly implemented, I can put back in.
 */
 
-#include "MCHit.h"
-#include "MCWire.h"
-#include "MCWireCollection.h"
-#include "MCHitCollection.h"
-#include "MCShower.h"
-#include "MCTrack.h"
+#include "lardata/MCBase/MCHit.h"
+#include "lardata/MCBase/MCWire.h"
+#include "lardata/MCBase/MCWireCollection.h"
+#include "lardata/MCBase/MCHitCollection.h"
+#include "lardata/MCBase/MCShower.h"
+#include "lardata/MCBase/MCTrack.h"
 
 template class art::Wrapper< sim::MCHit >;
 template class art::Wrapper< sim::MCWire   >;
