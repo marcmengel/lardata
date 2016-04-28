@@ -15,9 +15,12 @@ struct MVAPIDResult {
   float conicalness;
   float dEdxStart;
   float dEdxEnd;
-  float dEdxPenultimate;
+  float dEdxEndRatio;
+  float length;
   float nSpacePoints;
   unsigned int trackID;
+  int isTrack;
+  int isStoppingReco;
 
   friend bool           operator <  (const MVAPIDResult & a, const MVAPIDResult & b);
 
