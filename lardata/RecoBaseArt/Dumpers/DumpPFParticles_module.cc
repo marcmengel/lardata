@@ -33,10 +33,12 @@ namespace recob {
    * Configuration parameters
    * =========================
    * 
-   * - *PFModuleLabel* (art::InputTag, default: "pandora"): label of the
+   * - *PFModuleLabel* (art::InputTag, default: `"pandora"`): label of the
    *   producer used to create the recob::Wire collection to be dumped
-   * - *OutputCategory* (string, default: "DumpPFParticles"): the category used
-   *   for the output (useful for filtering)
+   * - *OutputCategory* (string, default: `"DumpPFParticles"`): the category
+   *   used for the output (useful for filtering)
+   * - *PrintHexFloats* (boolean, default: `false`): print all the floating
+   *   point numbers in base 16
    *
    */
   class DumpPFParticles: public art::EDAnalyzer {

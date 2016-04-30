@@ -61,7 +61,7 @@ namespace lar {
             {
                constexpr auto buf_size = 8 * sizeof(real_t) + 1;
                char buf[buf_size];
-               std::snprintf(buf, buf_size, "%024.16a", v);
+               std::snprintf(buf, buf_size, "%+24.14a", v);
                os << buf;
             }
          

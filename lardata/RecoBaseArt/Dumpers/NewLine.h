@@ -10,10 +10,31 @@
 
 // C/C++ standard libraries
 #include <string>
+#include <utility> // std::move()
 
 
 namespace recob {
   namespace dumper {
+    
+    /// Structure collecting indentation options
+    struct IndentOptions_t {
+      std::string indent; ///< indentation string
+      bool appendFirst = false; ///< skip indentation on the first line
+      
+      IndentOptions_t(std::string ind = "", bool followLine = false)
+        : indent(ind), appendFirst(followLine)
+        {}
+      
+      IndentOptions_t& appendIndentation(std::string more)
+        { indent += more; appendFirst = false; return *this; }
+      IndentOptions_t& removeIndentation(std::string less)
+        {
+          indent.erase(std::max(indent.length() - less.length(), size_t(0)));
+          return *this;
+        }
+      
+    }; // IndentOptions_t
+    
     
     /**
      * @brief Starts a new line in a output stream
@@ -51,6 +72,21 @@ namespace recob {
     template <typename Stream>
     class NewLine {
         public:
+      
+      /**
+       * @brief Constructor: associates with the stream
+       * @param stream a reference to the stream where to insert new lines
+       * @param indentOptions all indentation options (will be copied)
+       * @param followLine whether first line is already started (default: no)
+       * 
+       * The constructor does not start a new line.
+       * If followLine is true, the first line is supposed to be already started
+       * and no indentation nor new line will be set on it.
+       */
+      NewLine(Stream& stream, IndentOptions_t indentOptions)
+        : out(stream), options(std::move(indentOptions)), nLines(0)
+        {}
+      
       /**
        * @brief Constructor: associates with the stream
        * @param stream a reference to the stream where to insert new lines
@@ -62,7 +98,7 @@ namespace recob {
        * and no indentation nor new line will be set on it.
        */
       NewLine(Stream& stream, std::string indent = "", bool followLine = false)
-        : out(stream), indentString(indent), nLines(0), appendFirst(followLine)
+        : NewLine(stream, IndentOptions_t{ indent, followLine })
         {}
       
       /// @{
@@ -72,7 +108,7 @@ namespace recob {
       unsigned int lines() const { return nLines; }
       
       /// Returns the current indentation string
-      std::string indent() const { return indentString; }
+      std::string indent() const { return options.indent; }
       
       /// @}
       
@@ -83,24 +119,23 @@ namespace recob {
       Stream& operator() () { return newLine(); }
       
       /// Starts a new line (no matter what)
-      void forceNewLine() { out << "\n" << indentString; }
+      void forceNewLine() { out << "\n" << options.indent; }
       
       /// Returns whether newLine() will append text on the current line
-      bool append() const { return (lines() == 0) && appendFirst; }
+      bool append() const { return (lines() == 0) && options.appendFirst; }
       
       
       /// Replaces the indentation string
-      void setIndent(std::string newIndent) { indentString = newIndent; }
+      void setIndent(std::string newIndent) { options.indent = newIndent; }
       
       /// Adds to the end to the indentation string
-      void addIndent(std::string moreIndent) { indentString += moreIndent; }
+      void addIndent(std::string moreIndent) { options.indent += moreIndent; }
       
       
         protected:
       Stream& out; ///< reference to the output stream
-      std::string indentString; ///< full indentation string
+      IndentOptions_t options; ///< all indentation options
       unsigned int nLines; ///< number of lines in output
-      bool appendFirst; ///< whether to append to the first line
       
     }; // class NewLine
     
@@ -108,8 +143,14 @@ namespace recob {
     /// Convenience function to create a temporary NewLine
     template <typename Stream>
     inline NewLine<Stream> makeNewLine
-      (Stream& stream, std::string indent = "", bool followLine = false)
+      (Stream& stream, std::string indent, bool followLine = false)
       { return NewLine<Stream>(stream, indent, followLine); }
+    
+    /// Convenience function to create a temporary NewLine
+    template <typename Stream>
+    inline NewLine<Stream> makeNewLine
+      (Stream& stream, IndentOptions_t const& options)
+      { return NewLine<Stream>(stream, options); }
     
     
   } // namespace dumper

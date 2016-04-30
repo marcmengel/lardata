@@ -21,45 +21,55 @@
 
 // --- for the implementation ---
 // LArSoft libraries
+#include "lardata/RecoBaseArt/Dumpers/hexfloat.h"
 #include "lardata/RecoBaseArt/Dumpers/NewLine.h"
 
 
 namespace recob {
   namespace dumper {
     
-    /// Dumps the content of the specified space point (indentation info in nl)
-    /// @tparam Stream the type of the output stream
-    /// @tparam NewLineRef NewLine reference type (to get a universal reference)
-    template <typename Stream, typename NewLineRef>
-    std::enable_if_t
-      <std::is_same<NewLine<std::decay_t<Stream>>, std::decay_t<NewLineRef>>::value>
-    DumpSpacePoint
-      (Stream&& out, recob::SpacePoint const& sp, NewLineRef&& nl);
+    /// Collection of available printing style options
+    struct SpacePointPrintOptions_t {
+      IndentOptions_t indent; ///< indentation string
+      bool hexFloats = false; ///< print all floating point numbers in base 16
+      
+      /**
+       * @brief Default constructor
+       * 
+       * By default, the options are:
+       * 
+       *  * indentation string: two spaces
+       *  * same indentation for the first and the following lines
+       *  * real numbers printed in base 10
+       * 
+       */
+      SpacePointPrintOptions_t() = default;
+      
+      SpacePointPrintOptions_t
+        (IndentOptions_t indentOptions, bool bHexFloats)
+        : indent(indentOptions), hexFloats(bHexFloats)
+        {}
+      
+    }; // SpacePointPrintOptions_t
     
     
     /**
      * @brief Dumps the content of the specified space point into a stream
-     * @tparam Stream the type of output stream
+     * @tparam Stream the type of the output stream
+     * @tparam NewLineRef NewLine reference type (to get a universal reference)
      * @param out the output stream
      * @param sp the space point to be dumped
-     * @param indent indentation string (none by default)
-     * @param indentFirst whether to indent the first line (yes by default)
-     * 
-     * Insertion operators are required that insert into Stream basic types.
-     * 
-     * This function does not insert a end-of-line after its output.
+     * @param options indentation and formatting options
      */
-    template <typename Stream>
-    void DumpSpacePoint(Stream&& out, recob::SpacePoint const& sp,
-      std::string indent = "",
-      bool indentFirst = true
-      )
-      {
-        DumpSpacePoint(
-          std::forward<Stream>(out), sp, makeNewLine(out, indent, !indentFirst)
-          );
-      }
-    
+    template
+      <typename Stream, typename NewLineRef = recob::dumper::NewLine<Stream>>
+    std::enable_if_t
+      <std::is_same<NewLine<std::decay_t<Stream>>, std::decay_t<NewLineRef>>::value>
+    DumpSpacePoint(
+      Stream&& out,
+      recob::SpacePoint const& sp,
+      SpacePointPrintOptions_t const& options = {}
+      );
     
   } // namespace dumper
 } // namespace recob
@@ -71,23 +81,34 @@ namespace recob {
 //------------------------------------------------------------------------------
 //--- recob::dumper::DumpSpacePoint
 //---
-template <typename Stream, typename NewLineRef>
-std::enable_if_t
-  <std::is_same<recob::dumper::NewLine<std::decay_t<Stream>>, std::decay_t<NewLineRef>>::value>
-recob::dumper::DumpSpacePoint
-  (Stream&& out, recob::SpacePoint const& sp, NewLineRef&& nl)
-{
-  
+template
+  <typename Stream, typename NewLineRef = recob::dumper::NewLine<Stream>>
+std::enable_if_t<
+  std::is_same<
+    recob::dumper::NewLine<std::decay_t<Stream>>,
+    std::decay_t<NewLineRef>
+  >::value>
+recob::dumper::DumpSpacePoint(
+  Stream&& out,
+  recob::SpacePoint const& sp,
+  SpacePointPrintOptions_t const& options /* = {} */
+) {
   double const* pos = sp.XYZ();
   double const* err = sp.ErrXYZ();
   
-  nl()
-    << "ID=" << sp.ID() << " at (" << pos[0] << ", " << pos[1] << ", " << pos[2]
-    << ") cm, chi^2/NDF=" << sp.Chisq();
+  NewLineRef nl(out, options.indent);
+  lar::OptionalHexFloat hexfloat(options.hexFloats);
   
   nl()
-    << "variances { x^2=" << err[0] << " y^2=" << err[2] << " z^2=" << err[5]
-    << " xy=" << err[1] << " xz=" << err[3] << " yz=" << err[4] << " }";
+    << "ID=" << sp.ID() << " at (" << hexfloat(pos[0])
+    << ", " << hexfloat(pos[1]) << ", " << hexfloat(pos[2])
+    << ") cm, chi^2/NDF=" << hexfloat(sp.Chisq());
+  
+  nl()
+    << "variances { x^2=" << hexfloat(err[0]) << " y^2=" << hexfloat(err[2])
+    << " z^2=" << hexfloat(err[5])
+    << " xy=" << hexfloat(err[1]) << " xz=" << hexfloat(err[3])
+    << " yz=" << hexfloat(err[4]) << " }";
   
 } // recob::dumper::DumpSpacePoint()
 

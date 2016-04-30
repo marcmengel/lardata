@@ -8,6 +8,7 @@
 // LArSoft includes
 #include "lardata/RecoBaseArt/Dumpers/NewLine.h" // recob::dumper::makeNewLine()
 #include "lardata/RecoBaseArt/Dumpers/SpacePointDumpers.h"
+#include "lardata/RecoBaseArt/Dumpers/hexfloat.h"
 #include "lardata/RecoBase/SpacePoint.h"
 
 // art libraries
@@ -39,6 +40,8 @@ namespace recob {
    *   producer used to create the recob::SpacePoint collection to be dumped
    * - *OutputCategory* (string, default: "DumpSpacePoints"): the category used
    *   for the output (useful for filtering)
+   * - *PrintHexFloats* (boolean, default: `false`): print all the floating
+   *   point numbers in base 16
    *
    */
   class DumpSpacePoints: public art::EDAnalyzer {
@@ -58,7 +61,12 @@ namespace recob {
         Comment("the category used for the output (useful for filtering) [\"DumpSpacePoints\"]"),
         "DumpSpacePoints" /* default value */
         };
-      
+      fhicl::Atom<bool> PrintHexFloats {
+        Name   ("PrintHexFloats"),
+        Comment("print floating point numbers in base 16 [false]"),
+        false /* default value */
+        };
+        
     }; // struct Config
     
     /// Default constructor
@@ -71,7 +79,8 @@ namespace recob {
 
     art::InputTag fInputTag; ///< input tag of the SpacePoint product
     std::string fOutputCategory; ///< category for LogInfo output
-
+    bool fPrintHexFloats; ///< whether to print floats in base 16
+    
   }; // class DumpSpacePoints
   
 } // namespace recob
@@ -103,10 +112,16 @@ namespace {
   //----------------------------------------------------------------------------
   class SpacePointDumper {
       public:
+    using PrintOptions_t = recob::dumper::SpacePointPrintOptions_t;
+    
     
     /// Constructor; will dump space points from the specified list
-    SpacePointDumper(std::vector<recob::SpacePoint> const& point_list)
+    SpacePointDumper(
+      std::vector<recob::SpacePoint> const& point_list,
+      PrintOptions_t const& printOptions = {}
+      )
       : points(point_list)
+      , options(printOptions)
       {}
     
     
@@ -117,21 +132,37 @@ namespace {
     
     /// Dump a space point specified by its index in the input list
     template <typename Stream>
+    void DumpSpacePoint(Stream&& out, size_t iPoint) const
+      { DumpSpacePoint(std::forward<Stream>(out), iPoint, options); }
+    
+    /// Dump a space point specified by its index in the input list
+    template <typename Stream>
     void DumpSpacePoint
-      (Stream&& out, size_t iPoint, std::string indentstr = "") const
+      (Stream&& out, size_t iPoint, std::string indentstr) const
+      {
+        PrintOptions_t localOptions(options);
+        localOptions.indent.indent = indentstr;
+        DumpSpacePoint(std::forward<Stream>(out), iPoint, localOptions);
+      }
+    
+    /// Dump a space point specified by its index in the input list
+    template <typename Stream>
+    void DumpSpacePoint
+      (Stream&& out, size_t iPoint, PrintOptions_t const& localOptions) const
       {
         recob::SpacePoint const& point = points.at(iPoint);
         
         //
         // intro
         //
-        auto first_nl = recob::dumper::makeNewLine(out, indentstr);
+        auto first_nl = recob::dumper::makeNewLine(out, localOptions.indent);
         first_nl()
           << "[#" << iPoint << "] ";
         
-        auto nl = recob::dumper::makeNewLine
-          (out, indentstr + "  ", true /* follow */);
-        recob::dumper::DumpSpacePoint(out, point, nl);
+        PrintOptions_t indentedOptions(localOptions);
+        indentedOptions.indent.appendIndentation("  ");
+        recob::dumper::DumpSpacePoint
+          (std::forward<Stream>(out), point, indentedOptions);
         
         //
         // hits
@@ -142,6 +173,7 @@ namespace {
             out << "; no associated hits";
           }
           else {
+            auto nl = recob::dumper::makeNewLine(out, indentedOptions.indent);
             out
               << "; " << myHits.size() << " hits:";
             for (recob::Hit const* hit: myHits) {
@@ -166,16 +198,18 @@ namespace {
     template <typename Stream>
     void DumpAllSpacePoints(Stream&& out, std::string indentstr = "") const
       {
-        indentstr += "  ";
+        auto localOptions = options;
+        localOptions.indent.appendIndentation(indentstr);
         size_t const nPoints = points.size();
         for (size_t iPoint = 0; iPoint < nPoints; ++iPoint)
-          DumpSpacePoint(std::forward<Stream>(out), iPoint, indentstr);
+          DumpSpacePoint(std::forward<Stream>(out), iPoint, localOptions);
       } // DumpAllSpacePoints()
     
     
     
       protected:
     std::vector<recob::SpacePoint> const& points; ///< input list
+   PrintOptions_t options; ///< formatting and indentation options
     
     /// Associated hits (expected same order as for space points)
     art::FindMany<recob::Hit> const* hits = nullptr;
@@ -197,6 +231,7 @@ namespace recob {
     : EDAnalyzer(config)
     , fInputTag(config().SpacePointModuleLabel())
     , fOutputCategory(config().OutputCategory())
+    , fPrintHexFloats(config().PrintHexFloats())
     {}
   
   

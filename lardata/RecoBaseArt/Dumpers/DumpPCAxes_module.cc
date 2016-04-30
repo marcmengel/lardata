@@ -33,8 +33,10 @@ namespace recob {
    * 
    * - *PCAxisModuleLabel* (art::InputTag, mandatory): label of the
    *   producer used to create the recob::PCAxis collection to be dumped
-   * - *OutputCategory* (string, default: "DumpPCAxes"): the category used
+   * - *OutputCategory* (string, default: `"DumpPCAxes"`): the category used
    *   for the output (useful for filtering)
+   * - *PrintHexFloats* (boolean, default: `false`): print all the floating
+   *   point numbers in base 16
    *
    */
   class DumpPCAxes: public art::EDAnalyzer {
@@ -56,7 +58,7 @@ namespace recob {
         };
       fhicl::Atom<bool> PrintHexFloats {
         Name   ("PrintHexFloats"),
-        Comment("print floating point numbers in base 16 [\"DumpPCAxes\"]"),
+        Comment("print floating point numbers in base 16 [false]"),
         false /* default value */
         };
       

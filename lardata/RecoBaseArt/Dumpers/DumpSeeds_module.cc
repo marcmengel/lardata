@@ -7,6 +7,7 @@
 
 // LArSoft includes
 #include "lardata/RecoBase/Seed.h"
+#include "lardata/RecoBaseArt/Dumpers/hexfloat.h"
 
 // art libraries
 #include "art/Utilities/InputTag.h"
@@ -36,6 +37,8 @@ namespace recob {
    *   producer used to create the recob::Seed collection to be dumped
    * - *OutputCategory* (string, default: "DumpSeeds"): the category used
    *   for the output (useful for filtering)
+   * - *PrintHexFloats* (boolean, default: `false`): print all the floating
+   *   point numbers in base 16
    *
    */
   class DumpSeeds: public art::EDAnalyzer {
@@ -51,7 +54,8 @@ namespace recob {
 
     art::InputTag fInputTag; ///< input tag of the Seed product
     std::string fOutputCategory; ///< category for LogInfo output
-
+    bool fPrintHexFloats; ///< whether to print floats in base 16
+    
   }; // class DumpSeeds
   
 } // namespace recob
@@ -83,10 +87,20 @@ namespace {
   //----------------------------------------------------------------------------
   class SeedDumper {
       public:
-    
+         
+    /// Collection of available printing style options
+    struct PrintOptions_t {
+       bool hexFloats = false; ///< print all floating point numbers in base 16
+       std::string indent; ///< indentation string
+    }; // PrintOptions_t
+      
     /// Constructor; will dump seeds from the specified list
-    SeedDumper(std::vector<recob::Seed> const& seed_list)
+    SeedDumper(
+      std::vector<recob::Seed> const& seed_list,
+      PrintOptions_t print_options = {}
+      )
       : seeds(seed_list)
+      , options(print_options)
       {}
     
     
@@ -97,10 +111,12 @@ namespace {
     
     /// Dump a seed specified by its index in the input particle list
     template <typename Stream>
-    void DumpSeed(Stream&& out, size_t iSeed, std::string indentstr = "") const
+    void DumpSeed(Stream&& out, size_t iSeed) const
       {
-        recob::Seed const& seed = seeds.at(iSeed);
+        lar::OptionalHexFloat hexfloat(options.hexFloats);
+        std::string const& indentstr = options.indent;
         
+        recob::Seed const& seed = seeds.at(iSeed);
         //
         // intro
         //
@@ -112,9 +128,11 @@ namespace {
           seed.GetDirection(dir.data(), nullptr);
           seed.GetPoint(start.data(), nullptr);
           out
-            << " starts at (" << start[0] << "," << start[1] << "," << start[2]
-            << ") to (" << dir[0] << "," << dir[1] << "," << dir[2]
-            << "); length: " << seed.GetLength() << " cm"
+            << " starts at (" << hexfloat(start[0])
+            << "," << hexfloat(start[1]) << "," << hexfloat(start[2])
+            << ") toward (" << hexfloat(dir[0]) << "," << hexfloat(dir[1])
+            << "," << hexfloat(dir[2])
+            << "); length: " << hexfloat(seed.GetLength()) << " cm"
             ;
         }
         
@@ -124,15 +142,19 @@ namespace {
         if (hits) {
           std::vector<recob::Hit const*> myHits = hits->at(iSeed);
           if (!myHits.empty()) {
+            // we do not honour the base 16 printout requirement here, because
+            // these data members are single precision and there is no printf()
+            // flag taking a float as an argument;, and a promotion to double 
+            // would silently occurr, which we want to avoid
             out
               << "; " << myHits.size() << " hits:";
             for (recob::Hit const* hit: myHits) {
               out << "\n" << indentstr
                 << "  on " << hit->WireID()
-                << ", peak at tick " << hit->PeakTime() << ", "
-                << hit->PeakAmplitude() << " ADC, RMS: " << hit->RMS()
-                << " (channel: "
-                << hit->Channel() << ")";
+                << ", peak at tick " << hit->PeakTime()
+                << ", " << hit->PeakAmplitude()
+                << " ADC, RMS: " << hit->RMS()
+                << " (channel: " << hit->Channel() << ")";
             } // for hits
           } // if we have hits
         } // if we have hit information
@@ -146,18 +168,19 @@ namespace {
     
     /// Dumps all seeds in the input list
     template <typename Stream>
-    void DumpAllSeeds(Stream&& out, std::string indentstr = "") const
+    void DumpAllSeeds(Stream&& out) const
       {
-        indentstr += "  ";
         size_t const nSeeds = seeds.size();
         for (size_t iSeed = 0; iSeed < nSeeds; ++iSeed)
-          DumpSeed(out, iSeed, indentstr);
+          DumpSeed(out, iSeed);
       } // DumpAllSeeds()
     
     
     
       protected:
     std::vector<recob::Seed> const& seeds; ///< input list
+    
+    PrintOptions_t options; ///< printing and formatting options
     
     /// Associated hits (expected same order as for seeds)
     art::FindMany<recob::Hit> const* hits = nullptr;
@@ -179,6 +202,7 @@ namespace recob {
     : EDAnalyzer(pset)
     , fInputTag(pset.get<art::InputTag>("SeedModuleLabel"))
     , fOutputCategory(pset.get<std::string>("OutputCategory", "DumpSeeds"))
+    , fPrintHexFloats(pset.get<bool>("PrintHexFloats", false))
     {}
   
   
@@ -194,16 +218,20 @@ namespace recob {
     art::FindMany<recob::Hit> const SeedHits(Seeds, evt, fInputTag);
     
     size_t const nSeeds = Seeds->size();
-    mf::LogInfo(fOutputCategory)
-      << "The event contains " << nSeeds << " seeds from '"
+    mf::LogVerbatim(fOutputCategory) << "Event " << evt.id()
+      << " contains " << nSeeds << " seeds from '"
       << fInputTag.encode() << "'";
     
     // prepare the dumper
-    SeedDumper dumper(*Seeds);
+    SeedDumper::PrintOptions_t options;
+    options.hexFloats = fPrintHexFloats;
+    options.indent = "  ";
+    SeedDumper dumper(*Seeds, options);
+    
     if (SeedHits.isValid()) dumper.SetHits(&SeedHits);
     else mf::LogWarning("DumpSeeds") << "hit information not avaialble";
     
-    dumper.DumpAllSeeds(mf::LogVerbatim(fOutputCategory), "  ");
+    dumper.DumpAllSeeds(mf::LogVerbatim(fOutputCategory));
     
     mf::LogVerbatim(fOutputCategory) << "\n"; // two empty lines
     
