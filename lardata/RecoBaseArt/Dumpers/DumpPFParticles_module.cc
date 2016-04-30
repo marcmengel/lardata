@@ -7,6 +7,7 @@
 
 // LArSoft includes
 #include "lardata/RecoBase/PFParticle.h"
+#include "lardata/RecoBaseArt/Dumpers/hexfloat.h"
 
 // art libraries
 #include "art/Utilities/InputTag.h"
@@ -51,6 +52,7 @@ namespace recob {
 
     art::InputTag fInputTag; ///< input tag of the PFParticle product
     std::string fOutputCategory; ///< category for LogInfo output
+    bool fPrintHexFloats; ///< whether to print floats in base 16
 
   }; // class DumpPFParticles
   
@@ -190,9 +192,19 @@ namespace {
   class ParticleDumper {
       public:
     
+    /// Collection of available printing style options
+    struct PrintOptions_t {
+      bool hexFloats = false; ///< print all floating point numbers in base 16
+    }; // PrintOptions_t
+    
+    
     /// Constructor; will dump particles from the specified list
-    ParticleDumper(std::vector<recob::PFParticle> const& particle_list)
+    ParticleDumper(
+      std::vector<recob::PFParticle> const& particle_list,
+      PrintOptions_t print_options = {}
+      )
       : particles(particle_list)
+      , options(print_options)
       , visited(particles.size(), 0U)
       , particle_map (CreateMap(particles))
       {
@@ -230,6 +242,8 @@ namespace {
       (Stream&& out, size_t iPart, std::string indentstr = "")
       const
       {
+        lar::OptionalHexFloat hexfloat(options.hexFloats);
+        
         recob::PFParticle const& part = particles.at(iPart);
         bool const isPrimary = part.IsPrimary();
         ++visited[iPart];
@@ -254,7 +268,8 @@ namespace {
             std::array<double, 3> vtx_pos;
             vertex.XYZ(vtx_pos.data());
             out << " [decay at ("
-              << vtx_pos[0] << "," << vtx_pos[1] << "," << vtx_pos[2]
+              << hexfloat(vtx_pos[0]) << "," << hexfloat(vtx_pos[1])
+              << "," << hexfloat(vtx_pos[2])
               << "), ID=" << vertex.ID() << "]";
           }
           else {
@@ -274,11 +289,13 @@ namespace {
           if (myAxes.empty())
             out << " [no axis found!]";
           else {
-            auto printDirection = [](auto& out, recob::PCAxis const& axis){
+            auto printDirection
+              = [&hexfloat](auto& out, recob::PCAxis const& axis)
+              {
               out << "axis ID=" << axis.getID() << ", principal: ("
-                  << axis.getEigenVectors()[0][0]
-                  << ", " << axis.getEigenVectors()[0][1]
-                  << ", " << axis.getEigenVectors()[0][2] << ")";
+                  << hexfloat(axis.getEigenVectors()[0][0])
+                  << ", " << hexfloat(axis.getEigenVectors()[0][1])
+                  << ", " << hexfloat(axis.getEigenVectors()[0][2]) << ")";
               };
             if (myAxes.size() == 1) {
               printDirection(out, *(myAxes.front()));
@@ -304,13 +321,13 @@ namespace {
               << myTracks.size() << " tracks:";
             for (recob::Track const* track: myTracks) {
               if (myTracks.size() > 1) out << "\n" << indentstr << "   ";
-              out << " length " << track->Length()
-                << "cm from (" << track->Vertex().X()
-                  << ";" << track->Vertex().Y()
-                  << ";" << track->Vertex().Z()
-                << ") to (" << track->End().X()
-                  << ";" << track->End().Y()
-                  << ";" << track->End().Z()
+              out << " length " << hexfloat(track->Length())
+                << "cm from (" << hexfloat(track->Vertex().X())
+                  << ";" << hexfloat(track->Vertex().Y())
+                  << ";" << hexfloat(track->Vertex().Z())
+                << ") to (" << hexfloat(track->End().X())
+                  << ";" << hexfloat(track->End().Y())
+                  << ";" << hexfloat(track->End().Z())
                 << ") (ID=" << track->ID() << ")";
             } // for clusters
           }
@@ -333,9 +350,11 @@ namespace {
               seed->GetDirection(dir.data(), nullptr);
               seed->GetPoint(start.data(), nullptr);
               out << "\n" << indentstr
-                << "    (" << start[0] << "," << start[1] << "," << start[2]
-                << ")=>(" << dir[0] << "," << dir[1] << "," << dir[2]
-                << "), " << seed->GetLength() << " cm"
+                << "    (" << hexfloat(start[0]) << "," << hexfloat(start[1])
+                << "," << hexfloat(start[2])
+                << ")=>(" << hexfloat(dir[0]) << "," << hexfloat(dir[1])
+                << "," << hexfloat(dir[2])
+                << "), " << hexfloat(seed->GetLength()) << " cm"
                 ;
             } // for seeds
           } // if we have seeds
@@ -358,7 +377,8 @@ namespace {
               recob::SpacePoint const& sp = *(mySpacePoints[iSP]);
               const double* pos = sp.XYZ();
               out << "  ID=" << sp.ID()
-                << " at (" << pos[0] << "," << pos[1] << "," << pos[2] << ") cm"
+                << " at (" << hexfloat(pos[0]) << "," << hexfloat(pos[1])
+                << "," << hexfloat(pos[2]) << ") cm"
                 ;
             } // for seeds
           } // if we have space points
@@ -485,6 +505,8 @@ namespace {
       protected:
     std::vector<recob::PFParticle> const& particles; ///< input list
     
+    PrintOptions_t options; ///< printing and formatting options
+    
     /// Associated vertices (expected same order as for particles)
     art::FindOne<recob::Vertex> const* vertices = nullptr;
     
@@ -526,6 +548,7 @@ namespace recob {
     , fInputTag(pset.get<art::InputTag>("PFModuleLabel", "pandora"))
     , fOutputCategory
         (pset.get<std::string>("OutputCategory", "DumpPFParticles"))
+    , fPrintHexFloats(pset.get<bool>("PrintHexFloats", false))
     {}
   
   
@@ -558,7 +581,9 @@ namespace recob {
       << fInputTag.encode() << "'";
     
     // prepare the dumper
-    ParticleDumper dumper(*PFParticles);
+    ParticleDumper::PrintOptions_t options;
+    options.hexFloats = fPrintHexFloats;
+    ParticleDumper dumper(*PFParticles, options);
     if (ParticleVertices.isValid()) dumper.SetVertices(&ParticleVertices);
     else mf::LogPrint("DumpPFParticles") << "WARNING: vertex information not available";
     if (ParticleTracks.isValid()) dumper.SetTracks(&ParticleTracks);

@@ -54,6 +54,11 @@ namespace recob {
         Comment("the category used for the output (useful for filtering) [\"DumpPCAxes\"]"),
         "DumpPCAxes" /* default value */
         };
+      fhicl::Atom<bool> PrintHexFloats {
+        Name   ("PrintHexFloats"),
+        Comment("print floating point numbers in base 16 [\"DumpPCAxes\"]"),
+        false /* default value */
+        };
       
     }; // struct Config
     
@@ -67,6 +72,7 @@ namespace recob {
 
     art::InputTag fInputTag; ///< input tag of the PCAxis product
     std::string fOutputCategory; ///< category for LogInfo output
+    bool fPrintHexFloats; ///< whether to print floats in base 16
 
   }; // class DumpPCAxes
   
@@ -99,9 +105,19 @@ namespace {
   class PCAxisDumper {
       public:
     
+    /// Collection of available printing style options
+    struct PrintOptions_t {
+      bool hexFloats = false; ///< print all floating point numbers in base 16
+    }; // PrintOptions_t
+    
+    
     /// Constructor; will dump space points from the specified list
-    PCAxisDumper(std::vector<recob::PCAxis> const& pca_list)
+    PCAxisDumper(
+      std::vector<recob::PCAxis> const& pca_list,
+      PrintOptions_t print_options = {}
+      )
       : pcas(pca_list)
+      , options(print_options)
       {}
     
     
@@ -145,6 +161,8 @@ namespace {
       protected:
     std::vector<recob::PCAxis> const& pcas; ///< input list
     
+    PrintOptions_t options; ///< printing and formatting options
+    
   }; // PCAxisDumper
   
   
@@ -162,6 +180,7 @@ namespace recob {
     : EDAnalyzer(config)
     , fInputTag(config().PCAxisModuleLabel())
     , fOutputCategory(config().OutputCategory())
+    , fPrintHexFloats(config().PrintHexFloats())
     {}
   
   
@@ -180,7 +199,9 @@ namespace recob {
       << fInputTag.encode() << "'";
     
     // prepare the dumper
-    PCAxisDumper dumper(*PCAxes);
+    PCAxisDumper::PrintOptions_t options;
+    options.hexFloats = fPrintHexFloats;
+    PCAxisDumper dumper(*PCAxes, options);
     
     dumper.DumpAllPCAxes(mf::LogVerbatim(fOutputCategory), "  ");
     
