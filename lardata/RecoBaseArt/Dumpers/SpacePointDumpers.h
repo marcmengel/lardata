@@ -38,7 +38,7 @@ namespace recob {
        * 
        * By default, the options are:
        * 
-       *  * indentation string: two spaces
+       *  * no indentation
        *  * same indentation for the first and the following lines
        *  * real numbers printed in base 10
        * 
