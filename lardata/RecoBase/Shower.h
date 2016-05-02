@@ -28,13 +28,13 @@ namespace recob {
 
     int fID;
     TVector3 fDCosStart;             ///< direction cosines at start of shower
-    TVector3 fSigmaDCosStart;        ///< uncertainting on initial direction cosines
+    TVector3 fSigmaDCosStart;        ///< uncertainty on initial direction cosines
     TVector3 fXYZstart;             ///< direction cosines at start of shower
-    TVector3 fSigmaXYZstart;        ///< uncertainting on initial direction cosines
+    TVector3 fSigmaXYZstart;        ///< uncertainty on initial direction cosines
     std::vector< double > fTotalEnergy;           ///< Calculated Energy per each plane
     std::vector< double > fSigmaTotalEnergy;           ///< Calculated Energy per each plane
-    std::vector< double > fdEdx;           ///< Calculated dEdx per each plane
-    std::vector< double > fSigmadEdx;           ///< Calculated dEdx per each plane
+    std::vector< double > fdEdx;           ///< Calculated dE/dx per each plane
+    std::vector< double > fSigmadEdx;           ///< Calculated dE/dx per each plane
     
     std::vector< double > fTotalMIPEnergy;           ///< Calculated Energy per each plane
     std::vector< double > fSigmaTotalMIPEnergy;           ///< Calculated Energy per each plane
@@ -44,10 +44,10 @@ namespace recob {
 
   public:
 
-    Shower(TVector3& dcosVtx,
-	   TVector3& dcosVtxErr,
-	   TVector3& xyz,
-	   TVector3& xyzErr,
+    Shower(TVector3 const& dcosVtx,
+	   TVector3 const& dcosVtxErr,
+	   TVector3 const& xyz,
+	   TVector3 const& xyzErr,
 	   std::vector< double >  TotalEnergy,
 	   std::vector< double >  TotalEnergyErr,
 	   std::vector< double >  dEdx,
