@@ -9,6 +9,7 @@
 
 #include "lardata/RecoBase/Shower.h"
 
+#include <utility> // std::move()
 #include <iomanip>
 #include <iostream>
 
@@ -20,10 +21,10 @@ namespace recob{
   }
 
   //----------------------------------------------------------------------
-  Shower::Shower(TVector3& dcosVtx,
-	   TVector3& dcosVtxErr,
-	   TVector3& xyz,
-	   TVector3& xyzErr,
+  Shower::Shower(TVector3 const& dcosVtx,
+	   TVector3 const& dcosVtxErr,
+	   TVector3 const& xyz,
+	   TVector3 const& xyzErr,
 	   std::vector< double >  TotalEnergy,
 	   std::vector< double >  TotalEnergyErr,
 	   std::vector< double >  dEdx,
@@ -35,10 +36,10 @@ namespace recob{
     , fSigmaDCosStart(dcosVtxErr)
     , fXYZstart(xyz)
     , fSigmaXYZstart(xyzErr)
-    , fTotalEnergy(TotalEnergy)
-    , fSigmaTotalEnergy(TotalEnergyErr)
-    , fdEdx(dEdx)
-    , fSigmadEdx(dEdxErr)
+    , fTotalEnergy(std::move(TotalEnergy))
+    , fSigmaTotalEnergy(std::move(TotalEnergyErr))
+    , fdEdx(std::move(dEdx))
+    , fSigmadEdx(std::move(dEdxErr))
     , fBestPlane(bestplane)
   {
    
