@@ -22,7 +22,6 @@ argoneut_services:
  LArFFT:                        @local::argoneut_larfft
  DatabaseUtil:                  @local::argoneut_database
  BackTracker:                   @local::argoneut_backtracker
- SeedService:                   @local::argoneut_seedservice
  DetectorClocksService:         @local::argoneut_detectorclocks
  ChannelStatusService:         @local::argoneut_channelstatus
 }
@@ -39,7 +38,7 @@ argoneut_simulation_services:
  LArFFT:                 @local::argoneut_larfft
  DatabaseUtil:           @local::argoneut_database
  BackTracker:            @local::argoneut_backtracker
- SeedService:            @local::argoneut_seedservice
+ LArSeedService:            @local::argoneut_seedservice
  DetectorClocksService:  @local::argoneut_detectorclocks
  ChannelStatusService:  @local::argoneut_channelstatus
 }
