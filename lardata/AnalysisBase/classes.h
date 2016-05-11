@@ -76,6 +76,7 @@ template class std::pair< art::Ptr<recob::Shower>,     art::Ptr<anab::Calorimetr
 template class std::pair< art::Ptr<anab::ParticleID>,  art::Ptr<recob::Track>        >;
 template class std::pair< art::Ptr<recob::Track>,      art::Ptr<anab::ParticleID>    >;
 template class std::pair< art::Ptr<recob::Track>,      art::Ptr<anab::MVAPIDResult>     >;
+template class std::pair< art::Ptr<recob::Shower>,      art::Ptr<anab::MVAPIDResult>     >;
 template class std::pair< art::Ptr<anab::FlashMatch>,  art::Ptr<recob::OpFlash>      >;
 template class std::pair< art::Ptr<recob::OpFlash>,    art::Ptr<anab::FlashMatch>    >;
 template class std::pair< art::Ptr<anab::FlashMatch>,  art::Ptr<recob::Track>        >;
@@ -112,7 +113,9 @@ template class art::Assns<recob::Shower,     anab::Calorimetry, void>;
 template class art::Assns<anab::ParticleID,  recob::Track,     	void>;
 template class art::Assns<recob::Track,      anab::ParticleID,  void>;
 template class art::Assns<anab::MVAPIDResult,   recob::Track,   void>;
+template class art::Assns<anab::MVAPIDResult,   recob::Shower,   void>;
 template class art::Assns<recob::Track,      anab::MVAPIDResult,void>;
+template class art::Assns<recob::Shower,      anab::MVAPIDResult,void>;
 
 template class art::Assns<recob::Track,      anab::FlashMatch,  void>;
 template class art::Assns<recob::OpFlash,    anab::FlashMatch,  void>;
@@ -149,7 +152,9 @@ template class art::Wrapper< art::Assns<recob::Shower,     anab::Calorimetry, vo
 template class art::Wrapper< art::Assns<anab::ParticleID,  recob::Track,      void> >;
 template class art::Wrapper< art::Assns<recob::Track,      anab::ParticleID,  void> >;
 template class art::Wrapper< art::Assns<anab::MVAPIDResult,   recob::Track,   void> >;
+template class art::Wrapper< art::Assns<anab::MVAPIDResult,   recob::Shower,   void> >;
 template class art::Wrapper< art::Assns<recob::Track,      anab::MVAPIDResult,void> >;
+template class art::Wrapper< art::Assns<recob::Shower,      anab::MVAPIDResult,void> >;
 template class art::Wrapper< art::Assns<recob::Track,      anab::FlashMatch,  void> >;
 template class art::Wrapper< art::Assns<recob::OpFlash,    anab::FlashMatch,  void> >;
 template class art::Wrapper< art::Assns<anab::FlashMatch,  recob::Track,      void> >;

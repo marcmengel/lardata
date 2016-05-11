@@ -59,6 +59,7 @@
  <class name="std::pair< art::Ptr<recob::Track>,      art::Ptr<anab::ParticleID> >"    />
  <class name="std::pair< art::Ptr<anab::ParticleID>, art::Ptr<recob::Track>      >"    />
  <class name="std::pair< art::Ptr<recob::Track>,     art::Ptr<anab::MVAPIDResult>   >" /> 
+ <class name="std::pair< art::Ptr<recob::Shower>,     art::Ptr<anab::MVAPIDResult>   >" /> 
  <class name="std::pair< art::Ptr<anab::FlashMatch>, art::Ptr<recob::Track>      >"    />  
  <class name="std::pair< art::Ptr<anab::FlashMatch>, art::Ptr<recob::OpFlash>      >"    />  
  <class name="std::pair< art::Ptr<recob::OpFlash>, art::Ptr<anab::FlashMatch>      >"    />  
@@ -84,7 +85,9 @@
  <class name="art::Assns<recob::Track,      anab::ParticleID,  void>"	               />
  <class name="art::Assns<anab::ParticleID, recob::Track,       void>"	               />
  <class name="art::Assns<recob::Track,       anab::MVAPIDResult,  void>"               />
+ <class name="art::Assns<recob::Shower,       anab::MVAPIDResult,  void>"               />
  <class name="art::Assns<anab::MVAPIDResult, recob::Track,        void>"               />
+ <class name="art::Assns<anab::MVAPIDResult, recob::Shower,        void>"               />
  <class name="art::Assns<anab::FlashMatch, recob::Track,       void>"	               />
  <class name="art::Assns<anab::FlashMatch, recob::OpFlash,       void>"	               />
  <class name="art::Assns<recob::Track,     anab::FlashMatch,   void>"	               />
@@ -121,7 +124,9 @@
  <class name="art::Wrapper<art::Assns<anab::ParticleID,  recob::Track,       void> >"   />
  <class name="art::Wrapper< std::vector<anab::MVAPIDResult> >"                          />
  <class name="art::Wrapper< art::Assns<recob::Track,     anab::MVAPIDResult,   void> >"   />
+ <class name="art::Wrapper< art::Assns<recob::Shower,     anab::MVAPIDResult,   void> >"   />
  <class name="art::Wrapper< art::Assns<anab::MVAPIDResult,  recob::Track,     void> >"    />
+ <class name="art::Wrapper< art::Assns<anab::MVAPIDResult,  recob::Shower,     void> >"    />
  <class name="art::Wrapper< std::vector<anab::FlashMatch>       	>"	       />
  <class name="art::Wrapper<art::Assns<anab::FlashMatch, recob::OpFlash,  void> >"  />
  <class name="art::Wrapper<art::Assns<anab::FlashMatch,  recob::Track,       void> >"  />
