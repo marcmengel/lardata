@@ -20,6 +20,46 @@ cet_test( LArPropertiesBo_test
 )
 
 
-install_headers()
-install_fhicl()
-install_source()
+cet_test( DetectorClocksStandard_test
+  LIBRARIES
+    lardata_DetectorInfo
+  DATAFILES clockstest_standard.fcl
+  TEST_ARGS ./clockstest_standard.fcl
+)
+
+cet_test( DetectorClocksLArTPCdetector_test
+  HANDBUILT
+  DATAFILES clockstest_lartpcdetector.fcl
+  TEST_EXEC DetectorClocksStandard_test
+  TEST_ARGS ./clockstest_lartpcdetector.fcl
+)
+
+cet_test( DetectorClocksBo_test
+  HANDBUILT
+  DATAFILES clockstest_bo.fcl
+  TEST_EXEC DetectorClocksStandard_test
+  TEST_ARGS ./clockstest_bo.fcl
+)
+
+cet_test( DetectorClocksCSU40L_test
+  HANDBUILT
+  DATAFILES clockstest_csu40l.fcl
+  TEST_EXEC DetectorClocksStandard_test
+  TEST_ARGS ./clockstest_csu40l.fcl
+)
+
+
+cet_test( DetectorPropertiesLArTPCdetector_test
+  HANDBUILT
+  DATAFILES dettest_lartpcdetector.fcl
+  TEST_EXEC DetectorPropertiesStandard_test
+  TEST_ARGS ./dettest_lartpcdetector.fcl
+)
+
+cet_test( DetectorPropertiesBo_test
+  HANDBUILT
+  DATAFILES dettest_bo.fcl
+  TEST_EXEC DetectorPropertiesStandard_test
+  TEST_ARGS ./dettest_bo.fcl
+)
+

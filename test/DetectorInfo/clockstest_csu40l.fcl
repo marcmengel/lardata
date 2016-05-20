@@ -1,0 +1,27 @@
+#
+# File:    clockstest_csu40l.fcl
+# Purpose: test loading of DetectorClocksService service with CSU 40L configuration
+# Author:  Gianluca Petrillo (petrillo@fnal.gov)
+# Date:    May 9th, 2016
+# Version: 1.0
+# 
+# Description:
+# Test to load DetectorClocksService (or its provider).
+# No test module is actually run, but the service is constructed.
+# This test triggers construction, configuration and its validation.
+# 
+# Dependencies:
+# - DetectorClocksService service and its dependencies (none to date)
+# 
+# Changes:
+# 20160506 (petrillo@fnal.gov) [v1.0]
+#   first version
+#
+
+#include "detectorclocks_csu40l.fcl"
+
+process_name: DetClocksStandardTest
+
+services: {
+  DetectorClocksService: @local::csu40L_detectorclocks
+}

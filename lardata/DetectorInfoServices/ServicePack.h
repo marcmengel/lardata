@@ -10,7 +10,7 @@
 #define DETECTORINFOSERVICE_SERVICEPACK_H 1
 
 // LArSoft libraries
-#include "lardata/DetectorInfo/ProviderPack.h"
+#include "larcore/CoreUtils/ProviderPack.h"
 #include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom()
 
 
