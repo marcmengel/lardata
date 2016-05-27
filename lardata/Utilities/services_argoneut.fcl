@@ -10,6 +10,7 @@
 #include "seedservice_argoneut.fcl"
 #include "detectorclocks_argoneut.fcl"
 #include "channelstatus_argoneut.fcl"
+#include "spacecharge.fcl" 
 
 BEGIN_PROLOG
 
@@ -23,24 +24,26 @@ argoneut_services:
  DatabaseUtil:                  @local::argoneut_database
  BackTracker:                   @local::argoneut_backtracker
  DetectorClocksService:         @local::argoneut_detectorclocks
- ChannelStatusService:         @local::argoneut_channelstatus
+ ChannelStatusService:          @local::argoneut_channelstatus
+ SpaceCharge:                   @local::standard_spacecharge 
 }
 
 argoneut_simulation_services:
 {
- LArG4Parameters:        @local::argoneut_largeantparameters
- LArVoxelCalculator:     @local::argoneut_larvoxelcalculator
- MagneticField:          @local::no_mag
- ExptGeoHelperInterface: @local::argoneut_geometry_helper
- Geometry:               @local::argoneut_geo
+ LArG4Parameters:               @local::argoneut_largeantparameters
+ LArVoxelCalculator:            @local::argoneut_larvoxelcalculator
+ MagneticField:                 @local::no_mag
+ ExptGeoHelperInterface:        @local::argoneut_geometry_helper
+ Geometry:                      @local::argoneut_geo
  DetectorPropertiesService:     @local::argoneut_detproperties
  LArPropertiesService:          @local::argoneut_properties
- LArFFT:                 @local::argoneut_larfft
- DatabaseUtil:           @local::argoneut_database
- BackTracker:            @local::argoneut_backtracker
- LArSeedService:            @local::argoneut_seedservice
- DetectorClocksService:  @local::argoneut_detectorclocks
- ChannelStatusService:  @local::argoneut_channelstatus
+ LArFFT:                        @local::argoneut_larfft
+ DatabaseUtil:                  @local::argoneut_database
+ BackTracker:                   @local::argoneut_backtracker
+ LArSeedService:                @local::argoneut_seedservice
+ DetectorClocksService:         @local::argoneut_detectorclocks
+ ChannelStatusService:          @local::argoneut_channelstatus
+ SpaceCharge:                   @local::standard_spacecharge 
 }
 
 
