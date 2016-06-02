@@ -1,4 +1,4 @@
-#include "art/Persistency/Common/Wrapper.h"
+#include "canvas/Persistency/Common/Wrapper.h"
 /*
   Do not export MCWire* classes as data products at the moment as there's not really any use case for it.
   Once diffusion is correctly implemented, I can put back in.

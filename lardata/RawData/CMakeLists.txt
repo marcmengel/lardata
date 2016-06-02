@@ -3,7 +3,7 @@
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 
 art_make( 
-          LIB_LIBRARIES ${ART_PERSISTENCY_COMMON}
+          LIB_LIBRARIES art_Persistency_Common canvas_Persistency_Common
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 			${CETLIB}

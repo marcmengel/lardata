@@ -29,7 +29,7 @@
 // #include <bitset>
 
 // LArSoft libraries
-#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::Compress_t, raw::Channel_t
+#include "larcoreobj/SimpleTypesAndConstants/RawTypes.h" // raw::Compress_t, raw::Channel_t
 
 
 /// Raw data description and utilities

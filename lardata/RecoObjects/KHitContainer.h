@@ -49,7 +49,7 @@
 #include "lardata/RecoObjects/KHitGroup.h"
 #include "lardata/RecoObjects/KTrack.h"
 #include "lardata/RecoObjects/Propagator.h"
-#include "art/Persistency/Common/PtrVector.h"
+#include "canvas/Persistency/Common/PtrVector.h"
 #include "lardata/RecoBase/Hit.h"
 
 

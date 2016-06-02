@@ -30,13 +30,13 @@
  * (for example, a random seed).
  */
 #define BOOST_TEST_MODULE ( hit_test )
-#include "boost/test/auto_unit_test.hpp" // BOOST_AUTO_TEST_CASE()
+#include "cetlib/quiet_unit_test.hpp" // BOOST_AUTO_TEST_CASE()
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 #include <boost/test/floating_point_comparison.hpp> // BOOST_CHECK_CLOSE()
 
 // LArSoft libraries
-#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t, raw::TDCtick_t
-#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t
+#include "larcoreobj/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t, raw::TDCtick_t
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::View_t
 #include "lardata/RecoBase/Hit.h"
 
 

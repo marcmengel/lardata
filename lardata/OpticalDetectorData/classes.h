@@ -1,7 +1,7 @@
 // The headers required to built the ART dictionary for this
 // package. Also see classes_def.xml.
 
-#include "art/Persistency/Common/Wrapper.h"
+#include "canvas/Persistency/Common/Wrapper.h"
 #include "lardata/OpticalDetectorData/OpticalTypes.h"
 #include "lardata/OpticalDetectorData/ChannelData.h"
 #include "lardata/OpticalDetectorData/ChannelDataGroup.h"

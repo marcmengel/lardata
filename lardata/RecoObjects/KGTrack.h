@@ -27,8 +27,8 @@
 
 #include <map>
 
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/PtrVector.h"
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/PtrVector.h"
 
 #include "lardata/RecoObjects/KHitTrack.h"
 #include "lardata/RecoBase/Track.h"

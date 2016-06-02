@@ -15,9 +15,9 @@
 //    plans to fix it soon.  We can always work around it 
 //    by putting the string inside another object.
 
-#include "art/Persistency/Common/PtrVector.h" 
-#include "art/Persistency/Common/Wrapper.h"
-#include "art/Persistency/Common/Assns.h"
+#include "canvas/Persistency/Common/PtrVector.h" 
+#include "canvas/Persistency/Common/Wrapper.h"
+#include "canvas/Persistency/Common/Assns.h"
 
 #include "lardata/AnalysisBase/Calorimetry.h"
 #include "lardata/AnalysisBase/ParticleID.h"

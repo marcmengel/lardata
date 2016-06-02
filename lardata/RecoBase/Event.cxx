@@ -8,7 +8,7 @@
 ////////////////////////////////////////////////////////////////////////////
 #include "lardata/RecoBase/Event.h"
 
-#include "larcore/SimpleTypesAndConstants/PhysicalConstants.h"
+#include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
 #include "lardata/RecoBase/Vertex.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"

@@ -12,11 +12,11 @@
  * We can always work around it by putting the string inside another object.
  */
 
-#include "art/Persistency/Common/PtrVector.h" 
-#include "art/Persistency/Common/Wrapper.h"
-#include "art/Persistency/Common/Assns.h"
+#include "canvas/Persistency/Common/PtrVector.h" 
+#include "canvas/Persistency/Common/Wrapper.h"
+#include "canvas/Persistency/Common/Assns.h"
 
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "lardata/RawData/RawDigit.h"
 #include "lardata/RecoBase/Cluster.h"
 #include "lardata/RecoBase/Hit.h"

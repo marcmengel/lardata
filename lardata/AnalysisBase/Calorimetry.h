@@ -15,7 +15,7 @@
 #include <iomanip>
 #include <TVector3.h>
 
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 
 namespace anab {
 

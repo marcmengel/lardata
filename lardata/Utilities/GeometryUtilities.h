@@ -21,8 +21,8 @@
 
 #include "lardata/RecoBase/Hit.h"
 #include "larcore/Geometry/GeometryCore.h"
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
-#include "art/Persistency/Common/Ptr.h" 
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
+#include "canvas/Persistency/Common/Ptr.h" 
 
 #include <climits>
 #include <iostream>

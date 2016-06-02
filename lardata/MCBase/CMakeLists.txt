@@ -2,7 +2,7 @@
 art_make( 
 	  
           LIB_LIBRARIES
-			SimulationBase
+			nusimdata_SimulationBase
 			${ROOT_BASIC_LIB_LIST}
                         ${ROOT_EG}
 )

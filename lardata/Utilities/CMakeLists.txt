@@ -6,9 +6,9 @@ art_make( NO_PLUGINS
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
-                        ${ART_PERSISTENCY_COMMON}
-                        ${ART_PERSISTENCY_PROVENANCE}
-                        ${ART_UTILITIES}
+                        art_Persistency_Common canvas_Persistency_Common
+                        art_Persistency_Provenance canvas_Persistency_Provenance
+                        art_Utilities canvas_Utilities
                         ${MF_MESSAGELOGGER}
                         ${MF_UTILITIES}
                         ${CETLIB}
@@ -18,12 +18,12 @@ art_make( NO_PLUGINS
 #simple_plugin(TimeService "service"
 #	      lardata_RawData
 #             lardata_Utilities_DatabaseUtil_service
-# 	      ${ART_UTILITIES}
+# 	      art_Utilities canvas_Utilities
 #	      ${ART_FRAMEWORK_CORE}
 # 	      ${ART_FRAMEWORK_PRINCIPAL}
 # 	      ${ART_PERSISTENCY_ROOTDB}
-# 	      ${ART_PERSISTENCY_COMMON}
-# 	      ${ART_PERSISTENCY_PROVENANCE}
+# 	      art_Persistency_Common canvas_Persistency_Common
+# 	      art_Persistency_Provenance canvas_Persistency_Provenance
 # 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
 # 	      ${MF_MESSAGELOGGER}
 # 	      ${MF_UTILITIES}
@@ -40,16 +40,16 @@ simple_plugin(DatabaseUtil "service"
 	      ${FHICLCPP}
 	      ${CETLIB}
 	      ${PQ}
-	      ${ART_UTILITIES}
+	      art_Utilities canvas_Utilities
               ${ART_FRAMEWORK_CORE}
               ${ART_FRAMEWORK_PRINCIPAL}
               ${ART_PERSISTENCY_ROOTDB}
-              ${ART_PERSISTENCY_COMMON}
-              ${ART_PERSISTENCY_PROVENANCE}
+              art_Persistency_Common canvas_Persistency_Common
+              art_Persistency_Provenance canvas_Persistency_Provenance
               ${ART_FRAMEWORK_SERVICES_REGISTRY}
 )
 simple_plugin(FileCatalogMetadataExtras "service"
-	      ${ART_UTILITIES}
+	      art_Utilities canvas_Utilities
 	      ${ART_PERSISTENCY_ROOTDB}
 	      ${ART_FRAMEWORK_CORE}
 	      ${ART_FRAMEWORK_PRINCIPAL}
@@ -64,7 +64,7 @@ simple_plugin(FileCatalogMetadataExtras "service"
 
 simple_plugin(LArPropertiesServiceArgoNeuT "service"
               lardata_Utilities_DatabaseUtil_service
-              ${ART_UTILITIES}
+              art_Utilities canvas_Utilities
               ${MF_MESSAGELOGGER}
               ${MF_UTILITIES}
               ${CETLIB}
@@ -86,7 +86,7 @@ simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
 )
 
 simple_plugin(LArFFT "service"
-	      ${ART_UTILITIES}
+	      art_Utilities canvas_Utilities
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
 	      ${FHICLCPP}
@@ -97,10 +97,10 @@ simple_plugin(LArFFT "service"
 )
 
 simple_plugin(MemoryPeakReporter "service"
-              ${ART_UTILITIES}
+              art_Utilities canvas_Utilities
               ${ART_FRAMEWORK_SERVICES_REGISTRY}
               ${ART_FRAMEWORK_PRINCIPAL}
-              ${ART_PERSISTENCY_PROVENANCE}
+              art_Persistency_Provenance canvas_Persistency_Provenance
               ${MF_MESSAGELOGGER}
               ${MF_UTILITIES}
               ${FHICLCPP}

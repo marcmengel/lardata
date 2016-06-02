@@ -21,11 +21,11 @@
 
 // framework libraries
 #include "messagefacility/MessageLogger/MessageLogger.h" 
-#include "art/Utilities/Exception.h"
-#include "art/Utilities/InputTag.h"
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/Assns.h" 
-#include "art/Persistency/Provenance/ProductID.h"
+#include "canvas/Utilities/Exception.h"
+#include "canvas/Utilities/InputTag.h"
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/Assns.h" 
+#include "canvas/Persistency/Provenance/ProductID.h"
 #include "art/Framework/Principal/Event.h" 
 
 /// LArSoft-specific namespace

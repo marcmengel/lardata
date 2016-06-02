@@ -16,10 +16,10 @@
 #include <utility> // std::move()
 
 // framework libraries
-#include "art/Utilities/InputTag.h"
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/Assns.h"
-#include "art/Persistency/Provenance/ProductID.h"
+#include "canvas/Utilities/InputTag.h"
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/Assns.h"
+#include "canvas/Persistency/Provenance/ProductID.h"
 
 // LArSoft libraries
 #include "lardata/RawData/RawDigit.h"

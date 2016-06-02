@@ -29,8 +29,8 @@
 #endif
 
 // LArSoft libraries
-#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t, geo::SignalType, geo::WireID
-#include "larcore/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::View_t, geo::SignalType, geo::WireID
+#include "larcoreobj/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 
 
 namespace recob {

@@ -17,7 +17,7 @@
 
 #include <vector>
 #include "MCStep.h"
-#include "SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
 
 namespace sim{
 

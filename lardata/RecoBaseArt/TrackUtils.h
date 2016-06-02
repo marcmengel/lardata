@@ -16,7 +16,7 @@
 
 // LArSoft libraries
 #include "lardata/RecoBase/Track.h"
-#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::View_t
 
 
 namespace lar {

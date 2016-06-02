@@ -9,7 +9,7 @@
 
 #include <vector>
 #include <boost/circular_buffer.hpp>
-#include "larcore/SimpleTypesAndConstants/RawTypes.h"
+#include "larcoreobj/SimpleTypesAndConstants/RawTypes.h"
 
 namespace raw{
 

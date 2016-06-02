@@ -29,11 +29,11 @@
  * (for example, a random seed).
  */
 #define BOOST_TEST_MODULE ( cluster_test )
-#include "boost/test/auto_unit_test.hpp" // BOOST_AUTO_TEST_CASE()
+#include "cetlib/quiet_unit_test.hpp" // BOOST_AUTO_TEST_CASE()
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // LArSoft libraries
-#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::View_t
 #include "lardata/RecoBase/Cluster.h"
 
 

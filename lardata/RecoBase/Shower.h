@@ -11,7 +11,7 @@
 
 #ifndef __GCCXML__
 #include <iosfwd>
-#include "larcore/SimpleTypesAndConstants/PhysicalConstants.h"
+#include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
 #endif
 
 #include "TVector3.h"

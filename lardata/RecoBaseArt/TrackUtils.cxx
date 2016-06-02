@@ -11,7 +11,7 @@
 #include "lardata/RecoBaseArt/TrackUtils.h"
 
 // LArSoft libraries
-#include "larcore/SimpleTypesAndConstants/PhysicalConstants.h" // util::pi()
+#include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h" // util::pi()
 #include "larcore/Geometry/Geometry.h"
 #include "larcore/Geometry/PlaneGeo.h"
 #include "larcore/Geometry/WireGeo.h"

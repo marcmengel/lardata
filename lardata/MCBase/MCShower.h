@@ -19,7 +19,7 @@
 #include "lardata/MCBase/MCStep.h"
 
 // Supporting tools
-#include "SimulationBase/MCTruth.h"
+#include "nusimdata/SimulationBase/MCTruth.h"
 
 // ROOT libraries
 #include <TVector3.h>

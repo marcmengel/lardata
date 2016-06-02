@@ -16,7 +16,7 @@
 //    plans to fix it soon.  We can always work around it 
 //    by putting the string inside another object.
 
-#include "art/Persistency/Common/Wrapper.h"
+#include "canvas/Persistency/Common/Wrapper.h"
 
 #include "lardata/RawData/DAQHeader.h"
 #include "lardata/RawData/RawDigit.h"

@@ -10,7 +10,7 @@
 #ifndef RECOB_ENDPOINT2D_H
 #define RECOB_ENDPOINT2D_H
 
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 
 #ifndef __GCCXML__
 #include <iosfwd>
