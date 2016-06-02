@@ -1,7 +1,7 @@
 
 art_make( NO_PLUGINS
           LIB_LIBRARIES lardata_Utilities_LArFFT_service
-                        lardata_RecoBase
+                        lardataobj_RecoBase
                         larcore_Geometry
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
@@ -16,7 +16,7 @@ art_make( NO_PLUGINS
         )
 
 #simple_plugin(TimeService "service"
-#	      lardata_RawData
+#	      lardataobj_RawData
 #             lardata_Utilities_DatabaseUtil_service
 # 	      art_Utilities canvas_Utilities
 #	      ${ART_FRAMEWORK_CORE}

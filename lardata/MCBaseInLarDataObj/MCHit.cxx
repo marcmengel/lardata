@@ -1,6 +1,6 @@
 #ifndef MCHIT_CXX
 #define MCHIT_CXX
 
-#include "lardata/MCBase/MCHit.h"
+#include "lardataobj/MCBase/MCHit.h"
 
 #endif

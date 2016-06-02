@@ -21,7 +21,7 @@
 
 #include "larcoreobj/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
-#include "lardata/Utilities/sparse_vector.h"
+#include "lardataobj/Utilities/sparse_vector.h"
 
 
 // prototype declaration

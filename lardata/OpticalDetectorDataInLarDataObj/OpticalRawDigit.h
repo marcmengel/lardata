@@ -10,7 +10,7 @@
 #define optdata_OpticalRawDigit_h
 
 // LArSoft includes
-#include "lardata/OpticalDetectorData/FIFOChannel.h"
+#include "lardataobj/OpticalDetectorData/FIFOChannel.h"
 
 // C++ includes
 #include <vector>

@@ -4,7 +4,7 @@
 /// \modified by jti3@fnal.gov
 /// \version $Id: raw.cxx,v 2.0 2013/01/16  jti3 Exp $
 
-#include "lardata/RawData/raw.h"
+#include "lardataobj/RawData/raw.h"
 
 #include <iostream>
 #include <string>

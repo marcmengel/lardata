@@ -1,8 +1,8 @@
 
 art_make( 
           LIB_LIBRARIES lardata_AnalysisAlg
-                        lardata_AnalysisBase
-                        lardata_RecoBase
+                        lardataobj_AnalysisBase
+                        lardataobj_RecoBase
                         larcore_Geometry_Geometry_service
                         larcore_Geometry
                         ${ART_FRAMEWORK_CORE}

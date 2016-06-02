@@ -17,7 +17,7 @@
 #include "canvas/Persistency/Common/Assns.h"
 
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
-#include "lardata/RawData/RawDigit.h"
+#include "lardataobj/RawData/RawDigit.h"
 #include "lardata/RecoBase/Cluster.h"
 #include "lardata/RecoBase/Hit.h"
 #include "lardata/RecoBase/Shower.h"

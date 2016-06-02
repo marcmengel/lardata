@@ -18,14 +18,14 @@
 
 #include "canvas/Persistency/Common/Wrapper.h"
 
-#include "lardata/RawData/DAQHeader.h"
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/OpDetPulse.h"
-#include "lardata/RawData/AuxDetDigit.h"
-#include "lardata/RawData/BeamInfo.h"
-#include "lardata/RawData/ExternalTrigger.h"
-#include "lardata/RawData/TriggerData.h"
-#include "lardata/RawData/OpDetWaveform.h"
+#include "lardataobj/RawData/DAQHeader.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/OpDetPulse.h"
+#include "lardataobj/RawData/AuxDetDigit.h"
+#include "lardataobj/RawData/BeamInfo.h"
+#include "lardataobj/RawData/ExternalTrigger.h"
+#include "lardataobj/RawData/TriggerData.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
 
 //
 // Only include objects that we would like to be able to put into the event.

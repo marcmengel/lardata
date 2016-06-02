@@ -41,7 +41,7 @@
 
 // LArSoft libraries
 #include "larcoreobj/SimpleTypesAndConstants/RawTypes.h" // raw::Compress_t
-#include "lardata/RawData/raw.h"
+#include "lardataobj/RawData/raw.h"
 
 
 /// The seed for the default random engine

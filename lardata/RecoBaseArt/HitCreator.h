@@ -22,7 +22,7 @@
 #include "canvas/Persistency/Provenance/ProductID.h"
 
 // LArSoft libraries
-#include "lardata/RawData/RawDigit.h"
+#include "lardataobj/RawData/RawDigit.h"
 #include "lardata/RecoBase/Wire.h"
 #include "lardata/RecoBase/Hit.h"
 

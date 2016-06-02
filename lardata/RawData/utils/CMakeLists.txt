@@ -2,7 +2,7 @@
 art_make( NO_PLUGINS
           
 	  EXCLUDE LArRawInputDriverUBooNE.cxx
-          LIB_LIBRARIES lardata_RawData
+          LIB_LIBRARIES lardataobj_RawData
                         larcoreobj_SummaryData
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_IO_SOURCES}
@@ -42,7 +42,7 @@ art_make( NO_PLUGINS
         )
 
 simple_plugin(LArRawInputSource "source"
-  lardata_RawData
+  lardataobj_RawData
   lardata_RawData_utils
   ${ART_FRAMEWORK_CORE}
   ${ART_FRAMEWORK_IO_SOURCES}

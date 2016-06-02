@@ -7,7 +7,7 @@
 #define optdata_PMTTrigger_h
 
 // LArSoft includes
-#include "lardata/OpticalDetectorData/OpticalTypes.h"
+#include "lardataobj/OpticalDetectorData/OpticalTypes.h"
 
 // C++ includes
 #include <functional> // so we can redefine less<> below

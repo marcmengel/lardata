@@ -7,8 +7,8 @@
 #define optdata_FIFOChannel_h
 
 // LArSoft includes
-#include "lardata/OpticalDetectorData/OpticalTypes.h"
-#include "lardata/OpticalDetectorData/ChannelData.h"
+#include "lardataobj/OpticalDetectorData/OpticalTypes.h"
+#include "lardataobj/OpticalDetectorData/ChannelData.h"
 
 // C++ includes
 #include <vector>

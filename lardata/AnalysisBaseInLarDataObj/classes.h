@@ -19,12 +19,12 @@
 #include "canvas/Persistency/Common/Wrapper.h"
 #include "canvas/Persistency/Common/Assns.h"
 
-#include "lardata/AnalysisBase/Calorimetry.h"
-#include "lardata/AnalysisBase/ParticleID.h"
-#include "lardata/AnalysisBase/MVAPIDResult.h"
-#include "lardata/AnalysisBase/FlashMatch.h"
-#include "lardata/AnalysisBase/CosmicTag.h"
-#include "lardata/AnalysisBase/T0.h"
+#include "lardataobj/AnalysisBase/Calorimetry.h"
+#include "lardataobj/AnalysisBase/ParticleID.h"
+#include "lardataobj/AnalysisBase/MVAPIDResult.h"
+#include "lardataobj/AnalysisBase/FlashMatch.h"
+#include "lardataobj/AnalysisBase/CosmicTag.h"
+#include "lardataobj/AnalysisBase/T0.h"
 
 #include "lardata/RecoBase/OpFlash.h"
 #include "lardata/RecoBase/PFParticle.h"
@@ -34,7 +34,7 @@
 #include "lardata/RecoBase/Shower.h"
 #include "lardata/RecoBase/Cluster.h"
 
-#include "lardata/RawData/ExternalTrigger.h"
+#include "lardataobj/RawData/ExternalTrigger.h"
 
 
 // perform template instantiations

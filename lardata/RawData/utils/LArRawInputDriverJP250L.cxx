@@ -8,8 +8,8 @@
 
 #include "lardata/RawData/utils/LArRawInputDriverJP250L.h"
 
-#include "lardata/RawData/DAQHeader.h"
-#include "lardata/RawData/RawDigit.h"
+#include "lardataobj/RawData/DAQHeader.h"
+#include "lardataobj/RawData/RawDigit.h"
 #include "larcore/Geometry/Geometry.h"
 #include "larcoreobj/SummaryData/RunData.h"
 

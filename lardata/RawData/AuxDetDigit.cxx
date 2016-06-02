@@ -7,7 +7,7 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-#include "lardata/RawData/AuxDetDigit.h"
+#include "lardataobj/RawData/AuxDetDigit.h"
 
 #include "cetlib/exception.h"
 

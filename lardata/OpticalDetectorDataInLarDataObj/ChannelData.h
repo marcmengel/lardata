@@ -7,7 +7,7 @@
 #define OpticalDetectorData_ChannelData_h
 
 // LArSoft includes
-#include "lardata/OpticalDetectorData/OpticalTypes.h"
+#include "lardataobj/OpticalDetectorData/OpticalTypes.h"
 
 // C++ includes
 #include <vector>

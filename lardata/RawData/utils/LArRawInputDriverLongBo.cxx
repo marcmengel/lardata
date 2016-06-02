@@ -8,9 +8,9 @@
 
 #include "lardata/RawData/utils/LArRawInputDriverLongBo.h"
 
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/ExternalTrigger.h"
-#include "lardata/RawData/DAQHeader.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/ExternalTrigger.h"
+#include "lardataobj/RawData/DAQHeader.h"
 #include "larcore/Geometry/Geometry.h"
 #include "larcoreobj/SummaryData/RunData.h"
 

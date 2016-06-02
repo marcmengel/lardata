@@ -1,7 +1,7 @@
 
 simple_plugin(DetectorClocksServiceStandard "service"
               lardata_DetectorInfo
-	      lardata_RawData
+	      lardataobj_RawData
 	      art_Utilities canvas_Utilities
               ${ART_FRAMEWORK_CORE}
 	      ${ART_FRAMEWORK_PRINCIPAL}

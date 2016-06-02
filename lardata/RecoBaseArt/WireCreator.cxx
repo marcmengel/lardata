@@ -18,7 +18,7 @@
 
 // LArSoft libraries
 #include "larcore/Geometry/Geometry.h"
-#include "lardata/RawData/RawDigit.h"
+#include "lardataobj/RawData/RawDigit.h"
 #include "lardata/RecoBase/Wire.h"
 
 

@@ -1,7 +1,7 @@
 
 art_make( 
-          LIB_LIBRARIES lardata_RawData
-                        lardata_RecoBase
+          LIB_LIBRARIES lardataobj_RawData
+                        lardataobj_RecoBase
                         larcore_Geometry
                         larcore_Geometry_Geometry_service
                         ${ART_FRAMEWORK_CORE}

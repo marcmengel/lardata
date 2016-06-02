@@ -23,7 +23,7 @@
 #include <stdexcept> // std::out_of_range
 
 // LArSoft (larcore) libraries
-#include "lardata/Utilities/sparse_vector.h"
+#include "lardataobj/Utilities/sparse_vector.h"
 
 
 template <typename T>
