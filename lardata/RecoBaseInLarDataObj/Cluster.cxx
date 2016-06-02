@@ -12,7 +12,7 @@
 
 
 // class header
-#include "lardata/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/Cluster.h"
 
 // C/C++ standard libraries
 #include <iomanip> // std::setw(), ...

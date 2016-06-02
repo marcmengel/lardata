@@ -8,7 +8,7 @@
 ////////////////////////////////////////////////////////////////////////////
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
-#include "lardata/RecoBase/Vertex.h"
+#include "lardataobj/RecoBase/Vertex.h"
 
 #include <iomanip>
 

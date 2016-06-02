@@ -14,8 +14,8 @@
 #define HITUTILS_H
 
 // LArSoft libraries
-#include "lardata/RecoBase/Wire.h"
-#include "lardata/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Wire.h"
+#include "lardataobj/RecoBase/Hit.h"
 #include "lardata/RecoBaseArt/FindAllP.h"
 
 

@@ -8,8 +8,8 @@ include(CetTest)
 cet_enable_asserts()
 
 
-add_subdirectory( RawData )
-add_subdirectory( RecoBase )
+#add_subdirectory( RawData )
+#add_subdirectory( RecoBase )
 add_subdirectory( RecoObjects )
 add_subdirectory( Utilities )
 add_subdirectory( DetectorInfo )

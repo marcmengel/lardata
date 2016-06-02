@@ -15,7 +15,7 @@
 #define LARDATA_RECOBASEART_TRACKUTILS_H 1
 
 // LArSoft libraries
-#include "lardata/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Track.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::View_t
 
 

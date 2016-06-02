@@ -37,7 +37,7 @@
 // LArSoft libraries
 #include "larcoreobj/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t, raw::TDCtick_t
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::View_t
-#include "lardata/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Hit.h"
 
 
 

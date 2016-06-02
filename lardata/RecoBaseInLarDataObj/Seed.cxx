@@ -9,8 +9,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "lardata/RecoBase/Seed.h"
-#include "lardata/RecoBase/SpacePoint.h"
+#include "lardataobj/RecoBase/Seed.h"
+#include "lardataobj/RecoBase/SpacePoint.h"
 #include "TMath.h"
 #include "TVector3.h"
 #include <string>

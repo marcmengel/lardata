@@ -50,7 +50,7 @@
 #include "lardata/RecoObjects/KTrack.h"
 #include "lardata/RecoObjects/Propagator.h"
 #include "canvas/Persistency/Common/PtrVector.h"
-#include "lardata/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Hit.h"
 
 
 namespace trkf {

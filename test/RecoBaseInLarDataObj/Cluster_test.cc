@@ -34,7 +34,7 @@
 
 // LArSoft libraries
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::View_t
-#include "lardata/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/Cluster.h"
 
 
 

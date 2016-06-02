@@ -7,7 +7,7 @@
  * ****************************************************************************/
 
 // Hit header
-#include "lardata/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Hit.h"
 
 // C/C++ standard library
 #include <iomanip>

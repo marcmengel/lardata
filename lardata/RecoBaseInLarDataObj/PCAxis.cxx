@@ -10,7 +10,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include "lardata/RecoBase/PCAxis.h"
+#include "lardataobj/RecoBase/PCAxis.h"
 
 #include <iomanip>
 #include <iostream>

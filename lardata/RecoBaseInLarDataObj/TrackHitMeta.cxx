@@ -8,7 +8,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////////
 
-#include "lardata/RecoBase/TrackHitMeta.h"
+#include "lardataobj/RecoBase/TrackHitMeta.h"
 
 namespace recob {
 

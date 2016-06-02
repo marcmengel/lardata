@@ -8,7 +8,7 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-#include "lardata/RecoBase/OpFlash.h"
+#include "lardataobj/RecoBase/OpFlash.h"
 
 #include <cstddef> // std::size_t
 

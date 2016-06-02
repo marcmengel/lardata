@@ -19,7 +19,7 @@
 // LArSoft libraries
 #include "larcore/Geometry/Geometry.h"
 #include "lardataobj/RawData/RawDigit.h"
-#include "lardata/RecoBase/Wire.h"
+#include "lardataobj/RecoBase/Wire.h"
 
 
 /// Reconstruction base classes

@@ -23,8 +23,8 @@
 
 // LArSoft libraries
 #include "lardataobj/RawData/RawDigit.h"
-#include "lardata/RecoBase/Wire.h"
-#include "lardata/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Wire.h"
+#include "lardataobj/RecoBase/Hit.h"
 
 
 // declaration of some heavy art stuff

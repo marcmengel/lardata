@@ -31,8 +31,8 @@
 #include "canvas/Persistency/Common/PtrVector.h"
 
 #include "lardata/RecoObjects/KHitTrack.h"
-#include "lardata/RecoBase/Track.h"
-#include "lardata/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Hit.h"
 
 namespace trkf {
 

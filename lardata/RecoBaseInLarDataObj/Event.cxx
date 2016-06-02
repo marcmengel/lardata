@@ -6,10 +6,10 @@
 // \author brebel@fnal.gov
 //
 ////////////////////////////////////////////////////////////////////////////
-#include "lardata/RecoBase/Event.h"
+#include "lardataobj/RecoBase/Event.h"
 
 #include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
-#include "lardata/RecoBase/Vertex.h"
+#include "lardataobj/RecoBase/Vertex.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
 

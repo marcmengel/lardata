@@ -26,13 +26,13 @@
 #include "lardataobj/AnalysisBase/CosmicTag.h"
 #include "lardataobj/AnalysisBase/T0.h"
 
-#include "lardata/RecoBase/OpFlash.h"
-#include "lardata/RecoBase/PFParticle.h"
-#include "lardata/RecoBase/Track.h"
-#include "lardata/RecoBase/PCAxis.h"
-#include "lardata/RecoBase/Hit.h"
-#include "lardata/RecoBase/Shower.h"
-#include "lardata/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/OpFlash.h"
+#include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/PCAxis.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Shower.h"
+#include "lardataobj/RecoBase/Cluster.h"
 
 #include "lardataobj/RawData/ExternalTrigger.h"
 

@@ -20,7 +20,7 @@
 #include "lardata/Utilities/Dereference.h"
 //#include "time.h"
 
-#include "lardata/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Hit.h"
 //#include "Geometry/CryostatGeo.h"
 //#include "Geometry/PlaneGeo.h"
 //#include "Geometry/WireGeo.h"

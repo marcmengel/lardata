@@ -1,9 +1,8 @@
 # BulkAllocator_test, NestedIterator_test, CountersMap_test 
-# and sparse_vector_test test pure header libraries (they are templates)
+# and test pure header libraries (they are templates)
 cet_test(BulkAllocator_test USE_BOOST_UNIT)
 cet_test(NestedIterator_test USE_BOOST_UNIT)
 cet_test(CountersMap_test USE_BOOST_UNIT)
-cet_test(sparse_vector_test)
 cet_test(StatCollector_test USE_BOOST_UNIT)
 cet_test(FastMatrixMath_test USE_BOOST_UNIT)
 cet_test(SimpleFits_test USE_BOOST_UNIT)

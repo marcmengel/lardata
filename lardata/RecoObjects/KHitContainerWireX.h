@@ -17,7 +17,7 @@
 #define KHITCONTAINERWIREX_H
 
 #include "lardata/RecoObjects/KHitContainer.h"
-#include "lardata/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Hit.h"
 #include "canvas/Persistency/Common/PtrVector.h"
 
 namespace trkf {

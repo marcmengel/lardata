@@ -7,7 +7,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include "lardata/RecoBase/EndPoint2D.h"
+#include "lardataobj/RecoBase/EndPoint2D.h"
 
 #include <iomanip>
 #include <iostream>

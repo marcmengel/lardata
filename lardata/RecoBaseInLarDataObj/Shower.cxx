@@ -7,7 +7,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////
 
-#include "lardata/RecoBase/Shower.h"
+#include "lardataobj/RecoBase/Shower.h"
 
 #include <utility> // std::move()
 #include <iomanip>
