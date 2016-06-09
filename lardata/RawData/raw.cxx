@@ -9,12 +9,13 @@
 #include <iostream>
 #include <string>
 #include <bitset>
+#include <numeric> // std::adjacent_difference()
+#include <iterator> // std::back_inserter()
 
 #include "cetlib/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 namespace raw {
-
 
   //----------------------------------------------------------
   void Compress(std::vector<short> &adc, 
@@ -822,69 +823,50 @@ namespace raw {
   // pad out the lowest bits in a word with 0's
   void CompressHuffman(std::vector<short> &adc)
   {
-    std::vector<short> workvec(adc);
-    std::vector<short> diffs(adc.size(), 0);
-    diffs[0] = 0;
-
-    // loop over the rawadc and record the differences between 
-    // successive entries.  the first entry is always left
-    // as the raw adc value, just set the bit 15 to 0
-    for(unsigned int i = 1; i < diffs.size(); ++i) diffs[i] = adc[i] - adc[i-1];
-
+    std::vector<short> const orig_adc(std::move(adc));
+    
+    // diffs contains the difference between an element of adc and the previous
+    // one; the first entry is never used.
+    std::vector<short> diffs;
+    diffs.reserve(orig_adc.size());
+    std::adjacent_difference
+      (orig_adc.begin(), orig_adc.end(), std::back_inserter(diffs));
+    
+    // prepare adc for the new data; we kind-of-expect the size,
+    // so we pre-allocate it; we might want to shrink-to-fit at the end
+    adc.clear();
+    adc.reserve(orig_adc.size());
     // now loop over the diffs and do the Huffman encoding
-    unsigned int cur = 1;
-    unsigned int curb = 15;
+    adc.push_back(orig_adc.front());
+    unsigned int curb = 15U;
 
     std::bitset<16> bset;
     bset.set(15);
 
-    for(unsigned int i = 1; i < diffs.size(); ++i){
+    for(size_t i = 1U; i < diffs.size(); ++i){
 
-      //check to see if the difference is too large that we have to put the entire adc value in
-      if(std::abs(diffs[i]) > 3){
-
-	// put the current value into the adc vec unless the current bit is 15, then there 
-	// were multiple large difference values in a row
-	if(curb != 15){
-	  adc[cur] = bset.to_ulong();
-	  ++cur;
-	}
-
-	bset.reset();
-	bset.set(15);
-	curb = 15;
-
-	// put the current adcvalue in adc, with its bit 15 set to 0
-	if(workvec[i] > 0) adc[cur] = workvec[i];
-	else{
-	  std::bitset<16> tbit(-workvec[i]);
-	  tbit.set(14);
-	  adc[cur] = tbit.to_ulong();
-	} 
-	++cur;
-
-      }
-      else{
+      switch (diffs[i]) {
 	// if the difference is 0, check to see what the next 3 differences are
-	if(diffs[i] == 0){
+        case 0 : {
 	  if(i < diffs.size() - 3){
 	    // if next 3 are also 0, set the next bit to be 1
 	    if(diffs[i+1] == 0 && diffs[i+2] == 0 && diffs[i+3] == 0){
 	      if(curb > 0){
 		--curb;
 		bset.set(curb);
-		i += 3; 
+		i += 3;
+		continue;
 	      }
 	      else{	    
-		adc[cur] = bset.to_ulong();
-		++cur;
-
+		adc.push_back(bset.to_ulong());
+		
 		// reset the bitset to be ready for the next word
 		bset.reset();
 		bset.set(15);
 		bset.set(14); // account for the fact that this is a zero diff
 		curb = 14;
 		i += 3; 
+		continue;
 	      } // end if curb is not big enough to put current difference in bset	  
 	    } // end if next 3 are also zero
 	    else{
@@ -892,15 +874,16 @@ namespace raw {
 	      if(curb > 1){
 		curb -= 2;
 		bset.set(curb);
+		continue;
 	      } // end if the current bit is large enough to set this one
 	      else{	    
-		adc[cur] = bset.to_ulong();
-		++cur;
+		adc.push_back(bset.to_ulong());
 		// reset the bitset to be ready for the next word
 		bset.reset();
 		bset.set(15);
 		bset.set(13); // account for the fact that this is a zero diff
 		curb = 13;
+		continue;
 	      } // end if curb is not big enough to put current difference in bset	  	    
 	    } // end if next 3 are not also 0
 	  }// end if able to check next 3
@@ -909,123 +892,142 @@ namespace raw {
 	    if(curb > 1){
 	      curb -= 2;
 	      bset.set(curb);
+		continue;
 	    } // end if the current bit is large enough to set this one
 	    else{	    
-	      adc[cur] = bset.to_ulong();
-	      ++cur;
+	      adc.push_back(bset.to_ulong());
 	      // reset the bitset to be ready for the next word
 	      bset.reset();
 	      bset.set(15);
 	      bset.set(13); // account for the fact that this is a zero diff
 	      curb = 13;
+		continue;
 	    } // end if curb is not big enough to put current difference in bset	  
 	  }// end if not able to check the next 3
+	  break;
 	}// end if current difference is zero
-	else if( diffs[i] == 1){
+	case 1: {
 	  if(curb > 2){
 	    curb -= 3;
 	    bset.set(curb);
 	  }
 	  else{
-	    adc[cur] = bset.to_ulong();
-	    ++cur;
+	    adc.push_back(bset.to_ulong());
 	    // reset the bitset to be ready for the next word
 	    bset.reset();
 	    bset.set(15);
 	    bset.set(12); // account for the fact that this is a +1 diff
 	    curb = 12;
 	  } // end if curb is not big enough to put current difference in bset	  
-	}// end if difference = 1
-	else if( diffs[i] == -1){
+	  break;
+	} // end if difference = 1
+        case -1: {
 	  if(curb > 3){
 	    curb -= 4;
 	    bset.set(curb);
 	  }
 	  else{
-	    adc[cur] = bset.to_ulong();
-	    ++cur;
+	    adc.push_back(bset.to_ulong());
 	    // reset the bitset to be ready for the next word
 	    bset.reset();
 	    bset.set(15);
 	    bset.set(11); // account for the fact that this is a -1 diff
 	    curb = 11;
 	  } // end if curb is not big enough to put current difference in bset	  
+	  break;
 	}// end if difference = -1
-	else if( diffs[i] == 2){
+        case 2: {
 	  if(curb > 4){
 	    curb -= 5;
 	    bset.set(curb);
 	  }
 	  else{
-	    adc[cur] = bset.to_ulong();
-	    ++cur;
+	    adc.push_back(bset.to_ulong());
 	    // reset the bitset to be ready for the next word
 	    bset.reset();
 	    bset.set(15);
 	    bset.set(10); // account for the fact that this is a +2 diff
 	    curb = 10;
 	  } // end if curb is not big enough to put current difference in bset	  
+	  break;
 	}// end if difference = 2
-	else if( diffs[i] == -2){
+        case -2: {
 	  if(curb > 5){
 	    curb -= 6;
 	    bset.set(curb);
 	  }
 	  else{
-	    adc[cur] = bset.to_ulong();
-	    ++cur;
+	    adc.push_back(bset.to_ulong());
 	    // reset the bitset to be ready for the next word
 	    bset.reset();
 	    bset.set(15);
 	    bset.set(9); // account for the fact that this is a -2 diff
 	    curb = 9;
 	  } // end if curb is not big enough to put current difference in bset	  
+	  break;
 	}// end if difference = -2
-	else if( diffs[i] == 3){
+        case 3: {
 	  if(curb > 6){
 	    curb -= 7;
 	    bset.set(curb);
 	  }
 	  else{
-	    adc[cur] = bset.to_ulong();
-	    ++cur;
+	    adc.push_back(bset.to_ulong());
 	    // reset the bitset to be ready for the next word
 	    bset.reset();
 	    bset.set(15);
 	    bset.set(8); // account for the fact that this is a +3 diff
 	    curb = 8;
 	  } // end if curb is not big enough to put current difference in bset	  
+	  break;
 	}// end if difference = 3
-	else if( diffs[i] == -3){
+        case -3: {
 	  if(curb > 7){
 	    curb -= 8;
 	    bset.set(curb);
 	  }
 	  else{
-	    adc[cur] = bset.to_ulong();
-	    ++cur;
+	    adc.push_back(bset.to_ulong());
 	    // reset the bitset to be ready for the next word
 	    bset.reset();
 	    bset.set(15);
 	    bset.set(7); // account for the fact that this is a -3 diff
 	    curb = 7;
 	  } // end if curb is not big enough to put current difference in bset	  
+	  break;
 	}// end if difference = -3
-      }// end if difference is <= 3
+        default: {
+	  // if the difference is too large that we have to put the entire adc value in:
+	  // put the current value into the adc vec unless the current bit is 15, then there 
+	  // were multiple large difference values in a row
+	  if(curb != 15){
+	    adc.push_back(bset.to_ulong());
+	  }
+          
+	  bset.reset();
+	  bset.set(15);
+	  curb = 15;
+          
+	  // put the current adcvalue in adc, with its bit 15 set to 0
+	  if(orig_adc[i] > 0) adc.push_back(orig_adc[i]);
+	  else{
+	    std::bitset<16> tbit(-orig_adc[i]);
+	    tbit.set(14);
+	    adc.push_back(tbit.to_ulong());
+	  } 
+	  break;
+        } // if |difference| > 3
+      }// switch diff[i]
     }// end loop over differences
 
     //write out the last bitset
-    adc[cur] = bset.to_ulong();
-    ++cur;
+    adc.push_back(bset.to_ulong());
+    
+    // this would reduce global memory usage,
+    // at the cost of a new allocation and copy
+  //  adc.shrink_to_fit();
 
-    diffs.clear();
-    workvec.clear();
- 
-    // resize the adc to be the number of entries used
-    adc.resize(cur);
-
-    return;
-  }
+  } // CompressHuffman()
   //--------------------------------------------------------
   // need to decrement the bit you are looking at to determine the deltas as that is how
   // the bits are set
