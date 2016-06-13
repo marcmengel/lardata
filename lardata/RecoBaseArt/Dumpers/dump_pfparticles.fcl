@@ -1,0 +1,123 @@
+#
+# File:     dump_pfparticles.fcl
+# Purpose:  Dump on screen PFParticle content
+# Author:   Gianluca Petrillo (petrillo@fnal.gov)
+# Date:     September 25th, 2015
+# Version:  1.0
+#
+# Service dependencies:
+# - message facility
+# 
+# Changes:
+# 20150925 (petrillo@fnal.gov) [v1.0]
+#   first version
+#
+
+process_name: DumpPFParticles
+
+services: {
+  
+  message: {
+  #   debugModules: [ "*" ]
+    destinations: {
+      
+      # grab all the "DumpPFParticles" messages and put them in DumpPFParticles.log
+      LogPFParticles: {
+        append: false
+        categories: {
+          DumpSeeds:       { limit: -1 }
+          DumpVertices:    { limit: -1 }
+          DumpTracks:      { limit: -1 }
+          DumpPFParticles: { limit: -1 }
+          default: { limit: 0 }
+        }
+        filename: "DumpPFParticles.log"
+        threshold: "INFO"
+        type: "file"
+      } # LogPFParticles
+      
+      LogStandardOut: {
+        categories: {
+          AnaBaseDefaultCtor:  { limit: 0 }
+          RecoBaseDefaultCtor: { limit: 0 }
+          DumpSeeds:           { limit: 0 }
+          DumpVertices:        { limit: 0 }
+          DumpTracks:          { limit: 0 }
+          DumpPFParticles:     { limit: 0 }
+          default: {}
+        }
+        threshold: "WARNING"
+        type: "cout"
+      } # LogStandardOut
+      
+    } # destinations
+  } # message
+} # services
+
+
+source: {
+  module_type: RootInput
+  maxEvents:  -1            # number of events to read
+} # source
+
+
+physics: {
+  producers:{}
+  filters:  {}
+  analyzers: {
+    
+    dumpparticles: {
+      module_label: dumpparticles
+      module_type:  DumpPFParticles
+      
+      # output category ("DumpPFParticles" by default), useful for filtering (see above)
+      OutputCategory: "DumpPFParticles"
+      
+      # specify the label of recob::PFParticle producer
+      PFModuleLabel: "cluster3d"
+      
+    } # dumpparticles
+    
+    dumptracks: {
+      module_label: dumptracks
+      module_type:  DumpTracks
+      
+      # output category ("DumpTracks" by default), useful for filtering (see above)
+      OutputCategory: "DumpTracks"
+      
+      # specify the label of recob::Track producer
+      TrackModuleLabel: "cluster3d"
+      
+    } # dumptracks
+    
+    dumpseeds: {
+      module_label: dumpseeds
+      module_type:  DumpSeeds
+      
+      # output category ("DumpSeeds" by default), useful for filtering (see above)
+      OutputCategory: "DumpSeeds"
+      
+      # specify the label of recob::Seed producer
+      SeedModuleLabel: "cluster3d"
+      
+    } # dumpseeds
+    
+    dumpvertices: {
+      module_label: dumpvertices
+      module_type:  DumpVertices
+      
+      # output category ("DumpVertices" by default), useful for filtering (see above)
+      OutputCategory: "DumpVertices"
+      
+      # specify the label of recob::Vertex producer
+      VertexModuleLabel: "cluster3d"
+      
+    } # dumpparticles
+    
+  } # analyzers
+  
+  ana:  [ dumpparticles, dumptracks, dumpseeds, dumpvertices ]
+  
+  trigger_paths: []
+  end_paths:     [  ana ]
+} # physics

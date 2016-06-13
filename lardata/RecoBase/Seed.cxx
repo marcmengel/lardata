@@ -105,7 +105,7 @@ namespace recob{
     for(int i=0; i!=3; i++)
       {
 	rDir[i]    = fSeedDirection[i];
-	rDirErr[i] = fSeedDirectionError[i];
+	if (rDirErr) rDirErr[i] = fSeedDirectionError[i];
       }
   }
 
@@ -115,7 +115,7 @@ namespace recob{
     for(int i=0; i!=3; i++)
       {
 	rPt[i]    = fSeedPoint[i];
-	rPtErr[i] = fSeedPointError[i];
+	if (rPtErr) rPtErr[i] = fSeedPointError[i];
       }
   }
 

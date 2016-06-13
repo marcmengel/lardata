@@ -12,6 +12,8 @@
 #ifndef SEED_H
 #define SEED_H
 
+#include <iosfwd>
+
 namespace recob {
 
   class SpacePoint;
