@@ -18,7 +18,7 @@
 #   first version
 #
 
-#include "detectorclocks_csu40l.fcl"
+#include "detectorclocks_csu40L.fcl"
 
 process_name: DetClocksStandardTest
 
