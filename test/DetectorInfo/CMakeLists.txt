@@ -48,6 +48,11 @@ cet_test( DetectorClocksCSU40L_test
   TEST_ARGS ./clockstest_csu40l.fcl
 )
 
+cet_make_exec( DetectorPropertiesStandard_test
+  LIBRARIES
+    lardata_DetectorInfo
+    NO_INSTALL
+)
 
 cet_test( DetectorPropertiesLArTPCdetector_test
   HANDBUILT
