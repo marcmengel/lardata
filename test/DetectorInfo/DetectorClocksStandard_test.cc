@@ -1,14 +1,14 @@
 /**
- * @file   LArPropertiesStandard_test.cc
- * @brief  Simple instantiation-only test for LArPropertiesStandard
+ * @file   DetectorClocksStandard_test.cc
+ * @brief  Simple instantiation-only test for DetectorClocksStandard
  * @author Gianluca Petrillo (petrillo@fnal.gov)
- * @date   December 1st, 2015
+ * @date   May 6th, 2016
  */
 
 // LArSoft libraries
 #include "larcore/TestUtils/unit_test_base.h"
-#include "lardata/DetectorInfo/LArPropertiesStandard.h"
-#include "lardata/DetectorInfo/LArPropertiesStandardTestHelpers.h"
+#include "lardata/DetectorInfo/DetectorClocksStandard.h"
+#include "lardata/DetectorInfo/DetectorClocksStandardTestHelpers.h"
 
 
 //------------------------------------------------------------------------------
@@ -19,7 +19,7 @@
  * TesterEnvironment, configured with a "standard" configuration object, is used
  * in a non-Boost-unit-test context.
  * It provides:
- * - `detinfo::LArProperties const* Provider<detinfo::LArProperties>()`
+ * - `detinfo::DetectorClocks const* Provider<detinfo::DetectorClocks>()`
  * 
  */
 using TestEnvironment
@@ -39,18 +39,18 @@ using TestEnvironment
  * @throw cet::exception most of error situations throw
  * 
  * The arguments in argv are:
- * 0. name of the executable ("LArPropertiesStandard_test")
+ * 0. name of the executable ("DetectorClocksStandard_test")
  * 1. (mandatory) path to the FHiCL configuration file
  * 2. FHiCL path to the configuration of the test
  *    (default: physics.analyzers.larptest)
- * 3. FHiCL path to the configuration of LArProperties service
- *    (default: services.LArPropertiesService)
+ * 3. FHiCL path to the configuration of DetectorClocks service
+ *    (default: services.DetectorClocksService)
  * 
  */
 //------------------------------------------------------------------------------
 int main(int argc, char const** argv) {
   
-  testing::BasicEnvironmentConfiguration config("larp_test");
+  testing::BasicEnvironmentConfiguration config("clocks_test");
   
   //
   // parameter parsing
@@ -69,10 +69,10 @@ int main(int argc, char const** argv) {
   // (optional; default does not have any tester)
   if (++iParam < argc) config.SetMainTesterParameterSetPath(argv[iParam]);
   
-  // third argument: path of the parameter set for LArProperties configuration
-  // (optional; default: "services.LArProperties" from the inherited object)
+  // third argument: path of the parameter set for DetectorClocks configuration
+  // (optional; default: "services.DetectorClocks" from the inherited object)
   if (++iParam < argc)
-    config.SetServiceParameterSetPath("LArPropertiesService", argv[iParam]);
+    config.SetServiceParameterSetPath("DetectorClocksService", argv[iParam]);
   
   
   unsigned int nErrors = 0 /* Tester.Run() */ ;
@@ -82,8 +82,8 @@ int main(int argc, char const** argv) {
   //
   TestEnvironment TestEnv(config);
   
-  // LArPropertiesStandard supports the simple set up; so we invoke it
-  TestEnv.SimpleProviderSetup<detinfo::LArPropertiesStandard>();
+  // DetectorClocksStandard supports the simple set up; so we invoke it
+  TestEnv.SimpleProviderSetup<detinfo::DetectorClocksStandard>();
   
   //
   // run the test algorithm
@@ -94,17 +94,18 @@ int main(int argc, char const** argv) {
 //  MyTestAlgo Tester(TestEnv.TesterParameters());
   
   // 2. we set it up with the geometry from the environment
-//  Tester.Setup(*(TestEnv.LArProperties()));
+//  Tester.Setup(*(TestEnv.Provider<detinfo::DetectorClocks>()));
   
   // 3. then we run it!
-  mf::LogInfo("larp_test")
-    << "The atomic number of liquid argon is "
-    << TestEnv.Provider<detinfo::LArProperties>()->AtomicNumber()
+  mf::LogVerbatim("clocks_test")
+    << "TPC clock period: "
+    << TestEnv.Provider<detinfo::DetectorClocks>()->TPCClock().FramePeriod()
+    << " us"
     ;
   
   // 4. And finally we cross fingers.
   if (nErrors > 0) {
-    mf::LogError("larp_test") << nErrors << " errors detected!";
+    mf::LogError("clocks_test") << nErrors << " errors detected!";
   }
   
   return nErrors;

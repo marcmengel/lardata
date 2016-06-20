@@ -1,14 +1,17 @@
 /**
- * @file   LArPropertiesStandard_test.cc
- * @brief  Simple instantiation-only test for LArPropertiesStandard
+ * @file   DetectorPropertiesStandard_test.cc
+ * @brief  Simple instantiation-only test for DetectorPropertiesStandard
  * @author Gianluca Petrillo (petrillo@fnal.gov)
- * @date   December 1st, 2015
+ * @date   May 6th, 2016
  */
 
 // LArSoft libraries
-#include "larcore/TestUtils/unit_test_base.h"
-#include "lardata/DetectorInfo/LArPropertiesStandard.h"
+#include "test/Geometry/geometry_unit_test_base.h"
+#include "larcore/Geometry/ChannelMapStandardAlg.h"
 #include "lardata/DetectorInfo/LArPropertiesStandardTestHelpers.h"
+#include "lardata/DetectorInfo/DetectorClocksStandardTestHelpers.h"
+#include "lardata/DetectorInfo/DetectorPropertiesStandard.h"
+#include "lardata/DetectorInfo/DetectorPropertiesStandardTestHelpers.h"
 
 
 //------------------------------------------------------------------------------
@@ -16,14 +19,15 @@
 //---
 
 /*
- * TesterEnvironment, configured with a "standard" configuration object, is used
- * in a non-Boost-unit-test context.
+ * GeometryTesterEnvironment, configured with a geometry-aware configuration
+ * object, is used in a non-Boost-unit-test context.
  * It provides:
- * - `detinfo::LArProperties const* Provider<detinfo::LArProperties>()`
- * 
+ * - `detinfo::DetectorProperties const* Provider<detinfo::DetectorProperties>()`
+ * - all the other services configured as dependencies
  */
-using TestEnvironment
-  = testing::TesterEnvironment<testing::BasicEnvironmentConfiguration>;
+using TesterConfiguration
+  = testing::BasicGeometryEnvironmentConfiguration<geo::ChannelMapStandardAlg>;
+using TestEnvironment = testing::GeometryTesterEnvironment<TesterConfiguration>;
 
 
 //------------------------------------------------------------------------------
@@ -39,18 +43,18 @@ using TestEnvironment
  * @throw cet::exception most of error situations throw
  * 
  * The arguments in argv are:
- * 0. name of the executable ("LArPropertiesStandard_test")
+ * 0. name of the executable ("DetectorPropertiesStandard_test")
  * 1. (mandatory) path to the FHiCL configuration file
  * 2. FHiCL path to the configuration of the test
  *    (default: physics.analyzers.larptest)
- * 3. FHiCL path to the configuration of LArProperties service
- *    (default: services.LArPropertiesService)
+ * 3. FHiCL path to the configuration of DetectorProperties service
+ *    (default: services.DetectorPropertiesService)
  * 
  */
 //------------------------------------------------------------------------------
 int main(int argc, char const** argv) {
   
-  testing::BasicEnvironmentConfiguration config("larp_test");
+  TesterConfiguration config("detp_test");
   
   //
   // parameter parsing
@@ -69,11 +73,12 @@ int main(int argc, char const** argv) {
   // (optional; default does not have any tester)
   if (++iParam < argc) config.SetMainTesterParameterSetPath(argv[iParam]);
   
-  // third argument: path of the parameter set for LArProperties configuration
-  // (optional; default: "services.LArProperties" from the inherited object)
-  if (++iParam < argc)
-    config.SetServiceParameterSetPath("LArPropertiesService", argv[iParam]);
-  
+  // third argument: path of the parameter set for DetectorProperties confi
+  // (optional; default: "services.DetectorProperties" from inherited object)
+  if (++iParam < argc) {
+    config.SetServiceParameterSetPath
+      ("DetectorPropertiesService", argv[iParam]);
+  }
   
   unsigned int nErrors = 0 /* Tester.Run() */ ;
   
@@ -82,8 +87,13 @@ int main(int argc, char const** argv) {
   //
   TestEnvironment TestEnv(config);
   
-  // LArPropertiesStandard supports the simple set up; so we invoke it
+  // DetectorPropertiesStandard and all its dependencies support the simple set
+  // up (see testing::TesterEnvironment::SimpleProviderSetup()), except for
+  // Geometry, that has been configured already in the geometry-aware
+  // environment. So we invoke a simple set up for each of the dependencies:
   TestEnv.SimpleProviderSetup<detinfo::LArPropertiesStandard>();
+  TestEnv.SimpleProviderSetup<detinfo::DetectorClocksStandard>();
+  TestEnv.SimpleProviderSetup<detinfo::DetectorPropertiesStandard>();
   
   //
   // run the test algorithm
@@ -94,17 +104,17 @@ int main(int argc, char const** argv) {
 //  MyTestAlgo Tester(TestEnv.TesterParameters());
   
   // 2. we set it up with the geometry from the environment
-//  Tester.Setup(*(TestEnv.LArProperties()));
+//  Tester.Setup(*(TestEnv.Provider<detinfo::DetectorProperties>()));
   
   // 3. then we run it!
-  mf::LogInfo("larp_test")
-    << "The atomic number of liquid argon is "
-    << TestEnv.Provider<detinfo::LArProperties>()->AtomicNumber()
+  mf::LogVerbatim("detp_test")
+    << "Electric field in the active volume: "
+    << TestEnv.Provider<detinfo::DetectorProperties>()->Efield() << " kV/cm"
     ;
   
   // 4. And finally we cross fingers.
   if (nErrors > 0) {
-    mf::LogError("larp_test") << nErrors << " errors detected!";
+    mf::LogError("detp_test") << nErrors << " errors detected!";
   }
   
   return nErrors;
