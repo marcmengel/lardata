@@ -1,0 +1,37 @@
+#
+# File:    dettest_lartpcdetector.fcl
+# Purpose: test loading of DetectorProperties service with LArTPC detector configuration
+# Author:  Gianluca Petrillo (petrillo@fnal.gov)
+# Date:    May 6th, 2016
+# Version: 1.0
+# 
+# Description:
+# Test to load DetectorPropertiesService (or its provider).
+# No test module is actually run, but the service is constructed.
+# This test triggers construction, configuration and its validation.
+# 
+# Dependencies:
+# - DetectorPropertiesService service and its dependencies:
+#   - LArProperties service and its dependencies
+#   - DetectorClocks service and its dependencies
+#   - Geometry service and its dependencies
+# 
+# Changes:
+# 20160506 (petrillo@fnal.gov) [v1.0]
+#   first version
+#
+
+#include "detectorproperties_lartpcdetector.fcl"
+#include "larproperties_lartpcdetector.fcl"
+#include "detectorclocks_lartpcdetector.fcl"
+#include "geometry_lartpcdetector.fcl"
+
+process_name: DetPropStandardTest
+
+services: {
+  ExptGeoHelperInterface:    @local::lartpcdetector_geometry_helper
+  Geometry:                  @local::lartpcdetector_geometry
+  LArPropertiesService:      @local::lartpcdetector_properties
+  DetectorClocksService:     @local::lartpcdetector_detectorclocks
+  DetectorPropertiesService: @local::lartpcdetector_detproperties
+}

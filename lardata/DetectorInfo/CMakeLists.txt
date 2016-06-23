@@ -3,6 +3,7 @@ art_make( NO_PLUGINS
           
           LIB_LIBRARIES
 			larcore_Geometry
+			larcore_CoreUtils
                         ${MF_MESSAGELOGGER}
                         ${MF_UTILITIES}
                         ${CETLIB}

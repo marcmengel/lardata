@@ -66,7 +66,7 @@ class DataCreatorBase {
 	/// Random engine shared by all the data creators
 	static std::default_random_engine random_engine;
 	
-	/// Constructor: just assignes a name to this data set
+	/// Constructor: just assigns a name to this data set
 	DataCreatorBase(std::string new_name): test_name(new_name) {}
 	
 	/// Returns the name of this set
@@ -91,7 +91,7 @@ std::default_random_engine DataCreatorBase::random_engine(RandomSeed);
 class UniformNoiseCreator: public DataCreatorBase {
 		public:
 	float baseline; ///< pedestal
-	float width; ///< (half)width of the uniform distribuition
+	float width; ///< (half)width of the uniform distribution
 	
 	/// Constructor: assigns data set name and noise parameters
 	UniformNoiseCreator
@@ -114,11 +114,11 @@ class UniformNoiseCreator: public DataCreatorBase {
 }; // class UniformNoiseCreator
 
 
-/// Data creator: gaussian random data
+/// Data creator: Gaussian random data
 class GaussianNoiseCreator: public DataCreatorBase {
 		public:
-	float mean; ///< mean of the noise gaussian (pedestal)
-	float stdev; ///< standard deviation of the noise gaussian (RMS)
+	float mean; ///< mean of the noise Gaussian (pedestal)
+	float stdev; ///< standard deviation of the noise Gaussian (RMS)
 	
 	/// Constructor: assigns data set name and noise parameters
 	GaussianNoiseCreator
@@ -138,6 +138,33 @@ class GaussianNoiseCreator: public DataCreatorBase {
 		} // create()
 	
 }; // class GaussianNoiseCreator
+
+
+/// Data creator: sine wave data
+class SineWaveCreator: public DataCreatorBase {
+		public:
+	float period; ///< period of the wave [ticks]
+	float amplitude; ///< amplitude of the wave [ADC counts]
+	
+	/// Constructor: assigns data set name and noise parameters
+	SineWaveCreator
+		(std::string name, float new_period, float new_amplitude):
+		DataCreatorBase(name),
+		period(new_period), amplitude(new_amplitude)
+		{}
+	
+	/// Creates and returns the data sample
+	virtual InputData_t create(size_t size) override
+		{
+			constexpr float two_pi = float(2. * std::acos(-1.));
+			InputData_t data;
+			data.reserve(size);
+			for (size_t i = 0; i < size; ++i)
+			  data.push_back(amplitude * std::sin(i / period * two_pi));
+			return data;
+		} // create()
+	
+}; // class SineWaveCreator
 
 
 /// Data creator: uniformly random data, full range
@@ -199,12 +226,8 @@ void RunDataCompressionTest
 	// Boost provides facilities to compare data and print if it does not match:
 	BOOST_CHECK_EQUAL(data_again.size(), data.size());
 	
-	// Printing non-matching data is not always the best thing, especially if
-	// the data is some megabytes. Also, the data need to have an insertor in
-	// a STL ostream (e.g. std::cout << data), which std::vector does not have.
-	// Better to limit ourselves here to provide the result of the check to Boost
-	// that will still keep track of its outcome:
-	BOOST_CHECK(data == data_again);
+	BOOST_CHECK_EQUAL_COLLECTIONS
+	  (data.begin(), data.end(), data_again.begin(), data_again.end());
 	
 } // RunDataCompressionTest()
 
@@ -290,12 +313,27 @@ BOOST_AUTO_TEST_CASE(LargeUniformNoiseData) {
 }
 
 BOOST_AUTO_TEST_CASE(SmallGaussianNoiseOffsetData) {
-	GaussianNoiseCreator InputData("gaussian small noise and offset", 5., 123.2);
+	GaussianNoiseCreator InputData("Gaussian small noise and offset", 5., 123.2);
 	RunDataCompressionTests(&InputData);
 }
 
 BOOST_AUTO_TEST_CASE(LargeGaussianNoiseData) {
-	GaussianNoiseCreator InputData("gaussian large noise and offset", 40., 194.);
+	GaussianNoiseCreator InputData("Gaussian large noise and offset", 40., 194.);
+	RunDataCompressionTests(&InputData);
+}
+
+BOOST_AUTO_TEST_CASE(VeryLowFrequencySineWaveData) {
+	SineWaveCreator InputData("Very low frequency pure sine wave", 1024., 50.);
+	RunDataCompressionTests(&InputData);
+}
+
+BOOST_AUTO_TEST_CASE(LowFrequencySineWaveData) {
+	SineWaveCreator InputData("Low frequency pure sine wave", 128., 100.);
+	RunDataCompressionTests(&InputData);
+}
+
+BOOST_AUTO_TEST_CASE(HighFrequencySineWaveData) {
+	SineWaveCreator InputData("High frequency pure sine wave", 16., 100.);
 	RunDataCompressionTests(&InputData);
 }
 

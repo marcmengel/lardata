@@ -13,7 +13,7 @@
 
 // LArSoft libraries
 #include "larcore/Geometry/GeometryCore.h"
-#include "lardata/DetectorInfo/ProviderPack.h"
+#include "larcore/CoreUtils/ProviderPack.h"
 #include "lardata/DetectorInfo/LArProperties.h"
 #include "lardata/DetectorInfo/DetectorClocks.h"
 #include "lardata/DetectorInfo/DetectorProperties.h"
@@ -109,7 +109,7 @@ namespace detinfo{
 			 const geo::GeometryCore* geo,
 			 const detinfo::LArProperties* lp,
 			 const detinfo::DetectorClocks* c,
-			 std::set<std::string> ignore_params = {}
+			 std::set<std::string> const& ignore_params = {}
 			 );
       /**
        * @brief Constructs the provider and sets up the dependencies
@@ -119,7 +119,7 @@ namespace detinfo{
        */
       DetectorPropertiesStandard(fhicl::ParameterSet const& pset,
                          providers_type providers,
-                         std::set<std::string> ignore_params = {});
+                         std::set<std::string> const& ignore_params = {});
       DetectorPropertiesStandard(DetectorPropertiesStandard const&) = delete;
       virtual ~DetectorPropertiesStandard() = default;
       
@@ -132,8 +132,10 @@ namespace detinfo{
        * it's explicitly told to ignore) and extract the useful information out
        * of it.
        */
-      void ValidateAndConfigure
-        (fhicl::ParameterSet const& p, std::set<std::string> ignore_params = {});
+      void ValidateAndConfigure(
+        fhicl::ParameterSet const& p,
+        std::set<std::string> const& ignore_params = {}
+        );
 
       
       /// Extracts the relevant configuration from the specified object
@@ -150,9 +152,10 @@ namespace detinfo{
        * it's explicitly told to ignore) and it returns an object ready to
        * be used with Configure().
        */
-      Configuration_t ValidateConfiguration
-        (fhicl::ParameterSet const& p, std::set<std::string> ignore_params = {})
-        ;
+      Configuration_t ValidateConfiguration(
+        fhicl::ParameterSet const& p,
+        std::set<std::string> const& ignore_params = {}
+        );
 
       bool Update(uint64_t ts);
       bool UpdateClocks(const detinfo::DetectorClocks* clks);
