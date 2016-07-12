@@ -4,7 +4,7 @@
 #include "larfft_argoneut.fcl"
 #include "messageservice.fcl"
 #include "simulationservices_argoneut.fcl"
-#include "magfield.fcl"
+#include "magfield_larsoft.fcl"
 #include "databaseutil_argoneut.fcl"
 #include "backtracker.fcl"
 #include "seedservice_argoneut.fcl"
