@@ -32,7 +32,7 @@ argoneut_simulation_services:
 {
  LArG4Parameters:               @local::argoneut_largeantparameters
  LArVoxelCalculator:            @local::argoneut_larvoxelcalculator
- MagneticField:                 @local::no_mag
+ MagneticField:                 @local::no_mag_larsoft
  ExptGeoHelperInterface:        @local::argoneut_geometry_helper
  Geometry:                      @local::argoneut_geo
  DetectorPropertiesService:     @local::argoneut_detproperties
