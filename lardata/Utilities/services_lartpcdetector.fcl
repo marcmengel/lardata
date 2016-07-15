@@ -18,7 +18,7 @@
 #include "larproperties.fcl"
 #include "larfft.fcl"
 #include "simulationservices.fcl"
-#include "magfield.fcl"
+#include "magfield_larsoft.fcl"
 #include "databaseutil.fcl"
 #include "backtracker.fcl"
 #include "detectorclocks.fcl"

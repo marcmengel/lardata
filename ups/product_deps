@@ -6,9 +6,9 @@ defaultqual	e10
 fcldir product_dir job
 #
 product         version
+lardataobj	v06_00_00_rc6
 larcore		v06_00_00_rc6
 nutools		v2_00_02
-lardataobj	v06_00_00_rc6
 
 cetbuildtools	v5_02_02	-	only_for_build
 end_product_list
