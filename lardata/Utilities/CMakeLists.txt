@@ -47,6 +47,7 @@ simple_plugin(DatabaseUtil "service"
               art_Persistency_Common canvas_Persistency_Common
               art_Persistency_Provenance canvas_Persistency_Provenance
               ${ART_FRAMEWORK_SERVICES_REGISTRY}
+	      ${ROOT_CORE}
 )
 simple_plugin(FileCatalogMetadataExtras "service"
 	      art_Utilities canvas_Utilities
@@ -59,7 +60,6 @@ simple_plugin(FileCatalogMetadataExtras "service"
 	      ${MF_UTILITIES}
 	      ${CETLIB}
 	      ${ROOT_BASIC_LIB_LIST}
-              
 )
 
 simple_plugin(LArPropertiesServiceArgoNeuT "service"
@@ -68,7 +68,7 @@ simple_plugin(LArPropertiesServiceArgoNeuT "service"
               ${MF_MESSAGELOGGER}
               ${MF_UTILITIES}
               ${CETLIB}
-              
+	      ${ROOT_CORE}
 )
 
 simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
@@ -82,7 +82,6 @@ simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
               ${MF_UTILITIES}
               ${CETLIB}
               ${ROOT_BASIC_LIB_LIST}
-              
 )
 
 simple_plugin(LArFFT "service"
@@ -93,7 +92,6 @@ simple_plugin(LArFFT "service"
 	      ${CETLIB}
 	      ${ROOT_FFTW}
 	      ${ROOT_BASIC_LIB_LIST}
-              
 )
 
 simple_plugin(MemoryPeakReporter "service"
@@ -105,7 +103,7 @@ simple_plugin(MemoryPeakReporter "service"
               ${MF_UTILITIES}
               ${FHICLCPP}
               ${CETLIB}
-              
+ 	      ${ROOT_CORE}
 )
 
 simple_plugin(ComputePi "module"
@@ -114,7 +112,7 @@ simple_plugin(ComputePi "module"
               ${MF_UTILITIES}
               ${FHICLCPP}
               ${CETLIB}
-              
+	      ${ROOT_CORE}
 )
 
 install_headers()
