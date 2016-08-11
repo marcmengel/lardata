@@ -4,7 +4,7 @@
  * @date   December 18th, 2014
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * 
- * The code here is implementation details, living in lar::utils::details
+ * The code here is implementation details, living in lar::util::details
  * namespace.
  */
 
@@ -32,7 +32,7 @@
 namespace lar {
   
   /// LArSoft utility namespace
-  namespace utils {
+  namespace util {
     
     /// LArSoft utility implementation details
     namespace details {
@@ -208,7 +208,7 @@ namespace lar {
       
       
     } // namespace details
-  } // namespace utils
+  } // namespace util
 } // namespace lar
 
 
@@ -218,7 +218,7 @@ namespace lar {
 //******************************************************************************
 
 namespace lar {
-  namespace utils {
+  namespace util {
     namespace details {
       //------------------------------------------------------------------------
       //---  FindAllP
@@ -402,7 +402,7 @@ namespace lar {
       } // ResizeToPower2()
       
     } // namespace details
-  } // namespace utils
+  } // namespace util
 } // namespace lar
 
 

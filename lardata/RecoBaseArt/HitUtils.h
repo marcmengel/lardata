@@ -23,7 +23,7 @@
 namespace lar {
   
   /// LArSoft utility namespace
-  namespace utils {
+  namespace util {
     
     
     /** ************************************************************************
@@ -56,7 +56,12 @@ namespace lar {
     using HitToWire = details::FindAllP<recob::Hit, recob::Wire>;
     
     
-  } // namespace utils
+  } // namespace util
+  
+  // old, deprecated namespace
+  namespace utils {
+    using HitToWire [[deprecated("use lar::util namespace instead")]] = ::lar::util::HitToWire;
+  }
   
 } // namespace lar
 

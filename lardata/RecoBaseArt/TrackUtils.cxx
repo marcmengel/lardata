@@ -29,7 +29,7 @@
 
 
 //------------------------------------------------------------------------------
-double lar::utils::TrackProjectedLength(recob::Track const& track, geo::View_t view) {
+double lar::util::TrackProjectedLength(recob::Track const& track, geo::View_t view) {
                   
    if(view == geo::kUnknown) {
       throw cet::exception("TrackProjectedLength") << "cannot provide projected length for "
@@ -41,7 +41,7 @@ double lar::utils::TrackProjectedLength(recob::Track const& track, geo::View_t v
    double angleToVert = 0.;
    for(unsigned int i = 0; i < geom->Nplanes(); ++i){
       if(geom->Plane(i).View() == view){
-         angleToVert = geom->Plane(i).Wire(0).ThetaZ(false) - 0.5*util::pi<>();
+         angleToVert = geom->Plane(i).Wire(0).ThetaZ(false) - 0.5*::util::pi<>();
          break;
       }
    }
@@ -67,12 +67,12 @@ double lar::utils::TrackProjectedLength(recob::Track const& track, geo::View_t v
    } // end loop over distances between trajectory points
    
    return length;
-} // lar::utils::TrackProjectedLength()
+} // lar::util::TrackProjectedLength()
 
 
 
 //------------------------------------------------------------------------------
-double lar::utils::TrackPitchInView
+double lar::util::TrackPitchInView
   (recob::Track const& track, geo::View_t view, size_t trajectory_point /* = 0 */)
 {
    
@@ -95,7 +95,7 @@ double lar::utils::TrackPitchInView
          << " for trajectory point #" << trajectory_point  << ".\n";
    }
    double wirePitch   = geom->WirePitch(view, tpcid.TPC, tpcid.Cryostat);
-   double angleToVert = geom->WireAngleToVertical(view, tpcid.TPC, tpcid.Cryostat) - 0.5*util::pi<>();
+   double angleToVert = geom->WireAngleToVertical(view, tpcid.TPC, tpcid.Cryostat) - 0.5*::util::pi<>();
                                    
    const TVector3& dir = track.DirectionAtPoint(trajectory_point);
    //(sin(angleToVert),cos(angleToVert)) is the direction perpendicular to wire
@@ -106,6 +106,6 @@ double lar::utils::TrackPitchInView
       throw cet::exception("Track") << "cosgamma is basically 0, that can't be right\n";
    return wirePitch/cosgamma;
                                                                                                   
-} // lar::utils::TrackPitchInView()
+} // lar::util::TrackPitchInView()
    
 //------------------------------------------------------------------------------
