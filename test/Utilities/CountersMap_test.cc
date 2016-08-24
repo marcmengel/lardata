@@ -65,7 +65,7 @@ void RunHoughTransformTreeTest() {
   typedef std::map<int, int> BaseMap_t;
   
   // STL container
-  typedef std::vector<std::map<int, int>> MapVectorI_t;
+  typedef std::vector<BaseMap_t> MapVectorI_t;
   MapVectorI_t stl_image(NAngles);
   
   // CountersMap; uses chunks of 8 counters per block

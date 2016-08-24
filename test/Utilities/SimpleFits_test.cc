@@ -115,8 +115,6 @@ void CheckLinearFit(
   int NDF
 ) {
   
-  using Data_t = T;
-  
   BOOST_CHECK_EQUAL(fitter.N(), n);
   if (n == 0) {
     BOOST_CHECK(!fitter.isValid());
@@ -159,8 +157,6 @@ void CheckQuadraticFit(
   T chisq,
   int NDF
 ) {
-  
-  using Data_t = T;
   
   BOOST_CHECK_EQUAL(fitter.N(), n);
   if (n == 0) {
@@ -208,7 +204,6 @@ void CheckGaussianFit(
   T chisq,
   int NDF
 ) {
-  using Data_t = T;
   
   BOOST_CHECK_EQUAL(fitter.N(), n);
   if (n == 0) {

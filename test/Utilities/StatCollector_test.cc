@@ -55,7 +55,6 @@ void CheckStats(
   W rms // might as well compute it myself...
 ) {
   
-  using Data_t = T;
   using Weight_t = W;
   
   BOOST_CHECK_EQUAL(stats.N(),       n);
@@ -102,7 +101,6 @@ void CheckStats(
   W lin_corr
 ) {
   
-  using Data_t = T;
   using Weight_t = W;
   
   BOOST_CHECK_EQUAL(stats.N(),       n);
@@ -278,7 +276,7 @@ void StatCollector2DTest() {
   using UnweightedItem_t = std::pair<Data_t, Data_t>;
   using WeightedItem_t = std::tuple<Data_t, Data_t, Weight_t>;
   
-  using UnweightedData_t = std::vector<std::pair<Data_t, Data_t>>;
+//  using UnweightedData_t = std::vector<std::pair<Data_t, Data_t>>;
   using WeightedData_t = std::vector<WeightedItem_t>;
   
   // prepare input data
