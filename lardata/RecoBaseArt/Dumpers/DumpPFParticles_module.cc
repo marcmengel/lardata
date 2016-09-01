@@ -6,11 +6,11 @@
  */
 
 // LArSoft includes
-#include "lardata/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/PFParticle.h"
 #include "lardata/RecoBaseArt/Dumpers/hexfloat.h"
 
 // art libraries
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
 
@@ -65,18 +65,18 @@ namespace recob {
 //===  Implementation section
 //==============================================================================
 // LArSoft includes
-#include "lardata/RecoBase/PFParticle.h"
-#include "lardata/RecoBase/Vertex.h"
-#include "lardata/RecoBase/SpacePoint.h"
-#include "lardata/RecoBase/Track.h"
-#include "lardata/RecoBase/Cluster.h"
-#include "lardata/RecoBase/Seed.h"
-#include "lardata/RecoBase/PCAxis.h"
+#include "lardataobj/RecoBase/PFParticle.h"
+#include "lardataobj/RecoBase/Vertex.h"
+#include "lardataobj/RecoBase/SpacePoint.h"
+#include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/Cluster.h"
+#include "lardataobj/RecoBase/Seed.h"
+#include "lardataobj/RecoBase/PCAxis.h"
 
 // art libraries
 #include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Core/FindOne.h"
-#include "art/Framework/Core/FindMany.h"
+#include "canvas/Persistency/Common/FindOne.h"
+#include "canvas/Persistency/Common/FindMany.h"
 #include "art/Framework/Principal/Handle.h"
 
 // support libraries

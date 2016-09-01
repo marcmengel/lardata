@@ -6,10 +6,10 @@
  */
 
 // LArSoft includes
-#include "lardata/RecoBase/Vertex.h"
+#include "lardataobj/RecoBase/Vertex.h"
 
 // art libraries
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
 
@@ -65,7 +65,7 @@ namespace recob {
 //==============================================================================
 
 // LArSoft includes
-#include "lardata/RecoBase/Vertex.h"
+#include "lardataobj/RecoBase/Vertex.h"
 #include "lardata/RecoBaseArt/Dumpers/hexfloat.h"
 
 // art libraries

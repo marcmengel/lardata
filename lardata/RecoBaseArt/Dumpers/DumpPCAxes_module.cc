@@ -8,7 +8,7 @@
 // LArSoft includes
 
 // art libraries
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
 
@@ -86,7 +86,7 @@ namespace recob {
 //==============================================================================
 
 // LArSoft includes
-#include "lardata/RecoBase/PCAxis.h"
+#include "lardataobj/RecoBase/PCAxis.h"
 #include "lardata/RecoBaseArt/Dumpers/NewLine.h" // recob::dumper::makeNewLine()
 #include "lardata/RecoBaseArt/Dumpers/PCAxisDumpers.h" // recob::dumper::DumpPCAxis()
 

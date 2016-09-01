@@ -10,7 +10,7 @@
 #define LARDATA_RECOBASE_DUMPERS_PCAXISDUMPERS_H 1
 
 // LArSoft libraries
-#include "lardata/RecoBase/PCAxis.h"
+#include "lardataobj/RecoBase/PCAxis.h"
 
 // C/C++ standard libraries
 #include <string>

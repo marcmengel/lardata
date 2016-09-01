@@ -9,10 +9,10 @@
 #include "lardata/RecoBaseArt/Dumpers/NewLine.h" // recob::dumper::makeNewLine()
 #include "lardata/RecoBaseArt/Dumpers/SpacePointDumpers.h"
 #include "lardata/RecoBaseArt/Dumpers/hexfloat.h"
-#include "lardata/RecoBase/SpacePoint.h"
+#include "lardataobj/RecoBase/SpacePoint.h"
 
 // art libraries
-#include "art/Utilities/InputTag.h"
+#include "canvas/Utilities/InputTag.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
 
@@ -91,12 +91,12 @@ namespace recob {
 //==============================================================================
 
 // LArSoft includes
-#include "lardata/RecoBase/SpacePoint.h"
-#include "lardata/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/SpacePoint.h"
+#include "lardataobj/RecoBase/Hit.h"
 
 // art libraries
 #include "art/Framework/Core/ModuleMacros.h"
-#include "art/Framework/Core/FindMany.h"
+#include "canvas/Persistency/Common/FindMany.h"
 #include "art/Framework/Principal/Handle.h"
 
 // support libraries
