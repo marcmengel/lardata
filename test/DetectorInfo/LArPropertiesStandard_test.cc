@@ -5,36 +5,31 @@
  * @date   December 1st, 2015
  */
 
-// LArSoft test libraries
-#include "test/DetectorInfo/larproperties_unit_test_base.h"
-
 // LArSoft libraries
+#include "larcore/TestUtils/unit_test_base.h"
 #include "lardata/DetectorInfo/LArPropertiesStandard.h"
+#include "lardata/DetectorInfo/LArPropertiesStandardTestHelpers.h"
+
 
 //------------------------------------------------------------------------------
 //---  The test environment
 //---
 
-// we define here all the configuration that is needed;
-// we use an existing class provided for this purpose, since our test
-// environment allows us to tailor it at run time.
-using LArPropertiesStandardConfiguration
-  = testing::BasicLArPropertiesEnvironmentConfiguration<detinfo::LArPropertiesStandard>;
-
 /*
- * LArPropertiesTesterEnvironment, configured with the object above, is used in
- * a non-Boost-unit-test context.
+ * TesterEnvironment, configured with a "standard" configuration object, is used
+ * in a non-Boost-unit-test context.
  * It provides:
- * - `detinfo::LArProperties const* LArProperties()`
- * - `detinfo::LArProperties const* GlobalLArProperties()` (static member)
+ * - `detinfo::LArProperties const* Provider<detinfo::LArProperties>()`
+ * 
  */
-using LArPropertiesStandardTestEnvironment
-  = testing::LArPropertiesTesterEnvironment<LArPropertiesStandardConfiguration>;
+using TestEnvironment
+  = testing::TesterEnvironment<testing::BasicEnvironmentConfiguration>;
 
 
 //------------------------------------------------------------------------------
 //---  The tests
 //---
+
 
 /** ****************************************************************************
  * @brief Runs the test
@@ -55,7 +50,7 @@ using LArPropertiesStandardTestEnvironment
 //------------------------------------------------------------------------------
 int main(int argc, char const** argv) {
   
-  LArPropertiesStandardConfiguration config("larp_test");
+  testing::BasicEnvironmentConfiguration config("larp_test");
   
   //
   // parameter parsing
@@ -76,7 +71,8 @@ int main(int argc, char const** argv) {
   
   // third argument: path of the parameter set for LArProperties configuration
   // (optional; default: "services.LArProperties" from the inherited object)
-  if (++iParam < argc) config.SetLArPropertiesParameterSetPath(argv[iParam]);
+  if (++iParam < argc)
+    config.SetServiceParameterSetPath("LArPropertiesService", argv[iParam]);
   
   
   unsigned int nErrors = 0 /* Tester.Run() */ ;
@@ -84,39 +80,10 @@ int main(int argc, char const** argv) {
   //
   // testing environment setup
   //
-  LArPropertiesStandardTestEnvironment TestEnvironment(config);
+  TestEnvironment TestEnv(config);
   
-  // this test is only for LArPropertiesStandard...
-  fhicl::ParameterSet const LArPropertiesConfig
-    = TestEnvironment.ServiceParameters("LArPropertiesService");
-  std::string ServiceProviderPath;
-  if (LArPropertiesConfig.get_if_present
-    ("service_provider", ServiceProviderPath)
-    )
-  {
-    std::string ServiceProviderName = ServiceProviderPath;
-    size_t iSlash = ServiceProviderPath.rfind('/');
-    if (iSlash != std::string::npos)
-      ServiceProviderName.erase(0, iSlash + 1);
-    
-    if (ServiceProviderName == "LArPropertiesServiceStandard") {
-      mf::LogInfo("larp_test")
-        << "Verified service implementation specification: '"
-        << ServiceProviderPath << "'";
-    }
-    else {
-      mf::LogError("larp_test")
-        << "This test uses a LArPropertiesStandard provider.\n"
-        "Your configuration specifies a '" << ServiceProviderPath
-        << "' service implementation that is not known to use that provider.";
-      ++nErrors;
-    }
-  }
-  else {
-    mf::LogError("larp_test")
-      << "Service configuration does not specify the service provider!";
-    ++nErrors;
-  }
+  // LArPropertiesStandard supports the simple set up; so we invoke it
+  TestEnv.SimpleProviderSetup<detinfo::LArPropertiesStandard>();
   
   //
   // run the test algorithm
@@ -124,15 +91,15 @@ int main(int argc, char const** argv) {
   //
   
   // 1. we initialize it from the configuration in the environment,
-//  MyTestAlgo Tester(TestEnvironment.TesterParameters());
+//  MyTestAlgo Tester(TestEnv.TesterParameters());
   
   // 2. we set it up with the geometry from the environment
-//  Tester.Setup(*TestEnvironment.LArProperties());
+//  Tester.Setup(*(TestEnv.LArProperties()));
   
   // 3. then we run it!
   mf::LogInfo("larp_test")
     << "The atomic number of liquid argon is "
-    << TestEnvironment.LArProperties()->AtomicNumber()
+    << TestEnv.Provider<detinfo::LArProperties>()->AtomicNumber()
     ;
   
   // 4. And finally we cross fingers.

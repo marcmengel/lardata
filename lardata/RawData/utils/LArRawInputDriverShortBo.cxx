@@ -8,13 +8,13 @@
 
 #include "lardata/RawData/utils/LArRawInputDriverShortBo.h"
 
-#include "lardata/RawData/RawDigit.h"
-#include "lardata/RawData/DAQHeader.h"
+#include "lardataobj/RawData/RawDigit.h"
+#include "lardataobj/RawData/DAQHeader.h"
 #include "larcore/Geometry/Geometry.h"
-#include "larcore/SummaryData/RunData.h"
+#include "larcoreobj/SummaryData/RunData.h"
 
 #include "art/Framework/IO/Sources/put_product_in_principal.h"
-#include "art/Utilities/Exception.h"
+#include "canvas/Utilities/Exception.h"
 
 extern "C" {
 #include <sys/types.h>

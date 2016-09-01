@@ -6,11 +6,11 @@
 // \author jpaley@fnal.gov
 // 
 ////////////////////////////////////////////////////////////////////////
-#ifndef DETINFO_IDETECTORPROPERTIES_H
-#define DETINFO_IDETECTORPROPERTIES_H
+#ifndef LARDATA_DETINFO_DETECTORPROPERTIES_H
+#define LARDATA_DETINFO_DETECTORPROPERTIES_H
 
 #include "fhiclcpp/ParameterSet.h"
-#include "larcore/Geometry/Geometry.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::PlaneID, ...
 
 ///General LArSoft Utilities
 namespace detinfo{
@@ -114,4 +114,4 @@ namespace detinfo{
     }; // class DetectorProperties
 } //namespace detinfo
 
-#endif // DETINFO_IDETECTORPROPERTIES_H
+#endif // LARDATA_DETINFO_DETECTORPROPERTIES_H

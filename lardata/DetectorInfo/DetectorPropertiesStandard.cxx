@@ -12,12 +12,12 @@
 
 // LArSoft includes
 #include "lardata/DetectorInfo/DetectorPropertiesStandard.h"
-#include "lardata/DetectorInfo/ProviderUtil.h" // lar::IgnorableProviderConfigKeys()
-#include "larcore/Geometry/Geometry.h"
+#include "larcore/CoreUtils/ProviderUtil.h" // lar::IgnorableProviderConfigKeys()
+#include "larcore/Geometry/GeometryCore.h"
 #include "larcore/Geometry/CryostatGeo.h"
 #include "larcore/Geometry/TPCGeo.h"
 #include "larcore/Geometry/PlaneGeo.h"
-#include "larcore/SimpleTypesAndConstants/PhysicalConstants.h"
+#include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
@@ -45,10 +45,17 @@ namespace detinfo{
 					 const geo::GeometryCore* geo,
 					 const detinfo::LArProperties* lp,
 					 const detinfo::DetectorClocks* c,
-					 std::set<std::string> ignore_params /* = {} */
+					 std::set<std::string> const& ignore_params /* = {} */
 					 ):
     fLP(lp), fClocks(c), fGeo(geo)
   {
+    {
+       mf::LogInfo debug("setupProvider<DetectorPropertiesStandard>");
+       
+       debug << "Asked to ignore " << ignore_params.size() << " keys:";
+       for (auto const& key: ignore_params) debug << " '" << key << "'";
+    }
+    
     ValidateAndConfigure(pset, ignore_params);
     
     fTPCClock = fClocks->TPCClock();
@@ -58,7 +65,7 @@ namespace detinfo{
   //--------------------------------------------------------------------
   DetectorPropertiesStandard::DetectorPropertiesStandard(fhicl::ParameterSet const& pset,
 					 providers_type providers,
-					 std::set<std::string> ignore_params /* = {} */
+					 std::set<std::string> const& ignore_params /* = {} */
 					 ):
     DetectorPropertiesStandard(pset,
       providers.get<geo::GeometryCore>(),
@@ -159,9 +166,9 @@ namespace detinfo{
   //--------------------------------------------------------------------
   DetectorPropertiesStandard::Configuration_t
   DetectorPropertiesStandard::ValidateConfiguration(
-    fhicl::ParameterSet const& p, std::set<std::string> ignore_params /* = {} */
+    fhicl::ParameterSet const& p,
+    std::set<std::string> const& ignore_params /* = {} */
   ) {
-    
     std::set<std::string> ignorable_keys = lar::IgnorableProviderConfigKeys();
     ignorable_keys.insert(ignore_params.begin(), ignore_params.end());
     
@@ -174,7 +181,8 @@ namespace detinfo{
   
   //--------------------------------------------------------------------
   void DetectorPropertiesStandard::ValidateAndConfigure(
-    fhicl::ParameterSet const& p, std::set<std::string> ignore_params /* = {} */
+    fhicl::ParameterSet const& p,
+    std::set<std::string> const& ignore_params /* = {} */
   ) {
     Configure(ValidateConfiguration(p, ignore_params));
   } // ValidateAndConfigure()

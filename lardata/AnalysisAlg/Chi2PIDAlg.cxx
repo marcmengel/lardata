@@ -12,8 +12,8 @@ extern "C" {
 }
 
 //#include "RecoBase/Track.h"
-#include "lardata/AnalysisBase/Calorimetry.h"
-#include "lardata/AnalysisBase/ParticleID.h"
+#include "lardataobj/AnalysisBase/Calorimetry.h"
+#include "lardataobj/AnalysisBase/ParticleID.h"
 #include "lardata/Utilities/AssociationUtil.h"
 #include "lardata/AnalysisAlg/Chi2PIDAlg.h"
 
@@ -23,8 +23,8 @@ extern "C" {
 
 // Framework includes
 #include "art/Framework/Principal/Handle.h" 
-#include "art/Persistency/Common/Ptr.h" 
-#include "art/Persistency/Common/PtrVector.h" 
+#include "canvas/Persistency/Common/Ptr.h" 
+#include "canvas/Persistency/Common/PtrVector.h" 
 #include "art/Framework/Services/Registry/ServiceHandle.h" 
 #include "art/Framework/Services/Optional/TFileService.h" 
 #include "art/Framework/Services/Optional/TFileDirectory.h" 
@@ -81,6 +81,8 @@ void pid::Chi2PIDAlg::DoParticleID(art::Ptr<anab::Calorimetry> calo,
 
   int used_trkres = 0;
   for (unsigned i = 0; i<trkdedx.size(); ++i){//hits
+    //ignore the first and the last point
+    if (i==0 || i==trkdedx.size()-1) continue;
     avgdedx += trkdedx[i];
     if(trkres[i] < 30) {
       PIDA += trkdedx[i]*pow(trkres[i],0.42);

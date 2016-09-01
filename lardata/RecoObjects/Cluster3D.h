@@ -23,7 +23,7 @@
 #include <set>
 #include <map>
 
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 
 // Forward declaration for 2D Hits
 namespace recob{

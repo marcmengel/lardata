@@ -14,8 +14,8 @@
 #define HITUTILS_H
 
 // LArSoft libraries
-#include "lardata/RecoBase/Wire.h"
-#include "lardata/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Wire.h"
+#include "lardataobj/RecoBase/Hit.h"
 #include "lardata/RecoBaseArt/FindAllP.h"
 
 
@@ -23,7 +23,7 @@
 namespace lar {
   
   /// LArSoft utility namespace
-  namespace utils {
+  namespace util {
     
     
     /** ************************************************************************
@@ -56,7 +56,12 @@ namespace lar {
     using HitToWire = details::FindAllP<recob::Hit, recob::Wire>;
     
     
-  } // namespace utils
+  } // namespace util
+  
+  // old, deprecated namespace
+  namespace utils {
+    using HitToWire [[deprecated("use lar::util namespace instead")]] = ::lar::util::HitToWire;
+  }
   
 } // namespace lar
 

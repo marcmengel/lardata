@@ -4,7 +4,7 @@
  * @date   December 18th, 2014
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * 
- * The code here is implementation details, living in lar::utils::details
+ * The code here is implementation details, living in lar::util::details
  * namespace.
  */
 
@@ -21,18 +21,18 @@
 
 // framework libraries
 #include "messagefacility/MessageLogger/MessageLogger.h" 
-#include "art/Utilities/Exception.h"
-#include "art/Utilities/InputTag.h"
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/Assns.h" 
-#include "art/Persistency/Provenance/ProductID.h"
+#include "canvas/Utilities/Exception.h"
+#include "canvas/Utilities/InputTag.h"
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/Assns.h" 
+#include "canvas/Persistency/Provenance/ProductID.h"
 #include "art/Framework/Principal/Event.h" 
 
 /// LArSoft-specific namespace
 namespace lar {
   
   /// LArSoft utility namespace
-  namespace utils {
+  namespace util {
     
     /// LArSoft utility implementation details
     namespace details {
@@ -208,7 +208,7 @@ namespace lar {
       
       
     } // namespace details
-  } // namespace utils
+  } // namespace util
 } // namespace lar
 
 
@@ -218,7 +218,7 @@ namespace lar {
 //******************************************************************************
 
 namespace lar {
-  namespace utils {
+  namespace util {
     namespace details {
       //------------------------------------------------------------------------
       //---  FindAllP
@@ -402,7 +402,7 @@ namespace lar {
       } // ResizeToPower2()
       
     } // namespace details
-  } // namespace utils
+  } // namespace util
 } // namespace lar
 
 

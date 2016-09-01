@@ -49,8 +49,8 @@
 #include "lardata/RecoObjects/KHitGroup.h"
 #include "lardata/RecoObjects/KTrack.h"
 #include "lardata/RecoObjects/Propagator.h"
-#include "art/Persistency/Common/PtrVector.h"
-#include "lardata/RecoBase/Hit.h"
+#include "canvas/Persistency/Common/PtrVector.h"
+#include "lardataobj/RecoBase/Hit.h"
 
 
 namespace trkf {

@@ -1,0 +1,104 @@
+#
+# File:    resourcetracking_services.fcl
+# Purpose: configuration of resource tracking services.
+# Author:  Gianluca Petrillo (petrillo@fnal.gov)
+# Date:    August 11, 2016
+# Version: 1.0
+#
+# Configuration provided:
+# * single services:
+#
+#   - standard_memorytracker: reports on memory usage and its grow steps;
+#       note that this configuration requires art 2.1 or newer
+#
+#   - standard_timetracker: reports on CPU time used by each module
+#
+#
+# * service bundles:
+#
+#   - standard_resourcetrackers: runs memory and CPU time tracking services.
+#       Use as:
+#       
+#       services: {
+#         
+#         @table::standard_resourcetrackers
+#         
+#         # ...
+#         
+#       } # services
+#       
+#
+# Changes:
+# 20160811 (petrillo@fnal.gov) [v1.0]
+#   first version
+#
+
+BEGIN_PROLOG
+
+###
+### Single service configurations
+###
+#
+# configuration for art's memory tracker service
+#
+# - saves statistics in a new SQL database file (memory.db)
+# - writes a report on the standard message facility output channel
+#
+# All summaries are printed (by service default).
+#
+standard_memorytracker: {
+  
+  # do not report memory increase from the first event
+  # (this is guaranteed to be a large, but necessary, jump)
+  ignoreTotal: 1 
+  
+  dbOutput: {
+    
+    filename: "memory.db"
+    
+    # (re)create a new database file on each job
+    # (the output of merged job tends to be confusing)
+    overwrite: true
+    
+  } # dbOutput
+  
+  
+} # standard_memorytracker
+
+
+#
+# configuration for art's time tracker service
+#
+# - saves statistics in a new SQL database file (cputime.db)
+# - writes a report on the standard message facility output channel
+#
+standard_timetracker: {
+  
+  printSummary: true
+  
+  dbOutput: {
+    
+    filename: "cputime.db"
+    
+    # (re)create a new database file on each job
+    # (the output of merged job tends to be confusing)
+    overwrite: true
+    
+  } # dbOutput
+  
+  
+} # standard_timetracker
+
+
+###
+### service bundles
+###
+
+standard_resourcetrackers: {
+  MemoryTracker: @local::standard_memorytracker
+  TimeTracker:   @local::standard_timetracker
+} # standard_resourcetrackers
+
+
+END_PROLOG
+

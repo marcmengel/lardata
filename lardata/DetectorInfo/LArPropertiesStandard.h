@@ -1,7 +1,16 @@
+/**
+ * @file    LArPropertiesStandard.h
+ * @brief   Service provider with utility LAr functions
+ * @see     LArPropertiesStandard.cxx LArPropertiesStandardTestHelpers.h
+ * 
+ * The provider detinfo::LArProperiesStandard supports simple setup for testing
+ * environment, by including in your test:
+ *     
+ *     #include "lardata/DetectorInfo/LArPropertiesStandardTestHelpers.h"
+ *     
+ */
 ////////////////////////////////////////////////////////////////////////
-// LArProperties.h
-//
-// Utility LAr functions
+// Historical authors:
 //
 // maddalena.antonello@lngs.infn.it
 // ornella.palamara@lngs.infn.it
@@ -13,8 +22,12 @@
 //
 // Separation of service from Detector info class:
 // jpaley@fnal.gov
+// 
+// Test system:
+// petrillo@fnal.gov
 //
 ////////////////////////////////////////////////////////////////////////
+
 #ifndef DETECTORINFO_LARPROPERTIESSTANDARD_H
 #define DETECTORINFO_LARPROPERTIESSTANDARD_H
 

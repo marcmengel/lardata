@@ -16,18 +16,18 @@
 #include <limits> // std::numeric_limits<>
 
 // art libraries
-#include "art/Utilities/Exception.h"
+#include "canvas/Utilities/Exception.h"
 #include "art/Framework/Core/EDProducer.h"
-#include "art/Framework/Core/FindOneP.h"
+#include "canvas/Persistency/Common/FindOneP.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "art/Persistency/Common/EDProductGetter.h"
+#include "canvas/Persistency/Common/EDProductGetter.h"
 
 // LArSoft libraries
 #include "larcore/Geometry/Geometry.h"
 // #include "RawData/RawDigit.h"
-#include "lardata/RecoBase/Wire.h"
-#include "lardata/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Wire.h"
+#include "lardataobj/RecoBase/Hit.h"
 #include "lardata/Utilities/MakeIndex.h"
 
 
