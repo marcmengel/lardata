@@ -39,6 +39,10 @@ namespace recob {
    *   used for the output (useful for filtering)
    * - *PrintHexFloats* (boolean, default: `false`): print all the floating
    *   point numbers in base 16
+   * - *MaxDepth* (unsigned int, optional): if specified, at most this number of
+   *   particle generations will be printed; 1 means printing only primaries and
+   *   their daughters, 0 only primaries. If not specified, no limit will be
+   *   applied. This is useful for buggy PFParticles with circular references.
    *
    */
   class DumpPFParticles: public art::EDAnalyzer {
@@ -55,6 +59,7 @@ namespace recob {
     art::InputTag fInputTag; ///< input tag of the PFParticle product
     std::string fOutputCategory; ///< category for LogInfo output
     bool fPrintHexFloats; ///< whether to print floats in base 16
+    unsigned int fMaxDepth; ///< maximum generation to print (0: only primaries)
 
   }; // class DumpPFParticles
   
@@ -197,6 +202,10 @@ namespace {
     /// Collection of available printing style options
     struct PrintOptions_t {
       bool hexFloats = false; ///< print all floating point numbers in base 16
+      /// number of particle generations to descent into (0: only primaries)
+      unsigned int maxDepth = std::numeric_limits<unsigned int>::max();
+      /// name of the output stream
+      std::string streamName;
     }; // PrintOptions_t
     
     
@@ -239,269 +248,33 @@ namespace {
     
     
     /// Dump a particle specified by its index in the input particle list
+    /// @param gen max generations to print
     template <typename Stream>
-    void DumpParticle
-      (Stream&& out, size_t iPart, std::string indentstr = "")
-      const
-      {
-        lar::OptionalHexFloat hexfloat(options.hexFloats);
-        
-        recob::PFParticle const& part = particles.at(iPart);
-        bool const isPrimary = part.IsPrimary();
-        ++visited[iPart];
-        
-        //
-        // intro
-        //
-        auto const PartID = part.Self();
-        out << "\n" << indentstr << "ID=" << PartID;
-        if (iPart != PartID) out << " [#" << iPart << "]";
-        out << " (type: ";
-        DumpPDGID(out, part.PdgCode());
-        out << ")";
-        if (isPrimary) out << " (primary)";
-        else           out << " from ID=" << part.Parent();
-        
-        // vertex information
-        if (vertices) {
-          cet::maybe_ref<recob::Vertex const> VertexRef = vertices->at(iPart);
-          if (VertexRef.isValid()) {
-            recob::Vertex const& vertex = VertexRef.ref();
-            std::array<double, 3> vtx_pos;
-            vertex.XYZ(vtx_pos.data());
-            out << " [decay at ("
-              << hexfloat(vtx_pos[0]) << "," << hexfloat(vtx_pos[1])
-              << "," << hexfloat(vtx_pos[2])
-              << "), ID=" << vertex.ID() << "]";
-          }
-          else {
-            out << " [no vertex found!]";
-          }
-        }
-        
-        if (part.NumDaughters() > 0)
-          out << " with " << part.NumDaughters() << " daughters";
-        else
-          out << " with no daughter";
-        
-        // axis
-        if (pcaxes) {
-          std::vector<recob::PCAxis const*> const& myAxes = pcaxes->at(iPart);
-          out << "\n" << indentstr;
-          if (myAxes.empty())
-            out << " [no axis found!]";
-          else {
-            auto printDirection
-              = [&hexfloat](auto& out, recob::PCAxis const& axis)
-              {
-              out << "axis ID=" << axis.getID() << ", principal: ("
-                  << hexfloat(axis.getEigenVectors()[0][0])
-                  << ", " << hexfloat(axis.getEigenVectors()[0][1])
-                  << ", " << hexfloat(axis.getEigenVectors()[0][2]) << ")";
-              };
-            if (myAxes.size() == 1) {
-              printDirection(out, *(myAxes.front()));
-            }
-            else {
-              out << "  " << myAxes.size() << " axes present:";
-              for (recob::PCAxis const* axis: myAxes) {
-                out << "\n" << indentstr << "    ";
-                if (axis->getSvdOK()) printDirection(out, *axis);
-                else out << "axis is invalid";
-              } // for axes
-            } // else
-          } // if has axes
-        }
-        
-        //
-        // tracks
-        //
-        if (tracks) {
-          std::vector<recob::Track const*> const& myTracks = tracks->at(iPart);
-          if (!myTracks.empty()) {
-            out << "\n" << indentstr << "  "
-              << myTracks.size() << " tracks:";
-            for (recob::Track const* track: myTracks) {
-              if (myTracks.size() > 1) out << "\n" << indentstr << "   ";
-              out << " length " << hexfloat(track->Length())
-                << "cm from (" << hexfloat(track->Vertex().X())
-                  << ";" << hexfloat(track->Vertex().Y())
-                  << ";" << hexfloat(track->Vertex().Z())
-                << ") to (" << hexfloat(track->End().X())
-                  << ";" << hexfloat(track->End().Y())
-                  << ";" << hexfloat(track->End().Z())
-                << ") (ID=" << track->ID() << ")";
-            } // for clusters
-          }
-        } // if we have track information
-        
-        //
-        // seeds
-        //
-        if (seeds) {
-          std::vector<recob::Seed const*> const& mySeeds = seeds->at(iPart);
-          if (!mySeeds.empty()) {
-            out << "\n" << indentstr << "  "
-              << mySeeds.size() << " seeds:";
-            for (recob::Seed const* seed: mySeeds) {
-              if (!seed->IsValid()) {
-                out << "  <invalid>";
-                continue;
-              }
-              std::array<double, 3> start, dir;
-              seed->GetDirection(dir.data(), nullptr);
-              seed->GetPoint(start.data(), nullptr);
-              out << "\n" << indentstr
-                << "    (" << hexfloat(start[0]) << "," << hexfloat(start[1])
-                << "," << hexfloat(start[2])
-                << ")=>(" << hexfloat(dir[0]) << "," << hexfloat(dir[1])
-                << "," << hexfloat(dir[2])
-                << "), " << hexfloat(seed->GetLength()) << " cm"
-                ;
-            } // for seeds
-          } // if we have seeds
-        } // if we have seed information
-        
-        //
-        // space points
-        //
-        if (spacepoints) {
-          std::vector<recob::SpacePoint const*> const& mySpacePoints
-            = spacepoints->at(iPart);
-          out << "\n" << indentstr << "  ";
-          if (!mySpacePoints.empty()) {
-            constexpr unsigned int PointsPerLine = 2;
-            out << mySpacePoints.size() << " space points:";
-            for (size_t iSP = 0; iSP < mySpacePoints.size(); ++iSP) {
-              if ((iSP % PointsPerLine) == 0)
-                out << "\n" << indentstr << "  ";
-              
-              recob::SpacePoint const& sp = *(mySpacePoints[iSP]);
-              const double* pos = sp.XYZ();
-              out << "  ID=" << sp.ID()
-                << " at (" << hexfloat(pos[0]) << "," << hexfloat(pos[1])
-                << "," << hexfloat(pos[2]) << ") cm"
-                ;
-            } // for seeds
-          } // if we have space points
-          else out << "no space points";
-        } // if we have space point information
-        
-        //
-        // clusters
-        //
-        if (clusters) {
-          std::vector<recob::Cluster const*> myClusters = clusters->at(iPart);
-          if (!myClusters.empty()) {
-            out << "\n" << indentstr << "  "
-              << myClusters.size() << " clusters:";
-            for (recob::Cluster const* cluster: myClusters) {
-              out << "  " << cluster->NHits() << " hits on " << cluster->Plane()
-                << " (ID=" << cluster->ID() << ")";
-            } // for clusters
-            
-          }
-        } // if we have cluster information
-        
-        //
-        // daughters
-        //
-        if (part.NumDaughters() > 0) {
-          std::vector<size_t> const& daughters = part.Daughters();
-          out << "\n" << indentstr
-            << "  " << part.NumDaughters() << " particle daughters:";
-          for (size_t DaughterID: daughters) {
-            if (DaughterID == PartID) {
-              out << "\n" << indentstr
-                << "    oh, just great: this particle is its own daughter!";
-            }
-            else DumpParticleWithID(out, DaughterID, indentstr + "  ");
-          }
-        } // if has daughters
-        
-        //
-        // warnings
-        //
-        if (visited[iPart] == 2) {
-          out << "\n" << indentstr << "WARNING: particle ID=" << PartID
-            << " connected more than once!";
-        }
-        
-        //
-        // done
-        //
-        
-      } // DumpParticle()
+    void DumpParticle(
+      Stream&& out, size_t iPart, std::string indentstr = "",
+      unsigned int gen = 0
+      ) const;
     
     
     /// Dump a particle specified by its ID
+    /// @param gen max generations to print
     template <typename Stream>
-    void DumpParticleWithID
-      (Stream&& out, size_t pID, std::string indentstr = "")
-      const
-      {
-        size_t const pos = particle_map[pID];
-        if (particle_map.is_valid_value(pos)) {
-          DumpParticle(out, pos, indentstr);
-        }
-        else {
-          out << "\n" << indentstr << "<ID=" << pID << " not found>";
-        }
-      } // DumpParticleWithID()
+    void DumpParticleWithID(
+      Stream&& out, size_t pID, std::string indentstr = "",
+      unsigned int gen = 0
+      ) const;
     
     
     /// Dumps all primary particles
-    template <typename Stream>
-    void DumpAllPrimaries(Stream&& out, std::string indentstr = "") const
-      {
-        indentstr += "  ";
-        size_t const nParticles = particles.size();
-        unsigned int nPrimaries = 0;
-        for (size_t iPart = 0; iPart < nParticles; ++iPart) {
-          if (!particles[iPart].IsPrimary()) continue;
-          DumpParticle(out, iPart, indentstr);
-        } // for
-        if (nPrimaries == 0)
-          out << "\n" << indentstr << "No primary particle found";
-      } // DumpAllPrimaries()
+    void DumpAllPrimaries(std::string indentstr = "") const;
     
     
     /// Dumps all particles in the input list
-    template <typename Stream>
-    void DumpAllParticles(Stream&& out, std::string indentstr = "") const
-      {
-        // first print all the primary particles
-        DumpAllPrimaries(out, indentstr);
-        // then find out if there are any that are "disconnected"
-        unsigned int const nDisconnected
-          = std::count(visited.begin(), visited.end(), 0U);
-        if (nDisconnected) {
-          out << "\n" << indentstr
-            << nDisconnected << " particles not coming from primary ones:";
-          size_t const nParticles = visited.size();
-          for (size_t iPart = 0; iPart < nParticles; ++iPart) {
-            if (visited[iPart] > 0) continue;
-            DumpParticle(out, iPart, indentstr + "  ");
-          } // for unvisited particles
-          out << "\n" << indentstr
-            << "(end of " << nDisconnected << " particles not from primaries)";
-        } // if there are disconnected particles
-        // TODO finally, note if there are multiply-connected particles
-        
-      } // DumpAllParticles()
+    void DumpAllParticles(std::string indentstr = "") const;
     
     
     template <typename Stream>
-    static void DumpPDGID(Stream&& out, int ID)
-      {
-        switch (ID) {
-          case -11: out << "e+";  break;
-          case  11: out << "e-";  break;
-          case -13: out << "mu+"; break;
-          case  13: out << "mu-"; break;
-          default:  out << "MCID=" << ID; break;
-        } // switch
-      } // DumpPDGID()
+    static void DumpPDGID(Stream&& out, int ID);
     
     
       protected:
@@ -532,7 +305,504 @@ namespace {
     
     int_map<size_t> const particle_map; ///< fast lookup index by particle ID
     
-  }; // ParticleDumper
+    
+    template <typename Stream>
+    void DumpPFParticleInfo(
+      Stream&& out,
+      recob::PFParticle const& part,
+      unsigned int iPart,
+      std::string indentstr
+      ) const;
+    
+    template <typename Stream>
+    void DumpVertex(
+      Stream&& out,
+      cet::maybe_ref<recob::Vertex const> VertexRef,
+      std::string indentstr
+      ) const;
+    
+    template <typename Stream>
+    void DumpPCAxisDirection
+      (Stream&& out, recob::PCAxis const& axis) const;
+    
+    template <typename Stream>
+    void DumpPCAxes(
+      Stream&& out,
+      std::vector<recob::PCAxis const*> const& myAxes,
+      std::string indentstr
+      ) const;
+    
+    template <typename Stream>
+    void DumpTrack(Stream&& out, recob::Track const& track) const;
+    
+    template <typename Stream>
+    void DumpTracks(
+      Stream&& out,
+      std::vector<recob::Track const*> const& myTracks,
+      std::string indentstr
+      ) const;
+
+    template <typename Stream>
+    void DumpSeed
+      (Stream&& out, recob::Seed const& seed, std::string indentstr) const;
+    
+    template <typename Stream>
+    void DumpSeeds(
+      Stream&& out,
+      std::vector<recob::Seed const*> const& mySeeds,
+      std::string indentstr
+      ) const;
+    
+    template <typename Stream>
+    void DumpSpacePoint(Stream&& out, recob::SpacePoint const& sp) const;
+      
+    template <typename Stream>
+    void DumpSpacePoints(
+      Stream&& out,
+      std::vector<recob::SpacePoint const*> const& mySpacePoints,
+      std::string indentstr
+      ) const;
+      
+    template <typename Stream>
+    void DumpClusterSummary(Stream&& out, recob::Cluster const& track) const;
+    
+    template <typename Stream>
+    void DumpClusters(
+      Stream&& out,
+      std::vector<recob::Cluster const*> const& myClusters,
+      std::string indentstr
+      ) const;
+    
+  }; // class ParticleDumper
+  
+  
+  //----------------------------------------------------------------------------
+  class PFParticleGraphMaker {
+      public:
+    
+    PFParticleGraphMaker() = default;
+    
+    template <typename Stream>
+    void MakeGraph
+      (Stream&& out, std::vector<recob::PFParticle> const& particles) const;
+    
+    template <typename Stream>
+    void WriteGraphHeader(Stream&& out) const;
+    
+    template <typename Stream>
+    void WriteParticleRelations
+      (Stream&& out, std::vector<recob::PFParticle> const& particles) const;
+    
+    template <typename Stream>
+    void WriteParticleNodes
+      (Stream&& out, std::vector<recob::PFParticle> const& particles) const;
+    
+    template <typename Stream>
+    void WriteParticleEdges
+      (Stream&& out, std::vector<recob::PFParticle> const& particles) const;
+    
+    template <typename Stream>
+    void WriteGraphFooter(Stream&& out) const;
+    
+  }; // class PFParticleGraphMaker
+  
+  
+  //----------------------------------------------------------------------------
+  //--- ParticleDumper implementation
+  //--- 
+  template <typename Stream>
+  void ParticleDumper::DumpParticle(
+    Stream&& out, size_t iPart, std::string indentstr /* = "" */,
+    unsigned int gen /* = 0 */
+    ) const
+  {
+    lar::OptionalHexFloat hexfloat(options.hexFloats);
+    
+    recob::PFParticle const& part = particles.at(iPart);
+    ++visited[iPart];
+    
+    if (visited[iPart] > 1) {
+      out << indentstr << "particle " << part.Self()
+        << " already printed!!!";
+      return;
+    }
+    
+    //
+    // intro
+    //
+    DumpPFParticleInfo(std::forward<Stream>(out), part, iPart, indentstr);
+    
+    //
+    // vertex information
+    //
+    if (vertices)
+      DumpVertex(std::forward<Stream>(out), vertices->at(iPart), indentstr);
+    
+    // daughters tag
+    if (part.NumDaughters() > 0)
+      out << " with " << part.NumDaughters() << " daughters";
+    else
+      out << " with no daughter";
+    
+    //
+    // axis
+    //
+    if (pcaxes)
+      DumpPCAxes(std::forward<Stream>(out), pcaxes->at(iPart), indentstr);
+    
+    //
+    // tracks
+    //
+    if (tracks)
+      DumpTracks(std::forward<Stream>(out), tracks->at(iPart), indentstr);
+    
+    //
+    // seeds
+    //
+    if (seeds)
+      DumpSeeds(std::forward<Stream>(out), seeds->at(iPart), indentstr);
+    
+    //
+    // space points
+    //
+    if (spacepoints) {
+      DumpSpacePoints
+        (std::forward<Stream>(out), spacepoints->at(iPart), indentstr);
+    }
+    
+    //
+    // clusters
+    //
+    if (clusters) {
+      DumpClusters
+        (std::forward<Stream>(out), clusters->at(iPart), indentstr);
+    }
+    
+    //
+    // daughters
+    //
+    auto const PartID = part.Self();
+    if (part.NumDaughters() > 0) {
+      std::vector<size_t> const& daughters = part.Daughters();
+      out << "\n" << indentstr
+        << "  " << part.NumDaughters() << " particle daughters";
+      if (gen > 0) {
+        out << ":";
+        for (size_t DaughterID: daughters) {
+          if (DaughterID == PartID) {
+            out << "\n" << indentstr
+              << "    oh, just great: this particle is its own daughter!";
+          }
+          else {
+            out << '\n';
+            DumpParticleWithID(out, DaughterID, indentstr + "  ", gen - 1);
+          }
+        }
+      } // if descending
+      else {
+        out << " (further descend suppressed)";
+      }
+    } // if has daughters
+    
+    //
+    // warnings
+    //
+    if (visited[iPart] == 2) {
+      out << "\n" << indentstr << "  WARNING: particle ID=" << PartID
+        << " connected more than once!";
+    }
+    
+    //
+    // done
+    //
+    
+  } // ParticleDumper::DumpParticle()
+  
+  
+  //----------------------------------------------------------------------------
+  template <typename Stream>
+  void ParticleDumper::DumpParticleWithID(
+    Stream&& out, size_t pID, std::string indentstr /* = "" */,
+    unsigned int gen /* = 0 */
+  ) const {
+    size_t const pos = particle_map[pID];
+    if (particle_map.is_valid_value(pos)) {
+      DumpParticle(out, pos, indentstr, gen);
+    }
+    else {
+      out /* << "\n" */ << indentstr << "<ID=" << pID << " not found>";
+    }
+  } // ParticleDumper::DumpParticleWithID()
+    
+    
+  //----------------------------------------------------------------------------
+  void ParticleDumper::DumpAllPrimaries(std::string indentstr /* = "" */) const
+  {
+    indentstr += "  ";
+    size_t const nParticles = particles.size();
+    unsigned int nPrimaries = 0;
+    for (size_t iPart = 0; iPart < nParticles; ++iPart) {
+      if (!particles[iPart].IsPrimary()) continue;
+      DumpParticle(
+        mf::LogVerbatim(options.streamName),
+        iPart, indentstr, options.maxDepth
+        );
+    } // for
+    if (nPrimaries == 0) {
+      mf::LogVerbatim(options.streamName)
+        << indentstr << "No primary particle found";
+    }
+  } // ParticleDumper::DumpAllPrimaries()
+    
+    
+  //----------------------------------------------------------------------------
+  void ParticleDumper::DumpAllParticles(std::string indentstr /* = "" */) const
+  {
+    // first print all the primary particles
+    DumpAllPrimaries(indentstr);
+    // then find out if there are any that are "disconnected"
+    unsigned int const nDisconnected
+      = std::count(visited.begin(), visited.end(), 0U);
+    if (nDisconnected) {
+      mf::LogVerbatim(options.streamName) << indentstr
+        << nDisconnected << " particles not coming from primary ones:";
+      size_t const nParticles = visited.size();
+      for (size_t iPart = 0; iPart < nParticles; ++iPart) {
+        if (visited[iPart] > 0) continue;
+        DumpParticle(
+          mf::LogVerbatim(options.streamName), iPart, indentstr + "  ",
+          options.maxDepth
+          );
+      } // for unvisited particles
+      mf::LogVerbatim(options.streamName) << indentstr
+        << "(end of " << nDisconnected << " particles not from primaries)";
+    } // if there are disconnected particles
+    // TODO finally, note if there are multiply-connected particles
+    
+  } // ParticleDumper::DumpAllParticles()
+    
+    
+  //----------------------------------------------------------------------------
+  template <typename Stream>
+  void ParticleDumper::DumpPDGID(Stream&& out, int ID) {
+    switch (ID) {
+      case -11: out << "e+";  break;
+      case  11: out << "e-";  break;
+      case -13: out << "mu+"; break;
+      case  13: out << "mu-"; break;
+      default:  out << "MCID=" << ID; break;
+    } // switch
+  } // DumpPDGID()
+    
+    
+  //----------------------------------------------------------------------------
+  template <typename Stream>
+  void ParticleDumper::DumpPFParticleInfo(
+    Stream&& out,
+    recob::PFParticle const& part,
+    unsigned int iPart,
+    std::string indentstr
+    ) const
+  {
+    auto const PartID = part.Self();
+    out << indentstr << "ID=" << PartID;
+    if (iPart != PartID) out << " [#" << iPart << "]";
+    out << " (type: ";
+    DumpPDGID(out, part.PdgCode());
+    out << ")";
+    if (part.IsPrimary()) out << " (primary)";
+    else                  out << " from ID=" << part.Parent();
+  } // ParticleDumper::DumpPFParticleInfo()
+  
+  //----------------------------------------------------------------------------
+  template <typename Stream>
+  void ParticleDumper::DumpVertex(
+    Stream&& out,
+    cet::maybe_ref<recob::Vertex const> VertexRef,
+    std::string indentstr
+    ) const
+  {
+    if (!VertexRef.isValid()) {
+      out << " [no vertex found!]";
+      return;
+    }
+    recob::Vertex const& vertex = VertexRef.ref();
+    std::array<double, 3> vtx_pos;
+    vertex.XYZ(vtx_pos.data());
+    lar::OptionalHexFloat hexfloat(options.hexFloats);
+    out << " [decay at ("
+      << hexfloat(vtx_pos[0]) << "," << hexfloat(vtx_pos[1])
+      << "," << hexfloat(vtx_pos[2])
+      << "), ID=" << vertex.ID() << "]";
+    
+  } // ParticleDumper::DumpVertex()
+  
+  //----------------------------------------------------------------------------
+  template <typename Stream>
+  void ParticleDumper::DumpPCAxisDirection
+    (Stream&& out, recob::PCAxis const& axis) const
+  {
+    if (!axis.getSvdOK()) {
+      out << "axis is invalid";
+      return;
+    }
+    lar::OptionalHexFloat hexfloat(options.hexFloats);
+    out << "axis ID=" << axis.getID() << ", principal: ("
+        << hexfloat(axis.getEigenVectors()[0][0])
+        << ", " << hexfloat(axis.getEigenVectors()[0][1])
+        << ", " << hexfloat(axis.getEigenVectors()[0][2]) << ")";
+  } // ParticleDumper::DumpPCAxisDirection()
+  
+  template <typename Stream>
+  void ParticleDumper::DumpPCAxes(
+    Stream&& out,
+    std::vector<recob::PCAxis const*> const& myAxes,
+    std::string indentstr
+    ) const
+  {
+    out << "\n" << indentstr;
+    if (myAxes.empty()) {
+      out << " [no axis found!]";
+      return;
+    }
+    if (myAxes.size() == 1) {
+      DumpPCAxisDirection(std::forward<Stream>(out), *(myAxes.front()));
+    }
+    else {
+      out << "  " << myAxes.size() << " axes present:";
+      for (recob::PCAxis const* axis: myAxes) {
+        out << "\n" << indentstr << "    ";
+        DumpPCAxisDirection(std::forward<Stream>(out), *axis);
+      } // for axes
+    } // else
+  } // ParticleDumper::DumpPCAxes()
+  
+  //----------------------------------------------------------------------------
+  template <typename Stream>
+  void ParticleDumper::DumpSeed
+    (Stream&& out, recob::Seed const& seed, std::string indentstr) const
+  {
+    if (!seed.IsValid()) {
+      out << "  <invalid>";
+      return;
+    }
+    std::array<double, 3> start, dir;
+    seed.GetDirection(dir.data(), nullptr);
+    seed.GetPoint(start.data(), nullptr);
+    lar::OptionalHexFloat hexfloat(options.hexFloats);
+    out << "\n" << indentstr
+      << "    (" << hexfloat(start[0]) << "," << hexfloat(start[1])
+      << "," << hexfloat(start[2])
+      << ")=>(" << hexfloat(dir[0]) << "," << hexfloat(dir[1])
+      << "," << hexfloat(dir[2])
+      << "), " << hexfloat(seed.GetLength()) << " cm"
+      ;
+  } // ParticleDumper::DumpSeed()
+  
+  template <typename Stream>
+  void ParticleDumper::DumpSeeds(
+    Stream&& out,
+    std::vector<recob::Seed const*> const& mySeeds,
+    std::string indentstr
+    ) const
+  {
+    if (mySeeds.empty()) return;
+    out << "\n" << indentstr << "  "
+      << mySeeds.size() << " seeds:";
+    for (recob::Seed const* seed: mySeeds) 
+      DumpSeed(std::forward<Stream>(out), *seed, indentstr);
+  } // ParticleDumper::DumpSeeds()
+  
+  //----------------------------------------------------------------------------
+  template <typename Stream>
+  void ParticleDumper::DumpSpacePoint
+    (Stream&& out, recob::SpacePoint const& sp) const
+  {
+    const double* pos = sp.XYZ();
+    lar::OptionalHexFloat hexfloat(options.hexFloats);
+    out << "  ID=" << sp.ID()
+      << " at (" << hexfloat(pos[0]) << "," << hexfloat(pos[1])
+      << "," << hexfloat(pos[2]) << ") cm"
+      ;
+  } // ParticleDumper::DumpSpacePoints()
+    
+  template <typename Stream>
+  void ParticleDumper::DumpSpacePoints(
+    Stream&& out,
+    std::vector<recob::SpacePoint const*> const& mySpacePoints,
+    std::string indentstr
+    ) const
+  {
+    out << "\n" << indentstr << "  ";
+    if (mySpacePoints.empty()) {
+      out << "no space points";
+      return;
+    }
+    constexpr unsigned int PointsPerLine = 2;
+    out << mySpacePoints.size() << " space points:";
+    for (size_t iSP = 0; iSP < mySpacePoints.size(); ++iSP) {
+      if ((iSP % PointsPerLine) == 0)
+        out << "\n" << indentstr << "  ";
+      
+      DumpSpacePoint(std::forward<Stream>(out), *(mySpacePoints[iSP]));
+    } // for points
+  } // ParticleDumper::DumpSpacePoints()
+    
+  //----------------------------------------------------------------------------
+  template <typename Stream>
+  void ParticleDumper::DumpTrack(Stream&& out, recob::Track const& track) const
+  {
+    lar::OptionalHexFloat hexfloat(options.hexFloats);
+    out << " length " << hexfloat(track.Length())
+      << "cm from (" << hexfloat(track.Vertex().X())
+        << ";" << hexfloat(track.Vertex().Y())
+        << ";" << hexfloat(track.Vertex().Z())
+      << ") to (" << hexfloat(track.End().X())
+        << ";" << hexfloat(track.End().Y())
+        << ";" << hexfloat(track.End().Z())
+      << ") (ID=" << track.ID() << ")";
+  } // ParticleDumper::DumpTrack()
+    
+  template <typename Stream>
+  void ParticleDumper::DumpTracks(
+    Stream&& out,
+    std::vector<recob::Track const*> const& myTracks,
+    std::string indentstr
+    ) const
+  {
+    if (myTracks.empty()) return;
+    out << "\n" << indentstr << "  "
+      << myTracks.size() << " tracks:";
+    for (recob::Track const* track: myTracks) {
+      if (myTracks.size() > 1) out << "\n" << indentstr << "   ";
+      DumpTrack(std::forward<Stream>(out), *track);
+    } // for tracks
+  } // ParticleDumper::DumpTracks()
+    
+  //----------------------------------------------------------------------------
+  template <typename Stream>
+  void ParticleDumper::DumpClusterSummary
+    (Stream&& out, recob::Cluster const& cluster) const
+  {
+    out << "  " << cluster.NHits() << " hits on " << cluster.Plane()
+        << " (ID=" << cluster.ID() << ")";
+  } // ParticleDumper::DumpClusterSummary()
+  
+  template <typename Stream>
+  void ParticleDumper::DumpClusters(
+    Stream&& out,
+    std::vector<recob::Cluster const*> const& myClusters,
+    std::string indentstr
+    ) const
+  {
+    if (myClusters.empty()) return;
+    out << "\n" << indentstr << "  "
+      << myClusters.size() << " clusters:";
+    for (recob::Cluster const* cluster: myClusters) {
+      if (myClusters.size() > 1) out << "\n" << indentstr << "   ";
+      DumpClusterSummary(std::forward<Stream>(out), *cluster);
+    }
+  } // ParticleDumper::DumpClusters()
   
   
   //----------------------------------------------------------------------------
@@ -551,6 +821,9 @@ namespace recob {
     , fOutputCategory
         (pset.get<std::string>("OutputCategory", "DumpPFParticles"))
     , fPrintHexFloats(pset.get<bool>("PrintHexFloats", false))
+    , fMaxDepth(pset.get<unsigned int>
+        ("MaxDepth", std::numeric_limits<unsigned int>::max())
+        )
     {}
   
   
@@ -585,6 +858,8 @@ namespace recob {
     // prepare the dumper
     ParticleDumper::PrintOptions_t options;
     options.hexFloats = fPrintHexFloats;
+    options.maxDepth = fMaxDepth;
+    options.streamName = fOutputCategory;
     ParticleDumper dumper(*PFParticles, options);
     if (ParticleVertices.isValid()) dumper.SetVertices(&ParticleVertices);
     else mf::LogPrint("DumpPFParticles") << "WARNING: vertex information not available";
@@ -606,8 +881,7 @@ namespace recob {
       mf::LogPrint("DumpPFParticles")
         << "WARNING: principal component axis not available";
     }
-    
-    dumper.DumpAllParticles(mf::LogVerbatim(fOutputCategory), "  ");
+    dumper.DumpAllParticles("  ");
     
     mf::LogVerbatim(fOutputCategory) << "\n"; // two empty lines
     
