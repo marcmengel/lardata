@@ -11,6 +11,8 @@
 
 // art libraries
 #include "canvas/Utilities/InputTag.h"
+#include "canvas/Persistency/Provenance/EventID.h"
+#include "art/Framework/Principal/Provenance.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
 
@@ -43,6 +45,11 @@ namespace recob {
    *   particle generations will be printed; 1 means printing only primaries and
    *   their daughters, 0 only primaries. If not specified, no limit will be
    *   applied. This is useful for buggy PFParticles with circular references.
+   * - *MakeParticleGraphs* (boolean, default: `false`): creates a DOT file for
+   *   each event, with a graph of PFParticle relations; each file is named as:
+   *   `ProcessName_ModuleLabel_InstanceName_Run#_Subrun#_Event#_particles.dot`,
+   *   where the the input label elements refer to the data product being
+   *   plotted.
    *
    */
   class DumpPFParticles: public art::EDAnalyzer {
@@ -60,6 +67,16 @@ namespace recob {
     std::string fOutputCategory; ///< category for LogInfo output
     bool fPrintHexFloats; ///< whether to print floats in base 16
     unsigned int fMaxDepth; ///< maximum generation to print (0: only primaries)
+    bool fMakeEventGraphs; ///< whether to create one DOT file per event
+    
+    
+    static std::string DotFileName
+      (art::EventID const& evtID, art::Provenance const& prodInfo);
+    
+    void MakePFParticleGraph(
+      art::Event const& event,
+      art::ValidHandle<std::vector<recob::PFParticle>> const& handle
+      ) const;
 
   }; // class DumpPFParticles
   
@@ -89,8 +106,9 @@ namespace recob {
 
 // C//C++ standard libraries
 #include <vector>
+#include <fstream>
 #include <utility> // std::swap()
-#include <algorithm> // std::count()
+#include <algorithm> // std::count(), std::find()
 #include <limits> // std::numeric_limits<>
 
 
@@ -193,6 +211,14 @@ namespace {
     
     return pmap;
   } // CreateMap()
+  
+  
+  //----------------------------------------------------------------------------
+  bool hasDaughter(recob::PFParticle const& particle, size_t partID) {
+    auto const& daughters = particle.Daughters();
+    return daughters.end()
+      != std::find(daughters.begin(), daughters.end(), partID);
+  } // hasDaughter()
   
   
   //----------------------------------------------------------------------------
@@ -806,7 +832,158 @@ namespace {
   
   
   //----------------------------------------------------------------------------
+  //---  PFParticleGraphMaker
+  //---
+  template <typename Stream>
+  void PFParticleGraphMaker::MakeGraph
+    (Stream&& out, std::vector<recob::PFParticle> const& particles) const
+  {
+    
+    WriteGraphHeader      (std::forward<Stream>(out));
+    WriteParticleRelations(std::forward<Stream>(out), particles);
+    WriteGraphFooter      (std::forward<Stream>(out));
+    
+  } // PFParticleGraphMaker::MakeGraph()
   
+  
+  //----------------------------------------------------------------------------
+  template <typename Stream>
+  void PFParticleGraphMaker::WriteGraphHeader(Stream&& out) const {
+    out
+      << "\ndigraph {"
+      << "\n";
+  } // PFParticleGraphMaker::WriteGraphHeader()
+  
+  
+  template <typename Stream>
+  void PFParticleGraphMaker::WriteParticleNodes
+    (Stream&& out, std::vector<recob::PFParticle> const& particles) const
+  {
+    
+    for (auto const& particle: particles) {
+      
+      std::ostringstream label;
+      label << "#" << particle.Self();
+      if (particle.PdgCode() != 0) {
+        label << ", ";
+        ParticleDumper::DumpPDGID(label, particle.PdgCode());
+      }
+      
+      out << "\n  P" << particle.Self()
+        << " ["
+        << " label = \"" << label.str() << "\"";
+      if (particle.IsPrimary()) out << ", style = bold";
+      out << " ]";
+    } // for
+    
+  } // PFParticleGraphMaker::WriteParticleNodes()
+  
+  
+  template <typename Stream>
+  void PFParticleGraphMaker::WriteParticleEdges
+    (Stream&& out, std::vector<recob::PFParticle> const& particles) const
+  {
+    auto particle_map = CreateMap(particles);
+    
+    out
+      << "\n  "
+      << "\n  // relations"
+      << "\n  // "
+      << "\n  // the arrow is close to the information provider,;"
+      << "\n  // and it points from parent to daughter"
+      << "\n  // "
+      << "\n  // "
+      << "\n  "
+      ;
+    
+    for (auto const& particle: particles) {
+      auto const partID = particle.Self();
+      
+      // draw parent line
+      auto const parentID = particle.Parent();
+      size_t const iParent = particle_map[parentID];
+      if (!particle_map.is_valid_value(iParent)) {
+        out
+          << "\nP" << parentID
+            << " [ style = dashed, color = red ] // ghost particle"
+          << "\nP" << parentID << " -> P" << partID
+            << " [ dir = both, arrowhead = empty, arrowtail = none ]";
+      }
+      else {
+        recob::PFParticle const& parent = particles[iParent];
+        
+        // is the relation bidirectional?
+        if (hasDaughter(parent, partID)) {
+          out
+            << "\nP" << parentID << " -> P" << partID
+            << " [ dir = both ]";
+        } // if bidirectional
+        else {
+          out
+            << "\nP" << parentID << " -> P" << partID
+              << " [ dir = forward, color = red ]"
+              << " // claimed parent";
+        } // if parent disowns
+        
+      } // if ghost ... else
+      
+      // print daughter relationship only if daughters do not recognise us
+      for (auto daughterID: particle.Daughters()) {
+        size_t const iDaughter = particle_map[daughterID];
+        if (!particle_map.is_valid_value(iDaughter)) {
+          out
+            << "\nP" << daughterID
+              << " [ style = dashed, color = red ] // ghost daughter"
+            << "\nP" << partID << " -> P" << daughterID
+              << " [ dir = both, arrowhead = none, arrowtail = invempty ]";
+        }
+        else {
+          recob::PFParticle const& daughter = particles[iDaughter];
+          
+          // is the relation bidirectional? (if so, the daughter will draw)
+          if (daughter.Parent() != partID) {
+            out
+              << "\nP" << partID << " -> P" << daughterID
+              << " [ dir = both, arrowhead = none, arrowtail = inv, color = orange ]"
+              << " // claimed daughter";
+          } // if parent disowns
+          
+        } // if ghost ... else
+        
+        
+      } // for all daughters
+      
+    } // for all particles
+    
+  } // PFParticleGraphMaker::WriteParticleNodes()
+  
+  
+  template <typename Stream>
+  void PFParticleGraphMaker::WriteParticleRelations
+    (Stream&& out, std::vector<recob::PFParticle> const& particles) const
+  {
+    out << "\n  // " << particles.size() << " particles (nodes)";
+    WriteParticleNodes(std::forward<Stream>(out), particles);
+    
+    out
+      << "\n"
+      << "\n  // parent/children relations";
+    WriteParticleEdges(std::forward<Stream>(out), particles);
+    
+  } // PFParticleGraphMaker::WriteParticleRelations()
+  
+  
+  template <typename Stream>
+  void PFParticleGraphMaker::WriteGraphFooter(Stream&& out) const {
+    out
+      << "\n"
+      << "\n} // digraph"
+      << std::endl;
+  } // PFParticleGraphMaker::WriteGraphFooter()
+    
+  
+  
+  //----------------------------------------------------------------------------
   
 } // local namespace
 
@@ -824,7 +1001,48 @@ namespace recob {
     , fMaxDepth(pset.get<unsigned int>
         ("MaxDepth", std::numeric_limits<unsigned int>::max())
         )
+    , fMakeEventGraphs(pset.get<bool>("MakeParticleGraphs", false))
     {}
+  
+  
+  //----------------------------------------------------------------------------
+  std::string DumpPFParticles::DotFileName
+    (art::EventID const& evtID, art::Provenance const& prodInfo)
+  {
+    return prodInfo.processName()
+      + '_' + prodInfo.moduleLabel()
+      + '_' + prodInfo.productInstanceName()
+      + "_Run" + std::to_string(evtID.run())
+      + "_Subrun" + std::to_string(evtID.subRun())
+      + "_Event" + std::to_string(evtID.event())
+      + "_particles.dot";
+  } // DumpPFParticles::DotFileName()
+  
+  
+  //----------------------------------------------------------------------------
+  void DumpPFParticles::MakePFParticleGraph(
+    art::Event const& event,
+    art::ValidHandle<std::vector<recob::PFParticle>> const& handle
+  ) const {
+    art::EventID const eventID = event.id();
+    std::string fileName = DotFileName(eventID, *(handle.provenance()));
+    std::ofstream outFile(fileName); // overwrite by default
+    
+    outFile
+      <<   "// " << fileName
+      << "\n// "
+      << "\n// Created for run " << eventID.run()
+               << " subrun " << eventID.subRun()
+               << " event " << eventID.event()
+      << "\n// "
+      << "\n// dump of " << handle->size() << " particles"
+      << "\n// "
+      << std::endl;
+    
+    PFParticleGraphMaker graphMaker;
+    graphMaker.MakeGraph(outFile, *handle);
+    
+  } // DumpPFParticles::MakePFParticleGraph()
   
   
   //----------------------------------------------------------------------------
@@ -836,6 +1054,9 @@ namespace recob {
     // fetch the data to be dumped on screen
     art::ValidHandle<std::vector<recob::PFParticle>> PFParticles
       = evt.getValidHandle<std::vector<recob::PFParticle>>(fInputTag);
+    
+    if (fMakeEventGraphs)
+      MakePFParticleGraph(evt, PFParticles);
     
     art::FindOne<recob::Vertex> const ParticleVertices
       (PFParticles, evt, fInputTag);
