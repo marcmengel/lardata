@@ -18,6 +18,8 @@
 
 // support libraries
 #include "fhiclcpp/ParameterSet.h"
+#include "fhiclcpp/types/Atom.h"
+#include "fhiclcpp/types/OptionalAtom.h"
 
 // C//C++ standard libraries
 #include <string>
@@ -35,8 +37,8 @@ namespace recob {
    * Configuration parameters
    * =========================
    * 
-   * - *PFModuleLabel* (art::InputTag, default: `"pandora"`): label of the
-   *   producer used to create the recob::Wire collection to be dumped
+   * - *PFModuleLabel* (art::InputTag, _required_): label of the
+   *   producer used to create the recob::PFParticle collection to be dumped
    * - *OutputCategory* (string, default: `"DumpPFParticles"`): the category
    *   used for the output (useful for filtering)
    * - *PrintHexFloats* (boolean, default: `false`): print all the floating
@@ -55,8 +57,44 @@ namespace recob {
   class DumpPFParticles: public art::EDAnalyzer {
       public:
     
+    struct Config {
+      using Name = fhicl::Name;
+      using Comment = fhicl::Comment;
+      
+      fhicl::Atom<art::InputTag> PFModuleLabel {
+        Name("PFModuleLabel"),
+        Comment("label of producer of the recob::PFParticle to be dumped")
+      };
+      
+      fhicl::Atom<std::string> OutputCategory {
+        Name("OutputCategory"),
+        Comment("message facility category used for output (for filtering)"),
+        "DumpPFParticles"
+      };
+      
+      fhicl::Atom<bool> PrintHexFloats {
+        Name("PrintHexFloats"),
+        Comment("print all the floating point numbers in base 16"),
+        false
+      };
+      
+      fhicl::OptionalAtom<unsigned int> MaxDepth {
+        Name("MaxDepth"),
+        Comment("at most this number of particle generations will be printed")
+      };
+      
+      fhicl::Atom<bool> MakeParticleGraphs {
+        Name("MakeParticleGraphs"),
+        Comment("creates a DOT file with particle information for each event"),
+        false
+      };
+      
+    }; // struct Config
+    
+    using Parameters = art::EDAnalyzer::Table<Config>;
+    
     /// Default constructor
-    explicit DumpPFParticles(fhicl::ParameterSet const& pset); 
+    explicit DumpPFParticles(Parameters const& config); 
     
     /// Does the printing
     virtual void analyze (const art::Event& evt) override;
@@ -992,17 +1030,19 @@ namespace {
 namespace recob {
   
   //----------------------------------------------------------------------------
-  DumpPFParticles::DumpPFParticles(fhicl::ParameterSet const& pset) 
-    : EDAnalyzer(pset)
-    , fInputTag(pset.get<art::InputTag>("PFModuleLabel", "pandora"))
-    , fOutputCategory
-        (pset.get<std::string>("OutputCategory", "DumpPFParticles"))
-    , fPrintHexFloats(pset.get<bool>("PrintHexFloats", false))
-    , fMaxDepth(pset.get<unsigned int>
-        ("MaxDepth", std::numeric_limits<unsigned int>::max())
-        )
-    , fMakeEventGraphs(pset.get<bool>("MakeParticleGraphs", false))
-    {}
+  DumpPFParticles::DumpPFParticles(Parameters const& config) 
+    : EDAnalyzer(config)
+    , fInputTag(config().PFModuleLabel())
+    , fOutputCategory(config().OutputCategory())
+    , fPrintHexFloats(config().PrintHexFloats())
+    , fMaxDepth(std::numeric_limits<unsigned int>::max())
+    , fMakeEventGraphs(config().MakeParticleGraphs())
+    {
+      // here we are handling the optional configuration key as it had just a
+      // default value
+      if (!config().MaxDepth(fMaxDepth))
+        fMaxDepth = std::numeric_limits<unsigned int>::max();
+    }
   
   
   //----------------------------------------------------------------------------
