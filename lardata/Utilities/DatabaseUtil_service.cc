@@ -80,7 +80,7 @@ void util::DatabaseUtil::reconfigure(fhicl::ParameterSet const& pset)
   fDBUser 		 = pset.get< std::string >("DBUser");
   fTableName 		 = pset.get< std::string >("TableName");
   fPort      		 = pset.get< int >("Port"     );
-  fPassword 		 = " ";
+  fPassword 		 = "";
   fToughErrorTreatment   = pset.get< bool >("ToughErrorTreatment");
   fShouldConnect   	 = pset.get< bool >("ShouldConnect");
   
@@ -88,14 +88,23 @@ void util::DatabaseUtil::reconfigure(fhicl::ParameterSet const& pset)
   std::string passfname;
   cet::search_path sp("FW_SEARCH_PATH");
   sp.find_file(pset.get< std::string >("PassFileName"), passfname);
-    
-  std::ifstream in(passfname.c_str());
-  if(in.is_open())   {
+  
+  if (!passfname.empty()) {
+    std::ifstream in(passfname.c_str());
+    if(!in) {
+      throw art::Exception(art::errors::NotFound)
+        << "Database password file '" << passfname
+        << "' not found in FW_SEARCH_PATH; using an empty password.\n";
+    }
     std::getline(in, fPassword);
     in.close();
   }
+  else {
+    mf::LogWarning("DatabaseUtil")
+      << "No password file specified in the configuration.";
+  }
    
-  sprintf(connection_str,"host=%s dbname=%s user=%s port=%d password=%s",fDBHostName.c_str(),fDBName.c_str(),fDBUser.c_str(),fPort,fPassword.c_str());
+  sprintf(connection_str,"host=%s dbname=%s user=%s port=%d password=%s ",fDBHostName.c_str(),fDBName.c_str(),fDBUser.c_str(),fPort,fPassword.c_str());
    
   return;
 }
