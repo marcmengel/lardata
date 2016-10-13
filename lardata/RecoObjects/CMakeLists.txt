@@ -1,7 +1,6 @@
 
 art_make( 
-          LIB_LIBRARIES lardata_AnalysisAlg
-                        lardataobj_AnalysisBase
+          LIB_LIBRARIES lardataobj_AnalysisBase
                         lardataobj_RecoBase
                         larcore_Geometry_Geometry_service
                         larcore_Geometry
@@ -16,6 +15,7 @@ art_make(
 	                ${FHICLCPP}
 			${CETLIB}
 			${ROOT_BASIC_LIB_LIST}
+                        ${Boost_SYSTEM_LIBRARY}
         )
 
 
