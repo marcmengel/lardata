@@ -1013,38 +1013,43 @@ namespace {
       auto const partID = particle.Self();
       
       // draw parent line
-      auto const parentID = particle.Parent();
-      size_t const iParent = particle_map[parentID];
-      if (!particle_map.is_valid_value(iParent)) {
-        out
-          << "\nP" << parentID
-            << " [ style = dashed, color = red"
-            << ", label = \"(#" << parentID << ")\" ] // ghost particle"
-          << "\nP" << parentID << " -> P" << partID
-            << " [ dir = both, arrowhead = empty, arrowtail = none ]";
-      }
-      else {
-        recob::PFParticle const& parent = particles[iParent];
-        
-        // is the relation bidirectional?
-        if (hasDaughter(parent, partID)) {
+      if (!particle.IsPrimary()) {
+        auto const parentID = particle.Parent();
+        size_t const iParent = particle_map[parentID];
+        if (!particle_map.is_valid_value(iParent)) {
+          // parent is ghost
           out
+            << "\nP" << parentID
+              << " [ style = dashed, color = red"
+              << ", label = \"(#" << parentID << ")\" ] // ghost particle"
             << "\nP" << parentID << " -> P" << partID
-            << " [ dir = both, arrowtail = inv ]";
-        } // if bidirectional
+              << " [ dir = both, arrowhead = empty, arrowtail = none ]";
+        }
         else {
-          out
-            << "\nP" << parentID << " -> P" << partID
-              << " [ dir = forward, color = red ]"
-              << " // claimed parent";
-        } // if parent disowns
-        
-      } // if ghost ... else
+          // parent is a known particle
+          recob::PFParticle const& parent = particles[iParent];
+          
+          // is the relation bidirectional?
+          if (hasDaughter(parent, partID)) {
+            out
+              << "\nP" << parentID << " -> P" << partID
+              << " [ dir = both, arrowtail = inv ]";
+          } // if bidirectional
+          else {
+            out
+              << "\nP" << parentID << " -> P" << partID
+                << " [ dir = forward, color = red ]"
+                << " // claimed parent";
+          } // if parent disowns
+          
+        } // if ghost ... else
+      } // if not primary
       
       // print daughter relationship only if daughters do not recognise us
       for (auto daughterID: particle.Daughters()) {
         size_t const iDaughter = particle_map[daughterID];
         if (!particle_map.is_valid_value(iDaughter)) {
+          // daughter is ghost
           out
             << "\nP" << daughterID
               << " [ style = dashed, color = red"
@@ -1053,6 +1058,7 @@ namespace {
               << " [ dir = both, arrowhead = none, arrowtail = invempty ]";
         }
         else {
+          // daughter is a known particle
           recob::PFParticle const& daughter = particles[iDaughter];
           
           // is the relation bidirectional? (if so, the daughter will draw)
