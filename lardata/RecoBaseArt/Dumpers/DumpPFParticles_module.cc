@@ -52,7 +52,82 @@ namespace recob {
    *   `ProcessName_ModuleLabel_InstanceName_Run#_Subrun#_Event#_particles.dot`,
    *   where the the input label elements refer to the data product being
    *   plotted.
-   *
+   * 
+   * 
+   * Particle connection graphs
+   * ---------------------------
+   * 
+   * When _MakeParticleGraphs_ configuration option is activated, a file is
+   * created for each event, that contains the particle flow tree in GraphViz
+   * format. The GraphViz `dot` command can be used to render it into a PDF,
+   * SVG, EPS or one of the many supported bitmap formats.
+   * The typical command to use is:
+   *     
+   *     dot -Tpdf -oPMTrk.pdf PMTrk.dot
+   *     
+   * A `bash` command to convert all files into a `OutputFormat` format:
+   *     
+   *     OutputFormat='pdf'
+   *     for DotFile in *.dot ; do
+   *       OutputFile="${DotFile%.dot}.${OutputFormat}"
+   *       [[ "$OutputFile" -ot "$DotFile" ]] || continue # up to date already
+   *       echo "${DotFile} => ${OutputFile} ..."
+   *       dot -T"$OutputFormat" -o"$OutputFile" "$DotFile" || break
+   *     done
+   *     
+   * which will also skip files already converted.
+   * 
+   * The output shows one cell ("node") per particle. The format of the node
+   * follows these prescriptions:
+   * 
+   * * the label has the particle ID number prepended by a hash character (`#`)
+   * * if the particle has a PDG ID, that also appears in the label (either the
+   *   name of the corresponding particle, or, if unknown, just the PDG ID
+   *   number)
+   * * if the particle is primary, it is rendered in bold font
+   * * if the particle is referred by other particles, but it is not present
+   *   ("ghost particle"), its border is red and dashed
+   * 
+   * The relations between particles in the flow are represented by connecting
+   * lines ("edges"). Connection information is redundant: the parent particle
+   * should have the daughter in the daughter list, and the daughter should have
+   * the parent particle referenced as such. Since the connection is usually
+   * from two sources, there are usually two arrow heads, each one close to the
+   * particle that provides information on that connection; all arrow heads
+   * point from parent to daughter.
+   * 
+   * * when the information of daughter and parent is consistent, a black line
+   *   with two arrow heads both pointing to the daughter is shown
+   * * when the parent is ghost, the arrow head close to the daughter is hollow;
+   *   ghost particles have no arrow heads close to them
+   * * when the daughter is ghost, the arrow head close to the parent is hollow;
+   *   ghost particles have no arrow heads close to them
+   * 
+   * 
+   * If you are trying to interpret an existing diagram, the following list is
+   * more direct to the point.
+   * Nodes: represent particles (see above for the label content)
+   * 
+   *  * bold label: primary particle
+   *  * red, dashed border: "ghost particle" (missing but referenced by others)
+   *  * other: just a particle
+   * 
+   * Connecting lines ("edges"):
+   *  * all arrow heads point from parent to daughter
+   *  * black with two full arrow heads: regular parent to daughter
+   *  * black with a single inward empty arrow head: the particle close to the
+   *    arrow claims the particle pointed by the arrow as a daughter, but there
+   *    is no information on that daughter (ghost daughter)
+   *  * black with a single outward empty arrow head: the particle at the tip of
+   *    the arrow claims to be daughter of the other particle, but there is no
+   *    information on that parent (ghost parent)
+   *  * red, outward arrow: the daughter (at the tip of the only arrow) claims
+   *    the other particle as parent, but that parent does not recognise it as
+   *    daughter
+   *  * orange, inward arrow: the parent (close to the only arrow head) claims
+   *    the other particle as daughter, but that daighter does not recognise it
+   *    as parent
+   * 
    */
   class DumpPFParticles: public art::EDAnalyzer {
       public:
@@ -943,7 +1018,8 @@ namespace {
       if (!particle_map.is_valid_value(iParent)) {
         out
           << "\nP" << parentID
-            << " [ style = dashed, color = red ] // ghost particle"
+            << " [ style = dashed, color = red"
+            << ", label = \"(#" << parentID << ")\" ] // ghost particle"
           << "\nP" << parentID << " -> P" << partID
             << " [ dir = both, arrowhead = empty, arrowtail = none ]";
       }
@@ -954,7 +1030,7 @@ namespace {
         if (hasDaughter(parent, partID)) {
           out
             << "\nP" << parentID << " -> P" << partID
-            << " [ dir = both ]";
+            << " [ dir = both, arrowtail = inv ]";
         } // if bidirectional
         else {
           out
@@ -971,7 +1047,8 @@ namespace {
         if (!particle_map.is_valid_value(iDaughter)) {
           out
             << "\nP" << daughterID
-              << " [ style = dashed, color = red ] // ghost daughter"
+              << " [ style = dashed, color = red"
+              << ", label = \"(#" << daughterID << ")\" ] // ghost daughter"
             << "\nP" << partID << " -> P" << daughterID
               << " [ dir = both, arrowhead = none, arrowtail = invempty ]";
         }
