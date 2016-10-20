@@ -26,12 +26,12 @@ ClusterHit2D::ClusterHit2D() : m_statusBits(0),
                                m_timeTicks(0.),
                                m_hit(recob::Hit()) {}
 
-ClusterHit2D::ClusterHit2D(unsigned          statusBits,
-                           double            doca,
-                           double            poca,
-                           double            xPosition,
-                           double            timeTicks,
-                           const recob::Hit& hit) :
+ClusterHit2D::ClusterHit2D(unsigned           statusBits,
+                           double             doca,
+                           double             poca,
+                           double             xPosition,
+                           double             timeTicks,
+                           const recob::Hit&  hit) :
                            m_statusBits(statusBits),
                            m_docaToAxis(doca),
                            m_arcLenToPoca(poca),
@@ -64,7 +64,10 @@ ClusterHit3D::ClusterHit3D() : m_id(std::numeric_limits<size_t>::max()),
                                m_docaToAxis(0.),
                                m_arclenToPoca(0.)
 {
+    m_wireIDVector.clear();
     m_hitVector.clear();
+    
+    m_wireIDVector.resize(3, geo::WireID());
 }
     
 ClusterHit3D::ClusterHit3D(size_t                                        id,
@@ -77,6 +80,7 @@ ClusterHit3D::ClusterHit3D(size_t                                        id,
                            double                                        overlapFraction,
                            double                                        docaToAxis,
                            double                                        arclenToPoca,
+                           const std::vector<geo::WireID>&               wireIDs,
                            const std::vector<const reco::ClusterHit2D*>& hitVec) :
               m_id(id),
               m_statusBits(statusBits),
@@ -88,8 +92,14 @@ ClusterHit3D::ClusterHit3D(size_t                                        id,
               m_overlapFraction(overlapFraction),
               m_docaToAxis(docaToAxis),
               m_arclenToPoca(arclenToPoca),
+              m_wireIDVector(wireIDs),
               m_hitVector(hitVec)
     {}
+    
+void ClusterHit3D::setWireID(const geo::WireID& wid) const
+{
+    m_wireIDVector[wid.Plane] = wid;
+}
     
 std::ostream& operator<< (std::ostream& o, const ClusterHit3D& c)
 {
@@ -277,6 +287,39 @@ bool operator < (const Cluster3D & a, const Cluster3D & b)
     if (a.getStartPosition()[2] < b.getStartPosition()[2]) return true;
 
     return false; //They are equal
+}
+    
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void RecobClusterParameters::UpdateParameters(const reco::ClusterHit2D* clusterHit)
+{
+    /**
+     *  @brief a utility routine for building 3D clusters to keep basic info up to date
+     *         (a candidate for a better way to do this)
+     */
+    const recob::Hit& hit = clusterHit->getHit();
+    
+    // Need to keep track of stuff so we can form cluster
+    if (hit.WireID().Wire < m_startWire)
+    {
+        m_startWire      = hit.WireID().Wire;
+        m_startTime      = hit.PeakTimeMinusRMS();
+        m_sigmaStartTime = hit.SigmaPeakTime();
+    }
+    
+    if (hit.WireID().Wire > m_endWire)
+    {
+        m_endWire      = hit.WireID().Wire;
+        m_endTime      = hit.PeakTimePlusRMS();
+        m_sigmaEndTime = hit.SigmaPeakTime();
+    }
+    
+    m_totalCharge += hit.Integral();
+    m_view         = hit.View();
+    
+    m_hitVector.push_back(clusterHit);
+    
+    return;
 }
 
 }// namespace
