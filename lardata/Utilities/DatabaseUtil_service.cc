@@ -99,11 +99,12 @@ void util::DatabaseUtil::reconfigure(fhicl::ParameterSet const& pset)
     std::getline(in, fPassword);
     in.close();
   }
-  else {
-    mf::LogWarning("DatabaseUtil")
-      << "No password file specified in the configuration.";
+  else if (fShouldConnect){
+    throw art::Exception(art::errors::NotFound)
+      << "Database password file '" << pset.get< std::string >("PassFileName")
+      << "' not found in FW_SEARCH_PATH; using an empty password.\n";
   }
-   
+  
   sprintf(connection_str,"host=%s dbname=%s user=%s port=%d password=%s ",fDBHostName.c_str(),fDBName.c_str(),fDBUser.c_str(),fPort,fPassword.c_str());
    
   return;
