@@ -6,7 +6,7 @@ defaultqual	e10
 fcldir product_dir job
 #
 product         version
-lardataobj	v1_07_01
+lardataobj	v1_07_02
 larcore		v06_03_00
 nutools		v2_06_02
 
