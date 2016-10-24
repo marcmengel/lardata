@@ -10,7 +10,7 @@ process_name: DoNothing
 
 services: {
   TFileService:          { fileName: "hists_donothing.root" }
-  Timing:                {}
+  TimeTracker:           {}
   RandomNumberGenerator: {}
 } # services
 
