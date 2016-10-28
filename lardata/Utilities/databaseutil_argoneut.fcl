@@ -7,7 +7,7 @@ argoneut_database.DBName:	 "argoneut_dev"
 argoneut_database.DBUser:	 "argoneut_reader"
 argoneut_database.Port:		 5457
 argoneut_database.PassFileName:	 ".apswd"
-argoneut_database.ShouldConnect: true
+argoneut_database.ShouldConnect: false
 
 
 END_PROLOG
