@@ -3,9 +3,8 @@ services:
 {
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "daq_hist.root" }
-  Timing:       {}
+  TimeTracker:  {}
   RandomNumberGenerator: {} #ART native random number generator
-  user:         { }
 }
 
 #Start each new event with an empty event.
