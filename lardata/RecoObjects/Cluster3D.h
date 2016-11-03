@@ -103,17 +103,20 @@ private:
 #ifndef __GCCXML__
 public:
     
-    enum StatusBits { REJECTEDHIT    = 0x80000000,            ///< Hit has been rejected for any reason
-                      SKELETONHIT    = 0x10000000,            ///< Hit is a "skeleton" hit
-                      EDGEHIT        = 0x20000000,            ///< Hit is an "edge" hit
-                      SEEDHIT        = 0x40000000,            ///< Hit is part of Seed for track fits
-                      MADESPACEPOINT = 0x08000000,            ///< Hit has been made into Space Point
-                      SKELETONPOSAVE = 0x00100000,            ///< Skeleton hit position averaged
-                      SELECTEDBYMST  = 0x00000100,            ///< Hit has been used in Cluster Splitting MST
-                      PCAOUTLIER     = 0x00000080,            ///< Hit labelled outlier in PCA
-                      HITINVIEW0     = 0x00000001,            ///< Hit contains 2D hit from view 0 (u plane)
-                      HITINVIEW1     = 0x00000002,            ///< Hit contains 2D hit from view 1 (v plane)
-                      HITINVIEW2     = 0x00000004             ///< Hit contains 2D hit from view 2 (w plane)
+    enum StatusBits { REJECTEDHIT     = 0x80000000,           ///< Hit has been rejected for any reason
+                      SKELETONHIT     = 0x10000000,           ///< Hit is a "skeleton" hit
+                      EDGEHIT         = 0x20000000,           ///< Hit is an "edge" hit
+                      SEEDHIT         = 0x40000000,           ///< Hit is part of Seed for track fits
+                      MADESPACEPOINT  = 0x08000000,           ///< Hit has been made into Space Point
+                      SKELETONPOSAVE  = 0x00100000,           ///< Skeleton hit position averaged
+                      CLUSTERVISITED  = 0x00008000,           ///< "visited" by a clustering algorithm
+                      CLUSTERNOISE    = 0x00004000,           ///< Labelled "noise" by a clustering algorithm
+                      CLUSTERATTACHED = 0x00002000,           ///< attached to a cluster
+                      SELECTEDBYMST   = 0x00000100,           ///< Hit has been used in Cluster Splitting MST
+                      PCAOUTLIER      = 0x00000080,           ///< Hit labelled outlier in PCA
+                      HITINVIEW0      = 0x00000001,           ///< Hit contains 2D hit from view 0 (u plane)
+                      HITINVIEW1      = 0x00000002,           ///< Hit contains 2D hit from view 1 (v plane)
+                      HITINVIEW2      = 0x00000004            ///< Hit contains 2D hit from view 2 (w plane)
                     };
         
     
