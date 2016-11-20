@@ -55,21 +55,6 @@ namespace lar {
    } // namespace util
 
 
-   /// Old, deprecated namespace; use `lar::util` instead.
-   namespace utils {
-     
-      [[deprecated("use lar::util namespace instead")]]
-      inline auto TrackProjectedLength(recob::Track const& track, geo::View_t view)
-        { return ::lar::util::TrackProjectedLength(track, view); }
-
-      [[deprecated("use lar::util namespace instead")]]
-      inline auto TrackPitchInView
-        (recob::Track const& track, geo::View_t view, size_t trajectory_point = 0)
-        { return ::lar::util::TrackPitchInView(track, view, trajectory_point); }
-
-   }
-  
-  
 } // namespace lar
 
 

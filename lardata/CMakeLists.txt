@@ -9,5 +9,4 @@ add_subdirectory(RawData)
 add_subdirectory(DetectorInfoServices)
 add_subdirectory(DetectorInfo)
 #add_subdirectory(AnalysisBase)
-add_subdirectory(AnalysisAlg)
 

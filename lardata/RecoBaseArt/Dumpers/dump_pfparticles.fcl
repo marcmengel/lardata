@@ -3,14 +3,25 @@
 # Purpose:  Dump on screen PFParticle content
 # Author:   Gianluca Petrillo (petrillo@fnal.gov)
 # Date:     September 25th, 2015
-# Version:  1.0
+# Version:  1.1
 #
 # Service dependencies:
 # - message facility
 # 
+# Input:
+# - collections of particle flow particles, vertices, space points and tracks
+#   from a module labelled "cluster3d"
+# 
+# Output:
+# - a single text file "DumpPFParticles.log" with the collections mentioned
+#   above dumped
+# 
+# 
 # Changes:
 # 20150925 (petrillo@fnal.gov) [v1.0]
 #   first version
+# 20160908 (petrillo@fnal.gov) [v1.1]
+#   updated configuration for DumpPFParticles
 #
 
 process_name: DumpPFParticles
@@ -75,6 +86,12 @@ physics: {
       
       # specify the label of recob::PFParticle producer
       PFModuleLabel: "cluster3d"
+      
+      # max descend steps into particle hierarchy
+      MaxDepth: 50
+      
+      # do not produce dot files (false by default)
+      MakeParticleGraphs: false
       
     } # dumpparticles
     
