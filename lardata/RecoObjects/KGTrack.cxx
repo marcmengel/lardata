@@ -238,23 +238,26 @@ namespace trkf {
   ///
   /// hits - Hit vector to fill.
   ///
-  void KGTrack::fillHits(art::PtrVector<recob::Hit>& hits) const
+  void KGTrack::fillHits(art::PtrVector<recob::Hit>& hits,
+                         std::vector<unsigned int>& hittpindex) const
   {
     hits.reserve(hits.size() + fTrackMap.size());
 
     // Loop over KHitTracks and fill hits belonging to this track.
 
+    unsigned int counter = 0; //Index of corresponding trajectory point
     for(std::multimap<double, KHitTrack>::const_iterator it = fTrackMap.begin();
 	it != fTrackMap.end(); ++it) {
       const KHitTrack& track = (*it).second;
-
+      ++counter;
       // Extrack Hit from track.
-
       const std::shared_ptr<const KHitBase>& hit = track.getHit();
       if(const KHitWireX* phit = dynamic_cast<const KHitWireX*>(&*hit)) {
 	const art::Ptr<recob::Hit> prhit = phit->getHit();
-	if(!prhit.isNull())
+	if(!prhit.isNull()){
 	  hits.push_back(prhit);
+          hittpindex.push_back(counter-1);
+        }
       }
       else if(const KHitWireLine* phit = dynamic_cast<const KHitWireLine*>(&*hit)) {
 	const art::Ptr<recob::Hit> prhit = phit->getHit();
