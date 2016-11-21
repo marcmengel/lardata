@@ -28,8 +28,8 @@
 // art etc.
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "art/Utilities/Exception.h"
-#include "art/Persistency/Provenance/ModuleDescription.h"
+#include "canvas/Utilities/Exception.h"
+#include "canvas/Persistency/Provenance/ModuleDescription.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"

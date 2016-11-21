@@ -6,7 +6,7 @@
  * @see    TrackUtils.cxx
  * 
  * 
- * lar::utils::TrackProjectedLength() and lar::utils::TrackPitchInView() have
+ * lar::util::TrackProjectedLength() and lar::util::TrackPitchInView() have
  * been factored out from recob::Track, from recob::Track::ProjectedLength() and
  * recob::Track::PitchInView() respectively.
  */
@@ -15,12 +15,12 @@
 #define LARDATA_RECOBASEART_TRACKUTILS_H 1
 
 // LArSoft libraries
-#include "lardata/RecoBase/Track.h"
-#include "larcore/SimpleTypesAndConstants/geo_types.h" // geo::View_t
+#include "lardataobj/RecoBase/Track.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::View_t
 
 
 namespace lar {
-   namespace utils {
+   namespace util {
       
       /**
        * @brief Returns the length of the projection of a track on a view
@@ -52,7 +52,9 @@ namespace lar {
         (recob::Track const& track, geo::View_t view, size_t trajectory_point = 0);
       
       
-   } // namespace utils
+   } // namespace util
+
+
 } // namespace lar
 
 

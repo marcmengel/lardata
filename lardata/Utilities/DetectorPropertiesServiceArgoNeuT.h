@@ -26,7 +26,7 @@
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-#include "larcore/SimpleTypesAndConstants/geo_types.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 
 ///General LArSoft Utilities
 namespace util{
@@ -154,7 +154,7 @@ namespace util{
       util::LArPropertiesServiceArgoNeuT const* fLP;
       
     }; // class DetectorPropertiesServiceArgoNeuT
-} //namespace utils
+} //namespace util
 DECLARE_ART_SERVICE_INTERFACE_IMPL(util::DetectorPropertiesServiceArgoNeuT, detinfo::DetectorPropertiesService, LEGACY)
 #endif // UTIL_DETECTORPROPERTIESSERVICEARGONEUT_H
 

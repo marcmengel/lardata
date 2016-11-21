@@ -11,7 +11,7 @@
 
 // LArSoft includes
 #include "lardata/Utilities/LArPropertiesServiceArgoNeuT.h"
-#include "larcore/SimpleTypesAndConstants/PhysicalConstants.h"
+#include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
 #include "lardata/Utilities/DatabaseUtil.h"
 
 // ROOT includes

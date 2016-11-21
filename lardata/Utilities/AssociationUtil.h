@@ -77,16 +77,16 @@
 
 // framework libraries
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "art/Persistency/Common/Ptr.h"
-#include "art/Persistency/Common/PtrVector.h"
-#include "art/Persistency/Common/Assns.h"
-#include "art/Persistency/Provenance/ProductID.h" 
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/PtrVector.h"
+#include "canvas/Persistency/Common/Assns.h"
+#include "canvas/Persistency/Provenance/ProductID.h" 
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Core/EDProducer.h"
-#include "art/Framework/Core/FindMany.h" 
-#include "art/Framework/Core/FindManyP.h" 
-#include "art/Framework/Core/FindOneP.h" 
-#include "art/Framework/Core/FindOne.h" 
+#include "canvas/Persistency/Common/FindMany.h" 
+#include "canvas/Persistency/Common/FindManyP.h" 
+#include "canvas/Persistency/Common/FindOneP.h" 
+#include "canvas/Persistency/Common/FindOne.h" 
 
 namespace util {
 

@@ -11,7 +11,7 @@
 #include <iomanip>
 
 #include "lardata/RecoObjects/Cluster3D.h"
-#include "lardata/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Hit.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
 

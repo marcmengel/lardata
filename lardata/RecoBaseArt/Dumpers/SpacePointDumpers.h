@@ -11,7 +11,7 @@
 
 
 // LArSoft libraries
-#include "lardata/RecoBase/SpacePoint.h"
+#include "lardataobj/RecoBase/SpacePoint.h"
 
 // C/C++ standard libraries
 #include <string>

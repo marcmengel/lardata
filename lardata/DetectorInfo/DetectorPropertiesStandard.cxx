@@ -13,12 +13,11 @@
 // LArSoft includes
 #include "lardata/DetectorInfo/DetectorPropertiesStandard.h"
 #include "larcore/CoreUtils/ProviderUtil.h" // lar::IgnorableProviderConfigKeys()
-#include "larcore/CoreUtils/DebugUtils.h" // lar::IgnorableProviderConfigKeys()
-#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/GeometryCore.h"
 #include "larcore/Geometry/CryostatGeo.h"
 #include "larcore/Geometry/TPCGeo.h"
 #include "larcore/Geometry/PlaneGeo.h"
-#include "larcore/SimpleTypesAndConstants/PhysicalConstants.h"
+#include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
@@ -172,8 +171,6 @@ namespace detinfo{
   ) {
     std::set<std::string> ignorable_keys = lar::IgnorableProviderConfigKeys();
     ignorable_keys.insert(ignore_params.begin(), ignore_params.end());
-    
-    lar::debug::printBacktrace(mf::LogDebug("DetectorPropertiesStandard"), 15);
     
     // parses and validates the parameter set:
     fhicl::Table<Configuration_t> config_table { p, ignorable_keys };

@@ -20,13 +20,13 @@
 #include "lardata/Utilities/Dereference.h"
 //#include "time.h"
 
-#include "lardata/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Hit.h"
 //#include "Geometry/CryostatGeo.h"
 //#include "Geometry/PlaneGeo.h"
 //#include "Geometry/WireGeo.h"
 //#include "Geometry/TPCGeo.h"
 //#include "SimpleTypesAndConstants/geo_types.h"
-#include "art/Persistency/Common/Ptr.h" 
+#include "canvas/Persistency/Common/Ptr.h" 
 
 //#include <climits>
 #include <iostream>

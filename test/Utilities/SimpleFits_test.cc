@@ -35,7 +35,7 @@
  * (for example, a random seed).
  */
 #define BOOST_TEST_MODULE ( StatCollector_test )
-#include <boost/test/auto_unit_test.hpp> // BOOST_AUTO_TEST_CASE()
+#include <cetlib/quiet_unit_test.hpp> // BOOST_AUTO_TEST_CASE()
 #include <boost/test/test_tools.hpp> // BOOST_CHECK(), BOOST_CHECK_EQUAL()
 #include <boost/test/floating_point_comparison.hpp> // BOOST_CHECK_CLOSE()
 
@@ -115,8 +115,6 @@ void CheckLinearFit(
   int NDF
 ) {
   
-  using Data_t = T;
-  
   BOOST_CHECK_EQUAL(fitter.N(), n);
   if (n == 0) {
     BOOST_CHECK(!fitter.isValid());
@@ -159,8 +157,6 @@ void CheckQuadraticFit(
   T chisq,
   int NDF
 ) {
-  
-  using Data_t = T;
   
   BOOST_CHECK_EQUAL(fitter.N(), n);
   if (n == 0) {
@@ -208,7 +204,6 @@ void CheckGaussianFit(
   T chisq,
   int NDF
 ) {
-  using Data_t = T;
   
   BOOST_CHECK_EQUAL(fitter.N(), n);
   if (n == 0) {

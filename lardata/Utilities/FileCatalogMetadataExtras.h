@@ -182,7 +182,7 @@ namespace util{
 
   }; // class FileCatalogMetadataExtras
 
-} //namespace utils
+} //namespace util
 
 DECLARE_ART_SERVICE(util::FileCatalogMetadataExtras, LEGACY)
 

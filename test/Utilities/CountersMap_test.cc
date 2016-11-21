@@ -28,7 +28,7 @@
  * (for example, a random seed).
  */
 #define BOOST_TEST_MODULE ( CountersMap_test )
-#include <boost/test/auto_unit_test.hpp> // BOOST_AUTO_TEST_CASE()
+#include <cetlib/quiet_unit_test.hpp> // BOOST_AUTO_TEST_CASE()
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // LArSoft libraries
@@ -65,7 +65,7 @@ void RunHoughTransformTreeTest() {
   typedef std::map<int, int> BaseMap_t;
   
   // STL container
-  typedef std::vector<std::map<int, int>> MapVectorI_t;
+  typedef std::vector<BaseMap_t> MapVectorI_t;
   MapVectorI_t stl_image(NAngles);
   
   // CountersMap; uses chunks of 8 counters per block

@@ -84,7 +84,6 @@ namespace testing {
           }
         }
     
-        /// @todo remove this debug stuff!
         // 
         // create the new DetectorPropertiesStandard service provider
         //
@@ -93,13 +92,6 @@ namespace testing {
         // for this test the same configuration as for art-based tests.
         //
         std::set<std::string> ignore_keys({ "InheritNumberTimeSamples" });
-        {
-           mf::LogInfo debug("setupProvider<DetectorPropertiesStandard>");
-           
-           debug << "Asked to ignore " << ignore_keys.size() << " keys:";
-           for (auto const& key: ignore_keys) debug << " '" << key << "'";
-        }
-        
         return std::make_unique<detinfo::DetectorPropertiesStandard>
           (pset, providers, ignore_keys);
       } // setup()

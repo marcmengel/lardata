@@ -33,7 +33,7 @@
  * (for example, a random seed).
  */
 #define BOOST_TEST_MODULE ( StatCollector_test )
-#include <boost/test/auto_unit_test.hpp> // BOOST_AUTO_TEST_CASE()
+#include <cetlib/quiet_unit_test.hpp> // BOOST_AUTO_TEST_CASE()
 #include <boost/test/test_tools.hpp> // BOOST_CHECK(), BOOST_CHECK_EQUAL()
 #include <boost/test/floating_point_comparison.hpp> // BOOST_CHECK_CLOSE()
 
@@ -55,7 +55,6 @@ void CheckStats(
   W rms // might as well compute it myself...
 ) {
   
-  using Data_t = T;
   using Weight_t = W;
   
   BOOST_CHECK_EQUAL(stats.N(),       n);
@@ -102,7 +101,6 @@ void CheckStats(
   W lin_corr
 ) {
   
-  using Data_t = T;
   using Weight_t = W;
   
   BOOST_CHECK_EQUAL(stats.N(),       n);
@@ -278,7 +276,7 @@ void StatCollector2DTest() {
   using UnweightedItem_t = std::pair<Data_t, Data_t>;
   using WeightedItem_t = std::tuple<Data_t, Data_t, Weight_t>;
   
-  using UnweightedData_t = std::vector<std::pair<Data_t, Data_t>>;
+//  using UnweightedData_t = std::vector<std::pair<Data_t, Data_t>>;
   using WeightedData_t = std::vector<WeightedItem_t>;
   
   // prepare input data

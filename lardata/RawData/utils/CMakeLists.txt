@@ -2,17 +2,17 @@
 art_make( NO_PLUGINS
           
 	  EXCLUDE LArRawInputDriverUBooNE.cxx
-          LIB_LIBRARIES lardata_RawData
-                        larcore_SummaryData
+          LIB_LIBRARIES lardataobj_RawData
+                        larcoreobj_SummaryData
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_IO_SOURCES}
 			${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
                         ${ART_FRAMEWORK_SERVICES_OPTIONAL}
                         ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
- 			${ART_PERSISTENCY_COMMON}
-			${ART_PERSISTENCY_PROVENANCE}
-			${ART_UTILITIES}
+ 			art_Persistency_Common canvas_Persistency_Common
+			art_Persistency_Provenance canvas_Persistency_Provenance
+			art_Utilities canvas_Utilities
 			${MF_MESSAGELOGGER}
 			${MF_UTILITIES}
 			${CETLIB}
@@ -42,13 +42,13 @@ art_make( NO_PLUGINS
         )
 
 simple_plugin(LArRawInputSource "source"
-  lardata_RawData
+  lardataobj_RawData
   lardata_RawData_utils
   ${ART_FRAMEWORK_CORE}
   ${ART_FRAMEWORK_IO_SOURCES}
   ${ART_FRAMEWORK_PRINCIPAL}
-  ${ART_PERSISTENCY_PROVENANCE}
-  ${ART_UTILITIES}
+  art_Persistency_Provenance canvas_Persistency_Provenance
+  art_Utilities canvas_Utilities
   ${MF_MESSAGELOGGER}
   
 )

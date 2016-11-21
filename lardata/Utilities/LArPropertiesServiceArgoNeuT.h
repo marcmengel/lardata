@@ -219,6 +219,6 @@ namespace util{
     /// type of provider name following LArSoft name convention
     using LArPropertiesArgoNeuT = LArPropertiesServiceArgoNeuT;
     
-} //namespace utils
+} //namespace util
 DECLARE_ART_SERVICE_INTERFACE_IMPL(util::LArPropertiesServiceArgoNeuT, detinfo::LArPropertiesService, LEGACY)
 #endif // LARPROPERTIESSERVICEARGONEUT_H

@@ -22,8 +22,8 @@
 #define KHITWIRELINE_H
 
 #include "lardata/RecoObjects/KHit.h"
-#include "lardata/RecoBase/Hit.h"
-#include "art/Persistency/Common/Ptr.h"
+#include "lardataobj/RecoBase/Hit.h"
+#include "canvas/Persistency/Common/Ptr.h"
 
 namespace trkf {
 

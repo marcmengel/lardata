@@ -14,7 +14,7 @@
 
 // framework and supporting libraries
 #include "cetlib/demangle.h"
-#include "art/Persistency/Common/Assns.h"
+#include "canvas/Persistency/Common/Assns.h"
 
 
 namespace util {
