@@ -4,55 +4,54 @@
  * @brief  Utility object to perform functions of association 
  * 
  * This library provides a number of util::CreateAssn() functions;
- * for convenience, the ones supported as of January 2015 are listed here
- * together with their tag:
+ * for convenience, the ones supported as of January 2015 are listed here:
  * 
- * # CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, std::string, size_t)
+ * -# `CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, std::string, size_t)`
  *   one-to-one association, between a element of a vector (future data product)
  *   and a art-pointed object; allows for a instance name for the vector
- * # CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, size_t)
+ * -# `CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, size_t)`
  *   one-to-one association, between a element of a vector (future data product)
  *   and a art-pointed object
- * # CreateAssn(PRODUCER const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T>&)
+ * -# `CreateAssn(PRODUCER const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T>&)`
  *   one-to-one association, between two art-pointed objects
- * # CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, art::PtrVector<U> const&, art::Assns<T,U>&, size_t)
+ * -# `CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, art::PtrVector<U> const&, art::Assns<T,U>&, size_t)`
  *   one-to-many association, between a element of a vector (future data
  *   product) and a list of art-pointed objects in a art::PtrVector list
- * # CreateAssn(PRODUCER const&, art::Event&, art::Ptr<T> const&, std::vector<art::Ptr<U>> const&, art::Assns<T,U>&)
+ * -# `CreateAssn(PRODUCER const&, art::Event&, art::Ptr<T> const&, std::vector<art::Ptr<U>> const&, art::Assns<T,U>&)`
  *   one-to-many association, between an art-pointed object and all the elements
  *   in a std::vector of art-pointed objects
- * # CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, std::vector<art::Ptr<U>>&, art::Assns<T,U>&, size_t)
+ * -# `CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, std::vector<art::Ptr<U>>&, art::Assns<T,U>&, size_t)`
  *   one-to-many association, between an element of a vector (future data
  *   product) and all the elements in a std::vector of art-pointed objects
- * # CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, std::vector<U> const&, art::Assns<T,U>&, size_t, size_t, size_t)
+ * -# `CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, std::vector<U> const&, art::Assns<T,U>&, size_t, size_t, size_t)`
  *   one-to-many association, between an element of a vector (future data
  *   product) and the elements in a subrange of a std::vector (also future data
  *   product)
- * # CreateAssn(PRODUCER const&, art::Event&, art::Assns<T,U>&, size_t, Iter, Iter)
+ * -# `CreateAssn(PRODUCER const&, art::Event&, art::Assns<T,U>&, size_t, Iter, Iter)`
  *   one-to-many association, between an element of a collection and the
  *   elements of another collection, whose indices are specified by the values
  *   in a subrange of a third collection (of indices)
- * # CreateAssnD(PRODUCER const&, art::Event&, art::Assns<T,U>&, size_t, size_t, typename art::Assns<T,U,D>::data_t const&),
- *   CreateAssnD(PRODUCER const&, art::Event&, art::Assns<T,U>&, size_t, size_t, typename art::Assns<T,U,D>::data_t&&)
+ * -# `CreateAssnD(PRODUCER const&, art::Event&, art::Assns<T,U>&, size_t, size_t, typename art::Assns<T,U,D>::data_t const&)`,
+ *   `CreateAssnD(PRODUCER const&, art::Event&, art::Assns<T,U>&, size_t, size_t, typename art::Assns<T,U,D>::data_t&&)`
  *   one-to-one association, between an element of a collection and the element
  *   of another collection, both specified by index, with additional data
  * 
  * For all the associated objects, either side, that are not specified by
- * art::Ptr, the index of the object in its collection must be (or stay) the
+ * `art::Ptr`, the index of the object in its collection must be (or stay) the
  * same as the index in the final data product collection.
  * 
- * Let's see if Doxygen is able to render the table:
  * 
  * One-to-one associations
  * ------------------------
  * 
  * the one (T)            | the other one (U) | special notes               | function
  * :--------------------: | :---------------: | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------
- * element of std::vector | art pointer       | allows instance name for T  | CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, std::string, size_t)
- * element of std::vector | art pointer       |                             | CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, size_t)
+ * element of std::vector | art pointer       | allows instance name for T  | CreateAssn(PRODUCER const &, art::Event &, std::vector< T > const &, art::Ptr< U > const &, art::Assns< U, T > &, std::string, size_t)
+ * element of std::vector | art pointer       |                             | CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&, art::Assns<U,T> &, size_t)
  * art pointer            | art pointer       |                             | CreateAssn(PRODUCER const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T>&)
  * element by index       | element by index  | associates data too         | CreateAssnD(PRODUCER const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T,D>&, size_t, size_t, typename art::Assns<T,U,D>::data_t const&)
  * element by index       | element by index  | associates data too (moved) | CreateAssnD(PRODUCER const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T,D>&, size_t, size_t, typename art::Assns<T,U,D>::data_t&&)
+ * 
  * 
  * One-to-many associations
  * -------------------------
