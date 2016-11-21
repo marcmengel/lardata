@@ -126,8 +126,7 @@ namespace trkf {
   /// track - Track to fill.
   ///
   void KGTrack::fillTrack(recob::Track& track, 
-			  int id,
-			  bool store_np_plane) const
+			  int id) const
   {
     // Get geometry service.
 
@@ -158,11 +157,6 @@ namespace trkf {
     for(std::multimap<double, KHitTrack>::const_iterator itr = fTrackMap.begin();
 	itr != fTrackMap.end(); ++itr, ++n) {
       const KHitTrack& trh = (*itr).second;
-
-      // Skip nonpreferred plane hits?
-
-      if(!store_np_plane && trh.getHit()->getMeasPlane() != fPrefPlane)
-	continue;
 
       // Get position.
 

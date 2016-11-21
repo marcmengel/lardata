@@ -89,8 +89,7 @@ namespace trkf {
 
     /// Fill a recob::Track.
     void fillTrack(recob::Track& track,
-		   int id,
-		   bool store_np_plane) const;
+		   int id) const;
 
     /// Fill a PtrVector of Hits.
     void fillHits(art::PtrVector<recob::Hit>& hits) const;
