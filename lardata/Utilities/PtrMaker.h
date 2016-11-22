@@ -12,7 +12,6 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 
-// this namespace will be moved to a different file
 namespace lar {
    // to create art::Ptrs in to a particular collection in an event
    template <class T>
@@ -20,7 +19,7 @@ namespace lar {
    public:
       //Creates a PtrMaker that creates Ptrs in to a collection of type C created by the module of type MODULETYPE, where the collection has instance name "instance"
       template <class MODULETYPE, class C = std::vector<T>>
-      PtrMaker(art::Event const& evt, MODULETYPE const& module, std::string const & instance = std::string());
+      PtrMaker(art::Event const& evt, MODULETYPE const& module, std::string const& instance = std::string());
       
       //Creates a Ptr to an object in the slot indicated by "index"
       art::Ptr<T> operator()(std::size_t index) const;
