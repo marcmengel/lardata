@@ -261,8 +261,10 @@ namespace trkf {
       }
       else if(const KHitWireLine* phit = dynamic_cast<const KHitWireLine*>(&*hit)) {
 	const art::Ptr<recob::Hit> prhit = phit->getHit();
-	if(!prhit.isNull())
+	if(!prhit.isNull()){
 	  hits.push_back(prhit);
+          hittpindex.push_back(counter-1);
+        }
       }
     }
   }
