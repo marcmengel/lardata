@@ -22,6 +22,7 @@
 #include <list>
 #include <set>
 #include <map>
+#include <unordered_map>
 #include <memory>
 
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
@@ -48,9 +49,13 @@ private:
 #ifndef __GCCXML__
 public:
     
-    enum StatusBits { USEDINPAIR     = 0x00008000,
-                      USEDINTRIPLET  = 0x00004000,
-                      USED           = 0x00000001
+    enum StatusBits { SHAREDINPAIR    = 0x00080000,
+                      SHAREDINTRIPLET = 0x00040000,
+                      USEDINPAIR      = 0x00008000,
+                      USEDINTRIPLET   = 0x00004000,
+                      SHAREDINCLUSTER = 0x00000200,
+                      USEDINCLUSTER   = 0x00000100,
+                      USED            = 0x00000001
                     };
     
     ClusterHit2D(unsigned          statusBits,
@@ -112,6 +117,8 @@ public:
                       CLUSTERVISITED  = 0x00008000,           ///< "visited" by a clustering algorithm
                       CLUSTERNOISE    = 0x00004000,           ///< Labelled "noise" by a clustering algorithm
                       CLUSTERATTACHED = 0x00002000,           ///< attached to a cluster
+                      CLUSTERSHARED   = 0x00001000,           ///< 3D hit has 2D hits shared between clusters
+                      PATHCHECKED     = 0x00000800,           ///< Path checking algorithm has seen this hit
                       SELECTEDBYMST   = 0x00000100,           ///< Hit has been used in Cluster Splitting MST
                       PCAOUTLIER      = 0x00000080,           ///< Hit labelled outlier in PCA
                       HITINVIEW0      = 0x00000001,           ///< Hit contains 2D hit from view 0 (u plane)
@@ -293,17 +300,24 @@ public:
 };
     
     
-// Some useful typedefs for the above objects
-typedef std::list<const reco::ClusterHit2D*>                                    Hit2DListPtr;
-typedef std::list<const reco::ClusterHit3D*>                                    HitPairListPtr;
-typedef std::set<const reco::ClusterHit3D*>                                     HitPairSetPtr;
-typedef std::list<HitPairListPtr >                                              HitPairListPtrList;
-typedef std::map<int, HitPairListPtr >                                          HitPairClusterMap;
-
-typedef std::list<std::unique_ptr<reco::ClusterHit3D> >                         HitPairList;
+/**
+ *  @brief export some data structure definitions
+ */
+using Hit2DListPtr       = std::list<const reco::ClusterHit2D*>;
+using HitPairListPtr     = std::list<const reco::ClusterHit3D*>;
+using HitPairSetPtr      = std::set<const reco::ClusterHit3D*>;
+using HitPairListPtrList = std::list<HitPairListPtr>;
+using HitPairClusterMap  = std::map<int, HitPairListPtr>;
+using HitPairList        = std::list<std::unique_ptr<reco::ClusterHit3D>>;
     
-typedef std::pair<reco::PrincipalComponents, reco::HitPairClusterMap::iterator> PCAHitPairClusterMapPair;
-typedef std::map<geo::View_t, RecobClusterParameters>                           ViewToClusterParamsMap;
+using PCAHitPairClusterMapPair = std::pair<reco::PrincipalComponents, reco::HitPairClusterMap::iterator>;
+using ViewToClusterParamsMap   = std::map<geo::View_t, RecobClusterParameters>;
+    
+using EdgeTuple        = std::tuple<const reco::ClusterHit3D*,const reco::ClusterHit3D*,double>;
+using EdgeList         = std::list<EdgeTuple>;
+using Hit3DToEdgePair  = std::pair<const reco::ClusterHit3D*, reco::EdgeList>;
+using Hit3DToEdgeMap   = std::unordered_map<const reco::ClusterHit3D*, reco::EdgeList>;
+    
 
 /**
  *  @brief Class wrapping the above and containing volatile information to characterize the cluster
@@ -311,14 +325,26 @@ typedef std::map<geo::View_t, RecobClusterParameters>                           
 class ClusterParameters
 {
 public:
+    ClusterParameters()
+    {
+        m_clusterParams.clear();
+        m_hitPairListPtr.clear();
+        m_hit3DToEdgeMap.clear();
+        m_bestEdgeList.clear();
+    }
+    
     ClusterParameters(reco::HitPairClusterMap::iterator& mapItr) : m_hitPairListPtr(mapItr->second)
     {
         m_clusterParams.clear();
+        m_hit3DToEdgeMap.clear();
+        m_bestEdgeList.clear();
     }
     
     ClusterParameters(reco::HitPairListPtr& hitList) : m_hitPairListPtr(hitList)
     {
         m_clusterParams.clear();
+        m_hit3DToEdgeMap.clear();
+        m_bestEdgeList.clear();
     }
     
     void UpdateParameters(const reco::ClusterHit2D* hit)
@@ -326,13 +352,28 @@ public:
         m_clusterParams[hit->getHit().View()].UpdateParameters(hit);
     }
     
+    reco::ViewToClusterParamsMap& getClusterParams()  {return m_clusterParams;}
+    reco::HitPairListPtr&         getHitPairListPtr() {return m_hitPairListPtr;}
+    reco::PrincipalComponents&    getFullPCA()        {return m_fullPCA;}
+    reco::PrincipalComponents&    getSkeletonPCA()    {return m_skeletonPCA;}
+    reco::Hit3DToEdgeMap&         getHit3DToEdgeMap() {return m_hit3DToEdgeMap;}
+    reco::EdgeList&               getBestEdgeList()   {return m_bestEdgeList;}
+    
+    friend bool operator < (const ClusterParameters &a, const ClusterParameters& b)
+    {
+        return a.m_hitPairListPtr.size() > b.m_hitPairListPtr.size();
+    }
+
+private:
     ViewToClusterParamsMap    m_clusterParams;
-    reco::HitPairListPtr&     m_hitPairListPtr;
+    reco::HitPairListPtr      m_hitPairListPtr;    // This contains the list of 3D hits in the cluster
     reco::PrincipalComponents m_fullPCA;
     reco::PrincipalComponents m_skeletonPCA;
+    reco::Hit3DToEdgeMap      m_hit3DToEdgeMap;
+    reco::EdgeList            m_bestEdgeList;
 };
 
-typedef std::list<ClusterParameters> ClusterParametersList;
+using ClusterParametersList = std::list<ClusterParameters>;
     
 }
 

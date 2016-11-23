@@ -94,7 +94,8 @@ ClusterHit3D::ClusterHit3D(size_t                                        id,
               m_arclenToPoca(arclenToPoca),
               m_wireIDVector(wireIDs),
               m_hitVector(hitVec)
-    {}
+{
+}
     
 void ClusterHit3D::setWireID(const geo::WireID& wid) const
 {
@@ -177,8 +178,8 @@ Cluster3D::Cluster3D() : m_statusBits(0),
                          m_pcaResults(PrincipalComponents()),
                          m_totalCharge(0.),
                          m_startPosition{0.,0.,0.},
-		         m_endPosition{0.,0.,0.},
-		         m_clusterIdx(0)
+		                 m_endPosition{0.,0.,0.},
+		                 m_clusterIdx(0)
 {}
 
 Cluster3D::Cluster3D(unsigned                   statusBits,
