@@ -58,11 +58,6 @@ namespace lar {
     
   } // namespace util
   
-  // old, deprecated namespace
-  namespace utils {
-    using HitToWire [[deprecated("use lar::util namespace instead")]] = ::lar::util::HitToWire;
-  }
-  
 } // namespace lar
 
 

@@ -154,7 +154,7 @@ namespace util{
       util::LArPropertiesServiceArgoNeuT const* fLP;
       
     }; // class DetectorPropertiesServiceArgoNeuT
-} //namespace utils
+} //namespace util
 DECLARE_ART_SERVICE_INTERFACE_IMPL(util::DetectorPropertiesServiceArgoNeuT, detinfo::DetectorPropertiesService, LEGACY)
 #endif // UTIL_DETECTORPROPERTIESSERVICEARGONEUT_H
 

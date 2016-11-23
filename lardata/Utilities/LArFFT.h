@@ -91,7 +91,7 @@ namespace util{
       
     }; // class LArFFT
 
-} //namespace utils
+} //namespace util
 
 // "Forward" Fourier Transform
 //--------------------------------------------------------

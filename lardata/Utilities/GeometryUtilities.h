@@ -299,5 +299,5 @@ namespace util{
     
     }; // class GeometryUtilities
 
-} //namespace utils
+} //namespace util
 #endif // UTIL_GEOMETRYUTILITIES_H
