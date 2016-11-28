@@ -39,7 +39,7 @@ source:
 {
   module_type: EmptyEvent
   # were in the global area before
-  maxEvents: 5
+  maxEvents: 1
 }
 
 process_name: DEVEL2

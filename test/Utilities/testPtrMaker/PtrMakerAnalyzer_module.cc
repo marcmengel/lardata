@@ -39,7 +39,7 @@ public:
 
 private:
   std::string fInputLabel;
-  unsigned nvalues;
+  int nvalues;
 
 };
 
@@ -47,7 +47,7 @@ private:
 PtrMakerAnalyzer::PtrMakerAnalyzer(fhicl::ParameterSet const & p)
   : EDAnalyzer(p)
   , fInputLabel(p.get<std::string>("input_label"))
-  , nvalues    (p.get<unsigned> ("nvalues")) 
+  , nvalues    (p.get<int> ("nvalues")) 
 {}
 
 void PtrMakerAnalyzer::analyze(art::Event const & e)
@@ -56,7 +56,7 @@ void PtrMakerAnalyzer::analyze(art::Event const & e)
   art::Handle<intptrvector_t> h;
   e.getByLabel(fInputLabel, h);
   size_t sz = h->size();
-    if( sz != nvalues ) {
+    if( sz != (size_t)nvalues ) {
       throw cet::exception("SizeMismatch")
         << "Expected a PtrVector of size " << nvalues
         << " but the obtained size is " << sz
@@ -67,7 +67,7 @@ void PtrMakerAnalyzer::analyze(art::Event const & e)
 
   //now check the values
   intptrvector_t local(*h);
-  for (int i = 0; i < (int)nvalues; ++i) {
+  for (int i = 0; i < nvalues; ++i) {
     assert(*local[i] == eid*i);
   }
 }

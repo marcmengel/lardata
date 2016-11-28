@@ -41,7 +41,7 @@ public:
 
 private:
 
-  unsigned nvalues;
+  int nvalues;
 };
 
 
@@ -60,7 +60,7 @@ void PtrMakerProducer2::produce(art::Event & e)
   auto intptrs = std::make_unique<intPtrvector_t>();
   lar::PtrMaker<int> make_intptr(e, *this);
 
-  for( int i = 0; i != (int)nvalues; ++i ) {
+  for( int i = 0; i != nvalues; ++i ) {
     intvector->push_back(value_ * i);
     auto p = make_intptr(i);
     intptrs->push_back(p);
