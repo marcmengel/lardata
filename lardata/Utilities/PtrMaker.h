@@ -1,14 +1,29 @@
 /**
- *  @file   lardata/lardata/Utilities/PtrMaker.h
+ * @file   lardata/lardata/Utilities/PtrMaker.h
  *
- *  @brief  Helper function to create an art::Ptr
- *
+ * @brief  Helper function to create an art::Ptr
+ * 
+ * Description This utility simplifies creation of an art::Ptr 
+ * It is a two step process to create an art::Ptr. 
+ * 1. Construct a PtrMaker object that creates Ptrs in to a collection  
+ *    of type C created by the module of type MODULETYPE, where the 
+ *    collection has instance name "instance". These collections
+ *    can be from a different module or the same module. 
+ *    Constructors: 
+ *    PtrMaker<A>(Event, ProductID, instance); 
+ *    PtrMaker<A>(Event, MODULETYPE, instance);
+ * 2. Use an index to create an art::Ptr to an object in the 
+ *    slot indicated by "index"
+ *    
+ *    
+ * Example: 
+ * lar::PtrMaker<recob::SpacePoint> make_spptr(evt, *this);
+ * auto const spptr = make_spptr(index);
  */
 
 #include "art/Framework/Core/EDProducer.h"
-//#include "art/Framework/Core/FindManyP.h"
-#include "canvas/Persistency/Common/FindManyP.h"
 #include "art/Framework/Core/ModuleMacros.h"
+#include "canvas/Persistency/Common/FindManyP.h"
 #include "cetlib/exception.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
