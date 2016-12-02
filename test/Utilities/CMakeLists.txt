@@ -1,3 +1,5 @@
+add_subdirectory( testPtrMaker )
+
 # BulkAllocator_test, NestedIterator_test, CountersMap_test 
 # and test pure header libraries (they are templates)
 cet_test(BulkAllocator_test USE_BOOST_UNIT)
