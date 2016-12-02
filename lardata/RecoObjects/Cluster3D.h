@@ -330,6 +330,7 @@ public:
         m_clusterParams.clear();
         m_hitPairListPtr.clear();
         m_hit3DToEdgeMap.clear();
+        m_bestHitPairListPtr.clear();
         m_bestEdgeList.clear();
     }
     
@@ -337,6 +338,7 @@ public:
     {
         m_clusterParams.clear();
         m_hit3DToEdgeMap.clear();
+        m_bestHitPairListPtr.clear();
         m_bestEdgeList.clear();
     }
     
@@ -344,6 +346,7 @@ public:
     {
         m_clusterParams.clear();
         m_hit3DToEdgeMap.clear();
+        m_bestHitPairListPtr.clear();
         m_bestEdgeList.clear();
     }
     
@@ -352,12 +355,13 @@ public:
         m_clusterParams[hit->getHit().View()].UpdateParameters(hit);
     }
     
-    reco::ViewToClusterParamsMap& getClusterParams()  {return m_clusterParams;}
-    reco::HitPairListPtr&         getHitPairListPtr() {return m_hitPairListPtr;}
-    reco::PrincipalComponents&    getFullPCA()        {return m_fullPCA;}
-    reco::PrincipalComponents&    getSkeletonPCA()    {return m_skeletonPCA;}
-    reco::Hit3DToEdgeMap&         getHit3DToEdgeMap() {return m_hit3DToEdgeMap;}
-    reco::EdgeList&               getBestEdgeList()   {return m_bestEdgeList;}
+    reco::ViewToClusterParamsMap& getClusterParams()      {return m_clusterParams;}
+    reco::HitPairListPtr&         getHitPairListPtr()     {return m_hitPairListPtr;}
+    reco::PrincipalComponents&    getFullPCA()            {return m_fullPCA;}
+    reco::PrincipalComponents&    getSkeletonPCA()        {return m_skeletonPCA;}
+    reco::Hit3DToEdgeMap&         getHit3DToEdgeMap()     {return m_hit3DToEdgeMap;}
+    reco::HitPairListPtr&         getBestHitPairListPtr() {return m_bestHitPairListPtr;}
+    reco::EdgeList&               getBestEdgeList()       {return m_bestEdgeList;}
     
     friend bool operator < (const ClusterParameters &a, const ClusterParameters& b)
     {
@@ -370,6 +374,7 @@ private:
     reco::PrincipalComponents m_fullPCA;
     reco::PrincipalComponents m_skeletonPCA;
     reco::Hit3DToEdgeMap      m_hit3DToEdgeMap;
+    reco::HitPairListPtr      m_bestHitPairListPtr;
     reco::EdgeList            m_bestEdgeList;
 };
 
