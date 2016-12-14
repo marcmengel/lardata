@@ -30,7 +30,6 @@ class lartest::AssnProducer1 : public art::EDProducer {
 public:
    typedef  std::vector<int>             intvec_t;
    typedef  std::vector<std::string>     strvec_t;
-   typedef  art::Assns<std::string, int> strintAssns_t;
    
    explicit AssnProducer1(fhicl::ParameterSet const & p);
    // The compiler-generated destructor is fine for non-base
