@@ -1,4 +1,5 @@
 add_subdirectory( testPtrMaker )
+add_subdirectory( testForEachAssociatedGroup )
 
 # BulkAllocator_test, NestedIterator_test, CountersMap_test 
 # and test pure header libraries (they are templates)
