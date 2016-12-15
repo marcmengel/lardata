@@ -1,6 +1,7 @@
 art_make(
   LIB_LIBRARIES
     lardataobj_RecoBase
+    ${ROOT_BASIC_LIB_LIST}
   MODULE_LIBRARIES
     lardataobj_RecoBase
     lardata_RecoBaseArt_Dumpers
@@ -11,6 +12,7 @@ art_make(
     ${MF_MESSAGELOGGER}
     ${MF_UTILITIES}
     ${CETLIB}
+    ${ROOT_BASIC_LIB_LIST}
   )
 
 install_headers()
