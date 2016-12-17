@@ -1,24 +1,25 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent	lardata	v06_10_00
+parent	lardata	v06_11_00
 defaultqual	e10
 #
 fcldir product_dir job
 #
 product         version
-lardataobj	v1_07_02
-larcore		v06_04_01
-nutools		v2_08_00
+lardataobj	v1_08_00
+larcore		v06_05_01
+nutools		v2_09_00
+range		v3_0_0
 
 cetbuildtools	v5_06_01	-	only_for_build
 end_product_list
 
   
 # e10  - with gcc 4.9.3 and -std=c++14
-qualifier        larcore          nutools	lardataobj	notes
-e10:debug        e10:debug        e10:debug	e10:debug
-e10:opt          e10:opt          e10:opt	e10:opt
-e10:prof         e10:prof         e10:prof	e10:prof
+qualifier        larcore          nutools	lardataobj	range	notes
+e10:debug        e10:debug        e10:debug	e10:debug	-nq-
+e10:opt          e10:opt          e10:opt	e10:opt		-nq-
+e10:prof         e10:prof         e10:prof	e10:prof	-nq-
 end_qualifier_list
 
 # Preserve tabs and formatting in emacs and vi / vim:
