@@ -92,18 +92,19 @@ public:
     
 private:
     
-    mutable size_t                         m_id;              ///< "id" of this hit (useful for indexing)
-    mutable unsigned int                   m_statusBits;      ///< Volatile status information of this 3D hit
-    mutable double                         m_position[3];     ///< position of this hit combination in world coordinates
-    double                                 m_totalCharge;     ///< Sum of charges of all associated recob::Hits
-    double                                 m_avePeakTime;     ///< Average peak time of all associated recob::Hits
-    double                                 m_deltaPeakTime;   ///< Largest delta peak time of associated recob::Hits
-    double                                 m_sigmaPeakTime;   ///< Quad sum of peak time sigmas
-    double                                 m_overlapFraction; ///< Smallest pulse overlap fraction
-    mutable double                         m_docaToAxis;      ///< DOCA to the associated cluster axis
-    mutable double                         m_arclenToPoca;    ///< arc length along axis to DOCA point
-    mutable std::vector<geo::WireID>       m_wireIDVector;    ///< Wire ID's for the planes making up hit
-    std::vector<const reco::ClusterHit2D*> m_hitVector;       ///< Hits comprising this 3D hit
+    mutable size_t                         m_id;                 ///< "id" of this hit (useful for indexing)
+    mutable unsigned int                   m_statusBits;         ///< Volatile status information of this 3D hit
+    mutable double                         m_position[3];        ///< position of this hit combination in world coordinates
+    double                                 m_totalCharge;        ///< Sum of charges of all associated recob::Hits
+    double                                 m_avePeakTime;        ///< Average peak time of all associated recob::Hits
+    double                                 m_deltaPeakTime;      ///< Largest delta peak time of associated recob::Hits
+    double                                 m_sigmaPeakTime;      ///< Quad sum of peak time sigmas
+    double                                 m_maxOverlapFraction; ///< Smallest pulse overlap fraction
+    double                                 m_minOverlapFraction; ///< Smallest pulse overlap fraction
+    mutable double                         m_docaToAxis;         ///< DOCA to the associated cluster axis
+    mutable double                         m_arclenToPoca;       ///< arc length along axis to DOCA point
+    mutable std::vector<geo::WireID>       m_wireIDVector;       ///< Wire ID's for the planes making up hit
+    std::vector<const reco::ClusterHit2D*> m_hitVector;          ///< Hits comprising this 3D hit
     
 #ifndef __GCCXML__
 public:
@@ -136,27 +137,29 @@ public:
                  double                                        sigmaPeakTime,
                  double                                        docaToAxis,
                  double                                        arclenToPoca,
-                 double                                        overlapFraction,
+                 double                                        maxOverlapFraction,
+                 double                                        minOverlapFraction,
                  const std::vector<geo::WireID>&               wireIDVec,
                  const std::vector<const reco::ClusterHit2D*>& hitVec);
     
-    size_t                                        getID()              const {return m_id;}
-    unsigned int                                  getStatusBits()      const {return m_statusBits;}
-    const double*                                 getPosition()        const {return m_position;}
-    double                                        getX()               const {return m_position[0];}
-    double                                        getY()               const {return m_position[1];}
-    double                                        getZ()               const {return m_position[2];}
-    double                                        getTotalCharge()     const {return m_totalCharge;}
-    double                                        getAvePeakTime()     const {return m_avePeakTime;}
-    double                                        getDeltaPeakTime()   const {return m_deltaPeakTime;}
-    double                                        getSigmaPeakTime()   const {return m_sigmaPeakTime;}
-    double                                        getOverlapFraction() const {return m_overlapFraction;}
-    double                                        getDocaToAxis()      const {return m_docaToAxis;}
-    double                                        getArclenToPoca()    const {return m_arclenToPoca;}
-    const std::vector<geo::WireID>&               getWireIDs()         const {return m_wireIDVector;}
-    const std::vector<const reco::ClusterHit2D*>& getHits()            const {return m_hitVector;}
+    size_t                                        getID()                 const {return m_id;}
+    unsigned int                                  getStatusBits()         const {return m_statusBits;}
+    const double*                                 getPosition()           const {return m_position;}
+    double                                        getX()                  const {return m_position[0];}
+    double                                        getY()                  const {return m_position[1];}
+    double                                        getZ()                  const {return m_position[2];}
+    double                                        getTotalCharge()        const {return m_totalCharge;}
+    double                                        getAvePeakTime()        const {return m_avePeakTime;}
+    double                                        getDeltaPeakTime()      const {return m_deltaPeakTime;}
+    double                                        getSigmaPeakTime()      const {return m_sigmaPeakTime;}
+    double                                        getMaxOverlapFraction() const {return m_maxOverlapFraction;}
+    double                                        getMinOverlapFraction() const {return m_minOverlapFraction;}
+    double                                        getDocaToAxis()         const {return m_docaToAxis;}
+    double                                        getArclenToPoca()       const {return m_arclenToPoca;}
+    const std::vector<geo::WireID>&               getWireIDs()            const {return m_wireIDVector;}
+    const std::vector<const reco::ClusterHit2D*>& getHits()               const {return m_hitVector;}
     
-    bool bitsAreSet(const unsigned int& bitsToCheck)                   const {return m_statusBits & bitsToCheck;}
+    bool bitsAreSet(const unsigned int& bitsToCheck)                      const {return m_statusBits & bitsToCheck;}
 
     void setID(const size_t& id)           const {m_id            = id;}
     void setStatusBit(unsigned bits)       const {m_statusBits   |= bits;}
