@@ -16,8 +16,16 @@
  *  they are associated with.
  */
 
+// LArSoft libraries
+#include "lardata/Utilities/RangeForWrapper.h"
 
-#include "range/v3/all.hpp"
+// range library
+#include "range/v3/algorithm/for_each.hpp"
+#include "range/v3/view/group_by.hpp"
+#include "range/v3/view/transform.hpp"
+#include "range/v3/view/map.hpp" // range::view::values
+#include "range/v3/view/all.hpp"
+
 
 template <class A, class F>
 void for_each_associated_group(A const & assns, F & func) {
@@ -26,6 +34,17 @@ void for_each_associated_group(A const & assns, F & func) {
                     ranges::view::group_by([](auto a1, auto a2) { return a1.first == a2.first;}) |
                     ranges::view::transform([] (auto pairs) {return pairs | ranges::view::values;}),
                     func);
+}
+
+
+template <class A>
+auto associated_groups(A const & assns) {
+   return assns |
+          ranges::view::all |
+          ranges::view::group_by([](auto a1, auto a2) { return a1.first == a2.first;}) |
+          ranges::view::transform([] (auto pairs) {return pairs | ranges::view::values | util::range_for;}) |
+          util::range_for
+          ;
 }
 
 #endif
