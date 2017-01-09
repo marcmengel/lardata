@@ -81,8 +81,8 @@ void AssnAnalyzer::for_each_associated_group_test(art::Event const & e) const
       }
    };
    
-   for_each_associated_group(int_to_str_assns,
-                             strings);
+   util::for_each_associated_group(int_to_str_assns,
+                                   strings);
    
    //strings should be same as vs
    for(auto k=0; k<6;++k) {
@@ -102,7 +102,7 @@ void AssnAnalyzer::associated_groups_test(art::Event const & e) const
    auto vs = strvec_t {"one", "one-a", "two", "two-a", "three", "three-a"};
    
    strvec_t strvec;
-   for (auto strs: associated_groups(int_to_str_assns)) {
+   for (auto strs: util::associated_groups(int_to_str_assns)) {
       for(art::Ptr<std::string> const& s: strs) {
          strvec.push_back(*s);
       }

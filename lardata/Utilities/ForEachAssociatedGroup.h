@@ -26,25 +26,28 @@
 #include "range/v3/view/map.hpp" // range::view::values
 #include "range/v3/view/all.hpp"
 
+namespace util {
+  
+  template <class A, class F>
+  void for_each_associated_group(A const & assns, F & func) {
+     ranges::for_each(assns |
+                      ranges::view::all |
+                      ranges::view::group_by([](auto a1, auto a2) { return a1.first == a2.first;}) |
+                      ranges::view::transform([] (auto pairs) {return pairs | ranges::view::values;}),
+                      func);
+  }
 
-template <class A, class F>
-void for_each_associated_group(A const & assns, F & func) {
-   ranges::for_each(assns |
-                    ranges::view::all |
-                    ranges::view::group_by([](auto a1, auto a2) { return a1.first == a2.first;}) |
-                    ranges::view::transform([] (auto pairs) {return pairs | ranges::view::values;}),
-                    func);
-}
 
+  template <class A>
+  auto associated_groups(A const & assns) {
+     return assns |
+            ranges::view::all |
+            ranges::view::group_by([](auto a1, auto a2) { return a1.first == a2.first;}) |
+            ranges::view::transform([] (auto pairs) {return pairs | ranges::view::values | util::range_for;}) |
+            util::range_for
+            ;
+  }
 
-template <class A>
-auto associated_groups(A const & assns) {
-   return assns |
-          ranges::view::all |
-          ranges::view::group_by([](auto a1, auto a2) { return a1.first == a2.first;}) |
-          ranges::view::transform([] (auto pairs) {return pairs | ranges::view::values | util::range_for;}) |
-          util::range_for
-          ;
-}
+} // namespace util
 
 #endif
