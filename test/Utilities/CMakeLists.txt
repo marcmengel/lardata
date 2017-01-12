@@ -13,6 +13,7 @@ cet_test(Dereference_test USE_BOOST_UNIT)
 cet_test(TensorIndices_test USE_BOOST_UNIT)
 cet_test(TensorIndicesStress_test)
 cet_test(GridContainers_test USE_BOOST_UNIT)
+cet_test(RangeForWrapper_test USE_BOOST_UNIT)
 
 # run a FHiCL file with only ComputePi inside
 cet_test(timingreference_test HANDBUILT
