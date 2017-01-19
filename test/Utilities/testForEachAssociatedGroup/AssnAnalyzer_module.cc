@@ -45,6 +45,10 @@ public:
 
 private:
    std::string fInputLabel;
+   
+   void for_each_associated_group_test(art::Event const & e) const;
+   void associated_groups_test(art::Event const & e) const;
+   
 };
 
 
@@ -58,6 +62,14 @@ AssnAnalyzer::AssnAnalyzer(fhicl::ParameterSet const & p)
 
 void AssnAnalyzer::analyze(art::Event const & e)
 {
+   
+   AssnAnalyzer::for_each_associated_group_test(e);
+   AssnAnalyzer::associated_groups_test(e);
+   
+}
+
+void AssnAnalyzer::for_each_associated_group_test(art::Event const & e) const
+{
    typedef typename art::Assns<int, std::string> istr_assns;
    auto const & int_to_str_assns = *e.getValidHandle<istr_assns> (fInputLabel);
    auto vs = strvec_t {"one", "one-a", "two", "two-a", "three", "three-a"};
@@ -69,14 +81,39 @@ void AssnAnalyzer::analyze(art::Event const & e)
       }
    };
    
-   for_each_associated_group(int_to_str_assns,
-                             strings);
+   util::for_each_associated_group(int_to_str_assns,
+                                   strings);
    
    //strings should be same as vs
    for(auto k=0; k<6;++k) {
       assert(strvec[k]==vs[k]);
    }
    
-}
+} // for_each_associated_group_test()
+
+
+void AssnAnalyzer::associated_groups_test(art::Event const & e) const
+{
+   // this is the exact same test as for_each_associated_group_test(),
+   // but written with an explicit loop
+   
+   typedef typename art::Assns<int, std::string> istr_assns;
+   auto const & int_to_str_assns = *e.getValidHandle<istr_assns> (fInputLabel);
+   auto vs = strvec_t {"one", "one-a", "two", "two-a", "three", "three-a"};
+   
+   strvec_t strvec;
+   for (auto strs: util::associated_groups(int_to_str_assns)) {
+      for(art::Ptr<std::string> const& s: strs) {
+         strvec.push_back(*s);
+      }
+   } // for associated groups
+   
+   //strings should be same as vs
+   for(auto k=0; k<6;++k) {
+      assert(strvec[k]==vs[k]);
+   }
+   
+} // associated_groups_test()
+
 
 DEFINE_ART_MODULE(AssnAnalyzer)
