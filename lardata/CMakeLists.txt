@@ -2,6 +2,7 @@
 add_subdirectory(Utilities)
 add_subdirectory(RecoObjects)
 add_subdirectory(RecoBaseArt)
+add_subdirectory(ArtDataHelper)
 #add_subdirectory(RecoBase)
 add_subdirectory(RawData)
 #add_subdirectory(OpticalDetectorData)
