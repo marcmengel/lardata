@@ -1,0 +1,15 @@
+//////////////////////////////////////////////////////////////////////////////
+// \version 
+//
+// \brief Wrappers for accessing MVA output data products
+//
+// \author robert.sulej@cern.ch
+//
+//////////////////////////////////////////////////////////////////////////////
+
+#include "lardata/ArtDataHelper/MVAReader.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
+
+namespace anab {
+
+} // namespace anab
