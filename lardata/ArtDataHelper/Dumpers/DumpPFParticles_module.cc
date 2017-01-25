@@ -7,7 +7,7 @@
 
 // LArSoft includes
 #include "lardataobj/RecoBase/PFParticle.h"
-#include "lardata/RecoBaseArt/Dumpers/hexfloat.h"
+#include "lardata/ArtDataHelper/Dumpers/hexfloat.h"
 
 // art libraries
 #include "canvas/Utilities/InputTag.h"

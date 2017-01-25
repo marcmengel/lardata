@@ -66,7 +66,7 @@ namespace recob {
 
 // LArSoft includes
 #include "lardataobj/RecoBase/Vertex.h"
-#include "lardata/RecoBaseArt/Dumpers/hexfloat.h"
+#include "lardata/ArtDataHelper/Dumpers/hexfloat.h"
 
 // art libraries
 #include "art/Framework/Core/ModuleMacros.h"

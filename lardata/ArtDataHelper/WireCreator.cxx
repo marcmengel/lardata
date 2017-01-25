@@ -8,7 +8,7 @@
  * ****************************************************************************/
 
 // declaration header
-#include "lardata/RecoBaseArt/WireCreator.h"
+#include "lardata/ArtDataHelper/WireCreator.h"
 
 // C/C++ standard library
 #include <utility> // std::move()

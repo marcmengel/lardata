@@ -16,7 +16,7 @@
 // LArSoft libraries
 #include "lardataobj/RecoBase/Wire.h"
 #include "lardataobj/RecoBase/Hit.h"
-#include "lardata/RecoBaseArt/FindAllP.h"
+#include "lardata/ArtDataHelper/FindAllP.h"
 
 
 /// LArSoft-specific namespace

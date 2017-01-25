@@ -8,7 +8,7 @@
  */
 
 // our header
-#include "lardata/RecoBaseArt/TrackUtils.h"
+#include "lardata/ArtDataHelper/TrackUtils.h"
 
 // LArSoft libraries
 #include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h" // util::pi()

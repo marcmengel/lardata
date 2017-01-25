@@ -87,8 +87,8 @@ namespace recob {
 
 // LArSoft includes
 #include "lardataobj/RecoBase/PCAxis.h"
-#include "lardata/RecoBaseArt/Dumpers/NewLine.h" // recob::dumper::makeNewLine()
-#include "lardata/RecoBaseArt/Dumpers/PCAxisDumpers.h" // recob::dumper::DumpPCAxis()
+#include "lardata/ArtDataHelper/Dumpers/NewLine.h" // recob::dumper::makeNewLine()
+#include "lardata/ArtDataHelper/Dumpers/PCAxisDumpers.h" // recob::dumper::DumpPCAxis()
 
 // art libraries
 #include "art/Framework/Core/ModuleMacros.h"

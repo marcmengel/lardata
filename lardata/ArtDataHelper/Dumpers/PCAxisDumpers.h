@@ -20,7 +20,7 @@
 
 // --- for the implementation ---
 // LArSoft libraries
-#include "lardata/RecoBaseArt/Dumpers/NewLine.h"
+#include "lardata/ArtDataHelper/Dumpers/NewLine.h"
 
 
 namespace recob {
