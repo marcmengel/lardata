@@ -21,8 +21,8 @@
 
 // --- for the implementation ---
 // LArSoft libraries
-#include "lardata/RecoBaseArt/Dumpers/hexfloat.h"
-#include "lardata/RecoBaseArt/Dumpers/NewLine.h"
+#include "lardata/ArtDataHelper/Dumpers/hexfloat.h"
+#include "lardata/ArtDataHelper/Dumpers/NewLine.h"
 
 
 namespace recob {

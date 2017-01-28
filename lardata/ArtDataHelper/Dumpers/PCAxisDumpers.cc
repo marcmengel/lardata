@@ -9,4 +9,4 @@
  */
 
 // LArSoft libraries
-#include "lardata/RecoBaseArt/Dumpers/PCAxisDumpers.h"
+#include "lardata/ArtDataHelper/Dumpers/PCAxisDumpers.h"

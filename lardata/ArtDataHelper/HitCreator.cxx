@@ -8,7 +8,7 @@
  * ****************************************************************************/
 
 // declaration header
-#include "lardata/RecoBaseArt/HitCreator.h"
+#include "lardata/ArtDataHelper/HitCreator.h"
 
 // C/C++ standard library
 #include <utility> // std::move()

@@ -6,9 +6,9 @@
  */
 
 // LArSoft includes
-#include "lardata/RecoBaseArt/Dumpers/NewLine.h" // recob::dumper::makeNewLine()
-#include "lardata/RecoBaseArt/Dumpers/SpacePointDumpers.h"
-#include "lardata/RecoBaseArt/Dumpers/hexfloat.h"
+#include "lardata/ArtDataHelper/Dumpers/NewLine.h" // recob::dumper::makeNewLine()
+#include "lardata/ArtDataHelper/Dumpers/SpacePointDumpers.h"
+#include "lardata/ArtDataHelper/Dumpers/hexfloat.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
 
 // art libraries

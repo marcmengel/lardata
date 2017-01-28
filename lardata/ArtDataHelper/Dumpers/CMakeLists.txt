@@ -4,7 +4,7 @@ art_make(
     ${ROOT_BASIC_LIB_LIST}
   MODULE_LIBRARIES
     lardataobj_RecoBase
-    lardata_RecoBaseArt_Dumpers
+    lardata_ArtDataHelper_Dumpers
     art_Framework_Principal
     canvas_Persistency_Common
     canvas_Persistency_Provenance
