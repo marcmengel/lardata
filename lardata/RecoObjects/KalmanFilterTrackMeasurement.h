@@ -3,9 +3,9 @@
 
 //#include "lardataobj/RecoBase/TrackFitMeasurement.h"
 #include "lardata/RecoObjects/TrackFitMeasurement.h"
-#include "lardata/RecoObjects/SurfWireX.h"
 
-//kalman filter calculations (updatedTrackState and updatedTrackStateCov) optimized for 1D measurement along the first component of the track state, i.e. assuming H=(1,0,0,0,0)
+// wrapper around recob::TrackFitMeasurement to make KalmanFilter calculations
+// optimized for 1D measurement along a component of the track state, i.e. assuming H=(1,0,0,0,0) if component=0.
 
 namespace trkf {
 
@@ -17,25 +17,22 @@ namespace trkf {
     
   public:
     
-    KalmanFilterTrackMeasurement(unsigned int component, const recob::TrackFitMeasurement* measurement,const trkf::SurfWireX* surface)
-    :comp_(component),meas_(measurement),surf_(surface) {}
+    KalmanFilterTrackMeasurement(const TrackFitMeasurement* measurement, unsigned int component = 0)
+      : meas_(measurement),comp_(component) {}
     
-    const SVector5&          predictedTrackStatePar() const { return meas_->trackStatePar(); }
-    const SMatrixSym55&      predictedTrackStateCov() const { return meas_->trackStateCov(); }
-    const recob::TrackState& predictedTrackState()    const { return meas_->trackState(); }
+    const SVector5&     predictedTrackStatePar() const { return meas_->trackStatePar(); }
+    const SMatrixSym55& predictedTrackStateCov() const { return meas_->trackStateCov(); }
+    const TrackState&   predictedTrackState()    const { return meas_->trackState(); }
     
-    SVector5          updatedTrackStatePar() const;
-    SMatrixSym55      updatedTrackStateCov() const;
-    recob::TrackState updatedTrackState()    const { return recob::TrackState(updatedTrackStatePar(),updatedTrackStateCov()); }
+    SVector5     updatedTrackStatePar() const;
+    SMatrixSym55 updatedTrackStateCov() const;
+    TrackState   updatedTrackState()    const { return TrackState(updatedTrackStatePar(),updatedTrackStateCov(),meas_->trackState().plane(),meas_->trackState().mass()); }
     
-    recob::TrackState combinedTrackState(recob::TrackState state1, recob::TrackState state2, bool& success) const;
-    
-    const trkf::SurfWireX* surface() const {return surf_; }
+    bool combineWithState(const TrackState& state, TrackState& result) const;
     
   private:
+    const TrackFitMeasurement* meas_;
     unsigned int comp_;
-    const recob::TrackFitMeasurement* meas_;
-    const trkf::SurfWireX* surf_;
   };
 }
 

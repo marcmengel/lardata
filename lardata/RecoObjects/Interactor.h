@@ -21,6 +21,8 @@
 
 #include "lardata/RecoObjects/KalmanLinearAlgebra.h"
 #include "lardata/RecoObjects/KTrack.h"
+#include "lardata/RecoObjects/TrackFitMeasurement.h"
+#include "boost/optional.hpp"
 
 namespace trkf {
 
@@ -46,6 +48,13 @@ namespace trkf {
     /// Calculate noise matrix.
     virtual bool noise(const KTrack& trk, double s, TrackError& noise_matrix) const = 0;
 
+    /// Calculate noise matrix.
+    virtual bool noise(const TrackState& trk, double s, recob::tracking::SMatrixSym55& noise_matrix) const { return false; }
+
+    /// Method to calculate updated momentum due to dE/dx.
+    boost::optional<double> dedx_prop(double pinv, double mass,
+				      double s, double* deriv=0) const;
+    
   private:
 
     // Attributes.

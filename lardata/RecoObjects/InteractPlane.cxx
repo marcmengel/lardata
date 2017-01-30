@@ -93,6 +93,38 @@ namespace trkf {
     double pinv = vec[4];
     double mass = trk.Mass();
 
+    return noise(larprop, detprop, dudw, dvdw, pinv, mass, s, s<0, noise_matrix);
+  }
+  
+  bool InteractPlane::noise(const TrackState& trk, double s, recob::tracking::SMatrixSym55& noise_matrix) const {
+    // Get LAr service.
+
+    auto const * larprop = lar::providerFrom<detinfo::LArPropertiesService>();
+    auto const * detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
+
+    // Make sure we are on a plane surface (throw exception if not).
+
+    // const SurfPlane* psurf = dynamic_cast<const SurfPlane*>(&*trk.getSurface());
+    // if(psurf == 0)
+    //   throw cet::exception("InteractPlane") 
+    // 	<< "InteractPlane called for non-planar surface.\n";
+
+    // Clear noise matrix.
+
+    noise_matrix = recob::tracking::SMatrixSym55();
+
+    // Unpack track parameters.
+
+    double dudw = trk.parameters()[2];
+    double dvdw = trk.parameters()[3];
+    double pinv = trk.parameters()[4];
+    double mass = trk.mass();
+
+    return noise(larprop, detprop, dudw, dvdw, pinv, mass, s, s<0, noise_matrix);
+  }
+
+  template<typename T> bool InteractPlane::noise(detinfo::LArProperties const * larprop, detinfo::DetectorProperties const * detprop,
+						 double dudw, double dvdw, double pinv, double mass, double s, bool flipSign, T& noise_matrix) const {
     // If distance is zero, or momentum is infinite, return zero noise.
 
     if(pinv == 0. || s == 0.)
@@ -131,8 +163,7 @@ namespace trkf {
     double uv = dudw * dvdw;
     double dist2_3 = s*s / 3.;
     double dist_2 = std::abs(s) / 2.;
-    if(trk.getDirection() == Surface::BACKWARD)
-      dist_2 = -dist_2;
+    if(flipSign) dist_2 = -dist_2;
 
     // Calculate energy loss fluctuations.
 
@@ -178,5 +209,5 @@ namespace trkf {
 
     return true;
   }
-
+  
 } // end namespace trkf
