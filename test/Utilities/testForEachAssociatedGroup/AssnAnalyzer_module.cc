@@ -21,6 +21,10 @@
 
 #include "lardata/Utilities/ForEachAssociatedGroup.h"
 
+#include <set>
+#include <algorithm> // std::copy()
+#include <iterator> // std::inserter()
+
 class AssnAnalyzer;
 
 
@@ -44,7 +48,9 @@ public:
   void analyze(art::Event const & e) override;
 
 private:
-   std::string fInputLabel;
+   art::InputTag fInputLabel;
+   
+   std::set<std::string> fEnabledTests;
    
    void for_each_associated_group_test(art::Event const & e) const;
    void associated_groups_test(art::Event const & e) const;
@@ -55,17 +61,25 @@ private:
 AssnAnalyzer::AssnAnalyzer(fhicl::ParameterSet const & p)
   :
   EDAnalyzer(p)
-  , fInputLabel(p.get<std::string>("input_label"))
+  , fInputLabel(p.get<art::InputTag>("input_label"))
  // More initializers here.
-{}
+{
+  auto enableTests = p.get<std::vector<std::string>>("enableTests");
+  if (enableTests.empty())
+    fEnabledTests = { "forEachAssociatedGroup", "associatedGroups" };
+  else {
+    std::copy(enableTests.begin(), enableTests.end(),
+      std::inserter(enableTests, enableTests.begin()));
+  }
+}
 
 
 void AssnAnalyzer::analyze(art::Event const & e)
 {
-   
-   AssnAnalyzer::for_each_associated_group_test(e);
-   AssnAnalyzer::associated_groups_test(e);
-   
+   if (fEnabledTests.count("forEachAssociatedGroup"))
+     AssnAnalyzer::for_each_associated_group_test(e);
+   if (fEnabledTests.count("associatedGroups"))
+     AssnAnalyzer::associated_groups_test(e);
 }
 
 void AssnAnalyzer::for_each_associated_group_test(art::Event const & e) const
@@ -77,6 +91,7 @@ void AssnAnalyzer::for_each_associated_group_test(art::Event const & e) const
    strvec_t strvec;
    auto strings = [&strvec](auto strs) {
       for(auto s=begin(strs); s!=end(strs); ++s) {
+         std::cout << *s << std::flush << " \"" << **s << "\"" << std::endl;
          strvec.push_back(**s);
       }
    };
@@ -86,7 +101,11 @@ void AssnAnalyzer::for_each_associated_group_test(art::Event const & e) const
    
    //strings should be same as vs
    for(auto k=0; k<6;++k) {
-      assert(strvec[k]==vs[k]);
+      if (strvec[k] != vs[k]) {
+        throw art::Exception(art::errors::LogicError)
+          << "String #" << k << " expected to be '" << vs[k]
+          << "', got '" << strvec[k] << "' instead!\n";
+      }
    }
    
 } // for_each_associated_group_test()
@@ -104,13 +123,18 @@ void AssnAnalyzer::associated_groups_test(art::Event const & e) const
    strvec_t strvec;
    for (auto strs: util::associated_groups(int_to_str_assns)) {
       for(art::Ptr<std::string> const& s: strs) {
+         std::cout << s << std::flush << " \"" << *s << "\"" << std::endl;
          strvec.push_back(*s);
       }
    } // for associated groups
    
    //strings should be same as vs
    for(auto k=0; k<6;++k) {
-      assert(strvec[k]==vs[k]);
+      if (strvec[k] != vs[k]) {
+        throw art::Exception(art::errors::LogicError)
+          << "String #" << k << " expected to be '" << vs[k]
+          << "', got '" << strvec[k] << "' instead!\n";
+      }
    }
    
 } // associated_groups_test()
