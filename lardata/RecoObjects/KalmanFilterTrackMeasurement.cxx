@@ -27,6 +27,6 @@ bool KalmanFilterTrackMeasurement::combineWithState(const TrackState& state, Tra
   if (!success) return false;
   SVector5&& par = par1 + K*(par2 - par1);
   cov = SMatrixSym55(SMatrix55(K*cov2).LowerBlock());
-  result = TrackState(par,cov,state1.plane(),state1.mass());
+  result = TrackState(par,cov,state1.plane(),state1.isTrackAlongPlaneDir(),state1.mass());
   return true;//fixme check they are on the same plane
 }

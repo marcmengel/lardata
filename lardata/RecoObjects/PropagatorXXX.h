@@ -8,7 +8,7 @@
 
 namespace trkf {
 
-  class PropagatorXXX //: public Propagator
+  class PropagatorXXX
   {
   public:
 
@@ -21,7 +21,7 @@ namespace trkf {
     enum PropDirection {FORWARD, BACKWARD, UNKNOWN};
 
     /// Constructor.
-    PropagatorXXX(double maxStep, double tcut, const std::shared_ptr<const Interactor>& interactor);
+    PropagatorXXX(double maxStep, double tcut);
 
     /// Destructor.
     virtual ~PropagatorXXX();
@@ -32,24 +32,22 @@ namespace trkf {
 
     const std::shared_ptr<const Interactor>& getInteractor() const {return fInteractor;}
 
-    bool propagateToPlane(const TrackState& origin, const Plane& target, TrackState& result, PropDirection dir = FORWARD) const;
+    bool propagateToPlane(const TrackState& origin, const Plane& target, TrackState& result, bool dodedx, bool domcs, PropDirection dir = FORWARD) const;
 
-    bool propagateToPlaneNoMaterial(const TrackState& origin, const Plane& target, TrackState& result, PropDirection dir = FORWARD) const;
+    TrackState propagatedStateByPath(const TrackState& origin, const double s, const double sperp, bool dodedx, bool domcs, bool& success) const;
 
-    TrackState propagatedStateByPath(const TrackState& origin, const float s, bool& success) const;
-
-    inline Point_t propagatedPosByDistance(const Point_t& origpos, const Vector_t& origmom, float s) const { return origpos+s*origmom; }
-    inline Point_t propagatedPosByDistance(const SVector6& orig, float s) const { return Point_t(orig(0)+s*orig(3),orig(1)+s*orig(4),orig(2)+s*orig(5)); }
-    inline float distanceToPlane(const TrackState& origin, const Plane& target, PropDirection dir = FORWARD) const { return distanceToPlane(origin.position(), origin.momentum().Unit(), target, dir); }
-    float distanceToPlane(const Point_t& origpos, const Vector_t& origdir, const Plane& target, PropDirection dir = FORWARD) const;
+    inline Point_t propagatedPosByDistance(const Point_t& origpos, const Vector_t& origmom, double s) const { return origpos+s*origmom; }
+    inline Point_t propagatedPosByDistance(const SVector6& orig, double s) const { return Point_t(orig(0)+s*orig(3),orig(1)+s*orig(4),orig(2)+s*orig(5)); }
+    inline double distanceToPlane(const TrackState& origin, const Plane& target, PropDirection dir = FORWARD) const { return distanceToPlane(origin.position(), origin.momentum().Unit(), target, dir); }
+    double distanceToPlane(const Point_t& origpos, const Vector_t& origdir, const Plane& target, PropDirection dir = FORWARD) const;
+    inline std::pair<double, double> distancePairToPlane(const TrackState& origin, const Plane& target, PropDirection dir = FORWARD) const { return distancePairToPlane(origin.position(), origin.momentum().Unit(), target, dir); }
+    std::pair<double, double> distancePairToPlane(const Point_t& origpos, const Vector_t& origdir, const Plane& target, PropDirection dir = FORWARD) const;
 
   private:
 
-    // Attributes.
-    double fMaxStep;                                ///< Maximum propagation step length.
-    double fTcut;                                   ///< Maximum delta ray energy for dE/dx.
-    bool fDoDedx;                                   ///< Energy loss enable flag.
-    std::shared_ptr<const Interactor> fInteractor;  ///< Interactor (for calculating noise).
+    double fMaxStep;                                     ///< Maximum propagation step length.
+    double fTcut;                                        ///< Maximum delta ray energy for dE/dx.
+    std::shared_ptr<const Interactor> fInteractor;  ///< Interactor (for calculating dedx and noise).
   };
 }
 

@@ -229,6 +229,7 @@ namespace trkf {
 	}
       }
 
+      //std::cout << "completed propagation in Nstep=" << nit << std::endl;
       // Set the final result (distance + success).
 
       result = boost::optional<double>(true, s);

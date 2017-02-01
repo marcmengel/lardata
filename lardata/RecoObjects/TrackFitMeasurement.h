@@ -13,12 +13,12 @@ namespace trkf {
   using Point_t      = recob::tracking::Point_t;
   using Vector_t     = recob::tracking::Vector_t;
 
-  class TrackState {//add also mass, global point and global momentum (make it trkf, there should be another version in recob that becomes persistent)
+  class TrackState {//fixme add also charge? or turn mass into PID
   public:
-    TrackState(const SVector5& trackStatePar, const SMatrixSym55& trackStateCov, const Plane& plane, float mass)
+  TrackState(const SVector5& trackStatePar, const SMatrixSym55& trackStateCov, const Plane& plane, bool trackAlongPlaneDir, float mass)
       :fTrackStatePar(trackStatePar), fTrackStateCov(trackStateCov), fPlane(plane), fMass(mass)
     {
-      SVector6 par6d = fPlane.Local5DToGlobal6DParameters(fTrackStatePar);
+      SVector6 par6d = fPlane.Local5DToGlobal6DParameters(fTrackStatePar,trackAlongPlaneDir);
       fPos = Point_t(par6d[0],par6d[1],par6d[2]);
       fMom = Point_t(par6d[3],par6d[4],par6d[5]);
     }
@@ -30,6 +30,7 @@ namespace trkf {
           float         mass()       const { return fMass; }               
     const SVector6      parameters6D() const { return SVector6(fPos.X(),fPos.Y(),fPos.Z(),fMom.X(),fMom.Y(),fMom.Z()); }
     void setCovariance(SMatrixSym55 trackStateCov) { fTrackStateCov = trackStateCov; }
+    bool isTrackAlongPlaneDir() const { return fMom.Dot(fPlane.direction())>0; }
   private:
     SVector5     fTrackStatePar;
     SMatrixSym55 fTrackStateCov;
@@ -43,8 +44,8 @@ namespace trkf {
   public:
     /* TrackFitMeasurement() */
     /*   :fHitMeas(0),fHitMeasErr2(0),fTrackState(SVector5(),SMatrixSym55(),Plane()) {} */
-    TrackFitMeasurement(double aHitMeas, double aHitMeasErr2, const SVector5& aTrackStatePar, const SMatrixSym55& aTrackStateCov, const Plane& aPlane, float aMass)
-      :fHitMeas(aHitMeas),fHitMeasErr2(aHitMeasErr2),fTrackState(aTrackStatePar,aTrackStateCov,aPlane,aMass) {}
+    TrackFitMeasurement(double aHitMeas, double aHitMeasErr2, const SVector5& aTrackStatePar, const SMatrixSym55& aTrackStateCov, const Plane& aPlane, bool aTrackAlongPlaneDir, float aMass)
+      :fHitMeas(aHitMeas),fHitMeasErr2(aHitMeasErr2),fTrackState(aTrackStatePar,aTrackStateCov,aPlane,aTrackAlongPlaneDir,aMass) {}
     TrackFitMeasurement(double aHitMeas, double aHitMeasErr2, const TrackState& aTrackState)
       :fHitMeas(aHitMeas),fHitMeasErr2(aHitMeasErr2),fTrackState(aTrackState) {}
 

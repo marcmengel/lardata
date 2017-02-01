@@ -26,7 +26,7 @@ namespace trkf {
     
     SVector5     updatedTrackStatePar() const;
     SMatrixSym55 updatedTrackStateCov() const;
-    TrackState   updatedTrackState()    const { return TrackState(updatedTrackStatePar(),updatedTrackStateCov(),meas_->trackState().plane(),meas_->trackState().mass()); }
+    TrackState   updatedTrackState()    const { return TrackState(updatedTrackStatePar(),updatedTrackStateCov(),meas_->trackState().plane(),meas_->trackState().isTrackAlongPlaneDir(),meas_->trackState().mass()); }
     
     bool combineWithState(const TrackState& state, TrackState& result) const;
     
