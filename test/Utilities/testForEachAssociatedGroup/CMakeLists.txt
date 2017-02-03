@@ -15,4 +15,19 @@ cet_test(test_feag2 HANDBUILT
   TEST_PROPERTIES DEPENDS test_feag
 )
 
+cet_test(test_associatedgroups_full HANDBUILT
+  TEST_EXEC lar 
+  TEST_ARGS --rethrow-all --config test_associatedgroups_full.fcl
+  DATAFILES test_associatedgroups_full.fcl
+  OPTIONAL_GROUPS BROKEN
+)
+
+cet_test(test_associatedgroups HANDBUILT
+  TEST_EXEC lar 
+  TEST_ARGS --rethrow-all --config test_associatedgroups.fcl
+  DATAFILES test_associatedgroups.fcl
+  TEST_PROPERTIES DEPENDS test_associatedgroups_full
+  OPTIONAL_GROUPS BROKEN
+)
+
 art_dictionary(DICTIONARY_LIBRARIES cetlib NO_INSTALL)
