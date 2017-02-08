@@ -2,6 +2,15 @@ simple_plugin( AssnProducer1           "module"  NO_INSTALL )
 simple_plugin( AssnProducer2           "module"  NO_INSTALL )
 simple_plugin( AssnAnalyzer           "module"  NO_INSTALL )
 
+cet_test(associated_groups_test USE_BOOST_UNIT
+  LIBRARIES
+    canvas_Persistency_Provenance
+    canvas_Persistency_Common
+    canvas_Utilities
+    ${CETLIB}
+    ${ROOT_CORE}
+  )
+
 cet_test(test_feag HANDBUILT
   TEST_EXEC lar 
   TEST_ARGS --rethrow-all --config test_feag.fcl
