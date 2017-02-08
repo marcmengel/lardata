@@ -21,7 +21,7 @@ physics:
       input_label: pm2
       
       # supported: "forEachAssociatedGroup", "associatedGroups"
-      enableTests: [ "forEachAssociatedGroup", "associatedGroups" ]
+      enableTests: [ "associatedGroups" ]
     }
   }
 
