@@ -9,6 +9,7 @@ cet_test(associated_groups_test USE_BOOST_UNIT
     canvas_Utilities
     ${CETLIB}
     ${ROOT_CORE}
+  OPTIONAL_GROUPS BROKEN
   )
 
 cet_test(test_feag HANDBUILT
