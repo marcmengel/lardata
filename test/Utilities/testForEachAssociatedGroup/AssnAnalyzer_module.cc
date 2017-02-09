@@ -69,7 +69,7 @@ AssnAnalyzer::AssnAnalyzer(fhicl::ParameterSet const & p)
     fEnabledTests = { "forEachAssociatedGroup", "associatedGroups" };
   else {
     std::copy(enableTests.begin(), enableTests.end(),
-      std::inserter(enableTests, enableTests.begin()));
+      std::inserter(fEnabledTests, fEnabledTests.begin()));
   }
 }
 
