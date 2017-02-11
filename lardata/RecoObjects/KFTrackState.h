@@ -24,7 +24,7 @@ namespace trkf {
     const Point_t&      position()             const { return fTrackState.position(); }
     const Vector_t&     momentum()             const { return fTrackState.momentum(); }
     int                 pID()                  const { return fTrackState.pID(); }
-    double              mass()                 const { return fTrackState.mass(); }               
+    double              mass()                 const { return fTrackState.mass(); }
     const SVector6      parameters6D()         const { return fTrackState.parameters6D(); }
     bool                isTrackAlongPlaneDir() const { return fTrackState.isTrackAlongPlaneDir(); }
     //

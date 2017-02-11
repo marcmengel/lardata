@@ -40,7 +40,7 @@ namespace trkf {
     const geo::WireID fWireId;
     Plane             fPlane;
   };
-  
+
   class TrackState {
   public:
   TrackState(const SVector5& trackStatePar, const SMatrixSym55& trackStateCov, const Plane& plane, bool trackAlongPlaneDir, int pid)
@@ -60,7 +60,7 @@ namespace trkf {
       if (abs(fPid)==13) return mumass; if (abs(fPid)==211) return pimass;
       if (abs(fPid)==321) return kmass; if (abs(fPid)==2212) return pmass;
       return util::kBogusD;
-    }               
+    }
     const SVector6  parameters6D() const { return SVector6(fPos.X(),fPos.Y(),fPos.Z(),fMom.X(),fMom.Y(),fMom.Z()); }
     //
     bool isTrackAlongPlaneDir() const { return fMom.Dot(fPlane.direction())>0; }
