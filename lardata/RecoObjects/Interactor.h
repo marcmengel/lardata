@@ -21,7 +21,7 @@
 
 #include "lardata/RecoObjects/KalmanLinearAlgebra.h"
 #include "lardata/RecoObjects/KTrack.h"
-#include "lardata/RecoObjects/TrackFitMeasurement.h"
+#include "lardata/RecoObjects/TrackState.h"
 #include "boost/optional.hpp"
 
 namespace trkf {
