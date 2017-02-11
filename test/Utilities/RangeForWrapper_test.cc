@@ -86,6 +86,12 @@ template <typename Value>
 auto end(Data<Value> const& data) { return data.do_end(); }
 
 template <typename Value>
+auto begin(Data<Value>&& data) { return data.do_begin(); }
+
+template <typename Value>
+auto end(Data<Value>&& data) { return data.do_end(); }
+
+template <typename Value>
 auto begin(Data<Value>& data) { return data.do_begin(); }
 
 template <typename Value>
@@ -106,6 +112,12 @@ void const_test
   
   BOOST_CHECK_EQUAL(total, expected_total);
   
+  // from a temporary
+  total = 0;
+  for (value_type d: DataColl(data) | util::range_for) total += d;
+  
+  BOOST_CHECK_EQUAL(total, expected_total);
+  
 } // const_test()
 
 
@@ -113,11 +125,39 @@ template <typename DataColl>
 void test(DataColl& data, typename DataColl::value_type expected_total) {
   using value_type = typename DataColl::value_type;
   
+  //
+  // from a lvalue
+  //
   value_type total = 0;
   for (value_type d: data | util::range_for) total += d;
   
   BOOST_CHECK_EQUAL(total, expected_total);
   
+  //
+  // from a rvalue (temporary)
+  //
+  total = 0;
+  for (value_type d: DataColl(data) | util::range_for) total += d;
+  
+  BOOST_CHECK_EQUAL(total, expected_total);
+  
+  //
+  // from a temporary, which is changed
+  //
+  total = 0;
+  for (value_type& d: DataColl(data) | util::range_for) total += (d *= 3);
+  
+  BOOST_CHECK_EQUAL(total, 3 * expected_total);
+  
+  // original value is still unchanged
+  total = 0;
+  for (value_type d: data | util::range_for) total += d;
+  
+  BOOST_CHECK_EQUAL(total, expected_total);
+  
+  //
+  // from a lvalue, which is changed
+  //
   for (value_type& d: data | util::range_for) d *= 3;
   
   total = 0;
@@ -125,13 +165,25 @@ void test(DataColl& data, typename DataColl::value_type expected_total) {
   
   BOOST_CHECK_EQUAL(total, 3 * expected_total);
   
-} // const_test()
+} // test()
 
 
 BOOST_AUTO_TEST_CASE(RangeForWrapperSameIterator_test) {
   
   using value_type = int;
   std::vector<value_type> vdata = { 2, 3, 4 };
+  
+  // static checks
+  static_assert(std::is_same<
+      std::decay_t<decltype(vdata)>,
+      std::decay_t<decltype(vdata | util::range_for)>
+    >::value,
+    "util::range_for should be pass-through!"
+    );
+  static_assert(
+    std::is_lvalue_reference<decltype(vdata | util::range_for)>::value,
+    "Pass-through on a lvalue should return a rvalue reference"
+    );
   
   auto expected_total = std::accumulate(vdata.begin(), vdata.end(), 0);
   
@@ -150,6 +202,14 @@ BOOST_AUTO_TEST_CASE(RangeForWrapperDiffIterator_test) {
   Data<value_type> data = { 2, 3, 4 };
   
   auto expected_total = std::accumulate(vdata.begin(), vdata.end(), 0);
+  
+  // static check
+  static_assert(!std::is_same<
+      std::decay_t<decltype(data)>,
+      std::decay_t<decltype(data | util::range_for)>
+    >::value,
+    "util::range_for should generate a wrapper!"
+    );
   
 //  for (double d: data); // this should fail compilation
   

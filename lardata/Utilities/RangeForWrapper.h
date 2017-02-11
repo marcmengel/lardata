@@ -23,7 +23,7 @@
 namespace util {
   
   namespace details {
-   
+    
     /// Iterator wrapping one of two types of iterators.
     /// @see RangeForWrapperBox
     template <typename BeginIter, typename EndIter>
@@ -31,6 +31,7 @@ namespace util {
       struct Dereferencer;
       struct Incrementer;
       struct Comparer;
+      struct Dumper;
       
         public:
       using begin_t = BeginIter; ///< Type of begin iterator we can store.
@@ -70,21 +71,21 @@ namespace util {
       
       boost::variant<begin_t, end_t> fIter; ///< The actual iterator we store.
       
-      /// Visitor to dereference an iterator
+      /// Visitor to dereference an iterator.
       struct Dereferencer: public boost::static_visitor<value_type> {
         value_type operator() (begin_t const& iter) const { return *iter; }
         [[noreturn]] value_type operator() (end_t const&) const
           { throw std::logic_error("End iterator should not be dereferenced"); }
       }; // Dereferencer
       
-      /// Visitor to increment an iterator
+      /// Visitor to increment an iterator.
       struct Incrementer: public boost::static_visitor<> {
         void operator() (begin_t& iter) const { ++iter; }
         [[noreturn]] void operator() (end_t&) const
           { throw std::logic_error("End iterator should not be incremented"); }
       }; // Incrementer
-     
-      /// Visitor to compare iterators 
+      
+      /// Visitor to compare iterators.
       struct Comparer: public boost::static_visitor<bool> {
         bool operator() (begin_t const& left, begin_t const& right) const
           { return left != right; }
@@ -100,74 +101,114 @@ namespace util {
     }; // class RangeForWrapperIterator<>
     
     
-    // forward declaration
-    template <typename BeginIter, typename EndIter>
-    class RangeForWrapperBox;
     
-    /// Collection of static functions for type and iterator manipulation
-    struct RangeForWrapperBase {
-       /// Extracts the begin iterator from a range object
-      template <typename Range>
-      static auto extractBegin(Range&& range)
-        { using namespace std; return begin(std::forward<Range>(range)); }
+    /// Class defining types and traits for RangeForWrapperBox
+    template <typename RangeRef>
+    struct RangeForWrapperTraits {
       
-      /// Extracts the end iterator from a range object
-      template <typename Range>
-      static auto extractEnd(Range&& range)
-        { using namespace std; return end(std::forward<Range>(range)); }
+      using RangeRef_t = RangeRef; ///< Type of the stored reference.
       
-      /// Type of begin-of-range iterator
-      template <typename Range>
-      using begin_t = decltype(extractBegin(std::declval<Range>()));
+      ///< Type of the stored range (constantness is preserved).
+      using Range_t = std::remove_reference_t<RangeRef_t>;
       
-      /// Type of end-of-range iterator
-      template <typename Range>
-      using end_t = decltype(extractEnd(std::declval<Range>()));
+      /// Extractor of the begin iterator from a range.
+      static auto extractBegin(RangeRef_t range)
+        { using namespace std; return begin(static_cast<RangeRef_t>(range)); }
       
-      /// Type of iterator box for range-for loops
-      template <typename Range>
-      using iteratorbox_t = RangeForWrapperBox<begin_t<Range>, end_t<Range>>;
+      /// Extracts the end iterator from a range object.
+      static auto extractEnd(RangeRef_t range)
+        { using namespace std; return end(static_cast<RangeRef_t>(range)); }
       
-      /// Evaluates to true if the range has iterators of the same type
-      template <typename Range>
-      using same_iterator_types = std::integral_constant
-        <bool, std::is_same<begin_t<Range>, end_t<Range>>::value>;
+      /// Type of wrapped begin iterator.
+      using BeginIter_t = decltype(extractBegin(std::declval<RangeRef_t>()));
       
-    }; // struct RangeForWrapperBase
+      /// Type of wrapped end iterator.
+      using EndIter_t = decltype(extractEnd(std::declval<RangeRef_t>()));
+      
+      /// True if the range has iterators of the same type.
+      static constexpr bool sameIteratorTypes
+        = std::is_same<BeginIter_t, EndIter_t>();
+      
+      /// Type of wrapper iterators (same for begin and end iterators).
+      using Iterator_t = RangeForWrapperIterator<BeginIter_t, EndIter_t>;
+      
+    }; // class RangeForWrapperTraits<>
     
     
-    /// Class offering begin/end iterators of the same type out of a range of
-    /// iterators of different types.
-    template <typename BeginIter, typename EndIter>
+    /**
+     * @brief Class offering begin/end iterators of the same type out of a range
+     *        of iterators of different types.
+     * @tparam RangeRef type of reference to be stored (constantness embedded)
+     * 
+     * The class steals (moves) the value if `RangeRef` is a rvalue reference
+     * type, while it just references the original one otherwise.
+     */
+    template <typename RangeRef>
     class RangeForWrapperBox {
-      /// Type of iterator stored.
-      using iterator_t = RangeForWrapperIterator<BeginIter, EndIter>;
       
-      iterator_t fBegin; ///< Begin-of-range iterator.
-      iterator_t fEnd; ///< End-of-range iterator
+      static_assert(std::is_reference<RangeRef>::value,
+        "RangeForWrapperBox requires a reference type.");
+      
+      using Traits_t = RangeForWrapperTraits<RangeRef>;
       
         public:
       
-      /// Type of begin iterator.
-      using begin_t = typename iterator_t::begin_t;
-      /// Type of end iterator.
-      using end_t = typename iterator_t::end_t;
+      // Import traits
+      using RangeRef_t = typename Traits_t::RangeRef_t;
+      using Range_t = typename Traits_t::Range_t;
       
-      /// Constructor: extracts begin and end iterator from a range
-      template <typename Range>
-      RangeForWrapperBox(Range&& range)
-        : fBegin(RangeForWrapperBase::extractBegin(std::forward<Range>(range)))
-        , fEnd(RangeForWrapperBase::extractEnd(std::forward<Range>(range)))
+      /// Type of wrapper iterators (same for begin and end iterators).
+      using Iterator_t = typename Traits_t::Iterator_t;
+      
+      /// Constructor: references the specified range (lvalue reference).
+      RangeForWrapperBox(Range_t& range)
+        : fRange(range)
         {}
       
-      /// Returns a copy of the begin-of-range iterator.
-      iterator_t begin() const { return fBegin; }
+      /// Constructor: references the specified range (rvalue reference).
+      RangeForWrapperBox(Range_t&& range)
+        : fRange(std::move(range))
+        {}
       
-      /// Returns a copy of the end-of-range iterator.
-      iterator_t end() const { return fEnd; }
+      /// Returns a begin-of-range iterator.
+      Iterator_t begin()
+        {
+          return Iterator_t
+            (Traits_t::extractBegin(static_cast<RangeRef_t>(fRange)));
+        }
       
+      /// Returns a end-of-range iterator.
+      Iterator_t end()
+        {
+          return Iterator_t
+            (Traits_t::extractEnd(static_cast<RangeRef_t>(fRange)));
+        }
       
-    }; // class RangeForWrapperBox
+        private:
+      
+      struct DataBox {
+        
+        using Stored_t = std::conditional_t<
+          std::is_rvalue_reference<RangeRef_t>::value,
+          std::remove_reference_t<RangeRef_t>,
+          RangeRef_t
+          >;
+        using Data_t = std::remove_reference_t<Stored_t>;
+        
+        Stored_t data;
+        
+        // only one of these is valid...
+        DataBox(Data_t& data): data(data) {}
+        DataBox(Data_t&& data): data(std::move(data)) {}
+        
+        operator RangeRef_t() const { return RangeRef_t(data); }
+        operator RangeRef_t() { return RangeRef_t(data); }
+        
+      }; // DataBox
+      
+      DataBox fRange; ///< A reference to the original range.
+      
+    }; // class RangeForWrapperBox<>
     
     
     /// Tag for internal use.
@@ -184,29 +225,28 @@ namespace util {
     auto wrapRangeFor(
       Range&& range,
       std::enable_if_t
-        <RangeForWrapperBase::same_iterator_types<Range>::value, SameIterTag>
+        <RangeForWrapperTraits<Range>::sameIteratorTypes, SameIterTag>
         = {}
       ) -> decltype(auto)
-      { return range; }
+      { return std::forward<Range>(range); }
     
     
     /// Wraps an object for use in a range-for loop (different iterator types)
     template <
       typename Range,
       typename = std::enable_if_t
-        <!RangeForWrapperBase::same_iterator_types<Range>::value>
+        <!RangeForWrapperTraits<Range>::sameIteratorTypes>
       >
     auto wrapRangeFor(
       Range&& range,
       std::enable_if_t
-        <!RangeForWrapperBase::same_iterator_types<Range>::value, DiffIterTag>
+        <!RangeForWrapperTraits<Range>::sameIteratorTypes, DiffIterTag>
         = {}
       )
-      {
-        return RangeForWrapperBase::iteratorbox_t<Range>
-          (std::forward<Range>(range));
-      } // wrapRangeFor()
-    
+      { 
+        return RangeForWrapperBox<decltype(range)>
+          (static_cast<decltype(range)>(range));
+      }
     
     
   } // namespace details

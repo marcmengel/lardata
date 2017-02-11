@@ -45,12 +45,9 @@ TClass* QuickGenerateTClass() {
   int err; // we'll ignore errors
   char* classNameC = TClassEdit::DemangleTypeIdName(typeid(T), err);
   
-  std::cout << "classNameC = '" << classNameC << "'" << std::endl;
-  
   // "normalise" it
   std::string normalizedClassName;
   TClassEdit::GetNormalizedName(normalizedClassName, classNameC);
-  std::cout << "normalizedClassName = '" << normalizedClassName << "'" << std::endl;
   
   // clean up
   std::free(classNameC);
