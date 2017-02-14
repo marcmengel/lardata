@@ -221,33 +221,35 @@ namespace util {
     /// (same iterator types: pass through)
     // the return type decltype(auto) is necessary to preserve the forwarded
     // referenceness
-    template <typename Range>
-    auto wrapRangeFor(
-      Range&& range,
-      std::enable_if_t
-        <RangeForWrapperTraits<Range>::sameIteratorTypes, SameIterTag>
-        = {}
-      ) -> decltype(auto)
-      { return std::forward<Range>(range); }
-    
-    
-    /// Wraps an object for use in a range-for loop (different iterator types)
     template <
-      typename Range,
-      typename = std::enable_if_t
-        <!RangeForWrapperTraits<Range>::sameIteratorTypes>
+      typename BaseRange,
+      bool SameIteratorsType
+        = details::RangeForWrapperTraits<std::decay_t<BaseRange>>::sameIteratorTypes
       >
-    auto wrapRangeFor(
-      Range&& range,
-      std::enable_if_t
-        <!RangeForWrapperTraits<Range>::sameIteratorTypes, DiffIterTag>
-        = {}
-      )
-      { 
-        return RangeForWrapperBox<decltype(range)>
-          (static_cast<decltype(range)>(range));
-      }
+    struct WrapRangeForDispatcher;
     
+    // Template specialization for same iterator types
+    template <typename BaseRange>
+    struct WrapRangeForDispatcher<BaseRange, true> {
+      
+      using BaseRange_t = std::decay_t<BaseRange>;
+      
+      static BaseRange_t wrap(BaseRange_t&& range) { return std::move(range); }
+      static BaseRange_t& wrap(BaseRange_t& range) { return range; }
+      static BaseRange_t const& wrap(BaseRange_t const& range) { return range; }
+    }; // WrapRangeForDispatcher<BaseRange, true>
+    
+    
+    // Template specialization for different-iterator types
+    template <typename BaseRange>
+    struct WrapRangeForDispatcher<BaseRange, false> {
+      template <typename Range>
+      static auto wrap(Range&& range)
+        { 
+          return RangeForWrapperBox<decltype(range)>
+            (static_cast<decltype(range)>(range));
+        }
+    }; // WrapRangeForDispatcher<BaseRange, false> 
     
   } // namespace details
   
@@ -270,7 +272,10 @@ namespace util {
    */
   template <typename Range>
   auto wrapRangeFor(Range&& range) -> decltype(auto)
-    { return details::wrapRangeFor(std::forward<Range>(range)); }
+    {
+      return details::WrapRangeForDispatcher<Range>::wrap
+        (std::forward<Range>(range));
+    }
   
   
   /// Tag marking the use of RangeForWrapperBox
@@ -299,7 +304,7 @@ namespace util {
    */
   template <typename Range>
   auto operator| (Range&& range, RangeForWrapperTag) -> decltype(auto)
-    { return details::wrapRangeFor(std::forward<Range>(range)); }
+    { return wrapRangeFor(std::forward<Range>(range)); }
   
   
 } // namespace util
