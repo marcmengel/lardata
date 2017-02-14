@@ -208,6 +208,8 @@ BOOST_AUTO_TEST_CASE(RangeForWrapperSameIterator_test) {
     "Pass-through on a rvalue should return a rvalue (or its reference)"
     );
   
+  BOOST_CHECK_EQUAL(&vdata, &(vdata | util::range_for));
+  
   auto expected_total = std::accumulate(vdata.begin(), vdata.end(), 0);
   
   const_test(vdata, expected_total);
