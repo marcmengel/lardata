@@ -13,7 +13,7 @@
 #include "lardata/Utilities/RangeForWrapper.h"
 
 // Boost libraries
-#define BOOST_TEST_MODULE ( PointIsolationAlg_test )
+#define BOOST_TEST_MODULE ( RangeForWrapper_test )
 #include <cetlib/quiet_unit_test.hpp> // BOOST_AUTO_TEST_CASE()
 #include <boost/test/test_tools.hpp> // BOOST_CHECK(), BOOST_CHECK_EQUAL()
 
@@ -21,6 +21,7 @@
 #include <iterator>
 #include <algorithm> // std::accumulate()
 #include <vector>
+#include <type_traits> // std::is_same<>, std::is_lvalue_reference<>, ...
 #include <initializer_list>
 #include <iostream>
 
@@ -97,6 +98,10 @@ auto begin(Data<Value>& data) { return data.do_begin(); }
 template <typename Value>
 auto end(Data<Value>& data) { return data.do_end(); }
 
+template <typename T>
+T copy(T const& v) { return v; }
+
+
 //------------------------------------------------------------------------------
 
 template <typename DataColl>
@@ -104,6 +109,12 @@ void const_test
   (DataColl const& data, typename DataColl::value_type expected_total)
 {
   using value_type = typename DataColl::value_type;
+
+  static_assert(
+    !std::is_lvalue_reference
+      <decltype(copy(data) | util::range_for)>::value,
+    "util::range_for on a rvalue should return a rvalue"
+    );
 
 //  for (double& d: data); // this should fail compilation
   
@@ -114,7 +125,7 @@ void const_test
   
   // from a temporary
   total = 0;
-  for (value_type d: DataColl(data) | util::range_for) total += d;
+  for (value_type d: copy(data) | util::range_for) total += d;
   
   BOOST_CHECK_EQUAL(total, expected_total);
   
@@ -125,6 +136,12 @@ template <typename DataColl>
 void test(DataColl& data, typename DataColl::value_type expected_total) {
   using value_type = typename DataColl::value_type;
   
+  static_assert(
+    !std::is_lvalue_reference
+      <decltype(copy(data) | util::range_for)>::value,
+    "util::range_for on a rvalue should return a rvalue"
+    );
+
   //
   // from a lvalue
   //
@@ -137,7 +154,7 @@ void test(DataColl& data, typename DataColl::value_type expected_total) {
   // from a rvalue (temporary)
   //
   total = 0;
-  for (value_type d: DataColl(data) | util::range_for) total += d;
+  for (value_type d: copy(data) | util::range_for) total += d;
   
   BOOST_CHECK_EQUAL(total, expected_total);
   
@@ -145,7 +162,7 @@ void test(DataColl& data, typename DataColl::value_type expected_total) {
   // from a temporary, which is changed
   //
   total = 0;
-  for (value_type& d: DataColl(data) | util::range_for) total += (d *= 3);
+  for (value_type& d: copy(data) | util::range_for) total += (d *= 3);
   
   BOOST_CHECK_EQUAL(total, 3 * expected_total);
   
@@ -182,7 +199,13 @@ BOOST_AUTO_TEST_CASE(RangeForWrapperSameIterator_test) {
     );
   static_assert(
     std::is_lvalue_reference<decltype(vdata | util::range_for)>::value,
-    "Pass-through on a lvalue should return a rvalue reference"
+    "Pass-through on a lvalue should return a lvalue reference"
+    );
+
+  static_assert(
+    !std::is_lvalue_reference
+      <decltype(copy(vdata) | util::range_for)>::value,
+    "Pass-through on a rvalue should return a rvalue (or its reference)"
     );
   
   auto expected_total = std::accumulate(vdata.begin(), vdata.end(), 0);
