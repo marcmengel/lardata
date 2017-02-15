@@ -10,9 +10,10 @@ standard_properties:
  AtomicMass:       39.948  # Ar atomic mass (g/mol).
  ExcitationEnergy: 188.0   # Ar mean excitation energy (eV).
 
-# realistic Argon 39 decays
 # Argon39DecayRate: 0.00141 # decays per cm^3 per second.  Assumes 1.01 Bq/kg and a density of 1.396 g/cc
-# switch them off for faster simulation
+# The following parameter was formerly used to steer an ad-hoc 39Ar decay model as part of the G4 step.
+# Users are now recommended to use the radiological generator: see larsim/EventGenerators/radiological_gen.fcl
+# As of February 2017, this value is no longer used.
  Argon39DecayRate: 0.0
 
  # Optical properties	
