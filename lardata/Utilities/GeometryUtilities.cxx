@@ -1123,12 +1123,15 @@ namespace util{
 
     hitlistlocal_index.clear();
     double locintercept=startHit.t - startHit.w * lineslopetest;
+    
+    
     for(size_t i=0; i<hitlist.size(); ++i) {
 
       util::PxPoint hitonline;
       
       GetPointOnLine( lineslopetest, locintercept, (const util::PxHit*)(&hitlist.at(i)), hitonline );
-
+      
+      
       //calculate linear distance from start point and orthogonal distance from axis
       Double_t lindist=Get2DDistance((const util::PxPoint*)(&hitonline),(const util::PxPoint*)(&startHit));
       Double_t ortdist=Get2DDistance((const util::PxPoint*)(&hitlist.at(i)),(const util::PxPoint*)(&hitonline));
@@ -1419,33 +1422,32 @@ namespace util{
                                                  unsigned int wirein,
                                                  double timein) const
      {
-	
      double min_length_from_start=99999;
      util::PxHit  nearHit;
 
      unsigned int wire;
+     double time;
+     unsigned int ret_ind=0;
 
-     unsigned int ii=0;
-
-     for(ii=0; ii<hitlist.size();ii++){
+     for(unsigned int ii=0; ii<hitlist.size();ii++){
 
       util::PxHit * theHit = &(hitlist[ii]);
-      double time = theHit->t ;  
+      time = theHit->t ;  
       wire=theHit->w;
      // plane=theHit->WireID().Plane;
-
+      
       double dist_mod=Get2DDistance(wirein,timein,wire,time);
       if(dist_mod<min_length_from_start){
         //wire_start[plane]=wire;
         //time_start[plane]=time;
         nearHit=(hitlist[ii]);
         min_length_from_start=dist_mod;
+	ret_ind=ii;
       }        
     } 
+	
 						   
-						   
-   return ii;						   
-       
+   return ret_ind;						     
   }
 
   
