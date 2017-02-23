@@ -92,6 +92,7 @@ namespace detinfo{
       virtual double       TimeOffsetU()       const = 0;
       virtual double       TimeOffsetV()       const = 0;
       virtual double       TimeOffsetZ()       const = 0;
+      virtual double       TimeOffsetY()       const = 0;
 
       virtual double       ConvertXToTicks(double X, int p, int t, int c) const = 0;
       virtual double       ConvertXToTicks(double X, geo::PlaneID const& planeid) const = 0;

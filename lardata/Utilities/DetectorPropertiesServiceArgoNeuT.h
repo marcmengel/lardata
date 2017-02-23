@@ -89,6 +89,7 @@ namespace util{
       virtual double       TimeOffsetU()       const override { return fTimeOffsetU; }
       virtual double       TimeOffsetV()       const override { return fTimeOffsetV; }
       virtual double       TimeOffsetZ()       const override { return fTimeOffsetZ; }
+      virtual double       TimeOffsetY()       const override { return 0; }
       
       virtual double       ConvertXToTicks(double X, int p, int t, int c)             const override;
       virtual double       ConvertXToTicks(double X, geo::PlaneID const& planeid)     const override

@@ -80,6 +80,10 @@ namespace detinfo{
           Name("TimeOffsetZ"             ),
           Comment("tick offset subtracted to to convert spacepoint coordinates to hit times on view Z")
         };
+        fhicl::Atom<double      > TimeOffsetY              {
+          Name("TimeOffsetY"             ),
+          Comment("tick offset subtracted to to convert spacepoint coordinates to hit times on view Y")
+        };
         
         fhicl::Atom<double      > SternheimerA             {
           Name("SternheimerA"),
@@ -244,6 +248,7 @@ namespace detinfo{
       virtual double       TimeOffsetU()       const override{ return fTimeOffsetU; };
       virtual double       TimeOffsetV()       const override { return fTimeOffsetV; };
       virtual double       TimeOffsetZ()       const override{ return fTimeOffsetZ; };
+      virtual double       TimeOffsetY()       const override{ return fTimeOffsetY; };
 
       virtual double       ConvertXToTicks(double X, int p, int t, int c) const override;
       virtual double       ConvertXToTicks(double X, geo::PlaneID const& planeid) const override
@@ -300,6 +305,7 @@ namespace detinfo{
       double       fTimeOffsetU;       ///< time offset to convert spacepoint coordinates to hit times on view U
       double       fTimeOffsetV;       ///< time offset to convert spacepoint coordinates to hit times on view V
       double       fTimeOffsetZ;       ///< time offset to convert spacepoint coordinates to hit times on view Z
+      double       fTimeOffsetY;       ///< time offset to convert spacepoint coordinates to hit times on view Y
       
       SternheimerParameters_t fSternheimerParameters; ///< Sternheimer parameters
       

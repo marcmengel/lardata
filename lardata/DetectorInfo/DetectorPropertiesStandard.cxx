@@ -125,7 +125,8 @@ namespace detinfo{
     fReadOutWindowSize 	      = p.get< unsigned int >("ReadOutWindowSize");
     fTimeOffsetU       	      = p.get< double 	    >("TimeOffsetU"      );
     fTimeOffsetV       	      = p.get< double 	    >("TimeOffsetV"      );
-    fTimeOffsetZ       	      = p.get< double 	    >("TimeOffsetZ"      );
+    fTimeOffsetZ       	      = p.get< double 	    >("TimeOffsetZ",0.0  );
+    fTimeOffsetZ       	      = p.get< double 	    >("TimeOffsetY",0.0  );
     fInheritNumberTimeSamples = p.get<bool          >("InheritNumberTimeSamples", false);
     
     fSternheimerParameters.a    = p.get< double >("SternheimerA");
@@ -152,6 +153,7 @@ namespace detinfo{
     fTimeOffsetU                = config.TimeOffsetU();
     fTimeOffsetV                = config.TimeOffsetV();
     fTimeOffsetZ                = config.TimeOffsetZ();
+    fTimeOffsetY                = config.TimeOffsetY();
     
     fSternheimerParameters.a    = config.SternheimerA();
     fSternheimerParameters.k    = config.SternheimerK();
@@ -576,6 +578,8 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetV;
 	  else if(view == geo::kZ)
 	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetZ;
+	  else if(view == geo::kY)
+	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetY;
 	  else
 	    throw cet::exception(__FUNCTION__) << "Bad view = "
 						       << view << "\n" ;
