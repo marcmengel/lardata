@@ -162,7 +162,7 @@ namespace util {
             ranges::view::transform([] (auto pairs) {return pairs | ranges::view::values | util::range_for;}) |
             util::range_for
             ;
-  } // )associated_groups(
+  } // associated_groups()
 
 } // namespace util
 

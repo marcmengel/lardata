@@ -1,5 +1,5 @@
 /**
- * \file ElecClock.hh
+ * \file ElecClock.h
  *
  * \ingroup TimeService
  * 

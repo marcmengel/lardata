@@ -1,5 +1,5 @@
 /**
- * \file UtilException.hh
+ * \file UtilException.h
  *
  * \ingroup Utilities
  * 
