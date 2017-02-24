@@ -126,7 +126,7 @@ namespace detinfo{
     fTimeOffsetU       	      = p.get< double 	    >("TimeOffsetU"      );
     fTimeOffsetV       	      = p.get< double 	    >("TimeOffsetV"      );
     fTimeOffsetZ       	      = p.get< double 	    >("TimeOffsetZ",0.0  );
-    fTimeOffsetZ       	      = p.get< double 	    >("TimeOffsetY",0.0  );
+    fTimeOffsetY       	      = p.get< double 	    >("TimeOffsetY",0.0  );
     fInheritNumberTimeSamples = p.get<bool          >("InheritNumberTimeSamples", false);
     
     fSternheimerParameters.a    = p.get< double >("SternheimerA");
