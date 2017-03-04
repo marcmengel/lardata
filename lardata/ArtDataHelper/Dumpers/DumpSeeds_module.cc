@@ -15,7 +15,10 @@
 #include "art/Framework/Principal/Event.h"
 
 // support libraries
-#include "fhiclcpp/ParameterSet.h"
+#include "fhiclcpp/types/Atom.h"
+#include "fhiclcpp/types/Table.h"
+#include "fhiclcpp/types/Name.h"
+#include "fhiclcpp/types/Comment.h"
 
 // C//C++ standard libraries
 #include <string>
@@ -44,8 +47,34 @@ namespace recob {
   class DumpSeeds: public art::EDAnalyzer {
       public:
     
+    struct Config {
+      
+      using Name = fhicl::Name;
+      using Comment = fhicl::Comment;
+      
+      fhicl::Atom<art::InputTag> SeedModuleLabel{
+        Name("SeedModuleLabel"),
+        Comment("tag of the recob::Seed collection data product to be dumped")
+        };
+      
+      fhicl::Atom<std::string> OutputCategory{
+        Name("OutputCategory"),
+        Comment("name of the message facility category to be used for output"),
+        "DumpSeeds"
+        };
+      
+      fhicl::Atom<bool> PrintHexFloats{
+        Name("PrintHexFloats"),
+        Comment("print all the floating point numbers in base 16"),
+        false
+        };
+      
+    }; // struct Config
+    
+    using Parameters = art::EDAnalyzer::Table<Config>;
+    
     /// Default constructor
-    explicit DumpSeeds(fhicl::ParameterSet const& pset); 
+    explicit DumpSeeds(Parameters const& config); 
     
     /// Does the printing
     virtual void analyze (const art::Event& evt) override;
@@ -198,11 +227,11 @@ namespace {
 namespace recob {
   
   //----------------------------------------------------------------------------
-  DumpSeeds::DumpSeeds(fhicl::ParameterSet const& pset) 
-    : EDAnalyzer(pset)
-    , fInputTag(pset.get<art::InputTag>("SeedModuleLabel"))
-    , fOutputCategory(pset.get<std::string>("OutputCategory", "DumpSeeds"))
-    , fPrintHexFloats(pset.get<bool>("PrintHexFloats", false))
+  DumpSeeds::DumpSeeds(Parameters const& config) 
+    : EDAnalyzer(config)
+    , fInputTag(config().SeedModuleLabel())
+    , fOutputCategory(config().OutputCategory())
+    , fPrintHexFloats(config().PrintHexFloats())
     {}
   
   

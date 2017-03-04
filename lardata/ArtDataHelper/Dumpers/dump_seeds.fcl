@@ -1,0 +1,78 @@
+#
+# File:     dump_seeds.fcl
+# Purpose:  Dump on screen seed content
+# Author:   Gianluca Petrillo (petrillo@fnal.gov)
+# Date:     February 28, 2017
+# Version:  1.0
+#
+# Service dependencies:
+# - message facility
+#
+
+process_name: DumpSeeds
+
+services: {
+  
+  message: {
+  #   debugModules: [ "*" ]
+    destinations: {
+      
+      # grab all the "DumpTracks" messages and put them in DumpTracks.log
+      DumpSeeds: {
+        append: false
+        categories: {
+          DumpSeeds: { limit: -1 }
+          default: { limit: 0 }
+        }
+        filename: "DumpSeeds.log"
+        threshold: "INFO"
+        type: "file"
+      } # DumpSeeds
+      
+      LogStandardOut: {
+        categories: {
+          RecoBaseDefaultCtor: { limit: 0 }
+          DumpSeeds: { limit: 0 }
+          default: {}
+        }
+        threshold: "WARNING"
+        type: "cout"
+      } # LogStandardOut
+      
+    } # destinations
+  } # message
+} # services
+
+
+source: {
+  module_type: RootInput
+  maxEvents:  -1            # number of events to read
+} # source
+
+
+physics: {
+  producers:{}
+  filters:  {}
+  analyzers: {
+    dumpseeds: {
+      module_label: dumpseeds
+      module_type:  DumpSeeds
+      
+      # specify the label of the recob::Track producer
+      SeedModuleLabel: "cctrack"
+      
+      # output category ("DumpSeeds" by default), useful for filtering (see above)
+    #  OutputCategory: "DumpSeeds"
+      
+      # print all real numbers in base 16, to check all their bits
+    # PrintHexFloats: false
+      
+    } # dumpseeds
+  } # analyzers
+  
+  dumpers:  [ dumpseeds ]
+  
+  trigger_paths: []
+  end_paths:     [ dumpers ]
+} # physics
+
