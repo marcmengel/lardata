@@ -6,12 +6,10 @@ art_make(
     lardataobj_RecoBase
     lardata_ArtDataHelper_Dumpers
     art_Framework_Principal
-    canvas_Persistency_Common
-    canvas_Persistency_Provenance
-    canvas_Utilities
+    canvas
     ${MF_MESSAGELOGGER}
     ${MF_UTILITIES}
-    ${CETLIB}
+    cetlib cetlib_except
     ${ROOT_BASIC_LIB_LIST}
   )
 
