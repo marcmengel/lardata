@@ -1,4 +1,4 @@
-#include "lardata/RecoObjects/PropagatorToPlane.h"
+#include "lardata/RecoObjects/TrackStatePropagator.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "cetlib/exception.h"
@@ -8,7 +8,7 @@ using namespace recob::tracking;
 
 namespace trkf {
 
-  PropagatorToPlane::PropagatorToPlane(double minStep, double maxElossFrac, int maxNit, double tcut) :
+  TrackStatePropagator::TrackStatePropagator(double minStep, double maxElossFrac, int maxNit, double tcut) :
     fMinStep(minStep),
     fMaxElossFrac(maxElossFrac),
     fMaxNit(maxNit),
@@ -18,11 +18,11 @@ namespace trkf {
     larprop = lar::providerFrom<detinfo::LArPropertiesService>();
   }
 
-  PropagatorToPlane::~PropagatorToPlane() {}
+  TrackStatePropagator::~TrackStatePropagator() {}
 
-  using PropDirection = PropagatorToPlane::PropDirection;
+  using PropDirection = TrackStatePropagator::PropDirection;
   
-  TrackState PropagatorToPlane::propagateToPlane(bool& success, const TrackState& origin, const Plane& target, bool dodedx, bool domcs, PropDirection dir) const {
+  TrackState TrackStatePropagator::propagateToPlane(bool& success, const TrackState& origin, const Plane& target, bool dodedx, bool domcs, PropDirection dir) const {
     /*
       1- find distance to target plane
       2- propagate 3d position by distance
@@ -159,7 +159,7 @@ namespace trkf {
     return trackState;
   }
   
-  TrackState PropagatorToPlane::rotateToPlane(bool& success, const TrackState& origin, const Plane& target) const {
+  TrackState TrackStatePropagator::rotateToPlane(bool& success, const TrackState& origin, const Plane& target) const {
     const bool isTrackAlongPlaneDir = origin.momentum().Dot(target.direction())>0;
     //
     SVector5 orpar5 = origin.parameters();
@@ -233,7 +233,7 @@ namespace trkf {
     return TrackState(orpar5,ROOT::Math::Similarity(pm,origin.covariance()),Plane(origin.position(),target.direction()),isTrackAlongPlaneDir,origin.pID());
   }
 
-  double PropagatorToPlane::distanceToPlane(bool& success, const Point_t& origpos, const Vector_t& origmom, const Plane& target/*, PropDirection dir*/) const {
+  double TrackStatePropagator::distanceToPlane(bool& success, const Point_t& origpos, const Vector_t& origmom, const Plane& target/*, PropDirection dir*/) const {
     const Point_t& targpos = target.position();
     const Vector_t& targdir = target.direction();
     //check that origmom is not along the plane, i.e. targdir.Dot(origmom.Unit())=0
@@ -242,12 +242,12 @@ namespace trkf {
       return DBL_MAX;
     }
     double s = targdir.Dot(targpos-origpos)/targdir.Dot(origmom.Unit());
-    // if (dir==PropagatorToPlane::BACKWARD) s*=-1.;
+    // if (dir==TrackStatePropagator::BACKWARD) s*=-1.;
     success = true;
     return s;
   }
 
-  std::pair<double,double> PropagatorToPlane::distancePairToPlane(bool& success, const Point_t& origpos, const Vector_t& origmom, const Plane& target/*, PropDirection dir*/) const {
+  std::pair<double,double> TrackStatePropagator::distancePairToPlane(bool& success, const Point_t& origpos, const Vector_t& origmom, const Plane& target/*, PropDirection dir*/) const {
     const Point_t& targpos = target.position();
     const Vector_t& targdir = target.direction();
     //check that origmom is not along the plane, i.e. targdir.Dot(origmom.Unit())=0
@@ -259,12 +259,12 @@ namespace trkf {
     double sperp = targdir.Dot(targpos-origpos);
     //3d distance, correct sign for track momentum
     double s = sperp/targdir.Dot(origmom.Unit());
-    // if (dir==PropagatorToPlane::BACKWARD) s*=-1.;
+    // if (dir==TrackStatePropagator::BACKWARD) s*=-1.;
     success = true;
     return std::pair<double, double>(s,sperp);
   }
 
-  void PropagatorToPlane::apply_dedx(double& pinv, double dedx, double e1, double mass, double s, double& deriv) const
+  void TrackStatePropagator::apply_dedx(double& pinv, double dedx, double e1, double mass, double s, double& deriv) const
   {
     // For infinite initial momentum, return with infinite momentum.
     if (pinv == 0.) return;
@@ -286,7 +286,7 @@ namespace trkf {
     return;
   }
   
-  bool PropagatorToPlane::apply_mcs(double dudw, double dvdw, double pinv, double mass, double s, double range, double p, double e2, bool flipSign, SMatrixSym55& noise_matrix) const {
+  bool TrackStatePropagator::apply_mcs(double dudw, double dvdw, double pinv, double mass, double s, double range, double p, double e2, bool flipSign, SMatrixSym55& noise_matrix) const {
     // If distance is zero, or momentum is infinite, return zero noise.
 
     if(pinv == 0. || s == 0.)
@@ -383,7 +383,7 @@ namespace trkf {
     p[0]*sina*(cosb*cosB+sinb*sinB) - p[1]*(sinb*cosB-cosb*sinB) = P[0]*sinA
 */
 
-  // TrackState PropagatorToPlane::propagateToPlane(bool& success, const TrackState& origin, const Plane& target, bool dodedx, bool domcs, PropDirection dir) const {
+  // TrackState TrackStatePropagator::propagateToPlane(bool& success, const TrackState& origin, const Plane& target, bool dodedx, bool domcs, PropDirection dir) const {
   //   //first, translation and rotation of origin plane to be centered on initial position and parallel to target
   //   TrackState trackState = rotateToPlane(success, origin, target);
   //   if (!success) return origin;
@@ -440,7 +440,7 @@ namespace trkf {
   //   return TrackState(trackState.parameters(), trackState.covariance(), target, trackState.isTrackAlongPlaneDir(), trackState.pID());
   // }
 
-  // TrackState PropagatorToPlane::propagatedStateByPath(bool& success, const TrackState& origin, const double s, const double sperp, bool dodedx, bool domcs) const {
+  // TrackState TrackStatePropagator::propagatedStateByPath(bool& success, const TrackState& origin, const double s, const double sperp, bool dodedx, bool domcs) const {
   //   const SVector5& orig5d = origin.parameters();
   //   SVector5 dest5d(orig5d(0)+sperp*orig5d(2),orig5d(1)+sperp*orig5d(3),orig5d(2),orig5d(3),orig5d(4));
   //   Point_t destpos = propagatedPosByDistance(origin.position(), origin.momentum().Unit(), s);

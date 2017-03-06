@@ -15,7 +15,7 @@ namespace detinfo {
 
 namespace trkf {
 
-  class PropagatorToPlane
+  class TrackStatePropagator
   {
   public:
 
@@ -50,11 +50,11 @@ namespace trkf {
     enum PropDirection {FORWARD=0, BACKWARD=1, UNKNOWN=2};
     
     /// Constructor.
-    PropagatorToPlane(double minStep, double maxElossFrac, int maxNit, double tcut);
-    explicit PropagatorToPlane(Parameters const & p) : PropagatorToPlane(p().minStep(),p().maxElossFrac(),p().maxNit(),p().tcut()) {}
+    TrackStatePropagator(double minStep, double maxElossFrac, int maxNit, double tcut);
+    explicit TrackStatePropagator(Parameters const & p) : TrackStatePropagator(p().minStep(),p().maxElossFrac(),p().maxNit(),p().tcut()) {}
 
     /// Destructor.
-    virtual ~PropagatorToPlane();
+    virtual ~TrackStatePropagator();
 
     // Accessors.
 
