@@ -13,6 +13,7 @@ namespace trkf {
   using SVector6     = recob::tracking::SVector6;
   using SMatrix55    = recob::tracking::SMatrix55;
   using SMatrixSym55 = recob::tracking::SMatrixSym55;
+  using SMatrixSym66 = recob::tracking::SMatrixSym66;
   using Plane        = recob::tracking::Plane;
   using Point_t      = recob::tracking::Point_t;
   using Vector_t     = recob::tracking::Vector_t;
@@ -61,7 +62,8 @@ namespace trkf {
       if (abs(fPid)==321) return kmass; if (abs(fPid)==2212) return pmass;
       return util::kBogusD;
     }
-    const SVector6  parameters6D() const { return SVector6(fPos.X(),fPos.Y(),fPos.Z(),fMom.X(),fMom.Y(),fMom.Z()); }
+    SVector6     parameters6D() const { return SVector6(fPos.X(),fPos.Y(),fPos.Z(),fMom.X(),fMom.Y(),fMom.Z()); }
+    SMatrixSym66 covariance6D() const { return fPlane.Local5DToGlobal6DCovariance(fTrackStateCov, true, fMom); }
     //
     bool isTrackAlongPlaneDir() const { return fMom.Dot(fPlane.direction())>0; }
     //

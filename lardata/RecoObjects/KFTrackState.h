@@ -14,6 +14,7 @@ namespace trkf {
     : fTrackState(std::move(trackState)) { }
     //
     bool updateWithHitState(const HitState& hitstate);
+    bool updateWithHitState(const HitState& hitstate, const double slopevar);
     bool combineWithTrackState(const TrackState& trackstate);
     const TrackState& trackState() { return fTrackState; }
     void setTrackState(TrackState&& s) { fTrackState = std::move(s); }
