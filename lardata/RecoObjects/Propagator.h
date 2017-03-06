@@ -154,7 +154,7 @@ namespace trkf {
 
     /// Method to calculate updated momentum due to dE/dx.
     boost::optional<double> dedx_prop(double pinv, double mass,
-				      double s, double* deriv=0) const { return fInteractor->dedx_prop(pinv, mass, s, deriv); }
+				      double s, double* deriv=0) const;
 
   private:
 
