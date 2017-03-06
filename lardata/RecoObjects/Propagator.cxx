@@ -123,10 +123,12 @@ namespace trkf {
 
 	// If the iteration count exceeds the maximum, return failure.
 
+	//std::cout << "nit=" << nit << std::endl;
 	++nit;
 	if(nit > nitmax) {
 	  trk = trk0;
 	  result = boost::optional<double>(false, 0.);
+	  std::cout << __FILE__ << " " << __LINE__ << std::endl;
 	  return result;
 	}
 
@@ -154,10 +156,12 @@ namespace trkf {
 	KTrack trktest(trk);
 	boost::optional<double> dist = short_vec_prop(trktest, psurf, dir, false, 0, 0);
 
+	std::cout << "distance=" << dist.get_value_or(-999.) << " s=" << s << " smax=" << smax << std::endl;
 	// If the test propagation failed, return failure.
 
 	if(!dist) {
 	  trk = trk0;
+	  std::cout << __FILE__ << " " << __LINE__ << std::endl;
 	  return dist;
 	}
 
@@ -194,6 +198,7 @@ namespace trkf {
 
 	  pstep = std::shared_ptr<const Surface>(new SurfXYZPlane(xyz[0], xyz[1], xyz[2],
 								  mom[0], mom[1], mom[2]));
+	  std::cout << "MADE INTERMEDIATE SURFACE" << std::endl;
 	}
 
 	// Do the actual step propagation.
@@ -205,6 +210,7 @@ namespace trkf {
 
 	if(!dist) {
 	  trk = trk0;
+	  std::cout << __FILE__ << " " << __LINE__ << std::endl;
 	  return dist;
 	}
 
@@ -226,6 +232,13 @@ namespace trkf {
 	  TrackMatrix temp2 = prod(*plocal_prop_matrix, temp);
 	  *noise_matrix = ublas::symmetric_adaptor<TrackMatrix>(temp2);
 	  *noise_matrix += *plocal_noise_matrix;
+	  std::cout << "noise_matrix=\n";
+	  for (int i=0;i<5;++i) {
+	    for (int j=0;j<5;++j) {
+	      std::cout << (*noise_matrix)(i,j) << ", ";
+	    }
+	    std::cout << std::endl;
+	  }
 	}
       }
 

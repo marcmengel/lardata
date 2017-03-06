@@ -42,9 +42,12 @@ namespace trkf {
 
     /// Calculate noise matrix.
     virtual bool noise(const KTrack& trk, double s, TrackError& noise_matrix) const;
-    virtual bool noise(const TrackState& trk, double s, recob::tracking::SMatrixSym55& noise_matrix) const override;
-    template<typename T> bool noise(detinfo::LArProperties const * larprop, detinfo::DetectorProperties const * detprop,
-				    double dudw, double dvdw, double pinv, double mass, double s, bool flipSign, T& noise_matrix) const;
+    inline bool noise(const SVector5& par5d, double mass, double s, bool flipSign, recob::tracking::SMatrixSym55& noise_matrix) const override {
+      return noise(par5d[2], par5d[3], par5d[4], mass, s, flipSign, noise_matrix);
+    }
+    template<typename T> bool noise(double dudw, double dvdw, double pinv, double mass, double s, bool flipSign, T& noise_matrix) const;
+    /* bool noise(double dudw, double dvdw, double pinv, double mass, double s, bool flipSign, TrackError& noise_matrix) const; */
+    /* bool noise(double dudw, double dvdw, double pinv, double mass, double s, bool flipSign, recob::tracking::SMatrixSym55& noise_matrix) const; */
   };
 }
 

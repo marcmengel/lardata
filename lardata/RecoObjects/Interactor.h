@@ -23,6 +23,8 @@
 #include "lardata/RecoObjects/KTrack.h"
 #include "lardata/RecoObjects/TrackState.h"
 #include "boost/optional.hpp"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
 
 namespace trkf {
 
@@ -49,7 +51,7 @@ namespace trkf {
     virtual bool noise(const KTrack& trk, double s, TrackError& noise_matrix) const = 0;
 
     /// Calculate noise matrix.
-    virtual bool noise(const TrackState& trk, double s, recob::tracking::SMatrixSym55& noise_matrix) const { return false; }
+    virtual bool noise(const SVector5& par5d, double mass, double s, bool flipSign, recob::tracking::SMatrixSym55& noise_matrix) const { return false; }
 
     /// Method to calculate updated momentum due to dE/dx.
     boost::optional<double> dedx_prop(double pinv, double mass,
@@ -60,6 +62,10 @@ namespace trkf {
     // Attributes.
 
     double fTcut;  ///< Maximum delta ray energy for dE/dx.
+
+  protected:
+    detinfo::DetectorProperties const * detprop;
+    detinfo::LArProperties const * larprop;
   };
 }
 

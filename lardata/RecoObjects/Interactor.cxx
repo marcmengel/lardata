@@ -9,7 +9,6 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "lardata/RecoObjects/Interactor.h"
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 
 namespace trkf {
 
@@ -21,13 +20,17 @@ namespace trkf {
   ///
   Interactor::Interactor(double tcut) :
     fTcut(tcut)
-  {}
+  {
+    // Get LAr service.
+    detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
+    larprop = lar::providerFrom<detinfo::LArPropertiesService>();
+  }
 
   /// Destructor.
   Interactor::~Interactor()
   {}
 
-    /// Method to calculate updated momentum due to dE/dx.
+  /// Method to calculate updated momentum due to dE/dx.
   ///
   /// Arguments:
   ///
@@ -76,10 +79,6 @@ namespace trkf {
     // Set the default return value to be uninitialized with value 0.
 
     boost::optional<double> result(false, 0.);
-
-    // Get LAr service.
-
-    auto const * detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     // Calculate final energy.
 
