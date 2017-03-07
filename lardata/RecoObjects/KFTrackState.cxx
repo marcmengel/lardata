@@ -2,9 +2,6 @@
 
 using namespace trkf;
 
-using SMatrixSym11 = ROOT::Math::SMatrix<double,1,1,ROOT::Math::MatRepSym<double,1> >;
-using SMatrix51    = ROOT::Math::SMatrix<double,5,1>;
-
 bool KFTrackState::updateWithHitState(const HitState& hitstate) {
   //if track and hit not on same plane do not update and return false
   if ( (hitstate.plane().position()-fTrackState.plane().position()).Mag2()>10e-6   ) return false;

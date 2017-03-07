@@ -25,6 +25,16 @@ namespace trkf {
    const double pmass = 0.938272;      // Proton
   }
 
+  /// \class HitState
+  ///
+  /// \brief Class for a measurement on a recob::tracking::Plane defined by a wire and the drift direction.
+  ///
+  /// \author G. Cerati
+  ///
+  /// This class collects the measurement information from a Hit on wire.
+  /// The information are the measured (1D) position, its error, and the measurement plane (defined by the wire and the drift direction)
+  ///
+
   class HitState {
   public:
   HitState(double hitMeas, double hitMeasErr2, geo::WireID& wireId, const geo::WireGeo& wgeom)
@@ -47,6 +57,17 @@ namespace trkf {
     const geo::WireID fWireId;
     Plane             fPlane;
   };
+
+  /// \class TrackState
+  ///
+  /// \brief Class for track parameters (and errors) defined on a recob::tracking::Plane.
+  ///
+  /// \author G. Cerati
+  ///
+  /// This class collects the track parameters (and errors) defined on a recob::tracking::Plane.
+  /// It stores the 5d parameters and covariance, plus the global position and momentum.
+  /// Given a HitState on the same plane, it provides easy access to functionalities like chi2 and residual.
+  ///
 
   class TrackState {
   public:
@@ -81,12 +102,22 @@ namespace trkf {
       return out;
     }
     //
+    /// Residual of the TrackState with respect to a HitState. The two states must be on the same plane; it is responsibility of the user to enforce this.
     inline double residual      (const HitState& hitstate) const { return hitstate.hitMeas()-fTrackStatePar(0); }
+
+    /// Combined squared error of the TrackState with respect to a HitState. The two states must be on the same plane; it is responsibility of the user to enforce this.
     inline double combinedError2(const HitState& hitstate) const { return hitstate.hitMeasErr2()+fTrackStateCov(0,0); }
+
+    /// Combined error of the TrackState with respect to a HitState. The two states must be on the same plane; it is responsibility of the user to enforce this.
     inline double combinedError (const HitState& hitstate) const { return sqrt(combinedError2(hitstate)); }
+
+    /// Chi2 of the TrackState with respect to a HitState. The two states must be on the same plane; it is responsibility of the user to enforce this.
     inline double chi2          (const HitState& hitstate) const { return residual(hitstate)*residual(hitstate)/combinedError2(hitstate); }
-    //
+
+    /// Set the covariance matrix of the TrackState.
     void setCovariance(const SMatrixSym55& trackStateCov) { fTrackStateCov = trackStateCov; }
+
+    /// Set the parameters of the TrackState; also update the global position and momentum accordingly.
     void setParameters(const SVector5&     trackStatePar) {
       fTrackStatePar = trackStatePar;
       SVector6 par6d = fPlane.Local5DToGlobal6DParameters(trackStatePar,isTrackAlongPlaneDir());

@@ -188,14 +188,9 @@ namespace trkf {
     return s;
   }
 
-  double TrackStatePropagator::perpDistanceToPlane(bool& success, const Point_t& origpos, const Vector_t& origmom, const Plane& target) const {
+  double TrackStatePropagator::perpDistanceToPlane(bool& success, const Point_t& origpos, const Plane& target) const {
     const Point_t& targpos = target.position();
     const Vector_t& targdir = target.direction();
-    //check that origmom is not along the plane, i.e. targdir.Dot(origmom.Unit())=0
-    if (targdir.Dot(origmom.Unit())==0) {
-      success = false;
-      return DBL_MAX;
-    }
     //point-plane distance projected along direction orthogonal to the plane
     double sperp = targdir.Dot(targpos-origpos);
     success = true;

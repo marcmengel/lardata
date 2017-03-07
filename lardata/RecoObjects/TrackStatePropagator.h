@@ -1,5 +1,17 @@
-#ifndef PROPAGATORTOPLANE_H
-#define PROPAGATORTOPLACE_H
+#ifndef TRACKSTATEPROPAGATOR_H
+#define TRACKSTATEPROPAGATOR_H
+
+/// \class TrackStatePropagator
+///
+/// \brief Class for propagation of a trkf::TrackState to a recob::tracking::Plane
+///
+/// \author G. Cerati
+///
+/// This class holds the functionalities needed to propagate a trkf::TrackState to a recob::tracking::Plane.
+/// While the core physics is mainly duplicated from trkf::Propagator and its derived classes (kudos to H. Greenlee),
+/// the code and the interface are optimized for usage with classes based on SMatrix (e.g. TrackState) and
+/// for the needs of TrackKalmanFitter.
+///
 
 #include <memory>
 
@@ -53,44 +65,60 @@ namespace trkf {
     /// Propagation direction enum.
     enum PropDirection {FORWARD=0, BACKWARD=1, UNKNOWN=2};
 
-    /// Constructor.
+    /// Constructor from parameter values.
     TrackStatePropagator(double minStep, double maxElossFrac, int maxNit, double tcut, double wrongDirDistTolerance);
+
+    /// Constructor from Parameters (fhicl::Table<Config>).
     explicit TrackStatePropagator(Parameters const & p) : TrackStatePropagator(p().minStep(),p().maxElossFrac(),p().maxNit(),p().tcut(),p().wrongDirDistTolerance()) {}
 
     /// Destructor.
     virtual ~TrackStatePropagator();
 
-    // Accessors.
-
-    double getTcut() const {return fTcut;}
-
-
+    /// Main function for propagation of a TrackState to a Plane
     TrackState propagateToPlane(bool& success, const TrackState& origin, const Plane& target, bool dodedx, bool domcs, PropDirection dir = FORWARD) const;
 
+    /// Rotation of a TrackState to a Plane (zero distance propagation)
     inline TrackState rotateToPlane(bool& success, const TrackState& origin, const Plane& target) const { double dw2dw1 = 0.; return rotateToPlane(success, origin, target, dw2dw1);}
 
+    /// Quick accesss to the propagated position given a distance
     inline Point_t propagatedPosByDistance(const Point_t& origpos, const Vector_t& origdir, double distance) const { return origpos+distance*origdir; }
 
+    //@{
+    /// Distance of a TrackState (Point and Vector) to a Plane, along the TrackState direction
     double distanceToPlane(bool& success, const Point_t& origpos, const Vector_t& origdir, const Plane& target) const;
     inline double distanceToPlane(bool& success, const TrackState& origin, const Plane& target) const {
       return distanceToPlane(success, origin.position(), origin.momentum().Unit(), target);
     }
+    //@}
 
-    double perpDistanceToPlane(bool& success, const Point_t& origpos, const Vector_t& origdir, const Plane& target) const;
+    //@{
+    /// Distance of a TrackState (Point) to a Plane along the direction orthogonal to the Plane
+    double perpDistanceToPlane(bool& success, const Point_t& origpos, const Plane& target) const;
     inline double perpDistanceToPlane(bool& success, const TrackState& origin, const Plane& target) const {
-      return perpDistanceToPlane(success, origin.position(), origin.momentum().Unit(), target);
+      return perpDistanceToPlane(success, origin.position(), target);
     }
+    //@}
 
+    //@{
+    /// Return both direction types in one go
     std::pair<double, double> distancePairToPlane(bool& success, const Point_t& origpos, const Vector_t& origdir, const Plane& target) const;
     inline std::pair<double, double> distancePairToPlane(bool& success, const TrackState& origin, const Plane& target) const {
       return distancePairToPlane(success, origin.position(), origin.momentum().Unit(), target);
     }
+    //@}
 
+    /// Apply energy loss.
     void apply_dedx(double& pinv, double dedx, double e1, double mass, double s, double& deriv) const;
+
+    /// Apply multiple coulomb scattering.
     bool apply_mcs(double dudw, double dvdw, double pinv, double mass, double s, double range, double p, double e2, bool flipSign, SMatrixSym55& noise_matrix) const;
+
+    /// get Tcut parameter used in DetectorPropertiesService Eloss method
+    double getTcut() const {return fTcut;}
 
   private:
 
+    /// Rotation of a TrackState to a Plane (zero distance propagation), keeping track of dw2dw1 (needed by mcs)
     TrackState rotateToPlane(bool& success, const TrackState& origin, const Plane& target, double& dw2dw1) const;
 
     double fMinStep;               ///< Minimum propagation step length guaranteed.

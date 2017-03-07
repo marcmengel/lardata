@@ -5,16 +5,30 @@
 
 namespace trkf {
 
+  /// \class KFTrackState
+  ///
+  /// \brief Extension of a TrackState to perform KalmanFilter calculations.
+  ///
+  /// \author G. Cerati
+  ///
+  /// This class extends the concept of TrackState, providing functionalities for Kalman Filter-specific calculations such as 'update' and 'combine'.
+  /// It holds a TrackState by value, which is modified in place when updating or combining.
+  ///
+
   class KFTrackState {
   public:
-    //constructors
+    //
   KFTrackState(const SVector5& trackStatePar, const SMatrixSym55& trackStateCov, const Plane& plane, bool trackAlongPlaneDir, int pid)
     : fTrackState( std::move(TrackState(trackStatePar, trackStateCov, plane, trackAlongPlaneDir, pid)) ) {}
   KFTrackState(TrackState&& trackState)
     : fTrackState(std::move(trackState)) { }
-    //
+
+    /// Update the TrackState given a HitState (they need to be on the same plane)
     bool updateWithHitState(const HitState& hitstate);
+
+    /// Combine the TrackState given another TrackState (they need to be on the same plane)
     bool combineWithTrackState(const TrackState& trackstate);
+
     const TrackState& trackState() { return fTrackState; }
     void setTrackState(TrackState&& s) { fTrackState = std::move(s); }
     //
