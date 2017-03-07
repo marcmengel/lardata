@@ -93,21 +93,9 @@ namespace trkf {
     if(!result1)
       return result1;
 
-    //std::cout << "origin rotation" << std::endl;
-    //if (plocal_prop_matrix!=0) {
-    //  for (int i=0;i<5;i++) {
-    //	for (int j=0;j<5;j++) {
-    //	  std::cout << (*plocal_prop_matrix)(i,j) << " ";
-    //	}
-    //	std::cout << std::endl;
-    //  }
-    //} else {
-    //  std::cout << "invalid pointer" << std::endl;
-    //}
     // Get the intermediate track state vector and track parameters.
 
     const TrackVector& vec = trk.getVector();
-    //std::cout << "orpar5=" << vec(0) << ", " << vec(1) << ", " << vec(2) << ", " << vec(3) << ", " << vec(4) << std::endl;
     if(vec.size() != 5)
       throw cet::exception("PropXYZPlane") 
 	<< "Track state vector has wrong size" << vec.size() << "\n";
@@ -117,7 +105,6 @@ namespace trkf {
     double dvdw1 = vec(3);
     double pinv = vec(4);
     Surface::TrackDirection dir1 = trk.getDirection();
-    //std::cout << "TrackDirection=" << dir1 << std::endl;
 
     // Make sure intermediate track has a valid direction.
 
@@ -162,7 +149,6 @@ namespace trkf {
     // Calculate the signed propagation distance.
 
     double s = -w2 * std::sqrt(1. + dudw1*dudw1 + dvdw1*dvdw1);
-    //std::cout << "Test0 s=" << s << " -w2=" << -w2 << std::endl;
     if(dir1 == Surface::BACKWARD)
       s = -s;
 
@@ -182,7 +168,6 @@ namespace trkf {
     }
 
     // Find final momentum.
-    //std::cout << "Test1 s=" << s << " -w2=" << -w2 << std::endl;
     double deriv = 1.;
     boost::optional<double> pinv2(true, pinv);
     if(getDoDedx() && doDedx && s != 0.) {
@@ -239,13 +224,6 @@ namespace trkf {
       pm(3,4) = 0.;      // d(dvdw2)/d(pinv1);
       pm(4,4) = deriv;   // d(pinv2)/d(pinv1);
 
-      //std::cout << "propagation matrix" << std::endl;
-      //for (int i=0;i<5;i++) {
-      //	for (int j=0;j<5;j++) {
-      //	  std::cout << pm(i,j) << " ";
-      //	}
-      //	std::cout << std::endl;
-      //}
       // Compose the final propagation matrix from zero-distance propagation and
       // parallel surface propagation.
 
@@ -744,14 +722,6 @@ namespace trkf {
     double sindphi = std::sin(phi2 - phi1);
     double cosdphi = std::cos(phi2 - phi1);
 
-    // std::cout <<
-    //   "sinth1=" << sinth1 <<
-    //   " costh1=" << costh1 <<
-    //   " sinth2=" << sinth2 <<
-    //   " costh2=" << costh2 <<
-    //   " sindphi=" << sindphi <<
-    //   " cosdphi=" << cosdphi << std::endl;
-
     // Get the initial track state vector and track parameters.
 
     double dudw1 = vec(2);
@@ -843,7 +813,6 @@ namespace trkf {
       pm(2,4) = 0.;      // d(dudw2)/d(pinv1);
       pm(3,4) = 0.;      // d(dvdw2)/d(pinv1);
       pm(4,4) = 1.;      // d(pinv2)/d(pinv1);
-      //std::cout << "pm(1,0)=" << pm(1,0) << " rvu=" << rvu << " dvdw2*rwu=" << dvdw2*rwu << " dvdw2=" << dvdw2 << " rwu=" << rwu << std::endl;
     }
 
     // Update track vector.
