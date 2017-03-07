@@ -14,7 +14,6 @@ namespace trkf {
     : fTrackState(std::move(trackState)) { }
     //
     bool updateWithHitState(const HitState& hitstate);
-    bool updateWithHitState(const HitState& hitstate, const double slopevar);
     bool combineWithTrackState(const TrackState& trackstate);
     const TrackState& trackState() { return fTrackState; }
     void setTrackState(TrackState&& s) { fTrackState = std::move(s); }
@@ -28,6 +27,14 @@ namespace trkf {
     double              mass()                 const { return fTrackState.mass(); }
     const SVector6      parameters6D()         const { return fTrackState.parameters6D(); }
     bool                isTrackAlongPlaneDir() const { return fTrackState.isTrackAlongPlaneDir(); }
+    //
+    std::ostream& dump(std::ostream& out = std::cout) const {
+      out << "KFTrackState with pID=" << pID() << " mass=" << mass()
+	  << "\npars=" << parameters() << " position=" << position() << " momentum=" << momentum()
+	  << "\ncov=\n" << covariance()
+	  << "\non plane with pos=" << plane().position() << " and dir=" << plane().direction() << " along=" << isTrackAlongPlaneDir() << "\n";
+      return out;
+    }
     //
     double              residual      (const HitState& hitstate) const { return fTrackState.residual(hitstate); }
     double              combinedError2(const HitState& hitstate) const { return fTrackState.combinedError2(hitstate); }

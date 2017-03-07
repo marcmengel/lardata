@@ -35,6 +35,12 @@ namespace trkf {
     double             hitMeasErr2() const { return fHitMeasErr2; }
     const Plane&       plane()       const { return fPlane; }
     const geo::WireID& wireId()      const { return fWireId; }
+    std::ostream& dump(std::ostream& out = std::cout) const {
+      out << "HitState with meas=" << hitMeas() << " err2=" << hitMeasErr2()
+	  << " plane=" << wireId().Plane << " wire=" << wireId().Wire
+	  << " on plane with pos=" << plane().position() << " and dir=" << plane().direction() << "\n";
+      return out;
+    }
   private:
     double            fHitMeas;
     double            fHitMeasErr2;
@@ -66,6 +72,14 @@ namespace trkf {
     SMatrixSym66 covariance6D() const { return fPlane.Local5DToGlobal6DCovariance(fTrackStateCov, true, fMom); }
     //
     bool isTrackAlongPlaneDir() const { return fMom.Dot(fPlane.direction())>0; }
+    //
+    std::ostream& dump(std::ostream& out = std::cout) const {
+      out << "TrackState with pID=" << pID() << " mass=" << mass()
+	  << "\npars=" << parameters() << " position=" << position() << " momentum=" << momentum()
+	  << "\ncov=\n" << covariance()
+	  << "\non plane with pos=" << plane().position() << " and dir=" << plane().direction() << " along=" << isTrackAlongPlaneDir() << "\n";
+      return out;
+    }
     //
     inline double residual      (const HitState& hitstate) const { return hitstate.hitMeas()-fTrackStatePar(0); }
     inline double combinedError2(const HitState& hitstate) const { return hitstate.hitMeasErr2()+fTrackStateCov(0,0); }

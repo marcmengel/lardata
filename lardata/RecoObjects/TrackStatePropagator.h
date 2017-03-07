@@ -43,15 +43,19 @@ namespace trkf {
 	Name("tcut"),
 	Comment("Maximum delta ray energy for dE/dx.")
        };
+      fhicl::Atom<double> wrongDirDistTolerance {
+	Name("wrongDirDistTolerance"),
+	Comment("Allowed propagation distance in the wrong direction.")
+       };
     };
     using Parameters = fhicl::Table<Config>;
-    
+
     /// Propagation direction enum.
     enum PropDirection {FORWARD=0, BACKWARD=1, UNKNOWN=2};
-    
+
     /// Constructor.
-    TrackStatePropagator(double minStep, double maxElossFrac, int maxNit, double tcut);
-    explicit TrackStatePropagator(Parameters const & p) : TrackStatePropagator(p().minStep(),p().maxElossFrac(),p().maxNit(),p().tcut()) {}
+    TrackStatePropagator(double minStep, double maxElossFrac, int maxNit, double tcut, double wrongDirDistTolerance);
+    explicit TrackStatePropagator(Parameters const & p) : TrackStatePropagator(p().minStep(),p().maxElossFrac(),p().maxNit(),p().tcut(),p().wrongDirDistTolerance()) {}
 
     /// Destructor.
     virtual ~TrackStatePropagator();
@@ -63,14 +67,18 @@ namespace trkf {
 
     TrackState propagateToPlane(bool& success, const TrackState& origin, const Plane& target, bool dodedx, bool domcs, PropDirection dir = FORWARD) const;
 
-    TrackState rotateToPlane(bool& success, const TrackState& origin, const Plane& target) const;
+    inline TrackState rotateToPlane(bool& success, const TrackState& origin, const Plane& target) const { double dw2dw1 = 0.; return rotateToPlane(success, origin, target, dw2dw1);}
 
-    inline Point_t propagatedPosByDistance(const Point_t& origpos, const Vector_t& origmom, double s) const { return origpos+s*origmom; }
-    inline Point_t propagatedPosByDistance(const SVector6& orig, double s) const { return Point_t(orig(0)+s*orig(3),orig(1)+s*orig(4),orig(2)+s*orig(5)); }
+    inline Point_t propagatedPosByDistance(const Point_t& origpos, const Vector_t& origdir, double distance) const { return origpos+distance*origdir; }
 
     double distanceToPlane(bool& success, const Point_t& origpos, const Vector_t& origdir, const Plane& target) const;
     inline double distanceToPlane(bool& success, const TrackState& origin, const Plane& target) const {
       return distanceToPlane(success, origin.position(), origin.momentum().Unit(), target);
+    }
+
+    double perpDistanceToPlane(bool& success, const Point_t& origpos, const Vector_t& origdir, const Plane& target) const;
+    inline double perpDistanceToPlane(bool& success, const TrackState& origin, const Plane& target) const {
+      return perpDistanceToPlane(success, origin.position(), origin.momentum().Unit(), target);
     }
 
     std::pair<double, double> distancePairToPlane(bool& success, const Point_t& origpos, const Vector_t& origdir, const Plane& target) const;
@@ -83,10 +91,13 @@ namespace trkf {
 
   private:
 
-    double fMinStep;                                ///< Minimum propagation step length guaranteed.
-    double fMaxElossFrac;                           ///< Maximum propagation step length based on fraction of energy loss.
-    int    fMaxNit;                                 ///< Maximum number of iterations.
-    double fTcut;                                   ///< Maximum delta ray energy for dE/dx.
+    TrackState rotateToPlane(bool& success, const TrackState& origin, const Plane& target, double& dw2dw1) const;
+
+    double fMinStep;               ///< Minimum propagation step length guaranteed.
+    double fMaxElossFrac;          ///< Maximum propagation step length based on fraction of energy loss.
+    int    fMaxNit;                ///< Maximum number of iterations.
+    double fTcut;                  ///< Maximum delta ray energy for dE/dx.
+    double fWrongDirDistTolerance; ///< Allowed propagation distance in the wrong direction.
     const detinfo::DetectorProperties* detprop;
     const detinfo::LArProperties* larprop;
   };

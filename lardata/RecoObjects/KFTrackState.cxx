@@ -7,37 +7,12 @@ using SMatrix51    = ROOT::Math::SMatrix<double,5,1>;
 
 bool KFTrackState::updateWithHitState(const HitState& hitstate) {
   //if track and hit not on same plane do not update and return false
-  // std::cout << "hitstate.plane().position()=" << hitstate.plane().position() << std::endl;
-  // std::cout << "fTrackState.plane().position()=" << fTrackState.plane().position() << std::endl;
-  // std::cout << "hitstate.plane().direction()=" << hitstate.plane().direction() << std::endl;
-  // std::cout << "fTrackState.plane().direction()=" << fTrackState.plane().direction() << std::endl;
   if ( (hitstate.plane().position()-fTrackState.plane().position()).Mag2()>10e-6   ) return false;
   if ( (hitstate.plane().direction()-fTrackState.plane().direction()).Mag2()>10e-6 ) return false;
   SMatrixSym55 tmp;
   tmp(0,0) = 1./(hitstate.hitMeasErr2()+fTrackState.covariance()(0,0));
   fTrackState.setParameters( fTrackState.parameters() + fTrackState.covariance()*tmp.Col(0)*(hitstate.hitMeas() - fTrackState.parameters()(0)) );
   fTrackState.setCovariance( (fTrackState.covariance()-ROOT::Math::Similarity(fTrackState.covariance(),tmp)) );
-  return true;
-}
-
-bool KFTrackState::updateWithHitState(const HitState& hitstate, const double slopevar) {
-  //if track and hit not on same plane do not update and return false
-  // std::cout << "hitstate.plane().position()=" << hitstate.plane().position() << std::endl;
-  // std::cout << "fTrackState.plane().position()=" << fTrackState.plane().position() << std::endl;
-  // std::cout << "hitstate.plane().direction()=" << hitstate.plane().direction() << std::endl;
-  // std::cout << "fTrackState.plane().direction()=" << fTrackState.plane().direction() << std::endl;
-  if ( (hitstate.plane().position()-fTrackState.plane().position()).Mag2()>10e-6   ) return false;
-  if ( (hitstate.plane().direction()-fTrackState.plane().direction()).Mag2()>10e-6 ) return false;
-  SMatrixSym55 tmp;
-  tmp(0,0) = 1./(hitstate.hitMeasErr2()+fTrackState.covariance()(0,0)+slopevar);
-  fTrackState.setParameters( fTrackState.parameters() + fTrackState.covariance()*tmp.Col(0)*(hitstate.hitMeas() - fTrackState.parameters()(0)) );
-  SMatrix51 he;he.At(0,0) = 1./(hitstate.hitMeasErr2()+fTrackState.covariance().At(0,0)+slopevar);
-  SMatrix51 K = fTrackState.covariance()*he;
-  SMatrixSym11 V; V.At(0,0) = hitstate.hitMeasErr2();//+slopeVar
-  SMatrix55 KH;KH.Place_at(K,0,0);
-  SMatrix55 I = ROOT::Math::SMatrixIdentity();
-  //std::cout << "Result1=\n" << ROOT::Math::Similarity(I-KH,fPredTrackStateCov)+ROOT::Math::Similarity(K,V) << std::endl;
-  fTrackState.setCovariance( ROOT::Math::Similarity(I-KH,fTrackState.covariance())+ROOT::Math::Similarity(K,V) );
   return true;
 }
 
