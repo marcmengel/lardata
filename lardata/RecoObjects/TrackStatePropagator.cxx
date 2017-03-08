@@ -165,7 +165,7 @@ namespace trkf {
     pm(3,4) = 0.;      // d(dvdw2)/d(pinv1);
     pm(4,4) = 1.;      // d(pinv2)/d(pinv1);
     //
-    par5[0] = origin.position().X() - target.position().X();
+    par5[0] = (origin.position().X() - target.position().X()) * cosA2 + (origin.position().Y() - target.position().Y())*sinA2*sinB2 - (origin.position().Z() - target.position().Z())*sinA2*cosB2;
     par5[1] = (origin.position().Y() - target.position().Y()) * cosB2 + (origin.position().Z() - target.position().Z()) * sinB2;
     par5[2] = dudw2;
     par5[3] = dvdw2;
