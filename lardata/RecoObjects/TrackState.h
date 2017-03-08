@@ -3,9 +3,9 @@
 
 #include "lardataobj/RecoBase/TrackingTypes.h"
 #include "lardataobj/RecoBase/TrackingPlane.h"
-#include "larreco/TrackFinder/TrackingPlaneHelper.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
+#include "lardata/RecoObjects/TrackingPlaneHelper.h"
 
 namespace trkf {
 
