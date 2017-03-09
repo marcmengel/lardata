@@ -168,7 +168,6 @@ namespace trkf {
     }
 
     // Find final momentum.
-
     double deriv = 1.;
     boost::optional<double> pinv2(true, pinv);
     if(getDoDedx() && doDedx && s != 0.) {
