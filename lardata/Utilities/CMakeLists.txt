@@ -19,11 +19,11 @@ art_make( NO_PLUGINS
 #simple_plugin(TimeService "service"
 #	      lardataobj_RawData
 #             lardata_Utilities_DatabaseUtil_service
-# 	      art_Utilities canvas
+# 	      art_Utilities
 #	      ${ART_FRAMEWORK_CORE}
 # 	      ${ART_FRAMEWORK_PRINCIPAL}
 # 	      ${ART_PERSISTENCY_ROOTDB}
-# 	      art_Persistency_Common canvas
+# 	      art_Persistency_Common
 # 	      art_Persistency_Provenance canvas
 # 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
 # 	      ${MF_MESSAGELOGGER}
