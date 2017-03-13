@@ -156,7 +156,11 @@ anab::MVAReader<T, N>::MVAReader(const art::Event & evt, const art::InputTag & t
 
     if (!N) { std::cout << "MVAReader: MVA size should be > 0." << std::endl; return; }
 
-    auto descriptionHandle = evt.getValidHandle< std::vector< anab::MVADescription<N> > >(tag);
+    art::Handle< std::vector< anab::MVADescription<N> > > descriptionHandle;
+    if (!evt.getByLabel( tag, descriptionHandle ))
+    {
+        std::cout << "MVAReader: MVA data product not found." << std::endl; return;
+    }
 
     // search for MVADescription<N> produced for the type T, with the instance name from the tag
     std::string outputInstanceName = tag.instance() + getProductName(typeid(T));
