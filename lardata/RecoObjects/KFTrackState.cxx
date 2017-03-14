@@ -24,8 +24,9 @@ bool KFTrackState::combineWithTrackState(const TrackState& trackstate) {
   SMatrixSym55&& cov = cov1 + cov2;
   bool success = cov.Invert();
   if (!success) return false;
-  const auto K = cov1 * cov;
+  SMatrix55 K = cov1 * cov;
   fTrackState.setParameters( par1 + K*(par2 - par1) );
-  fTrackState.setCovariance( SMatrixSym55(SMatrix55(K*cov2).LowerBlock()) );
+  K = K*cov2;
+  fTrackState.setCovariance( K.LowerBlock() );
   return true;
 }
