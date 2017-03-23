@@ -12,8 +12,8 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#ifndef SURFWIREX_H
-#define SURFWIREX_H
+#ifndef SURFWIRELINE_H
+#define SURFWIRELINE_H
 
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "lardata/RecoObjects/SurfYZLine.h"
