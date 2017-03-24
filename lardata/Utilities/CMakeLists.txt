@@ -12,6 +12,7 @@ art_make( NO_PLUGINS
                         ${MF_MESSAGELOGGER}
                         ${MF_UTILITIES}
                         ${CETLIB}
+                        ${ROOT_GEOM}
                         ${ROOT_BASIC_LIB_LIST}
         )
 

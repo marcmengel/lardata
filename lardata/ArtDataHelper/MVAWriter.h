@@ -274,7 +274,7 @@ anab::MVAOutput_ID anab::MVAWriter<N>::initOutputs(
     {
         throw cet::exception("MVAWriter") << "MVADescription<N> already initialized for " << dataName << std::endl;
     }
-    fDescriptions->emplace_back(dataTag, fInstanceName + dataName);
+    fDescriptions->emplace_back(dataTag, fInstanceName + dataName, names);
 
     fOutputs.push_back( std::make_unique< std::vector< anab::FeatureVector<N> > >() );
     anab::MVAOutput_ID id = fOutputs.size() - 1;

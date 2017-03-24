@@ -95,6 +95,9 @@ public:
     /// Meaning/name of the index'th column in the collection of MVA output vectors.
     const std::string & outputName(size_t index) const { return fDescription->outputName(index); }
 
+    /// Index of column with given name, or -1 if name not found.
+    int getIndex(const std::string & name) const { return fDescription->getIndex(name); }
+
     friend std::ostream& operator<< (std::ostream &o, MVAReader const& a)
     {
         o << "MVAReader:" << std::endl << *(a.fDescription) << std::endl;
@@ -156,7 +159,13 @@ anab::MVAReader<T, N>::MVAReader(const art::Event & evt, const art::InputTag & t
 
     if (!N) { std::cout << "MVAReader: MVA size should be > 0." << std::endl; return; }
 
-    auto descriptionHandle = evt.getValidHandle< std::vector< anab::MVADescription<N> > >(tag);
+    art::Handle< std::vector< anab::MVADescription<N> > > descriptionHandle;
+    if (!evt.getByLabel( tag, descriptionHandle ))
+    {
+        // do it silently, since it is not-throwing and possibly expected to fail
+        // std::cout << "MVAReader: MVA data product not found." << std::endl;
+        return;
+    }
 
     // search for MVADescription<N> produced for the type T, with the instance name from the tag
     std::string outputInstanceName = tag.instance() + getProductName(typeid(T));
