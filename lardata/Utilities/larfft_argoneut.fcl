@@ -1,8 +1,0 @@
-#include "larfft.fcl"
-
-BEGIN_PROLOG
-
-argoneut_larfft:   @local::standard_larfft
-argoneut_larfft.FFTSize: 4096
-
-END_PROLOG
