@@ -304,7 +304,7 @@ anab::FVector_ID anab::FVectorWriter<N>::initOutputs(
 
     if (!fDescriptions)
     {
-        fDescriptions = std::make_unique< std::vector< anab::MVADescription<N> > >();
+        fDescriptions = std::make_unique< std::vector< anab::FVecDescription<N> > >();
     }
     else if (descriptionExists(dataName))
     {
