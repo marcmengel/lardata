@@ -914,7 +914,7 @@ typename lar::util::StatCollector<T, W>::Weight_t
 {
   if (Weights() == Weight_t(0))
     throw std::range_error("StatCollector<>::Variance(): divide by 0");
-  return (SumSq() - sqr(Sum()) / Weights()) / Weights();
+  return std::max(Weight_t(0), (SumSq() - sqr(Sum()) / Weights()) / Weights());
 } // StatCollector<T, W>::Variance()
 
 
