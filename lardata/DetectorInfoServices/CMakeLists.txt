@@ -2,17 +2,18 @@
 simple_plugin(DetectorClocksServiceStandard "service"
               lardata_DetectorInfo
 	      lardataobj_RawData
-	      art_Utilities canvas_Utilities
+	      art_Utilities
               ${ART_FRAMEWORK_CORE}
 	      ${ART_FRAMEWORK_PRINCIPAL}
 	      ${ART_PERSISTENCY_ROOTDB}
-	      art_Persistency_Common canvas_Persistency_Common
-	      art_Persistency_Provenance canvas_Persistency_Provenance
+	      art_Persistency_Common
+	      art_Persistency_Provenance
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
+	      canvas
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
 	      ${FHICLCPP}
-	      ${CETLIB}
+	      cetlib cetlib_except
 	      ${SQLITE3}
 	      ${ROOT_BASIC_LIB_LIST}
               
@@ -24,22 +25,24 @@ simple_plugin(DetectorPropertiesServiceStandard "service"
               larcore_Geometry
 	      ${ART_PERSISTENCY_ROOTDB}
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
-	      art_Utilities canvas_Utilities
+	      art_Utilities
+	      canvas
 	      ${SQLITE3}
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
-	      ${CETLIB}
+	      cetlib cetlib_except
 	      ${ROOT_BASIC_LIB_LIST}
               
 )
 
 simple_plugin(LArPropertiesServiceStandard "service"
 	      lardata_DetectorInfo
-	      art_Utilities canvas_Utilities
+	      art_Utilities
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
+	      canvas
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
-	      ${CETLIB}
+	      cetlib cetlib_except
               
 )
 
