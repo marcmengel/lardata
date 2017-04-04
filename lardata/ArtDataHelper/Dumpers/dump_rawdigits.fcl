@@ -1,0 +1,86 @@
+#
+# File:     dump_digits.fcl
+# Purpose:  Dump on screen raw digit content.
+# Author:   Gianluca Petrillo (petrillo@fnal.gov)
+# Date:     January 14th, 2015
+# Version:  1.1
+#
+# Service dependencies:
+# - message facility
+# 
+# Changes:
+# 20150114 (petrillo@fnal.gov) [v1.0]
+#   first version, from larevt/CalData/dump_good_wires.fcl
+# 20170404 (petrillo@fnal.gov) [v1.1]
+#   removed configuration for filtering
+#
+
+process_name: DumpRawDigits
+
+services: {
+  message: {
+  #   debugModules: [ "*" ]
+    destinations: {
+      
+      # grab all the "DumpDigits" messages and put them in DumpRawDigits.log
+      LogDigits: {
+        append: false
+        categories: {
+          DumpDigits: { limit: -1 }
+          default: { limit: 0 }
+        }
+        filename: "DumpRawDigits.log"
+        threshold: "INFO"
+        type: "file"
+      } # LogDigits
+      
+      LogStandardOut: {
+        categories: {
+          DumpDigits: { limit: 0 }
+          default: {}
+        }
+        threshold: "WARNING"
+        type: "cout"
+      } # LogStandardOut
+      
+    } # destinations
+  } # message
+} # services
+
+
+source: {
+  module_type: RootInput
+  maxEvents:  -1            # number of events to read
+} # source
+
+
+physics: {
+  producers:{}
+  filters:  {}
+  analyzers: {
+    dumpdigits: {
+      module_label: dumpdigits
+      module_type:  DumpRawDigits
+      
+      # specify the label of the raw::RawDigit producer
+      # in the comment, default is reported
+    #  DetSimModuleLabel:  "daq"
+      
+      # output category ("DumpDigits" by default), useful for filtering (see above)
+      OutputCategory: "DumpDigits"
+      
+      # set DigitsPerLine to 0 to suppress the output of the wire content
+      DigitsPerLine: 20
+      
+      # set the pedestal to be subtracted to all the digits (default: 0)
+      Pedestal: 2048
+      
+   } # dumpdigits
+  } # analyzers
+  
+  dumpers:  [ dumpdigits ]
+  
+  trigger_paths: []
+  end_paths:     [ dumpers ]
+  
+} # physics
