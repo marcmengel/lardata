@@ -23,6 +23,7 @@
 #include "fhiclcpp/types/Sequence.h"
 #include "fhiclcpp/types/Table.h"
 #include "fhiclcpp/types/Atom.h"
+#include "fhiclcpp/types/OptionalAtom.h"
 
 // C/C++ standard libraries
 #include <set>
@@ -68,19 +69,22 @@ namespace detinfo{
           Name("ReadOutWindowSize"       ),
           Comment("number of TPC readout TDC clock ticks per readout window")
         };
-        fhicl::Atom<double      > TimeOffsetU              {
+        
+        // The following are not really "optional": the ones for the views which
+        // are present are mandatory.
+        fhicl::OptionalAtom<double      > TimeOffsetU              {
           Name("TimeOffsetU"             ),
           Comment("tick offset subtracted to to convert spacepoint coordinates to hit times on view U")
         };
-        fhicl::Atom<double      > TimeOffsetV              {
+        fhicl::OptionalAtom<double      > TimeOffsetV              {
           Name("TimeOffsetV"             ),
           Comment("tick offset subtracted to to convert spacepoint coordinates to hit times on view V")
         };
-        fhicl::Atom<double      > TimeOffsetZ              {
+        fhicl::OptionalAtom<double      > TimeOffsetZ              {
           Name("TimeOffsetZ"             ),
           Comment("tick offset subtracted to to convert spacepoint coordinates to hit times on view Z")
         };
-        fhicl::Atom<double      > TimeOffsetY              {
+        fhicl::OptionalAtom<double      > TimeOffsetY              {
           Name("TimeOffsetY"             ),
           Comment("tick offset subtracted to to convert spacepoint coordinates to hit times on view Y")
         };
@@ -306,6 +310,10 @@ namespace detinfo{
       double       fTimeOffsetV;       ///< time offset to convert spacepoint coordinates to hit times on view V
       double       fTimeOffsetZ;       ///< time offset to convert spacepoint coordinates to hit times on view Z
       double       fTimeOffsetY;       ///< time offset to convert spacepoint coordinates to hit times on view Y
+      double       fHasTimeOffsetU = false; ///< whether time offset was configured for view U
+      double       fHasTimeOffsetV = false; ///< whether time offset was configured for view V
+      double       fHasTimeOffsetZ = false; ///< whether time offset was configured for view Z
+      double       fHasTimeOffsetY = false; ///< whether time offset was configured for view Y
       
       SternheimerParameters_t fSternheimerParameters; ///< Sternheimer parameters
       
@@ -315,6 +323,15 @@ namespace detinfo{
       std::vector<std::vector<double> >               fDriftDirection;
 
       ::detinfo::ElecClock fTPCClock;     ///< TPC electronics clock
+      
+      /// Checks the configuration of time offsets.
+      std::string CheckTimeOffsetConfigurationAfterSetup() const;
+      
+      /// Checks that provider configuration is complete, using setup
+      /// information.
+      void CheckConfigurationAfterSetup() const;
+      
+      
     }; // class DetectorPropertiesStandard
 } //namespace detinfo
 
