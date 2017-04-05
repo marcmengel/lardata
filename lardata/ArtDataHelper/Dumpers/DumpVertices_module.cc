@@ -90,9 +90,16 @@ namespace {
        bool hexFloats = false; ///< print all floating point numbers in base 16
     }; // PrintOptions_t
     
+    
     /// Constructor; will dump vertices from the specified list
-    VertexDumper(std::vector<recob::Vertex> const& vertex_list,
-      PrintOptions_t print_options = {}
+    VertexDumper(std::vector<recob::Vertex> const& vertex_list)
+      : VertexDumper(vertex_list, {})
+      {}
+    
+    /// Constructor; will dump vertices from the specified list, using options.
+    VertexDumper(
+      std::vector<recob::Vertex> const& vertex_list,
+      PrintOptions_t print_options
       )
       : vertices(vertex_list)
       , options(print_options)
