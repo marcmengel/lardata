@@ -85,8 +85,10 @@ namespace trkf {
     const Vector_t&     momentum()   const { return fMom; }
     int                 pID()        const { return fPid; }
     double              mass()       const {
-      if (abs(fPid)==13) return mumass; if (abs(fPid)==211) return pimass;
-      if (abs(fPid)==321) return kmass; if (abs(fPid)==2212) return pmass;
+      if (abs(fPid)==13) { return mumass; } 
+      if (abs(fPid)==211) { return pimass; }
+      if (abs(fPid)==321) { return kmass; } 
+      if (abs(fPid)==2212) { return pmass; }
       return util::kBogusD;
     }
     SVector6     parameters6D() const { return SVector6(fPos.X(),fPos.Y(),fPos.Z(),fMom.X(),fMom.Y(),fMom.Z()); }
