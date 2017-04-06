@@ -3,9 +3,11 @@
 # we collect them in groups:
 #
 set(RawDataDumpers
+  "DumpRawDigits"
   "DumpOpDetWaveforms"
   )
 set(RecoBaseDumpers
+  "DumpWires"
   "DumpHits"
   "DumpClusters"
   "DumpSeeds"
