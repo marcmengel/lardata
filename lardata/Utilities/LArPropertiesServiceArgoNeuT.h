@@ -133,7 +133,10 @@ namespace util{
       /// dQ/dX in electrons/cm, returns dE/dX in MeV/cm.
       double BirksCorrection(double dQdX) const;
       double ModBoxCorrection(double dQdX) const;
-      
+      bool ExtraMatProperties() const { return fExtraMatProperties; }
+      double TpbTimeConstant()  const { return fTpbTimeConstant;     }
+      bool SimpleBoundary()     const { return fSimpleBoundary;      }
+      bool SimpleScint()    const { return fSimpleScint;      }      
       
     private:
 
@@ -175,8 +178,21 @@ namespace util{
       std::vector<double> fRayleighSpectrum;
       std::vector<double> fRayleighEnergies;
 
-      bool fScintByParticleType;
+	bool fExtraMatProperties;
+	bool fSimpleBoundary;
 
+
+
+
+     //   { throw cet::exception("LArPropertiesServiceArgoNeuT") << __func__ << "() not implemented!\n"; }
+
+      virtual std::map<double, double>  TpbAbs() const override;   
+      virtual std::map<double, double>  TpbEm() const override;
+      virtual std::map<std::string, std::map<double, double> > SurfaceTpbReflectances() const override;
+      virtual std::map<std::string, std::map<double, double> > SurfaceReflectanceTpbDiffuseFractions() const override;
+                        
+      bool fScintByParticleType;
+      double fTpbTimeConstant;
       double fProtonScintYield;
       double fProtonScintYieldRatio; 
       double fMuonScintYield;
@@ -198,12 +214,22 @@ namespace util{
       double fScintYieldRatio;
       double fScintBirksConstant;
 
+      bool fSimpleScint;
+
       bool fEnableCerenkovLight;
 
       std::vector<std::string>          fReflectiveSurfaceNames;
       std::vector<double>               fReflectiveSurfaceEnergies;
       std::vector<std::vector<double> > fReflectiveSurfaceReflectances;
       std::vector<std::vector<double> > fReflectiveSurfaceDiffuseFractions;
+      std::vector<double>               fTpbEmmisionEnergies;
+      std::vector<double>               fTpbEmmisionSpectrum;
+      std::vector<double>               fTpbAbsorptionEnergies;
+      std::vector<double>               fTpbAbsorptionSpectrum;
+      std::vector<std::string>          fReflectiveSurfaceTpbNames;
+      std::vector<double>               fReflectiveSurfaceTpbEnergies;
+      std::vector<std::vector<double> > fReflectiveSurfaceTpbReflectances;
+      std::vector<std::vector<double> > fReflectiveSurfaceTpbDiffuseFractions;
       
       struct DBsettingsClass {
         DBsettingsClass();
@@ -219,6 +245,6 @@ namespace util{
     /// type of provider name following LArSoft name convention
     using LArPropertiesArgoNeuT = LArPropertiesServiceArgoNeuT;
     
-} //namespace util
+} //namespace utils
 DECLARE_ART_SERVICE_INTERFACE_IMPL(util::LArPropertiesServiceArgoNeuT, detinfo::LArPropertiesService, LEGACY)
 #endif // LARPROPERTIESSERVICEARGONEUT_H

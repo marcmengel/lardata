@@ -3,36 +3,46 @@
 //  LArPropertiesServiceArgoNeuT service implementation
 //
 ////////////////////////////////////////////////////////////////////////
-// Framework includes
+
 
 // C++ language includes
 #include <cmath>
 #include <iostream>
 
 // LArSoft includes
+
 #include "lardata/Utilities/LArPropertiesServiceArgoNeuT.h"
+
 #include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
+
 #include "lardata/Utilities/DatabaseUtil.h"
 
 // ROOT includes
 #include "TMath.h"
-
+#include "TSpline.h"
+#include "TH1.h"
+#include <Rtypes.h>
 // Framework includes
 #include "art/Framework/Principal/Run.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib/exception.h"
 //-----------------------------------------------
+
 util::LArPropertiesServiceArgoNeuT::LArPropertiesServiceArgoNeuT(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
+
   : DBsettings() // reads information from DatabaseUtil service
    //fval(0),
  //fElectronlifetime(  ( )
 {
   this->reconfigure(pset);
+
+
   reg.sPreBeginRun.watch(this, &LArPropertiesServiceArgoNeuT::preBeginRun);
 }
 
 //----------------------------------------------
 void util::LArPropertiesServiceArgoNeuT::preBeginRun(art::Run const& run)
+
 {
   int nrun = run.id().run();
   art::ServiceHandle<util::DatabaseUtil> DButil;
@@ -62,7 +72,9 @@ void util::LArPropertiesServiceArgoNeuT::preBeginRun(art::Run const& run)
 
 //------------------------------------------------
 /// \todo these values should eventually come from a database
+
 void util::LArPropertiesServiceArgoNeuT::reconfigure(fhicl::ParameterSet const& pset)
+
 {
   fEfield            = pset.get< std::vector<double> >("Efield"          );
   fTemperature       = pset.get< double              >("Temperature"     );
@@ -98,7 +110,9 @@ void util::LArPropertiesServiceArgoNeuT::reconfigure(fhicl::ParameterSet const& 
   fScintYield           = pset.get<double>("ScintYield"          );
   fScintPreScale        = pset.get<double>("ScintPreScale"       );
   fScintYieldRatio      = pset.get<double>("ScintYieldRatio"     );
-
+  fExtraMatProperties      = pset.get<bool>("LoadExtraMatProperties"     );
+  fSimpleBoundary     = pset.get<bool>("SimpleBoundaryProcess");
+  fSimpleScint     = pset.get<bool>("SimpleScintillation");
   if(fScintByParticleType){
     fProtonScintYield        = pset.get<double>("ProtonScintYield"     );
     fProtonScintYieldRatio   = pset.get<double>("ProtonScintYieldRatio");
@@ -114,6 +128,20 @@ void util::LArPropertiesServiceArgoNeuT::reconfigure(fhicl::ParameterSet const& 
     fAlphaScintYieldRatio    = pset.get<double>("AlphaScintYieldRatio" );
   }
   
+if(fExtraMatProperties){
+// Used data to be found e.g. in:  JINST 7 P05008 (reflectances estimated from measurements at Cracow University of Technology (thanks to dr. J. Jaglarz and dr. N. Nosidlak) + http://refractiveindex.info and refs. therein), G.M. Seidel, et al.,Nucl. Instr. and Meth. A 489 (2002)189; arXiv:1108.5584 [physics.ins-det]; Journal of Luminescence 81 (1999) 285}291;  arXiv:1304.6117v3 [physics.ins-det]; „Optical characterization and GEANT4 simulation of the light collection system for the WArP 100 liters detector: analysis of the event reconstruction capability”, F. Di Pompeo PhD thesis; //http://gentitfx.fr/litrani/AllModules/FitMacros/RIndexRev_vm2000.C.html for vm2000 (VM2000 (TM)) and refs. Therein - list will be updated for reference
+//std::cout<<"EXTRA MATERIAL PROPERTIES BEING LOADED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<std::endl;
+fTpbTimeConstant      = pset.get<double>("TpbTimeConstant"     );     
+  fTpbEmmisionEnergies       = pset.get<std::vector<double> >              ("TpbEmmisionEnergies"        );
+  fTpbEmmisionSpectrum        = pset.get<std::vector<double> >              ("TpbEmmisionSpectrum"        );
+  fTpbAbsorptionEnergies        = pset.get<std::vector<double> >              ("TpbAbsorptionEnergies"        );
+  fTpbAbsorptionSpectrum        = pset.get<std::vector<double> >              ("TpbAbsorptionSpectrum"        );
+fReflectiveSurfaceTpbNames           = pset.get<std::vector<std::string> >         ("ReflectiveSurfaceTpbNames"           );
+  fReflectiveSurfaceTpbEnergies        = pset.get<std::vector<double> >              ("ReflectiveSurfaceTpbEnergies"        );
+  fReflectiveSurfaceTpbReflectances    = pset.get<std::vector<std::vector<double> > >("ReflectiveSurfaceTpbReflectances"    );
+  fReflectiveSurfaceTpbDiffuseFractions= pset.get<std::vector<std::vector<double> > >("ReflectiveSurfaceTpbDiffuseFractions");
+}
+
   fEnableCerenkovLight  = pset.get<bool>("EnableCerenkovLight"       );
 
   fReflectiveSurfaceNames           = pset.get<std::vector<std::string> >         ("ReflectiveSurfaceNames"           );
@@ -132,7 +160,9 @@ void util::LArPropertiesServiceArgoNeuT::reconfigure(fhicl::ParameterSet const& 
 // slope is between -6.2 and -6.1, intercept is 1928 kg/m^3
 // this parameterization will be good to better than 0.5%.
 // density is returned in g/cm^3
+
 double util::LArPropertiesServiceArgoNeuT::Density(double temperature) const
+
 {
   // Default temperature use internal value.
   if(temperature == 0.)
@@ -145,25 +175,31 @@ double util::LArPropertiesServiceArgoNeuT::Density(double temperature) const
 
 
 //------------------------------------------------------------------------------------//
+
 double util::LArPropertiesServiceArgoNeuT::Efield(unsigned int planegap) const
+
 {
   this->checkDBstatus();
 
   if(planegap >= fEfield.size())
-    throw cet::exception("LArProperties") << "requesting Electric field in a plane gap that is not defined\n";
+    throw cet::exception("LArProperties") << "requesting Electric field in a plane gap that is not defined";
 
   return fEfield[planegap];
 }
 
 //------------------------------------------------------------------------------------//
+
 double util::LArPropertiesServiceArgoNeuT::Temperature() const
+
 {
   this->checkDBstatus();
   return fTemperature;
 }
 
 //------------------------------------------------------------------------------------//
+
 double util::LArPropertiesServiceArgoNeuT::ElectronLifetime() const
+
 {
   this->checkDBstatus();
   return fElectronlifetime;
@@ -175,6 +211,7 @@ double util::LArPropertiesServiceArgoNeuT::ElectronLifetime() const
 
 //------------------------------------------------------------------------------------//
 double util::LArPropertiesServiceArgoNeuT::DriftVelocity(double efield, double temperature) const {
+
 
   // Drift Velocity as a function of Electric Field and LAr Temperature
   // from : W. Walkowiak, NIM A 449 (2000) 288-294
@@ -266,7 +303,9 @@ double util::LArPropertiesServiceArgoNeuT::DriftVelocity(double efield, double t
 // parameters:
 //  dQdX in electrons/cm, charge (amplitude or integral obtained) divided by effective pitch for a given 3D track.
 // returns dEdX in MeV/cm
+
 double util::LArPropertiesServiceArgoNeuT::BirksCorrection(double dQdx) const
+
 {
   // Correction for charge quenching using parameterization from
   // S.Amoruso et al., NIM A 523 (2004) 275
@@ -283,7 +322,9 @@ double util::LArPropertiesServiceArgoNeuT::BirksCorrection(double dQdx) const
 }
 
 // Modified Box model correction 
+
 double util::LArPropertiesServiceArgoNeuT::ModBoxCorrection(double dQdx) const
+
 {
   // Modified Box model correction has better behavior than the Birks
   // correction at high values of dQ/dx.
@@ -315,7 +356,9 @@ double util::LArPropertiesServiceArgoNeuT::ModBoxCorrection(double dQdx) const
 // Material parameters (stored in larproperties.fcl) are taken from
 // pdg web site http://pdg.lbl.gov/AtomicNuclearProperties/
 //
+
 double util::LArPropertiesServiceArgoNeuT::Eloss(double mom, double mass, double tcut) const
+
 {
   // Some constants.
 
@@ -373,7 +416,9 @@ double util::LArPropertiesServiceArgoNeuT::Eloss(double mom, double mass, double
 //
 // Based on Bichsel formula referred to but not given in pdg.
 //
+
 double util::LArPropertiesServiceArgoNeuT::ElossVar(double mom, double mass) const
+
 {
   // Some constants.
 
@@ -393,7 +438,9 @@ double util::LArPropertiesServiceArgoNeuT::ElossVar(double mom, double mass) con
 }
 
 //---------------------------------------------------------------------------------
+
 void util::LArPropertiesServiceArgoNeuT::checkDBstatus() const
+
 {
   
   // if we don't have any business with DBs, we have already wasted enough time
@@ -420,11 +467,13 @@ void util::LArPropertiesServiceArgoNeuT::checkDBstatus() const
             << " Database originating values in BeginJob()s or constructors."
             << " You have been warned !!! \n ";
   }
+
 } // util::LArPropertiesServiceArgoNeuT::checkDBstatus()
 
 
 //---------------------------------------------------------------------------------
 std::map<double,double> util::LArPropertiesServiceArgoNeuT::FastScintSpectrum() const
+
 {
   if(fFastScintSpectrum.size()!=fFastScintEnergies.size()){
     throw cet::exception("Incorrect vector sizes in LArProperties")
@@ -441,7 +490,9 @@ std::map<double,double> util::LArPropertiesServiceArgoNeuT::FastScintSpectrum() 
 }
 
 //---------------------------------------------------------------------------------
+
 std::map<double, double> util::LArPropertiesServiceArgoNeuT::SlowScintSpectrum() const
+
 {
   if(fSlowScintSpectrum.size()!=fSlowScintEnergies.size()){
       throw cet::exception("Incorrect vector sizes in LArProperties")
@@ -458,7 +509,9 @@ std::map<double, double> util::LArPropertiesServiceArgoNeuT::SlowScintSpectrum()
 }
 
 //---------------------------------------------------------------------------------
+
 std::map<double, double> util::LArPropertiesServiceArgoNeuT::RIndexSpectrum() const
+
 {
   if(fRIndexSpectrum.size()!=fRIndexEnergies.size()){
       throw cet::exception("Incorrect vector sizes in LArProperties")
@@ -476,7 +529,9 @@ std::map<double, double> util::LArPropertiesServiceArgoNeuT::RIndexSpectrum() co
 
 
 //---------------------------------------------------------------------------------
+
 std::map<double, double> util::LArPropertiesServiceArgoNeuT::AbsLengthSpectrum() const
+
 {
   if(fAbsLengthSpectrum.size()!=fAbsLengthEnergies.size()){
     throw cet::exception("Incorrect vector sizes in LArProperties")
@@ -493,7 +548,9 @@ std::map<double, double> util::LArPropertiesServiceArgoNeuT::AbsLengthSpectrum()
 }
 
 //---------------------------------------------------------------------------------
+
 std::map<double, double> util::LArPropertiesServiceArgoNeuT::RayleighSpectrum() const
+
 {
   if(fRayleighSpectrum.size()!=fRayleighEnergies.size()){
     throw cet::exception("Incorrect vector sizes in LArProperties")
@@ -510,7 +567,18 @@ std::map<double, double> util::LArPropertiesServiceArgoNeuT::RayleighSpectrum() 
 }
 
 //---------------------------------------------------------------------------------
+
+std::map<double, double> util::LArPropertiesServiceArgoNeuT::TpbAbs() const
+{ throw cet::exception("LArPropertiesServiceArgoNeuT") << __func__ << "() not implemented here !\n"; }
+
+//---------------------------------------------------------------------------------
+std::map<double, double> util::LArPropertiesServiceArgoNeuT::TpbEm() const
+{ throw cet::exception("LArPropertiesServiceArgoNeuT") << __func__ << "() not implemented here !\n"; }
+
+//---------------------------------------------------------------------------------
+
 std::map<std::string, std::map<double,double> > util::LArPropertiesServiceArgoNeuT::SurfaceReflectances() const
+
 {
   std::map<std::string, std::map<double, double> > ToReturn;
 
@@ -534,7 +602,9 @@ std::map<std::string, std::map<double,double> > util::LArPropertiesServiceArgoNe
 }
 
 //---------------------------------------------------------------------------------
+
 std::map<std::string, std::map<double,double> > util::LArPropertiesServiceArgoNeuT::SurfaceReflectanceDiffuseFractions() const
+
 {
   std::map<std::string, std::map<double, double> > ToReturn;
 
@@ -556,13 +626,23 @@ std::map<std::string, std::map<double,double> > util::LArPropertiesServiceArgoNe
   return ToReturn;
 }
 
+//---------------------------------------------------------------------------------
+std::map<std::string, std::map<double,double> > util::LArPropertiesServiceArgoNeuT::SurfaceTpbReflectances() const
+{ throw cet::exception("LArPropertiesServiceArgoNeuT") << __func__ << "() not implemented here !\n"; }
 
 //---------------------------------------------------------------------------------
+std::map<std::string, std::map<double,double> > util::LArPropertiesServiceArgoNeuT::SurfaceReflectanceTpbDiffuseFractions() const
+{ throw cet::exception("LArPropertiesServiceArgoNeuT") << __func__ << "() not implemented here !\n"; }
+
+
+//---------------------------------------------------------------------------------
+
 util::LArPropertiesServiceArgoNeuT::DBsettingsClass::DBsettingsClass() {
   auto const& DButil = *art::ServiceHandle<util::DatabaseUtil>();
   ToughErrorTreatment= DButil.ToughErrorTreatment();
   ShouldConnect = DButil.ShouldConnect();
 } // util::LArPropertiesServiceArgoNeuT::DBsettingsClass::DBsettingsClass()
+
 
 
 //---------------------------------------------------------------------------------
