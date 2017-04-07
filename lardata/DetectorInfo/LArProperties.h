@@ -66,9 +66,19 @@ namespace detinfo{
       virtual std::map<double, double> RIndexSpectrum() const = 0;
       virtual std::map<double, double> AbsLengthSpectrum() const = 0;
       virtual std::map<double, double> RayleighSpectrum() const = 0;
-	
+      virtual std::map<double, double>  TpbAbs() const = 0;   
+      virtual std::map<double, double>  TpbEm() const = 0;
+      /// dQ/dX in electrons/cm, returns dE/dX in MeV/cm.
+      virtual double BirksCorrection(double dQdX) const=0;
+      virtual double ModBoxCorrection(double dQdX) const=0;
+      virtual bool ExtraMatProperties() const = 0;
+      virtual double TpbTimeConstant()  const = 0;
+      virtual bool SimpleBoundary()     const = 0;
+      virtual bool SimpleScint()    const = 0;     
       virtual std::map<std::string, std::map<double, double> > SurfaceReflectances() const = 0;
       virtual std::map<std::string, std::map<double, double> > SurfaceReflectanceDiffuseFractions() const = 0;
+      virtual std::map<std::string, std::map<double, double> > SurfaceTpbReflectances() const = 0;
+      virtual std::map<std::string, std::map<double, double> > SurfaceReflectanceTpbDiffuseFractions() const = 0;
 
     protected:
       LArProperties() = default;

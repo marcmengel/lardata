@@ -57,6 +57,8 @@
 
 
 
+
+
 namespace detinfo {
   /**
    * @brief Properties related to liquid argon environment in the detector
@@ -105,7 +107,10 @@ namespace detinfo {
     virtual double ScintFastTimeConst()   const override { return fScintFastTimeConst;   } 
     virtual double ScintSlowTimeConst()   const override { return fScintSlowTimeConst;   }
     virtual double ScintBirksConstant()   const override { return fScintBirksConstant;   }
-	
+    virtual bool ExtraMatProperties() const { return fExtraMatProperties; }
+    virtual double TpbTimeConstant()  const { return fTpbTimeConstant;     }
+    virtual bool SimpleBoundary()     const { return fSimpleBoundary;      }
+    virtual bool SimpleScint()    const { return fSimpleScint;      }    
     virtual bool ScintByParticleType()    const override { return fScintByParticleType;  }
 
     virtual double ScintYield(bool prescale = false)         const override { return fScintYield * ScintPreScale(prescale);}
@@ -132,20 +137,32 @@ namespace detinfo {
     virtual std::map<double, double> RIndexSpectrum() const override;
     virtual std::map<double, double> AbsLengthSpectrum() const override;
     virtual std::map<double, double> RayleighSpectrum() const override;
-	
+    virtual std::map<double, double>  TpbAbs() const override;   
+    virtual std::map<double, double>  TpbEm() const override;
     virtual std::map<std::string, std::map<double, double> > SurfaceReflectances() const override;
     virtual std::map<std::string, std::map<double, double> > SurfaceReflectanceDiffuseFractions() const override;
-	
+    virtual std::map<std::string, std::map<double, double> > SurfaceTpbReflectances()const override;
+    virtual std::map<std::string, std::map<double, double> > SurfaceReflectanceTpbDiffuseFractions()const override;
+    double BirksCorrection(double dQdX) const;
+    double ModBoxCorrection(double dQdX) const;
     void SetRadiationLength(double rl) { fRadiationLength = rl; }
+    void SetElectronlifetime(double el) { fElectronlifetime = el; }
+
     void SetArgon39DecayRate(double r) { fArgon39DecayRate = r;}
     void SetAtomicNumber(double z) { fZ = z;}
     void SetAtomicMass(double a) { fA = a;}
     void SetMeanExcitationEnergy(double e) { fI = e;}
-
+    void SetEfield(std::vector<double> s) { fEfield = s;}
     void SetFastScintSpectrum(std::vector<double> s) { fFastScintSpectrum = s;}
     void SetFastScintEnergies(std::vector<double> s) { fFastScintEnergies = s;}
     void SetSlowScintSpectrum(std::vector<double> s) { fSlowScintSpectrum = s;}
     void SetSlowScintEnergies(std::vector<double> s) { fSlowScintEnergies = s;}
+
+    void SetTpbEmmisionEnergies(std::vector<double> s) { fTpbEmmisionEnergies = s;}
+    void SetTpbEmmisionSpectrum(std::vector<double> s) { fTpbEmmisionSpectrum = s;}
+    void SetTpbAbsorptionEnergies(std::vector<double> s) { fTpbAbsorptionEnergies = s;}
+    void SetTpbAbsorptionSpectrum(std::vector<double> s) { fTpbAbsorptionSpectrum = s;}
+
     void SetRIndexSpectrum(std::vector<double> s)    { fRIndexSpectrum = s;}
     void SetRIndexEnergies(std::vector<double> s)    { fRIndexEnergies = s;}
     void SetAbsLengthSpectrum(std::vector<double> s) { fAbsLengthSpectrum = s;}
@@ -154,6 +171,10 @@ namespace detinfo {
     void SetRayleighEnergies(std::vector<double> s)  { fRayleighEnergies = s;}
 
     void SetScintByParticleType(bool l)        { fScintByParticleType = l;}
+    void SetSimpleScint(bool l)        { fSimpleScint = l;}
+    void SetExtraMatProperties(bool l)        { fExtraMatProperties = l;}
+    void SetSimpleBoundary(bool l)        { fSimpleBoundary = l;}
+    void SetTpbTimeConstant(double y)         { fTpbTimeConstant = y;}
     void SetProtonScintYield(double y)         { fProtonScintYield = y;}
     void SetProtonScintYieldRatio(double r)    { fProtonScintYieldRatio = r;}
     void SetMuonScintYield(double y)           { fMuonScintYield = y;}
@@ -174,12 +195,19 @@ namespace detinfo {
     void SetScintSlowTimeConst(double t)       { fScintSlowTimeConst = t;}
     void SetScintYieldRatio(double r)          { fScintYieldRatio = r;}
     void SetScintBirksConstant(double kb)      { fScintBirksConstant = kb;}
+    void SetTemperature(double te)      { fTemperature = te;}
     void SetEnableCerenkovLight(bool f)        { fEnableCerenkovLight = f; }
 
     void SetReflectiveSurfaceNames(std::vector<std::string> n) { fReflectiveSurfaceNames = n;}
     void SetReflectiveSurfaceEnergies(std::vector<double> e)   { fReflectiveSurfaceEnergies = e;}
     void SetReflectiveSurfaceReflectances(std::vector<std::vector<double> > r) { fReflectiveSurfaceReflectances = r;}
     void SetReflectiveSurfaceDiffuseFractions(std::vector<std::vector<double> > f) { fReflectiveSurfaceDiffuseFractions = f;}
+
+    void SetReflectiveSurfaceTpbNames(std::vector<std::string> tn) { fReflectiveSurfaceTpbNames = tn;}
+    void SetReflectiveSurfaceTpbEnergies(std::vector<double> ten)   { fReflectiveSurfaceTpbEnergies = ten;}
+    void SetReflectiveSurfaceTpbReflectances(std::vector<std::vector<double> > tr) { fReflectiveSurfaceTpbReflectances = tr;}
+    void SetReflectiveSurfaceTpbDiffuseFractions(std::vector<std::vector<double> > tf) { fReflectiveSurfaceTpbDiffuseFractions = tf;}
+
 
   private:
   protected:
@@ -195,17 +223,25 @@ namespace detinfo {
         { Name("AtomicNumber"    ), Comment("atomic number (yes, yes, it's 18...)") };
       fhicl::Atom<double> AtomicMass
         { Name("AtomicMass"      ), Comment("atomic mass [g/mol]") };
+      fhicl::Atom<double> Electronlifetime
+        { Name("Electronlifetime"      ), Comment("Electronlifetime") };
+
+ 
       fhicl::Atom<double> MeanExcitationEnergy
         { Name("ExcitationEnergy"), Comment("mean excitation energy [eV]") };
       
       fhicl::Atom<double> Argon39DecayRate
         { Name("Argon39DecayRate"), Comment("decays/(cm^3 s)") };
-      
+      fhicl::Sequence<double> Efield { Name("Efield"), Comment("") };      
       // scintillation parameters
       fhicl::Sequence<double> FastScintEnergies { Name("FastScintEnergies"), Comment("") };
       fhicl::Sequence<double> FastScintSpectrum { Name("FastScintSpectrum"), Comment("") };
       fhicl::Sequence<double> SlowScintEnergies { Name("SlowScintEnergies"), Comment("") };
       fhicl::Sequence<double> SlowScintSpectrum { Name("SlowScintSpectrum"), Comment("") };
+      fhicl::Sequence<double> TpbEmmisionEnergies { Name("TpbEmmisionEnergies"), Comment("") };
+      fhicl::Sequence<double> TpbEmmisionSpectrum { Name("TpbEmmisionSpectrum"), Comment("") };
+      fhicl::Sequence<double> TpbAbsorptionEnergies { Name("TpbAbsorptionEnergies"), Comment("") };
+      fhicl::Sequence<double> TpbAbsorptionSpectrum { Name("TpbAbsorptionSpectrum"), Comment("") };
       fhicl::Sequence<double> AbsLengthEnergies { Name("AbsLengthEnergies"), Comment("") };
       fhicl::Sequence<double> AbsLengthSpectrum { Name("AbsLengthSpectrum"), Comment("") };
       fhicl::Sequence<double> RIndexEnergies    { Name("RIndexEnergies"   ), Comment("") };
@@ -220,7 +256,12 @@ namespace detinfo {
       fhicl::Atom<double> ScintYield           { Name("ScintYield"          ), Comment("") };
       fhicl::Atom<double> ScintPreScale        { Name("ScintPreScale"       ), Comment("") };
       fhicl::Atom<double> ScintYieldRatio      { Name("ScintYieldRatio"     ), Comment("") };
+      fhicl::Atom<double> TpbTimeConstant      { Name("TpbTimeConstant"     ), Comment("") };
       fhicl::Atom<bool  > ScintByParticleType  { Name("ScintByParticleType" ), Comment("") };
+      fhicl::Atom<bool  > SimpleScint  { Name("SimpleScintillation" ), Comment("") };
+      fhicl::Atom<bool  > SimpleBoundary  { Name("SimpleBoundaryProcess" ), Comment("") };
+      fhicl::Atom<bool  > ExtraMatProperties  { Name("LoadExtraMatProperties" ), Comment("") };
+
 #if DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM
       fhicl::OptionalAtom<double> ProtonScintYield
         { Name("ProtonScintYield"       ), Comment("(only if ScintByParticleType is true)") };
@@ -249,7 +290,7 @@ namespace detinfo {
 #endif // DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM?
       
       fhicl::Atom<bool  > EnableCerenkovLight  { Name("EnableCerenkovLight" ), Comment("") };
-      
+      fhicl::Atom<double> Temperature  { Name("Temperature"   ), Comment("Temperature") };
       fhicl::Sequence<std::string> ReflectiveSurfaceNames
         { Name("ReflectiveSurfaceNames"),            Comment("") };
       fhicl::Sequence<double> ReflectiveSurfaceEnergies
@@ -258,6 +299,15 @@ namespace detinfo {
         { Name("ReflectiveSurfaceReflectances"),     Comment("") };
       fhicl::Sequence<fhicl::Sequence<double>> ReflectiveSurfaceDiffuseFractions
         { Name("ReflectiveSurfaceDiffuseFractions"), Comment("") };
+
+      fhicl::Sequence<std::string> ReflectiveSurfaceTpbNames
+        { Name("ReflectiveSurfaceTpbNames"),            Comment("") };
+      fhicl::Sequence<double> ReflectiveSurfaceTpbEnergies
+        { Name("ReflectiveSurfaceTpbEnergies"),         Comment("") };
+      fhicl::Sequence<fhicl::Sequence<double>> ReflectiveSurfaceTpbReflectances
+        { Name("ReflectiveSurfaceTpbReflectances"),     Comment("") };
+      fhicl::Sequence<fhicl::Sequence<double>> ReflectiveSurfaceTpbDiffuseFractions
+        { Name("ReflectiveSurfaceTpbDiffuseFractions"), Comment("") };
       
     }; // Configuration_t
     
@@ -309,6 +359,7 @@ namespace detinfo {
     // Optical parameters for LAr
 
     std::vector<double> fFastScintSpectrum;
+    std::vector<double> fEfield;
     std::vector<double> fFastScintEnergies;
     std::vector<double> fSlowScintSpectrum;
     std::vector<double> fSlowScintEnergies;
@@ -318,9 +369,17 @@ namespace detinfo {
     std::vector<double> fAbsLengthEnergies;
     std::vector<double> fRayleighSpectrum;
     std::vector<double> fRayleighEnergies;
-
+    std::vector<double>               fTpbEmmisionEnergies;
+    std::vector<double>               fTpbEmmisionSpectrum;
+    std::vector<double>               fTpbAbsorptionEnergies;
+    std::vector<double>               fTpbAbsorptionSpectrum;
+    std::vector<double>               fReflectiveSurfaceTpbEnergies;
+    std::vector<std::vector<double> > fReflectiveSurfaceTpbReflectances;
+    std::vector<std::vector<double> > fReflectiveSurfaceTpbDiffuseFractions;
+    bool fExtraMatProperties;
+    bool fSimpleBoundary;
     bool fScintByParticleType;
-
+    bool fSimpleScint;
     double fProtonScintYield;
     double fProtonScintYieldRatio; 
     double fMuonScintYield;
@@ -333,6 +392,8 @@ namespace detinfo {
     double fElectronScintYieldRatio; 
     double fAlphaScintYield;
     double fAlphaScintYieldRatio; 
+    double fElectronlifetime;
+    double fTpbTimeConstant;
 
     double fScintYield;
     double fScintPreScale;
@@ -341,9 +402,9 @@ namespace detinfo {
     double fScintSlowTimeConst;
     double fScintYieldRatio;
     double fScintBirksConstant;
-
+    double fTemperature;
     bool fEnableCerenkovLight;
-
+    std::vector<std::string>          fReflectiveSurfaceTpbNames;
     std::vector<std::string>          fReflectiveSurfaceNames;
     std::vector<double>               fReflectiveSurfaceEnergies;
     std::vector<std::vector<double> > fReflectiveSurfaceReflectances;
