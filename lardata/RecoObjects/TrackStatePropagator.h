@@ -59,6 +59,10 @@ namespace trkf {
 	Name("wrongDirDistTolerance"),
 	Comment("Allowed propagation distance in the wrong direction.")
        };
+      fhicl::Atom<bool> propPinvErr {
+	Name("propPinvErr"),
+	Comment("Propagate error on 1/p or not (in order to avoid infs, it should be set to false when 1/p not updated).")
+       };
     };
     using Parameters = fhicl::Table<Config>;
 
@@ -66,10 +70,10 @@ namespace trkf {
     enum PropDirection {FORWARD=0, BACKWARD=1, UNKNOWN=2};
 
     /// Constructor from parameter values.
-    TrackStatePropagator(double minStep, double maxElossFrac, int maxNit, double tcut, double wrongDirDistTolerance);
+    TrackStatePropagator(double minStep, double maxElossFrac, int maxNit, double tcut, double wrongDirDistTolerance, bool propPinvErr);
 
     /// Constructor from Parameters (fhicl::Table<Config>).
-    explicit TrackStatePropagator(Parameters const & p) : TrackStatePropagator(p().minStep(),p().maxElossFrac(),p().maxNit(),p().tcut(),p().wrongDirDistTolerance()) {}
+    explicit TrackStatePropagator(Parameters const & p) : TrackStatePropagator(p().minStep(),p().maxElossFrac(),p().maxNit(),p().tcut(),p().wrongDirDistTolerance(),p().propPinvErr()) {}
 
     /// Destructor.
     virtual ~TrackStatePropagator();
@@ -126,6 +130,7 @@ namespace trkf {
     int    fMaxNit;                ///< Maximum number of iterations.
     double fTcut;                  ///< Maximum delta ray energy for dE/dx.
     double fWrongDirDistTolerance; ///< Allowed propagation distance in the wrong direction.
+    bool   fPropPinvErr;           ///< Propagate error on 1/p or not (in order to avoid infs, it should be set to false when 1/p not updated)
     const detinfo::DetectorProperties* detprop;
     const detinfo::LArProperties* larprop;
   };

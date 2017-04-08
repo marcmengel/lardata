@@ -6,12 +6,13 @@ art_make( NO_PLUGINS
                         ${ART_FRAMEWORK_CORE}
                         ${ART_FRAMEWORK_PRINCIPAL}
                         ${ART_FRAMEWORK_SERVICES_REGISTRY}
-                        art_Persistency_Common canvas_Persistency_Common
-                        art_Persistency_Provenance canvas_Persistency_Provenance
-                        art_Utilities canvas_Utilities
+                        art_Persistency_Common
+                        art_Persistency_Provenance
+                        art_Utilities
+                        canvas
                         ${MF_MESSAGELOGGER}
                         ${MF_UTILITIES}
-                        ${CETLIB}
+                        cetlib cetlib_except
                         ${ROOT_GEOM}
                         ${ROOT_BASIC_LIB_LIST}
         )
@@ -19,17 +20,17 @@ art_make( NO_PLUGINS
 #simple_plugin(TimeService "service"
 #	      lardataobj_RawData
 #             lardata_Utilities_DatabaseUtil_service
-# 	      art_Utilities canvas_Utilities
+# 	      art_Utilities
 #	      ${ART_FRAMEWORK_CORE}
 # 	      ${ART_FRAMEWORK_PRINCIPAL}
 # 	      ${ART_PERSISTENCY_ROOTDB}
-# 	      art_Persistency_Common canvas_Persistency_Common
-# 	      art_Persistency_Provenance canvas_Persistency_Provenance
+# 	      art_Persistency_Common
+# 	      art_Persistency_Provenance canvas
 # 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
 # 	      ${MF_MESSAGELOGGER}
 # 	      ${MF_UTILITIES}
 # 	      ${FHICLCPP}
-# 	      ${CETLIB}
+# 	      cetlib cetlib_except
 # 	      ${SQLITE3}
 # 	      ${ROOT_BASIC_LIB_LIST}
 #              
@@ -39,36 +40,39 @@ simple_plugin(DatabaseUtil "service"
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
 	      ${FHICLCPP}
-	      ${CETLIB}
+	      cetlib cetlib_except
 	      ${PQ}
-	      art_Utilities canvas_Utilities
+	      art_Utilities
               ${ART_FRAMEWORK_CORE}
               ${ART_FRAMEWORK_PRINCIPAL}
               ${ART_PERSISTENCY_ROOTDB}
-              art_Persistency_Common canvas_Persistency_Common
-              art_Persistency_Provenance canvas_Persistency_Provenance
+              art_Persistency_Common
+              art_Persistency_Provenance
               ${ART_FRAMEWORK_SERVICES_REGISTRY}
+	      canvas
 	      ${ROOT_CORE}
 )
 simple_plugin(FileCatalogMetadataExtras "service"
-	      art_Utilities canvas_Utilities
+	      art_Utilities
 	      ${ART_PERSISTENCY_ROOTDB}
 	      ${ART_FRAMEWORK_CORE}
 	      ${ART_FRAMEWORK_PRINCIPAL}
 	      ${ART_FRAMEWORK_SERVICES_SYSTEM_FILECATALOGMETADATA_SERVICE}
+	      canvas
 	      ${SQLITE3}
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
-	      ${CETLIB}
+	      cetlib cetlib_except
 	      ${ROOT_BASIC_LIB_LIST}
 )
 
 simple_plugin(LArPropertiesServiceArgoNeuT "service"
               lardata_Utilities_DatabaseUtil_service
-              art_Utilities canvas_Utilities
+              art_Utilities
+	      canvas
               ${MF_MESSAGELOGGER}
               ${MF_UTILITIES}
-              ${CETLIB}
+              cetlib cetlib_except
 	      ${ROOT_CORE}
 )
 
@@ -81,29 +85,31 @@ simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
               ${SQLITE3}
               ${MF_MESSAGELOGGER}
               ${MF_UTILITIES}
-              ${CETLIB}
+              cetlib cetlib_except
               ${ROOT_BASIC_LIB_LIST}
 )
 
 simple_plugin(LArFFT "service"
-	      art_Utilities canvas_Utilities
+	      art_Utilities
+	      canvas
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
 	      ${FHICLCPP}
-	      ${CETLIB}
+	      cetlib cetlib_except
 	      ${ROOT_FFTW}
 	      ${ROOT_BASIC_LIB_LIST}
 )
 
 simple_plugin(MemoryPeakReporter "service"
-              art_Utilities canvas_Utilities
+              art_Utilities
               ${ART_FRAMEWORK_SERVICES_REGISTRY}
               ${ART_FRAMEWORK_PRINCIPAL}
-              art_Persistency_Provenance canvas_Persistency_Provenance
+              art_Persistency_Provenance
+	      canvas
               ${MF_MESSAGELOGGER}
               ${MF_UTILITIES}
               ${FHICLCPP}
-              ${CETLIB}
+              cetlib cetlib_except
  	      ${ROOT_CORE}
 )
 
@@ -112,7 +118,7 @@ simple_plugin(ComputePi "module"
               ${MF_MESSAGELOGGER}
               ${MF_UTILITIES}
               ${FHICLCPP}
-              ${CETLIB}
+              cetlib cetlib_except
 	      ${ROOT_CORE}
 )
 

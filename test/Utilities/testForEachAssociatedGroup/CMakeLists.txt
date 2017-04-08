@@ -1,13 +1,11 @@
-simple_plugin( AssnProducer1           "module"  NO_INSTALL )
-simple_plugin( AssnProducer2           "module"  NO_INSTALL )
-simple_plugin( AssnAnalyzer           "module"  NO_INSTALL )
+simple_plugin( AssnProducer1          "module"  NO_INSTALL cetlib_except )
+simple_plugin( AssnProducer2          "module"  NO_INSTALL cetlib_except )
+simple_plugin( AssnAnalyzer           "module"  NO_INSTALL cetlib_except )
 
 cet_test(associated_groups_test USE_BOOST_UNIT
   LIBRARIES
-    canvas_Persistency_Provenance
-    canvas_Persistency_Common
-    canvas_Utilities
-    ${CETLIB}
+    canvas
+    cetlib cetlib_except
     ${ROOT_CORE}
   )
 
@@ -37,4 +35,4 @@ cet_test(test_associatedgroups HANDBUILT
   TEST_PROPERTIES DEPENDS test_associatedgroups_full
 )
 
-art_dictionary(DICTIONARY_LIBRARIES cetlib NO_INSTALL)
+art_dictionary(DICTIONARY_LIBRARIES cetlib cetlib_except NO_INSTALL )
