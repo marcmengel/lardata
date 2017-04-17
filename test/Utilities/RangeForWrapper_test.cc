@@ -19,7 +19,7 @@
 
 // C/C++ standard libraries
 #include <iterator>
-#include <algorithm> // std::accumulate()
+#include <numeric> // std::accumulate()
 #include <vector>
 #include <type_traits> // std::is_same<>, std::is_lvalue_reference<>, ...
 #include <initializer_list>
