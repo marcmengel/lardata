@@ -113,11 +113,14 @@ namespace {
     }; // PrintOptions_t
     
     
-    /// Constructor; will dump space points from the specified list
-    PCAxisDumper(
-      std::vector<recob::PCAxis> const& pca_list,
-      PrintOptions_t print_options = {}
-      )
+    /// Constructor; will dump space points from the specified list.
+    PCAxisDumper(std::vector<recob::PCAxis> const& pca_list)
+      : PCAxisDumper(pca_list, {})
+      {}
+    
+    /// Constructor; will dump space points from the specified list.
+    PCAxisDumper
+      (std::vector<recob::PCAxis> const& pca_list, PrintOptions_t print_options)
       : pcas(pca_list)
       , options(print_options)
       {}

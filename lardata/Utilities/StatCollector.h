@@ -71,7 +71,7 @@ namespace lar {
         
         /// Returns the square of the specified value
         template <typename V>
-        inline constexpr V sqr(V const& v) { return v*v; }
+        static constexpr V sqr(V const& v) { return v*v; }
         
           protected:
         int n = 0;                ///< number of added entries
