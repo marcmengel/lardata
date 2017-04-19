@@ -3,7 +3,6 @@
 ///
 /// Utility FFT functions
 ///
-/// \version $Id: SingleGen.h,v 1.2 2010/02/15 19:10:40 brebel Exp $
 /// \author  Brian Page
 ////////////////////////////////////////////////////////////////////////
 #ifndef LARFFT_H

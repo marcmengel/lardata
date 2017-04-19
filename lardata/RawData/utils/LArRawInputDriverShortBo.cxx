@@ -2,7 +2,6 @@
 /// \file  LArRawInputDriverShortBo.cxx
 /// \brief Source to convert raw binary files to root files for Short Bo TPC
 ///
-/// \version $Id: LArRawInputDriverShortBo.h
 /// \author  brebel@fnal.gov, soderber@fnal.gov
 ////////////////////////////////////////////////////////////////////////
 

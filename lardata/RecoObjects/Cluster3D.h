@@ -1,5 +1,4 @@
 /**
- *  @version $Id: Cluster3D.h, v1.0 2015/01/24 00:00:00 usher Exp $
  *
  *  @brief Definition of utility objects for use in the 3D clustering for LArSoft
  *
