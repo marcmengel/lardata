@@ -12,6 +12,9 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::PlaneID, ...
 
+#include <stdexcept> // std::runtime_error()
+
+
 ///General LArSoft Utilities
 namespace detinfo{
   
@@ -92,6 +95,8 @@ namespace detinfo{
       virtual double       TimeOffsetU()       const = 0;
       virtual double       TimeOffsetV()       const = 0;
       virtual double       TimeOffsetZ()       const = 0;
+      virtual double       TimeOffsetY()       const
+        { throw std::runtime_error("DetectorProperties::TimeOffsetY() not implemented"); }
 
       virtual double       ConvertXToTicks(double X, int p, int t, int c) const = 0;
       virtual double       ConvertXToTicks(double X, geo::PlaneID const& planeid) const = 0;

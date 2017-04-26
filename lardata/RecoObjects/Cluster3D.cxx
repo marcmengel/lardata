@@ -1,5 +1,4 @@
 ////////////////////////////////////////////////////////////////////////////
-// \version $Id: Cluster3D.cxx,v 1.7 2010/06/12 21:46:34 spitz7 Exp $
 //
 // \brief Definition of 3D cluster object for LArSoft
 //

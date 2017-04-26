@@ -4,7 +4,6 @@
 ///
 /// \author bcarls@fnal.gov
 ///
-/// \version $Id: sim.h,v 1.6 2009/10/05 23:22:58 t962cvs Exp $
 ///
 /// Coding note: Never put '#include "SeedCreator.h"' in your code. It would
 /// force a dependency in your class on every other class in the
