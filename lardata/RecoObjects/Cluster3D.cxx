@@ -204,7 +204,7 @@ Cluster3D::Cluster3D(unsigned                   statusBits,
 Cluster3D Cluster3D::operator +(Cluster3D a)
 {
 /*
-    // throw exception if the clusters are not from the same view
+    // throw exception if the clusters are not from the same plane
     if( a.View() != this->View() )
       throw cet::exception("Cluster+operator") << "Attempting to sum clusters from "
                  << "different views is not allowed\n";
@@ -318,6 +318,7 @@ void RecobClusterParameters::UpdateParameters(const reco::ClusterHit2D* clusterH
     }
     
     m_totalCharge += hit.Integral();
+    m_plane        = hit.WireID().Plane;
     m_view         = hit.View();
     
     m_hitVector.push_back(clusterHit);

@@ -283,6 +283,7 @@ public:
     m_totalCharge(0.),
     m_startWire(9999999),
     m_endWire(0),
+    m_plane(100),
     m_view(geo::kUnknown)
     {
         m_hitVector.clear();
@@ -297,6 +298,7 @@ public:
     double         m_totalCharge;
     unsigned int   m_startWire;
     unsigned int   m_endWire;
+    unsigned int   m_plane;
     geo::View_t    m_view;
     HitVectorConst m_hitVector;
 };
@@ -313,7 +315,7 @@ using HitPairClusterMap  = std::map<int, HitPairListPtr>;
 using HitPairList        = std::list<std::unique_ptr<reco::ClusterHit3D>>;
     
 using PCAHitPairClusterMapPair = std::pair<reco::PrincipalComponents, reco::HitPairClusterMap::iterator>;
-using ViewToClusterParamsMap   = std::map<geo::View_t, RecobClusterParameters>;
+using PlaneToClusterParamsMap  = std::map<size_t, RecobClusterParameters>;
     
 using EdgeTuple        = std::tuple<const reco::ClusterHit3D*,const reco::ClusterHit3D*,double>;
 using EdgeList         = std::list<EdgeTuple>;
@@ -354,16 +356,16 @@ public:
     
     void UpdateParameters(const reco::ClusterHit2D* hit)
     {
-        m_clusterParams[hit->getHit().View()].UpdateParameters(hit);
+        m_clusterParams[hit->getHit().WireID().Plane].UpdateParameters(hit);
     }
     
-    reco::ViewToClusterParamsMap& getClusterParams()      {return m_clusterParams;}
-    reco::HitPairListPtr&         getHitPairListPtr()     {return m_hitPairListPtr;}
-    reco::PrincipalComponents&    getFullPCA()            {return m_fullPCA;}
-    reco::PrincipalComponents&    getSkeletonPCA()        {return m_skeletonPCA;}
-    reco::Hit3DToEdgeMap&         getHit3DToEdgeMap()     {return m_hit3DToEdgeMap;}
-    reco::HitPairListPtr&         getBestHitPairListPtr() {return m_bestHitPairListPtr;}
-    reco::EdgeList&               getBestEdgeList()       {return m_bestEdgeList;}
+    reco::PlaneToClusterParamsMap& getClusterParams()      {return m_clusterParams;}
+    reco::HitPairListPtr&          getHitPairListPtr()     {return m_hitPairListPtr;}
+    reco::PrincipalComponents&     getFullPCA()            {return m_fullPCA;}
+    reco::PrincipalComponents&     getSkeletonPCA()        {return m_skeletonPCA;}
+    reco::Hit3DToEdgeMap&          getHit3DToEdgeMap()     {return m_hit3DToEdgeMap;}
+    reco::HitPairListPtr&          getBestHitPairListPtr() {return m_bestHitPairListPtr;}
+    reco::EdgeList&                getBestEdgeList()       {return m_bestEdgeList;}
     
     friend bool operator < (const ClusterParameters &a, const ClusterParameters& b)
     {
@@ -371,7 +373,7 @@ public:
     }
 
 private:
-    ViewToClusterParamsMap    m_clusterParams;
+    PlaneToClusterParamsMap   m_clusterParams;
     reco::HitPairListPtr      m_hitPairListPtr;    // This contains the list of 3D hits in the cluster
     reco::PrincipalComponents m_fullPCA;
     reco::PrincipalComponents m_skeletonPCA;
