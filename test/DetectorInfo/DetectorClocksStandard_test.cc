@@ -85,6 +85,11 @@ int main(int argc, char const** argv) {
   // DetectorClocksStandard supports the simple set up; so we invoke it
   TestEnv.SimpleProviderSetup<detinfo::DetectorClocksStandard>();
   
+  // we print some information from the service itself;
+  // this is specific to the implementation, so we need to talk
+  // to the concrete type; this is not the way we would normally operate:
+  TestEnv.Provider<detinfo::DetectorClocksStandard>()->debugReport();
+  
   //
   // run the test algorithm
   // (I leave it here for reference -- there is no test algorithm here)
@@ -97,6 +102,8 @@ int main(int argc, char const** argv) {
 //  Tester.Setup(*(TestEnv.Provider<detinfo::DetectorClocks>()));
   
   // 3. then we run it!
+  // Note that here we are querying the abstract DetectorClocks interface;
+  // this is the right way to go.
   detinfo::DetectorClocks const* detClocks
     = TestEnv.Provider<detinfo::DetectorClocks>();
   mf::LogVerbatim("clocks_test")

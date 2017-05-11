@@ -20,6 +20,34 @@
 
 namespace detinfo{
 
+  /**
+   * @brief Implementation of `detinfo::DetectorClocks` interface with fixed
+   *        settings from configuration.
+   * 
+   * In this implementation, the trigger time is always defined to match the
+   * beam gate time, and both are at 0.0 &micro;s.
+   * 
+   * 
+   * Configuration parameters
+   * -------------------------
+   * 
+   * * *TriggerOffsetTPC*: time elapsed between the start of the TPC readout
+   *   clock and the trigger; it can be expressed in one of two ways:
+   *     * negative number [&micro;s]: the offset of the start of the TPC
+   *       readout clock start respect to the trigger time (where negative means
+   *       that the clock starts _before_ the trigger arrives)
+   *     * positive number [ticks]: the number of TPC readout clock tick at
+   *       which the trigger arrives; despite this being a tick number, it can
+   *       be fractional for added precision
+   *   
+   *   For example, `TriggerOffsetTPC` of `-1600.0` means that the TDC clock
+   *   starts 1.6 milliseconds before the trigger time. `TriggerOffsetTPC` of
+   *   `3200.0` means that the trigger arrives at the exact start of tick 3200
+   *   of the TPC readout. In this example, if the sampling frequency of that
+   *   readout is 2 MHz, these two settings are equivalent.
+   * 
+   * _[this list is incomplete]_
+   */
   class DetectorClocksStandard : public DetectorClocks {
 
   public:

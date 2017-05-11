@@ -7,7 +7,7 @@
 
 namespace detinfo {
 
-  /// Maximum time in nano-second
+  /// Maximum time in microseconds
   const double kTIME_MAX = std::numeric_limits<double>::max();
 
   /// Default Frequency in MHz
