@@ -2,15 +2,7 @@ BEGIN_PROLOG
 
 standard_properties:
 {
-
-LoadExtraMatProperties: false
- # Drift properties 
- Efield:           [0.5,0.66,0.8 ]   #kV/cm
- Temperature:      91                #Kelvin
- Electronlifetime: 750               #microseconds
-
  service_provider: "LArPropertiesServiceStandard"
-
 
  # For following parameters, see http://pdg.lbl.gov/AtomicNuclearProperties/
  RadiationLength:  19.55   # g/cm^2
@@ -18,9 +10,10 @@ LoadExtraMatProperties: false
  AtomicMass:       39.948  # Ar atomic mass (g/mol).
  ExcitationEnergy: 188.0   # Ar mean excitation energy (eV).
 
-# realistic Argon 39 decays
 # Argon39DecayRate: 0.00141 # decays per cm^3 per second.  Assumes 1.01 Bq/kg and a density of 1.396 g/cc
-# switch them off for faster simulation
+# The following parameter was formerly used to steer an ad-hoc 39Ar decay model as part of the G4 step.
+# Users are now recommended to use the radiological generator: see larsim/EventGenerators/radiological_gen.fcl
+# As of February 2017, this value is no longer used.
  Argon39DecayRate: 0.0
 
  # Optical properties	
@@ -40,8 +33,7 @@ LoadExtraMatProperties: false
  ScintByParticleType:  false  # whether to use different yields and
                               # quenching per particle in fast op sim
  EnableCerenkovLight: true    # whether to switch on cerenkov light (slow)
- SimpleBoundaryProcess: true #enable opticalBoundaryProcessSimple instead of G4 default
- SimpleScintillation: true #enable OpFastScintillation instead of G4 default
+
 
 
 
@@ -60,27 +52,9 @@ LoadExtraMatProperties: false
  AlphaScintYieldRatio:    0.56
 
 
-
  # Refractive index as a function of energy (eV) from arXiv:1502.04213v1
  RIndexEnergies: [ 1.900,  2.934,  3.592,  5.566,  6.694,  7.540,  8.574,  9.044,  9.232,  9.420,  9.514,  9.608,  9.702,  9.796,  9.890,  9.984,  10.08,  10.27,  10.45,  10.74,  10.92 ]
  RIndexSpectrum: [ 1.232,  1.236,  1.240,  1.261,  1.282,  1.306,  1.353,  1.387,  1.404,  1.423,  1.434,  1.446,  1.459,  1.473,  1.488,  1.505,  1.524,  1.569,  1.627,  1.751,  1.879 ]
-
-# TPB - WLS
-
-TpbTimeConstant: 2.5 #wls time constant in s J. Lumin 81(1999) 285
- # Refractive index as a function of energy
-  # index of refraction as a function of energy (arXiv:1502.04213v1)
- # Refractive index as a function of energy
-
-
-
- # index of refraction as a function of energy (arXiv:1502.04213v1)
-
- #RIndexEnergies: [1.9000,2.9340,3.5920,5.5660,6.6940,7.5400,8.5740,9.0440,9.2320,9.4200,9.5140,9.6080,9.7020,9.7960,9.8900,9.9840,10.0780,10.266,10.454,10.736,10.924]
-
-# RIndexSpectrum: [1.2316,1.2362,1.2403,1.2610,1.2821,1.3060,1.3533,1.3867,1.4035,1.4230,1.4339,1.4457,1.4587,1.4728,1.4883,1.5054, 1.5243,1.5691,1.6265,1.7507,1.8791]
-
-
 
  # absorption length as function of energy
  AbsLengthEnergies: [ 4,     5,     6,     7,     8,     9,     10,    11   ]       
@@ -91,27 +65,24 @@ TpbTimeConstant: 2.5 #wls time constant in s J. Lumin 81(1999) 285
  RayleighSpectrum: [ 47923., 35981., 18825., 10653., 3972., 1681., 750.9, 334.7, 216.8, 135.0, 109.7, 88.06, 78.32, 69.34, 61.06, 53.46, 46.50, 40.13, 28.91, 19.81, 12.61, 7.20 ]
 
  # Surface reflectivity data - vector of energy spectrum per
- #   surface type [1.77, 2.0675, 2.481, 2.819, 2.953, 3.1807, 3.54, 4.135, 4.962, 5.39]0.42, 0.43,0.46,0.43,0.41,0.36,0.33,0.2,0.07,0.07
+ #   surface type
  ReflectiveSurfaceEnergies:           [ 7, 9, 10 ]             
- ReflectiveSurfaceNames:            [ "STEEL_STAINLESS_Fe7Cr2Ni"]  
+ ReflectiveSurfaceNames:            [ "STEEL_STAINLESS_Fe7Cr2Ni" ]  
  ReflectiveSurfaceReflectances:     [ [ 0.25, 0.25, 0.25 ] ]        
- ReflectiveSurfaceDiffuseFractions: [ [ 0.5,  0.5,  0.5  ]]    
- 
+ ReflectiveSurfaceDiffuseFractions: [ [ 0.5,  0.5,  0.5  ] ]
 
- ReflectiveSurfaceTpbEnergies:           [ 1.77, 2.0675, 2.481, 2.819, 2.953, 3.1807, 3.54, 4.135, 4.962, 5.39 ]             
- ReflectiveSurfaceTpbNames:            [ "vm2000" ]  
-  ReflectiveSurfaceTpbReflectances:   [ [0.93, 0.93,0.93,0.93,0.93,0.93, 0.1,0.1,0.7,0.3] ]        
- ReflectiveSurfaceTpbDiffuseFractions: [ [0.05,  0.05,  0.05,0.05,  0.05,  0.05,0.05,  0.05,  0.05,0.05 ] ]
+ # Information related with the simulation of the Wavelength Shifter (TPB) 
+ LoadExtraMatProperties: false	    
 
-#WLS - TPB properties original tpb [0.0, 0.0, 0.0, 0.0588,0.235, 0.853, 1.0,1.0,0.9259,0.704,0.0296,0.011, 0.0,0.0, 0.]
-TpbEmmisionEnergies: [0.05,1.0,1.5, 2.25, 2.481, 2.819, 2.952,2.988,3.024, 3.1, 3.14,3.1807, 3.54, 5.5, 50.39]
-TpbEmmisionSpectrum: [0.0, 0.0, 0.0, 0.0588,0.235, 0.853, 1.0,1.0,0.9259,0.704,0.0296,0.011, 0.0,0.0, 0.]
-TpbAbsorptionEnergies: [0.05,1.77,2.0675, 7.42, 7.75, 8.16, 8.73, 9.78,10.69, 50.39]
-TpbAbsorptionSpectrum: [100000.0,100000.0, 100000.0,0.001,0.00000000001,0.00000000001, 0.00000000001, 0.00000000001, 0.00000000001, 0.00000000001]
+ # TPB - WLS
+ TpbTimeConstant: 2.5 #wls time constant in s J. Lumin 81(1999) 285
 
-#copper cathode/foil preliminary
-
-#G10 from measurements 10 points spectrum  
+ # WLS - TPB properties original tpb [0.0, 0.0, 0.0, 0.0588,0.235, 0.853, 1.0,1.0,0.9259,0.704,0.0296,0.011, 0.0,0.0, 0.]
+ TpbEmmisionEnergies: [0.05,1.0,1.5, 2.25, 2.481, 2.819, 2.952,2.988,3.024, 3.1, 3.14,3.1807, 3.54, 5.5, 50.39]
+ TpbEmmisionSpectrum: [0.0, 0.0, 0.0, 0.0588,0.235, 0.853, 1.0,1.0,0.9259,0.704,0.0296,0.011, 0.0,0.0, 0.]
+ TpbAbsorptionEnergies: [0.05,1.77,2.0675, 7.42, 7.75, 8.16, 8.73, 9.78,10.69, 50.39]
+ TpbAbsorptionSpectrum: [100000.0,100000.0, 100000.0,0.001,0.00000000001,0.00000000001, 0.00000000001, 0.00000000001, 0.00000000001, 0.00000000001]
+        
 }
 
 END_PROLOG
