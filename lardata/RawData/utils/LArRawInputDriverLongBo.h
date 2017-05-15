@@ -2,7 +2,6 @@
 /// \file  LArRawInputDriver.h
 /// \brief Source to convert raw binary files to root files for Long Bo TPC
 ///
-/// \version $Id: T962ConvertBinaryToROOT.h,v 1.7 2010/01/14 19:20:33 brebel Exp $
 /// \author  brebel@fnal.gov, soderber@fnal.gov
 ////////////////////////////////////////////////////////////////////////
 

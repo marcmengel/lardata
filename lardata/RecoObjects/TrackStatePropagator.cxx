@@ -8,12 +8,13 @@ using namespace recob::tracking;
 
 namespace trkf {
 
-  TrackStatePropagator::TrackStatePropagator(double minStep, double maxElossFrac, int maxNit, double tcut, double wrongDirDistTolerance) :
+  TrackStatePropagator::TrackStatePropagator(double minStep, double maxElossFrac, int maxNit, double tcut, double wrongDirDistTolerance, bool propPinvErr) :
     fMinStep(minStep),
     fMaxElossFrac(maxElossFrac),
     fMaxNit(maxNit),
     fTcut(tcut),
-    fWrongDirDistTolerance(wrongDirDistTolerance)
+    fWrongDirDistTolerance(wrongDirDistTolerance),
+    fPropPinvErr(propPinvErr)
   {
     detprop = art::ServiceHandle<detinfo::DetectorPropertiesService>()->provider();
     larprop = lar::providerFrom<detinfo::LArPropertiesService>();
@@ -94,7 +95,7 @@ namespace trkf {
 	apply_dedx(par5d(4), dedx, e, origin.mass(), s, deriv);
       }
     }
-    pm(4,4)*=deriv;
+    if (fPropPinvErr) pm(4,4)*=deriv;
     //
     // 6- create final track state
     cov5d = ROOT::Math::Similarity(pm,cov5d);//*rj
@@ -297,7 +298,7 @@ namespace trkf {
     // noise_matrix(4,3) += 0.;                                   // sigma^2(pinv, v')
 
     // Energy loss fluctuations.
-    noise_matrix(4,4) += pinvvar;                              // sigma^2(pinv, pinv)
+    if (fPropPinvErr) noise_matrix(4,4) += pinvvar;               // sigma^2(pinv, pinv)
 
     // Done (success).
     return true;

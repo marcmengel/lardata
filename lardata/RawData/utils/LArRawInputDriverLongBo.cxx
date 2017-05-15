@@ -2,7 +2,6 @@
 /// \file  LArRawInputDriverLongBo.cxx
 /// \brief Source to convert raw binary files to root files
 ///
-/// \version $Id: LArRawInputDriverLongBO.h,
 /// \author  brebel@fnal.gov, soderber@fnal.gov
 ////////////////////////////////////////////////////////////////////////
 

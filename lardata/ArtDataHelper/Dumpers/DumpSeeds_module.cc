@@ -122,12 +122,16 @@ namespace {
        bool hexFloats = false; ///< print all floating point numbers in base 16
        std::string indent; ///< indentation string
     }; // PrintOptions_t
-      
+    
+    
+    /// Constructor; will dump seeds from the specified list.
+    SeedDumper(std::vector<recob::Seed> const& seed_list)
+      : SeedDumper(seed_list, {})
+      {}
+    
     /// Constructor; will dump seeds from the specified list
-    SeedDumper(
-      std::vector<recob::Seed> const& seed_list,
-      PrintOptions_t print_options = {}
-      )
+    SeedDumper
+      (std::vector<recob::Seed> const& seed_list, PrintOptions_t print_options)
       : seeds(seed_list)
       , options(print_options)
       {}

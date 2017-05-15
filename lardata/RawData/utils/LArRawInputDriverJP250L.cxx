@@ -2,7 +2,6 @@
 /// \file  LArRawInputDriverJP250L.cxx
 /// \brief Source to convert JP250L files to LArSoft files
 ///
-/// \version $Id: LArRawInputDriverJP250L.h,v 1.0 2013/02/13 11:00:00 iwai Exp $
 /// \author  eito@post.kek.jp, brebel@fnal.gov
 ////////////////////////////////////////////////////////////////////////
 
