@@ -663,6 +663,12 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
       else
         errors << "TimeOffsetY missing for view Y.\n";
     }
+    if ((views.count(geo::kX) != 0) != fHasTimeOffsetX) {
+      if (fHasTimeOffsetX)
+        errors << "TimeOffsetX has been specified, but no X view is present.\n";
+      else
+        errors << "TimeOffsetX missing for view X.\n";
+    }
     
     return errors.str();
     
