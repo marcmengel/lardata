@@ -88,6 +88,10 @@ namespace detinfo{
           Name("TimeOffsetY"             ),
           Comment("tick offset subtracted to to convert spacepoint coordinates to hit times on view Y")
         };
+        fhicl::OptionalAtom<double      > TimeOffsetX              {
+          Name("TimeOffsetX"             ),
+          Comment("tick offset subtracted to to convert spacepoint coordinates to hit times on view X")
+        };
         
         fhicl::Atom<double      > SternheimerA             {
           Name("SternheimerA"),
@@ -310,10 +314,12 @@ namespace detinfo{
       double       fTimeOffsetV;       ///< time offset to convert spacepoint coordinates to hit times on view V
       double       fTimeOffsetZ;       ///< time offset to convert spacepoint coordinates to hit times on view Z
       double       fTimeOffsetY;       ///< time offset to convert spacepoint coordinates to hit times on view Y
+      double       fTimeOffsetX;       ///< time offset to convert spacepoint coordinates to hit times on view X
       double       fHasTimeOffsetU = false; ///< whether time offset was configured for view U
       double       fHasTimeOffsetV = false; ///< whether time offset was configured for view V
       double       fHasTimeOffsetZ = false; ///< whether time offset was configured for view Z
       double       fHasTimeOffsetY = false; ///< whether time offset was configured for view Y
+      double       fHasTimeOffsetX = false; ///< whether time offset was configured for view X
       
       SternheimerParameters_t fSternheimerParameters; ///< Sternheimer parameters
       

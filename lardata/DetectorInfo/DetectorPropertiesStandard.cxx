@@ -158,6 +158,7 @@ namespace detinfo{
     fHasTimeOffsetV = config.TimeOffsetV(fTimeOffsetV);
     fHasTimeOffsetZ = config.TimeOffsetZ(fTimeOffsetZ);
     fHasTimeOffsetY = config.TimeOffsetY(fTimeOffsetY);
+    fHasTimeOffsetX = config.TimeOffsetX(fTimeOffsetX);
     
     fSternheimerParameters.a    = config.SternheimerA();
     fSternheimerParameters.k    = config.SternheimerK();
@@ -577,19 +578,29 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 	  }
 	  
 	  // Add view dependent offset
+	  // FIXME the offset should be plane-dependent
 	  geo::View_t view = pgeom.View();
-	  if(view == geo::kU)
-	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetU;
-	  else if(view == geo::kV)
-	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetV;
-	  else if(view == geo::kZ)
-	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetZ;
-	  else if(view == geo::kY)
-	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetY;
-	  else
-	    throw cet::exception(__FUNCTION__) << "Bad view = "
-						       << view << "\n" ;
-	}	
+	  switch (view) {
+	    case geo::kU:
+	      fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetU;
+	      break;
+	    case geo::kV:
+	      fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetV;
+	      break;
+	    case geo::kZ:
+	      fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetZ;
+	      break;
+	    case geo::kY:
+	      fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetY;
+	      break;
+	    case geo::kX:
+	      fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetX;
+	      break;
+	    default:
+	      throw cet::exception(__FUNCTION__) << "Bad view = " << view << "\n" ;
+	  } // switch
+	}
+
       }
     }
 
