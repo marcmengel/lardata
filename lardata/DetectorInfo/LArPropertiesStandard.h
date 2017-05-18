@@ -181,6 +181,21 @@ namespace detinfo {
     void SetReflectiveSurfaceReflectances(std::vector<std::vector<double> > r) { fReflectiveSurfaceReflectances = r;}
     void SetReflectiveSurfaceDiffuseFractions(std::vector<std::vector<double> > f) { fReflectiveSurfaceDiffuseFractions = f;}
 
+    void SetExtraMatProperties(bool l)        { fExtraMatProperties = l;}
+    virtual bool ExtraMatProperties() const { return fExtraMatProperties; }
+    virtual double TpbTimeConstant()  const { return fTpbTimeConstant;     }
+
+    virtual std::map<double, double>  TpbAbs() const override;
+    virtual std::map<double, double>  TpbEm() const override;
+
+    void SetTpbTimeConstant(double y)         { fTpbTimeConstant = y;}
+
+    void SetTpbEmmisionEnergies(std::vector<double> s) { fTpbEmmisionEnergies = s;}
+    void SetTpbEmmisionSpectrum(std::vector<double> s) { fTpbEmmisionSpectrum = s;}
+    void SetTpbAbsorptionEnergies(std::vector<double> s) { fTpbAbsorptionEnergies = s;}
+    void SetTpbAbsorptionSpectrum(std::vector<double> s) { fTpbAbsorptionSpectrum = s;}
+
+
   private:
   protected:
     
@@ -221,6 +236,16 @@ namespace detinfo {
       fhicl::Atom<double> ScintPreScale        { Name("ScintPreScale"       ), Comment("") };
       fhicl::Atom<double> ScintYieldRatio      { Name("ScintYieldRatio"     ), Comment("") };
       fhicl::Atom<bool  > ScintByParticleType  { Name("ScintByParticleType" ), Comment("") };
+
+      fhicl::Sequence<double> TpbEmmisionEnergies   { Name("TpbEmmisionEnergies"  ), Comment("") };
+      fhicl::Sequence<double> TpbEmmisionSpectrum   { Name("TpbEmmisionSpectrum"  ), Comment("") };
+      fhicl::Sequence<double> TpbAbsorptionEnergies { Name("TpbAbsorptionEnergies"), Comment("") };
+      fhicl::Sequence<double> TpbAbsorptionSpectrum { Name("TpbAbsorptionSpectrum"), Comment("") };
+
+      fhicl::Atom<double> TpbTimeConstant    { Name("TpbTimeConstant"       ), Comment("") };
+      fhicl::Atom<bool  > ExtraMatProperties { Name("LoadExtraMatProperties"), Comment("") };
+
+
 #if DETECTORINFO_LARPROPERTIESSTANDARD_HASOPTIONALATOM
       fhicl::OptionalAtom<double> ProtonScintYield
         { Name("ProtonScintYield"       ), Comment("(only if ScintByParticleType is true)") };
@@ -348,6 +373,14 @@ namespace detinfo {
     std::vector<double>               fReflectiveSurfaceEnergies;
     std::vector<std::vector<double> > fReflectiveSurfaceReflectances;
     std::vector<std::vector<double> > fReflectiveSurfaceDiffuseFractions;
+
+    bool fExtraMatProperties;
+    double fTpbTimeConstant;   
+    std::vector<double>               fTpbEmmisionEnergies;
+    std::vector<double>               fTpbEmmisionSpectrum;
+    std::vector<double>               fTpbAbsorptionEnergies;
+    std::vector<double>               fTpbAbsorptionSpectrum;
+
     /*      
 	    struct DBsettingsClass {
 	    DBsettingsClass();

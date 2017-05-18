@@ -113,7 +113,21 @@ void util::LArPropertiesServiceArgoNeuT::reconfigure(fhicl::ParameterSet const& 
     fAlphaScintYield         = pset.get<double>("AlphaScintYield"      );
     fAlphaScintYieldRatio    = pset.get<double>("AlphaScintYieldRatio" );
   }
-  
+
+  if(fExtraMatProperties){
+    // Used data to be found e.g. in:  JINST 7 P05008 (reflectances estimated from measurements at Cracow University of Technology (thanks to dr. J. Jaglarz and dr. N. Nosidlak) + http://refractiveindex.info and refs. therein), G.M. Seidel, et al.,Nucl. Instr. and Meth. A 489 (2002)189; arXiv:1108.5584 [physics.ins-det]; Journal of Luminescence 81 (1999) 285}291;  arXiv:1304.6117v3 [physics.ins-det]; „Optical characterization and GEANT4 simulation of the light collection system for the WArP 100 liters detector: analysis of the event reconstruction capability”, F. Di Pompeo PhD thesis; //http://gentitfx.fr/litrani/AllModules/FitMacros/RIndexRev_vm2000.C.html for vm2000 (VM2000 (TM)) and refs. Therein - list will be updated for referece
+    
+    fTpbTimeConstant = pset.get<double>("TpbTimeConstant" );
+
+    fTpbEmmisionEnergies    = pset.get<std::vector<double> >("TpbEmmisionEnergies"  );
+    fTpbEmmisionSpectrum    = pset.get<std::vector<double> >("TpbEmmisionSpectrum"  );
+    fTpbAbsorptionEnergies  = pset.get<std::vector<double> >("TpbAbsorptionEnergies");
+    fTpbAbsorptionSpectrum  = pset.get<std::vector<double> >("TpbAbsorptionSpectrum");
+    
+  }
+
+
+
   fEnableCerenkovLight  = pset.get<bool>("EnableCerenkovLight"       );
 
   fReflectiveSurfaceNames           = pset.get<std::vector<std::string> >         ("ReflectiveSurfaceNames"           );
@@ -555,9 +569,16 @@ std::map<std::string, std::map<double,double> > util::LArPropertiesServiceArgoNe
 
   return ToReturn;
 }
+//---------------------------------------------------------------------------------  
+std::map<double, double> util::LArPropertiesServiceArgoNeuT::TpbAbs() const
+{ throw cet::exception("LArPropertiesServiceArgoNeuT") << __func__ << "() not implemented here !\n"; }
 
+//--------------------------------------------------------------------------------- 
+std::map<double, double> util::LArPropertiesServiceArgoNeuT::TpbEm() const
+{ throw cet::exception("LArPropertiesServiceArgoNeuT") << __func__ << "() not implemented here !\n"; }
 
 //---------------------------------------------------------------------------------
+
 util::LArPropertiesServiceArgoNeuT::DBsettingsClass::DBsettingsClass() {
   auto const& DButil = *art::ServiceHandle<util::DatabaseUtil>();
   ToughErrorTreatment= DButil.ToughErrorTreatment();

@@ -16,6 +16,8 @@
 
 // ROOT includes
 #include "TMath.h"
+#include "TH1.h"
+#include <Rtypes.h>
 
 // Framework includes
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -223,6 +225,15 @@ bool detinfo::LArPropertiesStandard::Configure(
   SetReflectiveSurfaceEnergies        (config.ReflectiveSurfaceEnergies());
   SetReflectiveSurfaceReflectances    (config.ReflectiveSurfaceReflectances());
   SetReflectiveSurfaceDiffuseFractions(config.ReflectiveSurfaceDiffuseFractions());
+
+  SetTpbEmmisionEnergies(config.TpbEmmisionEnergies());
+  SetTpbEmmisionSpectrum(config.TpbEmmisionSpectrum());
+  SetTpbAbsorptionEnergies(config.TpbAbsorptionEnergies());
+  SetTpbAbsorptionSpectrum(config.TpbAbsorptionSpectrum());
+
+  SetExtraMatProperties (config.ExtraMatProperties ());  
+  SetTpbTimeConstant (config.TpbTimeConstant ());
+
   
   fIsConfigured = true;
 
@@ -369,3 +380,70 @@ std::map<std::string, std::map<double,double> > detinfo::LArPropertiesStandard::
 
   return ToReturn;
 }
+//---------------------------------------------------------------------------------
+std::map<double, double> detinfo::LArPropertiesStandard::TpbAbs() const
+{
+  if(fTpbAbsorptionEnergies.size()!=fTpbAbsorptionSpectrum.size()){
+    throw cet::exception("Incorrect vector sizes in LArProperties")
+      << "The vectors specifying the TpbAbsorption spectrum are "
+      << " different sizes - " << fTpbAbsorptionEnergies.size()
+      << " " << fTpbAbsorptionSpectrum.size();
+  }
+
+  std::map<double, double> ToReturn;
+  for(size_t i=0; i!=fTpbAbsorptionSpectrum.size(); ++i)
+    ToReturn[fTpbAbsorptionEnergies.at(i)]=fTpbAbsorptionSpectrum.at(i);
+
+  return ToReturn;
+}
+//--------------------------------------------------------------------------------- 
+std::map<double, double> detinfo::LArPropertiesStandard::TpbEm() const
+{
+  if(fTpbEmmisionEnergies.size()!=fTpbEmmisionSpectrum.size()){
+    throw cet::exception("Incorrect vector sizes in LArProperties")
+      << "The vectors specifying the TpbEmmision spectrum are "
+      << " different sizes - " << fTpbEmmisionEnergies.size()
+      << " " << fTpbEmmisionSpectrum.size();
+  }
+  //using interpolation for more smooth spectrum of TPB emmision - won't affect anything but the effective size of table passed to G4               
+  Int_t tablesize=100;
+  std::vector<double> new_x;
+  double xrange=0.0;
+  Double_t *en = new Double_t[int(fTpbEmmisionSpectrum.size())+1];
+  Double_t *spectr = new Double_t[int(fTpbEmmisionSpectrum.size())+1];
+  for(int j=0;j<int(fTpbEmmisionSpectrum.size())+1;j++){
+    if(j==0){
+      en[j]=0.;
+      en[j]=0.;
+    }
+    else{
+      en[j]=fTpbEmmisionEnergies[j-1];
+      spectr[j]=fTpbEmmisionSpectrum[j-1];
+      //if(j==int(fTpbEmmisionSpectrum.size())) spectr[j]=+0.5; 
+    }
+    //std::cout<<j<<" "<<int(fTpbEmmisionSpectrum.size())<<" energiestpb "<<en[j]<<std::endl; 
+  }
+  TH1D *energyhist=new TH1D();
+  energyhist->SetBins(int(fTpbEmmisionSpectrum.size()),en);
+  for(int ii=0;ii<int(fTpbEmmisionSpectrum.size());ii++) energyhist->SetBinContent(ii,spectr[ii]);
+  xrange=double((en[int(fTpbEmmisionSpectrum.size())]-en[0])/double(fTpbEmmisionSpectrum.size()));
+  new_x.clear();
+  for(int jj=0; jj<int(tablesize); jj++){
+
+    new_x.push_back(jj*(xrange/double(tablesize)));
+    //std::cout<<"position "<<jj<<" "<<new_x[jj]<<" size of table "<<tablesize<<" range x "<<xrange<<std::endl;                        
+  }
+  std::map<double, double> ToReturn;
+  //for(size_t i=0; i!=fTpbEmmisionSpectrum.size(); ++i)        
+  //  ToReturn[fTpbEmmisionEnergies.at(i)]=fTpbEmmisionSpectrum.at(i);
+  for(int i=0; i<tablesize; i++){
+    ToReturn[new_x.at(i)]=energyhist->Interpolate(new_x[i]);
+    //std::cout<<ToReturn[new_x[i]]<< " is set in material propertiestpb at energy "<<new_x[i]<<" size of x "<<new_x.size()<<" "<<energyhist->Interpolate(new_x[i])<<std::end;
+  }
+  delete energyhist;
+
+  delete[] en;
+  delete[] spectr;
+  return ToReturn;
+}
+//--------------------------------------------------------------------------------- 
