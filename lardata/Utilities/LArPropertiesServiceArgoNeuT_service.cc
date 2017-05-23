@@ -98,6 +98,7 @@ void util::LArPropertiesServiceArgoNeuT::reconfigure(fhicl::ParameterSet const& 
   fScintYield           = pset.get<double>("ScintYield"          );
   fScintPreScale        = pset.get<double>("ScintPreScale"       );
   fScintYieldRatio      = pset.get<double>("ScintYieldRatio"     );
+  fExtraMatProperties   = pset.get<bool>("LoadExtraMatProperties");
 
   if(fScintByParticleType){
     fProtonScintYield        = pset.get<double>("ProtonScintYield"     );
