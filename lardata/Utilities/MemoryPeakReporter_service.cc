@@ -104,7 +104,7 @@ namespace lar {
 
     
     /// Executed after a source has been created
-    void postSource() { UpdatePeak(); Report("source"); }
+    void postSource( art::Event const& ) { UpdatePeak(); Report("source"); }
 
     
     /// Executed at the end of the job
@@ -166,7 +166,7 @@ lar::MemoryPeakReporter::MemoryPeakReporter
   
   // maybe report at the end of the event (and of source too)
   if (EventReportMode != rmNever) {
-    reg.sPostSource.watch(this, &MemoryPeakReporter::postSource);
+    reg.sPostSourceEvent.watch(this, &MemoryPeakReporter::postSource);
     reg.sPostProcessEvent.watch(this, &MemoryPeakReporter::postEventProcessing);
   }
   
