@@ -7,24 +7,24 @@
  * 
  * ****************************************************************************/
 
-#ifndef HITCREATOR_H
-#define HITCREATOR_H
-
-// C/C++ standard library
-#include <string>
-#include <vector>
-#include <utility> // std::move()
-
-// framework libraries
-#include "canvas/Utilities/InputTag.h"
-#include "canvas/Persistency/Common/Ptr.h"
-#include "canvas/Persistency/Common/Assns.h"
-#include "canvas/Persistency/Provenance/ProductID.h"
+#ifndef LARDATA_ARTDATAHELPERS_HITCREATOR_H
+#define LARDATA_ARTDATAHELPERS_HITCREATOR_H
 
 // LArSoft libraries
-#include "lardataobj/RawData/RawDigit.h"
-#include "lardataobj/RecoBase/Wire.h"
 #include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/Wire.h"
+#include "lardataobj/RawData/RawDigit.h"
+
+// framework libraries
+#include "canvas/Persistency/Provenance/ProductID.h"
+#include "canvas/Persistency/Common/Assns.h"
+#include "canvas/Persistency/Common/Ptr.h"
+#include "canvas/Utilities/InputTag.h"
+
+// C/C++ standard library
+#include <utility> // std::move()
+#include <vector>
+#include <string>
 
 
 // declaration of some heavy art stuff
@@ -340,7 +340,7 @@ namespace recob {
        * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
        * 
        */
-      Hit&& move() { return std::move(hit); }
+      recob::Hit&& move() { return std::move(hit); }
       
       
       /**
@@ -358,11 +358,11 @@ namespace recob {
        * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
        * 
        */
-      const Hit& copy() const { return hit; }
+      recob::Hit const& copy() const { return hit; }
       
     protected:
       
-      Hit hit; ///< local instance of the hit being constructed
+      recob::Hit hit; ///< Local instance of the hit being constructed.
       
   }; // class HitCreator
   
@@ -905,4 +905,4 @@ namespace recob {
   
 } // namespace recob
 
-#endif // HITCREATOR_H
+#endif // LARDATA_ARTDATAHELPERS_HITCREATOR_H
