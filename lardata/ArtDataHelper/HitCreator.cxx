@@ -280,9 +280,9 @@ namespace recob {
   
   //----------------------------------------------------------------------
   void HitAndAssociationsWriterBase::put_into(art::Event& event) {
-    if (hits) event.put(std::move(hits));
-    if (WireAssns) event.put(std::move(WireAssns));
-    if (RawDigitAssns) event.put(std::move(RawDigitAssns));
+    if (hits) event.put(std::move(hits), prod_instance);
+    if (WireAssns) event.put(std::move(WireAssns), prod_instance);
+    if (RawDigitAssns) event.put(std::move(RawDigitAssns), prod_instance);
   } // HitAndAssociationsWriterBase::put_into()
   
   
