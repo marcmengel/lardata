@@ -71,7 +71,7 @@ namespace lar {
         
         /// Returns the square of the specified value
         template <typename V>
-        inline constexpr V sqr(V const& v) { return v*v; }
+        static constexpr V sqr(V const& v) { return v*v; }
         
           protected:
         int n = 0;                ///< number of added entries
@@ -207,13 +207,15 @@ namespace lar {
      * unweighted data from collections.
      * For additional examples, see the unit test StatCollector_test.cc .
      * 
-     * @bug StatCollector::Variance() is known to be very sensitive to rounding
-     * errors, since it uses the formula E[x^2] - E^2[x] and if the variance
-     * is effectively small it can become negative.
-     * No logic is currently implemented to mitigate this effect.
-     * As a workaround, if you know roughly the average of the items you are
-     * add()ing, you can subtract it from the input value; you'll have to
-     * shift the average back, while the variance will not be affected;
+     * StatCollector::Variance() is known to be very sensitive to rounding
+     * errors, since it uses the formula E[x^2] - E^2[x].  If the variance
+     * is effectively small the formula can become negative.  In case of 
+     * negative value produced by the variance formula, the Variance() 
+     * method will round up to zero.
+     * If you know roughly the average of the items you are
+     * add()ing, you can reduce the rounding error by subtracting it from 
+     * the input value; you'll have to shift the average back, while the
+     * variance will not be affected;
      * also the sums will be shifted. Example:
      *     
      *     // fill the values, shifted
@@ -228,7 +230,7 @@ namespace lar {
      *     auto variance = sc.Variance();
      *     
      * A small variance implies values of similar magnitude, and therefore
-     * subtracting any sinhle one of them (in the example, the first one) is
+     * subtracting any single one of them (in the example, the first one) is
      * more effective than it seems.
      * As a rule of thumb, if you are collecting statistics for elements with
      * N significant bits, a 2N significant bits is recommended for statistics
@@ -914,7 +916,7 @@ typename lar::util::StatCollector<T, W>::Weight_t
 {
   if (Weights() == Weight_t(0))
     throw std::range_error("StatCollector<>::Variance(): divide by 0");
-  return (SumSq() - sqr(Sum()) / Weights()) / Weights();
+  return std::max(Weight_t(0), (SumSq() - sqr(Sum()) / Weights()) / Weights());
 } // StatCollector<T, W>::Variance()
 
 

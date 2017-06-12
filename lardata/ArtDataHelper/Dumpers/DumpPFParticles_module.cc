@@ -349,16 +349,20 @@ namespace {
     
     
     /// Constructor; will dump particles from the specified list
+    ParticleDumper(std::vector<recob::PFParticle> const& particle_list)
+      : ParticleDumper(particle_list, {})
+      {}
+    
+    /// Constructor; will dump particles from the specified list
     ParticleDumper(
       std::vector<recob::PFParticle> const& particle_list,
-      PrintOptions_t print_options = {}
+      PrintOptions_t print_options
       )
       : particles(particle_list)
       , options(print_options)
       , visited(particles.size(), 0U)
       , particle_map (CreateMap(particles))
-      {
-      }
+      {}
     
     
     /// Sets the vertices associated to each particle

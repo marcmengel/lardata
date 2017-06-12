@@ -136,7 +136,7 @@ namespace util {
    *       // add an association between the last object in wirecol
    *       // (that we just inserted) and digit_ptr
    *       if (!util::CreateAssn(*this, evt, *wirecol, digit_ptr, *WireDigitAssn, spill_name)) {
-   *         throw art::Exception(art::errors::InsertFailure)
+   *         throw art::Exception(art::errors::ProductRegistrationFailure)
    *           << "Can't associate wire #" << (wirecol->size() - 1)
    *           << " with raw digit #" << digit_ptr.key();
    *       } // if failed to add association
@@ -194,7 +194,7 @@ namespace util {
    *       // add an association between the last object in wirecol
    *       // (that we just inserted) and digit_ptr
    *       if (!util::CreateAssn(*this, evt, *wirecol, digit_ptr, *WireDigitAssn)) {
-   *         throw art::Exception(art::errors::InsertFailure)
+   *         throw art::Exception(art::errors::ProductRegistrationFailure)
    *           << "Can't associate wire #" << (wirecol->size() - 1)
    *           << " with raw digit #" << digit_ptr.key();
    *       } // if failed to add association

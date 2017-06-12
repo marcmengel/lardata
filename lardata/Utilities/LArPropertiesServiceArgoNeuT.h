@@ -133,7 +133,8 @@ namespace util{
       /// dQ/dX in electrons/cm, returns dE/dX in MeV/cm.
       double BirksCorrection(double dQdX) const;
       double ModBoxCorrection(double dQdX) const;
-      
+      bool ExtraMatProperties() const { return fExtraMatProperties; }
+      double TpbTimeConstant()  const { return fTpbTimeConstant; }      
       
     private:
 
@@ -144,6 +145,8 @@ namespace util{
       std::vector< double >          fEfield;           ///< kV/cm
       double                         fTemperature;      ///< kelvin
       double                         fElectronlifetime; ///< microseconds
+      double                         fDefTemperature;      ///< kelvin
+      double                         fDefElectronlifetime; ///< microseconds
       double                         fRadiationLength;  ///< g/cm^2
 
       double                         fArgon39DecayRate; ///<  decays per cm^3 per second
@@ -175,6 +178,12 @@ namespace util{
       std::vector<double> fRayleighSpectrum;
       std::vector<double> fRayleighEnergies;
 
+      bool fExtraMatProperties;
+      virtual std::map<double, double>  TpbAbs() const override;
+      virtual std::map<double, double>  TpbEm() const override;
+      double fTpbTimeConstant;
+
+
       bool fScintByParticleType;
 
       double fProtonScintYield;
@@ -205,6 +214,12 @@ namespace util{
       std::vector<std::vector<double> > fReflectiveSurfaceReflectances;
       std::vector<std::vector<double> > fReflectiveSurfaceDiffuseFractions;
       
+      std::vector<double>               fTpbEmmisionEnergies;
+      std::vector<double>               fTpbEmmisionSpectrum;
+      std::vector<double>               fTpbAbsorptionEnergies;
+      std::vector<double>               fTpbAbsorptionSpectrum;
+
+
       struct DBsettingsClass {
         DBsettingsClass();
         

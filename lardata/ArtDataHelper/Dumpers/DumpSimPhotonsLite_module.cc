@@ -1,5 +1,5 @@
 /**
- * @file   DumpSimPhotonsLiteLite_module.cc
+ * @file   DumpSimPhotonsLite_module.cc
  * @brief  Module dumping SimPhotonsLite information on screen
  * @date   March 8, 2017
  * @author Gianluca Petrillo (petrillo@fnal.gov)

@@ -24,6 +24,10 @@
 // Art includes
 #include "fhiclcpp/make_ParameterSet.h"
 
+// C/C++ libraries
+#include <sstream> // std::ostringstream
+
+
 namespace {
   
   template <typename T>
@@ -125,7 +129,8 @@ namespace detinfo{
     fReadOutWindowSize 	      = p.get< unsigned int >("ReadOutWindowSize");
     fTimeOffsetU       	      = p.get< double 	    >("TimeOffsetU"      );
     fTimeOffsetV       	      = p.get< double 	    >("TimeOffsetV"      );
-    fTimeOffsetZ       	      = p.get< double 	    >("TimeOffsetZ"      );
+    fTimeOffsetZ       	      = p.get< double 	    >("TimeOffsetZ",0.0  );
+    fTimeOffsetY       	      = p.get< double 	    >("TimeOffsetY",0.0  );
     fInheritNumberTimeSamples = p.get<bool          >("InheritNumberTimeSamples", false);
     
     fSternheimerParameters.a    = p.get< double >("SternheimerA");
@@ -149,9 +154,10 @@ namespace detinfo{
     fElectronsToADC             = config.ElectronsToADC();
     fNumberTimeSamples          = config.NumberTimeSamples();
     fReadOutWindowSize          = config.ReadOutWindowSize();
-    fTimeOffsetU                = config.TimeOffsetU();
-    fTimeOffsetV                = config.TimeOffsetV();
-    fTimeOffsetZ                = config.TimeOffsetZ();
+    fHasTimeOffsetU = config.TimeOffsetU(fTimeOffsetU);
+    fHasTimeOffsetV = config.TimeOffsetV(fTimeOffsetV);
+    fHasTimeOffsetZ = config.TimeOffsetZ(fTimeOffsetZ);
+    fHasTimeOffsetY = config.TimeOffsetY(fTimeOffsetY);
     
     fSternheimerParameters.a    = config.SternheimerA();
     fSternheimerParameters.k    = config.SternheimerK();
@@ -194,6 +200,8 @@ namespace detinfo{
     SetGeometry(providers.get<geo::GeometryCore>());
     SetLArProperties(providers.get<detinfo::LArProperties>());
     SetDetectorClocks(providers.get<detinfo::DetectorClocks>());
+    
+    CheckConfigurationAfterSetup();
     
   } // DetectorPropertiesStandard::Setup()
   
@@ -576,6 +584,8 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetV;
 	  else if(view == geo::kZ)
 	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetZ;
+	  else if(view == geo::kY)
+	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetY;
 	  else
 	    throw cet::exception(__FUNCTION__) << "Bad view = "
 						       << view << "\n" ;
@@ -609,4 +619,59 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
     return fXTicksOffsets.at(c).at(t).at(p);	
   }
 
+  
+  //--------------------------------------------------------------------
+  std::string DetectorPropertiesStandard::CheckTimeOffsetConfigurationAfterSetup
+    () const
+  {
+    
+    std::ostringstream errors;
+    auto const views = fGeo->Views();
+    
+    if ((views.count(geo::kU) != 0) != fHasTimeOffsetU) {
+      if (fHasTimeOffsetU)
+        errors << "TimeOffsetU has been specified, but no U view is present.\n";
+      else
+        errors << "TimeOffsetU missing for view U.\n";
+    }
+    if ((views.count(geo::kV) != 0) != fHasTimeOffsetV) {
+      if (fHasTimeOffsetV)
+        errors << "TimeOffsetV has been specified, but no V view is present.\n";
+      else
+        errors << "TimeOffsetV missing for view Z.\n";
+    }
+    if ((views.count(geo::kZ) != 0) != fHasTimeOffsetZ) {
+      if (fHasTimeOffsetZ)
+        errors << "TimeOffsetZ has been specified, but no Z view is present.\n";
+      else
+        errors << "TimeOffsetZ missing for view Z.\n";
+    }
+    if ((views.count(geo::kY) != 0) != fHasTimeOffsetY) {
+      if (fHasTimeOffsetY)
+        errors << "TimeOffsetY has been specified, but no Y view is present.\n";
+      else
+        errors << "TimeOffsetY missing for view Y.\n";
+    }
+    
+    return errors.str();
+    
+  } // DetectorPropertiesStandard::CheckTimeOffsetConfigurationAfterSetup()
+  
+  //--------------------------------------------------------------------
+  void DetectorPropertiesStandard::CheckConfigurationAfterSetup() const {
+    
+    std::string errors;
+    
+    errors += CheckTimeOffsetConfigurationAfterSetup();
+    
+    if (!errors.empty()) {
+      throw cet::exception("DetectorPropertiesStandard")
+        << "Detected configuration errors: \n" << errors;
+    }
+    
+  } // DetectorPropertiesStandard::CheckConfigurationAfterSetup()
+  
+  //--------------------------------------------------------------------
+  
+  
 } // namespace
