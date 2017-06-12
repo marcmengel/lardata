@@ -46,13 +46,21 @@ public:
     /// Access the vector of the feature vectors.
     std::vector< FeatureVector<N> > const & vectors() const { return *fVectors; }
 
+    /// Access feature vector data at index "key".
+    /// *** WOULD LIKE TO CHANGE TYPE OF FVEC DATA MEMBER TO std::array AND THEN ENABLE THIS FUNCTION ***
+    //const std::array<float, N> & getVector(size_t key) const { return (*fVectors)[key].data(); }
+
     /// Get copy of the feature vector at index "key".
     std::array<float, N> getVector(size_t key) const
-    { return FVectorReader<T, N>::getVector(key); }
+    {
+        std::array<float, N> vout;
+        for (size_t i = 0; i < N; ++i) vout[i] = (*fVectors)[key][i];
+        return vout;
+    }
 
     /// Get copy of the feature vector idicated with art::Ptr::key().
     std::array<float, N> getVector(art::Ptr<T> const & item) const
-    { return getOutput(item.key()); }
+    { return getVector(item.key()); }
 
 
     /// Get the number of contained items (no. of data product objects equal to no. of feature vectors).
@@ -123,7 +131,7 @@ public:
 
     /// Get copy of the MVA output vector idicated with art::Ptr::key().
     std::array<float, N> getOutput(art::Ptr<T> const & item) const
-    { return getOutput(item.key()); }
+    { return FVectorReader<T, N>::getVector(item.key()); }
 
     /// Get MVA results accumulated over the vector of items (eg. over hits associated to a cluster).
     std::array<float, N> getOutput(std::vector< art::Ptr<T> > const & items) const
