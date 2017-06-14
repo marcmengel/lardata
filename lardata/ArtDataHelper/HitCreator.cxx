@@ -14,6 +14,7 @@
 #include <utility> // std::move()
 #include <algorithm> // std::accumulate(), std::max()
 #include <limits> // std::numeric_limits<>
+#include <cassert>
 
 // art libraries
 #include "canvas/Utilities/Exception.h"
@@ -242,6 +243,7 @@ namespace recob {
       (doWireAssns? new art::Assns<recob::Wire, recob::Hit>: nullptr)
     , RawDigitAssns
       (doRawDigitAssns? new art::Assns<raw::RawDigit, recob::Hit>: nullptr)
+    , event(&event)
   {
     // get the product ID
     hit_prodId
@@ -279,10 +281,11 @@ namespace recob {
   
   
   //----------------------------------------------------------------------
-  void HitAndAssociationsWriterBase::put_into(art::Event& event) {
-    if (hits) event.put(std::move(hits), prod_instance);
-    if (WireAssns) event.put(std::move(WireAssns), prod_instance);
-    if (RawDigitAssns) event.put(std::move(RawDigitAssns), prod_instance);
+  void HitAndAssociationsWriterBase::put_into() {
+    assert(event);
+    if (hits) event->put(std::move(hits), prod_instance);
+    if (WireAssns) event->put(std::move(WireAssns), prod_instance);
+    if (RawDigitAssns) event->put(std::move(RawDigitAssns), prod_instance);
   } // HitAndAssociationsWriterBase::put_into()
   
   
@@ -328,13 +331,13 @@ namespace recob {
   
   
   //----------------------------------------------------------------------
-  void HitCollectionCreator::put_into(art::Event& event) {
+  void HitCollectionCreator::put_into() {
     if (!hits) {
       throw art::Exception(art::errors::LogicError)
         << "HitCollectionCreator is trying to put into the event"
         " a hit collection that was never created!\n";
     }
-    HitAndAssociationsWriterBase::put_into(event);
+    HitAndAssociationsWriterBase::put_into();
   } // HitCollectionCreator::put_into()
   
   
@@ -411,17 +414,18 @@ namespace recob {
   
   
   //----------------------------------------------------------------------
-  void HitCollectionAssociator::put_into(art::Event& event) {
-    prepare_associations(event);
-    HitAndAssociationsWriterBase::put_into(event);
+  void HitCollectionAssociator::put_into() {
+    prepare_associations();
+    HitAndAssociationsWriterBase::put_into();
   } // HitCollectionAssociator::put_into()
   
   
   //----------------------------------------------------------------------
   void HitCollectionAssociator::prepare_associations
-    (std::vector<recob::Hit> const& srchits, art::Event& event)
+    (std::vector<recob::Hit> const& srchits)
   {
     if (!RawDigitAssns && !WireAssns) return; // no associations needed
+    assert(event);
     
     // we make the associations anew
     if (RawDigitAssns) ClearAssociations(*RawDigitAssns);
@@ -436,7 +440,7 @@ namespace recob {
       
       // get the wire collection
       art::ValidHandle<std::vector<recob::Wire>> hWires
-        = event.getValidHandle<std::vector<recob::Wire>>(wires_label);
+        = event->getValidHandle<std::vector<recob::Wire>>(wires_label);
       
       // fill a map of wire index vs. channel number
       std::vector<size_t> WireMap
@@ -450,7 +454,7 @@ namespace recob {
       std::unique_ptr<art::FindOneP<raw::RawDigit>> WireToDigit;
       if (bUseWiresForDigits) {
         WireToDigit.reset
-          (new art::FindOneP<raw::RawDigit>(hWires, event, wires_label));
+          (new art::FindOneP<raw::RawDigit>(hWires, *event, wires_label));
       }
       
       // add associations, hit by hit:
@@ -493,7 +497,7 @@ namespace recob {
     if (RawDigitAssns && !bUseWiresForDigits) {
       // get the digit collection
       art::ValidHandle<std::vector<raw::RawDigit>> hDigits
-        = event.getValidHandle<std::vector<raw::RawDigit>>(digits_label);
+        = event->getValidHandle<std::vector<raw::RawDigit>>(digits_label);
       
       // fill a map of wire index vs. channel number
       std::vector<size_t> DigitMap
@@ -550,17 +554,18 @@ namespace recob {
   
   
   //----------------------------------------------------------------------
-  void HitRefinerAssociator::put_into(art::Event& event) {
-    prepare_associations(event);
-    HitAndAssociationsWriterBase::put_into(event);
+  void HitRefinerAssociator::put_into() {
+    prepare_associations();
+    HitAndAssociationsWriterBase::put_into();
   } // HitRefinerAssociator::put_into()
   
   
   //----------------------------------------------------------------------
   void HitRefinerAssociator::prepare_associations
-    (std::vector<recob::Hit> const& srchits, art::Event& event)
+    (std::vector<recob::Hit> const& srchits)
   {
     if (!RawDigitAssns && !WireAssns) return; // no associations needed
+    assert(event);
     
     // we make the associations anew
     if (RawDigitAssns) ClearAssociations(*RawDigitAssns);
@@ -568,7 +573,7 @@ namespace recob {
     // read the hits; this is going to hurt performances...
     // no solution to that until there is a way to have a lazy read
     art::ValidHandle<std::vector<recob::Hit>> hHits
-      = event.getValidHandle<std::vector<recob::Hit>>(hits_label);
+      = event->getValidHandle<std::vector<recob::Hit>>(hits_label);
     
     // now get the associations
     if (WireAssns) {
@@ -576,7 +581,7 @@ namespace recob {
       ClearAssociations(*WireAssns);
       
       // find the associations between the hits and the wires
-      art::FindOneP<recob::Wire> HitToWire(hHits, event, hits_label);
+      art::FindOneP<recob::Wire> HitToWire(hHits, *event, hits_label);
       if (!HitToWire.isValid()) {
         throw art::Exception(art::errors::ProductNotFound)
           << "Can't find the associations between hits and wires produced by '"
@@ -613,7 +618,7 @@ namespace recob {
       ClearAssociations(*RawDigitAssns);
       
       // find the associations between the hits and the raw digits
-      art::FindOneP<raw::RawDigit> HitToDigits(hHits, event, hits_label);
+      art::FindOneP<raw::RawDigit> HitToDigits(hHits, *event, hits_label);
       if (!HitToDigits.isValid()) {
         throw art::Exception(art::errors::ProductNotFound)
           << "Can't find the associations between hits and raw digits"

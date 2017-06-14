@@ -394,7 +394,7 @@ namespace recob {
    * 
    * // ... fill hcol in the proper way ...
    * 
-   * hcol.put_into(evt); // calls art::Event::put()
+   * hcol.put_into(); // calls art::Event::put()
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * 
    */
@@ -409,14 +409,24 @@ namespace recob {
     
     
     /**
-     * @brief Moves the data into an event.
-     * @param event the target event
+     * @brief Moves the data into the  event.
+     *
+     * The calling module must have already declared the production of these
+     * products with the proper instance name.
+     * After the move, the collections in this object are empty.
+     * 
+     * @deprecated Use the version with no arguments instead.
+     */
+    void put_into(art::Event&) { put_into(); }
+    
+    /**
+     * @brief Moves the data into the  event.
      *
      * The calling module must have already declared the production of these
      * products with the proper instance name.
      * After the move, the collections in this object are empty.
      */
-    void put_into(art::Event& event);
+    void put_into();
     
     
     /// Returns a read-only reference to the current list of hits.
@@ -458,7 +468,7 @@ namespace recob {
     /// Associations with raw digits.
     std::unique_ptr<art::Assns<raw::RawDigit, recob::Hit>> RawDigitAssns;
     
-    
+    art::Event* event = nullptr; ///< Pointer to the event we are using.
     art::ProductID hit_prodId; ///< Stuff for creating `art::Ptr`.
     art::EDProductGetter const* hit_getter; ///< Stuff for creating `art::Ptr`.
     
@@ -640,8 +650,19 @@ namespace recob {
      * The calling module must have already declared the production of these
      * products with the proper instance name.
      * After the move, the collections in this object are empty.
+     * 
+     * @deprecated Use the version with no arguments instead.
      */
-    void put_into(art::Event& event);
+    void put_into(art::Event&) { put_into(); }
+    
+    /**
+     * @brief Moves the data into the event.
+     *
+     * The calling module must have already declared the production of these
+     * products with the proper instance name.
+     * After the move, the collections in this object are empty.
+     */
+    void put_into();
     
     
     /// Returns a read-only reference to the current list of hits.
@@ -778,14 +799,24 @@ namespace recob {
     
     
     /**
-     * @brief Moves the data into an event.
-     * @param event the target event
+     * @brief Moves the data into the event.
+     *
+     * The calling module must have already declared the production of these
+     * products with the proper instance name.
+     * After the move, the collections in this object are empty.
+     * 
+     * @deprecated Use the version with no arguments instead.
+     */
+    void put_into(art::Event&) { put_into(); }
+    
+    /**
+     * @brief Moves the data into the event.
      *
      * The calling module must have already declared the production of these
      * products with the proper instance name.
      * After the move, the collections in this object are empty.
      */
-    void put_into(art::Event& event);
+    void put_into();
     
     
       protected:
@@ -795,12 +826,10 @@ namespace recob {
     art::InputTag digits_label;
     
     /// Finds out the associations for the specified hits.
-    void prepare_associations
-      (std::vector<recob::Hit> const& srchits, art::Event& event);
+    void prepare_associations(std::vector<recob::Hit> const& srchits);
     
     /// Finds out the associations for the current hits.
-    void prepare_associations(art::Event& event)
-      { prepare_associations(*hits, event); }
+    void prepare_associations() { prepare_associations(*hits); }
     
   }; // class HitCollectionAssociator
   
@@ -880,26 +909,35 @@ namespace recob {
     
     
     /**
-     * @brief Moves the data into an event.
-     * @param event the target event
+     * @brief Moves the data into the event.
+     *
+     * The calling module must have already declared the production of these
+     * products with the proper instance name.
+     * After the move, the collections in this object are empty.
+     * 
+     * @deprecated Use the version with no arguments instead.
+     * 
+     */
+    void put_into(art::Event&) { put_into(); }
+    
+    /**
+     * @brief Moves the data into the event.
      *
      * The calling module must have already declared the production of these
      * products with the proper instance name.
      * After the move, the collections in this object are empty.
      */
-    void put_into(art::Event& event);
+    void put_into();
     
     
       protected:
     art::InputTag hits_label; ///< Label of the collection of hits.
     
     /// Finds out the associations for the specified hits.
-    void prepare_associations
-      (std::vector<recob::Hit> const& srchits, art::Event& event);
+    void prepare_associations(std::vector<recob::Hit> const& srchits);
     
     /// Finds out the associations for the current hits.
-    void prepare_associations(art::Event& event)
-      { prepare_associations(*hits, event); }
+    void prepare_associations() { prepare_associations(*hits); }
     
   }; // class HitRefinerAssociator
   
@@ -940,7 +978,7 @@ namespace recob {
    *         // create hits...
    *           hitCollWriter.emplace_back(hit, wire, digit);
    *       }
-   *       hitCollWriter.put_into(event);
+   *       hitCollWriter.put_into();
    *     }
    *   
    * }; // class MyHitProducer
