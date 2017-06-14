@@ -29,25 +29,25 @@ namespace recob {
   namespace test {
   
     /**
-    * @brief Test module for `recob::HitCollector`.
-    * 
-    * Currently exercises:
-    * @todo
-    * 
-    * Throws an exception on failure.
-    * 
-    * Service requirements
-    * =====================
-    * 
-    * This module requires no service.
-    * 
-    * Configuration parameters
-    * =========================
-    * 
-    * * *instanceName* (string, default: empty): name of the data product
-    *     instance to produce
-    * 
-    */
+     * @brief Test module for `recob::HitCollector`.
+     * 
+     * Currently exercises:
+     * @todo
+     * 
+     * Throws an exception on failure.
+     * 
+     * Service requirements
+     * =====================
+     * 
+     * This module requires no service.
+     * 
+     * Configuration parameters
+     * =========================
+     * 
+     * * *instanceName* (string, default: empty): name of the data product
+     *     instance to produce
+     * 
+     */
     class HitCollectionCreatorTest: public art::EDProducer {
       
         public:
@@ -74,7 +74,12 @@ namespace recob {
       
       
         private:
+      
+      recob::HitCollectionCreatorManager<> hitCollManager;
+      
       std::string fInstanceName; ///< Instance name to be used for products.
+      
+      
       
       /// Produces a collection of hits and stores it into the event.
       void produceHits(art::Event& event, std::string instanceName);
@@ -94,13 +99,11 @@ namespace recob {
 recob::test::HitCollectionCreatorTest::HitCollectionCreatorTest
   (Parameters const& config)
   : art::EDProducer()
-  , fInstanceName(config().instanceName())
-{
-  // equivalent to produces():
-  HitCollectionCreator::declare_products
-    (*this, fInstanceName, false /* doWireAssns */, false /* doRawDigitAssns */)
-    ;
-}
+  , hitCollManager(
+      *this, config().instanceName(),
+      false /* doWireAssns */, false /* doRawDigitAssns */
+    ) // produces<>() hit collections
+  {}
 
 
 //----------------------------------------------------------------------------
@@ -117,8 +120,7 @@ void recob::test::HitCollectionCreatorTest::produceHits
   // this object will contain al the hits until they are moved into the event;
   // while it's useful to test the creation of the associations, that is too
   // onerous for this test
-  recob::HitCollectionCreator Hits(*this, event, instanceName,
-    false /* doWireAssns */, false /* doRawDigitAssns */);
+  auto Hits = hitCollManager.collectionWriter(event);
   
   // create hits, one by one
   for (double time: { 0.0, 200.0, 400.0 }) {

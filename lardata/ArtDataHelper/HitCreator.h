@@ -20,6 +20,7 @@
 #include "canvas/Persistency/Common/Assns.h"
 #include "canvas/Persistency/Common/Ptr.h"
 #include "canvas/Utilities/InputTag.h"
+#include "canvas/Utilities/Exception.h"
 
 // C/C++ standard library
 #include <utility> // std::move()
@@ -902,6 +903,193 @@ namespace recob {
     
   }; // class HitRefinerAssociator
   
+  
+  // ---------------------------------------------------------------------------
+  /**
+   * @brief A helper to centralise creation of a hit collection data product.
+   * @tparam Writer writer class to manage
+   * @tparam ModuleType owning module: `art::EDProducer` or `art::EDFilter`
+   * 
+   * This class adds an indirection layer to the model relying on
+   * `HitAndAssociationsWriter`. In that one, two different steps are required,
+   * one in the constructor of the module, where data products are declared, and
+   * one in the place where hits are actually assembled.
+   * These two steps need consistent setup, but they are separate and
+   * formally independent. The "manager" approach consists of an object
+   * performing the first step directly, and delivering an already configured
+   * object for the second step.
+   * 
+   * An example of usage in a module:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * class MyHitProducer: public art::EDProducer {
+   *   
+   *   recob::HitAndAssociationsWriterManager<recob::HitCollectionCreator>
+   *     hitCollCreator;
+   *   
+   *     public:
+   *   
+   *   MyHitProducer(fhicl::ParameterSet const& pset)
+   *     : hitCollCreator(*this, pset.get<std::string>("instanceName", ""))
+   *     {}
+   *   
+   *   void produce(art::Event& event)
+   *     {
+   *       auto hitCollWriter = hitCollCreator.collectionWriter(event);
+   *       
+   *       for (recob::Wire const& wire: Wires) {
+   *         // create hits...
+   *           hitCollWriter.emplace_back(hit, wire, digit);
+   *       }
+   *       hitCollWriter.put_into(event);
+   *     }
+   *   
+   * }; // class MyHitProducer
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * 
+   */
+  template <typename Writer, typename ModuleType = art::EDProducer>
+  class HitAndAssociationsWriterManager {
+    
+      public:
+    using Writer_t = Writer; ///< Type of managed hit collection writer.
+    using Module_t = ModuleType; ///< Type of producing module.
+    
+    /**
+     * @brief Constructor: does not declare anything.
+     * 
+     * This constructor does not declare products. Calling `declare_products()`
+     * explicitly is then required in the module constructor.
+     * 
+     */
+    HitAndAssociationsWriterManager() = default;
+    
+    /**
+     * @brief Declares the hit products we are going to fill.
+     * @param callingProducer the module this manager is bound to
+     * @param instanceName name of the instance for all data products
+     * @param doWireAssns whether to enable associations to wires
+     * @param doRawDigitAssns whether to enable associations to raw digits
+     *
+     * This constructor calls `declareProducts()`.
+     */
+    HitAndAssociationsWriterManager(
+      Module_t& callingProducer, std::string instanceName = "",
+      bool doWireAssns = true, bool doRawDigitAssns = true
+      );
+    
+    /**
+     * @brief Declares the hit products we are going to fill.
+     * @param callingProducer the module this manager is bound to
+     * @param instance_name name of the instance for all data products
+     * @param doWireAssns whether to enable associations to wires
+     * @param doRawDigitAssns whether to enable associations to raw digits
+     *
+     * This declaration must be made in the constructor of producer.
+     * It is equivalent to manually declare the relevant among these products:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * produces<std::vector<recob::Hit>>(prod_instance);
+     * produces<art::Assns<recob::Wire, recob::Hit>>(prod_instance);
+     * produces<art::Assns<raw::RawDigit, recob::Hit>>(prod_instance);
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * in the producer constructor.
+     * All the data products (hit collection and associations) will have the
+     * specified product instance name.
+     */
+    void declareProducts(
+      Module_t& callingProducer, std::string instanceName = "",
+      bool doWireAssns = true, bool doRawDigitAssns = true
+      );
+    
+    /// Returns a new writer already configured.
+    Writer_t collectionWriter(art::Event& event) const;
+    
+    
+    /// Returns the configured product instance name.
+    std::string instanceName() const { return prodInstance; }
+    
+    /// Returns whether the class is fully configured.
+    bool ready() const { return producer; }
+    
+      protected:
+    Module_t* producer = nullptr; ///< Producer this manager is bound to.
+    
+    std::string prodInstance; ///< Tame of the instance for data products.
+    
+    /// Whether we produce hit-digit associations.
+    bool hasRawDigitAssns = true;
+    
+    /// Whether we produce hit-wire associations.
+    bool hasWireAssns = true;
+    
+    
+  }; // class HitAndAssociationsWriterManager
+  
+  /// A manager for `recob::HitCollectionCreator` writer class.
+  template <typename ModuleType = art::EDProducer>
+  using HitCollectionCreatorManager
+    = HitAndAssociationsWriterManager<HitCollectionCreator, ModuleType>;
+  
 } // namespace recob
+
+
+//------------------------------------------------------------------------------
+//--- template implementation
+//------------------------------------------------------------------------------
+//--- recob::HitAndAssociationsWriterManager
+//---
+template <typename Writer, typename ModuleType /* = art::EDProducer */>
+recob::HitAndAssociationsWriterManager<Writer, ModuleType>
+  ::HitAndAssociationsWriterManager
+  (
+    Module_t& callingProducer, std::string instanceName /* = "" */,
+    bool doWireAssns /* = true */, bool doRawDigitAssns /* = true */
+  )
+{
+  declareProducts
+    (callingProducer, instanceName, doWireAssns, doRawDigitAssns);
+} // recob::HitAndAssociationsWriterManager::HitAndAssociationsWriterManager()
+
+
+//------------------------------------------------------------------------------
+template <typename Writer, typename ModuleType /* = art::EDProducer */>
+void recob::HitAndAssociationsWriterManager<Writer, ModuleType>::declareProducts
+  (
+    Module_t& callingProducer, std::string instanceName /* = "" */,
+    bool doWireAssns /* = true */, bool doRawDigitAssns /* = true */
+  )
+{
+  if (producer) {
+    // this means you already called to declaredProducts()
+    // or used the wrong constructor (which did that for you):
+    throw art::Exception(art::errors::LogicError)
+      << "HitAndAssociationsWriter<> has already declared its products.";
+  }
+  producer = &callingProducer;
+  prodInstance = instanceName;
+  hasWireAssns = doWireAssns;
+  hasRawDigitAssns = doRawDigitAssns;
+  HitAndAssociationsWriterBase::declare_products
+    (callingProducer, prodInstance, hasWireAssns, hasRawDigitAssns);
+} // recob::HitAndAssociationsWriterManager::declareProducts()
+
+
+//------------------------------------------------------------------------------
+template <typename Writer, typename ModuleType /* = art::EDProducer */>
+typename recob::HitAndAssociationsWriterManager<Writer, ModuleType>::Writer_t
+recob::HitAndAssociationsWriterManager<Writer, ModuleType>::collectionWriter
+  (art::Event& event) const
+{
+  if (!producer) {
+    // this means you forgot to code a call to declaredProducts()
+    // or used the wrong constructor:
+    throw art::Exception(art::errors::LogicError)
+      << "HitAndAssociationsWriter<>::collectionWriter() called"
+      " before products are declared.";
+  }
+  return
+    { *producer, event, prodInstance, hasWireAssns, hasRawDigitAssns };
+} // recob::HitAndAssociationsWriterManager::collectionWriter()
+
+//------------------------------------------------------------------------------
 
 #endif // LARDATA_ARTDATAHELPERS_HITCREATOR_H
