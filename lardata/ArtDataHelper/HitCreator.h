@@ -17,7 +17,6 @@
 #include "lardata/Utilities/PtrMaker.h"
 
 // framework libraries
-#include "canvas/Persistency/Provenance/ProductID.h"
 #include "canvas/Persistency/Common/Assns.h"
 #include "canvas/Persistency/Common/Ptr.h"
 #include "canvas/Utilities/InputTag.h"
@@ -436,6 +435,7 @@ namespace recob {
     
     /**
      * @brief Declares the hit products we are going to fill.
+     * @tparam ModuleType type of producing module (`EDProducer` or `EDFilter`)
      * @param producer the module producing the data products
      * @param instance_name name of the instance for all data products
      * @param doWireAssns whether to enable associations to wires
@@ -452,8 +452,9 @@ namespace recob {
      * All the data products (hit collection and associations) will have the
      * specified product instance name.
      */
+    template <typename ModuleType>
     static void declare_products(
-      art::EDProducer& producer, std::string instance_name = "",
+      ModuleType& producer, std::string instance_name = "",
       bool doWireAssns = true, bool doRawDigitAssns = true
       );
     
@@ -476,6 +477,7 @@ namespace recob {
     
     /**
      * @brief Constructor: sets instance name and whether to build associations.
+     * @tparam ModuleType type of producing module (`EDProducer` or `EDFilter`)
      * @param producer the module producing the data products
      * @param event the event the products are going to be put into
      * @param instance_name name of the instance for all data products
@@ -485,15 +487,16 @@ namespace recob {
      * All the data products (hit collection and associations) will have the
      * specified product instance name.
      */
+    template <typename ModuleType>
     HitAndAssociationsWriterBase(
-      art::EDProducer& producer, art::Event& evt,
+      ModuleType& producer, art::Event& evt,
       std::string instance_name,
       bool doWireAssns, bool doRawDigitAssns
       );
     
     
     /// Creates an art pointer to the hit with the specified index.
-    HitPtr_t CreatePtr(size_t index) const;
+    HitPtr_t CreatePtr(size_t index) const { return hitPtrMaker(index); }
     
   }; // class HitAndAssociationsWriterBase
   
@@ -514,6 +517,7 @@ namespace recob {
     /// @{
     /**
      * @brief Constructor: sets instance name and whether to build associations.
+     * @tparam ModuleType type of producing module (`EDProducer` or `EDFilter`)
      * @param producer the module producing the data products
      * @param event the event the products are going to be put into
      * @param instance_name name of the instance for all data products
@@ -523,8 +527,9 @@ namespace recob {
      * All the data products (hit collection and associations) will have the
      * specified product instance name.
      */
+    template <typename ModuleType>
     HitCollectionCreator(
-      art::EDProducer& producer, art::Event& evt,
+      ModuleType& producer, art::Event& evt,
       std::string instance_name = "",
       bool doWireAssns = true, bool doRawDigitAssns = true
       );
@@ -532,13 +537,15 @@ namespace recob {
     
     /**
      * @brief Constructor: no product instance name.
+     * @tparam ModuleType type of producing module (`EDProducer` or `EDFilter`)
      * @param producer the module producing the data products
      * @param event the event the products are going to be put into
      * @param doWireAssns whether to enable associations to wires
      * @param doRawDigitAssns whether to enable associations to raw digits
      */
+    template <typename ModuleType>
     HitCollectionCreator(
-      art::EDProducer& producer, art::Event& evt,
+      ModuleType& producer, art::Event& evt,
       bool doWireAssns, bool doRawDigitAssns
       ):
       HitCollectionCreator(producer, evt, "", doWireAssns, doRawDigitAssns)
@@ -700,6 +707,7 @@ namespace recob {
     /// @{
     /**
      * @brief Constructor: sets instance name and whether to build associations.
+     * @tparam ModuleType type of producing module (`EDProducer` or `EDFilter`)
      * @param producer the module producing the data products
      * @param event the event the products are going to be put into
      * @param instance_name name of the instance for all data products
@@ -711,8 +719,9 @@ namespace recob {
      * 
      * If a label is empty, the corresponding association will not be produced.
      */
+    template <typename ModuleType>
     HitCollectionAssociator(
-      art::EDProducer& producer, art::Event& evt,
+      ModuleType& producer, art::Event& evt,
       std::string instance_name,
       art::InputTag const& WireModuleLabel,
       art::InputTag const& RawDigitModuleLabel
@@ -720,6 +729,7 @@ namespace recob {
     
     /**
      * @brief Constructor: sets instance name and whether to build associations.
+     * @tparam ModuleType type of producing module (`EDProducer` or `EDFilter`)
      * @param producer the module producing the data products
      * @param event the event the products are going to be put into
      * @param WireModuleLabel label of the module used to create wires
@@ -730,8 +740,9 @@ namespace recob {
      * 
      * If a label is empty, the corresponding association will not be produced.
      */
+    template <typename ModuleType>
     HitCollectionAssociator(
-      art::EDProducer& producer, art::Event& evt,
+      ModuleType& producer, art::Event& evt,
       art::InputTag const& WireModuleLabel,
       art::InputTag const& RawDigitModuleLabel
       ):
@@ -741,6 +752,7 @@ namespace recob {
     
     /**
      * @brief Constructor: sets instance name and whether to build associations.
+     * @tparam ModuleType type of producing module (`EDProducer` or `EDFilter`)
      * @param producer the module producing the data products
      * @param event the event the products are going to be put into
      * @param instance_name name of the instance for all data products
@@ -753,8 +765,9 @@ namespace recob {
      * The raw digit association is built out of their existing associations
      * with wires, rather than by directly using the raw digits data product.
      */
+    template <typename ModuleType>
     HitCollectionAssociator(
-      art::EDProducer& producer, art::Event& evt,
+      ModuleType& producer, art::Event& evt,
       std::string instance_name,
       art::InputTag const& WireModuleLabel,
       bool doRawDigitAssns
@@ -762,6 +775,7 @@ namespace recob {
     
     /**
      * @brief Constructor: sets instance name and whether to build associations.
+     * @tparam ModuleType type of producing module (`EDProducer` or `EDFilter`)
      * @param producer the module producing the data products
      * @param event the event the products are going to be put into
      * @param instance_name name of the instance for all data products
@@ -774,8 +788,9 @@ namespace recob {
      * The raw digit association is built out of their existing associations
      * with wires, rather than by directly using the raw digits data product.
      */
+    template <typename ModuleType>
     HitCollectionAssociator(
-      art::EDProducer& producer, art::Event& evt,
+      ModuleType& producer, art::Event& evt,
       art::InputTag const& WireModuleLabel,
       bool doRawDigitAssns
       ):
@@ -856,6 +871,7 @@ namespace recob {
     /// @{
     /**
      * @brief Constructor: sets instance name and whether to build associations.
+     * @tparam ModuleType type of producing module (`EDProducer` or `EDFilter`)
      * @param producer the module producing the data products
      * @param event the event the products are going to be put into
      * @param HitModuleLabel label of the module used to create hits
@@ -866,8 +882,9 @@ namespace recob {
      * All the data products (hit collection and associations) will have the
      * specified product instance name.
      */
+    template <typename ModuleType>
     HitRefinerAssociator(
-      art::EDProducer& producer, art::Event& evt,
+      ModuleType& producer, art::Event& evt,
       art::InputTag const& HitModuleLabel,
       std::string instance_name = "",
       bool doWireAssns = true, bool doRawDigitAssns = true
@@ -875,6 +892,7 @@ namespace recob {
     
     /**
      * @brief Constructor: sets instance name and whether to build associations.
+     * @tparam ModuleType type of producing module (`EDProducer` or `EDFilter`)
      * @param producer the module producing the data products
      * @param event the event the products are going to be put into
      * @param HitModuleLabel label of the module used to create hits
@@ -884,8 +902,9 @@ namespace recob {
      * All the data products (hit collection and associations) will have an
      * empty product instance name.
      */
+    template <typename ModuleType>
     HitRefinerAssociator(
-      art::EDProducer& producer, art::Event& evt,
+      ModuleType& producer, art::Event& evt,
       art::InputTag const& HitModuleLabel,
       bool doWireAssns, bool doRawDigitAssns = true
       ):
@@ -1072,7 +1091,130 @@ namespace recob {
 
 
 //------------------------------------------------------------------------------
-//--- template implementation
+//---  template implementation
+//------------------------------------------------------------------------------
+//---  recob::HitAndAssociationsWriterBase
+//---
+template <typename ModuleType>
+recob::HitAndAssociationsWriterBase::HitAndAssociationsWriterBase(
+  ModuleType& producer, art::Event& event,
+  std::string instance_name, bool doWireAssns, bool doRawDigitAssns
+  )
+  : prod_instance(instance_name)
+  , hits()
+  , WireAssns
+    (doWireAssns? new art::Assns<recob::Wire, recob::Hit>: nullptr)
+  , RawDigitAssns
+    (doRawDigitAssns? new art::Assns<raw::RawDigit, recob::Hit>: nullptr)
+  , event(&event)
+  , hitPtrMaker(*(this->event), producer, prod_instance)
+{
+  // this must be run in the producer constructor...
+//  declare_products(producer, doWireAssns, doRawDigitAssns);
+} // recob::HitAndAssociationsWriterBase::HitAndAssociationsWriterBase()
+
+
+//------------------------------------------------------------------------------
+template <typename ModuleType>
+void recob::HitAndAssociationsWriterBase::declare_products(
+  ModuleType& producer,
+  std::string instance_name /* = "" */,
+  bool doWireAssns /* = true */, bool doRawDigitAssns /* = true */
+) {
+  producer.template produces<std::vector<recob::Hit>>(instance_name);
+  
+  // declare the other products we are creating (if any)
+  if (doWireAssns) {
+    producer.template produces<art::Assns<recob::Wire, recob::Hit>>
+      (instance_name);
+  }
+  if (doRawDigitAssns) {
+    producer.template produces<art::Assns<raw::RawDigit, recob::Hit>>
+      (instance_name);
+  }
+  
+} // recob::HitAndAssociationsWriterBase::declare_products()
+
+
+//------------------------------------------------------------------------------
+//---  recob::HitRefinerAssociator
+//---
+template <typename ModuleType>
+recob::HitRefinerAssociator::HitRefinerAssociator(
+  ModuleType& producer, art::Event& evt,
+  art::InputTag const& HitModuleLabel,
+  std::string instance_name /* = "" */,
+  bool doWireAssns /* = true */, bool doRawDigitAssns /* = true */
+)
+  : HitAndAssociationsWriterBase
+      (producer, evt, instance_name, doWireAssns, doRawDigitAssns)
+  , hits_label(HitModuleLabel)
+{
+  hits.reset(new std::vector<recob::Hit>);
+} // recob::HitRefinerAssociator::HitRefinerAssociator()
+  
+  
+//------------------------------------------------------------------------------
+//---  recob::HitCollectionCreator
+//---
+template <typename ModuleType>
+recob::HitCollectionCreator::HitCollectionCreator(
+  ModuleType& producer, art::Event& event,
+  std::string instance_name /* = "" */,
+  bool doWireAssns /* = true */, bool doRawDigitAssns /* = true */
+  )
+  : HitAndAssociationsWriterBase
+    (producer, event, instance_name, doWireAssns, doRawDigitAssns)
+{
+  hits.reset(new std::vector<recob::Hit>);
+} // recob::HitCollectionCreator::HitCollectionCreator()
+
+
+//------------------------------------------------------------------------------
+//---  recob::HitCollectionAssociator
+//---
+template <typename ModuleType>
+recob::HitCollectionAssociator::HitCollectionAssociator(
+  ModuleType& producer, art::Event& evt,
+  std::string instance_name,
+  art::InputTag const& WireModuleLabel,
+  art::InputTag const& RawDigitModuleLabel
+)
+  : HitAndAssociationsWriterBase(
+      producer, evt, instance_name,
+      WireModuleLabel != "", RawDigitModuleLabel != ""
+      )
+  , wires_label(WireModuleLabel)
+  , digits_label(RawDigitModuleLabel)
+{
+  hits.reset(new std::vector<recob::Hit>);
+} // recob::HitCollectionAssociator::HitCollectionAssociator()
+
+
+//------------------------------------------------------------------------------
+template <typename ModuleType>
+recob::HitCollectionAssociator::HitCollectionAssociator(
+  ModuleType& producer, art::Event& evt,
+  std::string instance_name,
+  art::InputTag const& WireModuleLabel,
+  bool doRawDigitAssns /* = false */
+)
+  : HitAndAssociationsWriterBase(
+      producer, evt, instance_name,
+      WireModuleLabel != "", doRawDigitAssns
+      )
+  , wires_label(WireModuleLabel)
+  , digits_label()
+{
+  if (RawDigitAssns && !WireAssns) {
+    throw art::Exception(art::errors::LogicError)
+      << "HitCollectionAssociator can't create hit <--> raw digit"
+      " associations through wires, without wires!\n";
+  }
+  hits.reset(new std::vector<recob::Hit>);
+} // recob::HitCollectionAssociator::HitCollectionAssociator()
+  
+  
 //------------------------------------------------------------------------------
 //--- recob::HitAndAssociationsWriterManager
 //---
@@ -1128,6 +1270,7 @@ recob::HitAndAssociationsWriterManager<Writer, ModuleType>::collectionWriter
   return
     { *producer, event, prodInstance, hasWireAssns, hasRawDigitAssns };
 } // recob::HitAndAssociationsWriterManager::collectionWriter()
+
 
 //------------------------------------------------------------------------------
 
