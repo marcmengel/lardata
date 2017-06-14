@@ -436,7 +436,6 @@ namespace recob {
      * produces<art::Assns<recob::Wire, recob::Hit>>(prod_instance);
      * produces<art::Assns<raw::RawDigit, recob::Hit>>(prod_instance);
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     * 
      * in the producer constructor.
      * All the data products (hit collection and associations) will have the
      * specified product instance name.

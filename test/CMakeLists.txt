@@ -14,6 +14,7 @@ add_subdirectory( RecoObjects )
 add_subdirectory( Utilities )
 add_subdirectory( DetectorInfo )
 add_subdirectory( DetectorInfoServices )
+add_subdirectory( ArtDataHelper )
 
 # various integration tests
 
