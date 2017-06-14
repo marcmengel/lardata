@@ -244,12 +244,8 @@ namespace recob {
     , RawDigitAssns
       (doRawDigitAssns? new art::Assns<raw::RawDigit, recob::Hit>: nullptr)
     , event(&event)
+    , hitPtrMaker(*(this->event), producer, prod_instance)
   {
-    // get the product ID
-    hit_prodId
-      = producer.getProductID<std::vector<recob::Hit>>(event, prod_instance);
-    hit_getter = event.productGetter(hit_prodId);
-    
     // this must be run in the producer constructor...
   //  declare_products(producer, doWireAssns, doRawDigitAssns);
   } // HitAndAssociationsWriterBase::HitAndAssociationsWriterBase()
@@ -276,7 +272,7 @@ namespace recob {
   inline HitAndAssociationsWriterBase::HitPtr_t
   HitAndAssociationsWriterBase::CreatePtr(size_t index) const
   {
-    return { hit_prodId, index, hit_getter };
+    return hitPtrMaker(index);
   } // HitAndAssociationsWriterBase::CreatePtr()
   
   

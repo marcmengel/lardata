@@ -14,6 +14,7 @@
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/Wire.h"
 #include "lardataobj/RawData/RawDigit.h"
+#include "lardata/Utilities/PtrMaker.h"
 
 // framework libraries
 #include "canvas/Persistency/Provenance/ProductID.h"
@@ -469,8 +470,8 @@ namespace recob {
     std::unique_ptr<art::Assns<raw::RawDigit, recob::Hit>> RawDigitAssns;
     
     art::Event* event = nullptr; ///< Pointer to the event we are using.
-    art::ProductID hit_prodId; ///< Stuff for creating `art::Ptr`.
-    art::EDProductGetter const* hit_getter; ///< Stuff for creating `art::Ptr`.
+    
+    lar::PtrMaker<recob::Hit> hitPtrMaker; ///< Tool to create hit pointers,
     
     
     /**
