@@ -145,6 +145,8 @@ namespace util{
       std::vector< double >          fEfield;           ///< kV/cm
       double                         fTemperature;      ///< kelvin
       double                         fElectronlifetime; ///< microseconds
+      double                         fDefTemperature;      ///< kelvin
+      double                         fDefElectronlifetime; ///< microseconds
       double                         fRadiationLength;  ///< g/cm^2
 
       double                         fArgon39DecayRate; ///<  decays per cm^3 per second

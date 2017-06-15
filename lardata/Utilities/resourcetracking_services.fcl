@@ -50,7 +50,7 @@ standard_memorytracker: {
   
   # do not report memory increase from the first event
   # (this is guaranteed to be a large, but necessary, jump)
-  ignoreTotal: 1 
+  #ignoreTotal: 1 
   
   dbOutput: {
     

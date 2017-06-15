@@ -43,11 +43,16 @@ void util::LArPropertiesServiceArgoNeuT::preBeginRun(art::Run const& run)
     //get lifetime for a given run. If it doesn't work return to default value.
     if(DButil->GetLifetimeFromDB(nrun,inpvalue)!=-1)
       fElectronlifetime=inpvalue;
+    else{//use default value
+      fElectronlifetime=fDefElectronlifetime;
+    }
 
     //get temperature for a given run. If it doesn't work return to default value.
     if(DButil->GetTemperatureFromDB(nrun,inpvalue)!=-1)
       fTemperature=inpvalue;
-
+    else{
+      fTemperature=fDefTemperature;
+    }
     //get Efield vlaues for a given run. If it doesn't work return to default value.
     DButil->GetEfieldValuesFromDB(nrun,fEfield);
 
@@ -67,6 +72,8 @@ void util::LArPropertiesServiceArgoNeuT::reconfigure(fhicl::ParameterSet const& 
   fEfield            = pset.get< std::vector<double> >("Efield"          );
   fTemperature       = pset.get< double              >("Temperature"     );
   fElectronlifetime  = pset.get< double              >("Electronlifetime");
+  fDefTemperature    = pset.get< double              >("Temperature"     );
+  fDefElectronlifetime = pset.get< double            >("Electronlifetime");
   fRadiationLength   = pset.get< double              >("RadiationLength" );
   fZ                 = pset.get< double              >("AtomicNumber"    );
   fA                 = pset.get< double              >("AtomicMass"      );
@@ -98,6 +105,7 @@ void util::LArPropertiesServiceArgoNeuT::reconfigure(fhicl::ParameterSet const& 
   fScintYield           = pset.get<double>("ScintYield"          );
   fScintPreScale        = pset.get<double>("ScintPreScale"       );
   fScintYieldRatio      = pset.get<double>("ScintYieldRatio"     );
+  fExtraMatProperties   = pset.get<bool>("LoadExtraMatProperties");
 
   if(fScintByParticleType){
     fProtonScintYield        = pset.get<double>("ProtonScintYield"     );

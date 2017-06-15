@@ -17,6 +17,7 @@
 #include <functional>
 #include <string>
 #include <unordered_map>
+#include <cmath>
 
 namespace anab {
 
@@ -76,7 +77,7 @@ std::array<float, N> anab::MVAWrapperBase::pAccumulate(
     acc.fill(0);
 
 	float pmin = 1.0e-6, pmax = 1.0 - pmin;
-	float log_pmin = log(pmin), log_pmax = log(pmax);
+	float log_pmin = std::log(pmin), log_pmax = std::log(pmax);
 
 	for (auto const & ptr : items)
 	{
@@ -86,7 +87,7 @@ std::array<float, N> anab::MVAWrapperBase::pAccumulate(
 		    float v;
 			if (vout[i] < pmin) v = log_pmin;
 			else if (vout[i] > pmax) v = log_pmax;
-			else v = log(vout[i]);
+			else v = std::log(vout[i]);
 
 			acc[i] += v;
 		}
@@ -123,7 +124,7 @@ std::array<float, N> anab::MVAWrapperBase::pAccumulate(
     acc.fill(0);
 
 	float pmin = 1.0e-6, pmax = 1.0 - pmin;
-	float log_pmin = log(pmin), log_pmax = log(pmax);
+	float log_pmin = std::log(pmin), log_pmax = std::log(pmax);
 	double totw = 0.0;
 
 	for (size_t k = 0; k < items.size(); ++k)
@@ -139,7 +140,7 @@ std::array<float, N> anab::MVAWrapperBase::pAccumulate(
 		    float v;
 			if (vout[i] < pmin) v = log_pmin;
 			else if (vout[i] > pmax) v = log_pmax;
-			else v = log(vout[i]);
+			else v = std::log(vout[i]);
 
 			acc[i] += w * v;
 		}
@@ -177,7 +178,7 @@ std::array<float, N> anab::MVAWrapperBase::pAccumulate(
     acc.fill(0);
 
 	float pmin = 1.0e-6, pmax = 1.0 - pmin;
-	float log_pmin = log(pmin), log_pmax = log(pmax);
+	float log_pmin = std::log(pmin), log_pmax = std::log(pmax);
 	double totw = 0.0;
 
 	for (size_t k = 0; k < items.size(); ++k)
@@ -193,7 +194,7 @@ std::array<float, N> anab::MVAWrapperBase::pAccumulate(
 		    float v;
 			if (vout[i] < pmin) v = log_pmin;
 			else if (vout[i] > pmax) v = log_pmax;
-			else v = log(vout[i]);
+			else v = std::log(vout[i]);
 
 			acc[i] += w * v;
 		}
@@ -231,7 +232,7 @@ std::array<float, N> anab::MVAWrapperBase::pAccumulate(
     acc.fill(0);
 
 	float pmin = 1.0e-6, pmax = 1.0 - pmin;
-	float log_pmin = log(pmin), log_pmax = log(pmax);
+	float log_pmin = std::log(pmin), log_pmax = std::log(pmax);
 	double totw = 0.0;
 
 	for (size_t k = 0; k < items.size(); ++k)
@@ -247,7 +248,7 @@ std::array<float, N> anab::MVAWrapperBase::pAccumulate(
 		    float v;
 			if (vout[i] < pmin) v = log_pmin;
 			else if (vout[i] > pmax) v = log_pmax;
-			else v = log(vout[i]);
+			else v = std::log(vout[i]);
 
 			acc[i] += w * v;
 		}
@@ -316,7 +317,7 @@ std::array<float, N> anab::MVAWrapperBase::pAccumulate(
     acc.fill(0);
 
 	float pmin = 1.0e-6, pmax = 1.0 - pmin;
-	float log_pmin = log(pmin), log_pmax = log(pmax);
+	float log_pmin = std::log(pmin), log_pmax = std::log(pmax);
 
 	for (auto const & ptr : items)
 	{
@@ -328,7 +329,7 @@ std::array<float, N> anab::MVAWrapperBase::pAccumulate(
 		    float v;
 			if (vout[i] < pmin) v = log_pmin;
 			else if (vout[i] > pmax) v = log_pmax;
-			else v = log(vout[i]);
+			else v = std::log(vout[i]);
 
 			acc[i] += v;
 		}
