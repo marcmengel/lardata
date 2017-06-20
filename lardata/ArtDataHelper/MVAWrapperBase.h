@@ -21,14 +21,22 @@
 
 namespace anab {
 
-/// Helper functions for MVAReader and MVAWriter wrappers.
-class MVAWrapperBase {
+/// Helper functions for MVAReader/Writer and FVecReader/Writer wrappers.
+class FVectorWrapperBase {
 public:
 
 protected:
 
     std::string getProductName(std::type_info const & ti) const;
     size_t getProductHash(std::type_info const & ti) const { return ti.hash_code(); }
+
+};
+
+/// Helper functions for MVAReader and MVAWriter wrappers.
+class MVAWrapperBase {
+public:
+
+protected:
 
     // all mva outputs in the feature vecor sum up to p=1
 

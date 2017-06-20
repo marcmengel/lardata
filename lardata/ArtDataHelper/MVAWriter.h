@@ -18,139 +18,104 @@
 
 namespace anab {
 
-/// Index to the MVA output collection, used when result vectors are added or set.
+/// Index to the MVA output / FeatureVector collection, used when result vectors are added or set.
+typedef size_t FVector_ID;
 typedef size_t MVAOutput_ID;
 
-/// Helper for registering in the art::EDProducer all data products needed for
-/// N-output MVA results: keep MVADescriptions<N> for all types T in one collection
-/// while separate instance names are used for the MVA output value collections for
-/// each type T.
-/// Use one instance of this class per one MVA model, applied to one or more types.
 template <size_t N>
-class MVAWriter : public MVAWrapperBase {
+class FVectorWriter : public FVectorWrapperBase {
 public:
 
-    /// Name provided to the constructor is used as an instance name for MVADescription<N>
+    /// Name provided to the constructor is used as an instance name for FVecDescription<N>
     /// and FeatureVector<N> (for which it is combined with the processed data product names).
-    /// Good idea is to use the name as an indication of what MVA model was used on the data
-    /// (like eg. "emtrack" for outputs from a model distinguishing EM from track-like hits
-    /// and clusters). The name is used as an instance name for the MVADescription data product
-    /// which lets you to save multiple MVA results from a single art module.
-    MVAWriter(art::EDProducer* module, const char* name = "") :
+    /// The name is used as an instance name for the FVecDescription data product
+    /// which lets you to save multiple vector collections from a single art module.
+    FVectorWriter(art::EDProducer* module, const char* name = "") :
         fProducer(module), fInstanceName(name),
         fIsDescriptionRegistered(false),
         fDescriptions(nullptr)
     { }
 
-    /// Register the collection of metadata type MVADescription<N> (once for all data types
-    /// for which MVA is saved) and the collection of FeatureVectors<N> (using data type name
+    /// Register the collection of metadata type FVecDescription<N> (once for all data types
+    /// for which vectors are saved) and the collection of FeatureVectors<N> (using data type name
     /// added to fInstanceName as instance name of the collection made for the type T).
     template <class T>
     void produces_using();
 
-    /// Initialize container for MVA outputs and, if not yet done, the container for
-    /// metadata, then creates metadata for data products of type T. MVA output container
+    /// Initialize container for FeatureVectors and, if not yet done, the container for
+    /// metadata, then creates metadata for data products of type T. FeatureVector container
     /// is initialized to hold dataSize vectors (if dataSize > 0): use setOutput() to
     /// store values.
-    /// Returns index of outputs which should be used when saving actual output values.
+    /// Returns index of collection which should be used when saving actual output values.
     template <class T>
-    MVAOutput_ID initOutputs(std::string const & dataTag, size_t dataSize,
+    FVector_ID initOutputs(std::string const & dataTag, size_t dataSize,
         std::vector< std::string > const & names = std::vector< std::string >(N, ""));
 
     template <class T>
-    MVAOutput_ID initOutputs(art::InputTag const & dataTag, size_t dataSize,
+    FVector_ID initOutputs(art::InputTag const & dataTag, size_t dataSize,
         std::vector< std::string > const & names = std::vector< std::string >(N, ""))
     { return initOutputs<T>(dataTag.encode(), dataSize, names); }
 
-    void setOutput(MVAOutput_ID id, size_t key, std::array<float, N> const & values) { (*(fOutputs[id]))[key] = values; }
-    void setOutput(MVAOutput_ID id, size_t key, std::array<double, N> const & values) { (*(fOutputs[id]))[key] = values; }
-    void setOutput(MVAOutput_ID id, size_t key, std::vector<float> const & values) { (*(fOutputs[id]))[key] = values; }
-    void setOutput(MVAOutput_ID id, size_t key, std::vector<double> const & values) { (*(fOutputs[id]))[key] = values; }
+    void setVector(FVector_ID id, size_t key, std::array<float, N> const & values) { (*(fVectors[id]))[key] = values; }
+    void setVector(FVector_ID id, size_t key, std::array<double, N> const & values) { (*(fVectors[id]))[key] = values; }
+    void setVector(FVector_ID id, size_t key, std::vector<float> const & values) { (*(fVectors[id]))[key] = values; }
+    void setVector(FVector_ID id, size_t key, std::vector<double> const & values) { (*(fVectors[id]))[key] = values; }
 
 
-    /// Initialize container for MVA outputs and, if not yet done, the container for
-    /// metadata, then creates metadata for data products of type T. MVA output container
-    /// is initialized as EMPTY and MVA vectors should be added with addOutput() function.
-    /// Returns index of outputs which should be used when adding actual output values.
+    /// Initialize container for FeatureVectors and, if not yet done, the container for
+    /// metadata, then creates metadata for data products of type T. FeatureVector container
+    /// is initialized as EMPTY and vectors should be added with addOutput() function.
+    /// Returns index of collection which should be used when adding actual output values.
     template <class T>
-    MVAOutput_ID initOutputs(art::InputTag const & dataTag,
+    FVector_ID initOutputs(art::InputTag const & dataTag,
         std::vector< std::string > const & names = std::vector< std::string >(N, ""))
     { return initOutputs<T>(dataTag.encode(), 0, names); }
 
     template <class T>
-    MVAOutput_ID initOutputs(
+    FVector_ID initOutputs(
         std::vector< std::string > const & names = std::vector< std::string >(N, ""))
     { return initOutputs<T>(std::string(""), 0, names); }
 
-    void addOutput(MVAOutput_ID id, std::array<float, N> const & values) { fOutputs[id]->emplace_back(values); }
-    void addOutput(MVAOutput_ID id, std::array<double, N> const & values) { fOutputs[id]->emplace_back(values); }
-    void addOutput(MVAOutput_ID id, std::vector<float> const & values) { fOutputs[id]->emplace_back(values); }
-    void addOutput(MVAOutput_ID id, std::vector<double> const & values) { fOutputs[id]->emplace_back(values); }
+    void addVector(FVector_ID id, std::array<float, N> const & values) { fVectors[id]->emplace_back(values); }
+    void addVector(FVector_ID id, std::array<double, N> const & values) { fVectors[id]->emplace_back(values); }
+    void addVector(FVector_ID id, std::vector<float> const & values) { fVectors[id]->emplace_back(values); }
+    void addVector(FVector_ID id, std::vector<double> const & values) { fVectors[id]->emplace_back(values); }
 
     /// Set tag of associated data products in case it was not ready at the initialization time.
-    void setDataTag(MVAOutput_ID id, art::InputTag const & dataTag) { (*fDescriptions)[id].setDataTag(dataTag.encode()); }
+    void setDataTag(FVector_ID id, art::InputTag const & dataTag) { (*fDescriptions)[id].setDataTag(dataTag.encode()); }
 
     /// Check consistency and save all the results in the event.
     void saveOutputs(art::Event & evt);
 
-    /// Get MVA results accumulated over the vector of items (eg. over hits associated to a cluster).
-    /// NOTE: MVA outputs for these items has to be added to the MVAWriter first!
-    template <class T>
-    std::array<float, N> getOutput(std::vector< art::Ptr<T> > const & items) const
-    { return pAccumulate<T, N>(items, *(fOutputs[getProductID<T>()])); }
+    /// Get the number of contained feature vectors.
+    size_t size(FVector_ID id) const { return fVectors[id]->size(); }
 
-    /// Get MVA results accumulated with provided weights over the vector of items
-    /// (eg. over clusters associated to a track, weighted by the cluster size; or
-    /// over hits associated to a cluster, weighted by the hit area).
-    /// NOTE: MVA outputs for these items has to be added to the MVAWriter first!
-    template <class T>
-    std::array<float, N> getOutput(std::vector< art::Ptr<T> > const & items,
-        std::vector<float> const & weights) const
-    { return pAccumulate<T, N>(items, weights, *(fOutputs[getProductID<T>()])); }
-
-    /// Get MVA results accumulated with provided weighting function over the vector
-    /// of items (eg. over clusters associated to a track, weighted by the cluster size;
-    /// or over hits associated to a cluster, weighted by the hit area).
-    /// NOTE: MVA outputs for these items has to be added to the MVAWriter first!
-    template <class T>
-    std::array<float, N> getOutput(std::vector< art::Ptr<T> > const & items,
-        std::function<float (T const &)> fweight) const
-    { return pAccumulate<T, N>(items, fweight, *(fOutputs[getProductID<T>()])); }
-
-    template <class T>
-    std::array<float, N> getOutput(std::vector< art::Ptr<T> > const & items,
-        std::function<float (art::Ptr<T> const &)> fweight) const
-    { return pAccumulate<T, N>(items, fweight, *(fOutputs[getProductID<T>()])); }
-
-    /// Get copy of the MVA output vector for the type T, at index "key".
-    template <class T>
-    std::array<float, N> getOutput(size_t key) const
-    {
-        std::array<float, N> vout;
-        auto const & src = ( *(fOutputs[getProductID<T>()]) )[key];
-        for (size_t i = 0; i < N; ++i) vout[i] = src[i];
-        return vout;
-    }
-
-    /// Get copy of the MVA output vector for the type T, idicated with art::Ptr::key().
-    template <class T>
-    std::array<float, N> getOutput(art::Ptr<T> const & item) const
-    {
-        std::array<float, N> vout;
-        auto const & src = ( *(fOutputs[getProductID<T>()]) )[item.key()];
-        for (size_t i = 0; i < N; ++i) vout[i] = src[i];
-        return vout;
-    }
-
-    /// Get the number of contained MVA output vectors.
-    size_t size(MVAOutput_ID id) const { return fOutputs[id]->size(); }
-
-    /// Get the length of a single vector of MVA values.
+    /// Get the length of a single feature vector.
     size_t length() const { return N; }
 
-    friend std::ostream& operator<< (std::ostream &o, MVAWriter const& a)
+    /// Get copy of the feature vector for the type T, at index "key".
+    template <class T>
+    std::array<float, N> getVector(size_t key) const
     {
-        o << "MVAWriter for " << a.fInstanceName << ", " << N << " outputs";
+        std::array<float, N> vout;
+        auto const & src = ( *(fVectors[getProductID<T>()]) )[key];
+        for (size_t i = 0; i < N; ++i) vout[i] = src[i];
+        return vout;
+    }
+
+    /// Get copy of the feature vector for the type T, idicated with art::Ptr::key().
+    template <class T>
+    std::array<float, N> getVector(art::Ptr<T> const & item) const
+    {
+        std::array<float, N> vout;
+        auto const & src = ( *(fVectors[getProductID<T>()]) )[item.key()];
+        for (size_t i = 0; i < N; ++i) vout[i] = src[i];
+        return vout;
+    }
+
+    friend std::ostream& operator<< (std::ostream &o, FVectorWriter const& a)
+    {
+        o << "FVectorWriter for " << a.fInstanceName << ", " << N << " outputs";
         if (!a.fRegisteredDataTypes.empty())
         {
             o << ", ready to write results made for:" << std::endl;
@@ -160,8 +125,13 @@ public:
         return o;
     }
 
-private:
+protected:
+    // Data collected for each event:
+    template <class T> FVector_ID getProductID() const;
 
+    std::vector< std::unique_ptr< std::vector< anab::FeatureVector<N> > > > fVectors;
+
+private:
     // Data initialized for the module life:
     art::EDProducer* fProducer;
     std::string fInstanceName;
@@ -169,15 +139,12 @@ private:
     std::vector< std::string > fRegisteredDataTypes;
     bool fIsDescriptionRegistered;
 
-    // Data collected for each event:
-    std::unordered_map< size_t, MVAOutput_ID > fTypeHashToID;
-    template <class T> MVAOutput_ID getProductID() const;
+    std::unordered_map< size_t, FVector_ID > fTypeHashToID;
 
-    std::vector< std::unique_ptr< std::vector< anab::FeatureVector<N> > > > fOutputs;
-    std::unique_ptr< std::vector< anab::MVADescription<N> > > fDescriptions;
+    std::unique_ptr< std::vector< anab::FVecDescription<N> > > fDescriptions;
     void clearEventData()
     {
-        fTypeHashToID.clear(); fOutputs.clear();
+        fTypeHashToID.clear(); fVectors.clear();
         fDescriptions.reset(nullptr);
     }
 
@@ -187,27 +154,96 @@ private:
     bool descriptionExists(const std::string & tname) const;
 };
 
+/// Helper for registering in the art::EDProducer all data products needed for
+/// N-output MVA results: keep MVADescriptions<N> for all types T in one collection
+/// while separate instance names are used for the MVA output value collections for
+/// each type T.
+/// Use one instance of this class per one MVA model, applied to one or more types.
+template <size_t N>
+class MVAWriter : public FVectorWriter<N>, public MVAWrapperBase {
+public:
+
+    /// Name provided to the constructor is used as an instance name for MVADescription<N>
+    /// and FeatureVector<N> (for which it is combined with the processed data product names).
+    /// Good idea is to use the name as an indication of what MVA model was used on the data
+    /// (like eg. "emtrack" for outputs from a model distinguishing EM from track-like hits
+    /// and clusters). The name is used as an instance name for the MVADescription data product
+    /// which lets you to save multiple MVA results from a single art module.
+    MVAWriter(art::EDProducer* module, const char* name = "") :
+        FVectorWriter<N>(module, name)
+    { }
+
+    void setOutput(FVector_ID id, size_t key, std::array<float, N> const & values) { FVectorWriter<N>::setVector(id, key, values); }
+    void setOutput(FVector_ID id, size_t key, std::array<double, N> const & values) { FVectorWriter<N>::setVector(id, key, values); }
+    void setOutput(FVector_ID id, size_t key, std::vector<float> const & values) { FVectorWriter<N>::setVector(id, key, values); }
+    void setOutput(FVector_ID id, size_t key, std::vector<double> const & values) { FVectorWriter<N>::setVector(id, key, values); }
+
+    void addOutput(FVector_ID id, std::array<float, N> const & values) { FVectorWriter<N>::addVector(id, values); }
+    void addOutput(FVector_ID id, std::array<double, N> const & values) { FVectorWriter<N>::addVector(id, values); }
+    void addOutput(FVector_ID id, std::vector<float> const & values) { FVectorWriter<N>::addVector(id, values); }
+    void addOutput(FVector_ID id, std::vector<double> const & values) { FVectorWriter<N>::addVector(id, values); }
+
+
+    /// Get MVA results accumulated over the vector of items (eg. over hits associated to a cluster).
+    /// NOTE: MVA outputs for these items has to be added to the MVAWriter first!
+    template <class T>
+    std::array<float, N> getOutput(std::vector< art::Ptr<T> > const & items) const
+    { return pAccumulate<T, N>(items, *(FVectorWriter<N>::fVectors[FVectorWriter<N>::template getProductID<T>()])); }
+
+    /// Get MVA results accumulated with provided weights over the vector of items
+    /// (eg. over clusters associated to a track, weighted by the cluster size; or
+    /// over hits associated to a cluster, weighted by the hit area).
+    /// NOTE: MVA outputs for these items has to be added to the MVAWriter first!
+    template <class T>
+    std::array<float, N> getOutput(std::vector< art::Ptr<T> > const & items,
+        std::vector<float> const & weights) const
+    { return pAccumulate<T, N>(items, weights, *(FVectorWriter<N>::fVectors[FVectorWriter<N>::template getProductID<T>()])); }
+
+    /// Get MVA results accumulated with provided weighting function over the vector
+    /// of items (eg. over clusters associated to a track, weighted by the cluster size;
+    /// or over hits associated to a cluster, weighted by the hit area).
+    /// NOTE: MVA outputs for these items has to be added to the MVAWriter first!
+    template <class T>
+    std::array<float, N> getOutput(std::vector< art::Ptr<T> > const & items,
+        std::function<float (T const &)> fweight) const
+    { return pAccumulate<T, N>(items, fweight, *(FVectorWriter<N>::fVectors[FVectorWriter<N>::template getProductID<T>()])); }
+
+    template <class T>
+    std::array<float, N> getOutput(std::vector< art::Ptr<T> > const & items,
+        std::function<float (art::Ptr<T> const &)> fweight) const
+    { return pAccumulate<T, N>(items, fweight, *(FVectorWriter<N>::fVectors[FVectorWriter<N>::template getProductID<T>()])); }
+
+    /// Get copy of the MVA output vector for the type T, at index "key".
+    template <class T>
+    std::array<float, N> getOutput(size_t key) const { return FVectorWriter<N>::template getVector<T>(key); }
+
+    /// Get copy of the MVA output vector for the type T, idicated with art::Ptr::key().
+    template <class T>
+    std::array<float, N> getOutput(art::Ptr<T> const & item) const { return FVectorWriter<N>::template getVector<T>(item); }
+};
+
 } // namespace anab
 
+
 //----------------------------------------------------------------------------
-// MVAWriter functions.
+// FVectorWriter functions.
 //
 template <size_t N>
 template <class T>
-anab::MVAOutput_ID anab::MVAWriter<N>::getProductID() const
+anab::FVector_ID anab::FVectorWriter<N>::getProductID() const
 {
     auto const & ti = typeid(T);
     auto search = fTypeHashToID.find(getProductHash(ti));
     if (search != fTypeHashToID.end()) { return search->second; }
     else
     {
-        throw cet::exception("MVAWriter") << "MVA not initialized for product " << getProductName(ti) << std::endl;
+        throw cet::exception("FVectorWriter") << "Feature vectors not initialized for product " << getProductName(ti) << std::endl;
     }
 }
 //----------------------------------------------------------------------------
 
 template <size_t N>
-bool anab::MVAWriter<N>::dataTypeRegistered(const std::string & dname) const
+bool anab::FVectorWriter<N>::dataTypeRegistered(const std::string & dname) const
 {
     for (auto const & s : fRegisteredDataTypes)
     {
@@ -219,17 +255,17 @@ bool anab::MVAWriter<N>::dataTypeRegistered(const std::string & dname) const
 
 template <size_t N>
 template <class T>
-void anab::MVAWriter<N>::produces_using()
+void anab::FVectorWriter<N>::produces_using()
 {
     std::string dataName = getProductName(typeid(T));
     if (dataTypeRegistered(dataName))
     {
-        throw cet::exception("MVAWriter") << "Type " << dataName << "was already registered." << std::endl;
+        throw cet::exception("FVectorWriter") << "Type " << dataName << "was already registered." << std::endl;
     }
 
     if (!fIsDescriptionRegistered)
     {
-        fProducer->produces< std::vector< anab::MVADescription<N> > >(fInstanceName);
+        fProducer->produces< std::vector< anab::FVecDescription<N> > >(fInstanceName);
         fIsDescriptionRegistered = true;
     }
 
@@ -239,7 +275,7 @@ void anab::MVAWriter<N>::produces_using()
 //----------------------------------------------------------------------------
 
 template <size_t N>
-bool anab::MVAWriter<N>::descriptionExists(const std::string & tname) const
+bool anab::FVectorWriter<N>::descriptionExists(const std::string & tname) const
 {
     if (!fDescriptions) return false;
 
@@ -254,7 +290,7 @@ bool anab::MVAWriter<N>::descriptionExists(const std::string & tname) const
 
 template <size_t N>
 template <class T>
-anab::MVAOutput_ID anab::MVAWriter<N>::initOutputs(
+anab::FVector_ID anab::FVectorWriter<N>::initOutputs(
     std::string const & dataTag, size_t dataSize,
     std::vector< std::string > const & names)
 {
@@ -263,53 +299,53 @@ anab::MVAOutput_ID anab::MVAWriter<N>::initOutputs(
 
     if (!dataTypeRegistered(dataName))
     {
-        throw cet::exception("MVAWriter") << "Type " << dataName << "not registered with produces_using() function." << std::endl;
+        throw cet::exception("FVectorWriter") << "Type " << dataName << "not registered with produces_using() function." << std::endl;
     }
 
     if (!fDescriptions)
     {
-        fDescriptions = std::make_unique< std::vector< anab::MVADescription<N> > >();
+        fDescriptions = std::make_unique< std::vector< anab::FVecDescription<N> > >();
     }
     else if (descriptionExists(dataName))
     {
-        throw cet::exception("MVAWriter") << "MVADescription<N> already initialized for " << dataName << std::endl;
+        throw cet::exception("FVectorWriter") << "FVecDescription<N> already initialized for " << dataName << std::endl;
     }
     fDescriptions->emplace_back(dataTag, fInstanceName + dataName, names);
 
-    fOutputs.push_back( std::make_unique< std::vector< anab::FeatureVector<N> > >() );
-    anab::MVAOutput_ID id = fOutputs.size() - 1;
+    fVectors.push_back( std::make_unique< std::vector< anab::FeatureVector<N> > >() );
+    anab::FVector_ID id = fVectors.size() - 1;
     fTypeHashToID[dataHash] = id;
 
-    if (dataSize) { fOutputs[id]->resize(dataSize, anab::FeatureVector<N>(0.0F)); }
+    if (dataSize) { fVectors[id]->resize(dataSize, anab::FeatureVector<N>(0.0F)); }
 
     return id;
 }
 //----------------------------------------------------------------------------
 
 template <size_t N>
-void anab::MVAWriter<N>::saveOutputs(art::Event & evt)
+void anab::FVectorWriter<N>::saveOutputs(art::Event & evt)
 {
     for (auto const & n : fRegisteredDataTypes)
     {
         if (!descriptionExists(n))
         {
-            throw cet::exception("MVAWriter") << "No MVADescription<N> prepared for type " << n << std::endl;
+            throw cet::exception("FVectorWriter") << "No FVecDescription<N> prepared for type " << n << std::endl;
         }
     }
 
-    if (fOutputs.size() != fDescriptions->size())
+    if (fVectors.size() != fDescriptions->size())
     {
-        throw cet::exception("MVAWriter") << "MVADescription<N> vector length not equal to the number of FeatureVector<N> vectors" << std::endl;
+        throw cet::exception("FVectorWriter") << "FVecDescription<N> vector length not equal to the number of FeatureVector<N> vectors" << std::endl;
     }
 
-    for (size_t i = 0; i < fOutputs.size(); ++i)
+    for (size_t i = 0; i < fVectors.size(); ++i)
     {
         auto const & outInstName = (*fDescriptions)[i].outputInstance();
         if ((*fDescriptions)[i].dataTag().empty())
         {
-            throw cet::exception("MVAWriter") << "MVADescription<N> reco data tag not set for " << outInstName << std::endl;
+            throw cet::exception("FVectorWriter") << "FVecDescription<N> reco data tag not set for " << outInstName << std::endl;
         }
-        evt.put(std::move(fOutputs[i]), outInstName);
+        evt.put(std::move(fVectors[i]), outInstName);
     }
     evt.put(std::move(fDescriptions), fInstanceName);
     clearEventData();
