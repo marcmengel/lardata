@@ -4,7 +4,7 @@
 #include "lardataobj/RecoBase/TrackingPlane.h"
 #include "lardataobj/RecoBase/Trajectory.h"
 #include "lardata/RecoObjects/SurfWireX.h"
-#include "larcore/Geometry/WireGeo.h"
+#include "larcorealg/Geometry/WireGeo.h"
 #include "TMath.h"
 
 namespace recob {

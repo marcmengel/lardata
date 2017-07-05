@@ -7,7 +7,7 @@
 
 // LArSoft libraries
 #include "test/Geometry/geometry_unit_test_base.h"
-#include "larcore/Geometry/ChannelMapStandardAlg.h"
+#include "larcorealg/Geometry/ChannelMapStandardAlg.h"
 #include "lardata/DetectorInfo/LArPropertiesStandardTestHelpers.h"
 #include "lardata/DetectorInfo/DetectorClocksStandardTestHelpers.h"
 #include "lardata/DetectorInfo/DetectorPropertiesStandard.h"

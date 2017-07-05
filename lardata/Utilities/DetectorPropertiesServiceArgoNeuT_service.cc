@@ -10,9 +10,9 @@
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "larcore/Geometry/Geometry.h"
-#include "larcore/Geometry/CryostatGeo.h"
-#include "larcore/Geometry/TPCGeo.h"
-#include "larcore/Geometry/PlaneGeo.h"
+#include "larcorealg/Geometry/CryostatGeo.h"
+#include "larcorealg/Geometry/TPCGeo.h"
+#include "larcorealg/Geometry/PlaneGeo.h"
 #include "lardata/Utilities/DatabaseUtil.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
