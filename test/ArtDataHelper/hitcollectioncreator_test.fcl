@@ -1,0 +1,50 @@
+# 
+# File:    hitcollectioncreator_test.fcl
+# Author:  Gianluca Petrillo (petrillo@fnal.gov)
+# Date:    June 12, 2017
+# 
+# Purpose: run all tests from HitCollectionCreatorTest module.
+# 
+# hitCollCreatorTest creates a collection of hits using
+# recob::HitCollectionCreator.
+# This collection is checked by the analyzer checkHitColl.
+# 
+
+process_name: HitCollTest
+
+source: {
+  module_type: "EmptyEvent"
+  maxEvents:       2
+}
+
+physics: {
+  
+  producers: {
+    
+    hitCollCreatorTest: {
+      module_type:  "HitCollectionCreatorTest"
+      instanceName: "test"
+    } # hitCollCreatorTest
+    
+  } # producers
+  
+  analyzers: {
+    checkHitColl: {
+      module_type: "HitDataProductChecker"
+      hits:
+        [
+          {
+            name:     "hitCollCreatorTest:test"
+            expected:  3
+          }
+        ] # hits
+    } # checkHitColl
+  } # analyzers
+  
+  test:  [ "hitCollCreatorTest" ]
+  check: [ "checkHitColl" ]
+  
+  trigger_paths: [ "test" ]
+  end_paths: [ "check" ]
+  
+} # physics

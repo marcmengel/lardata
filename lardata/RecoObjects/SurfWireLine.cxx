@@ -10,7 +10,7 @@
 
 #include "lardata/RecoObjects/SurfWireLine.h"
 #include "larcore/Geometry/Geometry.h"
-#include "larcore/Geometry/WireGeo.h"
+#include "larcorealg/Geometry/WireGeo.h"
 #include "TMath.h"
 
 namespace trkf {

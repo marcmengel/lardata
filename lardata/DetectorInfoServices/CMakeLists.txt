@@ -22,7 +22,7 @@ simple_plugin(DetectorClocksServiceStandard "service"
 simple_plugin(DetectorPropertiesServiceStandard "service"
               lardata_DetectorInfo
               larcore_Geometry_Geometry_service
-              larcore_Geometry
+              larcorealg_Geometry
 	      ${ART_PERSISTENCY_ROOTDB}
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
 	      art_Utilities

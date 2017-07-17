@@ -9,10 +9,10 @@
 
 
 #include "lardata/Utilities/GeometryUtilities.h"
-#include "larcore/Geometry/CryostatGeo.h"
-#include "larcore/Geometry/PlaneGeo.h"
-#include "larcore/Geometry/WireGeo.h"
-#include "larcore/Geometry/TPCGeo.h"
+#include "larcorealg/Geometry/CryostatGeo.h"
+#include "larcorealg/Geometry/PlaneGeo.h"
+#include "larcorealg/Geometry/WireGeo.h"
+#include "larcorealg/Geometry/TPCGeo.h"
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 //#include "PxHitConverter.h"
 

@@ -19,7 +19,7 @@
 
 // LArSoft libraries
 #include "lardata/DetectorInfo/LArPropertiesStandard.h"
-#include "larcore/TestUtils/ProviderTestHelpers.h"
+#include "larcorealg/TestUtils/ProviderTestHelpers.h"
 
 // framework and utility libraries
 #include "fhiclcpp/ParameterSet.h"

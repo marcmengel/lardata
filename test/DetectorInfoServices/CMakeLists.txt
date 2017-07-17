@@ -1,6 +1,6 @@
 art_make(
   MODULE_LIBRARIES
-    larcore_Geometry
+    larcorealg_Geometry
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
     ${MF_MESSAGELOGGER}
     ${MF_UTILITIES}

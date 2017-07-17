@@ -14,7 +14,7 @@
 
 namespace anab {
 
-std::string MVAWrapperBase::getProductName(std::type_info const & ti) const
+std::string FVectorWrapperBase::getProductName(std::type_info const & ti) const
 {
     char* realname;
     int status;

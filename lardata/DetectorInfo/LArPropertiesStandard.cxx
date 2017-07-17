@@ -11,7 +11,7 @@
 
 // LArSoft includes
 #include "lardata/DetectorInfo/LArPropertiesStandard.h"
-#include "larcore/CoreUtils/ProviderUtil.h" // lar::IgnorableProviderConfigKeys()
+#include "larcorealg/CoreUtils/ProviderUtil.h" // lar::IgnorableProviderConfigKeys()
 #include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
 
 // ROOT includes
