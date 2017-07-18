@@ -111,6 +111,7 @@ namespace util{
       virtual double       ConvertTDCToTicks(double tdc)   const override;
       virtual double       ConvertTicksToTDC(double ticks) const override;
       
+      virtual bool SimpleBoundary() const override { return fSimpleBoundary; }
       
       //------------------------------------------------------------------------
       
@@ -154,6 +155,8 @@ namespace util{
       /// Pointer to the specific LArPropertiesServiceArgoNeuT service (provider)
       util::LArPropertiesServiceArgoNeuT const* fLP;
       
+      bool fSimpleBoundary;      
+
     }; // class DetectorPropertiesServiceArgoNeuT
 } //namespace util
 DECLARE_ART_SERVICE_INTERFACE_IMPL(util::DetectorPropertiesServiceArgoNeuT, detinfo::DetectorPropertiesService, LEGACY)

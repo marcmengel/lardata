@@ -112,6 +112,9 @@ namespace detinfo{
       // ticks (RawDigit/Wire time).
       virtual double       ConvertTDCToTicks(double tdc) const = 0;
       virtual double       ConvertTicksToTDC(double ticks) const = 0;
+      
+      // To set the model we want for the optical boundary simulation Simple or G4 default
+      virtual bool SimpleBoundary()     const = 0;
 
     protected:
       DetectorProperties() = default;

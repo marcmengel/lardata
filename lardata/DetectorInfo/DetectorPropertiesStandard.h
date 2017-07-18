@@ -109,6 +109,8 @@ namespace detinfo{
           Name("SternheimerCbar"),
           Comment("parameter cbar of Sternheimer correction delta = 2log(10) x - cbar + { a (x_1-x)^k } theta(x1-x), x = log10(p/m)")
         };
+
+	fhicl::Atom<bool> SimpleBoundary { Name("SimpleBoundaryProcess" ), Comment("") };
       
       }; // Configuration_t
  
@@ -274,6 +276,8 @@ namespace detinfo{
       virtual double       ConvertTDCToTicks(double tdc) const override;
       virtual double       ConvertTicksToTDC(double ticks) const override;
       
+
+      virtual bool SimpleBoundary()     const { return fSimpleBoundary; }
       
       /// Verifies that the provider is in a fully configured status
       /// @throw cet::exception (category DetectorPropertiesStandard) if not ok
@@ -324,6 +328,8 @@ namespace detinfo{
 
       ::detinfo::ElecClock fTPCClock;     ///< TPC electronics clock
       
+      bool fSimpleBoundary;
+
       /// Checks the configuration of time offsets.
       std::string CheckTimeOffsetConfigurationAfterSetup() const;
       

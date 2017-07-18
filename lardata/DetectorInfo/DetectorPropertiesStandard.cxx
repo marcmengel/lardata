@@ -138,6 +138,8 @@ namespace detinfo{
     fSternheimerParameters.x0   = p.get< double >("SternheimerX0");
     fSternheimerParameters.x1   = p.get< double >("SternheimerX1");
     fSternheimerParameters.cbar = p.get< double >("SternheimerCbar");
+    
+    fSimpleBoundary = p.get<bool >("SimpleBoundaryProcess", true);
 
     CalculateXTicksParams();
     
@@ -164,6 +166,8 @@ namespace detinfo{
     fSternheimerParameters.x0   = config.SternheimerX0();
     fSternheimerParameters.x1   = config.SternheimerX1();
     fSternheimerParameters.cbar = config.SternheimerCbar();
+
+    fSimpleBoundary = config.SimpleBoundary();
 
     CalculateXTicksParams();
     

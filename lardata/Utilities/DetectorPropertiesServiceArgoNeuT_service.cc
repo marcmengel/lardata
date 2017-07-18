@@ -79,6 +79,9 @@ namespace util{
     fTimeOffsetV       	      = p.get< double 	     >("TimeOffsetV"      );
     fTimeOffsetZ       	      = p.get< double 	     >("TimeOffsetZ"      );
     fInheritNumberTimeSamples = p.get<bool           >("InheritNumberTimeSamples", false);
+    
+    fSimpleBoundary           = p.get<bool           >("SimpleBoundaryProcess", true);
+
     fXTicksParamsLoaded = false;
 
     fTPCClock = lar::providerFrom<detinfo::DetectorClocksService>()->TPCClock();
