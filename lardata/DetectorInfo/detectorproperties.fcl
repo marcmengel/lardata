@@ -21,6 +21,9 @@ standard_detproperties :
  TimeOffsetV:       0.585
  TimeOffsetZ:       0
  ReadOutWindowSize: 2048
+
+ SimpleBoundaryProcess: true  #enable opticalBoundaryProcessSimple instead of G4 default
+
 }
 
 # be sure to make the necessary changes when microboone and
