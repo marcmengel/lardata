@@ -97,12 +97,23 @@ int main(int argc, char const** argv) {
 //  Tester.Setup(*(TestEnv.Provider<detinfo::DetectorClocks>()));
   
   // 3. then we run it!
+  detinfo::DetectorClocks const* detClocks
+    = TestEnv.Provider<detinfo::DetectorClocks>();
   mf::LogVerbatim("clocks_test")
-    << "TPC clock period: "
-    << TestEnv.Provider<detinfo::DetectorClocks>()->TPCClock().FramePeriod()
-    << " us"
-    ;
+    << "TPC clock period: " << detClocks->TPCClock().FramePeriod() << " us";
   
+  // here we cheat and use the knowledge of which implementation we are using
+  // (need to use pointers to use the feature of nullptr on conversion failure)
+  auto const* detClocksStd
+    = dynamic_cast<detinfo::DetectorClocksStandard const*>(detClocks);
+  if (detClocksStd) {
+    detClocksStd->debugReport();
+  }
+  else {
+    mf::LogWarning("clocks_test")
+      << "Can't run DetectorClocksStandard-specific diagnostics.";
+  }
+
   // 4. And finally we cross fingers.
   if (nErrors > 0) {
     mf::LogError("clocks_test") << nErrors << " errors detected!";
