@@ -1,0 +1,58 @@
+#
+# File:    test_trackproxy.fcl
+# Purpose: exercise the proxy::Tracks object
+# Author:  Gianluca Petrillo (petrillo@fnal.gov)
+# Date:    July 28, 2017
+# Version: 0.0
+# 
+# Run with `lar_ut`!
+#
+
+process_name: TrackProxyTest
+
+
+source: {
+  module_type: EmptyEvent
+  maxEvents:   2
+} # source
+
+
+physics: {
+  
+  producers: {
+    
+    hitmaker: {
+      module_type: TrackProxyHitMaker
+      
+      nHits: 100
+      
+    } # hitmaker
+    
+    trackmaker: {
+      module_type: TrackProxyTrackMaker
+      
+      hits: hitmaker
+      # 4 or 5 tracks (the last, optional, gets all the hits left)
+      hitsPerTrack: [ 5, 10, 15, 20 ]
+    } # trackmaker
+    
+    
+  } # producers
+  
+  analyzers: {
+    trackproxytest: {
+      module_type: TrackProxyTest
+      
+      tracks: trackmaker
+      
+    }
+  } # analyzers
+  
+  reco:  [ hitmaker, trackmaker ]
+  tests: [ trackproxytest ]
+  
+  trigger_paths: [ reco ]
+  end_paths:     [ tests ]
+  
+} # physics
+
