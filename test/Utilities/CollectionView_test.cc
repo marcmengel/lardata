@@ -1,5 +1,5 @@
 /**
- * @file   lardata/lardata/Utilities/CollectionView_test.cc
+ * @file   lardata/test/Utilities/CollectionView_test.cc
  * @brief  Unit test for `CollectionView` class.
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   August 3rd, 2017

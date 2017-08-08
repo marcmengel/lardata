@@ -75,7 +75,7 @@ namespace proxy {
     auto nHits() const { return hits().size(); }
     
     /// Returns an iterable range with point-by-point information
-    /// (`TrackPointProxyWrapper`)
+    /// (`TrackPointProxyWrapper`).
     auto points() const { return details::TrackPointIteratorBox(*this); }
     
     

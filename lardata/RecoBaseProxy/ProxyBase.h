@@ -456,7 +456,7 @@ namespace proxy {
      * The argument of this function is an iterator to the begin iterator of the
      * range. The begin iterator itself is obtained by dereferencing the
      * argument: `*iBegin`. The end iterator of the range is required to be
-     * immediately after the begin iterator (`*std::next(iBegin)`).
+     * immediately after the begin iterator (@code *std::next(iBegin) @endcode).
      * This pair of iterators is exposed via the `lar::CollectionView` view,
      * that presents a vector-like interface.
      * For this to fully work, the data iterators (e.g., `*iBegin`) must comply
@@ -492,7 +492,7 @@ namespace proxy {
      * `lar::makeBoundaryListRange()` (which takes an iterator to `rangeStart`
      * as argument).
      * The `BoundaryIter` type in this example would be
-     * `std::vector<data_iterator_t>::const_iterator`.
+     * @code std::vector<data_iterator_t>::const_iterator @endcode.
      * 
      * When dereferenced, this iterator returns a view of the range currently
      * pointed. This view has a STL-vector-like interface (again, see
