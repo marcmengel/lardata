@@ -153,6 +153,7 @@ namespace lar {
         
         /**
          * @brief Reads the specified association from the event
+         * @param event the event to read the associations from
          * @param assnTag the input tag for the association
          * @throw art::Exception if multiple dest objects are found for one
          *   source object
@@ -166,6 +167,7 @@ namespace lar {
         
         /**
          * @brief Reads the specified association from the event
+         * @param event the event to read the associations from
          * @param assnTag the input tag for the association
          * @throw art::Exception if multiple dest objects are found for one
          *   source object

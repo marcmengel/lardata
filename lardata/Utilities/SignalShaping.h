@@ -36,21 +36,23 @@
 /// Frequency series are represented as vector<TComplex> of length (N/2+1),
 /// representing sampled frequencies on interval [0, 1/2] cycles/tick.
 /// Negative frequencies (not stored) are complex conjugate of
-/// corresponding postive frequency.
+/// corresponding positive frequency.
 ///
-/// \update notes:  Yun-Tse Tsai (yuntse@slac.stanford.edu), July 17th, 2014
-///                 Modify
-///                 void AddResponseFunction(const std::vector<double>& resp);
-///                 to 
-///                 void AddResponseFunction(const std::vector<double>& resp, bool ResetResponse = false );
-///                 If you want to reset your response, fResponse in this
-///                 object, you can do 
-///                 AddResponseFunction( yourResponse, true )
-///                 The other part involving AddResponseFunction shouldn't
-///                 be affected.
-///                 X. Qian 2015/01/06
-///                 Add the time offset variable
-///                 Need to add the set and extraction code 
+/// Update notes
+/// -------------
+/// 
+/// * Yun-Tse Tsai (yuntse@slac.stanford.edu), July 17th, 2014<br/>
+///     Modify
+///     `void AddResponseFunction(const std::vector<double>& resp);`
+///     to 
+///     `void AddResponseFunction(const std::vector<double>& resp, bool ResetResponse = false );`
+///     If you want to reset your response, `fResponse` in this object, you can
+///     do
+///     `AddResponseFunction( yourResponse, true )`
+///     The other part involving `AddResponseFunction` shouldn't be affected.
+/// * X. Qian 2015/01/06 <br/>
+///     Add the time offset variable<br/>
+///     Need to add the set and extraction code 
 ////////////////////////////////////////////////////////////////////////
 
 #ifndef SIGNALSHAPING_H
