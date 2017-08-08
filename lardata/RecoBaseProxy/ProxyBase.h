@@ -375,22 +375,41 @@ namespace proxy {
       bool operator!=(iterator const& other) const
         { return operator!=(other.asDataIterator()); }
       
-      
-        protected:
+      auto operator[](std::size_t index) const -> decltype(auto)
+        { return asIterator().transform(asDataIterator() + index); }
       
       /// Dereference operator; need to be redefined by derived classes.
       auto operator*() const -> decltype(auto)
-        { return data_iterator_t::operator*(); }
+        { return asIterator().transform(asDataIterator()); }
       
-      /// Index operator; need to be redefined by derived classes.
-      auto operator[](std::size_t index) const -> decltype(auto)
-        { return data_iterator_t::operator[](index); }
+      /// Dereference operator; need to be redefined by derived classes.
+      auto operator->() const -> decltype(auto)
+        { return makeValuePointer(operator*()); }
+      
+      
+        protected:
+      /// Transforms and returns the value at the specified data iterator.
+      static auto transform(data_iterator_t const&) -> decltype(auto)
+        { return data_iterator_t::operator*(); }
       
       data_iterator_t const& asDataIterator() const
         { return static_cast<data_iterator_t const&>(*this); }
       
-      
         private:
+      /// Value box for use with pointer dereference `operator->()`.
+      template <typename Value>
+      class ValuePtr {
+        Value value; ///< Value to return the address of (may be reference).
+          public:
+        ValuePtr(Value const& value): value(value) {}
+        /// Access the contained value via its pointer.
+        auto operator->() const -> decltype(auto)
+          { return std::addressof(value); }
+      }; // class ValuePtr<>
+      template <typename Value>
+      static ValuePtr<Value> makeValuePointer(Value&& value)
+        { return { std::forward<Value>(value) }; }
+      
       iterator const& asIterator() const
         { return static_cast<iterator const&>(*this); }
       iterator& asIterator() { return static_cast<iterator&>(*this); }
@@ -528,8 +547,8 @@ namespace proxy {
        * overlaid on a different data structure.
        * As such, it may be not copiable and need to be propagated by reference.
        */
-      rangeview_t operator*() const
-        { return makeBoundaryListRange(base_t::asDataIterator()); }
+      static auto transform(BoundaryIter const& iter)
+        { return makeBoundaryListRange(iter); }
       
     }; // class BoundaryListRangeIterator<>
     
@@ -554,6 +573,12 @@ namespace proxy {
      * This is a data class which does not contain any logic to define the
      * subsequences, but rather acquires the result of an algorithm which is
      * expected to have established which the boundaries are.
+     * 
+     * The underlying representation of the class is a random-access sequence
+     * of boundaries. The exposed value, `range_t`, is a range of data elements
+     * (a view with the interface of a random access container), which is
+     * internally represented as a single iterator pointing to the begin
+     * iterator of the range.
      */
     template <typename Iter>
     class BoundaryList {
@@ -679,10 +704,6 @@ namespace proxy {
         std::tuple_element_t<N, typename TupleIter::value_type>
         >;
       
-      static auto transform(typename TupleIter::value_type const& v)
-        -> decltype(auto)
-        {return std::get<N>(v); }
-      
         public:
       using base_iterator_t::base_iterator_t;
       
@@ -690,11 +711,8 @@ namespace proxy {
       tuple_element_iterator(base_iterator_t const& from)
         : base_iterator_t(from) {}
       
-      auto operator*() const -> decltype(auto)
-        { return transform(base_iterator_t::operator*()); }
-      
-      auto operator[](std::size_t index) const -> decltype(auto)
-        { return transform(base_iterator_t::operator[](index)); }
+      static auto transform(TupleIter const& v) -> decltype(auto)
+        {return std::get<N>(*v); }
       
     }; // tuple_element_iterator
     

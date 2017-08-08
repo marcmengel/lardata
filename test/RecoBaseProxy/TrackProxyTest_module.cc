@@ -7,7 +7,7 @@
  */
 
 // LArSoft libraries
-#include "lardata/RecoBaseProxy/Track.h"
+#include "lardata/RecoBaseProxy/Track.h" // proxy namespace
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Hit.h"
 
