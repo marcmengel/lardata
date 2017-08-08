@@ -41,11 +41,12 @@ namespace recob {
      * @tparam Stream type of output stream
      * 
      * Example of usage:
-     *     
-     *     std::cout << "Preamble on its own line." << std::endl;
-     *     NewLine OutLn(std::cout, "> ");
-     *     OutLn() << "An indented line.";
-     *     OutLn() << "Another indented line.";
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * std::cout << "Preamble on its own line." << std::endl;
+     * NewLine OutLn(std::cout, "> ");
+     * OutLn() << "An indented line.";
+     * OutLn() << "Another indented line.";
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      *     
      * that (after flush) will result in the output
      *     
@@ -55,12 +56,12 @@ namespace recob {
      *     > Another indented line.
      *     
      * Asking to consider the first line already started, instead:
-     *     
-     *     std::cout << "Preamble on its own line." << std::endl;
-     *     NewLine OutLn(std::cout, "> ", true);
-     *     OutLn() << "An indented line.";
-     *     OutLn() << "Another indented line.";
-     *     
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * std::cout << "Preamble on its own line." << std::endl;
+     * NewLine OutLn(std::cout, "> ", true);
+     * OutLn() << "An indented line.";
+     * OutLn() << "Another indented line.";
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * will instead result in the output
      *     
      *     Preamble on its own line.
@@ -77,7 +78,6 @@ namespace recob {
        * @brief Constructor: associates with the stream
        * @param stream a reference to the stream where to insert new lines
        * @param indentOptions all indentation options (will be copied)
-       * @param followLine whether first line is already started (default: no)
        * 
        * The constructor does not start a new line.
        * If followLine is true, the first line is supposed to be already started

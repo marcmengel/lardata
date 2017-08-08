@@ -81,14 +81,14 @@ class sim::DumpSimPhotonsLite: public art::EDAnalyzer {
    * @brief Dumps the content of specified SimPhotonsLite in the output stream.
    * @tparam Stream the type of output stream
    * @param out the output stream
-   * @param simphotons the SimPhotonsLite to be dumped
-   * @param indent base indentation string (default: none)
-   * @param bIndentFirst if first output line should be indented (default: yes)
+   * @param photons the SimPhotonsLite to be dumped
+   * @param indent base indentation string _(default: none)_
+   * @param firstIndent if first output line should be indented _(default: yes)_
    * 
    * The indent string is prepended to every line of output, with the possible
    * exception of the first one, in case bIndentFirst is true.
    * 
-   * The output starts on the current line, and the last line is NOT broken.
+   * The output starts on the current line, and the last line is *not* broken.
    */
   template <typename Stream>
   void DumpPhoton(

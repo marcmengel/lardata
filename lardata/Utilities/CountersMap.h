@@ -155,6 +155,7 @@ namespace lar {
     /**
      * @brief Sets the specified counter to a count
      * @param key key of the counter to be increased
+     * @param value count value to be set
      * @return new value of the counter
      *
      * Given the complex underlying structure (especially when subcounters are

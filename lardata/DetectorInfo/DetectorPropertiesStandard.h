@@ -128,7 +128,10 @@ namespace detinfo{
       /**
        * @brief Constructs the provider and sets up the dependencies
        * @param pset FHiCL parameter set for provider configuration
-       * @param providers pack of providers DetectorPropertiesStandard depends on
+       * @param providers pack of providers `DetectorPropertiesStandard` depends
+       *        on
+       * @param ignore_params unknown configuration keys in `pset` to be
+       *        tolerated
        * @see Setup()
        */
       DetectorPropertiesStandard(fhicl::ParameterSet const& pset,
@@ -244,9 +247,10 @@ namespace detinfo{
       /**
        * @brief Energy loss fluctuation (@f$ \sigma_{E}^2 / x @f$)
        * @param mom  momentum of incident particle in [GeV/c]
+       * @param mass mass of incident particle [GeV/c^2]
        * @return energy loss fluctuation in MeV^2/cm
        *
-       * Based on Bichsel formula referred to but not given in pdg.
+       * Based on Bichsel formula referred to but not given in PDG.
        */
       virtual double ElossVar(double mom, double mass) const override;
 
