@@ -168,7 +168,7 @@ namespace lar {
     ///@{
     /**
      * @brief Demangles the name of a type
-     * @param T type to be demangled
+     * @tparam T type to be demangled
      * @param [anonymous] parameter to determine the type
      * @return a string with the demangled name
      *

@@ -183,6 +183,7 @@ namespace lar {
     /**
      * @brief Constructor: starts from the container at the specified iterator
      * @param src the starting point of the iterator
+     * @param end the end point of the iterator
      *
      * This constructor does not set and end. Due to how the class works,
      * if the outer container has an "end", reaching it with this iterator has
@@ -191,32 +192,46 @@ namespace lar {
      */
     deep_const_fwd_iterator_nested(OuterIterator_t src, OuterIterator_t end);
     
-    ///@{
     /**
      * @brief Constructor: starts from the beginning of the specified container
      * @param cont the container
-     * @param [anonymous] tag to select the begin- or end-of-container behaviour
+     * @param [anonymous] tag to select the begin-of-container behaviour
      *
      * The second parameter is used just to choose which constructor to use.
      * Two constants are provided, begin and end, defined in the iterator itself
      * (no explicit namespace is required).
      * Example:
-     * @code
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
      * using Data_t = std::vector<std::vector<float>>;
      * Data_t data(5, { 1., 3., 5. });
      * deep_const_fwd_iterator_nested<Data_t::const_iterator> iData(data, begin),
      *   data_end(data, end);
-     * @endcode
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      */
     template <class CONT>
     deep_const_fwd_iterator_nested(const CONT& cont, BeginPositionTag):
       deep_const_fwd_iterator_nested(std::begin(cont), std::end(cont))
       { skip_empty(); }
     
+    /**
+     * @brief Constructor: starts from the end of the specified container
+     * @param cont the container
+     * @param [anonymous] tag to select the end-of-container behaviour
+     *
+     * The second parameter is used just to choose which constructor to use.
+     * Two constants are provided, begin and end, defined in the iterator itself
+     * (no explicit namespace is required).
+     * Example:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * using Data_t = std::vector<std::vector<float>>;
+     * Data_t data(5, { 1., 3., 5. });
+     * deep_const_fwd_iterator_nested<Data_t::const_iterator> iData(data, begin),
+     *   data_end(data, end);
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     */
     template <class CONT>
     deep_const_fwd_iterator_nested(const CONT& cont, EndPositionTag):
       deep_const_fwd_iterator_nested(std::end(cont)) {}
-    ///@}
     
     /**
      * @brief Prefix increment operator: points to the next element

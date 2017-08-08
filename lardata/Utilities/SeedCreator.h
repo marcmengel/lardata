@@ -1,15 +1,14 @@
-/// \file SeedCreator.h
-///
-/// \brief Tools and modules for checking out the basics of the Monte Carlo
-///
-/// \author bcarls@fnal.gov
-///
-///
-/// Coding note: Never put '#include "SeedCreator.h"' in your code. It would
-/// force a dependency in your class on every other class in the
-/// Simulation directory; e.g., if I changed the MCTruth code, your
-/// code that generates Electrons would re-compile.  This class exists
-/// solely as a bookkeeping tool.
+/**
+ * @file SeedCreator.h
+ * @brief Tools and modules for checking out the basics of the Monte Carlo.
+ * @author Ben Carls (bcarls@fnal.gov)
+ *
+ * Coding note: Never put @code #include "SeedCreator.h" @endcode in your code.
+ * It would force a dependency in your class on every other class in the
+ * Simulation directory; e.g., if I changed the `MCTruth` code, your
+ * code that generates Electrons would re-compile.  This class exists
+ * solely as a bookkeeping tool.
+ */
 
 #ifndef SEEDCREATOR_H
 #define SEEDCREATOR_H

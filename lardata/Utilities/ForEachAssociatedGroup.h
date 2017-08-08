@@ -72,11 +72,11 @@ namespace util {
    *        other (via `addSingle`); if the order of the hits is relevant (it is
    *        not in this specific example), hits must be associated in that order
    *      * each track must have at least one associated hit;
-   *      * the original association has to be stored with recob::Track` as
+   *      * the original association has to be stored with `recob::Track` as
    *        _left_ key and `recob::Hit` as _right_ key;
-   *  * we use here a lambda function as `func`; any object behaving as a
-   *    function and able to accept the range of hits as its only argument will
-   *    work just as well;
+   *  * we use here a lambda function as `func`; any object
+   *    behaving as a function and able to accept the range of hits as its only
+   *    argument will work just as well;
    *  * `func` will be called once for every track (but if a track has no
    *    associated hit, that track will be skipped, and if a track appears in
    *    more than one association sequence, like in (T1,H1) (T1,H2) (T2,H4)

@@ -80,6 +80,7 @@ namespace detinfo{
       /**
        * @brief Energy loss fluctuation (@f$ \sigma_{E}^2 / x @f$)
        * @param mom  momentum of incident particle in [GeV/c]
+       * @param mass mass of incident particle [GeV/c^2]
        * @return energy loss fluctuation in MeV^2/cm
        */
       virtual double ElossVar(double mom, double mass) const = 0;

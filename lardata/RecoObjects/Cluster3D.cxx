@@ -71,7 +71,7 @@ ClusterHit3D::ClusterHit3D() : m_id(std::numeric_limits<size_t>::max()),
 }
     
 ClusterHit3D::ClusterHit3D(size_t                                        id,
-                           unsigned                                      statusBits,
+                           unsigned int                                  statusBits,
                            const double*                                 position,
                            double                                        totalCharge,
                            double                                        avePeakTime,

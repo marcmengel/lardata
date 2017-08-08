@@ -239,7 +239,7 @@ namespace recob {
        *        from
        * @param goodness_of_fit quality parameter for the hit
        * @param dof degrees of freedom in the definition of the hit shape
-       * @param SignalRoI the signal region the hit was extracted from
+       * @param signal the signal region the hit was extracted from
        *
        * The information used from the wire are the channel ID, view
        * and the region of interest; the signal type is obtained from
@@ -390,7 +390,7 @@ namespace recob {
    * (this example declares a collection with empty instance name and that we
    * want associations to both wires and raw digits), and then in `produce()`:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * HitAndAssociationsWriterDerived hcol(*this, evt);
+   * HitAndAssociationsWriterDerived hcol(*this, event);
    * 
    * // ... fill hcol in the proper way ...
    * 
@@ -489,7 +489,7 @@ namespace recob {
      */
     template <typename ModuleType>
     HitAndAssociationsWriterBase(
-      ModuleType& producer, art::Event& evt,
+      ModuleType& producer, art::Event& event,
       std::string instance_name,
       bool doWireAssns, bool doRawDigitAssns
       );
@@ -529,7 +529,7 @@ namespace recob {
      */
     template <typename ModuleType>
     HitCollectionCreator(
-      ModuleType& producer, art::Event& evt,
+      ModuleType& producer, art::Event& event,
       std::string instance_name = "",
       bool doWireAssns = true, bool doRawDigitAssns = true
       );
@@ -545,10 +545,10 @@ namespace recob {
      */
     template <typename ModuleType>
     HitCollectionCreator(
-      ModuleType& producer, art::Event& evt,
+      ModuleType& producer, art::Event& event,
       bool doWireAssns, bool doRawDigitAssns
       ):
-      HitCollectionCreator(producer, evt, "", doWireAssns, doRawDigitAssns)
+      HitCollectionCreator(producer, event, "", doWireAssns, doRawDigitAssns)
       {}
     
     /// @}
@@ -653,7 +653,6 @@ namespace recob {
     
     /**
      * @brief Moves the data into an event.
-     * @param event the target event
      *
      * The calling module must have already declared the production of these
      * products with the proper instance name.
@@ -721,7 +720,7 @@ namespace recob {
      */
     template <typename ModuleType>
     HitCollectionAssociator(
-      ModuleType& producer, art::Event& evt,
+      ModuleType& producer, art::Event& event,
       std::string instance_name,
       art::InputTag const& WireModuleLabel,
       art::InputTag const& RawDigitModuleLabel
@@ -742,12 +741,12 @@ namespace recob {
      */
     template <typename ModuleType>
     HitCollectionAssociator(
-      ModuleType& producer, art::Event& evt,
+      ModuleType& producer, art::Event& event,
       art::InputTag const& WireModuleLabel,
       art::InputTag const& RawDigitModuleLabel
       ):
       HitCollectionAssociator
-        (producer, evt, "", WireModuleLabel, RawDigitModuleLabel)
+        (producer, event, "", WireModuleLabel, RawDigitModuleLabel)
       {}
     
     /**
@@ -767,7 +766,7 @@ namespace recob {
      */
     template <typename ModuleType>
     HitCollectionAssociator(
-      ModuleType& producer, art::Event& evt,
+      ModuleType& producer, art::Event& event,
       std::string instance_name,
       art::InputTag const& WireModuleLabel,
       bool doRawDigitAssns
@@ -778,7 +777,6 @@ namespace recob {
      * @tparam ModuleType type of producing module (`EDProducer` or `EDFilter`)
      * @param producer the module producing the data products
      * @param event the event the products are going to be put into
-     * @param instance_name name of the instance for all data products
      * @param WireModuleLabel label of the module used to create wires
      * @param doRawDigitAssns whether to write associations with raw digits
      *
@@ -790,12 +788,12 @@ namespace recob {
      */
     template <typename ModuleType>
     HitCollectionAssociator(
-      ModuleType& producer, art::Event& evt,
+      ModuleType& producer, art::Event& event,
       art::InputTag const& WireModuleLabel,
       bool doRawDigitAssns
       ):
       HitCollectionAssociator
-        (producer, evt, "", WireModuleLabel, doRawDigitAssns)
+        (producer, event, "", WireModuleLabel, doRawDigitAssns)
       {}
 
     /// @}
@@ -884,7 +882,7 @@ namespace recob {
      */
     template <typename ModuleType>
     HitRefinerAssociator(
-      ModuleType& producer, art::Event& evt,
+      ModuleType& producer, art::Event& event,
       art::InputTag const& HitModuleLabel,
       std::string instance_name = "",
       bool doWireAssns = true, bool doRawDigitAssns = true
@@ -904,12 +902,12 @@ namespace recob {
      */
     template <typename ModuleType>
     HitRefinerAssociator(
-      ModuleType& producer, art::Event& evt,
+      ModuleType& producer, art::Event& event,
       art::InputTag const& HitModuleLabel,
       bool doWireAssns, bool doRawDigitAssns = true
       ):
       HitRefinerAssociator
-        (producer, evt, HitModuleLabel, "", doWireAssns, doRawDigitAssns)
+        (producer, event, HitModuleLabel, "", doWireAssns, doRawDigitAssns)
       {}
       
     /// @}
@@ -1038,7 +1036,7 @@ namespace recob {
     /**
      * @brief Declares the hit products we are going to fill.
      * @param callingProducer the module this manager is bound to
-     * @param instance_name name of the instance for all data products
+     * @param instanceName name of the instance for all data products
      * @param doWireAssns whether to enable associations to wires
      * @param doRawDigitAssns whether to enable associations to raw digits
      *
@@ -1141,13 +1139,13 @@ void recob::HitAndAssociationsWriterBase::declare_products(
 //---
 template <typename ModuleType>
 recob::HitRefinerAssociator::HitRefinerAssociator(
-  ModuleType& producer, art::Event& evt,
+  ModuleType& producer, art::Event& event,
   art::InputTag const& HitModuleLabel,
   std::string instance_name /* = "" */,
   bool doWireAssns /* = true */, bool doRawDigitAssns /* = true */
 )
   : HitAndAssociationsWriterBase
-      (producer, evt, instance_name, doWireAssns, doRawDigitAssns)
+      (producer, event, instance_name, doWireAssns, doRawDigitAssns)
   , hits_label(HitModuleLabel)
 {
   hits.reset(new std::vector<recob::Hit>);
@@ -1175,13 +1173,13 @@ recob::HitCollectionCreator::HitCollectionCreator(
 //---
 template <typename ModuleType>
 recob::HitCollectionAssociator::HitCollectionAssociator(
-  ModuleType& producer, art::Event& evt,
+  ModuleType& producer, art::Event& event,
   std::string instance_name,
   art::InputTag const& WireModuleLabel,
   art::InputTag const& RawDigitModuleLabel
 )
   : HitAndAssociationsWriterBase(
-      producer, evt, instance_name,
+      producer, event, instance_name,
       WireModuleLabel != "", RawDigitModuleLabel != ""
       )
   , wires_label(WireModuleLabel)
@@ -1194,13 +1192,13 @@ recob::HitCollectionAssociator::HitCollectionAssociator(
 //------------------------------------------------------------------------------
 template <typename ModuleType>
 recob::HitCollectionAssociator::HitCollectionAssociator(
-  ModuleType& producer, art::Event& evt,
+  ModuleType& producer, art::Event& event,
   std::string instance_name,
   art::InputTag const& WireModuleLabel,
   bool doRawDigitAssns /* = false */
 )
   : HitAndAssociationsWriterBase(
-      producer, evt, instance_name,
+      producer, event, instance_name,
       WireModuleLabel != "", doRawDigitAssns
       )
   , wires_label(WireModuleLabel)

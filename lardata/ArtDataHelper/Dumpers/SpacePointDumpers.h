@@ -63,13 +63,12 @@ namespace recob {
      */
     template
       <typename Stream, typename NewLineRef = recob::dumper::NewLine<Stream>>
-    std::enable_if_t
-      <std::is_same<NewLine<std::decay_t<Stream>>, std::decay_t<NewLineRef>>::value>
-    DumpSpacePoint(
+    auto DumpSpacePoint(
       Stream&& out,
       recob::SpacePoint const& sp,
       SpacePointPrintOptions_t const& options = {}
-      );
+      ) -> std::enable_if_t
+      <std::is_same<NewLine<std::decay_t<Stream>>, std::decay_t<NewLineRef>>::value>;
     
   } // namespace dumper
 } // namespace recob
@@ -81,18 +80,17 @@ namespace recob {
 //------------------------------------------------------------------------------
 //--- recob::dumper::DumpSpacePoint
 //---
-template
-  <typename Stream, typename NewLineRef = recob::dumper::NewLine<Stream>>
-std::enable_if_t<
-  std::is_same<
-    recob::dumper::NewLine<std::decay_t<Stream>>,
-    std::decay_t<NewLineRef>
-  >::value>
-recob::dumper::DumpSpacePoint(
+template <typename Stream, typename NewLineRef>
+auto recob::dumper::DumpSpacePoint(
   Stream&& out,
   recob::SpacePoint const& sp,
   SpacePointPrintOptions_t const& options /* = {} */
-) {
+) -> std::enable_if_t<
+  std::is_same<
+    NewLine<std::decay_t<Stream>>,
+    std::decay_t<NewLineRef>
+  >::value>
+{
   double const* pos = sp.XYZ();
   double const* err = sp.ErrXYZ();
   
