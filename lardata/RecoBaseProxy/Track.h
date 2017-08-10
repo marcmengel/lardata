@@ -436,9 +436,7 @@ namespace proxy {
   //---
   /// Type of information pertaining a point on a track.
   using TrackPointData = std::tuple<
-    recob::Track::Point_t const*,
-    recob::Track::Vector_t const*,
-    recob::Track::PointFlags_t const*,
+    recob::Track const*,
     art::Ptr<recob::Hit> const*,
     std::size_t
     >;
@@ -455,9 +453,7 @@ namespace proxy {
     (proxy::Track const& track, std::size_t index)
     {
       return {
-        &(track->Trajectory().LocationAtPoint(index)),
-        &(track->Trajectory().MomentumVectorAtPoint(index)),
-        &(track->FlagsAtPoint(index)),
+        &(track.track()),
         &(track.HitAtPoint(index)),
         index
       };
@@ -489,12 +485,13 @@ namespace proxy {
     using This_t = TrackPointWrapper<Data>;
     using Wrapped_t = std::add_const_t<Data>;
     
-    static constexpr std::size_t PositionIndex = 0;
-    static constexpr std::size_t MomentumIndex = 1;
-    static constexpr std::size_t FlagsIndex    = 2;
-    static constexpr std::size_t HitIndex      = 3;
-    static constexpr std::size_t IndexIndex    = 4;
-    static constexpr std::size_t NIndices      = 5;
+    static constexpr std::size_t TrackIndex = 0;
+    static constexpr std::size_t HitIndex      = 1;
+    static constexpr std::size_t IndexIndex    = 2;
+    static constexpr std::size_t NIndices      = 3;
+    
+    static_assert(std::tuple_size<Data>::value == NIndices,
+      "Unexpected data size.");
     
     Wrapped_t const& base() const
       { return reinterpret_cast<Wrapped_t const&>(*this); }
@@ -512,19 +509,25 @@ namespace proxy {
       public:
     
     /// Returns the position of the trajectory point.
-    auto position() const -> decltype(auto) { return *get<PositionIndex>(); }
+    auto track() const -> decltype(auto) { return *get<TrackIndex>(); }
     
+    /// Returns the position of the trajectory point.
+    auto position() const -> decltype(auto)
+      { return track().Trajectory().LocationAtPoint(index()); }
+
     /// Returns the momentum vector of the trajectory point.
-    auto momentum() const -> decltype(auto) { return *get<MomentumIndex>(); }
+    auto momentum() const -> decltype(auto)
+      { return track().Trajectory().MomentumVectorAtPoint(index()); }
     
     /// Returns the flags associated with the trajectory point.
-    auto flags   () const -> decltype(auto) { return *get<FlagsIndex   >(); }
+    auto flags() const -> decltype(auto)
+      { return track().Trajectory().FlagsAtPoint(index()); }
     
     /// Returns the hit associated with the trajectory point, as _art_ pointer.
-    auto hitPtr  () const -> decltype(auto) { return *get<HitIndex     >(); }
+    auto hitPtr() const -> decltype(auto) { return *get<HitIndex     >(); }
     
     /// Returns the index of this point in the trajectory.
-    auto index   () const -> decltype(auto) { return get<IndexIndex   >(); }
+    auto index() const -> decltype(auto) { return get<IndexIndex   >(); }
     
     /// Returns a pointer to the hit on the trajectory point, if any.
     recob::Hit const* hit() const
@@ -556,7 +559,7 @@ namespace proxy {
         recob::Track::Vector_t
         >(),
         "momentum() is not a recob::Track::Vector_t"
-        );
+          );
       static_assert(std::is_same<
         std::decay_t<decltype(std::declval<Wrapper_t>().flags())>,
         recob::Track::PointFlags_t
@@ -564,7 +567,7 @@ namespace proxy {
         "flags() is not a recob::Track::PointFlags_t"
         );
       static_assert(std::is_same<
-        std::decay_t<decltype(std::declval<Wrapper_t>().hit())>,
+        std::decay_t<decltype(std::declval<Wrapper_t>().hitPtr())>,
         art::Ptr<recob::Hit>
         >(),
         "hit() is not a art::Ptr<recob::Hit>"
