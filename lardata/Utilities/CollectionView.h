@@ -9,6 +9,75 @@
  *  @note It is likely that a skillful use of Nibbler's range library will
  *  provide the same functionality (and loads more).
  *
+ *
+ *
+ * Interface replacement technique
+ * ================================
+ * 
+ * A technique that is used in this implementation is to replace (or extend) the
+ * interface of an existing object.
+ * A key requirement is that the new interface object must not have any
+ * additional state.
+ * 
+ * The interface class is superimposed to the _existing_ data without
+ * replication by _reinterpreting_ its content. This is achieved deriving the
+ * new interface class from the data class:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * 
+ * class Data {
+ *   double chiSq;
+ *   double NDF;
+ *     public:
+ *   Data(double chiSq, double NDF): chiSq(chiSq), NDF(NDF) {}
+ *   
+ *   double chiSquare() const { return chiSq; }
+ *   double DegreesOfFreedom() const { return NDF; }
+ *   
+ * }; // class Data
+ * 
+ * 
+ * class DataInterface: private Data {
+ *   Data const& asData() const { return static_cast<Data const&>(*this); }
+ *     public:
+ *   
+ *   double normalizedChiSquare() const
+ *     { return asData().chiSquare() / asData().DegreesOfFreedom(); }
+ *   
+ *     protected:
+ *   DataInterface(Data const& from): Data(data) {}
+ *   
+ *   friend DataInterface const& makeDataInterface(Data const&);
+ *   
+ * }; // class DataInterface
+ * 
+ * 
+ * DataInterface const& makeDataInterface(Data const& data)
+ *   { return static_const<DataInterface const&>(data); }
+ * 
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * With this pattern, an interface object can be obtained only by calling
+ * `makeDataInterface()` on the base object, and in this way it will be returned
+ * only as a reference (in this case, constant). The interface object can't
+ * be copied, and it must be passed around as reference. It's not possible to
+ * convert it back to `Data`, because the base class is private.
+ * There is a single protected constructor. This choice, compared to deleting
+ * all constructors, allows for a derived class to acquire the same interface:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * struct DataWithInterface: public DataInterface {
+ *   DataWithInterface(Data const& from): DataInterface(from) {}
+ * }; // class DataWithInterface
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * This simple class provides the storage for `Data` in addition to exposing
+ * `DataInterface`.
+ * There are other ways to achieve the same goal (e.g., multiple inheritance).
+ * 
+ * The presence of a friend function should raise a warning. Friendship is
+ * required because the function is attempting a downcast from a private base
+ * class. If it is intended that the full `Data` interface is exposed, then
+ * the inheritance can be public and no special friendship will be needed.
+ * Another way is to replace the `static_cast` with a `reinterpret_cast`.
+ * 
+ *
  */
 
 #ifndef LARDATA_UTILITIES_COLLECTIONVIEW_H

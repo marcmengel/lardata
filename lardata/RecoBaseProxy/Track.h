@@ -1,6 +1,7 @@
 /**
  * @file   Track.h
- * @brief  Offers `proxy::Track` class for `recob::Track` access.
+ * @brief  Offers `proxy::Tracks` and `proxy::Track` class for
+ *         `recob::Track` access.
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   July 27, 2017
  * 
@@ -82,18 +83,7 @@
  * Overhead
  * ---------
  * 
- * The proxies have been developed with an eye on minimising the replication of
- * information. The proxies are therefore light-weight objects relying on
- * pointers to the original data. One exception is that an additional structure
- * is created for each one-to-many association (i.e., to hits), which includes
- * a number of entries proportional to the number of tracks.
- * 
- * In general, anyway, copy of any proxies is not recommended, as it is usually
- * better just to pass around a reference to them.
- * 
- * Since this interface (and implementation) is still in development, there
- * might be flaws that make it non-performant. Please report any suspicious
- * behaviour.
+ * See the notes on overhead in `ProxyBase.h`.
  * 
  * 
  * Interface replacement
@@ -101,140 +91,8 @@
  * 
  * A technique that is used in this implementation is to replace (or extend) the
  * interface of an existing object.
- * A key requirement is that the new interface object must not have any
- * additional state.
- * 
- * The interface class is superimposed to the _existing_ data without
- * replication by _reinterpreting_ its content. This is achieved deriving the
- * new interface class from the data class:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * 
- * class Data {
- *   double chiSq;
- *   double NDF;
- *     public:
- *   Data(double chiSq, double NDF): chiSq(chiSq), NDF(NDF) {}
- *   
- *   double chiSquare() const { return chiSq; }
- *   double DegreesOfFreedom() const { return NDF; }
- *   
- * }; // class Data
- * 
- * 
- * class DataInterface: private Data {
- *   Data const& asData() const { return static_cast<Data const&>(*this); }
- *     public:
- *   
- *   double normalizedChiSquare() const
- *     { return asData().chiSquare() / asData().DegreesOfFreedom(); }
- *   
- *     protected:
- *   DataInterface(Data const& from): Data(data) {}
- *   
- *   friend DataInterface const& makeDataInterface(Data const&);
- *   
- * }; // class DataInterface
- * 
- * 
- * DataInterface const& makeDataInterface(Data const& data)
- *   { return static_const<DataInterface const&>(data); }
- * 
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * With this pattern, an interface object can be obtained only by calling
- * `makeDataInterface()` on the base object, and in this way it will be returned
- * only as a reference (in this case, constant). The interface object can't
- * be copied, and it must be passed around as reference. It's not possible to
- * convert it back to `Data`, because the base class is private.
- * There is a single protected constructor. This choice, compared to deleting
- * all constructors, allows for a derived class to acquire the same interface:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * struct DataWithInterface: public DataInterface {
- *   DataWithInterface(Data const& from): DataInterface(from) {}
- * }; // class DataWithInterface
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * This simple class provides the storage for `Data` in addition to exposing
- * `DataInterface`.
- * There are other ways to achieve the same goal (e.g., multiple inheritance).
- * 
- * The presence of a friend function should raise a warning. Friendship is
- * required because the function is attempting a downcast from a private base
- * class. If it is intended that the full `Data` interface is exposed, then
- * the inheritance can be public and no special friendship will be needed.
- * Another way is to replace the `static_cast` with a `reinterpret_cast`.
- * 
- * 
- * Iterator wrappers and "static polymorphism"
- * --------------------------------------------
- * 
- * A widely used interface change is the substitution of the dereference
- * operator of an iterator:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * struct address_iterator: public iterator { // DON'T DO THIS (won't work)
- *   auto operator*() -> decltype(auto)
- *     { return std::addressof(iterator::operator*()); }
- * }; // my_iterator
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * There are two important pitfalls to be aware of in this specific case, well
- * illustrated in this example.
- * 
- * If the caller tries to use e.g. `ait->name()` on a `address_iterator ait`
- * (or other members, like `ait[0]`), they will be picked from the base class,
- * and the overloaded `operator*()` is ignored. This can be avoided with private
- * inheritance, forcing the explicit implementation of everything we want to
- * use, which will be at very least an increment operator and a comparison one.
- * 
- * The second pitfall is that the base class methods return base class
- * references. For example, `*ait++` will call the inherited increment operator,
- * which returns an object of type `iterator`, and the following dereference
- * will be called on it, again bypassing the overridden dereference method.
- * This means that to implement the increment operator is not enough to import
- * the inherited one (`using iterator::operator++;`).
- * 
- * This task of wrapping a `base_iterator` involves a lot of "boilerplate" code:
- * the prefix increment operator will always be
- * `auto& operator++() { base_iterator::operator++(); return *this; }`, the
- * indexing operator will always be
- * `auto operator[](std::size_t i) -> decltype(auto) { return std::addressof(base_iterator::operator[](i)); }`
- * etc. The usual solution is to derive the iterator class from one that
- * implements the boilerplate. Unfortunately part of the boilerplate is from
- * the derived class and so it can't appear in the base class. With run-time
- * polymorphism, the base iterator might define an abstract value transformation
- * method (`transform()`) and use it in its other methods; the linker will take
- * care later on of plugging the right `transform()` method from the derived
- * class. To obtain the same effect at compile time, the base class needs to
- * know in advance the `transform()` function. Plugging it as a templated
- * literal argument (a function pointer) requires quite some gymnastic in
- * predicting the right data type, especially the return type.
- * A weird alternative is to have this base class inherit from the derived
- * class, specified as template argument. The derived iterator looks like:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * struct address_iterator: public iterator_base<address_iterator, iterator> {
- *   using iterator_base_t = iterator_base<address_iterator>;
- *   using iterator_base_t::iterator_base_t;
- *   static auto transform(iterator const& it) { return std::addressof(*it); }
- * };
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * and the weirdness is concentrated in the `iterator_base`:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * template <typename FinalIter, typename WrappedIter>
- * class iterator_base: private WrappedIter {
- *   WrappedIter& asWrapped() const
- *     { return static_const<WrappedIter&>(*this); }
- *   FinalIter& asFinal() { return static_const<FinalIter&>(*this); }
- *     public:
- *   iterator_base() = default;
- *   iterator_base(WrappedIter const& from): WrapperIter(from) {}
- *   FinalIter& operator++() { WrappedIter::operator++(); return asFinal(); }
- *   auto operator*() const -> decltype(auto)
- *     { return asFinal().transform(*asWrapped()); }
- *   bool operator!= (iterator_base const& other) const
- *     { return asWrapped() != other.asWrapped(); }
- * }; // class iterator_base
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * With this class, it's possible to transform an `iterator` into an
- * `address_iterator`, in a similar way to how described in the "Interface
- * replacement" section (there are some workaround needed because of private
- * inheritance and to ensure that the iterator traits are correct).
+ * The documentation of file `CollectionView.h` includes a more in-depth
+ * description of it.
  * 
  * 
  * Track collection proxy
@@ -267,9 +125,8 @@
  * associated hit list, again belonging to the `proxy::Tracks` object.
  * 
  * The object describing the information of a single point has the interface of
- * `TrackPointWrapper`. The underlying storage includes pointers to all relevant
- * information (flags, position, hit, etc.), and the index of the point in the
- * track.
+ * `TrackPointWrapper`. The underlying storage includes pointers to the track,
+ * the associated hit, and the index of the point in the track.
  * 
  * 
  */

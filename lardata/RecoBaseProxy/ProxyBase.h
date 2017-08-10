@@ -5,6 +5,115 @@
  * @date   July 27, 2017
  * 
  * This library is header-only.
+ * 
+ * 
+ * Technical details
+ * ==================
+ * 
+ * Overhead
+ * ---------
+ * 
+ * The proxies have been developed with an eye on minimising the replication of
+ * information. The proxies are therefore light-weight objects relying on
+ * pointers to the original data. One exception is that an additional structure
+ * is created for each one-to-many association (i.e., to hits), which includes
+ * a number of entries proportional to the number of tracks.
+ * 
+ * In general, anyway, copy of any proxies is not recommended, as it is usually
+ * better just to pass around a reference to them.
+ * 
+ * Since this interface (and implementation) is still in development, there
+ * might be flaws that make it non-performant. Please report any suspicious
+ * behaviour.
+ * 
+ * 
+ * Interface replacement
+ * ----------------------
+ * 
+ * A technique that is used in this implementation is to replace (or extend) the
+ * interface of an existing object.
+ * The documentation of file `CollectionView.h` includes a more in-depth
+ * description of it.
+ * 
+ * 
+ * Iterator wrappers and "static polymorphism"
+ * --------------------------------------------
+ * 
+ * A widely used interface change is the substitution of the dereference
+ * operator of an iterator:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * struct address_iterator: public iterator { // DON'T DO THIS (won't work)
+ *   auto operator*() -> decltype(auto)
+ *     { return std::addressof(iterator::operator*()); }
+ * }; // my_iterator
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * There are two important pitfalls to be aware of in this specific case, well
+ * illustrated in this example.
+ * 
+ * If the caller tries to use e.g. `ait->name()` on a `address_iterator ait`
+ * (or other members, like `ait[0]`), they will be picked from the base class,
+ * and the overloaded `operator*()` is ignored. This can be avoided with private
+ * inheritance, forcing the explicit implementation of everything we want to
+ * use, which will be at very least an increment operator and a comparison one.
+ * 
+ * The second pitfall is that the base class methods return base class
+ * references. For example, `*ait++` will call the inherited increment operator,
+ * which returns an object of type `iterator`, and the following dereference
+ * will be called on it, again bypassing the overridden dereference method.
+ * This means that to implement the increment operator is not enough to import
+ * the inherited one (`using iterator::operator++;`).
+ * 
+ * This task of wrapping a `base_iterator` involves a lot of "boilerplate" code:
+ * the prefix increment operator will always be
+ * `auto& operator++() { base_iterator::operator++(); return *this; }`, the
+ * indexing operator will always be
+ * `auto operator[](std::size_t i) -> decltype(auto) { return std::addressof(base_iterator::operator[](i)); }`
+ * etc. The usual solution is to derive the iterator class from one that
+ * implements the boilerplate. Unfortunately part of the boilerplate is from
+ * the derived class and so it can't appear in the base class. With run-time
+ * polymorphism, the base iterator might define an abstract value transformation
+ * method (`transform()`) and use it in its other methods; the linker will take
+ * care later on of plugging the right `transform()` method from the derived
+ * class. To obtain the same effect at compile time, the base class needs to
+ * know in advance the `transform()` function. Plugging it as a templated
+ * literal argument (a function pointer) requires quite some gymnastic in
+ * predicting the right data type, especially the return type.
+ * A weird alternative is to have this base class inherit from the derived
+ * class, specified as template argument. The derived iterator looks like:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * struct address_iterator: public iterator_base<address_iterator, iterator> {
+ *   using iterator_base_t = iterator_base<address_iterator>;
+ *   using iterator_base_t::iterator_base_t;
+ *   static auto transform(iterator const& it) { return std::addressof(*it); }
+ * };
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * and the weirdness is concentrated in the `iterator_base`:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * template <typename FinalIter, typename WrappedIter>
+ * class iterator_base: private WrappedIter {
+ *   WrappedIter& asWrapped() const
+ *     { return static_const<WrappedIter&>(*this); }
+ *   FinalIter& asFinal() { return static_const<FinalIter&>(*this); }
+ *     public:
+ *   iterator_base() = default;
+ *   iterator_base(WrappedIter const& from): WrapperIter(from) {}
+ *   FinalIter& operator++() { WrappedIter::operator++(); return asFinal(); }
+ *   auto operator*() const -> decltype(auto)
+ *     { return asFinal().transform(*asWrapped()); }
+ *   bool operator!= (iterator_base const& other) const
+ *     { return asWrapped() != other.asWrapped(); }
+ * }; // class iterator_base
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * With this class, it's possible to transform an `iterator` into an
+ * `address_iterator`, in a similar way to how described in the "Interface
+ * replacement" section (there are some workaround needed because of private
+ * inheritance and to ensure that the iterator traits are correct).
+ * 
+ * @note I learned afterward about the existence of `boost::iterator_adapter`,
+ *       which might provide similar functionality and also be dealing correctly
+ *       with non-constant iterators. Worth considering.
+ * 
+ * 
  */
 
 #ifndef LARDATA_RECOBASEPROXY_PROXYBASE_H
