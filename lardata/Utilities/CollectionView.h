@@ -328,6 +328,11 @@ namespace lar {
       return details::makeCollectionView(details::makeCollectionExtremes(b, e));
     }
   
+  /// Type of collection view owning the two range boundary iterators.
+  template <typename BeginIter, typename EndIter = BeginIter>
+  using RangeAsCollection_t = decltype
+    (makeCollectionView(std::declval<BeginIter>(), std::declval<EndIter>()));
+  
   
   //----------------------------------------------------------------------------
   namespace details {

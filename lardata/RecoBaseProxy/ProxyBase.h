@@ -592,8 +592,11 @@ namespace proxy {
         = BoundaryListRangeIterator<typename boundaries_t::const_iterator>;
       
       /// Structure holding begin and end iterator for a single range.
-      // BoundaryListRangeBase<data_iterator_t> const&
-      using range_t = typename range_iterator_t::value_type;
+      // BoundaryListRange<data_iterator_t> const&
+      using range_ref_t = typename range_iterator_t::value_type;
+      
+      /// Range object directly containing the boundary iterators.
+      using range_t = lar::RangeAsCollection_t<data_iterator_t>;
       
       
       /// Constructor: steals the specified boundary list.
@@ -619,11 +622,41 @@ namespace proxy {
       /// Returns the end iterator of the last range.
       range_iterator_t end() const
         { return { std::prev(boundaries.end()) }; }
-      /// Returns the begin iterator of the `i`-th range (unchecked).
-      range_t range(std::size_t i) const
+      /**
+       * @brief Returns the specified range.
+       * @param i index of the range to be returned
+       * @return a proxy object with container interface
+       * @see `range()`
+       * 
+       * The returned object exposes the range as a random access container
+       * interface.
+       * 
+       * Internally, it refers to the relevant information from this
+       * `BoundaryList` object, and therefore it becomes invalid when this 
+       * `BoundaryList` object is destroyed.
+       * If this is not acceptable, use `range()` instead.
+       */
+      range_ref_t rangeRef(std::size_t i) const
         { return { std::next(boundaries.begin(), i) }; }
+      /**
+       * @brief Returns the specified range in an object holding the iterators.
+       * @param i index of the range to be returned
+       * @return a new object with container interface
+       * @see `rangeRef()`
+       * 
+       * The returned object contains copies of the begin and end iterators of
+       * the range. This object is self-contained and valid even after this
+       * BoundaryList object is destroyed.
+       * 
+       * Note the content of the range itself is _not_ copied: just the boundary
+       * iterators of the range are.
+       */
+      range_t range(std::size_t i) const
+        { return lar::makeCollectionView(rangeBegin(i), rangeEnd(i)); }
+      
       /// Returns the begin iterator of the `i`-th range (unchecked).
-      range_t operator[](std::size_t i) const
+      /// @see `range()`
+      auto operator[](std::size_t i) const -> decltype(auto)
         { return range(i); }
       
         private:
