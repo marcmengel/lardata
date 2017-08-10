@@ -459,6 +459,16 @@ namespace proxy {
       };
     } // makeTrackPointData()
   
+  namespace details {
+    
+    template <typename Obj>
+    struct StaticAsserts;
+    
+    // calling this function ensures static assert template is instantiated
+    template <typename Obj>
+    constexpr bool staticChecks() { return StaticAsserts<Obj>::value; }
+    
+  }// namespace details
   
   /**
    * @brief Wrapper for a track data proxy.
@@ -539,14 +549,10 @@ namespace proxy {
   namespace details {
     
     template <typename Data>
-    struct StaticAsserts;
-    
-    
-    template <typename Data>
-    struct StaticAsserts<TrackPointWrapper<Data>> {
+    struct StaticAsserts<TrackPointWrapper<Data>>: public std::true_type {
       using Wrapper_t = TrackPointWrapper<Data>;
       
-      static_assert(sizeof(Wrapper_t) == 0U, "Wrapper carries data!");
+      static_assert(sizeof(Wrapper_t) == 1U, "Wrapper carries data!");
       
       static_assert(std::is_same<
         std::decay_t<decltype(std::declval<Wrapper_t>().position())>,
@@ -580,13 +586,14 @@ namespace proxy {
         );
       
     }; // StaticAsserts<TrackPointWrapper<Data>>
+          
   } // namespace details
   
   
   template <typename Data>
   auto wrapTrackPoint(Data const& wrappedData)
     {
-      details::StaticAsserts<TrackPointWrapper<Data>>();
+      if (!details::StaticAsserts<TrackPointWrapper<Data>>()) return nullptr;
       return reinterpret_cast<TrackPointWrapper<Data> const&>(wrappedData); 
     }
   
@@ -595,6 +602,9 @@ namespace proxy {
     , public TrackPointWrapper<TrackPointData>
   {
     using TrackPointData::TrackPointData;
+      private:
+    static constexpr bool asserts
+      = details::StaticAsserts<TrackPointWrapper<TrackPointData>>::value;
   }; // class TrackPoint
   
   
