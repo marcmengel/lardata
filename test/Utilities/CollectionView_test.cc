@@ -297,5 +297,62 @@ BOOST_AUTO_TEST_CASE(DocumentationTestCase) {
   std::cout << out.str() << std::endl;
   
   BOOST_CHECK_EQUAL(out.str(), "4 5 6 ");
- 
+  
+  /* The promise:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * class IntVector {
+   *    using vector_t = std::vector<int>;
+   *    
+   *    vector_t data;
+   *      
+   *      public:
+   *    IntVector(vector_t&& data): data(std::move(data)) {}
+   *    
+   *    auto begin() const -> decltype(auto) { return data.cbegin(); }
+   *    auto end() const -> decltype(auto) { return data.cend(); }
+   *    
+   * }; // struct IntVector
+   * 
+   * using IntViewBase_t = lar::CollectionView<IntVector>;
+   * 
+   * struct MyCollection: public IntViewBase_t {
+   *   MyCollection(std::vector<int>&& data) : IntViewBase_t(std::move(data)) {}
+   * }; // class MyCollection
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   */
+  out.str("");
+  {
+    std::vector<int> v_data(10);
+    std::iota(v_data.begin(), v_data.end(), 0); // { 0, 1, ..., 9 }
+    
+    class IntVector {
+       using vector_t = std::vector<int>;
+       
+       vector_t data;
+         
+         public:
+       IntVector(vector_t&& data): data(std::move(data)) {}
+       
+       auto begin() const -> decltype(auto) { return data.cbegin(); }
+       auto end() const -> decltype(auto) { return data.cend(); }
+       
+    }; // struct IntVector
+    
+    using IntViewBase_t = lar::CollectionView<IntVector>;
+    
+    struct MyCollection: public IntViewBase_t {
+      MyCollection(std::vector<int>&& data) : IntViewBase_t(std::move(data)) {}
+    }; // class MyCollection
+    
+    MyCollection v(std::move(v_data));
+    
+    for (int d: v) {
+      out << d << " ";
+    }
+    std::cout << out.str() << std::endl;
+    
+    BOOST_CHECK_EQUAL(out.str(), "0 1 2 3 4 5 6 7 8 9 ");
+  }
+  
+  
 } // BOOST_AUTO_TEST_CASE(DocumentationTestCase)

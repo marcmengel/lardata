@@ -244,7 +244,44 @@ namespace lar {
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * will print "0 1 2 3 4 5 6 7 8 9 ".
    * 
-   *
+   * 
+   * Declaring a wrapper class
+   * --------------------------
+   * 
+   * The function `lar::makeCollectionView()` creates a view owning the
+   * information the view requires. Similarly, a new class can be defined which
+   * does the same, by simply deriving it from `lar::CollectionView`:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * class IntVector {
+   *    using vector_t = std::vector<int>;
+   *    
+   *    vector_t data;
+   *      
+   *      public:
+   *    IntVector(vector_t&& data): data(std::move(data)) {}
+   *    
+   *    auto begin() const -> decltype(auto) { return data.cbegin(); }
+   *    auto end() const -> decltype(auto) { return data.cend(); }
+   *    
+   * }; // struct IntVector
+   * 
+   * using IntViewBase_t = lar::CollectionView<IntVector>;
+   * 
+   * struct MyCollection: public IntViewBase_t {
+   *   MyCollection(std::vector<int>&& data) : IntViewBase_t(std::move(data)) {}
+   * }; // class MyCollection
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * aftter which `MyCollection` interface can be enriched as needed.
+   * The `IntViewBase_t` alias is a way to overcome the fact that the name
+   * `IntVector` can't be used inside `MyCollection` because it's actually a
+   * private base class (the base class, even if not direct, will hide
+   * `IntVector`, even if, being private, it can't even be used). Another way
+   * is to fully qualify its name (e.g. `::IntVector`).
+   * 
+   * Note that to avoid accidental copies, `lar::CollectionView` objects can't
+   * be directly instantiated: using directly `IntViewBase_t` will _not_ be
+   * allowed.
+   * 
    */
   template <typename Range>
   class CollectionView: private Range {
@@ -261,6 +298,7 @@ namespace lar {
     using iter_traits_t = std::iterator_traits<begin_iter_t>;
     
       public:
+    using collection_type = range_t; ///< Type of collection being wrapped.
     
     using value_type = typename iter_traits_t::value_type;
     // reference not provided
