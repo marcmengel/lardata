@@ -29,7 +29,7 @@ namespace trkf {
     /// Combine the TrackState given another TrackState (they need to be on the same plane)
     bool combineWithTrackState(const TrackState& trackstate);
 
-    const TrackState& trackState() { return fTrackState; }
+    const TrackState& trackState() const { return fTrackState; }
     void setTrackState(TrackState&& s) { fTrackState = std::move(s); }
     //
     const SVector5&     parameters()           const { return fTrackState.parameters(); }
@@ -41,6 +41,9 @@ namespace trkf {
     double              mass()                 const { return fTrackState.mass(); }
     const SVector6      parameters6D()         const { return fTrackState.parameters6D(); }
     bool                isTrackAlongPlaneDir() const { return fTrackState.isTrackAlongPlaneDir(); }
+    //
+    Point_t&&  movePositionRef() { return std::move(fTrackState.positionRef()); }
+    Vector_t&& moveMomentumRef() { return std::move(fTrackState.momentumRef()); }
     //
     std::ostream& dump(std::ostream& out = std::cout) const {
       out << "KFTrackState with pID=" << pID() << " mass=" << mass()
