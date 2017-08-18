@@ -321,7 +321,6 @@ using EdgeTuple        = std::tuple<const reco::ClusterHit3D*,const reco::Cluste
 using EdgeList         = std::list<EdgeTuple>;
 using Hit3DToEdgePair  = std::pair<const reco::ClusterHit3D*, reco::EdgeList>;
 using Hit3DToEdgeMap   = std::unordered_map<const reco::ClusterHit3D*, reco::EdgeList>;
-    
 
 /**
  *  @brief Class wrapping the above and containing volatile information to characterize the cluster
@@ -383,6 +382,7 @@ private:
 };
 
 using ClusterParametersList = std::list<ClusterParameters>;
+using Hit2DToClusterMap     = std::unordered_map<const reco::ClusterHit2D*,std::unordered_map<reco::ClusterParameters*,std::set<const reco::ClusterHit3D*>>>;
     
 }
 
