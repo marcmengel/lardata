@@ -145,7 +145,7 @@
 
 
 namespace proxy {
-  
+#if 0
   // forward declarations
   class Track;
   
@@ -282,7 +282,10 @@ namespace proxy {
       {
         auto trackHandle
           = event.template getValidHandle<ProductCollection_t>(tag);
-        return { *trackHandle, { trackHandle, event, tag } };
+        return {
+          *trackHandle,
+          makeAssociatedData<recob::Hit>(trackHandle, event, tag)
+          };
       }
     
   }; // class ProxyCollectionGetter<Tracks>
@@ -484,6 +487,104 @@ namespace proxy {
       { return (index != other.index) || (track != other.track); }
     
   }; // class TrackPointIterator
+#endif // 0
+  
+  
+} // namespace proxy
+
+
+namespace proxy {
+  
+  /**
+   * @brief Proxy tag for a `recob::Track` collection proxy.
+   *
+   * This type can be used to get a proxy for `recob::Track` collection:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto tracks = proxy::getCollection<proxy::Tracks>(event, tracksTag);
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * 
+   * @todo Document how to use that collection.
+   * 
+   */
+  using Tracks = std::vector<recob::Track>;
+  
+  
+  
+  //----------------------------------------------------------------------------
+  /// Specialization to create a proxy for `recob::Track` collection.
+  template <>
+  struct CollectionProxyMaker<Tracks> {
+    
+    /// Traits of the collection proxy for the collection proxy maker.
+    using traits_t = CollectionProxyMakerTraits<Tracks>;
+    
+    /// Type of main collection proxy.
+    using main_collection_proxy_t = typename traits_t::main_collection_proxy_t;
+    
+    /// Type returned by the main collection indexing operator.
+    using main_element_t = typename traits_t::main_element_t;
+    
+    /// Type of element of the main collection.
+    using main_collection_t = typename traits_t::main_collection_t;
+    
+    /**
+     * @brief Creates and returns a collection proxy for `recob::Track` based on
+     *        `proxy::Tracks` tag and with the requested associated data.
+     * @tparam Event type of the event to read the information from
+     * @tparam WithArgs type of arguments for associated data
+     * @param event event to read the information from
+     * @param tag input tag of the `recob::Track` collection data product
+     * @param withArgs optional associated objects to be included
+     * @return a collection proxy to `recob::Track` collection with `tag`
+     * 
+     * For each argument in `withArgs`, an action is taken. Usually that is to
+     * add an association to the proxy.
+     * Associated hits are automatically added to the proxy and must not be
+     * explicitly specified.
+     * 
+     * Only a few associated data collections are supported:
+     * * `withAssociated<Aux>()` (optional argument: hit-track association
+     *     tag, as track by default): adds to the proxy an association to the
+     *     `Aux` data product (see `withAssociated()`)
+     * 
+     */
+    template <typename Event, typename... WithArgs>
+    static auto make
+      (Event const& event, art::InputTag tag, WithArgs&&... withArgs)
+      {
+        auto mainHandle = event.template getValidHandle<main_collection_t>(tag);
+        // automatically add associated hits with the same tag;
+        // TODO allow a withAssociated<recob::Hit>() from withArgs to override
+        // this one; the pattern may be:
+        // - if withArgs contains a withAssociated<recob::Hit>(), produce a new
+        //   withArgs with that one pushed first
+        // - otherwise, produce a new withArgs with a new
+        //   withAssociated<recob::Hit>(tag) as first element
+        // In principle there is no need for these hits to be first; code might
+        // be simpler when assuming that though.
+        auto proxy = makeCollectionProxy(
+          *mainHandle,
+          withAssociated<recob::Hit>()
+            .template createAssnProxyMaker<main_collection_proxy_t>
+            (event, mainHandle, tag),
+          withArgs.template createAssnProxyMaker<main_collection_proxy_t>
+            (event, mainHandle, tag)...
+          );
+        return proxy;
+      } // make()
+    
+      private:
+    // helper function to avoid typing the exact types of auxiliary collections
+    template <typename MainColl, typename... AuxColl>
+    static auto makeCollectionProxy(MainColl const& main, AuxColl&&... aux)
+      {
+        return CollectionProxy<MainColl, AuxColl...>
+          (main, std::forward<AuxColl>(aux)...);
+      }
+    
+  }; // struct CollectionProxyMaker<>
+  
+  //----------------------------------------------------------------------------
   
   
 } // namespace proxy

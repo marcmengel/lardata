@@ -7,6 +7,21 @@
  * This library is header-only.
  * 
  * 
+ * Definitions
+ * ============
+ * 
+ * * *one-to-many sequential association*: an association between `L` and `R`
+ *   types where:
+ *     * `L` objects come from a single data product
+ *     * the sequence of associations is such that if `L1` is before `L2` in the
+ *       original data product, all `L1`-`Rx` associations of `L1` are listed
+ *       before any of the `L2`-`Rx` associations of `L2`; in other words, the
+ *       association list follows the original order of the `L` data product;
+ *       note that this preclude actual many-to-many associations.
+ *   This does _not_ require associations to be one-to-one (it allows one `L` to
+ *   many `R`), nor that all `L` be associated to at least one `R`.
+ *   
+ * 
  * Technical details
  * ==================
  * 
@@ -139,266 +154,842 @@
 #include <cstdlib> // std::size_t
 #include <cassert>
 
+/**
+ * @defgroup LArSoftProxies Helper classes for easier access to connected data.
+ */
 
 /// Encloses LArSoft data product proxy objects and utilities.
 namespace proxy {
   
   namespace details {
-    template <typename Proxy>
-    struct ProxyCollectionGetterTraits;
+    
+    //--------------------------------------------------------------------------
+    template <typename>
+    using always_true = std::true_type;
+    
+    //--------------------------------------------------------------------------
+    // forward declarations
+    template <typename MainColl>
+    struct MainCollectionProxy;
+    
+    //--------------------------------------------------------------------------
+    template <typename AuxCollTuple>
+    struct SubstituteWithAuxList;
+    
+    //--------------------------------------------------------------------------
+    template <typename Main, typename Aux, typename Tag = Aux>
+    class AssociatedData;
+    
+    //--------------------------------------------------------------------------
+    template <typename Aux, typename ArgTuple, typename AuxTag = Aux>
+    class WithAssociatedStruct;
+    
+    //--------------------------------------------------------------------------
+    template <typename ProxyElement, typename... AuxData>
+    auto makeCollectionProxyElement(
+      std::size_t index,
+      typename ProxyElement::main_element_t const& main,
+      AuxData&&... auxData
+      );
+    
+    //--------------------------------------------------------------------------
+    template <typename Coll>
+    class IndexBasedIterator;
+    
+    //--------------------------------------------------------------------------
+    
   } // namespace details
   
   
-  /**
-   * @brief Object to create the proxy of a collection.
-   * @tparam Proxy the type of proxy to be created
-   * 
-   * This class can't be used directly and must be specialized.
-   * Its content reflects the interface that the infrastructure expects to find.
-   * 
-   * The interface it made of:
-   * - traits:
-   *     * `ProductCollection_t` is the type of the collection of the main data
-   *       product
-   *     * `ProductElement_t` is the type of the main data product object
-   * - `get()` method doing the work, using an event and a tag
-   * 
-   * This class is used by `proxy::getCollection()` function.
-   * Overloading that function is another way to customize the creation of a
-   * proxy.
-   */
-  template <typename Proxy>
-  class ProxyCollectionGetter {
-    
-    using Traits_t = details::ProxyCollectionGetterTraits<Proxy>;
-    
-      public:
-    using ProductCollection_t = typename Traits_t::ProductCollection_t;
-    using ProductElement_t = typename Traits_t::ProductElement_t;
-    
-    /// Returns the specified proxy object, reading data from `event`.
-    template <typename Event>
-    auto get(Event const& event, art::InputTag tag) const;
-    
-      private:
-    ProxyCollectionGetter() = delete; // this class must be specialized
-  }; // class ProxyCollectionGetter
-  
-  
-  /**
-   * @brief Creates and returns a proxy of the specified data type.
-   * @tparam Proxy type of proxy object to be created
-   * @tparam Event type of event object to be used (let C++ autodetect it!)
-   * @param event the event object to read the information from
-   * @param tag the tag of the main object collection
-   * @return a Proxy object pointing to the specified data product
-   * 
-   * This functions creates and returns a collection-like object where each
-   * element is a proxy to an element of a data product collection.
-   * For example, `proxy::getCollection<proxy::Tracks>(event, "pandora")` will
-   * return a random-access object where each element is a `proxy::Track`,
-   * proxy object of a track of type `recob::Track` in a data product with tag
-   * `"pandora"`.
-   * 
-   * The supported proxy objects are normally defined in the `proxy` namespace
-   * and they share the class name with the data product they are proxy of.
-   * For example, the proxy object of `recob::Track` is `proxy::Track`.
-   * A collection of tracks, `std::vector<recob::Track>`, is proxied by a
-   * `proxy::Tracks` object (note the plural "s").
-   * 
-   */
-  template <typename Proxy, typename Event>
-  auto getCollection(Event const& event, art::InputTag tag)
-    { return ProxyCollectionGetter<Proxy>().get(event, tag); }
-  
+  /// @{
+  /// @name Associated data infrastructure
+  /// @ingroup LArSoftProxies
   
   //----------------------------------------------------------------------------
-  /// Traits for a collection element proxy.
-  template <typename Data>
-  struct ProxyCollectionElementTraits {
-    
-    using main_value_type = Data; ///< Type of main data product content.
-    
-    using value_type = main_value_type; ///< Type of main data product content.
-    
-  }; // struct ProxyCollectionElementTraits<>
+  /**
+   * @brief Creates and returns an associated data object.
+   * @tparam Main type of main object to be associated
+   * @tparam Aux type of data to be associated to the main objects
+   * @tparam Tag the tag labelling this associated data (if omitted: `Aux`)
+   * @tparam Event type of event to read associations from
+   * @param event event to read associations from
+   * @param tag input tag of the association object
+   * @param minSize minimum number of entries in the produced association data
+   * @return a new `AssociatedData` filled with associations from `tag`
+   * 
+   * The association being retrieved must fulfill the requirements of
+   * "one-to-many sequential association" requirement (see the "Definitions"
+   * section in `ProxyBase.h` documentation).
+   * 
+   * Elements in the main collection not associated with any object will be
+   * recorded as such. If there is information for less than `minSize` main
+   * objects, more records will be added to mark the missing objects as not
+   * associated to anything.
+   * 
+   * Two template types must be explicitly specified, e.g.
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto assData = makeAssociatedData<recob::Track, recob::Hit>(event, tag);
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   */
+  template <typename Main, typename Aux, typename Tag, typename Event>
+  auto makeAssociatedData
+    (Event const& event, art::InputTag tag, std::size_t minSize = 0);
   
+  template <typename Main, typename Aux, typename Event>
+  auto makeAssociatedData
+    (Event const& event, art::InputTag tag, std::size_t minSize = 0)
+    { return makeAssociatedData<Main, Aux, Aux, Event>(event, tag, minSize); }
   
-  /// Traits for a collection proxy.
-  template<
-    typename Proxy,
-    template <typename T, typename...> class Coll = std::vector
-    >
-  struct ProxyCollectionTraits {
-      private:
-    using proxy_traits_t
-      = ProxyCollectionElementTraits<typename Proxy::value_type>;
-    
-      public:
-    using proxy_value_type = Proxy; ///< Type of proxy.
-    
-    /// Type of proxy collection (that is, this class).
-    using proxy_collection_type = ProxyCollectionTraits<Proxy, Coll>;
-    
-    /// Type exposed by the collection (the proxy).
-    using value_type = proxy_value_type;
-    
-    /// Type of the main object contained in the value proxy.
-    using main_value_type = typename proxy_value_type::value_type;
-    
-    /// Type of data product collection.
-    using main_collection_type = Coll<main_value_type>;
-    
-  }; // struct ProxyCollectionTraits<>
+  /**
+   * @brief Creates and returns an associated data object.
+   * @tparam Aux type of data to be associated to the main objects
+   * @tparam Tag the tag labelling this associated data (if omitted: `Aux`)
+   * @tparam Handle type of handle to the main collection object
+   * @tparam Event type of event to read associations from
+   * @param handle handle to the main collection object
+   * @param event event to read associations from
+   * @param tag input tag of the association object
+   * @return a new `AssociatedData` filled with associations from `tag`
+   * @see `makeAssociatedData(Handle&&, Event&&, art::InputTag)`
+   * 
+   * This function operates like
+   * `makeAssociatedData(Handle&&, Event&&, art::InputTag)`, but it extracts
+   * the information about the type of main object and the minimum number of
+   * them from a handle.
+   * The handle object is expected to behave as a smart pointer to a
+   * collection of elements of the associated type.
+   * 
+   * One template type must be explicitly specified, e.g.
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto assData = makeAssociatedData<recob::Hit>(handle, event, tag);
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   */
+  template <typename Aux, typename Tag, typename Handle, typename Event>
+  auto makeAssociatedData
+    (Handle&& handle, Event const& event, art::InputTag tag);
+  
+  template <typename Aux, typename Handle, typename Event>
+  auto makeAssociatedData
+    (Handle&& handle, Event const& event, art::InputTag tag)
+    {
+      return makeAssociatedData<Aux, Aux, Handle, Event>
+        (std::forward<Handle>(handle), event, tag);
+    }
   
   
   //----------------------------------------------------------------------------
   /**
-   * @brief Proxy to a collection of objects.
-   * @tparam Proxy type of proxy to the element of the collection.
+   * @brief Creates an associated data wrapper for the specified types.
+   * @tparam Main type of main datum (element) to associate from ("left")
+   * @tparam AuxTag tag labelling this association
    * 
-   * The collection and its elements are immutable.
+   * Usually, `AuxTag` is also the type of datum (element) to associate to
+   * ("right").
+   * 
+   * This class works as a base class for `AssociatedDataProxyMaker` so that
+   * the specializations of the latter can still inherit from this one if they
+   * its facilities.
    */
-  template <typename Proxy>
-  class ProxyCollection: public ProxyCollectionTraits<Proxy> {
-    using Base_t = ProxyCollectionTraits<Proxy>;
+  template <typename Main, typename Aux, typename AuxTag = Aux>
+  struct AssociatedDataProxyMakerBase {
     
-      public:
-    /// Returns whether the track collection is empty.
-    bool empty() const { return main->empty(); }
+    /// Tag labelling the associated data we are going to produce.
+    using data_tag = AuxTag;
     
-    /// Returns the number of tracks in the collection.
-    std::size_t size() const { return main->size(); }
+    /// Type of the main datum ("left").
+    using main_element_t = Main;
     
-      protected:
-    using main_collection_type = typename Base_t::main_collection_type;
+    /// Type of the auxiliary associated datum ("right").
+    using aux_element_t = Aux;
     
-    ProxyCollection(main_collection_type const& main): main(&main) {}
+    /// Type of associated data proxy being created.
+    using aux_collection_proxy_t
+       = details::AssociatedData<main_element_t, aux_element_t, data_tag>;
     
-    /// Returns the main element at the specified index. No boundary checked.
-    auto getMainAt(std::size_t index) const -> decltype(auto)
-      { return main->operator[](index); }
+    /// Type of _art_ association being used as input.
+    using assns_t = typename aux_collection_proxy_t::assns_t;
+    
+    /**
+     * @brief Create a association proxy collection using main collection tag.
+     * @tparam Event type of the event to read associations from
+     * @tparam Handle type of handle to the main data product
+     * @tparam MainArgs any type convertible to `art::InputTag`
+     * @param event the event to read associations from
+     * @param mainHandle handle to the main collection data product
+     * @param mainArgs an object describing the main data product
+     * @return an auxiliary data proxy object
+     * 
+     * The returned object exposes a random access container interface, with
+     * data indexed by the index of the corresponding object in the main
+     * collection.
+     * 
+     * The `mainArgs` object is of an arbitrary type that must be convertible
+     * by explicit type cast into a `art::InputTag`; that input tag will be
+     * used to fetch the association.
+     */
+    template<typename Event, typename Handle, typename MainArgs>
+    static auto make
+      (Event const& event, Handle&& mainHandle, MainArgs const& mainArgs)
+      {
+        return createFromTag
+          (event, std::forward<Handle>(mainHandle), art::InputTag(mainArgs));
+      }
+    
+    /**
+     * @brief Create a association proxy collection using the specified tag.
+     * @tparam Event type of the event to read associations from
+     * @tparam Handle type of handle to the main data product
+     * @tparam MainArgs any type convertible to `art::InputTag` (unused)
+     * @param event the event to read associations from
+     * @param mainHandle handle to the main collection data product
+     * @param auxInputTag the tag of the association to be read
+     * @return a auxiliary data proxy object
+     * 
+     * The returned object exposes a random access container interface, with
+     * data indexed by the index of the corresponding object in the main
+     * collection.
+     */
+    template<typename Event, typename Handle, typename MainArgs>
+    static auto make(
+      Event const& event, Handle&& mainHandle,
+      MainArgs const&, art::InputTag auxInputTag
+      )
+      {
+        return
+          createFromTag(event, std::forward<Handle>(mainHandle), auxInputTag);
+      }
     
       private:
+    template<typename Event, typename Handle>
+    static auto createFromTag
+      (Event const& event, Handle&& mainHandle, art::InputTag auxInputTag)
+      {
+        return makeAssociatedData<main_element_t, aux_element_t, data_tag>
+          (event, auxInputTag, mainHandle->size());
+      }
     
-    main_collection_type const* main; ///< Pointer to the main data collection.
-    
-  }; // class ProxyCollection
+  }; // struct AssociatedDataProxyMakerBase<>
   
+  
+  //--------------------------------------------------------------------------
+  /**
+   * @brief Creates an associated data wrapper for the specified types.
+   * @tparam Main type of main datum (element) to associate from ("left")
+   * @tparam Aux type of datum (element) to associate to ("right")
+   * @tparam CollProxy type of proxy this associated data works for
+   * @tparam Tag tag for the association proxy to be created
+   * @see `withAssociated()`
+   * This class is (indirectly) called when using `proxy::withAssociated()`
+   * in `getCollection()`.
+   * Its task is to supervise the creation of the proxy to the data
+   * association between the main data type and an auxiliary one.
+   * The interface required by `withAssociated()` includes:
+   * * a static `make()` method creating and returning the associated data
+   *   proxy with arguments an event, a template argument representing the
+   *   main collection information, and all the arguments required for the
+   *   creation of the associated proxy (coming from `withAssociated()`);
+   *   equivalent to the signature:
+   *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   *   template <typename Event, template MainArg, template... Args>
+   *   auto make(Event const&, MainArg const&, Args&&...);
+   *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * 
+   * This class can be specialized (see `withAssociated()` for an example).
+   * The default implementation just wraps a one-to-many
+   * `art::Assns<Main, Aux>` data product fulfilling "one-to-many sequential
+   * association" requirement (see the "Definitions" section in `ProxyBase.h`
+   * documentation).
+   * 
+   * The third template argument is designed for specialization of associations
+   * in the context of a specific proxy type.
+   */
+  template
+    <typename Main, typename Aux, typename CollProxy, typename Tag = Aux>
+  class AssociatedDataProxyMaker
+    : public AssociatedDataProxyMakerBase<Main, Aux, Tag>
+  {
+    //
+    // Note that this implementation is here only to document how to derive
+    // a AssociatedDataProxyMaker (specialization) from
+    // AssociatedDataProxyMakerBase. It's just mirroring the base class.
+    //
+    using base_t = AssociatedDataProxyMakerBase<Main, Aux, Tag>;
+    
+      public:
+    
+    /// Type of the main datum ("left").
+    using typename base_t::main_element_t;
+    
+    /// Type of the auxiliary associated datum ("right").
+    using typename base_t::aux_element_t;
+    
+    /// Type of associated data proxy being created.
+    using typename base_t::aux_collection_proxy_t;
+    
+    /// Type of _art_ association being used as input.
+    using typename base_t::assns_t;
+    
+    /**
+     * @brief Create a association proxy collection using main collection tag.
+     * @tparam Event type of the event to read associations from
+     * @tparam MainArgs any type convertible to `art::InputTag`
+     * @param event the event to read associations from
+     * @param margs an object describing the main data product
+     * @return an auxiliary data proxy object
+     * 
+     * The returned object exposes a random access container interface, with
+     * data indexed by the index of the corresponding object in the main
+     * collection.
+     * 
+     * This implementation requires `margs` object to be convertible
+     * by explicit type cast into a `art::InputTag`; that input tag will be
+     * used to fetch the association.
+     */
+    template
+      <typename Event, typename Handle, typename MainArgs, typename... Args>
+    static auto make(
+      Event const& event, Handle&& mainHandle, MainArgs const& margs,
+      Args&&... args
+      )
+      {
+        return base_t::make(
+          event,
+          std::forward<Handle>(mainHandle),
+          margs,
+          std::forward<Args>(args)...
+          );
+      }
+    
+  }; // struct AssociatedDataProxyMaker<>
+  
+  /// @}
+  // end Associated data
+  
+  /// @{
+  /// @name Proxy element infrastructure
+  /// @ingroup LArSoftProxies
   
   //----------------------------------------------------------------------------
   /**
-   * @brief Iterator for a proxy collection.
-   * @tparam ProxyColl type of proxy collection to iterate
+   * @brief An element of a collection proxy.
+   * @tparam CollProxy the type of collection proxy this is the element of
    * 
-   * `ProxyColl` is a collection derived from `ProxyCollection`, which must
-   * provide a public `operator[](std::size_t)` method returning a proxy.
-   * A new proxy object is generated at each dereferenciation, that means
-   * the expression `&*it == &*it` will be false (while generally `*it == *it`
-   * would be true).
+   * 
+   * @todo The interface of this objects need to be developed
+   * @todo Document this class
    */
-  template <typename ProxyColl>
-  class ProxyCollectionIterator {
-    using Collection_t = ProxyColl;
-    
+  template <typename CollProxy>
+  struct CollectionProxyElement {
       public:
-    using value_type = typename Collection_t::value_type;
-    using const_iterator = ProxyCollectionIterator;
+    using collection_proxy_t = CollProxy;
+    using main_element_t = typename collection_proxy_t::main_element_t;
     
-    /// Default constructor (required by iterator protocol): an unusable iterator.
-    ProxyCollectionIterator() = default;
+    /// Tuple of elements.
+    using aux_elements_t = typename details::SubstituteWithAuxList
+      <typename CollProxy::auxcoll_t>::type;
     
-    /// Constructor: initializes from an iterator of the proxy main collection.
-    ProxyCollectionIterator(Collection_t const& coll, std::size_t index = 0)
-      : fColl(&coll), fIndex(index) {}
+    /// Constructor: sets the element index, the main element and steals
+    /// auxiliary data.
+    CollectionProxyElement
+      (std::size_t index, main_element_t const& main, aux_elements_t&& auxData)
+      : index(index), main(&main) , auxData(std::move(auxData))
+      {}
     
-    /// Returns the value pointed by this iterator.
-    auto operator* () const -> decltype(auto)
-      { return fColl->operator[](fIndex); }
+    /// Returns a pointer to the main element.
+    main_element_t const* operator->() const { return main; }
     
-    /// Returns the value pointed by this iterator.
-    const_iterator& operator++ () { ++fIndex; return *this; }
+    /// Returns a reference to the main element.
+    main_element_t const& operator*() const { return *main; }
     
-    /// Returns whether the iterators point to the same element.
-    bool operator!= (const_iterator const& other) const
-      { return (other.fIndex != fIndex) || (other.fColl != fColl); }
     
-      protected:
-    /// Pointer to the original collection.
-    Collection_t const* fColl = nullptr;
     
-    /// Current index in the main collection.
-    std::size_t fIndex = std::numeric_limits<std::size_t>::max();
+      private:
+    std::size_t index; ///< Index of this element in the proxy.
+    main_element_t const* main; ///< Pointer to the main object of the element.
+    aux_elements_t auxData; ///< Data associated to the main object.
     
-  }; // ProxyCollectionIterator<>
+  }; // CollectionProxyElement<>
 
 
+  /// @}
+  // end Collection proxy infrastructure
+  
+  
+  /// @{
+  /// @name Data product proxy infrastructure
+  /// @ingroup LArSoftProxies
+  
   //----------------------------------------------------------------------------
   /**
-   * @brief Proxy to an element of a proxy collection.
-   * @tparam Data type of element being proxied
+   * @brief Base representation of a collection of proxied objects.
+   * @tparam MainColl type of the collection of the main data product
+   * @tparam AuxColls type of all included auxiliary data proxies
+   * @see proxy::CollectionProxyElement
    * 
-   * The element points to a "main" object (of type `Data`) via an immutable
-   * pointer.
+   * This object exposes a collection interface.
+   * The collection proxy is driven by a data product containing the main
+   * objects. The size of the collection proxy is the same as the one of this
+   * main data product, and all associated data is referring to its elements.
    * 
-   * Given the point of a proxy, there is no use of this class directly, but it
-   * should be extended with additional data and interface.
+   * Thus, the elements of this collection proxy are objects that collect the
+   * information of a single element in the main data product and all the data
+   * associated with it.
    * 
-   * As a proxy base class, it provides access to the original object via a
-   * dereference `operator->`, smart-pointer-like. The proxy is expected always
-   * to point to a main object.
+   * @note This proxy supports at most an auxiliary collection proxy of each
+   *       type.
    * 
    */
-  template <typename Data>
-  class ProxyCollectionElement: public ProxyCollectionElementTraits<Data> {
-    using Base_t = ProxyCollectionElementTraits<Data>;
-    using CollTraits_t = Base_t;
+  template <typename MainColl, typename... AuxColls>
+  class CollectionProxy
+    : public details::MainCollectionProxy<MainColl>, public AuxColls...
+  {
+    /// This type.
+    using collection_proxy_t = CollectionProxy<MainColl, AuxColls...>;
+    
+    /// Type of wrapper used for the main data product.
+    using main_collection_proxy_t = details::MainCollectionProxy<MainColl>;
+    
+    /// Tuple of all auxiliary data collections (wrappers).
+    using auxcoll_t = std::tuple<AuxColls...>;
+    
       public:
+    /// Type of element of the main data product.
+    using typename main_collection_proxy_t::main_element_t;
     
-    // this is a "regular" object
-    ProxyCollectionElement(ProxyCollectionElement const&) = default;
-    ProxyCollectionElement(ProxyCollectionElement&&) = default;
-    ProxyCollectionElement& operator=(ProxyCollectionElement const&) = default;
-    ProxyCollectionElement& operator=(ProxyCollectionElement&&) = default;
+    /// Type of collection in the main data product.
+    using typename main_collection_proxy_t::main_collection_t;
+    
+    /// Type of element of this collection proxy.
+    using element_proxy_t = CollectionProxyElement<collection_proxy_t>;
+    
+    /// Type of element of this collection proxy.
+    using value_type = element_proxy_t;
+    
+    /// Type of iterator to this collection (constant).
+    using const_iterator = details::IndexBasedIterator<collection_proxy_t>;
+    
+    /// Type of iterator to this collection (still constant).
+    using iterator = const_iterator;
+    
+    /**
+     * @brief Constructor: uses the specified data.
+     * @param main the original main data product collection
+     * @param aux all auxiliary data collections and structures
+     * 
+     * The auxiliary data structures are stolen (moved) from the arguments.
+     * They are expected to be wrappers around the original associated data,
+     * not owning the auxiliary data itself.
+     */
+    CollectionProxy(main_collection_t const& main, AuxColls&&... aux)
+      : main_collection_proxy_t(main), AuxColls(std::move(aux))...
+      {}
+    
+    /**
+     * @brief Returns the element of this collection with the specified index.
+     * @param i the index in the collection
+     * @return a value representing an element of the collection
+     * 
+     * The returned value is an object created on the spot, not a reference to
+     * an existing structure.
+     * The structure exposes the `i`-th element in the main collection, plus all
+     * objects that are associated to it.
+     */
+    element_proxy_t operator[] (std::size_t i) const
+      {
+        return details::makeCollectionProxyElement<element_proxy_t>
+          (i, getMainAt(i), aux<AuxColls>().operator[](i)...);
+      }
+    
+    /// Returns an iterator to the first element of the collection.
+    const_iterator begin() const { return makeIterator(0); }
+    
+    /// Returns an iterator past the last element of the collection.
+    const_iterator end() const { return makeIterator(size()); }
+    
+    /// Returns whether this collection is empty.
+    bool empty() const { return main().empty(); }
+    
+    /// Returns the size of this collection.
+    std::size_t size() const { return main().size(); }
     
     
-    /// Access to the main object of the proxy: `recob::Track`.
-    auto operator->() const { return mainPtr(); }
-    
-    /// Access to the main object of the proxy: `recob::Track`.
-    auto operator*() const -> decltype(auto) { return mainRef(); }
+    /// Returns the associated data proxy specified by `AuxTag`.
+    template <typename AuxTag>
+    auto get() const -> decltype(auto) { return auxByTag<AuxTag>(); }
     
     
       protected:
-    using main_value_type = typename Base_t::main_value_type;
     
-    /// Constructor: points to the specified main value.
-    ProxyCollectionElement(main_value_type const& main): fMain(&main) {}
+    friend element_proxy_t;
     
-    /// Access to the main data element.
-    auto mainPtr() const { return fMain; }
+    using main_collection_proxy_t::main;
+    using main_collection_proxy_t::mainProxy;
+    using main_collection_proxy_t::getMainAt;
     
-    /// Access to the main data element.
-    auto mainRef() const -> decltype(auto) { return *mainPtr(); }
+    /// Returns the auxiliary data specified by type.
+    template <typename AuxColl>
+    AuxColl const& aux() const { return static_cast<AuxColl const&>(*this); }
     
-  //  void setMain(Base_t::main_value_type const* main) { fMain = main; }
+    /// Returns the auxiliary data specified by type.
+    template <typename AuxColl>
+    AuxColl const& aux() const { return static_cast<AuxColl const&>(*this); }
+    
+    /// Returns an iterator pointing to the specified index of this collection.
+    const_iterator makeIterator(std::size_t i) const { return { *this, i }; }
+    
+  }; // struct CollectionProxy
+  
+  
+  //----------------------------------------------------------------------------
+  /// The same as `withAssociated()`, but it also specified a tag for the data.
+  template <typename Aux, typename AuxTag, typename... Args>
+  auto withAssociatedAs(Args&&... args) {
+    using ArgTuple_t = std::tuple<Args&&...>;
+    ArgTuple_t argsTuple(std::forward<Args>(args)...);
+    return details::WithAssociatedStruct<Aux, ArgTuple_t, AuxTag>
+      (std::move(argsTuple));
+  } // withAssociatedAs()
+  
+  
+  //----------------------------------------------------------------------------
+  /**
+   * @brief Helper function to request associated data.
+   * @tparam Aux type of associated data requested
+   * @tparam Args types of constructor arguments for associated data collection
+   * @param args constructor arguments for the associated data collection
+   * @return a temporary object that `getCollection()` knows to handle
+   * 
+   * This function is meant to convey to `getCollection()` function the request
+   * for the delivered collection proxy to carry auxiliary data.
+   * The function also transfers the information required to create a proxy to
+   * that auxiliary data.
+   * 
+   * This data will be tagged with the type `Aux`. To use a different type as
+   * tag, use `withAssociatedAs()` instead, specifying the tag as second
+   * template argument, e.g.:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * struct MCS {};
+   * auto tracks = proxy::getCollection<proxy::Tracks>(event, trackTag,
+   *   withAssociated<recob::TrackMomentum>(defaultMomTag),
+   *   withAssociatedAs<recob::TrackMomentum, MCS>(MCSmomTag)
+   *   );
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * The first momentum association (`"defaultMomTag"`) will be accessed by
+   * using the type `recob::TrackMomentum` as tag, while the second one will
+   * be accessed by the `MCS` tag (which is better not be defined in a local
+   * scope).
+   * 
+   * 
+   * Customization of the association proxy
+   * =======================================
+   * 
+   * To have a call like:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto tracks = getCollection<SpecialTracks>
+   *   (event, tag, withAssociated<recob::Hit>(hitAssnTag, "special"));
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * create something different than the standard association proxy, specialize
+   * `proxy::AssociatedDataProxyMaker`:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * namespace proxy {
+   *   template <>
+   *   struct AssociatedDataProxyMaker<recob::Track, recob::Hit, SpecialTracks>
+   *     : public AssociatedDataProxyMakerBase<recob::Track, recob::Hit>
+   *   {
+   *     
+   *     template<typename Event, typename MainArgs>
+   *     static auto make(
+   *       Event const& event,
+   *       MainArgs const&,
+   *       art::InputTag assnTag,
+   *       std::string quality
+   *       )
+   *       {
+   *         ::SpecialTrackHitsProxy myAuxProxy;
+   *         // ... make it, and make it right
+   *         return myAuxProxy;
+   *       }
+   *     
+   *   }; // struct AssociatedDataProxyMaker<recob::Track, recob::Hit>
+   *   
+   * } // namespace proxy
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * 
+   * 
+   * Technical details
+   * ==================
+   * 
+   * The main purpose of this function and the related `WithAssociatedData`
+   * class is to save the user from specifying the main type the auxiliary data
+   * is * associated with, when using it as `getCollection()` argument:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto tracks = getCollection<proxy::Tracks>
+   *   (event, tag, withAssociated<recob::Hit>(hitAssnTag));
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * While parsing the `withAssociated()` argument (or any argument), the
+   * information of which is the proxy collection type (`proxy::Tracks` in the
+   * example) is not known. In principle, to fully define the association, two
+   * template arguments are needed, e.g.
+   * `withAssociated<recob::Track, recob::Hit>(hitAssnTag)`.
+   * The class `WithAssociatedData` holds the information of which associated
+   * type is requested (`recob::Hit`) and the information needed to create a
+   * proxy to such association (all arguments, here just `hitAssnTag`).
+   * The function `getCollection()` will have this object as argument, and when
+   * executing will be able to supply the missing information, that
+   * `recob::Track` is the main data product element we are associating to.
+   */
+  template <typename Aux, typename... Args>
+  auto withAssociated(Args&&... args)
+    { return withAssociatedAs<Aux, Aux>(std::forward<Args>(args)...); }
+  
+  
+  //----------------------------------------------------------------------------
+  /**
+   * @brief Collection of data type definitions for collection proxies.
+   * @tparam Proxy type of proxy the traits refer to
+   * @tparam Selector specialization helper type
+   * 
+   * Expected traits:
+   * * `main_collection_t`: type of the main data product collection
+   * * `main_element_t`: type contained in the main data product collection
+   * * `main_collection_proxy_t`: type wrapping the main data product collection
+   * 
+   * Note that the `Proxy` type is expected to be the same type as used in
+   * `getCollection()` calls, and does not need to match the actual type of a
+   * proxy collection.
+   */
+  template <typename Proxy, typename Selector = Proxy>
+  struct CollectionProxyMakerTraits {
+    static_assert
+      (details::always_true<Proxy>(), "This class requires specialization.");
+  };
+  
+  
+  //----------------------------------------------------------------------------
+  /**
+   * @brief Class to assemble the required proxy.
+   * @tparam CollProxy a type characterizing the produced proxy
+   * 
+   * This class is used by `getCollection()` to create the requested proxy.
+   * The required interface for this class is:
+   * * `make()`: a static method returning the collection proxy, matching the
+   *   signature
+   *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   *   template <typename Event, typename... Args>
+   *   auto make(Event const&, Args&&...);
+   *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   *   where the first argument will be the event to read the information from.
+   * 
+   * A default implementation is provided. In it, the template argument
+   * `CollProxy` is expected to have the interface of `CollectionProxy`.
+   * The arguments required are documented in the implementation of the `make()`
+   * function. Note that the type of proxy returned does not need to be
+   * `CollProxy`, but is in fact an instance of `proxy::CollectionProxy`.
+   * 
+   */
+  template <typename CollProxy>
+  struct CollectionProxyMaker {
+    
+    /// Traits of the collection proxy for the collection proxy maker.
+    using traits_t = CollectionProxyMakerTraits<CollProxy>;
+    
+    /// Type of main collection proxy.
+    using main_collection_proxy_t = typename traits_t::main_collection_proxy_t;
+    
+    /// Type returned by the main collection indexing operator.
+    using main_element_t = typename traits_t::main_element_t;
+    
+    /// Type of element of the main collection.
+    using main_collection_t = typename traits_t::main_collection_t;
+    
+    /**
+     * @brief Creates and returns a collection proxy based on `CollProxy` and
+     *        with the requested associated data.
+     * @tparam Event type of the event to read the information from
+     * @tparam WithArgs type of arguments for associated data
+     * @param event event to read the information from
+     * @param tag input tag of the main data product
+     * @param withArgs optional associated objects to be included
+     * @return a collection proxy from data as retrieved via `tag`
+     * 
+     * For each argument in `withArgs`, an action is taken. Usually that is to
+     * add an association to the proxy.
+     * 
+     * Only a few associated data collections are supported:
+     * * `withAssociated<Aux>()` (optional argument: hit-track association
+     *     tag, as track by default): adds to the proxy an association to the
+     *     `Aux` data product (see `withAssociated()`)
+     * 
+     */
+    template <typename Event, typename... WithArgs>
+    static auto make
+      (Event const& event, art::InputTag tag, WithArgs&&... withArgs)
+      {
+        auto mainHandle = event.template getValidHandle<main_collection_t>(tag);
+        return makeCollectionProxy(
+          *mainHandle,
+          withArgs.template createAssnProxyMaker<main_collection_proxy_t>
+            (event, mainHandle, tag)...
+          );
+      } // make()
     
       private:
-    ///< Pointer to the proxied object. It should never be nullptr.
-    main_value_type const* fMain;
+    // helper function to avoid typing the exact types of auxiliary collections
+    template <typename MainColl, typename... AuxColl>
+    static auto makeCollectionProxy(MainColl const& main, AuxColl&&... aux)
+      {
+        return CollectionProxy<MainColl, AuxColl...>
+          (main, std::forward<AuxColl>(aux)...);
+      }
     
-  }; // class ProxyCollectionElement
+  }; // struct CollectionProxyMaker<>
+  
+  
+
+  /**
+   * @brief Creates a proxy to a data product collection.
+   * @tparam CollProxy type of target main collection proxy
+   * @tparam Event type of event to read data from
+   * @tparam OptionalArgs type of optional arguments
+   * @param event event to read data from
+   * @param optionalArgs optional arguments for construction of the proxy
+   * @return a collection proxy object
+   * 
+   * This function delivers a collection proxy related to `CollProxy`.
+   * 
+   * 
+   *  The type
+   * of proxy delivered is arbitrary and usually not `CollProxy`.
+   * The type of the collection proxy must be explicitly specified, e.g.:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto tracks = proxy::getCollection<proxy::Tracks>
+   *   (event, tag, withAssociated<recob::Hits>());
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * In this case, two optional arguments arre passed: the input tag to the main
+   * collection, and then `withAssociated<recob::Hits>()`. The meaning of both
+   * is decided depending on the collection proxy being created, but it's common
+   * to have the first argument be the input tag to the main collection, as in
+   * the example.
+   * 
+   * The collection proxy name is arbitrary, but it's custom to have it live in
+   * `proxy` namespace and have the same name as the base object, made plural:
+   * a proxy to a `recob::Track` collection data product will have a proxy
+   * called `proxy::Tracks`.
+   * 
+   * Note that a proxy need to be explicitly supported in order to be available.
+   * 
+   * In practice, this function does very little apart from invoking the proper
+   * `CollectionProxyMaker` class. Each proxy has its own, and there is where
+   * the meaning of the optional arguments is assigned.
+   * 
+   * 
+   * Customization
+   * ==============
+   * 
+   * To control which type of collection proxy is produced for the type
+   * `CollProxy`, the class `CollectionProxyMaker` may be specialised.
+   * 
+   */
+  template <typename CollProxy, typename Event, typename... OptionalArgs>
+  auto getCollection(Event const& event, OptionalArgs&&... args)
+  {
+    return CollectionProxyMaker<CollProxy>::make
+      (event, std::forward<OptionalArgs>(args)...);
+  }
+  
+  
+  /// @}
+  // end group Data product proxy infrastructure
+  
+  
+  //----------------------------------------------------------------------------
+  //--- specializations of CollectionProxyMakerTraits
+  //----------------------------------------------------------------------------
+  template <typename T>
+  struct CollectionProxyMakerTraits<std::vector<T>> {
+    
+    /// Type of element of the main collection.
+    using main_collection_t = std::vector<T>;
+    
+    /// Type returned by the main collection indexing operator.
+    using main_element_t = typename main_collection_t::value_type;
+    
+    /// Type of main collection proxy.
+    using main_collection_proxy_t
+      = details::MainCollectionProxy<main_collection_t>;
+    
+  }; // CollectionProxyMakerTraits<CollectionProxy>
+  
+  
+  template <typename MainColl>
+  struct CollectionProxyMakerTraits<CollectionProxy<MainColl>> {
+    /// Type of main collection proxy.
+    using main_collection_proxy_t = CollectionProxy<MainColl>;
+    
+    /// Type returned by the main collection indexing operator.
+    using main_element_t = typename main_collection_proxy_t::main_element_t;
+    
+    /// Type of element of the main collection.
+    using main_collection_t
+      = typename main_collection_proxy_t::main_collection_t;
+  }; // CollectionProxyMakerTraits<CollectionProxy>
   
   
   //----------------------------------------------------------------------------
   namespace details {
     
+    //--------------------------------------------------------------------------
+    //---  general infrastructure
+    //--------------------------------------------------------------------------
     /// Constant expressing whether `Iter` type implements random access.
     template <typename Iter>
     constexpr bool is_random_access_iterator_v = std::is_same<
       typename std::iterator_traits<Iter>::iterator_category,
       std::random_access_iterator_tag
       >::value;
+    
+    
+    //--------------------------------------------------------------------------
+    /**
+     * @brief Iterator to random access collection storing a current index.
+     * @tparam Cont type of random-access container to iterate
+     * 
+     * `Cont` is a type providing a public `operator[](std::size_t)` method.
+     */
+    template <typename Cont>
+    class IndexBasedIterator {
+      
+        public:
+      using container_t = Cont;
+      
+      using value_type = typename container_t::value_type;
+      using const_iterator = IndexBasedIterator;
+      
+      /// Default constructor (required by iterator protocol): an unusable iterator.
+      IndexBasedIterator() = default;
+      
+      /// Constructor: initializes from an iterator of the proxy main collection.
+      IndexBasedIterator(container_t const& cont, std::size_t index = 0)
+        : fCont(&cont), fIndex(index) {}
+      
+      /// Returns the value pointed by this iterator.
+      auto operator* () const -> decltype(auto)
+        { return fCont->operator[](fIndex); }
+      
+      /// Returns the value pointed by this iterator.
+      const_iterator& operator++ () { ++fIndex; return *this; }
+      
+      /// Returns whether the iterators point to the same element.
+      bool operator!= (const_iterator const& other) const
+        { return (other.fIndex != fIndex) || (other.fCont != fCont); }
+      
+        protected:
+      container_t const* fCont = nullptr; ///< Pointer to the original container.
+      
+      /// Current index in the main collection.
+      std::size_t fIndex = std::numeric_limits<std::size_t>::max();
+      
+    }; // IndexBasedIterator<>
     
     
     /**
@@ -526,6 +1117,191 @@ namespace proxy {
     }; // IteratorWrapperBase<>
     
     
+    /// Modified iterator returning the `N`-th element out of the pointed tuple.
+    template <std::size_t N, typename TupleIter>
+    class tuple_element_iterator:
+      public IteratorWrapperBase<
+        tuple_element_iterator<N, TupleIter>,
+        TupleIter,
+        std::tuple_element_t<N, typename TupleIter::value_type>
+        >
+    {
+      using base_iterator_t = IteratorWrapperBase<
+        tuple_element_iterator<N, TupleIter>,
+        TupleIter,
+        std::tuple_element_t<N, typename TupleIter::value_type>
+        >;
+      
+        public:
+      using base_iterator_t::base_iterator_t;
+      
+      /// Constructor from a base iterator (explicitly allowed).
+      tuple_element_iterator(base_iterator_t const& from)
+        : base_iterator_t(from) {}
+      
+      static auto transform(TupleIter const& v) -> decltype(auto)
+        {return std::get<N>(*v); }
+      
+    }; // tuple_element_iterator
+    
+    
+    //--------------------------------------------------------------------------
+    //--- stuff for the main collection
+    //--------------------------------------------------------------------------
+    /**
+     * @brief Wrapper for the main collection of a proxy.
+     * @tparam MainColl type of the collection being wrapped
+     * 
+     * The wrapper contains a pointer to the original collection, which must
+     * persist. The original collection is not modified.
+     * 
+     * The `MainColl` type must expose a random access container interface.
+     */
+    template <typename MainColl>
+    struct MainCollectionProxy {
+      
+      /// Type of the original collection.
+      using main_collection_t = MainColl;
+      
+      /// Type of the elements in the original collection.
+      using main_element_t = typename MainColl::value_type;
+      
+      /// Constructor: wraps the specified collection.
+      MainCollectionProxy(main_collection_t const& main): fMain(&main) {}
+      
+      /// Returns the wrapped collection.
+      main_collection_t const& main() const { return mainRef(); }
+      
+      /// Returns a reference to the wrapped collection.
+      main_collection_t const& mainRef() const { return *fMain; }
+      
+      /// Returns a pointer to the wrapped collection.
+      main_collection_t const* mainPtr() const { return fMain; }
+      
+      
+        protected:
+      /// This type.
+      using this_t = MainCollectionProxy<main_collection_t>;
+      
+      /// Return this object as main collection proxy.
+      this_t& mainProxy() { return *this; }
+      
+      /// Return this object as main collection proxy.
+      this_t const& mainProxy() const { return *this; }
+      
+      /// Returns the specified item in the original collection.
+      auto getMainAt(std::size_t i) const -> decltype(auto)
+        { return fMain->operator[](i); }
+      
+        private:
+      main_collection_t const* fMain; /// Pointer to the original collection.
+      
+    }; // struct MainCollectionProxy
+    
+    
+    
+    //--------------------------------------------------------------------------
+    //--- stuff for auxiliary data
+    //--------------------------------------------------------------------------
+    // Trait replacing each element of the specified tuple with 
+    template <typename Tuple>
+    struct SubstituteWithAuxList {
+      static_assert(always_true<Tuple>(), "Template argument must be a tuple");
+    }; // SubstituteWithAuxList<>
+    
+    template <typename... T>
+    struct SubstituteWithAuxList<std::tuple<T...>> {
+      using type = std::tuple<typename T::associated_data_t...>;
+    }; // SubstituteWithAuxList<tuple>
+    
+    
+    //--------------------------------------------------------------------------
+    /**
+     * @brief Helper to create associated data proxy.
+     * @tparam Aux type of data associated to the main one
+     * @tparam ArgTuple type of arguments required for the creation of proxy
+     * @tparam AuxTag tag for the associated data (default: as `Aux`)
+     * 
+     * This class stores user arguments for the construction of a proxy to
+     * associated data of type `Aux`.
+     * It can use that information plus some additional one to create the
+     * associated data itself. This additional information is provided by
+     * `getCollection()`.
+     * 
+     * The association will be identified by type `AuxTag`.
+     * 
+     * This is not a customization point: to have a custom associated data
+     * produced, specialize `proxy::AssociatedDataProxyMaker` class
+     */
+    template <typename Aux, typename ArgTuple, typename AuxTag /* = Aux */>
+    class WithAssociatedStruct {
+      
+      /// Type of main data product element from a proxy of type `CollProxy`.
+      template <typename CollProxy>
+      using main_t = typename CollProxy::main_element_t;
+      
+      /// Type of associated data.
+      using aux_t = Aux;
+      
+      /// Tag for the associated data (same as the data type itself).
+      using tag = AuxTag;
+      
+      /// Class to create the data proxy associated to a `CollProxy`.
+      template <typename CollProxy>
+      using proxy_maker_t = AssociatedDataProxyMaker
+        <main_t<CollProxy>, aux_t, CollProxy, tag>;
+      
+        public:
+      
+      /// Type association proxy type created for the specified `CollProxy`.
+      template <typename CollProxy>
+      using aux_collection_proxy_t
+        = typename proxy_maker_t<CollProxy>::aux_collection_proxy_t;
+      
+      /// Constructor: steals the arguments, to be used by
+      /// `createAssnProxyMaker()`.
+      WithAssociatedStruct(ArgTuple&& args): args(std::move(args)) {}
+      
+      /// Creates the associated data proxy by means of
+      /// `AssociatedDataProxyMaker`.
+      template
+        <typename CollProxy, typename Event, typename Handle, typename MainArgs>
+      auto createAssnProxyMaker
+        (Event const& event, Handle&& mainHandle, MainArgs const& mainArgs)
+        { 
+          return createAssnProxyMakerImpl<CollProxy>(
+            event, std::forward<Handle>(mainHandle), mainArgs,
+            std::make_index_sequence<NArgs>()
+            );
+        } // construct()
+      
+      
+        protected:
+      
+      ArgTuple args; ///< Argument construction storage as tuple.
+      
+      /// Number of arguments stored.
+      static constexpr std::size_t NArgs = std::tuple_size<ArgTuple>();
+      
+      // this method allows unpacking the arguments from the tuple
+      template<
+        typename CollProxy, typename Event, typename Handle, typename MainArgs,
+        std::size_t... I
+        >
+      auto createAssnProxyMakerImpl(
+        Event const& event, Handle&& mainHandle, MainArgs const& mainArgs,
+        std::index_sequence<I...>
+        )
+        {
+          return proxy_maker_t<CollProxy>::make(
+            event, mainHandle, mainArgs,
+            std::get<I>(std::forward<ArgTuple>(args))...
+            );
+        }
+      
+    }; // struct WithAssociatedStruct
+    
+    
     /// Interface providing begin and end iterator of a range.
     /// @tparam BoundaryIter iterator to the first of the range iterators.
     template <typename BoundaryIter>
@@ -597,7 +1373,6 @@ namespace proxy {
     BoundaryListRange<BoundaryIter> makeBoundaryListRange
       (BoundaryIter const& iBegin)
       { return { iBegin }; }
-    
     
     
     /**
@@ -831,38 +1606,11 @@ namespace proxy {
       = BoundaryList<typename Assns::assn_iterator>;
     
     
-    /// Modified iterator returning the second element out of the pointed tuple.
-    template <std::size_t N, typename TupleIter>
-    class tuple_element_iterator:
-      public IteratorWrapperBase<
-        tuple_element_iterator<N, TupleIter>,
-        TupleIter,
-        std::tuple_element_t<N, typename TupleIter::value_type>
-        >
-    {
-      using base_iterator_t = IteratorWrapperBase<
-        tuple_element_iterator<N, TupleIter>,
-        TupleIter,
-        std::tuple_element_t<N, typename TupleIter::value_type>
-        >;
-      
-        public:
-      using base_iterator_t::base_iterator_t;
-      
-      /// Constructor from a base iterator (explicitly allowed).
-      tuple_element_iterator(base_iterator_t const& from)
-        : base_iterator_t(from) {}
-      
-      static auto transform(TupleIter const& v) -> decltype(auto)
-        {return std::get<N>(*v); }
-      
-    }; // tuple_element_iterator
-    
-    
     /**
      * @brief Object to draft associated data interface.
      * @tparam Main type of the main associated object (one)
      * @tparam Aux type of the additional associated objects (many)
+     * @tparam Tag tag this data is labeled with
      * 
      * Allows:
      *  * random access (no index check guarantee)
@@ -870,58 +1618,73 @@ namespace proxy {
      * 
      * Construction is not part of the interface.
      */
-    template <typename Main, typename Aux>
+    template <typename Main, typename Aux, typename Tag /* = Aux */>
     class AssociatedData {
-      using This_t = AssociatedData<Main, Aux>; ///< This type.
-      using Assns_t = art::Assns<Main, Aux>; ///< Type of _art_ association.
-      
-      using associated_data_iterator_t
-        = tuple_element_iterator<1U, typename Assns_t::assn_iterator>;
-      
-      using GroupRanges_t = BoundaryList<associated_data_iterator_t>;
-      
-      GroupRanges_t groups;
+      using This_t = AssociatedData<Main, Aux, Tag>; ///< This type.
       
         public:
-      using range_iterator_t = typename GroupRanges_t::range_iterator_t;
+      using assns_t = art::Assns<Main, Aux>; ///< Type of _art_ association.
       
+        private:
+      using associated_data_iterator_t
+        = tuple_element_iterator<1U, typename assns_t::assn_iterator>;
+      
+        public:
+      using tag = Tag; ///< Tag of this association proxy.
+      
+      using group_ranges_t = BoundaryList<associated_data_iterator_t>;
+      
+      /// Type of collection of auxiliary data associated with a main item.
+      using associated_data_t = typename group_ranges_t::range_t;
       
       // constructor is not part of the interface
-      template <typename Handle, typename Event>
-      AssociatedData(Handle&& handle, Event&& event, art::InputTag tag)
-        : groups(
-            makeAssociatedGroups
-              (std::forward<Handle>(handle), std::forward<Event>(event), tag)
-          )
+      AssociatedData(group_ranges_t&& groups)
+        : fGroups(std::move(groups))
         {}
-      
       
       /// Returns an iterator pointing to the first associated data range.
       auto begin() const -> decltype(auto)
-        { return groups.begin(); }
+        { return fGroups.begin(); }
       
       /// Returns an iterator pointing past the last associated data range.
       auto end() const -> decltype(auto)
-        { return groups.end(); }
+        { return fGroups.end(); }
       
       /// Returns the range with the specified index (no check performed).
       auto getRange(std::size_t i) const -> decltype(auto)
-        { return groups.range(i); }
+        { return fGroups.range(i); }
       
       /// Returns the range with the specified index (no check performed).
       auto operator[] (std::size_t index) const -> decltype(auto)
         { return getRange(index); }
       
-      /// Type of collection of auxiliary data associated with a main item.
-      using AuxList_t = decltype(std::declval<This_t>().operator[](0U));
+      /// Returns whether this data is labeled with the specified tag
+      template <typename TestTag>
+      static constexpr bool hasTag() { return std::is_same<TestTag, tag>(); }
       
         private:
-      template <typename Handle, typename Event>
-      GroupRanges_t makeAssociatedGroups
-        (Handle&& handle, Event&& event, art::InputTag tag);
-      
+      group_ranges_t fGroups;
     }; // class AssociatedData<>
     
+    
+    
+    //--------------------------------------------------------------------------
+    //---  Stuff for the whole collection proxy
+    //--------------------------------------------------------------------------
+    template <typename ProxyElement, typename... AuxData>
+    auto makeCollectionProxyElement(
+      std::size_t index,
+      typename ProxyElement::main_element_t const& main,
+      AuxData&&... auxData
+    ) {
+      return ProxyElement(
+        index, main,
+        typename ProxyElement::aux_elements_t(std::forward<AuxData>(auxData)...)
+        );
+    } // makeCollectionProxyElement()
+    
+    
+    //--------------------------------------------------------------------------
     
   } // namespace details
   
@@ -935,12 +1698,6 @@ namespace proxy {
 namespace proxy {
   
   namespace details {
-    template <typename Proxy>
-    struct ProxyCollectionGetterTraits {
-      using ProductCollection_t = typename Proxy::main_collection_type;
-      using ProductElement_t = typename Proxy::main_value_type;
-    }; // struct ProxyCollectionGetterTraits
-    
     
     //--------------------------------------------------------------------------
     //--- associationRanges() implementation
@@ -989,6 +1746,7 @@ namespace proxy {
       if (boundaries.size() <= n) {
         boundaries.insert
           (boundaries.end(), n + 1 - boundaries.size(), boundaries.back()); 
+        assert(boundaries.size() == (n + 1));
       }
       return boundaries;
     } // associationRangeBoundaries(Iter, Iter, std::size_t)
@@ -1013,28 +1771,57 @@ namespace proxy {
     
     
     //--------------------------------------------------------------------------
-    //--- AssociatedData<Main,Aux> implementation
-    //--------------------------------------------------------------------------
-    template <typename Main, typename Aux>
-    template <typename Handle, typename Event>
-    auto AssociatedData<Main,Aux>::makeAssociatedGroups
-      (Handle&& handle, Event&& event, art::InputTag tag)
-      -> GroupRanges_t
-    {
-      auto const& assns = *(event.template getValidHandle<Assns_t>(tag));
-      // associationRanges() produces iterators to association elements,
-      // (i.e. tuples)
-      auto ranges = associationRangeBoundaries<0U>
-        (assns.begin(), assns.end(), handle->size());
-      // we convert those iterators into iterators to the right associated item
-      return GroupRanges_t
-        (typename GroupRanges_t::boundaries_t(ranges.begin(), ranges.end()));
-    } // AssociatedData<Main,Aux>::makeAssociatedGroups()
-    
-    
-    //--------------------------------------------------------------------------
     
   } // namespace details
+  
+  
+  //----------------------------------------------------------------------------
+  //--- makeAssociatedData() implementations
+  //----------------------------------------------------------------------------
+  template <typename Main, typename Aux, typename Tag, typename Event>
+  auto makeAssociatedData
+    (Event const& event, art::InputTag tag, std::size_t minSize /* = 0 */)
+  {
+    using Main_t = Main;
+    using Aux_t = Aux;
+    using AssociatedData_t = details::AssociatedData<Main_t, Aux_t, Tag>;
+    using Assns_t = typename AssociatedData_t::assns_t;
+    
+    auto const& assns = *(event.template getValidHandle<Assns_t>(tag));
+    // associationRangeBoundaries() produces iterators to association elements,
+    // (i.e. tuples)
+    auto ranges = details::associationRangeBoundaries<0U>
+      (assns.begin(), assns.end(), minSize);
+    // we convert those iterators into iterators to the right associated item
+    // (it takes a few steps)
+    using group_ranges_t = typename AssociatedData_t::group_ranges_t;
+    return AssociatedData_t(
+      group_ranges_t
+        (typename group_ranges_t::boundaries_t(ranges.begin(), ranges.end()))
+      );
+  } // makeAssociatedData(size)
+  
+  
+  //----------------------------------------------------------------------------
+  template <typename Aux, typename Tag, typename Handle, typename Event>
+  auto makeAssociatedData
+    (Handle&& handle, Event const& event, art::InputTag tag)
+  {
+    // Handle::value_type is the main data product type (a collection)
+    using Main_t = typename Handle::value_type::value_type;
+    using Aux_t = Aux;
+    return makeAssociatedData<Main_t, Aux_t, Tag>(event, tag, handle->size());
+  } // makeAssociatedData(handle)
+  
+  
+  
+  //----------------------------------------------------------------------------
+  //---  CollectionProxyMaker specializations
+  //----------------------------------------------------------------------------
+  // none so far
+  
+  //----------------------------------------------------------------------------
+  
   
 } // namespace proxy
 
