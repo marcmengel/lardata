@@ -601,7 +601,7 @@ void RangeForWrapperIteratorStandardsTest() {
   decltype(auto) rbegin = begin(range);
   using std::end;
   decltype(auto) rend = end(range);
-  
+    
   auto vbegin = vdata.begin();
   auto vend = vdata.end();
   
@@ -609,6 +609,20 @@ void RangeForWrapperIteratorStandardsTest() {
   
   iterator_test(rbegin, vbegin, vend);
   iterator_test(rend, vend, vend);
+  
+  
+  using std::cbegin;
+  decltype(auto) rcbegin = cbegin(range);
+  using std::cend;
+  decltype(auto) rcend = cend(range);
+    
+  auto vcbegin = vdata.cbegin();
+  auto vcend = vdata.cend();
+  
+  BOOST_CHECK_EQUAL(std::distance(rcbegin, rcend), vdata.size());
+  
+  iterator_test(rcbegin, vcbegin, vcend);
+  iterator_test(rcend, vcend, vcend);
   
 } // RangeForWrapperIteratorStandardsTest()
 

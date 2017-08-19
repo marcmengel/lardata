@@ -263,14 +263,14 @@ namespace util {
         {}
       
       /// Returns a begin-of-range iterator.
-      Iterator_t begin()
+      Iterator_t begin() const
         {
           return Iterator_t
             (Traits_t::extractBegin(static_cast<RangeRef_t>(fRange)));
         }
       
       /// Returns a end-of-range iterator.
-      Iterator_t end()
+      Iterator_t end() const
         {
           return Iterator_t
             (Traits_t::extractEnd(static_cast<RangeRef_t>(fRange)));
