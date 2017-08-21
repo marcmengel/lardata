@@ -925,8 +925,8 @@ typename lar::util::StatCollector<T, W>::Weight_t
   lar::util::StatCollector<T, W>::RMS() const
 {
   const Weight_t rms2 = Variance();
-  if (rms2 < Weight_t(0))
-    throw std::range_error("StatCollector<>::RMS(): negative RMS^2");
+  if (rms2 < Weight_t(0)) return 0.;
+//    throw std::range_error("StatCollector<>::RMS(): negative RMS^2");
   return std::sqrt(rms2);
 } // StatCollector<T, W>::RMS()
 
@@ -1017,8 +1017,8 @@ typename lar::util::StatCollector2D<T, W>::Weight_t
   lar::util::StatCollector2D<T, W>::RMSx() const
 {
   const Weight_t rms2 = VarianceX();
-  if (rms2 < Weight_t(0))
-    throw std::range_error("StatCollector2D<>::RMSx(): negative RMS^2");
+  if (rms2 < Weight_t(0)) return 0.;
+//    throw std::range_error("StatCollector2D<>::RMSx(): negative RMS^2");
   return std::sqrt(rms2);
 } // StatCollector2D<T, W>::RMSx()
 
@@ -1058,8 +1058,8 @@ typename lar::util::StatCollector2D<T, W>::Weight_t
   lar::util::StatCollector2D<T, W>::RMSy() const
 {
   const Weight_t rms2 = VarianceY();
-  if (rms2 < Weight_t(0))
-    throw std::range_error("StatCollector2D<>::RMSy(): negative RMS^2");
+  if (rms2 < Weight_t(0)) return 0.;
+//    throw std::range_error("StatCollector2D<>::RMSy(): negative RMS^2");
   return std::sqrt(rms2);
 } // StatCollector2D<T, W>::RMSy()
 

@@ -17,6 +17,7 @@
 // C/C++ standard libraries
 #include <stdexcept> // std::logic_error
 #include <utility> // std::move(), std::declval(), ...
+#include <iterator> // std::iterator_traits
 #include <type_traits> // std::is_same<>, std::enable_if_t<>, ...
 
 
@@ -33,13 +34,37 @@ namespace util {
       struct Comparer;
       struct Dumper;
       
+      using traits_t = std::iterator_traits<BeginIter>;
+      
         public:
       using begin_t = BeginIter; ///< Type of begin iterator we can store.
       using end_t = EndIter; ///< Type of end iterator we can store.
       using this_t = RangeForWrapperIterator<begin_t, end_t>; ///< This class.
       
-      /// Type returned dereferencing the iterator (may be a reference).
-      using value_type = decltype(*(std::declval<begin_t>()));
+      /// @{
+      /// @brief Iterator traits, imported from the wrapped begin iterator.
+      using difference_type   = typename traits_t::difference_type;
+      using value_type        = typename traits_t::value_type;
+      using pointer           = typename traits_t::pointer;
+      using reference         = typename traits_t::reference;
+      //
+      // This wrapper fully supports up to bidirectional iterators;
+      // if the wrapped iterator is a random or contiguous iterator,
+      // the wrapper will still expose only a bidirectional iterator interface.
+      // Supporting random access is possible, but writing a proper unit test
+      // is tedious... open a feature request if needed.
+      //
+      using iterator_category = std::conditional_t<
+        std::is_base_of<std::bidirectional_iterator_tag, typename traits_t::iterator_category>::value,
+        std::bidirectional_iterator_tag,
+        typename traits_t::iterator_category
+        >;
+      /// @}
+      
+      /// Constructor: initializes with a end-type default-constructed iterator.
+      explicit RangeForWrapperIterator()
+        : fIter(end_t{})
+        {}
       
       /// Constructor: initializes with a begin-type iterator.
       explicit RangeForWrapperIterator(begin_t&& begin)
@@ -52,16 +77,36 @@ namespace util {
         {}
       
       /// Returns the pointed value (just like the original iterator).
-      value_type operator*() const
+      reference operator*() const
         { return boost::apply_visitor(Dereferencer(), fIter); }
+      
+      /// Returns the pointed value (just like the original iterator).
+      pointer operator->() const
+        { return boost::apply_visitor(MemberAccessor(), fIter); }
       
       /// Increments the iterator (prefix operator).
       this_t& operator++()
         { boost::apply_visitor(Incrementer(), fIter); return *this; }
       
-      /// Returns whether the other iterator is equal to this one.
+      /// Decrements the iterator (prefix operator).
+      this_t& operator--()
+        { boost::apply_visitor(Decrementer(), fIter); return *this; }
+      
+      /// Increments the iterator (postfix operator).
+      this_t operator++(int)
+        { auto old = *this; this_t::operator++(); return old; }
+      
+      /// Decrements the iterator (postfix operator).
+      this_t operator--(int)
+        { auto old = *this; this_t::operator--(); return old; }
+      
+      /// Returns whether the other iterator is not equal to this one.
       bool operator!=(this_t const& other) const
         { return boost::apply_visitor(Comparer(), fIter, other.fIter); }
+      
+      /// Returns whether the other iterator is equal to this one.
+      bool operator==(this_t const& other) const
+        { return !(this->operator!=(other)); }
       
       
         private: 
@@ -71,31 +116,78 @@ namespace util {
       
       boost::variant<begin_t, end_t> fIter; ///< The actual iterator we store.
       
+      //
+      // We opt for allowing all the operations if the underlying operators do.
+      // While it is true that, for example, an end iterator should not be
+      // dereferenced, if it's bidirectional, its operator--() may make it
+      // useful, but its type will still be the one of the end iterator.
+      // Therefore we don't judge by the type, but by the action.
+      //
+      
       /// Visitor to dereference an iterator.
-      struct Dereferencer: public boost::static_visitor<value_type> {
-        value_type operator() (begin_t const& iter) const { return *iter; }
-        [[noreturn]] value_type operator() (end_t const&) const
-          { throw std::logic_error("End iterator should not be dereferenced"); }
+      struct Dereferencer: public boost::static_visitor<reference> {
+        
+        template <typename Iter>
+        auto operator() (Iter& iter) const -> decltype(auto)
+          { return DereferencerImpl<reference, Iter>::dereference(iter); }
+        
+          private:
+        template <typename Result, typename Iter, typename = void>
+        struct DereferencerImpl;
+        
       }; // Dereferencer
+      
+      /// Visitor to access a data member of the pointed class.
+      struct MemberAccessor: public boost::static_visitor<pointer> {
+        
+        template <typename Iter>
+        auto operator() (Iter& iter) const -> decltype(auto)
+          { return MemberAccessorImpl<pointer, Iter>::access(iter); }
+        
+          private:
+        template <typename Result, typename Iter, typename = void>
+        struct MemberAccessorImpl;
+        
+      }; // MemberAccessor
       
       /// Visitor to increment an iterator.
       struct Incrementer: public boost::static_visitor<> {
-        void operator() (begin_t& iter) const { ++iter; }
-        [[noreturn]] void operator() (end_t&) const
-          { throw std::logic_error("End iterator should not be incremented"); }
+        
+        template <typename Iter>
+        void operator() (Iter& iter) const
+          { IncrementerImpl<Iter>::increment(iter); }
+        
+          private:
+        template <typename Iter, typename = void>
+        struct IncrementerImpl;
+        
       }; // Incrementer
       
-      /// Visitor to compare iterators.
+      /// Visitor to decrement an iterator.
+      struct Decrementer: public boost::static_visitor<> {
+        
+        template <typename Iter>
+        void operator() (Iter& iter) const
+          { DecrementerImpl<Iter>::decrement(iter); }
+        
+          private:
+        template <typename Iter, typename = void>
+        struct DecrementerImpl;
+        
+      }; // Decrementer
+      
+      
+      /// Visitor to compare iterators (returns whether they differ).
       struct Comparer: public boost::static_visitor<bool> {
-        bool operator() (begin_t const& left, begin_t const& right) const
-          { return left != right; }
-        // A range for is supposed to use only this comparison:
-        bool operator() (begin_t const& left, end_t const& right) const
-          { return left != right; }
-        bool operator() (end_t const& left, begin_t const& right) const
-          { return left != right; }
-        [[noreturn]] bool operator() (end_t const&, end_t const&) const
-          { throw std::logic_error("End iterators should not be compared"); }
+        
+        template <typename A, typename B>
+        bool operator() (A const& left, B const& right) const
+          { return ComparerImpl<A, B>::compare(left, right); }
+        
+          private:
+        template <typename A, typename B, typename = void>
+        struct ComparerImpl;
+        
       }; // Comparer
       
     }; // class RangeForWrapperIterator<>
@@ -171,14 +263,14 @@ namespace util {
         {}
       
       /// Returns a begin-of-range iterator.
-      Iterator_t begin()
+      Iterator_t begin() const
         {
           return Iterator_t
             (Traits_t::extractBegin(static_cast<RangeRef_t>(fRange)));
         }
       
       /// Returns a end-of-range iterator.
-      Iterator_t end()
+      Iterator_t end() const
         {
           return Iterator_t
             (Traits_t::extractEnd(static_cast<RangeRef_t>(fRange)));
@@ -308,6 +400,143 @@ namespace util {
   
   
 } // namespace util
+
+
+//------------------------------------------------------------------------------
+//---  template implementation
+//------------------------------------------------------------------------------
+namespace util {
+  
+  namespace details {
+    
+    //--------------------------------------------------------------------------
+    template <typename T>
+    struct is_type: public std::true_type {};
+    
+    template <typename T>
+    constexpr bool is_type_v = is_type<T>();
+    
+    
+    //--------------------------------------------------------------------------
+    template <typename BeginIter, typename EndIter>
+    template <typename A, typename B, typename /* = void */>
+    struct RangeForWrapperIterator<BeginIter, EndIter>::Comparer::ComparerImpl {
+      // this would be worth a static_assert(), but apparently boost::variant
+      // visitor instantiates it even when it's not called
+      static bool compare(A const&, B const&)
+        { throw std::logic_error("These iterators can't be compared!"); }
+    }; //
+    
+    //--------------------------------------------------------------------------
+    template <typename BeginIter, typename EndIter>
+    template <typename A, typename B>
+    struct RangeForWrapperIterator<BeginIter, EndIter>::Comparer::ComparerImpl<
+      A, B, std::enable_if_t<
+        std::is_convertible
+          <decltype(std::declval<A>() != std::declval<B>()), bool>::value
+        >
+      >
+    {
+      static bool compare(A const& left, B const& right) 
+        { return left != right; }
+    }; //
+    
+    
+    //--------------------------------------------------------------------------
+    template <typename BeginIter, typename EndIter>
+    template <typename Result, typename Iter, typename /* = void */>
+    struct RangeForWrapperIterator<BeginIter, EndIter>::Dereferencer::DereferencerImpl {
+      // this would be worth a static_assert(), but apparently boost::variant
+      // visitor instantiates it even when it's not called
+      [[noreturn]] static Result dereference(Iter const&)
+        { throw std::logic_error("This iterator can't be dereferenced!"); }
+    }; //
+    
+    //--------------------------------------------------------------------------
+    template <typename BeginIter, typename EndIter>
+    template <typename Result, typename Iter>
+    struct RangeForWrapperIterator<BeginIter, EndIter>::Dereferencer::DereferencerImpl<
+      Result, Iter, std::enable_if_t<is_type_v<decltype(*(std::declval<Iter>()))>>
+      >
+    {
+      static Result dereference(Iter const& iter)
+        { return *iter; }
+    }; //
+    
+    
+    //--------------------------------------------------------------------------
+    template <typename BeginIter, typename EndIter>
+    template <typename Result, typename Iter, typename /* = void */>
+    struct RangeForWrapperIterator<BeginIter, EndIter>::MemberAccessor::MemberAccessorImpl {
+      // this would be worth a static_assert(), but apparently boost::variant
+      // visitor instantiates it even when it's not called
+      [[noreturn]] static Result access(Iter const&)
+        { throw std::logic_error("This iterator can't be dereferenced!"); }
+    }; //
+    
+    //--------------------------------------------------------------------------
+    template <typename BeginIter, typename EndIter>
+    template <typename Result, typename Iter>
+    struct RangeForWrapperIterator<BeginIter, EndIter>::MemberAccessor::MemberAccessorImpl<
+      Result, Iter, std::enable_if_t<is_type_v<decltype(std::declval<Iter>().operator->())>>
+      >
+    {
+      static Result access(Iter const& iter)
+        { return iter.operator->(); }
+    }; //
+    
+    
+    //--------------------------------------------------------------------------
+    template <typename BeginIter, typename EndIter>
+    template <typename Iter, typename /* = void */>
+    struct RangeForWrapperIterator<BeginIter, EndIter>::Incrementer::IncrementerImpl {
+      // this would be worth a static_assert(), but apparently boost::variant
+      // visitor instantiates it even when it's not called
+      [[noreturn]] static void increment(Iter&)
+        { throw std::logic_error("This iterator can't be incremented!"); }
+    }; //
+    
+    //--------------------------------------------------------------------------
+    template <typename BeginIter, typename EndIter>
+    template <typename Iter>
+    struct RangeForWrapperIterator<BeginIter, EndIter>::Incrementer::IncrementerImpl<
+      Iter, std::enable_if_t<is_type_v<decltype(++(std::declval<Iter>()))>>
+      >
+    {
+      static void increment(Iter& iter) 
+        { ++iter; }
+    }; //
+    
+    
+    //--------------------------------------------------------------------------
+    template <typename BeginIter, typename EndIter>
+    template <typename Iter, typename /* = void */>
+    struct RangeForWrapperIterator<BeginIter, EndIter>::Decrementer::DecrementerImpl {
+      // this would be worth a static_assert(), but apparently boost::variant
+      // visitor instantiates it even when it's not called
+      [[noreturn]] static void decrement(Iter&)
+        { throw std::logic_error("This iterator can't be decremented!"); }
+    }; //
+    
+    //--------------------------------------------------------------------------
+    template <typename BeginIter, typename EndIter>
+    template <typename Iter>
+    struct RangeForWrapperIterator<BeginIter, EndIter>::Decrementer::DecrementerImpl<
+      Iter, std::enable_if_t<is_type_v<decltype(--(std::declval<Iter>()))>>
+      >
+    {
+      static void decrement(Iter& iter) 
+        { --iter; }
+    }; //
+    
+    //--------------------------------------------------------------------------
+    
+    
+  } // namespace details
+} // namespace util
+  
+
+//------------------------------------------------------------------------------
 
 
 #endif // LARDATA_UTILITIES_RANGEFORWRAPPER_H
