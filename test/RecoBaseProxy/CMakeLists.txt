@@ -1,16 +1,22 @@
 simple_plugin(TrackProxyTest "module"
   lardata_RecoBaseProxy
   lardataobj_RecoBase
-  boost_unit_test_framework
+  ${MF_MESSAGELOGGER}
+  ${MF_UTILITIES}
+  ${ROOT_GENVECTOR}
   USE_BOOST_UNIT
   )
 
 simple_plugin(TrackProxyHitMaker "module"
   lardataobj_RecoBase
+  ${MF_MESSAGELOGGER}
+  ${MF_UTILITIES}
   )
 
 simple_plugin(TrackProxyTrackMaker "module"
   lardataobj_RecoBase
+  ${MF_MESSAGELOGGER}
+  ${MF_UTILITIES}
   )
 
 cet_test(Track_test

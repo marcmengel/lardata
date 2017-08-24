@@ -9,6 +9,7 @@
 
 // LArSoft libraries
 #include "lardata/Utilities/PtrMaker.h"
+#include "lardataobj/RecoBase/TrackFitHitInfo.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Hit.h"
 
@@ -26,6 +27,9 @@
 #include "fhiclcpp/types/Sequence.h"
 #include "fhiclcpp/types/Name.h"
 #include "fhiclcpp/types/Comment.h"
+
+// ROOT
+#include "Math/SMatrix.h" // ROOT::Math::SMatrixIdentity
 
 // C/C++ standard libraries
 #include <vector>
@@ -78,6 +82,7 @@ namespace lar {
         , hitsPerTrack(config().hitsPerTrack())
         {
           produces<std::vector<recob::Track>>();
+          produces<std::vector<std::vector<recob::TrackFitHitInfo>>>();
           produces<art::Assns<recob::Track, recob::Hit>>();
         }
 
@@ -100,6 +105,8 @@ namespace lar {
 void lar::test::TrackProxyTrackMaker::produce(art::Event& event) {
   
   auto tracks = std::make_unique<std::vector<recob::Track>>();
+  auto trackFitInfo
+    = std::make_unique<std::vector<std::vector<recob::TrackFitHitInfo>>>();
   auto hitTrackAssn = std::make_unique<art::Assns<recob::Track, recob::Hit>>();
   
   auto hitHandle = event.getValidHandle<std::vector<recob::Hit>>(hitsTag);
@@ -117,16 +124,30 @@ void lar::test::TrackProxyTrackMaker::produce(art::Event& event) {
       ;
     
     //
-    // create the track trajectory
+    // create the track trajectory and fit information
     //
     std::size_t const firstHit = usedHits;
     recob::TrackTrajectory::Positions_t pos;
     recob::TrackTrajectory::Momenta_t mom;
     recob::TrackTrajectory::Flags_t flags;
+    std::vector<recob::TrackFitHitInfo> fitInfo;
     for (unsigned int iPoint = 0; iPoint < nTrackHits; ++iPoint) {
+      //
+      // fill base track information
+      //
       pos.emplace_back(iPoint, iPoint, iPoint);
       mom.emplace_back(2.0, 1.0, 0.0);
       flags.emplace_back(usedHits++);
+      //
+      // fill optional information
+      //
+      fitInfo.push_back({
+        double(iPoint),                    // aHitMeas
+        double(iPoint),                    // aHitMeasErr2
+        {},                                // aTrackStatePar
+        { ROOT::Math::SMatrixIdentity{} }, // aTrackStateCov
+        hits[usedHits + iPoint].WireID()   // aWireId
+        });
     } // for
     recob::TrackTrajectory traj
       (std::move(pos), std::move(mom), std::move(flags), true);
@@ -136,6 +157,11 @@ void lar::test::TrackProxyTrackMaker::produce(art::Event& event) {
     //
     recob::Track track(std::move(traj), 2112, 1.0, nTrackHits, {}, {}, iTrack);
     tracks->push_back(std::move(track));
+    
+    //
+    // and the additional objects
+    //
+    trackFitInfo->push_back(std::move(fitInfo));
     
     //
     // create the track-hit associations
@@ -159,6 +185,7 @@ void lar::test::TrackProxyTrackMaker::produce(art::Event& event) {
     << "Produced " << tracks->size() << " tracks from " << usedHits << " hits.";
   
   event.put(std::move(tracks));
+  event.put(std::move(trackFitInfo));
   event.put(std::move(hitTrackAssn));
   
 } // lar::test::TrackProxyTrackMaker::produce()

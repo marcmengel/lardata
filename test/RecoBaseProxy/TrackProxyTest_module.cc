@@ -6,13 +6,14 @@
  * 
  */
 
+
 // LArSoft libraries
 #include "lardata/RecoBaseProxy/Track.h" // proxy namespace
+#include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Hit.h"
 
 // framework libraries
-#include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Event.h"
@@ -116,7 +117,6 @@ void TrackProxyTest::proxyUsageExample(art::Event const& event) {
     log << "Track " << trackRef
       << "\n  with " << trackRef.NPoints() << " points and " << track.nHits()
         << " hits:";
-#if 0
     
     for (auto const& point: track.points()) {
       log <<
@@ -133,7 +133,6 @@ void TrackProxyTest::proxyUsageExample(art::Event const& event) {
         log << " (no associated hit)";
       
     } // for points in track
-#endif // 0
     
   } // for track
   
@@ -159,20 +158,32 @@ void TrackProxyTest::testTracks(art::Event const& event) {
   auto tracks = proxy::getCollection<proxy::Tracks>(event, tracksTag,
     proxy::withAssociatedAs<recob::Hit, tag::SpecialHits>()
     );
+  
+  //
+  // we try to access something we did not "register" in the proxy: space points
+  //
+  static_assert(!tracks.has<recob::SpacePoint>(),
+    "Track proxy does NOT have space points available!!!"); 
+  BOOST_CHECK_THROW(tracks.getIf<recob::SpacePoint>(), std::logic_error);
+  
+  
   BOOST_CHECK_EQUAL(tracks.empty(), expectedTracks.empty());
   BOOST_CHECK_EQUAL(tracks.size(), expectedTracks.size());
   
   std::size_t iExpectedTrack = 0;
   for (auto trackProxy: tracks) {
-    auto const& expectedTrack [[gnu::unused]] = expectedTracks[iExpectedTrack];
-    auto const& expectedHits [[gnu::unused]] = hitsPerTrack.at(iExpectedTrack);
+    auto const& expectedTrack = expectedTracks[iExpectedTrack];
+    auto const& expectedHits = hitsPerTrack.at(iExpectedTrack);
     
-    recob::Track const& trackRef [[gnu::unused]] = *trackProxy;
+    recob::Track const& trackRef = *trackProxy;
     
-#if 0
     BOOST_CHECK_EQUAL(&trackRef, &expectedTrack);
     BOOST_CHECK_EQUAL(&(trackProxy.track()), &expectedTrack);
     BOOST_CHECK_EQUAL(trackProxy.nHits(), expectedHits.size());
+    
+    BOOST_CHECK_EQUAL
+      (trackProxy.get<tag::SpecialHits>().size(), expectedHits.size());
+    
     
     // direct interface to recob::Track
     BOOST_CHECK_EQUAL(trackProxy->NPoints(), expectedTrack.NPoints());
@@ -201,8 +212,6 @@ void TrackProxyTest::testTracks(art::Event const& event) {
       ++iPoint;
     } // for
     BOOST_CHECK_EQUAL(iPoint, expectedTrack.NPoints());
-    
-#endif // 0
     
     ++iExpectedTrack;
   } // for

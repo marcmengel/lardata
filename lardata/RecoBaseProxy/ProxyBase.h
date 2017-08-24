@@ -136,6 +136,8 @@
 
 // LArSoft libraries
 #include "lardata/Utilities/CollectionView.h"
+#include "lardata/Utilities/TupleLookupByTag.h" // util::getByTag(), ...
+#include "larcorealg/CoreUtils/DebugUtils.h" // lar::debug::demangle()
 
 // framework libraries
 #include "canvas/Persistency/Common/Assns.h"
@@ -148,7 +150,7 @@
 #include <iterator> // std::distance(), ...
 #include <algorithm> // std::min()
 #include <utility> // std::forward()
-#include <stdexcept> // std::runtime_error
+#include <stdexcept> // std::runtime_error, std::logic_error
 #include <type_traits> // std::is_same<>, std::enable_if_t<>, ...
 #include <limits> // std::numeric_limits<>
 #include <cstdlib> // std::size_t
@@ -164,8 +166,8 @@ namespace proxy {
   namespace details {
     
     //--------------------------------------------------------------------------
-    template <typename>
-    using always_true = std::true_type;
+    template <bool B>
+    using YesNoStruct = std::integral_constant<bool, B>;
     
     //--------------------------------------------------------------------------
     // forward declarations
@@ -465,6 +467,7 @@ namespace proxy {
   /// @}
   // end Associated data
   
+  
   /// @{
   /// @name Proxy element infrastructure
   /// @ingroup LArSoftProxies
@@ -480,39 +483,132 @@ namespace proxy {
    */
   template <typename CollProxy>
   struct CollectionProxyElement {
+    
       public:
     using collection_proxy_t = CollProxy;
     using main_element_t = typename collection_proxy_t::main_element_t;
     
     /// Tuple of elements.
     using aux_elements_t = typename details::SubstituteWithAuxList
-      <typename CollProxy::auxcoll_t>::type;
+      <typename CollProxy::aux_collections_t>::type;
     
     /// Constructor: sets the element index, the main element and steals
     /// auxiliary data.
     CollectionProxyElement
       (std::size_t index, main_element_t const& main, aux_elements_t&& auxData)
-      : index(index), main(&main) , auxData(std::move(auxData))
+      : fIndex(index), fMain(&main) , fAuxData(std::move(auxData))
       {}
     
     /// Returns a pointer to the main element.
-    main_element_t const* operator->() const { return main; }
+    main_element_t const* operator->() const { return fMain; }
     
     /// Returns a reference to the main element.
-    main_element_t const& operator*() const { return *main; }
+    main_element_t const& operator*() const { return *fMain; }
+    
+    /// Returns the index of this element in the collection.
+    std::size_t index() const { return fIndex; };
+    
+    /// Returns the auxiliary data specified by type (`Tag`).
+    template <typename Tag>
+    auto get() const -> decltype(auto)
+      { return std::get<util::index_of_tag_v<Tag, aux_elements_t>>(fAuxData); }
     
     
+    /**
+     * @brief Returns the auxiliary data specified by type (`Tag`).
+     * @tparam Tag tag of the data to fetch (usually, its type)
+     * @tparam T type to return (by default, a constant reference to `Tag`)
+     * @return the auxiliary data specified by type (`Tag`).
+     * @throw std::logic_error if the tag is not available.
+     * @see get(), has()
+     * 
+     * This method is a `get()` which forgives when the requested type is not
+     * available (because this proxy was configured not to hold it).
+     * 
+     * The difference with `get()` is the following:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * decltype(auto) elem = tracks[0];
+     * if (elem.has<recob::Hit>()) {
+     *   auto hits = elem.get<recob::Hit>();
+     *   // ...
+     * }
+     * if (elem.has<recob::SpacePoint>()) {
+     *   auto spacepoints = elem.getIf<recob::SpacePoint>();
+     *   // ...
+     * }
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * If the proxy `tracks` has _not_ been coded with `recob::Hit` data,
+     * the code snippet will _not_ compile, because `get()` will not compile
+     * for tags that were not coded in. On the other end, if `recob::Hit`
+     * is coded in `tracks` but `recob::SpacePoint` is not, the snippet _will_
+     * compile. In that case, if the `has()` check had been omitted, `getIt()`
+     * would throw a `std::logic_error` exception when executed.
+     * With C++17, this will not be necessary any more by using "constexpr if":
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * decltype(auto) elem = tracks[0];
+     * if constexpr (elem.has<recob::Hit>()) {
+     *   auto hits = elem.get<recob::Hit>();
+     *   // ...
+     * }
+     * if constexpr (elem.has<recob::SpacePoint>()) {
+     *   auto spacepoints = elem.get<recob::SpacePoint>();
+     *   // ...
+     * }
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * 
+     * @note The second template argument contains the *exact* type returned by
+     *       the function. That information is needed because this method needs
+     *       to return the same type (or compatible types) whether the required
+     *       tag is present or not, in order for user code like
+     *       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     *       if (elem.has<recob::SpacePoint>()) {
+     *         recob::SpacePoint const* spacepoints
+     *           = elem.getIf<recob::SpacePoint>(); // won't do
+     *         // ...
+     *       }
+     *       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     *       to work; it becomes:
+     *       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     *       if (elem.has<recob::SpacePoint>()) {
+     *         recob::SpacePoint const* spacepoints
+     *           = elem.getIf<recob::SpacePoint, recob::SpacePoint const*>();
+     *         // ...
+     *       }
+     *       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     *       This is necessary because when the tag (in the example,
+     *       `recob::SpacePoint`) is not registered in the proxy, `getIf()` has
+     *       no clue of what the return value should be ("which is the type of
+     *       the data that does not exist?").
+     * 
+     */
+    template <typename Tag, typename T = Tag const&>
+    auto getIf() const -> decltype(auto);
+    
+    
+    /// Returns whether this class knowns about the specified type (`Tag`).
+    template <typename Tag>
+    static constexpr bool has() { return util::has_tag_v<Tag, aux_elements_t>; }
     
       private:
-    std::size_t index; ///< Index of this element in the proxy.
-    main_element_t const* main; ///< Pointer to the main object of the element.
-    aux_elements_t auxData; ///< Data associated to the main object.
+    
+    std::size_t fIndex; ///< Index of this element in the proxy.
+    main_element_t const* fMain; ///< Pointer to the main object of the element.
+    
+    // note that the auxiliary data is not tagged, we need to learn which
+    // the tags are from the collection.
+    aux_elements_t fAuxData; ///< Data associated to the main object.
+    
+    template <typename Tag, typename>
+    auto getIfHas(details::YesNoStruct<true>) const -> decltype(auto);
+    
+    template <typename Tag, typename T>
+    [[noreturn]] auto getIfHas(details::YesNoStruct<false>) const -> T;
     
   }; // CollectionProxyElement<>
 
 
   /// @}
-  // end Collection proxy infrastructure
+  // end Collection proxy element infrastructure
   
   
   /// @{
@@ -522,6 +618,7 @@ namespace proxy {
   //----------------------------------------------------------------------------
   /**
    * @brief Base representation of a collection of proxied objects.
+   * @tparam Element type of element of the collection proxy
    * @tparam MainColl type of the collection of the main data product
    * @tparam AuxColls type of all included auxiliary data proxies
    * @see proxy::CollectionProxyElement
@@ -535,22 +632,32 @@ namespace proxy {
    * information of a single element in the main data product and all the data
    * associated with it.
    * 
-   * @note This proxy supports at most an auxiliary collection proxy of each
-   *       type.
+   * The `AuxColls` types are tagged types: all must define a `tag` type.
+   * Their data is accessed specifying that tag, i.e. via `get<Tag>()`.
+   * Therefore, tags must be unique.
+   * 
+   * The type `Element` is expected to expose the same interface of
+   * `CollectionProxyElement`, from which it can derive. It is a template
+   * that needs to take as only argument the type of collection proxy it is the
+   * element of. This is a way to customize the interface of access to single
+   * element of proxy.
+   * 
    * 
    */
-  template <typename MainColl, typename... AuxColls>
-  class CollectionProxy
+  template <
+    template <typename CollProxy> class Element,
+    typename MainColl,
+    typename... AuxColls
+    >
+  class CollectionProxyBase
     : public details::MainCollectionProxy<MainColl>, public AuxColls...
   {
     /// This type.
-    using collection_proxy_t = CollectionProxy<MainColl, AuxColls...>;
+    using collection_proxy_t
+      = CollectionProxyBase<Element, MainColl, AuxColls...>;
     
     /// Type of wrapper used for the main data product.
     using main_collection_proxy_t = details::MainCollectionProxy<MainColl>;
-    
-    /// Tuple of all auxiliary data collections (wrappers).
-    using auxcoll_t = std::tuple<AuxColls...>;
     
       public:
     /// Type of element of the main data product.
@@ -560,7 +667,10 @@ namespace proxy {
     using typename main_collection_proxy_t::main_collection_t;
     
     /// Type of element of this collection proxy.
-    using element_proxy_t = CollectionProxyElement<collection_proxy_t>;
+    using element_proxy_t = Element<collection_proxy_t>;
+    
+    /// Tuple of all auxiliary data collections (wrappers).
+    using aux_collections_t = std::tuple<AuxColls...>;
     
     /// Type of element of this collection proxy.
     using value_type = element_proxy_t;
@@ -580,7 +690,7 @@ namespace proxy {
      * They are expected to be wrappers around the original associated data,
      * not owning the auxiliary data itself.
      */
-    CollectionProxy(main_collection_t const& main, AuxColls&&... aux)
+    CollectionProxyBase(main_collection_t const& main, AuxColls&&... aux)
       : main_collection_proxy_t(main), AuxColls(std::move(aux))...
       {}
     
@@ -618,10 +728,65 @@ namespace proxy {
     auto get() const -> decltype(auto) { return auxByTag<AuxTag>(); }
     
     
+    /**
+     * @brief Returns the auxiliary data specified by type (`Tag`).
+     * @tparam Tag tag of the data to fetch (usually, its type)
+     * @tparam T exact type returned by the method (by default a vector of tags)
+     * @return the auxiliary data specified by type (`Tag`).
+     * @throw std::logic_error if the tag is not available.
+     * @see get(), has()
+     * 
+     * This method is a `get()` which forgives when the requested type is not
+     * available (because this proxy was configured not to hold it).
+     * 
+     * The difference with `get()` is the following:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * if (tracks.has<recob::Hit>()) {
+     *   auto hits = tracks.get<recob::Hit>();
+     *   // ...
+     * }
+     * if (tracks.has<recob::SpacePoint>()) {
+     *   auto spacepoints = tracks.getIf<recob::SpacePoint>();
+     *   // ...
+     * }
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * If the proxy `tracks` has _not_ been coded with `recob::Hit` data,
+     * the code snippet will _not_ compile, because `get()` will not compile
+     * for tags that were not coded in. On the other end, if `recob::Hit`
+     * is coded in `tracks` but `recob::SpacePoint` is not, the snippet _will_
+     * compile. In that case, if the `has()` check had been omitted, `getIt()`
+     * would throw a `std::logic_error` exception when executed.
+     * With C++17, this will not be necessary any more by using "constexpr if":
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * if constexpr (tracks.has<recob::Hit>()) {
+     *   auto hits = tracks.get<recob::Hit>();
+     *   // ...
+     * }
+     * if constexpr (tracks.has<recob::SpacePoint>()) {
+     *   auto spacepoints = tracks.get<recob::SpacePoint>();
+     *   // ...
+     * }
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * 
+     * @note If the wrapped data product is something different than a vector
+     *       of space points (which in the example is likely, if space points
+     *       are associated to tracks), the almost-correct type of return value
+     *       needs to be specified as second template parameter `T`.
+     * 
+     * @warning This functionality is not trivial to use!
+     *          It's mostly meant for implementation of higher level wrappers.
+     */
+    template <typename Tag, typename T = std::vector<Tag> const&>
+    auto getIf() const -> decltype(auto);
+    
+    
+    /// Returns whether this class knowns about the specified type (`Tag`).
+    template <typename Tag>
+    static constexpr bool has()
+      { return util::has_tag_v<Tag, aux_collections_t>; }
+    
+    
       protected:
-    
-    friend element_proxy_t;
-    
     using main_collection_proxy_t::main;
     using main_collection_proxy_t::mainProxy;
     using main_collection_proxy_t::getMainAt;
@@ -631,13 +796,39 @@ namespace proxy {
     AuxColl const& aux() const { return static_cast<AuxColl const&>(*this); }
     
     /// Returns the auxiliary data specified by type.
-    template <typename AuxColl>
-    AuxColl const& aux() const { return static_cast<AuxColl const&>(*this); }
+    template <typename AuxTag>
+    auto auxByTag() const -> decltype(auto)
+      { return aux<util::index_of_tag_v<AuxTag, aux_collections_t>>(); }
+    
+    
+    template <typename Tag, typename>
+    auto getIfHas(details::YesNoStruct<true>) const -> decltype(auto);
+    template <typename Tag, typename T>
+    [[noreturn]] auto getIfHas(details::YesNoStruct<false>) const -> T;
     
     /// Returns an iterator pointing to the specified index of this collection.
     const_iterator makeIterator(std::size_t i) const { return { *this, i }; }
     
-  }; // struct CollectionProxy
+    
+    static_assert(!util::has_duplicate_tags<aux_collections_t>(),
+      "Some auxiliary data collections share the same tag. They should not.");
+    
+  }; // struct CollectionProxyBase
+  
+  
+  //----------------------------------------------------------------------------
+  /**
+   * @brief Base representation of a collection of proxied objects.
+   * @tparam MainColl type of the collection of the main data product
+   * @tparam AuxColls type of all included auxiliary data proxies
+   * @see proxy::CollectionProxyElement
+   * 
+   * This object is a "specialization" of `proxy::CollectionProxyBase` using
+   * `proxy::CollectionProxyElement` as element type.
+   */
+  template <typename MainColl, typename... AuxColls>
+  using CollectionProxy
+    = CollectionProxyBase<CollectionProxyElement, MainColl, AuxColls...>;
   
   
   //----------------------------------------------------------------------------
@@ -761,7 +952,7 @@ namespace proxy {
   template <typename Proxy, typename Selector = Proxy>
   struct CollectionProxyMakerTraits {
     static_assert
-      (details::always_true<Proxy>(), "This class requires specialization.");
+      (util::always_true_type<Proxy>(), "This class requires specialization.");
   };
   
   
@@ -1203,10 +1394,12 @@ namespace proxy {
     //--------------------------------------------------------------------------
     //--- stuff for auxiliary data
     //--------------------------------------------------------------------------
-    // Trait replacing each element of the specified tuple with 
+    // Trait replacing each element of the specified tuple with its
+    // `associated_data_t`
     template <typename Tuple>
     struct SubstituteWithAuxList {
-      static_assert(always_true<Tuple>(), "Template argument must be a tuple");
+      static_assert
+        (util::always_true_type<Tuple>(), "Template argument must be a tuple");
     }; // SubstituteWithAuxList<>
     
     template <typename... T>
@@ -1635,7 +1828,8 @@ namespace proxy {
       using group_ranges_t = BoundaryList<associated_data_iterator_t>;
       
       /// Type of collection of auxiliary data associated with a main item.
-      using associated_data_t = typename group_ranges_t::range_t;
+      using associated_data_t
+        = util::add_tag_t<typename group_ranges_t::range_t, tag>;
       
       // constructor is not part of the interface
       AssociatedData(group_ranges_t&& groups)
@@ -1652,7 +1846,7 @@ namespace proxy {
       
       /// Returns the range with the specified index (no check performed).
       auto getRange(std::size_t i) const -> decltype(auto)
-        { return fGroups.range(i); }
+        { return util::makeTagged<tag>(fGroups.range(i)); }
       
       /// Returns the range with the specified index (no check performed).
       auto operator[] (std::size_t index) const -> decltype(auto)
@@ -1813,6 +2007,69 @@ namespace proxy {
     return makeAssociatedData<Main_t, Aux_t, Tag>(event, tag, handle->size());
   } // makeAssociatedData(handle)
   
+  
+  
+  //----------------------------------------------------------------------------
+  //---  CollectionProxyElement
+  //----------------------------------------------------------------------------
+  template <typename CollProxy>
+  template <typename Tag, typename T>
+  auto CollectionProxyElement<CollProxy>::getIf() const -> decltype(auto)
+    { return getIfHas<Tag, T>(details::YesNoStruct<has<Tag>()>{}); }
+  
+  
+  template <typename CollProxy>
+  template <typename Tag, typename>
+  auto CollectionProxyElement<CollProxy>::getIfHas
+    (details::YesNoStruct<true>) const -> decltype(auto)
+    { return get<Tag>(); }
+  
+  template <typename CollProxy>
+  template <typename Tag, typename T>
+  auto CollectionProxyElement<CollProxy>::getIfHas
+    (details::YesNoStruct<false>) const -> T
+    {
+      throw std::logic_error
+        ("Tag '" + lar::debug::demangle<Tag>() + "' not available."); 
+    }
+  
+  
+  //----------------------------------------------------------------------------
+  //---  CollectionProxyBase
+  //----------------------------------------------------------------------------
+  template <
+    template <typename CollProxy> class Element,
+    typename MainColl,
+    typename... AuxColls
+    >
+  template <typename Tag, typename T>
+  auto CollectionProxyBase<Element, MainColl, AuxColls...>::getIf() const
+    -> decltype(auto)
+    { return getIfHas<Tag, T>(details::YesNoStruct<has<Tag>()>{}); }
+  
+  
+  template <
+    template <typename CollProxy> class Element,
+    typename MainColl,
+    typename... AuxColls
+    >
+  template <typename Tag, typename>
+  auto CollectionProxyBase<Element, MainColl, AuxColls...>::getIfHas
+    (details::YesNoStruct<true>) const -> decltype(auto)
+    { return get<Tag>(); }
+  
+  template <
+    template <typename CollProxy> class Element,
+    typename MainColl,
+    typename... AuxColls
+    >
+  template <typename Tag, typename T>
+  auto CollectionProxyBase<Element, MainColl, AuxColls...>::getIfHas
+    (details::YesNoStruct<false>) const -> T
+    {
+      throw std::logic_error
+        ("Tag '" + lar::debug::demangle<Tag>() + "' not available."); 
+    }
   
   
   //----------------------------------------------------------------------------
