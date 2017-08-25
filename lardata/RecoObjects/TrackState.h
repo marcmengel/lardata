@@ -94,9 +94,6 @@ namespace trkf {
     SVector6     parameters6D() const { return SVector6(fPos.X(),fPos.Y(),fPos.Z(),fMom.X(),fMom.Y(),fMom.Z()); }
     SMatrixSym66 covariance6D() const { return fPlane.Local5DToGlobal6DCovariance(fTrackStateCov, true, fMom); }
     //
-    Point_t&   positionRef() { return fPos; }
-    Vector_t&  momentumRef() { return fMom; }
-    //
     bool isTrackAlongPlaneDir() const { return fMom.Dot(fPlane.direction())>0; }
     //
     std::ostream& dump(std::ostream& out = std::cout) const {
