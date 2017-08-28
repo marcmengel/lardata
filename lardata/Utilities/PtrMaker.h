@@ -4,10 +4,13 @@
 // 
 // Author:      Saba Sehrish
 //
+// NOTE: PtrMaker is now in art/Persistency/Common/PtrMaker.h.
+//       This header is now a wrapper and is retained for backwards compatibility.
+//
 // Description: A common pattern is to create a collection A, 
 // and a collection B, create art::Ptrs to the objects in each of 
 // the collection and then create associations between the objects 
-// in the two collections. The purpose of lar::PtrMaker is to simplify 
+// in the two collections. The purpose of art::PtrMaker is to simplify 
 // the process of creating art::Assns by providing a utility to create 
 // art::Ptrs. It is a two step process to create an art::Ptr with this 
 // approach. 
@@ -37,54 +40,6 @@
 // 
 ////////////////////////////////////////////////////////////////////////
 
-#include "art/Framework/Core/EDProducer.h"
-#include "art/Framework/Core/ModuleMacros.h"
-#include "canvas/Persistency/Common/FindManyP.h"
-#include "cetlib/exception.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-
-
-#include <iostream>
-
-namespace lar {
-   // to create art::Ptrs in to a particular collection in an event
-   template <class T>
-   class PtrMaker {
-   public:
-      //Creates a PtrMaker that creates Ptrs in to a collection of type C created by the module of type MODULETYPE, where the collection has instance name "instance"
-      template <class MODULETYPE, class C = std::vector<T>>
-      PtrMaker(art::Event const & evt, MODULETYPE const& module, std::string const& instance = std::string());
-      
-      //use this constructor when making Ptrs to products created in other modules
-      PtrMaker(art::Event const & evt, const art::ProductID & prodId, std::string const& instance = std::string());
-      
-      //Creates a Ptr to an object in the slot indicated by "index"
-      art::Ptr<T> operator()(std::size_t index) const;
-      
-   private:
-      const art::ProductID prodId;
-      art::EDProductGetter const* prodGetter;
-   };
-   
-   template <class T>
-   template <class MODULETYPE, class C>
-   PtrMaker<T>::PtrMaker(art::Event const & evt, MODULETYPE const& module, std::string const & instance)
-   : prodId(module.template getProductID<C>(evt, instance))
-   , prodGetter(evt.productGetter(prodId))
-   {  }
-   
-   template <class T>
-   PtrMaker<T>::PtrMaker(art::Event const & evt, const art::ProductID & pid, std::string const & instance)
-   : prodId(pid)
-   , prodGetter(evt.productGetter(pid))
-   {  }
-   
-   template <class T>
-   art::Ptr<T> PtrMaker<T>::operator()(size_t index) const
-   {
-      art::Ptr<T> artPtr(prodId, index, prodGetter);
-      return artPtr;
-   }
-}
-// end of namespace
+// PtrMaker is now in art
+#include "art/Persistency/Common/PtrMaker.h"
 

@@ -79,7 +79,7 @@ void AssociatedGroupsTest() {
   expected[0] = { 0, { 0, 3, 6 } };
   expected[1] = { 1, { 2, 4, 6 } };
   expected[2] = { 3, { 8, 10, 12, 13 } };
-  art::ProductID aPID{ 5, 10 }, bPID{ 7, 12 };
+  art::ProductID aPID{ 5 }, bPID{ 12 };
   
   // fill the association
   MyAssns_t assns;
