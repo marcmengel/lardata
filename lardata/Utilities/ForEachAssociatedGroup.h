@@ -27,6 +27,10 @@
 #include "range/v3/view/map.hpp" // range::view::values
 #include "range/v3/view/all.hpp"
 
+// C/C++ standard libraries
+#include <iterator> // std::next()
+
+
 namespace util {
   /**
    * @brief  Helper functions to access associations in order
@@ -163,6 +167,22 @@ namespace util {
             util::range_for
             ;
   } // associated_groups()
+
+
+  /**
+   * @brief  Returns the group within `groups` with the specified index.
+   * @tparam Groups the type of collection of groups
+   * @param groups the collection of all groups
+   * @param index the index of the group to be accessed
+   * @return the group with specified index (may be a reference)
+   * @see `associated_groups()`
+   *
+   * The `groups` argument is expected to be the one returned by
+   * `associated_groups`.
+   */
+  template <typename Groups>
+  auto groupByIndex(Groups&& groups, std::size_t index) -> decltype(auto)
+    { return *(std::next(groups.begin(), index)); }
 
 } // namespace util
 
