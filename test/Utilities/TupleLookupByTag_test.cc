@@ -11,9 +11,13 @@
 
 #include "lardata/Utilities/TupleLookupByTag.h"
 
+// LArSoft utilities
+#include "larcorealg/CoreUtils/UncopiableAndUnmovableClass.h"
+
 // C/C++ standard libraries
 #include <tuple>
 #include <type_traits>
+#include <memory> // std::addressof()
 #include <utility> // std::move(), std::forward()
 #include <cstddef> // std::size_t
 #include <cassert>
@@ -337,9 +341,36 @@ struct TaggedType <Tag, void> {
   using tag = Tag;
 };
 
-struct TagA {};
-struct TagB {};
-struct TagC {};
+using TagA = util::TagN<0>;
+using TagB = util::TagN<1>;
+using TagC = util::TagN<2>;
+
+
+void testMakeTagged() {
+  
+  struct MyData {
+    int content = 5;
+  };
+  
+  struct MyStonedData: public MyData, public lar::UncopiableAndUnmovableClass {};
+  
+  MyData lightData;        // moveable, copiable
+  MyStonedData heavyStone; // unmoveable, uncopiable
+  
+  decltype(auto) lightDataTagged     = util::makeTagged<TagA>(lightData        );
+  decltype(auto) heavyStoneTagged    = util::makeTagged<TagA>(heavyStone       );
+  decltype(auto) lightDataCopyTagged = util::makeTagged<TagA>(MyData(lightData));
+  
+  static_assert( std::is_lvalue_reference<decltype(util::makeTagged<TagA>(lightData)        )>(), "makeTagged(moveable lvalue)   does not produce a reference");
+  static_assert( std::is_lvalue_reference<decltype(util::makeTagged<TagA>(heavyStone)       )>(), "makeTagged(unmoveable lvalue) does not produce a reference");
+  static_assert(!std::is_lvalue_reference<decltype(util::makeTagged<TagA>(MyData(lightData)))>(), "makeTagged(rvalue) produces a (lvalue) reference"          );
+  static_assert(!std::is_rvalue_reference<decltype(util::makeTagged<TagA>(MyData(lightData)))>(), "makeTagged(rvalue) produces a (rvalue) reference"          );
+  
+  assert(std::addressof(lightDataTagged    ) == std::addressof(lightData ));
+  assert(std::addressof(heavyStoneTagged   ) == std::addressof(heavyStone));
+  assert(std::addressof(lightDataCopyTagged) != std::addressof(lightData ));
+  
+} // testMakeTagged()
 
 
 int main() {
@@ -428,6 +459,16 @@ int main() {
 //  static_assert(util::index_of_tag<TagA, decltype(dataWithDupl)>() == 2U, "Unexpected tagged type 3 (dupl)");
   
   //
+  // util::type_with_tag()
+  //
+    static_assert(std::is_same<util::type_with_tag_t<TagA, decltype(data)        >, DataA>(), "Unexpected tagged type 1");
+    static_assert(std::is_same<util::type_with_tag_t<TagC, decltype(data)        >, DataC>(), "Unexpected tagged type 2");
+    static_assert(std::is_same<util::type_with_tag_t<TagB, decltype(data)        >, DataB>(), "Unexpected tagged type 3");
+//  static_assert(std::is_same<util::type_with_tag_t<TagA, decltype(dataWithDupl)>, DataA>(), "Unexpected tagged type 1 (dupl)");
+    static_assert(std::is_same<util::type_with_tag_t<TagC, decltype(dataWithDupl)>, DataC>(), "Unexpected tagged type 2 (dupl)");
+//  static_assert(std::is_same<util::type_with_tag_t<TagA, decltype(dataWithDupl)>, DataA>(), "Unexpected tagged type 3 (dupl)");
+  
+  //
   // util::has_type()
   //
   static_assert( util::has_type<DataA, decltype(data)        >(), "Unexpected type 1");
@@ -496,6 +537,10 @@ int main() {
     assert((util::getByTag<TagC>(dataWithDupl)).data == 'b');
 //  assert((util::getByTag<TagA>(dataWithDupl)).data ==  66); // does not compile: duplicate types!
   
+  // 
+  // makeTagged()
+  //
+  testMakeTagged();
   
   return 0;
 } // main()

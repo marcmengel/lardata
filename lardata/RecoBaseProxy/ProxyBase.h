@@ -20,7 +20,15 @@
  *       note that this preclude actual many-to-many associations.
  *   This does _not_ require associations to be one-to-one (it allows one `L` to
  *   many `R`), nor that all `L` be associated to at least one `R`.
- *   
+ * * *parallel data product*: a data product collection of elements extending
+ *   the information from another data product collection ("main"), where
+ *     * the two data products have the same number of elements
+ *     * there is an implicit one-to-one association between the elements of the
+ *       two data products, so that an element at position _i_ of the parallel
+ *       data product pertains to the element at position _i_ of the main
+ *       data product
+ * 
+ * 
  * 
  * Technical details
  * ==================
@@ -179,13 +187,49 @@ namespace proxy {
     struct SubstituteWithAuxList;
     
     //--------------------------------------------------------------------------
+    template <
+      typename AuxColl,
+      typename Aux = typename AuxColl::value_type,
+      typename Tag = Aux
+      >
+    class ParallelData;
+    
+    //--------------------------------------------------------------------------
     template <typename Main, typename Aux, typename Tag = Aux>
     class AssociatedData;
     
     //--------------------------------------------------------------------------
-    template <typename Aux, typename ArgTuple, typename AuxTag = Aux>
-    class WithAssociatedStruct;
+    template <
+      typename Aux,
+      typename ArgTuple,
+      template <typename CollProxy> class ProxyMaker,
+      typename AuxTag = Aux
+      >
+    class WithAssociatedStructBase;
     
+    template <typename Aux, typename AuxTag = Aux>
+    struct AssociatedDataProxyMakerWrapper;
+    
+    template <typename Aux, typename ArgTuple, typename AuxTag = Aux>
+    using WithAssociatedStruct = WithAssociatedStructBase<
+      Aux,
+      ArgTuple,
+      AssociatedDataProxyMakerWrapper<Aux, AuxTag>::template maker_t,
+      AuxTag
+      >;
+
+    template <typename Aux, typename AuxTag = Aux>
+    struct ParallelDataProxyMakerWrapper;
+    
+    template <typename Aux, typename ArgTuple, typename AuxTag = Aux>
+    using WithParallelCollectionStruct = WithAssociatedStructBase<
+      Aux,
+      ArgTuple,
+      ParallelDataProxyMakerWrapper<Aux, AuxTag>::template maker_t,
+      AuxTag
+      >;
+
+
     //--------------------------------------------------------------------------
     template <typename ProxyElement, typename... AuxData>
     auto makeCollectionProxyElement(
@@ -195,7 +239,7 @@ namespace proxy {
       );
     
     //--------------------------------------------------------------------------
-    template <typename Coll>
+    template <typename Cont>
     class IndexBasedIterator;
     
     //--------------------------------------------------------------------------
@@ -252,12 +296,12 @@ namespace proxy {
    * @param event event to read associations from
    * @param tag input tag of the association object
    * @return a new `AssociatedData` filled with associations from `tag`
-   * @see `makeAssociatedData(Handle&&, Event&&, art::InputTag)`
+   * @see `makeAssociatedData(Event const&, art::InputTag, std::size_t)`
    * 
    * This function operates like
-   * `makeAssociatedData(Handle&&, Event&&, art::InputTag)`, but it extracts
-   * the information about the type of main object and the minimum number of
-   * them from a handle.
+   * `makeAssociatedData(Event const&, art::InputTag, std::size_t)`, but it
+   * extracts the information about the type of main object and the minimum
+   * number of them from a handle.
    * The handle object is expected to behave as a smart pointer to a
    * collection of elements of the associated type.
    * 
@@ -283,6 +327,7 @@ namespace proxy {
   /**
    * @brief Creates an associated data wrapper for the specified types.
    * @tparam Main type of main datum (element) to associate from ("left")
+   * @tparam Aux type of datum (element) to associate to ("right")
    * @tparam AuxTag tag labelling this association
    * 
    * Usually, `AuxTag` is also the type of datum (element) to associate to
@@ -387,13 +432,13 @@ namespace proxy {
    * association between the main data type and an auxiliary one.
    * The interface required by `withAssociated()` includes:
    * * a static `make()` method creating and returning the associated data
-   *   proxy with arguments an event, a template argument representing the
-   *   main collection information, and all the arguments required for the
-   *   creation of the associated proxy (coming from `withAssociated()`);
-   *   equivalent to the signature:
+   *   proxy with arguments an event, the main data product handle, a template
+   *   argument representing the main collection information, and all the
+   *   arguments required for the creation of the associated proxy (coming from
+   *   `withAssociated()`); equivalent to the signature:
    *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   *   template <typename Event, template MainArg, template... Args>
-   *   auto make(Event const&, MainArg const&, Args&&...);
+   *   template <typename Event, typename Handle, typename MainArg, typename... Args>
+   *   auto make(Event const&, Handle&&, MainArg const&, Args&&...);
    *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * 
    * This class can be specialized (see `withAssociated()` for an example).
@@ -402,7 +447,7 @@ namespace proxy {
    * association" requirement (see the "Definitions" section in `ProxyBase.h`
    * documentation).
    * 
-   * The third template argument is designed for specialization of associations
+   * The last template argument is designed for specialization of associations
    * in the context of a specific proxy type.
    */
   template
@@ -435,8 +480,10 @@ namespace proxy {
      * @brief Create a association proxy collection using main collection tag.
      * @tparam Event type of the event to read associations from
      * @tparam MainArgs any type convertible to `art::InputTag`
+     * @tparam Args optional single type (`art::InputTag` required)
      * @param event the event to read associations from
      * @param margs an object describing the main data product
+     * @param args input tag for associated data, if different from main
      * @return an auxiliary data proxy object
      * 
      * The returned object exposes a random access container interface, with
@@ -466,6 +513,248 @@ namespace proxy {
   
   /// @}
   // end Associated data
+  
+  
+  /// @{
+  /// @name Parallel data infrastructure
+  /// @ingroup LArSoftProxies
+
+  //----------------------------------------------------------------------------
+  /**
+   * @brief Creates and returns an parallel data collection object.
+   * @tparam AuxColl type of parallel data data product container
+   * @tparam Aux type of parallel data to be associated to the main objects
+   *             (if omitted: `AuxColl::value_type`)
+   * @tparam Tag the tag labelling this associated data (if omitted: as `Aux`)
+   * @tparam Event type of event to read the data product from
+   * @param event event to read the data product from
+   * @param tag input tag of the parallel data product
+   * @return a new `ParallelData` filled with data from `tag`
+   * 
+   * The data product being retrieved must fulfill the requirements of
+   * "parallel data product" (see the "Definitions" section in `ProxyBase.h`
+   * documentation).
+   * 
+   * Two template types must be explicitly specified, e.g.
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto auxData
+   *   = makeParallelData<std::vector<recob::TrackFitHitInfo>>(event, tag);
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   */
+  template <typename AuxColl, typename Aux, typename Tag, typename Event>
+  auto makeParallelData(Event const& event, art::InputTag tag);
+  
+  template <typename AuxColl, typename Aux, typename Event>
+  auto makeParallelData(Event const& event, art::InputTag tag)
+    { return makeParallelData<AuxColl, Aux, Aux, Event>(event, tag); }
+  
+  template <typename AuxColl, typename Event>
+  auto makeParallelData(Event const& event, art::InputTag tag)
+    {
+      return makeParallelData<AuxColl, typename AuxColl::value_type, Event>
+        (event, tag);
+    }
+  
+  
+  //----------------------------------------------------------------------------
+  /**
+   * @brief Creates an parallel data wrapper for the specified types.
+   * @tparam Main type of main datum (element)
+   * @tparam AuxColl type of the parallel data collection
+   * @tparam Aux type of the parallel data element
+   * @tparam AuxTag tag labelling the parallel data collection
+   * 
+   * Usually, `AuxTag` is also the type of datum (element) in the parallel
+   * collection.
+   * 
+   * This class works as a base class for `ParallelDataProxyMaker` so that
+   * the specializations of the latter can still inherit from this one if they
+   * its facilities.
+   */
+  template <
+    typename Main,
+    typename AuxColl,
+    typename Aux,
+    typename AuxTag = typename AuxColl::value_type
+    >
+  struct ParallelDataProxyMakerBase {
+    
+    /// Tag labelling the associated data we are going to produce.
+    using data_tag = AuxTag;
+    
+    /// Type of the main datum.
+    using main_element_t = Main;
+    
+    /// Type of the auxiliary data product.
+    using aux_collection_t = AuxColl;
+    
+    /// Type of the auxiliary datum.
+    using aux_element_t = Aux;
+    
+    /// Type of associated data proxy being created.
+    using aux_collection_proxy_t
+       = details::ParallelData<aux_collection_t, aux_element_t, data_tag>;
+    
+    /**
+     * @brief Create a parallel data proxy collection using main collection tag.
+     * @tparam Event type of the event to read data from
+     * @tparam Handle type of handle to the main data product
+     * @tparam MainArgs _(unused)_ any type convertible to `art::InputTag`
+     * @param event the event to read data from
+     * @param mainHandle _(unused)_ handle to the main collection data product
+     * @param mainArgs an object describing the main data product
+     * @return a parallel data proxy object
+     * 
+     * The returned object exposes a random access container interface, with
+     * data indexed by the index of the corresponding object in the main
+     * collection.
+     * 
+     * The `mainArgs` object is of an arbitrary type that must be convertible
+     * by explicit type cast into a `art::InputTag`; that input tag will be
+     * used to fetch the parallel data collection.
+     */
+    template<typename Event, typename Handle, typename MainArgs>
+    static auto make
+      (Event const& event, Handle&& mainHandle, MainArgs const& mainArgs)
+      {
+        return createFromTag
+          (event, std::forward<Handle>(mainHandle), art::InputTag(mainArgs));
+      }
+    
+    /**
+     * @brief Create a parallel data proxy collection using the specified tag.
+     * @tparam Event type of the event to read data from
+     * @tparam Handle type of handle to the main data product
+     * @tparam MainArgs _(unused)_ any type convertible to `art::InputTag`
+     * @param event the event to read associations from
+     * @param mainHandle _(unused)_ handle to the main collection data product
+     * @param auxInputTag the tag of the data to be read
+     * @return a parallel data proxy object
+     * 
+     * The returned object exposes a random access container interface, with
+     * data indexed by the index of the corresponding object in the main
+     * collection.
+     */
+    template<typename Event, typename Handle, typename MainArgs>
+    static auto make(
+      Event const& event, Handle&& mainHandle,
+      MainArgs const&, art::InputTag auxInputTag
+      )
+      {
+        return
+          createFromTag(event, std::forward<Handle>(mainHandle), auxInputTag);
+      }
+    
+      private:
+    template<typename Event, typename Handle>
+    static auto createFromTag
+      (Event const& event, Handle&&, art::InputTag auxInputTag)
+      {
+        return makeParallelData<aux_collection_t, aux_element_t, data_tag>
+          (event, auxInputTag);
+      }
+    
+  }; // struct ParallelDataProxyMakerBase<>
+  
+  
+  //--------------------------------------------------------------------------
+  /**
+   * @brief Creates an associated data wrapper for the specified types.
+   * @tparam Main type of main datum (element) to associate from ("left")
+   * @tparam Aux type of datum (element) to associate to ("right")
+   * @tparam CollProxy type of proxy this associated data works for
+   * @tparam Tag tag for the association proxy to be created
+   * @see `withAssociated()`
+   * 
+   * This class is (indirectly) called when using `proxy::withParallelData()`
+   * in `getCollection()`.
+   * Its task is to supervise the creation of the proxy to the auxiliary data
+   * parallel to the main data type.
+   * The interface required by `withParallelData()` includes:
+   * * a static `make()` method creating and returning the auxiliary data
+   *   proxy with arguments an event, the main data product handle, a template
+   *   argument representing the main collection information, and all the
+   *   arguments required for the creation of the associated proxy (coming from
+   *   `withParallelData()`); equivalent to the signature:
+   *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   *   template <typename Event, typename Handle, typename MainArg, typename... Args>
+   *   auto make(Event const&, Handle&&, MainArg const&, Args&&...);
+   *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * 
+   * This class can be specialized (see `withParallelData()` for an example).
+   * The default implementation just wraps a one-to-many
+   * `std::vector<Aux>` data product fulfilling "parallel data product"
+   * requirement (see the "Definitions" section in `ProxyBase.h` documentation).
+   * 
+   * The last template argument is designed for specialization of auxiliary data
+   * in the context of a specific proxy type.
+   */
+  template
+    <typename Main, typename Aux, typename CollProxy, typename Tag = Aux>
+  class ParallelDataProxyMaker
+    : public ParallelDataProxyMakerBase<Main, std::vector<Aux>, Aux, Tag>
+  {
+    //
+    // Note that this implementation is here only to document how to derive
+    // a ParallelDataProxyMaker (specialization) from
+    // ParallelDataProxyMakerBase. It's just mirroring the base class.
+    //
+    using base_t = ParallelDataProxyMakerBase<Main, std::vector<Aux>, Aux, Tag>;
+    
+      public:
+    
+    /// Type of the main datum.
+    using typename base_t::main_element_t;
+    
+    /// Type of the auxiliary data product.
+    using typename base_t::aux_collection_t;
+    
+    /// Type of the auxiliary datum.
+    using typename base_t::aux_element_t;
+    
+    /// Type of collection data proxy being created.
+    using typename base_t::aux_collection_proxy_t;
+    
+    
+    /**
+     * @brief Create a association proxy collection using main collection tag.
+     * @tparam Event type of the event to read associations from
+     * @tparam MainArgs any type convertible to `art::InputTag`
+     * @tparam Args optional single type (`art::InputTag` required)
+     * @param event the event to read associations from
+     * @param margs an object describing the main data product
+     * @param args input tag for parallel data, if different from main
+     * @return an auxiliary data proxy object
+     * 
+     * The returned object exposes a random access container interface, with
+     * data indexed by the index of the corresponding object in the main
+     * collection.
+     * 
+     * This implementation requires `margs` object to be convertible
+     * by explicit type cast into a `art::InputTag`; that input tag will be
+     * used to fetch the association.
+     */
+    template
+      <typename Event, typename Handle, typename MainArgs, typename... Args>
+    static auto make(
+      Event const& event, Handle&& mainHandle, MainArgs const& margs,
+      Args&&... args
+      )
+      {
+        return base_t::make(
+          event,
+          std::forward<Handle>(mainHandle),
+          margs,
+          std::forward<Args>(args)...
+          );
+      }
+    
+  }; // struct ParallelDataProxyMaker<>
+  
+  
+  
+  /// @}
+  // end Parallel data
   
   
   /// @{
@@ -798,7 +1087,7 @@ namespace proxy {
     /// Returns the auxiliary data specified by type.
     template <typename AuxTag>
     auto auxByTag() const -> decltype(auto)
-      { return aux<util::index_of_tag_v<AuxTag, aux_collections_t>>(); }
+      { return aux<util::type_with_tag_t<AuxTag, aux_collections_t>>(); }
     
     
     template <typename Tag, typename>
@@ -829,6 +1118,22 @@ namespace proxy {
   template <typename MainColl, typename... AuxColls>
   using CollectionProxy
     = CollectionProxyBase<CollectionProxyElement, MainColl, AuxColls...>;
+  
+  
+  //----------------------------------------------------------------------------
+  /// The same as `withParallelData()`, but it also specified a tag.
+  template <typename Aux, typename AuxTag, typename... Args>
+  auto withParallelDataAs(Args&&... args) {
+    using ArgTuple_t = std::tuple<Args&&...>;
+    ArgTuple_t argsTuple(std::forward<Args>(args)...);
+    return details::WithParallelCollectionStruct<Aux, ArgTuple_t, AuxTag>
+      (std::move(argsTuple));
+  } // withParallelDataAs()
+  
+  //----------------------------------------------------------------------------
+  template <typename Aux, typename... Args>
+  auto withParallelData(Args&&... args)
+    { return withParallelDataAs<Aux, Aux>(std::forward<Args>(args)...); }
   
   
   //----------------------------------------------------------------------------
@@ -1082,10 +1387,10 @@ namespace proxy {
    * 
    */
   template <typename CollProxy, typename Event, typename... OptionalArgs>
-  auto getCollection(Event const& event, OptionalArgs&&... args)
+  auto getCollection(Event const& event, OptionalArgs&&... optionalArgs)
   {
     return CollectionProxyMaker<CollProxy>::make
-      (event, std::forward<OptionalArgs>(args)...);
+      (event, std::forward<OptionalArgs>(optionalArgs)...);
   }
   
   
@@ -1395,7 +1700,7 @@ namespace proxy {
     //--- stuff for auxiliary data
     //--------------------------------------------------------------------------
     // Trait replacing each element of the specified tuple with its
-    // `associated_data_t`
+    // `auxiliary_data_t`
     template <typename Tuple>
     struct SubstituteWithAuxList {
       static_assert
@@ -1404,15 +1709,19 @@ namespace proxy {
     
     template <typename... T>
     struct SubstituteWithAuxList<std::tuple<T...>> {
-      using type = std::tuple<typename T::associated_data_t...>;
+      using type = std::tuple<typename T::auxiliary_data_t...>;
     }; // SubstituteWithAuxList<tuple>
     
     
     //--------------------------------------------------------------------------
+    //--- stuff for parallel collections (a form of auxiliary data)
+    //--------------------------------------------------------------------------
+    
     /**
      * @brief Helper to create associated data proxy.
      * @tparam Aux type of data associated to the main one
      * @tparam ArgTuple type of arguments required for the creation of proxy
+     * @tparam ProxyMaker template type of the proxy maker class
      * @tparam AuxTag tag for the associated data (default: as `Aux`)
      * 
      * This class stores user arguments for the construction of a proxy to
@@ -1424,10 +1733,15 @@ namespace proxy {
      * The association will be identified by type `AuxTag`.
      * 
      * This is not a customization point: to have a custom associated data
-     * produced, specialize `proxy::AssociatedDataProxyMaker` class
+     * produced, choose and then specialize the `ProxyMaker` class.
      */
-    template <typename Aux, typename ArgTuple, typename AuxTag /* = Aux */>
-    class WithAssociatedStruct {
+    template <
+      typename Aux,
+      typename ArgTuple,
+      template <typename CollProxy> class ProxyMaker,
+      typename AuxTag /* = Aux */
+      >
+    class WithAssociatedStructBase {
       
       /// Type of main data product element from a proxy of type `CollProxy`.
       template <typename CollProxy>
@@ -1441,8 +1755,7 @@ namespace proxy {
       
       /// Class to create the data proxy associated to a `CollProxy`.
       template <typename CollProxy>
-      using proxy_maker_t = AssociatedDataProxyMaker
-        <main_t<CollProxy>, aux_t, CollProxy, tag>;
+      using proxy_maker_t = ProxyMaker<CollProxy>;
       
         public:
       
@@ -1453,10 +1766,9 @@ namespace proxy {
       
       /// Constructor: steals the arguments, to be used by
       /// `createAssnProxyMaker()`.
-      WithAssociatedStruct(ArgTuple&& args): args(std::move(args)) {}
+      WithAssociatedStructBase(ArgTuple&& args): args(std::move(args)) {}
       
-      /// Creates the associated data proxy by means of
-      /// `AssociatedDataProxyMaker`.
+      /// Creates the associated data proxy by means of `ProxyMaker`.
       template
         <typename CollProxy, typename Event, typename Handle, typename MainArgs>
       auto createAssnProxyMaker
@@ -1492,7 +1804,123 @@ namespace proxy {
             );
         }
       
-    }; // struct WithAssociatedStruct
+    }; // struct WithAssociatedStructBase
+    
+    
+    
+    //--------------------------------------------------------------------------
+    //--- stuff for parallel data collection (a form of auxiliary data)
+    //--------------------------------------------------------------------------
+    template <typename Aux, typename AuxTag /* = Aux */>
+    struct ParallelDataProxyMakerWrapper {
+      template <typename CollProxy>
+      using maker_t = ParallelDataProxyMaker
+        <typename CollProxy::main_element_t, Aux, CollProxy, AuxTag>;
+    };
+    
+    
+    /**
+     * @brief Object to draft parallel data interface.
+     * @tparam AuxColl type of the parallel data collection
+     * @tparam Aux type of the associated object
+     * @tparam Tag tag this data is labeled with
+     * 
+     * Allows:
+     *  * random access (no index check guarantee)
+     *  * forward iteration
+     * 
+     * Construction is not part of the interface.
+     */
+    template <
+      typename AuxColl,
+      typename Aux /* = typename AuxColl::value_type */,
+      typename Tag /* = Aux */
+      >
+    class ParallelData {
+      using This_t = ParallelData<AuxColl, Aux, Tag>; ///< This type.
+      
+      using parallel_data_t = AuxColl;
+      using aux_t = Aux;
+      
+      using parallel_data_iterator_t = typename parallel_data_t::const_iterator;
+      
+        public:
+      using tag = Tag; ///< Tag of this association proxy.
+      
+      /// Type of auxiliary data associated with a main item.
+      using auxiliary_data_t = util::add_tag_t<aux_t, tag> const&;
+      
+      ParallelData(parallel_data_t const& data)
+        : fData(&data)
+        {}
+      
+      /// Returns an iterator pointing to the first data element.
+      auto begin() const -> decltype(auto)
+        { return fData->begin(); }
+      
+      /// Returns an iterator pointing past the last data element.
+      auto end() const -> decltype(auto)
+        { return fData->end(); }
+      
+      /// Returns the element with the specified index (no check performed).
+      auto operator[] (std::size_t index) const -> decltype(auto)
+        {
+          static_assert(
+            std::is_convertible<decltype(getElement(index)), auxiliary_data_t>(),
+            "Inconsistent data types."
+            );
+          return getElement(index); 
+        }
+      
+      /// Returns whether this data is labeled with the specified tag.
+      template <typename TestTag>
+      static constexpr bool hasTag() { return std::is_same<TestTag, tag>(); }
+      
+      /// Returns a pointer to the whole data collection.
+      parallel_data_t const* data() const { return fData; }
+      
+        private:
+      
+      parallel_data_t const* fData; ///< Reference to the original data product.
+      
+      auto getElement(std::size_t index) const -> decltype(auto)
+        { return util::makeTagged<tag>(fData->operator[](index)); }
+      
+    }; // class ParallelData<>
+    
+    
+    
+    
+    //--------------------------------------------------------------------------
+    //--- stuff for associated data (a form of auxiliary data)
+    //--------------------------------------------------------------------------
+    template <typename Aux, typename AuxTag /* = Aux */>
+    struct AssociatedDataProxyMakerWrapper {
+      template <typename CollProxy>
+      using maker_t = AssociatedDataProxyMaker
+        <typename CollProxy::main_element_t, Aux, CollProxy, AuxTag>;
+    };
+    
+    
+    /**
+     * @class WithAssociatedStruct
+     * @brief Helper to create associated data proxy.
+     * @tparam Aux type of data associated to the main one
+     * @tparam ArgTuple type of arguments required for the creation of proxy
+     * @tparam AuxTag tag for the associated data (default: as `Aux`)
+     * 
+     * This class stores user arguments for the construction of a proxy to
+     * associated data of type `Aux`.
+     * It can use that information plus some additional one to create the
+     * associated data itself. This additional information is provided by
+     * `getCollection()`.
+     * 
+     * The association will be identified by type `AuxTag`.
+     * 
+     * This is not a customization point: to have a custom associated data
+     * produced, specialize `proxy::AssociatedDataProxyMaker` class
+     */
+    // the class is actually an alias whose definition was above
     
     
     /// Interface providing begin and end iterator of a range.
@@ -1810,6 +2238,16 @@ namespace proxy {
      *  * forward iteration
      * 
      * Construction is not part of the interface.
+     * 
+     * The `AssociatedData` object, on creation, finds the borders surrounding
+     * the associated `Aux` objects for each `Main` one, and keep a record of
+     * them.
+     * The `AssociatedData` object also provides a container-like view of this
+     * information, where each element in the container is associated to a
+     * single `Main` and it is a container (actually, another view) of `Right`.
+     * Both levels of containers are random access, so that the set of `Right`
+     * objects associated to a `Left` can be accessed by index, and the `Right`
+     * objects within can be accessed with `Right` index in the `Left`.
      */
     template <typename Main, typename Aux, typename Tag /* = Aux */>
     class AssociatedData {
@@ -1828,7 +2266,7 @@ namespace proxy {
       using group_ranges_t = BoundaryList<associated_data_iterator_t>;
       
       /// Type of collection of auxiliary data associated with a main item.
-      using associated_data_t
+      using auxiliary_data_t
         = util::add_tag_t<typename group_ranges_t::range_t, tag>;
       
       // constructor is not part of the interface
@@ -1850,7 +2288,13 @@ namespace proxy {
       
       /// Returns the range with the specified index (no check performed).
       auto operator[] (std::size_t index) const -> decltype(auto)
-        { return getRange(index); }
+        {
+          static_assert(
+            std::is_convertible<decltype(getRange(index)), auxiliary_data_t>(),
+            "Inconsistent data types."
+            );
+          return getRange(index);
+        }
       
       /// Returns whether this data is labeled with the specified tag
       template <typename TestTag>
@@ -1858,6 +2302,7 @@ namespace proxy {
       
         private:
       group_ranges_t fGroups;
+      
     }; // class AssociatedData<>
     
     
@@ -2007,6 +2452,20 @@ namespace proxy {
     return makeAssociatedData<Main_t, Aux_t, Tag>(event, tag, handle->size());
   } // makeAssociatedData(handle)
   
+  
+  
+  //----------------------------------------------------------------------------
+  //--- makeParallelData() implementations
+  //----------------------------------------------------------------------------
+  template <typename AuxColl, typename Aux, typename Tag, typename Event>
+  auto makeParallelData(Event const& event, art::InputTag tag)
+  {
+    using AuxColl_t = AuxColl;
+    using Aux_t = Aux;
+    using ParallelData_t = details::ParallelData<AuxColl_t, Aux_t, Tag>;
+    
+    return ParallelData_t(*(event.template getValidHandle<AuxColl_t>(tag)));
+  } // makeParallelData()
   
   
   //----------------------------------------------------------------------------

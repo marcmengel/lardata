@@ -310,6 +310,54 @@ namespace util {
   
   //----------------------------------------------------------------------------
   /**
+   * @brief Returns the element type in `Tuple` with the specified type.
+   * @tparam Extractor extract the candidate type from a `Tuple` element
+   * @tparam Target the type being sought
+   * @tparam Tuple tuple-like data structure containing types.
+   * @see `type_with_extracted_type_t`, `index_of_extracted_type`,
+   *      `has_extracted_type`, `count_extracted_types`, `has_type`, 
+   * 
+   * Given a tuple-like type `Tuple`, this traits returns the one element type
+   * which "contains" the target type `Target`.
+   * For example:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * template <typename T>
+   * struct ExtractValueType { using type = typename T::value_type; };
+   * 
+   * using tuple_t = std::tuple<std::vector<std::string>, std::vector<int>>;
+   * 
+   * using int_container_t
+   *   = util::type_with_extracted_type<ExtractValueType, int, tuple_t>();
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * `int_container_t` will be `std::vector<int>`, as the type in `tuple_t`
+   * with `int` as `value_type`.
+   * 
+   * If the target type is not present, or if it is present more than once, a
+   * compilation error will ensue.
+   * 
+   * @note Currently there is no equivalent trait to ask for the second or
+   *       following type; this can be implemented on request.
+   */
+  template<
+    template <typename T, typename...> class Extractor,
+    typename Target,
+    typename Tuple
+    >
+  using type_with_extracted_type = std::tuple_element
+    <index_of_extracted_type_v<Extractor, Target, Tuple>, Tuple>;
+  
+  /// Direct access to the value in `type_with_extracted_type`.
+  template<
+    template <typename T, typename...> class Extractor,
+    typename Target,
+    typename Tuple
+    >
+  using type_with_extracted_type_t
+    = typename type_with_extracted_type<Extractor, Target, Tuple>::type;
+  
+  
+  //----------------------------------------------------------------------------
+  /**
    * @brief Trait holding whether an element in `Tuple` type contains `Target`.
    * @tparam Extractor trait exposing the target type in an element
    * @tparam Target the target type to be found
@@ -576,7 +624,11 @@ namespace util {
    */
   template <typename T, typename Tag>
   struct TaggedType: public T {
-    using T::T;
+    
+    // Forward all constructors
+    template <typename... Args>
+    TaggedType(Args&&... args): T(std::forward<Args>(args)...) {}
+    
     using tag = Tag; ///< Tag of this object
   };  // struct TaggedType
   
@@ -594,12 +646,23 @@ namespace util {
   
   /// "Converts" an object of type `T` in one derived from `T` with tag `Tag`.
   template <typename Tag, typename T>
-  auto makeTagged(T& obj) { return static_cast<add_tag_t<T, Tag>&>(obj); }
+  auto makeTagged(T& obj) -> decltype(auto)
+    { return static_cast<add_tag_t<T, Tag>&>(obj); }
   
   /// "Converts" an object of type `T` in one derived from `T` with tag `Tag`.
   template <typename Tag, typename T>
-  auto makeTagged(T const& obj)
+  auto makeTagged(T const& obj) -> decltype(auto)
     { return static_cast<add_tag_t<T, Tag> const&>(obj); }
+  
+  /// "Converts" an object of type `T` in one derived from `T` with tag `Tag`.
+  template <typename Tag, typename T>
+  auto makeTagged(T&& obj) -> decltype(auto)
+    { return add_tag_t<T, Tag>(std::move(obj)); }
+  
+  
+  /// Tag class parametrized by a sequence of numbers.
+  template <std::size_t...>
+  struct TagN {};
   
   
   /**
@@ -668,6 +731,44 @@ namespace util {
   /// Direct access to the value in `index_of_tag`.
   template <typename Tag, typename Tuple>
   constexpr std::size_t index_of_tag_v = index_of_tag<Tag, Tuple>();
+  
+  
+  /**
+   * @brief Trait holding the type of the element of `Tuple` with tag `Tag`.
+   * @tparam Tag the sought tag
+   * @tparam Tuple the tuple-like type holding the elements to check
+   * @see `type_with_tag_t`, `index_of_tag`, `count_tags`, `has_duplicate_tags`,
+   *      `has_tag`
+   * 
+   * Given a tuple-like type `Tuple`, this traits returns the one element type
+   * tagged with `Tag`.
+   * If the target type is not present, or if it is present more than once, a
+   * compilation error will ensue.
+   * 
+   * For example (see above for the definitions):
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * using TagA_t = typename util::type_with_tag<TagA, Tuple_t>::type;
+   * using TagB_t = typename util::type_with_tag<TagB, Tuple_t>::type;
+   * using TagBdupl_t = typename util::type_with_tag<TagB, DuplTuple_t>::type;
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * `TagA_t` will be `IntTaggedA`, the type in `Tuple_t` with `TagA`, while
+   * `TagB_t` will be `DoubleTaggedB` and `TagBdupl_t` will be also
+   * `DoubleTaggedB`. Instead, the type `util::type_with_tag<TagD, Tuple_t>`
+   * would not compile because no element in `Tuple_t` is tagged with `TagD`,
+   * and the type `util::type_with_tag<TagA, DuplTuple_t>()` would not compile
+   * because two elements of `DuplTuple_t` are tagged `TagA`.
+   * 
+   * @note Currently there is no equivalent trait to ask for the second or
+   *       following type, allowing for duplicate tags; this can be implemented
+   *       on request.
+   */
+  template <typename Tag, typename Tuple>
+  using type_with_tag = type_with_extracted_type<TagExtractor, Tag, Tuple>;
+  
+  
+  /// Direct access to the value in `type_with_tag`.
+  template <typename Tag, typename Tuple>
+  using type_with_tag_t = typename type_with_tag<Tag, Tuple>::type;
   
   
   /**
@@ -1009,10 +1110,13 @@ namespace util {
     };
 
     template <typename Tagged>
-    struct TagExtractorImpl
-      <Tagged, std::enable_if_t<always_true_type<typename Tagged::tag>::value>>
+    struct TagExtractorImpl<
+      Tagged,
+      std::enable_if_t
+        <always_true_type<typename std::remove_reference_t<Tagged>::tag>::value>
+      >
     {
-      using type = typename Tagged::tag;
+      using type = typename std::remove_reference_t<Tagged>::tag;
     };
     
     

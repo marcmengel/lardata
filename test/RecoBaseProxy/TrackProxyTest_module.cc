@@ -12,6 +12,10 @@
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/TrackFitHitInfo.h"
+
+#include "larcorealg/CoreUtils/DebugUtils.h" // lar::debug::demangle()
+#include "larcorealg/CoreUtils/UncopiableAndUnmovableClass.h"
 
 // framework libraries
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -26,7 +30,6 @@
 #include "fhiclcpp/types/Atom.h"
 #include "fhiclcpp/types/Name.h"
 #include "fhiclcpp/types/Comment.h"
-#include "fhiclcpp/ParameterSet.h"
 
 // Boost libraries
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
@@ -155,8 +158,13 @@ void TrackProxyTest::testTracks(art::Event const& event) {
   art::FindManyP<recob::Hit> hitsPerTrack
     (expectedTracksHandle, event, tracksTag);
   
-  auto tracks = proxy::getCollection<proxy::Tracks>(event, tracksTag,
-    proxy::withAssociatedAs<recob::Hit, tag::SpecialHits>()
+  auto const& expectedTrackFitHitInfo
+    = *(event.getValidHandle<std::vector<std::vector<recob::TrackFitHitInfo>>>
+    (tracksTag));
+  
+  auto tracks = proxy::getCollection<proxy::Tracks>(event, tracksTag
+    , proxy::withAssociatedAs<recob::Hit, tag::SpecialHits>()
+    , proxy::withFitHitInfo()
     );
   
   //
@@ -166,24 +174,53 @@ void TrackProxyTest::testTracks(art::Event const& event) {
     "Track proxy does NOT have space points available!!!"); 
   BOOST_CHECK_THROW(tracks.getIf<recob::SpacePoint>(), std::logic_error);
   
+  static_assert(
+    tracks.has<recob::TrackFitHitInfo>(),
+    "recob::TrackFitHitInfo not found!!!"
+    );
+  
   
   BOOST_CHECK_EQUAL(tracks.empty(), expectedTracks.empty());
   BOOST_CHECK_EQUAL(tracks.size(), expectedTracks.size());
+  
+  BOOST_CHECK_EQUAL(tracks.size(), expectedTrackFitHitInfo.size());
+  decltype(auto) allFitHitInfo = tracks.get<recob::TrackFitHitInfo>();
+  static_assert(
+    std::is_lvalue_reference<decltype(allFitHitInfo)>(),
+    "Copy of parallel data!"
+    );
+  BOOST_CHECK_EQUAL
+    (allFitHitInfo.data(), std::addressof(expectedTrackFitHitInfo));
+  
+  auto fitHitInfoSize
+    = std::distance(allFitHitInfo.begin(), allFitHitInfo.end());
+  BOOST_CHECK_EQUAL(fitHitInfoSize, expectedTrackFitHitInfo.size());
   
   std::size_t iExpectedTrack = 0;
   for (auto trackProxy: tracks) {
     auto const& expectedTrack = expectedTracks[iExpectedTrack];
     auto const& expectedHits = hitsPerTrack.at(iExpectedTrack);
+    auto const& expectedFitHitInfo = expectedTrackFitHitInfo[iExpectedTrack];
     
     recob::Track const& trackRef = *trackProxy;
     
-    BOOST_CHECK_EQUAL(&trackRef, &expectedTrack);
-    BOOST_CHECK_EQUAL(&(trackProxy.track()), &expectedTrack);
+    BOOST_CHECK_EQUAL
+      (std::addressof(trackRef), std::addressof(expectedTrack));
+    BOOST_CHECK_EQUAL
+      (std::addressof(trackProxy.track()), std::addressof(expectedTrack));
     BOOST_CHECK_EQUAL(trackProxy.nHits(), expectedHits.size());
+    
+    decltype(auto) fitHitInfo = trackProxy.get<recob::TrackFitHitInfo>();
+    static_assert(
+      std::is_lvalue_reference<decltype(fitHitInfo)>(),
+      "Copy of parallel data element!"
+      );
+    BOOST_CHECK_EQUAL
+      (std::addressof(fitHitInfo), std::addressof(expectedFitHitInfo));
+    BOOST_CHECK_EQUAL(fitHitInfo.size(), expectedFitHitInfo.size());
     
     BOOST_CHECK_EQUAL
       (trackProxy.get<tag::SpecialHits>().size(), expectedHits.size());
-    
     
     // direct interface to recob::Track
     BOOST_CHECK_EQUAL(trackProxy->NPoints(), expectedTrack.NPoints());
@@ -208,6 +245,15 @@ void TrackProxyTest::testTracks(art::Event const& event) {
       else {
         BOOST_CHECK(!pointInfo.hitPtr());
       }
+      
+      BOOST_CHECK_EQUAL
+        (fitHitInfo[iPoint].WireId(), expectedFitHitInfo[iPoint].WireId());
+      BOOST_CHECK_EQUAL
+        (pointInfo.fitInfoPtr(), std::addressof(expectedFitHitInfo[iPoint]));
+      BOOST_CHECK_EQUAL(
+        std::addressof(fitHitInfo[iPoint]),
+        std::addressof(expectedFitHitInfo[iPoint])
+        );
       
       ++iPoint;
     } // for
