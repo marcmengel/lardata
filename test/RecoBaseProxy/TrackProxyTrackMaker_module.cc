@@ -142,8 +142,8 @@ void lar::test::TrackProxyTrackMaker::produce(art::Event& event) {
       // fill optional information
       //
       fitInfo.push_back({
-        double(iPoint),                    // aHitMeas
-        double(iPoint),                    // aHitMeasErr2
+        double(iPoint) * 2.5,              // aHitMeas
+        double(iPoint) * 1.5,              // aHitMeasErr2
         {},                                // aTrackStatePar
         { ROOT::Math::SMatrixIdentity{} }, // aTrackStateCov
         hits[usedHits + iPoint].WireID()   // aWireId

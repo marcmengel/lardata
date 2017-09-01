@@ -86,7 +86,15 @@ class TrackProxyTest : public art::EDAnalyzer {
   /// Performs the actual test.
   void testTracks(art::Event const& event);
   
-}; // TrackProxyTest
+  /// Single-track processing function example.
+  template <typename Track>
+  void processTrack(Track const& track) const;
+  
+  /// Single-track-point processing function example.
+  template <typename TrackPoint>
+  void processPoint(TrackPoint const& point) const;
+  
+}; // class TrackProxyTest
 
 
 //------------------------------------------------------------------------------
@@ -100,8 +108,50 @@ void TrackProxyTest::analyze(art::Event const& event) {
 
 
 //------------------------------------------------------------------------------
+template <typename TrackPoint>
+void TrackProxyTest::processPoint(TrackPoint const& point) const {
+  
+  mf::LogVerbatim log("TrackProxyTest");
+  log <<
+    "  [#" << point.index() << "] at " << point.position()
+      << " (momentum: " << point.momentum() << "), flags: "
+      << point.flags();
+  
+  recob::Hit const* hit = point.hit();
+  if (hit) {
+    log << " with a Q=" << hit->Integral() << " hit on channel "
+      << hit->Channel() << " at tick " << hit->PeakTime()
+      << ", measured: " << point.fitInfoPtr()->hitMeas();
+  }
+  else
+    log << " (no associated hit)";
+  
+} // TrackProxyTest::processPoint()
+
+
+//------------------------------------------------------------------------------
+template <typename Track>
+void TrackProxyTest::processTrack(Track const& track) const {
+  
+  recob::Track const& trackRef = track.track();
+  
+  mf::LogVerbatim("TrackProxyTest")
+    << "[#" << track.index() << "] track " << trackRef
+    << "\n  with " << trackRef.NPoints() << " points and " << track.nHits()
+    << " hits:";
+  
+  for (auto point: track.points()) {
+    processPoint(point);
+  } // for points in track
+  
+} // TrackProxyTest::processTrack()
+
+
+//------------------------------------------------------------------------------
 void TrackProxyTest::proxyUsageExample(art::Event const& event) {
-  auto tracks = proxy::getCollection<proxy::Tracks>(event, tracksTag);
+  
+  auto tracks = proxy::getCollection<proxy::Tracks>
+    (event, tracksTag, proxy::withFitHitInfo());
   
   if (tracks.empty()) {
     mf::LogVerbatim("TrackProxyTest") << "No tracks in '" << tracksTag.encode()
@@ -114,28 +164,7 @@ void TrackProxyTest::proxyUsageExample(art::Event const& event) {
   
   for (auto track: tracks) {
     
-    recob::Track const& trackRef = track.track();
-    
-    mf::LogVerbatim log("TrackProxyTest");
-    log << "Track " << trackRef
-      << "\n  with " << trackRef.NPoints() << " points and " << track.nHits()
-        << " hits:";
-    
-    for (auto const& point: track.points()) {
-      log <<
-        "\n  [#" << point.index() << "] at " << point.position()
-          << " (momentum: " << point.momentum() << "), flags: "
-          << point.flags();
-      
-      recob::Hit const* hit = point.hit();
-      if (hit) {
-        log << " with a Q=" << hit->Integral() << " hit on channel "
-          << hit->Channel() << " at tick " << hit->PeakTime();
-      }
-      else
-        log << " (no associated hit)";
-      
-    } // for points in track
+    processTrack(track);
     
   } // for track
   
@@ -209,6 +238,7 @@ void TrackProxyTest::testTracks(art::Event const& event) {
     BOOST_CHECK_EQUAL
       (std::addressof(trackProxy.track()), std::addressof(expectedTrack));
     BOOST_CHECK_EQUAL(trackProxy.nHits(), expectedHits.size());
+    BOOST_CHECK_EQUAL(trackProxy.index(), iExpectedTrack);
     
     decltype(auto) fitHitInfo = trackProxy.get<recob::TrackFitHitInfo>();
     static_assert(
@@ -226,7 +256,7 @@ void TrackProxyTest::testTracks(art::Event const& event) {
     BOOST_CHECK_EQUAL(trackProxy->NPoints(), expectedTrack.NPoints());
     
     std::size_t iPoint = 0;
-    for (auto const& pointInfo: trackProxy.points()) {
+    for (auto pointInfo: trackProxy.points()) {
       
       decltype(auto) expectedPointFlags = expectedTrack.FlagsAtPoint(iPoint);
       

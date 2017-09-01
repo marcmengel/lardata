@@ -50,8 +50,8 @@
  * behaviour.
  * 
  * 
- * Interface replacement
- * ----------------------
+ * Interface substitution
+ * -----------------------
  * 
  * A technique that is used in this implementation is to replace (or extend) the
  * interface of an existing object.
@@ -129,7 +129,7 @@
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * With this class, it's possible to transform an `iterator` into an
  * `address_iterator`, in a similar way to how described in the "Interface
- * replacement" section (there are some workaround needed because of private
+ * substitution" section (there are some workaround needed because of private
  * inheritance and to ensure that the iterator traits are correct).
  * 
  * @note I learned afterward about the existence of `boost::iterator_adapter`,
@@ -479,9 +479,11 @@ namespace proxy {
     /**
      * @brief Create a association proxy collection using main collection tag.
      * @tparam Event type of the event to read associations from
+     * @tparam Handle type of data product handle
      * @tparam MainArgs any type convertible to `art::InputTag`
      * @tparam Args optional single type (`art::InputTag` required)
      * @param event the event to read associations from
+     * @param mainHandle handle of the main collection data product
      * @param margs an object describing the main data product
      * @param args input tag for associated data, if different from main
      * @return an auxiliary data proxy object
@@ -719,9 +721,11 @@ namespace proxy {
     /**
      * @brief Create a association proxy collection using main collection tag.
      * @tparam Event type of the event to read associations from
+     * @tparam Handle type of data product handle
      * @tparam MainArgs any type convertible to `art::InputTag`
      * @tparam Args optional single type (`art::InputTag` required)
      * @param event the event to read associations from
+     * @param mainHandle handle of the main collection data product
      * @param margs an object describing the main data product
      * @param args input tag for parallel data, if different from main
      * @return an auxiliary data proxy object

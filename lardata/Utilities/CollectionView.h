@@ -11,8 +11,8 @@
  *
  *
  *
- * Interface replacement technique
- * ================================
+ * Interface substitution technique
+ * =================================
  * 
  * A technique that is used in this implementation is to replace (or extend) the
  * interface of an existing object.
