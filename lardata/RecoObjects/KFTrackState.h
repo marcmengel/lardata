@@ -29,7 +29,7 @@ namespace trkf {
     /// Combine the TrackState given another TrackState (they need to be on the same plane)
     bool combineWithTrackState(const TrackState& trackstate);
 
-    const TrackState& trackState() { return fTrackState; }
+    const TrackState& trackState() const { return fTrackState; }
     void setTrackState(TrackState&& s) { fTrackState = std::move(s); }
     //
     const SVector5&     parameters()           const { return fTrackState.parameters(); }

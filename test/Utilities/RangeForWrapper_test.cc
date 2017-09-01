@@ -50,6 +50,12 @@ class base_iterator {
   
   base_iterator& operator++ () { ++ptr; return *this; }
   base_iterator& operator-- () { --ptr; return *this; }
+  
+  reference operator[] (difference_type offset) const { return ptr[offset]; }
+  
+  difference_type operator- (base_iterator const& other) const
+    { return ptr - other.ptr; }
+  
 };
 
 
@@ -90,7 +96,12 @@ struct Data {
   end_const_iterator do_end() const { return { &*data.cend() }; }
   end_iterator do_end() { return { &*data.end() }; }
   
+  bool empty() const { return data.empty(); }
   auto size() const { return data.size(); }
+  auto operator[](std::size_t index) -> decltype(auto)
+    { return data[index]; }
+  auto operator[](std::size_t index) const -> decltype(auto)
+    { return data[index]; }
   
 }; // class Data
 
@@ -575,9 +586,6 @@ void iterator_test(Iter iter, RefIter refIter, RefIter refEnd) {
 
 template <bool IsConst>
 void RangeForWrapperIteratorStandardsTest() {
-  //
-  // Test to use begin() and end() iterators
-  //
   
   using value_type = int;
   using base_reference_container_t = std::vector<value_type>;
@@ -592,9 +600,11 @@ void RangeForWrapperIteratorStandardsTest() {
   static_assert(std::is_same<typename basic_container_t::begin_const_iterator::reference, std::add_const_t<value_type>&>(), "!!!!");
   static_assert(std::is_same<typename std::iterator_traits<typename basic_container_t::begin_const_iterator>::reference, std::add_const_t<value_type>&>(), "!!!!");
   
-  
   using container_t
     = std::conditional_t<IsConst, basic_container_t const, basic_container_t>;
+  //
+  // non-const iterator interface (iterators may still be constant)
+  //
   container_t data = { 2, 3, 4 };
   auto range = data | util::range_for;
   using std::begin;
@@ -611,6 +621,9 @@ void RangeForWrapperIteratorStandardsTest() {
   iterator_test(rend, vend, vend);
   
   
+  //
+  // const iterator interface
+  //
   using std::cbegin;
   decltype(auto) rcbegin = cbegin(range);
   using std::cend;
@@ -623,6 +636,16 @@ void RangeForWrapperIteratorStandardsTest() {
   
   iterator_test(rcbegin, vcbegin, vcend);
   iterator_test(rcend, vcend, vcend);
+  
+  //
+  // extra access (partial support for random access)
+  //
+  BOOST_CHECK_EQUAL(range.size(), data.size());
+  BOOST_CHECK_EQUAL(range.empty(), data.empty());
+  for (std::size_t i = 0; i < data.size(); ++i) {
+    decltype(auto) value = range[i];
+    BOOST_CHECK_EQUAL(value, data[i]);
+  }
   
 } // RangeForWrapperIteratorStandardsTest()
 

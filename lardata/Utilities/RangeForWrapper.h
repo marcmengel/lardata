@@ -109,6 +109,12 @@ namespace util {
         { return !(this->operator!=(other)); }
       
       
+      reference operator[] (difference_type offset) const
+        { return boost::apply_visitor(IndexAccessor(offset), fIter); }
+      
+      difference_type operator- (this_t const& other) const
+        { return boost::apply_visitor(Difference(), fIter, other.fIter); }
+      
         private: 
       static_assert(!std::is_same<begin_t, end_t>::value,
         "RangeForWrapperIterator requires two different iterator types."
@@ -190,6 +196,36 @@ namespace util {
         
       }; // Comparer
       
+      /// Visitor to access element by index.
+      struct IndexAccessor: public boost::static_visitor<reference> {
+        
+        difference_type offset;
+        
+        IndexAccessor(difference_type offset): offset(offset) {}
+        
+        template <typename Iter>
+        bool operator() (Iter& iter) const
+          { return IndexAccessorImpl<reference, Iter>(offset).access(iter); }
+        
+          private:
+        template <typename Result, typename Iter, typename = void>
+        struct IndexAccessorImpl;
+        
+      }; // IndexAccessor
+      
+      /// Visitor to compare iterators (returns whether they differ).
+      struct Difference: public boost::static_visitor<difference_type > {
+        
+        template <typename A, typename B>
+        difference_type operator() (A const& minuend, B const& subtrahend) const
+          { return DifferenceImpl<A, B>::subtract(minuend, subtrahend); }
+        
+          private:
+        template <typename A, typename B, typename = void>
+        struct DifferenceImpl;
+        
+      }; // Difference
+      
     }; // class RangeForWrapperIterator<>
     
     
@@ -224,6 +260,12 @@ namespace util {
       /// Type of wrapper iterators (same for begin and end iterators).
       using Iterator_t = RangeForWrapperIterator<BeginIter_t, EndIter_t>;
       
+      using value_type = typename BeginIter_t::value_type;
+      using size_type = std::size_t;
+      using difference_type = typename BeginIter_t::difference_type;
+      using reference = typename BeginIter_t::value_type;
+      using pointer = typename BeginIter_t::pointer;
+      
     }; // class RangeForWrapperTraits<>
     
     
@@ -252,6 +294,12 @@ namespace util {
       /// Type of wrapper iterators (same for begin and end iterators).
       using Iterator_t = typename Traits_t::Iterator_t;
       
+      /// Type of number of stored elements.
+      using size_type = typename Traits_t::size_type;
+      
+      /// Type of difference between element positions.
+      using difference_type = typename Traits_t::difference_type;
+      
       /// Constructor: references the specified range (lvalue reference).
       RangeForWrapperBox(Range_t& range)
         : fRange(range)
@@ -264,17 +312,24 @@ namespace util {
       
       /// Returns a begin-of-range iterator.
       Iterator_t begin() const
-        {
-          return Iterator_t
-            (Traits_t::extractBegin(static_cast<RangeRef_t>(fRange)));
-        }
+        { return Iterator_t(wrappedBegin()); }
       
       /// Returns a end-of-range iterator.
       Iterator_t end() const
-        {
-          return Iterator_t
-            (Traits_t::extractEnd(static_cast<RangeRef_t>(fRange)));
-        }
+        { return Iterator_t(wrappedEnd()); }
+      
+      /// @{
+      /// @name Reduced container interface.
+      
+      auto size() const { return std::distance(begin(), end()); }
+      
+      bool empty() const { return !(wrappedBegin() != wrappedEnd()); }
+      
+      auto operator[] (difference_type index) const -> decltype(auto)
+        { return wrappedBegin()[index]; }
+      
+      /// @}
+      
       
         private:
       
@@ -299,6 +354,11 @@ namespace util {
       }; // DataBox
       
       DataBox fRange; ///< A reference to the original range.
+      
+      auto wrappedBegin() const -> decltype(auto)
+        { return Traits_t::extractBegin(static_cast<RangeRef_t>(fRange)); }
+      auto wrappedEnd() const -> decltype(auto)
+        { return Traits_t::extractEnd(static_cast<RangeRef_t>(fRange)); }
       
     }; // class RangeForWrapperBox<>
     
@@ -528,6 +588,62 @@ namespace util {
       static void decrement(Iter& iter) 
         { --iter; }
     }; //
+    
+    
+    //--------------------------------------------------------------------------
+    template <typename BeginIter, typename EndIter>
+    template <typename Result, typename Iter, typename /* = void */>
+    struct RangeForWrapperIterator<BeginIter, EndIter>::IndexAccessor::IndexAccessorImpl {
+      // this would be worth a static_assert(), but apparently boost::variant
+      // visitor instantiates it even when it's not called
+      
+      IndexAccessorImpl(difference_type) {}
+      
+      [[noreturn]] Result access(Iter const&) const
+        { throw std::logic_error("This iterator can't be indexed!"); }
+    }; //
+    
+    //--------------------------------------------------------------------------
+    template <typename BeginIter, typename EndIter>
+    template <typename Result, typename Iter>
+    struct RangeForWrapperIterator<BeginIter, EndIter>::IndexAccessor::IndexAccessorImpl<
+      Result, Iter, std::enable_if_t<is_type_v<decltype((std::declval<Iter>())[0])>>
+      >
+    {
+      difference_type offset;
+      
+      IndexAccessorImpl(difference_type offset): offset(offset) {}
+      
+      Result dereference(Iter const& iter) const
+        { return iter[offset]; }
+    }; //
+    
+    
+    //--------------------------------------------------------------------------
+    template <typename BeginIter, typename EndIter>
+    template <typename A, typename B, typename /* = void */>
+    struct RangeForWrapperIterator<BeginIter, EndIter>::Difference::DifferenceImpl {
+      // this would be worth a static_assert(), but apparently boost::variant
+      // visitor instantiates it even when it's not called
+      static difference_type subtract(A const&, B const&)
+        { throw std::logic_error("These iterators can't be subtracted!"); }
+    }; //
+    
+    //--------------------------------------------------------------------------
+    template <typename BeginIter, typename EndIter>
+    template <typename A, typename B>
+    struct RangeForWrapperIterator<BeginIter, EndIter>::Difference::DifferenceImpl<
+      A, B, std::enable_if_t<
+        std::is_convertible<
+          decltype(std::declval<A>() - std::declval<B>()),
+          typename RangeForWrapperIterator<BeginIter, EndIter>::difference_type>::value
+        >
+      >
+    {
+      static difference_type subtract(A const& minuend, B const& subtrahend) 
+        { return minuend - subtrahend; }
+    }; //
+    
     
     //--------------------------------------------------------------------------
     
