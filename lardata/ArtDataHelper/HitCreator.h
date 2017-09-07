@@ -14,7 +14,7 @@
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/Wire.h"
 #include "lardataobj/RawData/RawDigit.h"
-#include "lardata/Utilities/PtrMaker.h"
+#include "art/Persistency/Common/PtrMaker.h"
 
 // framework libraries
 #include "canvas/Persistency/Common/Assns.h"
@@ -472,7 +472,7 @@ namespace recob {
     
     art::Event* event = nullptr; ///< Pointer to the event we are using.
     
-    lar::PtrMaker<recob::Hit> hitPtrMaker; ///< Tool to create hit pointers,
+    art::PtrMaker<recob::Hit> hitPtrMaker; ///< Tool to create hit pointers,
     
     
     /**

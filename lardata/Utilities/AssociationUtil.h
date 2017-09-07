@@ -601,7 +601,7 @@ bool util::CreateAssn(
   if (indx == UINT_MAX) indx = a.size()-1;
   
   try{
-    art::ProductID aid = prod.template getProductID< std::vector<T>>(evt, a_instance);
+    art::ProductID aid = prod.template getProductID< std::vector<T>>( a_instance);
     art::Ptr<T> aptr(aid, indx, evt.productGetter(aid));
     assn.addSingle(b, aptr);
     return true;
@@ -653,7 +653,7 @@ bool util::CreateAssn(
   if(indx == UINT_MAX) indx = a.size() - 1;
   
   try{
-    art::ProductID aid = prod.template getProductID< std::vector<T> >(evt);
+    art::ProductID aid = prod.template getProductID< std::vector<T> >();
     art::Ptr<T> aptr(aid, indx, evt.productGetter(aid));
     for(art::Ptr<U> const& b_item: b) assn.addSingle(aptr, b_item);
   }
@@ -704,7 +704,7 @@ bool util::CreateAssn(
   if (indx == UINT_MAX) indx = a.size() - 1;
   
   try{
-    art::ProductID aid = prod.template getProductID< std::vector<T> >(evt);
+    art::ProductID aid = prod.template getProductID< std::vector<T> >();
     art::Ptr<T> aptr(aid, indx, evt.productGetter(aid));
     for (art::Ptr<U> const& b_item: b) assn.addSingle(aptr, b_item);
   }
@@ -734,8 +734,8 @@ bool util::CreateAssn(
   if(indx == UINT_MAX) indx = a.size() - 1;
   
   try{
-    art::ProductID aid = prod.template getProductID< std::vector<T> >(evt);
-    art::ProductID bid = prod.template getProductID< std::vector<U> >(evt);
+    art::ProductID aid = prod.template getProductID< std::vector<T> >();
+    art::ProductID bid = prod.template getProductID< std::vector<U> >();
     art::Ptr<T> aptr(aid, indx, evt.productGetter(aid));
     auto const* getter = evt.productGetter(bid); // I don't want to know what it is
     for(size_t i = startU; i < endU; ++i){
@@ -768,8 +768,8 @@ bool util::CreateAssn(
   if(indx == UINT_MAX) indx = a.size() - 1;
   
   try{
-    art::ProductID aid = prod.template getProductID< std::vector<T> >(evt);
-    art::ProductID bid = prod.template getProductID< std::vector<U> >(evt);
+    art::ProductID aid = prod.template getProductID< std::vector<T> >();
+    art::ProductID bid = prod.template getProductID< std::vector<U> >();
     art::Ptr<T> aptr(aid, indx, evt.productGetter(aid));
     auto const* getter = evt.productGetter(bid); // I don't want to know what it is
     for(size_t index: indices){
@@ -803,8 +803,8 @@ bool util::CreateAssn(
     // The data product ID is unique for the combination of process, producer,
     // data type and product (instance) label.
     // 
-    art::ProductID first_id = prod.template getProductID< std::vector<T> >(evt);
-    art::ProductID second_id = prod.template getProductID< std::vector<U> >(evt);
+    art::ProductID first_id = prod.template getProductID< std::vector<T> >();
+    art::ProductID second_id = prod.template getProductID< std::vector<U> >();
     
     // we declare here that we want to associate the element first_index of the
     // (only) data product of type std::vector<T> with other objects.
@@ -849,12 +849,12 @@ bool util::CreateAssnD(
     // 
     // we declare here that we want to associate the element first_index of the
     // (only) data product of type std::vector<T> with the other object
-    art::ProductID first_id = prod.template getProductID< std::vector<T> >(evt);
+    art::ProductID first_id = prod.template getProductID< std::vector<T> >();
     art::Ptr<T> first_ptr(first_id, first_index, evt.productGetter(first_id));
     
     // the same to associate the element second_index of the (only)
     // data product of type std::vector<U> with the first object.
-    art::ProductID second_id = prod.template getProductID< std::vector<U> >(evt);
+    art::ProductID second_id = prod.template getProductID< std::vector<U> >();
     art::Ptr<U> second_ptr
       (second_id, second_index, evt.productGetter(second_id));
     
@@ -886,12 +886,12 @@ bool util::CreateAssnD(
     // 
     // we declare here that we want to associate the element first_index of the
     // (only) data product of type std::vector<T> with the other object
-    art::ProductID first_id = prod.template getProductID< std::vector<T> >(evt);
+    art::ProductID first_id = prod.template getProductID< std::vector<T> >();
     art::Ptr<T> first_ptr(first_id, first_index, evt.productGetter(first_id));
     
     // the same to associate the element second_index of the (only)
     // data product of type std::vector<U> with the first object.
-    art::ProductID second_id = prod.template getProductID< std::vector<U> >(evt);
+    art::ProductID second_id = prod.template getProductID< std::vector<U> >();
     art::Ptr<U> second_ptr
       (second_id, second_index, evt.productGetter(second_id));
     

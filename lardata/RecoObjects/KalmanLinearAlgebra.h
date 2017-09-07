@@ -40,6 +40,7 @@
 #define KALMANLINEARALGEBRA_H
 
 #include <cmath>
+#include "boost/serialization/array_wrapper.hpp"  // workaround for deficiency in boost 1.64
 #include "boost/numeric/ublas/vector.hpp"
 #include "boost/numeric/ublas/matrix.hpp"
 #include "boost/numeric/ublas/symmetric.hpp"
