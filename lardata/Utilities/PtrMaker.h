@@ -43,12 +43,7 @@
 // PtrMaker is now in art
 #include "art/Persistency/Common/PtrMaker.h"
 
-namespace lar {
-  
-  /// @deprecated `lar::PtrMaker` has become `art::PtrMaker`. Please update your code.
-  template <typename... Args>
-  using PtrMaker
-    [[deprecated("lar::PtrMaker has become art::PtrMaker (see issue #17672). Change namespace and header.")]]
-    = art::PtrMaker<Args...>;
-  
-} // namespace lar
+#pragma message("lar::PtrMaker has become art::PtrMaker (see https://cdcvs.fnal.gov/redmine/projects/larsoft/wiki/Breaking_Changes#larPtrMaker-moved-to-art .")
+
+/// @class lar::PtrMaker
+/// @deprecated `lar::PtrMaker` has become `art::PtrMaker`. Please update your code.
