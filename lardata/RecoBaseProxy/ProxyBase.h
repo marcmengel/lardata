@@ -5,13 +5,59 @@
  * @date   July 27, 2017
  * 
  * This library is header-only.
+ */
+
+#ifndef LARDATA_RECOBASEPROXY_PROXYBASE_H
+#define LARDATA_RECOBASEPROXY_PROXYBASE_H
+
+// LArSoft libraries
+#include "lardata/Utilities/CollectionView.h"
+#include "lardata/Utilities/TupleLookupByTag.h" // util::getByTag(), ...
+#include "larcorealg/CoreUtils/DebugUtils.h" // lar::debug::demangle()
+
+// framework libraries
+#include "canvas/Persistency/Common/Assns.h"
+#include "canvas/Utilities/InputTag.h"
+
+// C/C++ standard 
+#include <vector>
+#include <string> // std::to_string()
+#include <tuple> // std::tuple_element_t<>, std::get()
+#include <iterator> // std::distance(), ...
+#include <algorithm> // std::min()
+#include <utility> // std::forward()
+#include <stdexcept> // std::runtime_error, std::logic_error
+#include <type_traits> // std::is_same<>, std::enable_if_t<>, ...
+#include <limits> // std::numeric_limits<>
+#include <cstdlib> // std::size_t
+#include <cassert>
+
+/**
+ * @defgroup LArSoftProxies LArSoft data proxies
+ * @brief Helper classes for easier access to connected data.
+ * 
+ * Proxies are objects that expose multiple connected data products with a
+ * single interface, implicitly browsing the interconnections.
+ * The connections may be explicit (via some type of data product association,
+ * like `art::Assns`, or element indices) or implicit, following an agreed rule
+ * (like in @ref LArSoftProxyDefinitionParallelData "parallel data products").
+ * 
+ * More complex proxy implementations are provided for some LArSoft data
+ * products.
+ * New proxies can be created as well.
  * 
  * 
- * Definitions
- * ============
+ * @{
+ */
+/**
+ * @page LArSoftProxiesIntro Introduction to LArSoft data product proxy objects.
  * 
- * * *one-to-many sequential association*: an association between `L` and `R`
- *   types where:
+ * 
+ * @section LArSoftProxyDefinitions Definitions
+ * 
+ * * *one-to-many sequential association*:
+ *   @anchor LArSoftProxyDefinitionOneToManySeqAssn
+ *   an association between `L` and `R` types where:
  *     * `L` objects come from a single data product
  *     * the sequence of associations is such that if `L1` is before `L2` in the
  *       original data product, all `L1`-`Rx` associations of `L1` are listed
@@ -20,7 +66,9 @@
  *       note that this preclude actual many-to-many associations.
  *   This does _not_ require associations to be one-to-one (it allows one `L` to
  *   many `R`), nor that all `L` be associated to at least one `R`.
- * * *parallel data product*: a data product collection of elements extending
+ * * *parallel data product*:
+ *   @anchor LArSoftProxyDefinitionParallelData
+ *   a data product collection of elements extending
  *   the information from another data product collection ("main"), where
  *     * the two data products have the same number of elements
  *     * there is an implicit one-to-one association between the elements of the
@@ -29,12 +77,152 @@
  *       data product
  * 
  * 
+ */
+/**
+ * @defgroup LArSoftProxyCustom LArSoft data proxy infrastructure
+ * @ingroup LArSoftProxies
+ * @brief Classes for implementation and customization of LArsoft proxies.
  * 
- * Technical details
- * ==================
+ * This documentation section contains hints for the creation or customization
+ * of data product proxies. The creation of new proxies is not overly hard, but
+ * it is nevertheless not straightforward, and following the example of already
+ * implemented proxies may be the best starting point.
  * 
- * Overhead
- * ---------
+ * It also explains some implementation choices.
+ * 
+ * @section LArSoftProxySimple The simplest new proxy
+ * 
+ * In its simplest form, a proxy may be created with no customization at all:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * auto tracks = proxy::getCollection<std::vector<recob::Track>>
+ *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * makes a proxy object called `tracks` which accesses a `recob::Track`
+ * collection data product and its associated hits, assuming that tracks and
+ * their association with hits be created by the same module (`trackTag`).
+ * From this, it is possible to access tracks and their hits:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * for (auto trackInfo: tracks) {
+ *   
+ *   recob::Track const& track = *trackInfo; // access to the track
+ *   double const startTheta = track.Theta();
+ *   
+ *   double const length = trackInfo->Length(); // access to track members
+ * 
+ *   // access to associated data (returns random-access collection-like object)
+ *   decltype(auto) hits = trackInfo.get<recob::Hit>();
+ *   
+ *   double charge = 0.0;
+ *   for (auto const& hitPtr: hits) {
+ *     charge += hitPtr->Integral();
+ *   } // for hits
+ *   
+ *   mf::LogVerbatim("Info")
+ *     << "[#" << trackInfo.index() << "] track ID=" << track.ID()
+ *     << " (" << length << " cm, starting with theta=" << startTheta
+ *     << " rad) deposited charge=" << charge
+ *     << " with " << hits.size() << " hits";
+ *   
+ * } // for tracks
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * 
+ * 
+ * @subsection LArSoftProxyQuirks Quirks of proxy usage (a.k.a. "C++ is not python")
+ * 
+ * There are a number of things one should remember when using proxies.
+ * 
+ * First, the type of the proxy collection, and the type of the proxy collection
+ * element, are not trivial. That is the reason why we use
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * auto tracks = proxy::getCollection<std::vector<recob::Track>>
+ *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * instead of
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * proxy::CollectionProxyBase<
+ *     proxy::CollectionProxyElement,
+ *     std::vector<recob::Track>,
+ *     proxy::details::AssociatedData<recob::Track, recob::Hit, recob::Hit>
+ *   >
+ *   tracks = proxy::getCollection<std::vector<recob::Track>>
+ *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * and even more so
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * for (auto trackInfo: tracks)
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * instead of the full class name
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * for (proxy::CollectionProxyElement<
+ *   proxy::CollectionProxyBase<
+ *     proxy::CollectionProxyElement,
+ *     std::vector<recob::Track>,
+ *     proxy::details::AssociatedData<recob::Track, recob::Hit, recob::Hit> >
+ *   > trackInfo: tracks)
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * More important, the type depends on which elements we merged into the
+ * collection proxy (in the example, `proxy::details::AssociatedData` reveals
+ * that we merged an associated data). This means that a C++ function in general
+ * can't reliably take a proxy argument by specifying its type, and it needs to
+ * use templated arguments instead:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * template <typename Track>
+ * unsigned int nHitsOnView(Track const& track, geo::View view);
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Also remember that template class methods are allowed but they can't be
+ * virtual.
+ * 
+ * Second quirk, which yields a confused compilation message (at least with GCC
+ * 6), is that template class methods of objects of a template type need the
+ * `template` keyword for C++ to understand what's going on:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * template <typename Track>
+ * unsigned int nHitsOnView(Track const& track, geo::View view) {
+ *   unsigned int count = 0U;
+ *   for (art::Ptr<recob::Hit> const& hitPtr: track.template get<recob::Hit>())
+ *     if (hitPtr->View() == view) ++count;
+ *   return count;
+ * } // nHitsOnView()
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Here, `track` is a constant reference to type `Track`, which is a template
+ * type, so that when we ask for `track.get<recob::Hit>()` the compiler does not
+ * know that the object `track` of type `Track` has a method `get()` which is a
+ * template method, and it gets confused (in fact, it thinks the expression
+ * might be a comparison, `track.get < recob::Hit`, and hilarity ensues).
+ * This is not true when the type of the object is immediately known:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * auto tracks = proxy::getCollection<std::vector<recob::Track>>
+ *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
+ * 
+ * for (auto track: tracks) {
+ *   unsigned int count = 0U;
+ *   for (art::Ptr<recob::Hit> const& hitPtr: track.get<recob::Hit>())
+ *     if (hitPtr->View() == view) ++count;
+ *   mf::LogVerbatim("") << "Track ID=" << track->ID() << ": " << count
+ *     << " hits on view " << view;
+ * } // for
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * where `tracks` is a well-known (to the compiler) type, and `track` as well.
+ * 
+ * 
+ * @section LArSoftProxyCustomization Customization of collection proxies
+ * 
+ * The "customization" of a collection proxy consists of writing classes and
+ * functions specific for a use case, to be used as components of a collection
+ * proxy in place of the standard ones.
+ * 
+ * The options of customization are numerous, and it is recommended that
+ * customization start from the code of an existing customized proxy
+ * implementing functionalities similar to the desired ones.
+ * In the same spirit, customization hints are not provided here, but rather
+ * in the
+ * @ref LArSoftProxyTracksCustom "documentation of the proxy::Tracks collection proxy".
+ * 
+ * 
+ * 
+ * @section LArSoftProxyImplementation Technical details
+ * 
+ * @subsection LArSoftProxyOverhead Overhead
  * 
  * The proxies have been developed with an eye on minimising the replication of
  * information. The proxies are therefore light-weight objects relying on
@@ -50,17 +238,15 @@
  * behaviour.
  * 
  * 
- * Interface substitution
- * -----------------------
+ * @subsection LArSoftProxyInterfaceSubstitition Interface substitution
  * 
  * A technique that is used in this implementation is to replace (or extend) the
  * interface of an existing object.
- * The documentation of file `CollectionView.h` includes a more in-depth
- * description of it.
+ * The @ref InterfaceSubstitution "documentation of file CollectionView.h"
+ * includes a more in-depth description of it.
  * 
  * 
- * Iterator wrappers and "static polymorphism"
- * --------------------------------------------
+ * @subsection IteratorWrappers Iterator wrappers and "static polymorphism"
  * 
  * A widely used interface change is the substitution of the dereference
  * operator of an iterator:
@@ -136,39 +322,22 @@
  *       which might provide similar functionality and also be dealing correctly
  *       with non-constant iterators. Worth considering.
  * 
+ */
+/**
+ * @defgroup LArSoftProxyReco Reconstructed object data proxy
+ * @ingroup LArSoftProxies
+ * @brief Data proxies for LArSoft reconstruction data products.
  * 
  */
-
-#ifndef LARDATA_RECOBASEPROXY_PROXYBASE_H
-#define LARDATA_RECOBASEPROXY_PROXYBASE_H
-
-// LArSoft libraries
-#include "lardata/Utilities/CollectionView.h"
-#include "lardata/Utilities/TupleLookupByTag.h" // util::getByTag(), ...
-#include "larcorealg/CoreUtils/DebugUtils.h" // lar::debug::demangle()
-
-// framework libraries
-#include "canvas/Persistency/Common/Assns.h"
-#include "canvas/Utilities/InputTag.h"
-
-// C/C++ standard 
-#include <vector>
-#include <string> // std::to_string()
-#include <tuple> // std::tuple_element_t<>, std::get()
-#include <iterator> // std::distance(), ...
-#include <algorithm> // std::min()
-#include <utility> // std::forward()
-#include <stdexcept> // std::runtime_error, std::logic_error
-#include <type_traits> // std::is_same<>, std::enable_if_t<>, ...
-#include <limits> // std::numeric_limits<>
-#include <cstdlib> // std::size_t
-#include <cassert>
-
+// LArSoftProxyReco group is only defined here, no content is provided.
+// We selectively add to LArSoftProxies group via @ingroup directives.
 /**
- * @defgroup LArSoftProxies Helper classes for easier access to connected data.
+ * @}
  */
 
+
 /// Encloses LArSoft data product proxy objects and utilities.
+/// @ingroup LArSoftProxies
 namespace proxy {
   
   namespace details {
@@ -247,9 +416,20 @@ namespace proxy {
   } // namespace details
   
   
-  /// @{
-  /// @name Associated data infrastructure
-  /// @ingroup LArSoftProxies
+  /**
+   * @defgroup LArSoftProxiesAssociatedData Associated data infrastructure
+   * @ingroup  LArSoftProxyCustom
+   * @brief Infrastructure for support of associated data.
+   * 
+   * Associated data is auxiliary data connected to the main data via _art_
+   * associations.
+   * The following associated data are currently supported:
+   * * @ref LArSoftProxyDefinitionOneToManySeqAssn "one-to-many sequential association"
+   *   implicitly supporting also one-to-any (one-to-one, one-to-zero/or/one) in
+   *   a non-optimized way
+   * 
+   * @{
+   */
   
   //----------------------------------------------------------------------------
   /**
@@ -264,8 +444,7 @@ namespace proxy {
    * @return a new `AssociatedData` filled with associations from `tag`
    * 
    * The association being retrieved must fulfill the requirements of
-   * "one-to-many sequential association" requirement (see the "Definitions"
-   * section in `ProxyBase.h` documentation).
+   * @ref LArSoftProxyDefinitionOneToManySeqAssn "one-to-many sequential association".
    * 
    * Elements in the main collection not associated with any object will be
    * recorded as such. If there is information for less than `minSize` main
@@ -517,9 +696,22 @@ namespace proxy {
   // end Associated data
   
   
-  /// @{
-  /// @name Parallel data infrastructure
-  /// @ingroup LArSoftProxies
+  /**
+   * @defgroup LArSoftProxiesParallelData Parallel data infrastructure
+   * @ingroup LArSoftProxyCustom
+   * @brief Infrastructure for support of parallel data structures.
+   * 
+   * This infrastructure provides support for merging to a proxy data products
+   * fulfilling the
+   * @ref LArSoftProxyDefinitionParallelData "parallel data product"
+   * requirements.
+   * 
+   * The typical pattern is to merge a parallel data product with
+   * `withParallelData()`:
+   * 
+   * 
+   * @{
+   */
 
   //----------------------------------------------------------------------------
   /**
@@ -534,14 +726,15 @@ namespace proxy {
    * @return a new `ParallelData` filled with data from `tag`
    * 
    * The data product being retrieved must fulfill the requirements of
-   * "parallel data product" (see the "Definitions" section in `ProxyBase.h`
-   * documentation).
+   * @ref LArSoftProxyDefinitionParallelData "parallel data product".
    * 
-   * Two template types must be explicitly specified, e.g.
+   * At least one template type must be explicitly specified, e.g.
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * auto auxData
    *   = makeParallelData<std::vector<recob::TrackFitHitInfo>>(event, tag);
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * In this case, the `Aux` type is defined as `recob::TrackFitHitInfo`, as is
+   * the tag.
    */
   template <typename AuxColl, typename Aux, typename Tag, typename Event>
   auto makeParallelData(Event const& event, art::InputTag tag);
@@ -761,18 +954,115 @@ namespace proxy {
   // end Parallel data
   
   
-  /// @{
-  /// @name Proxy element infrastructure
-  /// @ingroup LArSoftProxies
+  /**
+   * @defgroup LArSoftProxiesElement Proxy element infrastructure
+   * @ingroup LArSoftProxyCustom
+   * @brief Infrastructure to describe the element of a proxy
+   * 
+   * A collection proxy element is a complex entity in that it has to figure out
+   * all the data it can return, and their type.
+   * 
+   * The default type of a collection proxy element is
+   * `proxy::CollectionProxyElement`.
+   * 
+   * @{
+   */
   
   //----------------------------------------------------------------------------
   /**
    * @brief An element of a collection proxy.
    * @tparam CollProxy the type of collection proxy this is the element of
    * 
+   * The collection proxy element represents, unsurprisingly, a single element
+   * of the collection proxy.
+   * It exposes all the connections between the components merged into the
+   * collection proxy, for a specific element.
    * 
-   * @todo The interface of this objects need to be developed
-   * @todo Document this class
+   * The interface of a proxy element allows it to access the main and auxiliary
+   * data as follows:
+   * * main data element (always present!):
+   *     * the whole object, by dereference method (`*track`)
+   *     * methods and fields, by member access (`track->Length()`)
+   * * auxiliary data: accessed by tag (usually it's the default, that is the
+   *   same as the data type):
+   *     * check if available: `has()` method, static
+   *       (`track.has<recob::Hit>()`)
+   *     * get the data:
+   *         * `get()` method; the data *must* be available or this
+   *           call will not compile (`track.get<recob::Hit>()`)
+   *         * `getIf()` method; if the data is not available, an exception is
+   *           thrown
+   * * _index_ of the element in the collection (a bonus!): `index()` method
+   * 
+   * The for loop block illustrates how to use some of them:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto tracks = proxy::getCollection<std::vector<recob::Track>>
+   *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
+   * 
+   * for (auto track: tracks) {
+   *   
+   *   recob::Track const& trackObj = *track; // access to the track
+   *   
+   *   double const length = track->Length(); // access to track members
+   * 
+   *   // access to associated data
+   *   // (returns random-access collection-like object)
+   *   decltype(auto) hits = track.get<recob::Hit>();
+   *   double charge = 0.0;
+   *   for (auto const& hitPtr: hits) charge += hitPtr->Integral();
+   *   
+   *   std::vector<recob::TrackFitHitInfo> const* fitInfo
+   *     = track.has<std::vector<recob::TrackFitHitInfo>>()
+   *     ? &(track.getIf<std::vector<recob::TrackFitHitInfo>>())
+   *     : nullptr
+   *     ;
+   *   
+   *   mf::LogVerbatim("Info")
+   *     << "[#" << trackInfo.index() << "] track ID=" << trackObj.ID()
+   *     << " (" << length << " cm) deposited charge=" << charge
+   *     << " with " << hits.size() << " hits and"
+   *     << (fitInfo? "": " no") << " fit information";
+   *   
+   * } // for tracks
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * Please note that `getIf()` method is _not easy to use correctly_.
+   * In this example, we rely on the knowledge that `track.getIf()` would return
+   * a reference to a (non-temporary) object, and we take the address of that
+   * object: this is not necessarily the case (e.g., it is not the case for
+   * `getIf<recob::Hit>()`).
+   * 
+   * 
+   * Customization
+   * ==============
+   * 
+   * A proxy element class can (and should) be derived from
+   * `proxy::CollectionProxyElement`.
+   * On top of it, the derived class can extend or completely rewrite the
+   * interface:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * template <typename CollProxy>
+   * class TrackProxy: public proxy::CollectionProxyElement<CollProxy> {
+   *   using base_t = proxy::CollectionProxyElement<CollProxy>;
+   *     public:
+   *   unsigned int nHits() const
+   *     { return base_t::template get<recob::Hit>().size(); }
+   * }; // class TrackProxy
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * Specialization is also possible, but discouraged.
+   * 
+   * A `proxy::CollectionProxyElement` has knowledge of the type of collection
+   * proxy it's an element of, but it has no connection to a collection proxy
+   * object and in fact it never interacts with any, not even during
+   * construction.
+   * 
+   * Once the element is customized, a `proxy::CollectionProxy` can use it by
+   * having it as first template argument:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * template <typename MainColl, typename... AuxColl>
+   * using Proxy_t
+   *   = proxy::CollectionProxyBase<TrackProxy, MainColl, AuxColl...>;
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * A `CollectionProxyMaker` specialization will have to `make()` such objects.
    */
   template <typename CollProxy>
   struct CollectionProxyElement {
@@ -781,7 +1071,7 @@ namespace proxy {
     using collection_proxy_t = CollProxy;
     using main_element_t = typename collection_proxy_t::main_element_t;
     
-    /// Tuple of elements.
+    /// Tuple of elements (expected to be tagged types).
     using aux_elements_t = typename details::SubstituteWithAuxList
       <typename CollProxy::aux_collections_t>::type;
     
@@ -904,9 +1194,41 @@ namespace proxy {
   // end Collection proxy element infrastructure
   
   
-  /// @{
-  /// @name Data product proxy infrastructure
-  /// @ingroup LArSoftProxies
+  /**
+   * @defgroup LArSoftProxyCollections Collection proxy infrastructure
+   * @ingroup LArSoftProxyCustom
+   * @brief Infrastructure to define a proxy of collection data product.
+   * 
+   * A data collection proxy connects a main collection data product with other
+   * data products whose elements have relation with one of the main product
+   * elements.
+   * 
+   * A collection proxy is created via a call to `getCollection()`, in a fashion
+   * non dissimilar from calling, e.g., `art::Event::getValidHandle()`.
+   * 
+   * A proxy is characterized by a proxy tag, which is the type used in the
+   * `getCollection()` call, but that is not necessarily in direct relation with
+   * the type of the collection proxy itself. In other words, calling
+   * `proxy::getCollection<proxy::Tracks>(event, trackTag)` will return a proxy
+   * object whose type is likely not `proxy::Tracks`.
+   * 
+   * Proxy collections are created by _merging_ auxiliary data into a main
+   * collection data product. See `getCollection()` for more details.
+   * 
+   * Proxies can be customized, meaning that collection proxies may be written
+   * to have a specific interface. There are different levels of customization,
+   * of the collection proxy itself, of its element type, and of the auxiliary
+   * data merged. Customization may require quite a bit of coding, and the
+   * easiest approach is to start from an already customized proxy implementing
+   * features similar to the desired ones.
+   * 
+   * It's worth stressing @ref LArSoftProxyQuirks "again" that collection
+   * proxies composed by merging different auxiliary data have different C++
+   * types, and that if such proxies need to be propagated as function arguments
+   * those arguments need to be of template type.
+   * 
+   * @{
+   */
   
   //----------------------------------------------------------------------------
   /**
@@ -1135,6 +1457,83 @@ namespace proxy {
   } // withParallelDataAs()
   
   //----------------------------------------------------------------------------
+  /**
+   * @brief Helper function to merge an auxiliary data product into the proxy.
+   * @tparam Aux type of parallel data product requested
+   * @tparam Args types of constructor arguments for parallel data proxy
+   * @param args constructor arguments for the parallel data collection proxy
+   * @return a temporary object that `getCollection()` knows to handle
+   * 
+   * This function is meant to convey to `getCollection()` function the request
+   * for merging a collection proxy to carry auxiliary data structured as a
+   * collection parallel to the main collection.
+   * The function also bridges the information required to create a proxy to
+   * that auxiliary data.
+   * 
+   * This data will be tagged with the type `Aux`. To use a different type as
+   * tag, use `withParallelDataAs()` instead, specifying the tag as second
+   * template argument, e.g.:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * struct MCS {};
+   * auto tracks = proxy::getCollection<proxy::Tracks>(event, trackTag,
+   *   withParallelData<recob::TrackMomentum>(defaultMomTag),
+   *   withParallelDataAs<recob::TrackMomentum, MCS>(MCSmomTag)
+   *   );
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * The first momentum association (`"defaultMomTag"`) will be accessed by
+   * using the type `recob::TrackMomentum` as tag, while the second one will
+   * be accessed by the `MCS` tag (which is better not be defined in a local
+   * scope):
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * for (auto&& track: tracks) {
+   *   decltype(auto) trackMom = track.get<recob::TrackMomentum>();
+   *   decltype(auto) trackMCSmom = track.get<MCS>();
+   *   // ...
+   * }
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * 
+   * The default implementation of parallel data proxy returns for each element
+   * query an object with the same interface as the element of the parallel data
+   * collection. In the previous examples, that would be a constant reference to
+   * an object with `recob::TrackMomentum` interface.
+   * 
+   * 
+   * Customization of the parallel data proxy
+   * =========================================
+   * 
+   * To have a call like:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto tracks = getCollection<SpecialTracks>
+   *   (event, tag, withParallelData<recob::TrackMomentum>(momTag, "special"));
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * to create something different than the standard parallel data proxy,
+   * one needs to specialize `proxy::ParallelDataProxyMaker`, e.g.:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * namespace proxy {
+   *   template <>
+   *   struct ParallelDataProxyMaker<recob::Track, recob::TrackMomentum, SpecialTracks>
+   *     : public ParallelDataProxyMakerBase<recob::Track, std::vector<recob::TrackMomentum>, recob::TrackMomentum>
+   *   {
+   *     
+   *     template<typename Event, typename MainArgs>
+   *     static auto make(
+   *       Event const& event,
+   *       MainArgs const&,
+   *       art::InputTag assnTag,
+   *       std::string quality = "default"
+   *       )
+   *       {
+   *         ::SpecialTrackHitsProxy myAuxProxy;
+   *         // ... make it, and make it right
+   *         return myAuxProxy;
+   *       }
+   *     
+   *   }; // struct ParallelDataProxyMaker<recob::Track, recob::TrackMomentum, SpecialTracks>
+   *   
+   * } // namespace proxy
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * 
+   */
   template <typename Aux, typename... Args>
   auto withParallelData(Args&&... args)
     { return withParallelDataAs<Aux, Aux>(std::forward<Args>(args)...); }
@@ -1153,7 +1552,7 @@ namespace proxy {
   
   //----------------------------------------------------------------------------
   /**
-   * @brief Helper function to request associated data.
+   * @brief Helper function to merge associated data.
    * @tparam Aux type of associated data requested
    * @tparam Args types of constructor arguments for associated data collection
    * @param args constructor arguments for the associated data collection
@@ -1168,16 +1567,23 @@ namespace proxy {
    * tag, use `withAssociatedAs()` instead, specifying the tag as second
    * template argument, e.g.:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * struct MCS {};
+   * struct DubiousClusters {};
    * auto tracks = proxy::getCollection<proxy::Tracks>(event, trackTag,
-   *   withAssociated<recob::TrackMomentum>(defaultMomTag),
-   *   withAssociatedAs<recob::TrackMomentum, MCS>(MCSmomTag)
+   *   withAssociated<recob::Cluster>(defaultClusterTag),
+   *   withAssociatedAs<recob::Cluster, DubiousClusters>(maybeClusterTag)
    *   );
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * The first momentum association (`"defaultMomTag"`) will be accessed by
-   * using the type `recob::TrackMomentum` as tag, while the second one will
-   * be accessed by the `MCS` tag (which is better not be defined in a local
-   * scope).
+   * The first cluster association (`"defaultClusterTag"`) will be accessed by
+   * using the type `recob::Cluster` as tag, while the second one will be
+   * accessed by the `DubiousClusters` tag (which is better not be defined in a
+   * local scope):
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * for (auto&& track: tracks) {
+   *   decltype(auto) clusters = track.get<recob::Clusters>();
+   *   decltype(auto) maybeClusters = track.get<DubiousClusters>();
+   *   // ...
+   * }
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * 
    * 
    * Customization of the association proxy
@@ -1189,7 +1595,7 @@ namespace proxy {
    *   (event, tag, withAssociated<recob::Hit>(hitAssnTag, "special"));
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * create something different than the standard association proxy, specialize
-   * `proxy::AssociatedDataProxyMaker`:
+   * `proxy::AssociatedDataProxyMaker`, e.g.:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * namespace proxy {
    *   template <>
@@ -1270,25 +1676,22 @@ namespace proxy {
    * @brief Class to assemble the required proxy.
    * @tparam CollProxy a type characterizing the produced proxy
    * 
-   * This class is used by `getCollection()` to create the requested proxy.
-   * The required interface for this class is:
-   * * `make()`: a static method returning the collection proxy, matching the
-   *   signature
-   *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   *   template <typename Event, typename... Args>
-   *   auto make(Event const&, Args&&...);
-   *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   *   where the first argument will be the event to read the information from.
+   * This is a base class suitable for deriving `CollectionProxyMaker`,
+   * which is used by `getCollection()` to create the requested proxy.
+   * Deriving a specialization of `CollectionProxyMaker` from
+   * `CollectionProxyMakerBase` provides some basic definitions and
+   * functionality that might be tedious to copy.
    * 
-   * A default implementation is provided. In it, the template argument
-   * `CollProxy` is expected to have the interface of `CollectionProxy`.
+   * In this, which can be considered as the default implementation of
+   * `CollectionProxyMaker`, the template argument `CollProxy` is expected to
+   * have the interface of `CollectionProxy`.
    * The arguments required are documented in the implementation of the `make()`
    * function. Note that the type of proxy returned does not need to be
    * `CollProxy`, but is in fact an instance of `proxy::CollectionProxy`.
    * 
    */
   template <typename CollProxy>
-  struct CollectionProxyMaker {
+  struct CollectionProxyMakerBase {
     
     /// Traits of the collection proxy for the collection proxy maker.
     using traits_t = CollectionProxyMakerTraits<CollProxy>;
@@ -1342,10 +1745,34 @@ namespace proxy {
           (main, std::forward<AuxColl>(aux)...);
       }
     
-  }; // struct CollectionProxyMaker<>
+  }; // struct CollectionProxyMakerBase<>
   
   
-
+  
+  //----------------------------------------------------------------------------
+  /**
+   * @brief Class to assemble the required proxy.
+   * @tparam CollProxy a type characterizing the produced proxy
+   * 
+   * This class is used by `getCollection()` to create the requested proxy.
+   * The required interface for this class is:
+   * * `make()`: a static method returning the collection proxy, matching the
+   *   signature
+   *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   *   template <typename Event, typename... Args>
+   *   auto make(Event const&, Args&&...);
+   *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   *   where the first argument will be the event to read the information from.
+   * 
+   * A default implementation is provided as `proxy::CollectionProxyMakerBase`.
+   * Specializations of `proxy::CollectionProxyMaker` may choose to derive from
+   * `proxy::CollectionProxyMakerBase` as well, for convenience.
+   */
+  template <typename CollProxy>
+  struct CollectionProxyMaker: CollectionProxyMakerBase<CollProxy> {};
+  
+  
+  
   /**
    * @brief Creates a proxy to a data product collection.
    * @tparam CollProxy type of target main collection proxy
@@ -1357,15 +1784,14 @@ namespace proxy {
    * 
    * This function delivers a collection proxy related to `CollProxy`.
    * 
-   * 
-   *  The type
-   * of proxy delivered is arbitrary and usually not `CollProxy`.
+   * The @ref LArSoftProxyQuirks "type of proxy delivered is arbitrary"
+   * and usually not `CollProxy`.
    * The type of the collection proxy must be explicitly specified, e.g.:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * auto tracks = proxy::getCollection<proxy::Tracks>
    *   (event, tag, withAssociated<recob::Hits>());
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * In this case, two optional arguments arre passed: the input tag to the main
+   * In this case, two optional arguments are passed: the input tag to the main
    * collection, and then `withAssociated<recob::Hits>()`. The meaning of both
    * is decided depending on the collection proxy being created, but it's common
    * to have the first argument be the input tag to the main collection, as in

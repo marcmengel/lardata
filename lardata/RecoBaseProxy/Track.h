@@ -5,6 +5,14 @@
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   July 27, 2017
  * 
+ */
+
+/**
+ * @defgroup LArSoftProxyTracks proxy::Tracks (recob::Track proxy)
+ * @brief Proxy for a `recob::Track` collection.
+ * @ingroup LArSoftProxyReco
+ * 
+ * 
  * Track proxies is a way to facilitate the navigation of `recob::Track` data
  * objects.
  * The ensemble of fundamental data of a track collection includes:
@@ -57,7 +65,7 @@
  * Each proxy is a different beast which needs to be explicitly supported:
  * here support for the proxy to `recob::Track` is described.
  * 
- * The additional customisations for track proxy are described above.
+ * The additional customizations for track proxy are described above.
  * For example, if the module with label `fitTag` stored the fit information for
  * the track, that information can be merged as:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
@@ -100,61 +108,16 @@
  *   track proxy (`proxy::Track`).
  * 
  * For the details of the interface and the information that is exposed by each
- * of these proxy classes, please refer to each class documentation.
+ * of these proxy classes, please refer to each class documentation. In
+ * particular, see `proxy::Tracks` documentation for more usage examples.
  * 
  * @note The interface allows by deliberate design only read-only access to the
  *       underlying data.
  * 
  * 
- * Technical details
- * ==================
+ * @section LArSoftProxyTracksTech Technical details
  * 
- * Track proxy as an example of proxy customization
- * -------------------------------------------------
- * 
- * The proxy utilities provide the basic functionality of the track proxy,
- * including the track collection proxy, representing all the tracks in the
- * event, and the track proxy, representing a single track. Access to a third
- * tier, the single trajectory point, as proxy is not covered by the basic
- * framework, and it has been implemented here from scratch.
- * 
- * The most relevant customization pertains the track proxy. The proxy is
- * derived from `proxy::details::CollectionProxyElement` for basic
- * functionality, which is enriched by a custom interface that does not in fact
- * add functionality, except for the trajectory point proxy described below.
- * The customizations are fairly trivial, overlaying user-friendly names on the
- * existing functionality. A step beyond that is the access to data that might
- * not be present, that is the fit information. The proxy takes the necessary
- * steps to determine (statically) whether that information is present, and to
- * provide a null pointer to the information if that is not the case. This is
- * a functionality that can't be completely implemented by the basic proxy code,
- * since that generic code has no clue about what type of null pointer to return
- * when the tag `Tracks::TrackFitHitInfoTag` is unknown. This information is
- * provided by the track proxy via the `getIf()` call.
- * 
- * 
- * 
- * 
- * The trajectory point proxy has been implemented from scratch here, and it is
- * much less refined than the generic proxy code. It is based on a data
- * structure with a selected list of pointers to the actual data. This structure
- * is implemented as a `std::tuple`. On top of it, a wrapper provides the
- * interface (by interface substitution). This choice is non-essential and has
- * been taken to stress the separation between data storage and interface.
- * Point data structures are created by the proxy on demand, and they are
- * designed so that they don't become invalid when the original proxies fall out
- * of scope, at the price of added memory usage (the minimal information would
- * be a pointer to the track proxy and a point index).
- * 
- * 
- * Overhead
- * ---------
- * 
- * See the notes on overhead in `ProxyBase.h`.
- * 
- * 
- * Track collection proxy
- * -----------------------
+ * @subsection LArSoftProxyTracksTechDetails Track collection proxy
  * 
  * The track collection proxy object is derived from
  * `proxy::CollectionProxyBase`, which points to the original (track) data
@@ -177,6 +140,86 @@
  * track-specific and it is not part of the generic proxy infrastructure.
  * 
  * 
+ * @subsection LArSoftProxyTracksCustom Track proxy as an example of proxy customization
+ * 
+ * The proxy utilities provide the basic functionality of the track proxy,
+ * including the track collection proxy, representing all the tracks in the
+ * event, and the track proxy, representing a single track. Access to a third
+ * tier, the single trajectory point, as proxy is not covered by the basic
+ * framework, and it has been implemented here from scratch.
+ * 
+ * The most relevant customization pertains proxy to the single track. The proxy
+ * is derived from `proxy::details::CollectionProxyElement` for basic
+ * functionality, which is enriched by a custom interface that does not in fact
+ * add functionality, except for the trajectory point proxy described below.
+ * The customizations are fairly trivial, overlaying user-friendly names on the
+ * existing functionality. A step beyond that is the access to data that might
+ * not be present, that is the fit information. The proxy takes the necessary
+ * steps to determine (statically) whether that information is present, and to
+ * provide a null pointer to the information if that is not the case. This is
+ * a functionality that can't be completely implemented by the basic proxy code,
+ * since that generic code has no clue about what type of null pointer to return
+ * when the tag `Tracks::TrackFitHitInfoTag` is unknown. This information is
+ * provided by the track proxy via the `getIf()` call.
+ * For convenience, `proxy::Track` is defined as alias of this single track
+ * proxy.
+ * 
+ * The collection proxy customization is way more straightforward.
+ * A proxy "tag" is defined, `proxy::Tracks`, with the only purpose of
+ * identifying the collection proxy for tracks. For convenience, it hosts a
+ * definition used internally to identify one of the optional auxiliary data,
+ * and the type of the main data product, but both definitions are contingent
+ * and their presence in there is only to centralize some customization in a
+ * single place.
+ * Traits (`CollectionProxyMakerTraits<Tracks>`) are specialized to inform that
+ * this `proxy::Tracks` proxy relies on `std::vector<recob::Track>` as main
+ * data product collection type (`std::vector<recob::Track>` is read as
+ * `proxy::Tracks`, but again, this is a contingent detail).
+ * Then, the creation of the collection proxy is customised by specializing
+ * `CollectionProxyMaker` (`CollectionProxyMaker<Tracks>`). The purpose is for
+ * it to create a `proxy::CollectionProxyBase` object, and the simple
+ * customization just automatically adds the hits, using `withAssociated()`.
+ * Finally, some customized functions may be provided for convenience, like
+ * `withFitHitInfo()` as alias of `withAssociated<recob::TrackFitHitInfo>()`.
+ * 
+ * 
+ * The trajectory point proxy has been implemented from scratch here, and it is
+ * much less refined than the generic proxy code. It is based on a data
+ * structure with a selected list of pointers to the actual data. This structure
+ * is implemented as a `std::tuple`. On top of it, a wrapper provides the
+ * interface (by interface substitution). This choice is non-essential and has
+ * been taken to stress the separation between data storage and interface.
+ * Point data structures are created by the proxy on demand, and they are
+ * designed so that they don't become invalid when the original proxies fall out
+ * of scope, at the price of added memory usage (the minimal information would
+ * be a pointer to the track proxy and a point index).
+ * 
+ * Summary of the customization procedure:
+ * -# define the tag to identify the proxy (`proxy::Tracks`)
+ * -# choose what type of object that will be (`proxy::CollectionProxyBase`
+ *      should do for most)
+ * -# define the main data product type (`std::vector<recob::Track>`) and set
+ *     the traits of the collection proxy (often, deriving them from
+ *     `proxy::CollectionProxyMakerTraits` with the main data product type as
+ *     template argument is enough)
+ * -# (_optional_) customize the element type; deriving it from
+ *      `proxy::CollectionProxyElement` is recommended
+ * -# customize the creation of the proxy collection, if either:
+ *     * the proxy element is being customised; if using
+ *       `proxy::CollectionProxyBase` as collection proxy, its first template
+ *       argument must be the element type (here, `proxy::Track`)
+ *     * special logic or default components are specified for the proxy
+ *       (here, `withAssociated<recob::Hit>()`)
+ *   In this case, `proxy::CollectionProxyMaker` must be specialized (for
+ *   `proxy::Tracks`), and a starting point may be to derive the specialization
+ *   from `proxy::CollectionProxyMakerBase` and redefine its `make()` member
+ * 
+ * 
+ * @subsection LArSoftProxyTracksOverhead Overhead
+ * 
+ * See the notes on @ref LArSoftProxyOverhead "overhead" in `ProxyBase.h`.
+ * 
+ * 
  */
 
 #ifndef LARDATA_RECOBASEPROXY_TRACK_H
@@ -196,10 +239,15 @@
 namespace proxy {
   
   //----------------------------------------------------------------------------
+  // forward declarations
+  template <typename TrackProxy>
+  class TrackPointIterator;
+
+  template <typename Data>
+  class TrackPointWrapper;
+  
+  //----------------------------------------------------------------------------
   namespace details {
-    
-    template <typename CollProxy>
-    class TrackCollectionProxyElement;
     
     template <typename CollProxy>
     struct TrackPointIteratorBox;
@@ -207,13 +255,57 @@ namespace proxy {
     template <typename T>
     struct isTrackProxy;
     
+    template <typename Obj>
+    struct StaticAsserts;
+    
+    template <typename Data>
+    struct StaticAsserts<TrackPointWrapper<Data>>: public std::true_type {
+      using Wrapper_t = TrackPointWrapper<Data>;
+      
+      static_assert(sizeof(Wrapper_t) == 1U, "Wrapper carries data!");
+      
+      static_assert(std::is_same<
+        std::decay_t<decltype(std::declval<Wrapper_t>().position())>,
+        recob::Track::Point_t
+        >(),
+        "position() is not a recob::Track::Point_t"
+        );
+      static_assert(std::is_same<
+        std::decay_t<decltype(std::declval<Wrapper_t>().momentum())>,
+        recob::Track::Vector_t
+        >(),
+        "momentum() is not a recob::Track::Vector_t"
+          );
+      static_assert(std::is_same<
+        std::decay_t<decltype(std::declval<Wrapper_t>().flags())>,
+        recob::Track::PointFlags_t
+        >(),
+        "flags() is not a recob::Track::PointFlags_t"
+        );
+      static_assert(std::is_same<
+        std::decay_t<decltype(std::declval<Wrapper_t>().hitPtr())>,
+        art::Ptr<recob::Hit>
+        >(),
+        "hit() is not a art::Ptr<recob::Hit>"
+        );
+      static_assert(std::is_same<
+        std::decay_t<decltype(std::declval<Wrapper_t>().index())>,
+        std::size_t
+        >(),
+        "index() is not a std::size_t"
+        );
+      
+    }; // StaticAsserts<TrackPointWrapper<Data>>
+    
   } // namespace details
+  
   
   //----------------------------------------------------------------------------
   
-  
   /**
    * @brief Proxy tag for a `recob::Track` collection proxy.
+   * @see `proxy::TrackCollectionProxyElement`
+   * @ingroup LArSoftProxyTracks
    *
    * This type can be used to get a proxy for `recob::Track` collection:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
@@ -379,163 +471,71 @@ namespace proxy {
    * }
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * 
+   * A new, filtered collection of proxies can be created with obvious means and
+   * with a less-than-friendly declaration:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * std::vector<decltype(tracks)::element_proxy_t> longTracks;
+   * for (auto track: tracks) {
+   *   if (track->Length() >= 30.0) longTracks.push_back(track);
+   * }
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * The collection thus created (`longTracks`) is valid also after the
+   * collection proxy (`tracks`) has fallen out of scope.
+   * 
+   * 
+   * @note `proxy::Tracks` is *not* the type of the collection proxy returned
+   *       by `getCollection()`.
    */
   struct Tracks {
+    
+    /// Type of the main collection.
+    using TrackDataProduct_t = std::vector<recob::Track>;
+    
+    /// Tag used for the "standard" track fit information.
     using TrackFitHitInfoTag = recob::TrackFitHitInfo;
-  };
+    
+    /// Tag used for the associated hits.
+    using HitTag = recob::Hit;
+    
+  }; // struct Tracks
+  
   
   
   /// Define the traits of `proxy::Tracks` proxy.
   template <>
   struct CollectionProxyMakerTraits<Tracks>
-    : public CollectionProxyMakerTraits<std::vector<recob::Track>>
+    : public CollectionProxyMakerTraits<Tracks::TrackDataProduct_t>
   {};
-  
-  
-  /**
-   * @brief Proxy to an element of a proxy collection of `recob::Track` objects.
-   * @tparam TrackCollProxy type of the track collection proxy
-   * 
-   * This class is the proxy equivalent of `recob::Track`, which exposes data
-   * associated with the track.
-   * An object of this type is returned when accessing a single track from a
-   * track collection proxy. While the data itself is not copied, this object
-   * owns some pointers to the actual data, and once created it is independent
-   * of the track collection proxy which created it.
-   * 
-   * The interface is currently defined by
-   * `proxy::details::TrackCollectionProxyElement`.
-   */
-  template <typename TrackCollProxy>
-  using Track = details::TrackCollectionProxyElement<TrackCollProxy>;
-  
-  
-  
-  //----------------------------------------------------------------------------
-  /**
-   * @brief Adds `recob::TrackFitHitInfo` information to the proxy.
-   * @param inputTag the data product label to read the data from
-   * @return an object driving `getCollection()` to use `recob::TrackFitHitInfo`
-   * 
-   * The collection of `recob::TrackFitHitInfo` is required to be a
-   * `std::vector<std::vector<recob::TrackFitHitInfo>>`, where the first index
-   * addresses which track the information is about, and the second index which
-   * point within that track.
-   * 
-   * The data is avaialble through the regular interface via tag
-   * `recob::TrackFitHitInfo`.
-   * 
-   * The data must satisfy the "parallel data product" requirement described in
-   * `ProxyBase.h`.
-   * 
-   */
-  inline auto withFitHitInfo(art::InputTag inputTag)
-    {
-      return proxy::withParallelDataAs
-        <std::vector<recob::TrackFitHitInfo>, Tracks::TrackFitHitInfoTag>
-        (inputTag);
-    }
-  
-  /// Like `withFitHitInfo(art::InputTag)`, using the same label as for tracks.
-  inline auto withFitHitInfo()
-    {
-      return proxy::withParallelDataAs
-        <std::vector<recob::TrackFitHitInfo>, Tracks::TrackFitHitInfoTag>();
-    }
-  
-  //----------------------------------------------------------------------------
-  /// Specialization to create a proxy for `recob::Track` collection.
-  template <>
-  struct CollectionProxyMaker<Tracks> {
-    
-    /// Traits of the collection proxy for the collection proxy maker.
-    using traits_t = CollectionProxyMakerTraits<Tracks>;
-    
-    /// Type of main collection proxy.
-    using main_collection_proxy_t = typename traits_t::main_collection_proxy_t;
-    
-    /// Type returned by the main collection indexing operator.
-    using main_element_t = typename traits_t::main_element_t;
-    
-    /// Type of element of the main collection.
-    using main_collection_t = typename traits_t::main_collection_t;
-    
-    /**
-     * @brief Creates and returns a collection proxy for `recob::Track` based on
-     *        `proxy::Tracks` tag and with the requested associated data.
-     * @tparam Event type of the event to read the information from
-     * @tparam WithArgs type of arguments for associated data
-     * @param event event to read the information from
-     * @param tag input tag of the `recob::Track` collection data product
-     * @param withArgs optional associated objects to be included
-     * @return a collection proxy to `recob::Track` collection with `tag`
-     * 
-     * For each argument in `withArgs`, an action is taken. Usually that is to
-     * add an association to the proxy.
-     * Associated hits are automatically added to the proxy and must not be
-     * explicitly specified.
-     * 
-     * Only a few associated data collections are supported:
-     * * `withAssociated<Aux>()` (optional argument: hit-track association
-     *     tag, as track by default): adds to the proxy an association to the
-     *     `Aux` data product (see `withAssociated()`)
-     * 
-     */
-    template <typename Event, typename... WithArgs>
-    static auto make
-      (Event const& event, art::InputTag tag, WithArgs&&... withArgs)
-      {
-        auto mainHandle = event.template getValidHandle<main_collection_t>(tag);
-        // automatically add associated hits with the same tag;
-        // TODO allow a withAssociated<recob::Hit>() from withArgs to override
-        // this one; the pattern may be:
-        // - if withArgs contains a withAssociated<recob::Hit>(), produce a new
-        //   withArgs with that one pushed first
-        // - otherwise, produce a new withArgs with a new
-        //   withAssociated<recob::Hit>(tag) as first element
-        // In principle there is no need for these hits to be first; code might
-        // be simpler when assuming that though.
-        auto proxy = makeCollectionProxy(
-          *mainHandle,
-          withAssociated<recob::Hit>()
-            .template createAssnProxyMaker<main_collection_proxy_t>
-            (event, mainHandle, tag),
-          withArgs.template createAssnProxyMaker<main_collection_proxy_t>
-            (event, mainHandle, tag)...
-          );
-        return proxy;
-      } // make()
-    
-      private:
-    template <typename MainColl, typename... AuxColl>
-    using coll_proxy_t = CollectionProxyBase<Track, MainColl, AuxColl...>;
-    
-    // helper function to avoid typing the exact types of auxiliary collections
-    template <typename MainColl, typename... AuxColl>
-    static auto makeCollectionProxy(MainColl const& main, AuxColl&&... aux)
-      {
-        return coll_proxy_t<MainColl, AuxColl...>
-          (main, std::forward<AuxColl>(aux)...);
-      }
-    
-  }; // struct CollectionProxyMaker<>
   
   
   //----------------------------------------------------------------------------
   //---  track point information
   //---
-  /// Type of information pertaining a point on a track.
-  //
-  // NOTE The generic proxy structure we use (from `ProxyBase.h`) does not help
-  // in this nested collection. It can help navigate elements of the main data
-  // product collections (e.g. tracks), but not elements of elements of the main
-  // data (e.g. track points). The main difficulty is to automatically determine
-  // which of the auxiliary data is conformly indexed, and with what: there is
-  // nothing in recob::Track interface that explicitly states it is a collection
-  // of points (no `for(auto&& point: track)`), and there is nothing that
-  // indicates a relation in the auxiliary data with it.
-  // So we are back to hard-coding here.
-  //
+  /**
+   * @brief Container of track point information.
+   * @see `proxy::Track`, `proxy::TrackPointWrapper`
+   * @ingroup LArSoftProxyTracks
+   * 
+   * This class contains some information pertaining a single point of a
+   * `recob::Track`.
+   * 
+   * The information is not extensible via the usual proxy mechanisms. The data
+   * supported is stored in `proxy::TrackPointData` class, and it currently
+   * includes:
+   * * the `recob::Track` the point belongs to
+   * * the position, momentum and flags of the point
+   * * the hit associated to the point
+   * * the index of the point in its track
+   * * fit information
+   * 
+   * The access interface is determined by `proxy::TrackPointWrapper`.
+   * 
+   * An object of this type is returned when accessing a single track point from
+   * a track proxy. While the data itself is not copied, this object owns some
+   * pointers to the actual data, and once created it is independent of the
+   * track proxy which created it.
+   * 
+   */
   using TrackPointData = std::tuple<
     recob::Track const*,
     art::Ptr<recob::Hit> const*,
@@ -544,41 +544,9 @@ namespace proxy {
     >;
   
   /**
-   * @brief Returns an object with information about the specified track point.
-   * @tparam TrackProxy an instance of proxy::Track template
-   * @param track the track (proxy) the points belong to
-   * @param index the index of the point within the track
-   * @return a `TrackPointData` object with information on that point
-   * 
-   * For an interface to the point information, see `TrackPointWrapper`.
-   */
-  template <typename TrackProxy>
-  TrackPointData makeTrackPointData
-    (TrackProxy const& track, std::size_t index)
-    {
-      static_assert(details::isTrackProxy<TrackProxy>(), "Not a proxy::Track!");
-      return {
-        &(track.track()),
-        &(track.hitAtPoint(index)),
-        track.fitInfoAtPoint(index),
-        index
-      };
-    } // makeTrackPointData()
-  
-  namespace details {
-    
-    template <typename Obj>
-    struct StaticAsserts;
-    
-    // calling this function ensures static assert template is instantiated
-    template <typename Obj>
-    constexpr bool staticChecks() { return StaticAsserts<Obj>::value; }
-    
-  }// namespace details
-  
-  /**
    * @brief Wrapper for a track data proxy.
    * @tparam Data the point data type; requirements are described below
+   * @ingroup LArSoftProxyTracks
    * 
    * This class provides a user interface to data pertaining a single trajectory
    * point of a `recob::Track`.
@@ -665,88 +633,12 @@ namespace proxy {
   }; // TrackPointWrapper<>
   
   
-  namespace details {
-    
-    template <typename Data>
-    struct StaticAsserts<TrackPointWrapper<Data>>: public std::true_type {
-      using Wrapper_t = TrackPointWrapper<Data>;
-      
-      static_assert(sizeof(Wrapper_t) == 1U, "Wrapper carries data!");
-      
-      static_assert(std::is_same<
-        std::decay_t<decltype(std::declval<Wrapper_t>().position())>,
-        recob::Track::Point_t
-        >(),
-        "position() is not a recob::Track::Point_t"
-        );
-      static_assert(std::is_same<
-        std::decay_t<decltype(std::declval<Wrapper_t>().momentum())>,
-        recob::Track::Vector_t
-        >(),
-        "momentum() is not a recob::Track::Vector_t"
-          );
-      static_assert(std::is_same<
-        std::decay_t<decltype(std::declval<Wrapper_t>().flags())>,
-        recob::Track::PointFlags_t
-        >(),
-        "flags() is not a recob::Track::PointFlags_t"
-        );
-      static_assert(std::is_same<
-        std::decay_t<decltype(std::declval<Wrapper_t>().hitPtr())>,
-        art::Ptr<recob::Hit>
-        >(),
-        "hit() is not a art::Ptr<recob::Hit>"
-        );
-      static_assert(std::is_same<
-        std::decay_t<decltype(std::declval<Wrapper_t>().index())>,
-        std::size_t
-        >(),
-        "index() is not a std::size_t"
-        );
-      
-    }; // StaticAsserts<TrackPointWrapper<Data>>
-          
-  } // namespace details
-  
-  
-  /// "Converts" point data into a `proxy::TrackPointWrapper`.
-  template <typename Data>
-  auto wrapTrackPoint(Data const& wrappedData)
-    {
-      (void) details::StaticAsserts<TrackPointWrapper<Data>>();
-      return reinterpret_cast<TrackPointWrapper<Data> const&>(wrappedData); 
-    }
-  
   /**
-   * @brief Container of track point information.
-   * @see `proxy::Track`, `proxy::TrackPointWrapper`
+   * @brief Type of track point information.
+   * @ingroup LArSoftProxyTracks
    * 
-   * This class contains some information pertaining a single point of a
-   * `recob::Track`.
-   * 
-   * The information is not extensible via the usual proxy mechanisms. The data
-   * supported is stored in `proxy::TrackPointData` class, and it currently
-   * includes:
-   * * the `recob::Track` the point belongs to
-   * * the position, momentum and flags of the point
-   * * the hit associated to the point
-   * * the index of the point in its track
-   * * fit information
-   * 
-   * The access interface is determined by `proxy::TrackPointWrapper`.
-   * 
-   * An object of this type is returned when accessing a single track point from
-   * a track proxy. While the data itself is not copied, this object owns some
-   * pointers to the actual data, and once created it is independent of the
-   * track proxy which created it.
-   * 
+   * For its interface, see `proxy::TrackPointWrapper`.
    */
-  using TrackPointData = std::tuple<
-    recob::Track const*,
-    art::Ptr<recob::Hit> const*,
-    recob::TrackFitHitInfo const*,
-    std::size_t
-    >;
   struct TrackPoint
     : private TrackPointData
     , public TrackPointWrapper<TrackPointData>
@@ -758,7 +650,251 @@ namespace proxy {
   }; // class TrackPoint
   
   
+  /**
+   * @brief Returns an object with information about the specified track point.
+   * @tparam TrackProxy an instance of proxy::Track template
+   * @param track the track (proxy) the points belong to
+   * @param index the index of the point within the track
+   * @return a `TrackPointData` object with information on that point
+   * 
+   * For an interface to the point information, see `TrackPointWrapper`.
+   */
+  template <typename TrackProxy>
+  TrackPointData makeTrackPointData
+    (TrackProxy const& track, std::size_t index)
+    {
+      static_assert(details::isTrackProxy<TrackProxy>(), "Not a proxy::Track!");
+      return {
+        &(track.track()),
+        &(track.hitAtPoint(index)),
+        track.fitInfoAtPoint(index),
+        index
+      };
+    } // makeTrackPointData()
+  
+  
+  //--------------------------------------------------------------------------
+  /**
+    * @brief Class for track proxy elements.
+    * @tparam CollProxy type of track proxy collection to get data from
+    * @ingroup LArSoftProxyTracks
+    */
+  template <typename CollProxy>
+  struct TrackCollectionProxyElement
+    : public CollectionProxyElement<CollProxy>
+  {
+    using base_t = CollectionProxyElement<CollProxy>; ///< Base type.
+    using base_t::base_t; // inherit constructors
+    
+    ///< This type.
+    using track_proxy_t = TrackCollectionProxyElement<CollProxy>;
+    
+      public:
+    /// Iterator for trajectory point information.
+    using point_iterator = TrackPointIterator<track_proxy_t>;
+    
+    /// Returns the pointed track.
+    recob::Track const& track() const { return base_t::operator*(); }
+    
+    /// @{
+    /// @name Direct hit interface.
+    
+    /// Returns a collection-like range of hits of this track, at point order.
+    auto hits() const -> decltype(auto)
+      { return base_t::template get<Tracks::HitTag>(); }
+    
+    /// Returns an art pointer to the hit associated with the specified point.
+    auto const& hitAtPoint(std::size_t index) const { return hits()[index]; }
+    
+    /// Returns the number of hits associated with this track.
+    std::size_t nHits() const { return hits().size(); }
+    
+    /// @}
+    
+    /// Returns fit info for the specified point (`nullptr` if not available).
+    recob::TrackFitHitInfo const* fitInfoAtPoint(std::size_t index) const
+      {
+        if (!base_t::template has<Tracks::TrackFitHitInfoTag>())
+          return nullptr;
+        auto&& fitInfo = base_t::template getIf<
+          Tracks::TrackFitHitInfoTag,
+          std::vector<recob::TrackFitHitInfo> const&
+          >();
+        return &(fitInfo[index]);
+      }
+    
+    
+    /// @{
+    /// @name Point-by-point iteration interface
+    /// 
+    /// The points on track can be accessed individually with a special,
+    /// non-extensible proxy.
+    /// 
+    
+    /// Returns an iterable range with point-by-point information
+    /// (`TrackPointWrapper`).
+    auto points() const
+      { return details::TrackPointIteratorBox<CollProxy>(*this); }
+    
+    /// Returns the number of trajectory points in the track.
+    std::size_t nPoints() const { return track().NPoints(); }
+    
+    /// Returns the iterator to the data of the first point.
+    point_iterator beginPoint() const { return { *this, 0 }; }
+    
+    /// Returns the iterator past the last point.
+    point_iterator endPoint() const { return { *this, nPoints() }; }
+    
+    /// Extracts information from the specified point.
+    TrackPoint operator[](std::size_t index) const
+      { return { makeTrackPointData(track(), index) }; }
+    
+    /// @}
+    
+  }; // TrackCollectionProxyElement<>
+  
+  
+  /**
+   * @brief Proxy to an element of a proxy collection of `recob::Track` objects.
+   * @tparam TrackCollProxy type of the track collection proxy
+   * @ingroup LArSoftProxyTracks
+   * 
+   * This class is the proxy equivalent of `recob::Track`, which exposes data
+   * associated with the track.
+   * An object of this type is returned when accessing a single track from a
+   * track collection proxy. While the data itself is not copied, this object
+   * owns some pointers to the actual data, and once created it is independent
+   * of the track collection proxy which created it.
+   * 
+   * The interface is currently defined by
+   * `proxy::TrackCollectionProxyElement`.
+   */
+  template <typename TrackCollProxy>
+  using Track = TrackCollectionProxyElement<TrackCollProxy>;
+  
+  
+  
+  //----------------------------------------------------------------------------
+  /**
+   * @brief Adds `recob::TrackFitHitInfo` information to the proxy.
+   * @param inputTag the data product label to read the data from
+   * @return an object driving `getCollection()` to use `recob::TrackFitHitInfo`
+   * @ingroup LArSoftProxyTracks
+   * 
+   * The collection of `recob::TrackFitHitInfo` is required to be a
+   * `std::vector<std::vector<recob::TrackFitHitInfo>>`, where the first index
+   * addresses which track the information is about, and the second index which
+   * point within that track.
+   * 
+   * The data is avaialble through the regular interface via tag
+   * `recob::TrackFitHitInfo`.
+   * 
+   * The data must satisfy the "parallel data product" requirement described in
+   * `ProxyBase.h`.
+   * 
+   */
+  inline auto withFitHitInfo(art::InputTag inputTag)
+    {
+      return proxy::withParallelDataAs
+        <std::vector<recob::TrackFitHitInfo>, Tracks::TrackFitHitInfoTag>
+        (inputTag);
+    }
+  
+  /// Like `withFitHitInfo(art::InputTag)`, using the same label as for tracks.
+  /// @ingroup LArSoftProxyTracks
+  inline auto withFitHitInfo()
+    {
+      return proxy::withParallelDataAs
+        <std::vector<recob::TrackFitHitInfo>, Tracks::TrackFitHitInfoTag>();
+    }
+  
+  //----------------------------------------------------------------------------
+  /// Specialization to create a proxy for `recob::Track` collection.
+  template <>
+  struct CollectionProxyMaker<Tracks>
+    : public CollectionProxyMakerBase<Tracks>
+  {
+    
+    /// Traits of the collection proxy for the collection proxy maker.
+    using maker_base_t = CollectionProxyMakerBase<Tracks>;
+    
+    /// Type of main collection proxy.
+    using typename maker_base_t::main_collection_proxy_t;
+    
+    /// Type of element of the main collection.
+    using typename maker_base_t::main_collection_t;
+    
+    /**
+     * @brief Creates and returns a collection proxy for `recob::Track` based on
+     *        `proxy::Tracks` tag and with the requested associated data.
+     * @tparam Event type of the event to read the information from
+     * @tparam WithArgs type of arguments for associated data
+     * @param event event to read the information from
+     * @param tag input tag of the `recob::Track` collection data product
+     * @param withArgs optional associated objects to be included
+     * @return a collection proxy to `recob::Track` collection with `tag`
+     * 
+     * For each argument in `withArgs`, an action is taken. Usually that is to
+     * add an association to the proxy.
+     * Associated hits (tag: `recob::Hit`) are automatically added to the proxy
+     * and must not be explicitly specified.
+     * 
+     * Only a few associated data collections are supported:
+     * * `withAssociated<Aux>()` (optional argument: hit-track association
+     *     tag, as track by default): adds to the proxy an association to the
+     *     `Aux` data product (see `withAssociated()`)
+     * 
+     */
+    template <typename Event, typename... WithArgs>
+    static auto make
+      (Event const& event, art::InputTag tag, WithArgs&&... withArgs)
+      {
+        auto mainHandle = event.template getValidHandle<main_collection_t>(tag);
+        // automatically add associated hits with the same input tag;
+        // TODO allow a withAssociated<recob::Hit>() from withArgs to override
+        // this one; the pattern may be:
+        // - if withArgs contains a withAssociated<recob::Hit>(), produce a new
+        //   withArgs with that one pushed first
+        // - otherwise, produce a new withArgs with a new
+        //   withAssociated<recob::Hit>(tag) as first element
+        // In principle there is no need for these hits to be first; code might
+        // be simpler when assuming that though.
+        auto proxy = makeCollectionProxy(
+          *mainHandle,
+          withAssociatedAs<recob::Hit, Tracks::HitTag>()
+            .template createAssnProxyMaker<main_collection_proxy_t>
+            (event, mainHandle, tag),
+          withArgs.template createAssnProxyMaker<main_collection_proxy_t>
+            (event, mainHandle, tag)...
+          );
+        return proxy;
+      } // make()
+    
+      private:
+    template <typename MainColl, typename... AuxColl>
+    using coll_proxy_t = CollectionProxyBase<Track, MainColl, AuxColl...>;
+    
+    // helper function to avoid typing the exact types of auxiliary collections
+    template <typename MainColl, typename... AuxColl>
+    static auto makeCollectionProxy(MainColl const& main, AuxColl&&... aux)
+      {
+        return coll_proxy_t<MainColl, AuxColl...>
+          (main, std::forward<AuxColl>(aux)...);
+      }
+    
+  }; // struct CollectionProxyMaker<>
+  
+  
+  /// "Converts" point data into a `proxy::TrackPointWrapper`.
+  template <typename Data>
+  auto wrapTrackPoint(Data const& wrappedData)
+    {
+      (void) details::StaticAsserts<TrackPointWrapper<Data>>();
+      return reinterpret_cast<TrackPointWrapper<Data> const&>(wrappedData); 
+    }
+  
   /// Iterator for points of a track proxy. Only supports range-for loops.
+  /// @ingroup LArSoftProxyReco
   template <typename TrackProxy>
   class TrackPointIterator {
     
@@ -819,85 +955,6 @@ namespace proxy {
       track_proxy_t const* track = nullptr;
       
     }; // TrackPointIteratorBox<>
-    
-    
-    //--------------------------------------------------------------------------
-    /// @brief Base class for track proxy elements.
-    /// @tparam CollProxy type of track proxy collection to get data from
-    template <typename CollProxy>
-    struct TrackCollectionProxyElement
-      : public CollectionProxyElement<CollProxy>
-    {
-      using base_t = CollectionProxyElement<CollProxy>; ///< Base type.
-      using base_t::base_t; // inherit constructors
-      
-      ///< This type.
-      using track_proxy_t = TrackCollectionProxyElement<CollProxy>;
-      
-        public:
-      /// Iterator for trajectory point information.
-      using point_iterator = TrackPointIterator<track_proxy_t>;
-      
-      /// Returns the pointed track.
-      recob::Track const& track() const { return base_t::operator*(); }
-      
-      /// @{
-      /// @name Direct hit interface.
-      
-      /// Returns a collection-like range of hits of this track, at point order.
-      auto hits() const -> decltype(auto)
-        { return base_t::template get<recob::Hit>(); }
-      
-      /// Returns an art pointer to the hit associated with the specified point.
-      auto const& hitAtPoint(std::size_t index) const { return hits()[index]; }
-      
-      /// Returns the number of hits associated with this track.
-      std::size_t nHits() const { return hits().size(); }
-      
-      /// @}
-      
-      /// Returns fit info for the specified point (`nullptr` if not available).
-      recob::TrackFitHitInfo const* fitInfoAtPoint(std::size_t index) const
-        {
-          if (!base_t::template has<Tracks::TrackFitHitInfoTag>())
-            return nullptr;
-          return &(base_t::template getIf<
-            Tracks::TrackFitHitInfoTag,
-            std::vector<recob::TrackFitHitInfo> const&
-            >
-            ()
-            [index]
-            );
-        }
-      
-      
-      /// @{
-      /// @name Point-by-point iteration interface
-      /// 
-      /// The points on track can be accessed individually with a special,
-      /// non-extensible proxy.
-      /// 
-      
-      /// Returns an iterable range with point-by-point information
-      /// (`TrackPointWrapper`).
-      auto points() const { return TrackPointIteratorBox<CollProxy>(*this); }
-      
-      /// Returns the number of trajectory points in the track.
-      std::size_t nPoints() const { return track().NPoints(); }
-      
-      /// Returns the iterator to the data of the first point.
-      point_iterator beginPoint() const { return { *this, 0 }; }
-      
-      /// Returns the iterator past the last point.
-      point_iterator endPoint() const { return { *this, nPoints() }; }
-      
-      /// Extracts information from the specified point.
-      TrackPoint operator[](std::size_t index) const
-        { return { makeTrackPointData(track(), index) }; }
-      
-      /// @}
-      
-    }; // TrackCollectionProxyElement<>
     
     
     //--------------------------------------------------------------------------

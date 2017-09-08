@@ -1,14 +1,14 @@
 #
-# File:    test_trackproxy.fcl
-# Purpose: exercise the proxy::Tracks object
+# File:    test_proxybase.fcl
+# Purpose: exercise proxy objects
 # Author:  Gianluca Petrillo (petrillo@fnal.gov)
-# Date:    July 28, 2017
+# Date:    September 8, 2017
 # Version: 1.0
 # 
 # Run with `lar_ut`!
 #
 
-process_name: TrackProxyTest
+process_name: ProxyBaseTest
 
 
 source: {
@@ -41,7 +41,7 @@ physics: {
   
   analyzers: {
     trackproxytest: {
-      module_type: TrackProxyTest
+      module_type: ProxyBaseTest
       
       tracks: trackmaker
       

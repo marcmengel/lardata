@@ -6,13 +6,12 @@
  * 
  * This library is header-only.
  *
- *  @note It is likely that a skillful use of Nibbler's range library will
- *  provide the same functionality (and loads more).
+ * @note It is likely that a skillful use of Nibbler's range library will
+ *       provide the same functionality (and loads more).
  *
  *
  *
- * Interface substitution technique
- * =================================
+ * @section InterfaceSubstitution Interface substitution technique
  * 
  * A technique that is used in this implementation is to replace (or extend) the
  * interface of an existing object.

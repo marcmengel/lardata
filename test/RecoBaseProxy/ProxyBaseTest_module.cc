@@ -1,8 +1,8 @@
 /**
- * @file   TrackProxyTest_module.cc
- * @brief  Tests `proxy::Track` class.
+ * @file   ProxyBaseTest_module.cc
+ * @brief  Tests feattures of `ProxyBase.h`.
  * @author Gianluca Petrillo (petrillo@fnal.gov)
- * @date   July 27, 2017
+ * @date   September 8, 2017
  * 
  */
 
@@ -49,7 +49,7 @@
  * This module is that it uses Boost unit test library, and as such it must be
  * run with `lar_ut` instead of `lar`.
  */
-class TrackProxyTest : public art::EDAnalyzer {
+class ProxyBaseTest : public art::EDAnalyzer {
     public:
   
   struct Config {
@@ -65,16 +65,16 @@ class TrackProxyTest : public art::EDAnalyzer {
   
   using Parameters = art::EDAnalyzer::Table<Config>;
   
-  explicit TrackProxyTest(Parameters const& config)
+  explicit ProxyBaseTest(Parameters const& config)
     : art::EDAnalyzer(config)
     , tracksTag(config().tracksTag())
     {}
   
   // Plugins should not be copied or assigned.
-  TrackProxyTest(TrackProxyTest const &) = delete;
-  TrackProxyTest(TrackProxyTest &&) = delete;
-  TrackProxyTest& operator= (TrackProxyTest const &) = delete;
-  TrackProxyTest& operator= (TrackProxyTest &&) = delete;
+  ProxyBaseTest(ProxyBaseTest const &) = delete;
+  ProxyBaseTest(ProxyBaseTest &&) = delete;
+  ProxyBaseTest& operator= (ProxyBaseTest const &) = delete;
+  ProxyBaseTest& operator= (ProxyBaseTest &&) = delete;
   
   virtual void analyze(art::Event const& event) override;
   
@@ -94,74 +94,68 @@ class TrackProxyTest : public art::EDAnalyzer {
   template <typename Track>
   void processTrack(Track const& track) const;
   
-  /// Single-track-point processing function example.
-  template <typename TrackPoint>
-  void processPoint(TrackPoint const& point) const;
-  
-}; // class TrackProxyTest
-
-
-//------------------------------------------------------------------------------
-template <typename TrackPoint>
-void TrackProxyTest::processPoint(TrackPoint const& point) const {
-  
-  mf::LogVerbatim log("TrackProxyTest");
-  log <<
-    "  [#" << point.index() << "] at " << point.position()
-      << " (momentum: " << point.momentum() << "), flags: "
-      << point.flags();
-  
-  recob::Hit const* hit = point.hit();
-  if (hit) {
-    log << " with a Q=" << hit->Integral() << " hit on channel "
-      << hit->Channel() << " at tick " << hit->PeakTime()
-      << ", measured: " << point.fitInfoPtr()->hitMeas();
-  }
-  else
-    log << " (no associated hit)";
-  
-} // TrackProxyTest::processPoint()
+}; // class ProxyBaseTest
 
 
 //------------------------------------------------------------------------------
 template <typename Track>
-void TrackProxyTest::processTrack(Track const& track) const {
+void ProxyBaseTest::processTrack(Track const& track) const {
   
-  recob::Track const& trackRef = track.track();
+  recob::Track const& trackRef = *track;
   
-  mf::LogVerbatim("TrackProxyTest")
+  mf::LogVerbatim("ProxyBaseTest")
     << "[#" << track.index() << "] track " << trackRef
     << "  " << track->Length() << " cm long, with "
-    << trackRef.NPoints() << " points and " << track.nHits()
+    << trackRef.NPoints() << " points and "
+    << track.template get<recob::Hit>().size()
     << " hits:";
   
-  for (auto point: track.points()) {
-    processPoint(point);
-  } // for points in track
-  
-} // TrackProxyTest::processTrack()
+} // ProxyBaseTest::processTrack()
 
 
 //------------------------------------------------------------------------------
-void TrackProxyTest::proxyUsageExample(art::Event const& event) const {
+void ProxyBaseTest::proxyUsageExample(art::Event const& event) const {
   
-  auto tracks = proxy::getCollection<proxy::Tracks>
-    (event, tracksTag, proxy::withFitHitInfo());
+  auto tracks = proxy::getCollection<std::vector<recob::Track>>
+    (event, tracksTag, proxy::withAssociated<recob::Hit>());
   
   if (tracks.empty()) {
-    mf::LogVerbatim("TrackProxyTest") << "No tracks in '" << tracksTag.encode()
+    mf::LogVerbatim("ProxyBaseTest") << "No tracks in '" << tracksTag.encode()
       << "'";
     return;
   }
   
-  mf::LogVerbatim("TrackProxyTest") << "Collection '" << tracksTag.encode()
+  mf::LogVerbatim("ProxyBaseTest") << "Collection '" << tracksTag.encode()
     << "' contains " << tracks.size() << " tracks.";
   
-} // TrackProxyTest::proxyUsageExample()
+  for (auto trackInfo: tracks) {
+    
+    recob::Track const& track = *trackInfo; // access to the track
+    double const startTheta = track.Theta();
+    
+    double const length = trackInfo->Length(); // access to track members
+  
+    // access to associated data (returns random-access collection-like object)
+    decltype(auto) hits = trackInfo.get<recob::Hit>();
+    
+    double charge = 0.0;
+    for (auto const& hitPtr: hits) {
+      charge += hitPtr->Integral();
+    } // for hits
+    
+    mf::LogVerbatim("Info")
+      << "[#" << trackInfo.index() << "] track ID=" << track.ID()
+      << " (" << length << " cm, starting with theta=" << startTheta
+      << " rad) deposited charge=" << charge
+      << " with " << hits.size() << " hits";
+    
+  } // for tracks
+ 
+} // ProxyBaseTest::proxyUsageExample()
 
 
 //------------------------------------------------------------------------------
-auto TrackProxyTest::getLongTracks
+auto ProxyBaseTest::getLongTracks
   (art::Event const& event, double minLength) const
 {
   //
@@ -169,8 +163,8 @@ auto TrackProxyTest::getLongTracks
   // that after the proxy collection is out of scope, elements copied from it
   // are still valid
   //
-  auto tracks = proxy::getCollection<proxy::Tracks>
-    (event, tracksTag, proxy::withFitHitInfo());
+  auto tracks = proxy::getCollection<std::vector<recob::Track>>
+    (event, tracksTag, proxy::withAssociated<recob::Hit>() );
   
   std::vector<decltype(tracks)::element_proxy_t> longTracks;
   for (auto track: tracks) {
@@ -178,7 +172,7 @@ auto TrackProxyTest::getLongTracks
   } // for track
   return longTracks;
   
-} // TrackProxyTest::proxyUsageExample()
+} // ProxyBaseTest::proxyUsageExample()
 
 
 //------------------------------------------------------------------------------
@@ -186,13 +180,13 @@ namespace tag {
   struct SpecialHits {};
 }
 
-void TrackProxyTest::testTracks(art::Event const& event) {
+void ProxyBaseTest::testTracks(art::Event const& event) {
   
   auto expectedTracksHandle
     = event.getValidHandle<std::vector<recob::Track>>(tracksTag);
   auto const& expectedTracks = *expectedTracksHandle;
   
-  mf::LogInfo("TrackProxyTest")
+  mf::LogInfo("ProxyBaseTest")
     << "Starting test on " << expectedTracks.size() << " tracks from '"
     << tracksTag.encode() << "'";
   
@@ -203,9 +197,11 @@ void TrackProxyTest::testTracks(art::Event const& event) {
     = *(event.getValidHandle<std::vector<std::vector<recob::TrackFitHitInfo>>>
     (tracksTag));
   
-  auto tracks = proxy::getCollection<proxy::Tracks>(event, tracksTag
+  auto tracks = proxy::getCollection<std::vector<recob::Track>>(
+    event, tracksTag
+    , proxy::withAssociated<recob::Hit>()
     , proxy::withAssociatedAs<recob::Hit, tag::SpecialHits>()
-    , proxy::withFitHitInfo()
+    , proxy::withParallelData<std::vector<recob::TrackFitHitInfo>>()
     );
   
   //
@@ -216,7 +212,7 @@ void TrackProxyTest::testTracks(art::Event const& event) {
   BOOST_CHECK_THROW(tracks.getIf<recob::SpacePoint>(), std::logic_error);
   
   static_assert(
-    tracks.has<recob::TrackFitHitInfo>(),
+    tracks.has<std::vector<recob::TrackFitHitInfo>>(),
     "recob::TrackFitHitInfo not found!!!"
     );
   
@@ -225,7 +221,8 @@ void TrackProxyTest::testTracks(art::Event const& event) {
   BOOST_CHECK_EQUAL(tracks.size(), expectedTracks.size());
   
   BOOST_CHECK_EQUAL(tracks.size(), expectedTrackFitHitInfo.size());
-  decltype(auto) allFitHitInfo = tracks.get<recob::TrackFitHitInfo>();
+  decltype(auto) allFitHitInfo
+    = tracks.get<std::vector<recob::TrackFitHitInfo>>();
   static_assert(
     std::is_lvalue_reference<decltype(allFitHitInfo)>(),
     "Copy of parallel data!"
@@ -248,11 +245,12 @@ void TrackProxyTest::testTracks(art::Event const& event) {
     BOOST_CHECK_EQUAL
       (std::addressof(trackRef), std::addressof(expectedTrack));
     BOOST_CHECK_EQUAL
-      (std::addressof(trackProxy.track()), std::addressof(expectedTrack));
-    BOOST_CHECK_EQUAL(trackProxy.nHits(), expectedHits.size());
+      (std::addressof(*trackProxy), std::addressof(expectedTrack));
+    BOOST_CHECK_EQUAL(trackProxy.get<recob::Hit>().size(), expectedHits.size());
     BOOST_CHECK_EQUAL(trackProxy.index(), iExpectedTrack);
     
-    decltype(auto) fitHitInfo = trackProxy.get<recob::TrackFitHitInfo>();
+    std::vector<recob::TrackFitHitInfo> const& fitHitInfo
+      = trackProxy.get<std::vector<recob::TrackFitHitInfo>>();
     static_assert(
       std::is_lvalue_reference<decltype(fitHitInfo)>(),
       "Copy of parallel data element!"
@@ -267,49 +265,15 @@ void TrackProxyTest::testTracks(art::Event const& event) {
     // direct interface to recob::Track
     BOOST_CHECK_EQUAL(trackProxy->NPoints(), expectedTrack.NPoints());
     
-    std::size_t iPoint = 0;
-    for (auto pointInfo: trackProxy.points()) {
-      
-      decltype(auto) expectedPointFlags = expectedTrack.FlagsAtPoint(iPoint);
-      
-      BOOST_CHECK_EQUAL(pointInfo.index(), iPoint);
-      BOOST_CHECK_EQUAL(
-        pointInfo.position(),
-        expectedTrack.Trajectory().LocationAtPoint(iPoint)
-        );
-      BOOST_CHECK_EQUAL
-        (pointInfo.momentum(), expectedTrack.MomentumVectorAtPoint(iPoint));
-      BOOST_CHECK_EQUAL(pointInfo.flags(), expectedPointFlags);
-      if (expectedPointFlags.hasOriginalHitIndex()) {
-        BOOST_CHECK_EQUAL
-          (pointInfo.hitPtr().key(), expectedPointFlags.fromHit());
-      }
-      else {
-        BOOST_CHECK(!pointInfo.hitPtr());
-      }
-      
-      BOOST_CHECK_EQUAL
-        (fitHitInfo[iPoint].WireId(), expectedFitHitInfo[iPoint].WireId());
-      BOOST_CHECK_EQUAL
-        (pointInfo.fitInfoPtr(), std::addressof(expectedFitHitInfo[iPoint]));
-      BOOST_CHECK_EQUAL(
-        std::addressof(fitHitInfo[iPoint]),
-        std::addressof(expectedFitHitInfo[iPoint])
-        );
-      
-      ++iPoint;
-    } // for
-    BOOST_CHECK_EQUAL(iPoint, expectedTrack.NPoints());
-    
     ++iExpectedTrack;
   } // for
   BOOST_CHECK_EQUAL(iExpectedTrack, expectedTracks.size());
   
-} // TrackProxyTest::testTracks()
+} // ProxyBaseTest::testTracks()
 
 
 //------------------------------------------------------------------------------
-void TrackProxyTest::analyze(art::Event const& event) {
+void ProxyBaseTest::analyze(art::Event const& event) {
   
   // "test" that track proxies survive their collection (part I)
   const double minLength = 30.0;
@@ -322,14 +286,14 @@ void TrackProxyTest::analyze(art::Event const& event) {
   testTracks(event);
   
   // "test" that track proxies survive their collection (part II)
-  mf::LogVerbatim("TrackProxyTest")
+  mf::LogVerbatim("ProxyBaseTest")
     << longTracks.size() << " tracks are longer than " << minLength << " cm:";
   std::for_each(longTracks.begin(), longTracks.end(),
     [this](auto const& track){ this->processTrack(track); });
   
-} // TrackProxyTest::analyze()
+} // ProxyBaseTest::analyze()
 
 
 //------------------------------------------------------------------------------
 
-DEFINE_ART_MODULE(TrackProxyTest)
+DEFINE_ART_MODULE(ProxyBaseTest)

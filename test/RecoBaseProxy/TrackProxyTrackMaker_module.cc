@@ -8,7 +8,7 @@
  */
 
 // LArSoft libraries
-#include "lardata/Utilities/PtrMaker.h"
+#include "art/Persistency/Common/PtrMaker.h"
 #include "lardataobj/RecoBase/TrackFitHitInfo.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Hit.h"
@@ -112,7 +112,7 @@ void lar::test::TrackProxyTrackMaker::produce(art::Event& event) {
   auto hitHandle = event.getValidHandle<std::vector<recob::Hit>>(hitsTag);
   auto const& hits = *hitHandle;
   
-  lar::PtrMaker<recob::Track> trackPtrMaker(event, *this);
+  art::PtrMaker<recob::Track> trackPtrMaker(event, *this);
   unsigned int iTrack = 0;
   unsigned int usedHits = 0;
   while (usedHits < hits.size()) {
