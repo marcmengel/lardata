@@ -340,6 +340,20 @@
 /// @ingroup LArSoftProxies
 namespace proxy {
   
+  //----------------------------------------------------------------------------
+  /// Trait of value contained in the template collection.
+  template <typename Coll>
+  struct collection_value_type {
+    using type = typename Coll::value_type;
+    using value_type = type;
+  }; // struct collection_value_type
+  
+  /// Type contained in the collection `Coll`.
+  template <typename Coll>
+  using collection_value_t = typename collection_value_type<Coll>::type;
+  
+  
+  //----------------------------------------------------------------------------
   namespace details {
     
     //--------------------------------------------------------------------------
@@ -358,7 +372,7 @@ namespace proxy {
     //--------------------------------------------------------------------------
     template <
       typename AuxColl,
-      typename Aux = typename AuxColl::value_type,
+      typename Aux = collection_value_t<AuxColl>,
       typename Tag = Aux
       >
     class ParallelData;
@@ -416,6 +430,7 @@ namespace proxy {
   } // namespace details
   
   
+  //----------------------------------------------------------------------------
   /**
    * @defgroup LArSoftProxiesAssociatedData Associated data infrastructure
    * @ingroup  LArSoftProxyCustom
@@ -432,6 +447,44 @@ namespace proxy {
    */
   
   //----------------------------------------------------------------------------
+  /**
+   * @brief Processes and returns an associated data object.
+   * @tparam Tag the tag labelling this associated data
+   *             (if omitted: second type of the association: `right_t`)
+   * @tparam Assns type of association to be processed
+   * @param assns association object to be processed
+   * @param minSize minimum number of entries in the produced association data
+   * @return a new `AssociatedData` filled with associations from `tag`
+   * 
+   * The content of the association object must fulfill the requirements of
+   * @ref LArSoftProxyDefinitionOneToManySeqAssn "one-to-many sequential association".
+   * The `Assns` type is expected to be a `art::Assns` instance. At least,
+   * the `Assns` type is required to have `left_t` and `right_t` definitions
+   * representing respectively the main data type and the associated one, and
+   * to respond to `begin()` and `end()` functions. The iterated object must
+   * also respond to `std::get<0>()` with a `art::Ptr<left_t>` and to
+   * `std::get<1>()` with a `art::Ptr<right_t>`.
+   * 
+   * Elements in the main collection not associated with any object will be
+   * recorded as such. If there is information for less than `minSize` main
+   * objects, more records will be added to mark the missing objects as not
+   * associated to anything.
+   * 
+   * Example:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * art::Assns<recob::Track, recob::Hit> trackHitAssns;
+   * // ...
+   * auto assData = makeAssociatedData(assns);
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * will have `assData` tagged as `recob::Hit`.
+   */
+  template <typename Tag, typename Assns>
+  auto makeAssociatedData(Assns const& assns, std::size_t minSize = 0);
+  
+  template <typename Assns>
+  auto makeAssociatedData(Assns const& assns, std::size_t minSize = 0)
+    { return makeAssociatedData<typename Assns::right_t>(assns, minSize); }
+  
   /**
    * @brief Creates and returns an associated data object.
    * @tparam Main type of main object to be associated
@@ -500,6 +553,29 @@ namespace proxy {
       return makeAssociatedData<Aux, Aux, Handle, Event>
         (std::forward<Handle>(handle), event, tag);
     }
+  
+  
+  /**
+   * @brief Creates and returns an associated data object.
+   * @tparam Tag the tag labelling this associated data (if omitted: `Aux`)
+   * @tparam MainColl type of the main collection object
+   * @tparam Assns type of the association object
+   * @param mainColl the main collection object
+   * @param assns association data object
+   * @return a new `AssociatedData` wrapping the information in `assns`
+   * @see `makeAssociatedData(Assns const&, std::size_t)`
+   * 
+   * This function operates like
+   * `makeAssociatedData(Assns const&, std::size_t)`, where the size is
+   * extracted from the main data collection.
+   */
+  template <typename Tag, typename MainColl, typename Assns>
+  auto makeAssociatedData(MainColl const& mainColl, Assns const& assns)
+    { return makeAssociatedData<Tag>(assns, mainColl.size()); }
+  
+  template <typename MainColl, typename Assns>
+  auto makeAssociatedData(MainColl const& mainColl, Assns const& assns)
+    { return makeAssociatedData<typename Assns::right_t>(mainColl, assns); }
   
   
   //----------------------------------------------------------------------------
@@ -584,6 +660,30 @@ namespace proxy {
         return
           createFromTag(event, std::forward<Handle>(mainHandle), auxInputTag);
       }
+    
+    /**
+     * @brief Create a association proxy collection using the specified tag.
+     * @tparam Event type of the event to read associations from (unused)
+     * @tparam Handle type of handle to the main data product (unused)
+     * @tparam MainArgs any type convertible to `art::InputTag` (unused)
+     * @param assns the associations to be wrapped
+     * @return a auxiliary data proxy object
+     * 
+     * The returned object exposes a random access container interface, with
+     * data indexed by the index of the corresponding object in the main
+     * collection.
+     */
+    template<typename Event, typename Handle, typename MainArgs, typename Assns>
+    static auto make
+      (Event const&, Handle&&, MainArgs const&, Assns const& assns)
+      {
+        static_assert(
+          std::is_convertible<typename Assns::right_t, aux_element_t>(),
+          "Improper right type for association."
+          );
+        return makeAssociatedData<data_tag>(assns);
+      }
+    
     
       private:
     template<typename Event, typename Handle>
@@ -715,7 +815,38 @@ namespace proxy {
 
   //----------------------------------------------------------------------------
   /**
-   * @brief Creates and returns an parallel data collection object.
+   * @brief Wraps a collection into a parallel data collection object.
+   * @tparam AuxColl type of parallel data data product container
+   * @tparam Aux type of parallel data to be associated to the main objects
+   *             (if omitted: `AuxColl::value_type`)
+   * @tparam Tag the tag labelling this associated data (if omitted: as `Aux`)
+   * @param data data collection to be wrapped
+   * @return a new `ParallelData` wrapping the information in `data`
+   * 
+   * The data collection must be non-temporary and it is treated as fulfilling
+   * @ref LArSoftProxyDefinitionParallelData "parallel data product"
+   * requirements.
+   * 
+   * Example:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * std::vector<recob::TrackFitHitInfo> trackData;
+   * // ...
+   * auto auxData = makeParallelData(trackData);
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * where the tag of the parallel data is now `recob::TrackFitHitInfo` and
+   * `auxData` behaviour becomes undefined as soon as `trackData` falls out of
+   * scope.
+   */
+  template <
+    typename AuxColl,
+    typename Aux = collection_value_t<AuxColl>,
+    typename Tag = Aux
+    >
+  auto makeParallelData(AuxColl const& data);
+  
+  
+  /**
+   * @brief Creates and returns a parallel data collection object.
    * @tparam AuxColl type of parallel data data product container
    * @tparam Aux type of parallel data to be associated to the main objects
    *             (if omitted: `AuxColl::value_type`)
@@ -746,7 +877,7 @@ namespace proxy {
   template <typename AuxColl, typename Event>
   auto makeParallelData(Event const& event, art::InputTag tag)
     {
-      return makeParallelData<AuxColl, typename AuxColl::value_type, Event>
+      return makeParallelData<AuxColl, collection_value_t<AuxColl>, Event>
         (event, tag);
     }
   
@@ -770,7 +901,7 @@ namespace proxy {
     typename Main,
     typename AuxColl,
     typename Aux,
-    typename AuxTag = typename AuxColl::value_type
+    typename AuxTag = collection_value_t<AuxColl>
     >
   struct ParallelDataProxyMakerBase {
     
@@ -820,9 +951,9 @@ namespace proxy {
      * @brief Create a parallel data proxy collection using the specified tag.
      * @tparam Event type of the event to read data from
      * @tparam Handle type of handle to the main data product
-     * @tparam MainArgs _(unused)_ any type convertible to `art::InputTag`
+     * @tparam MainArgs (_unused_) any type convertible to `art::InputTag`
      * @param event the event to read associations from
-     * @param mainHandle _(unused)_ handle to the main collection data product
+     * @param mainHandle (_unused_) handle to the main collection data product
      * @param auxInputTag the tag of the data to be read
      * @return a parallel data proxy object
      * 
@@ -839,6 +970,27 @@ namespace proxy {
         return
           createFromTag(event, std::forward<Handle>(mainHandle), auxInputTag);
       }
+    
+    /**
+     * @brief Create a parallel data proxy collection using the specified tag.
+     * @tparam Event (_unused_) type of the event to read data from
+     * @tparam Handle (_unused_) type of handle to the main data product
+     * @tparam MainArgs (_unused_) any type convertible to `art::InputTag`
+     * @param auxColl the collection to be wrapped
+     * @return a parallel data proxy object
+     * 
+     * The returned object exposes a random access container interface, with
+     * data indexed by the index of the corresponding object in the main
+     * collection.
+     */
+    template<typename Event, typename Handle, typename MainArgs>
+    static auto make
+      (Event const&, Handle&&, MainArgs const&, aux_collection_t const& auxColl)
+      {
+        return
+          makeParallelData<aux_collection_t, aux_element_t, data_tag>(auxColl);
+      }
+    
     
       private:
     template<typename Event, typename Handle>
@@ -1540,6 +1692,25 @@ namespace proxy {
   
   
   //----------------------------------------------------------------------------
+  /// Like `withParallelDataAs()`, but directly using the specified collection.
+  template <typename AuxTag, typename AuxColl>
+  auto wrapParallelDataAs(AuxColl const& auxColl) {
+    return details::WithParallelCollectionStruct
+      <collection_value_t<AuxColl>, std::tuple<>, AuxTag>({});
+  } // wrapParallelDataAs()
+  
+  /// Like `withParallelData()`, but directly using the specified collection.
+  template <typename AuxTag, typename AuxColl>
+  auto wrapParallelData(AuxColl const& auxColl)
+    { return wrapParallelDataAs<AuxTag>(auxColl); }
+  
+  /// Like `withParallelData()`, but directly using the specified collection.
+  template <typename AuxColl>
+  auto wrapParallelData(AuxColl const& auxColl)
+    { return wrapParallelDataAs<collection_value_t<AuxColl>>(auxColl); }
+  
+  
+  //----------------------------------------------------------------------------
   /// The same as `withAssociated()`, but it also specified a tag for the data.
   template <typename Aux, typename AuxTag, typename... Args>
   auto withAssociatedAs(Args&&... args) {
@@ -1650,6 +1821,119 @@ namespace proxy {
   
   
   //----------------------------------------------------------------------------
+  /// Like `withAssociatedAs()`, but directly using the specified association.
+  template <typename AuxTag, typename Assns>
+  auto wrapAssociatedAs(Assns const& assns) {
+    using Aux_t = typename Assns::right_t;
+    return details::WithAssociatedStruct<Aux_t, std::tuple<>, AuxTag>({});
+  } // wrapAssociatedAs()
+  
+  
+  /// Like `withAssociated()`, but directly using the specified association.
+  template <typename AuxTag, typename Assns>
+  auto wrapAssociated(Assns const& assns)
+    { return wrapAssociatedAs<AuxTag>(assns); }
+  
+  /// Like `withAssociated()`, but directly using the specified association.
+  template <typename Assns>
+  auto wrapAssociated(Assns const& assns)
+    { return wrapAssociatedAs<typename Assns::right_t>(assns); }
+  
+  
+  //----------------------------------------------------------------------------
+  /// The same as `withParallelData()`, but it also specified a tag.
+  template <typename Aux, typename AuxTag, typename... Args>
+  auto withCollectionAs(Args&&... args) {
+    using ArgTuple_t = std::tuple<Args&&...>;
+    ArgTuple_t argsTuple(std::forward<Args>(args)...);
+    return details::WithParallelCollectionStruct<Aux, ArgTuple_t, AuxTag>
+      (std::move(argsTuple));
+  } // withParallelDataAs()
+  
+  //----------------------------------------------------------------------------
+  /**
+   * @brief Helper function to merge an auxiliary data product into the proxy.
+   * @tparam Aux type of parallel data product requested
+   * @tparam Args types of constructor arguments for parallel data proxy
+   * @param args constructor arguments for the parallel data collection proxy
+   * @return a temporary object that `getCollection()` knows to handle
+   * 
+   * This function is meant to convey to `getCollection()` function the request
+   * for merging a collection proxy to carry auxiliary data structured as a
+   * collection parallel to the main collection.
+   * The function also bridges the information required to create a proxy to
+   * that auxiliary data.
+   * 
+   * This data will be tagged with the type `Aux`. To use a different type as
+   * tag, use `withParallelDataAs()` instead, specifying the tag as second
+   * template argument, e.g.:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * struct MCS {};
+   * auto tracks = proxy::getCollection<proxy::Tracks>(event, trackTag,
+   *   withParallelData<recob::TrackMomentum>(defaultMomTag),
+   *   withParallelDataAs<recob::TrackMomentum, MCS>(MCSmomTag)
+   *   );
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * The first momentum association (`"defaultMomTag"`) will be accessed by
+   * using the type `recob::TrackMomentum` as tag, while the second one will
+   * be accessed by the `MCS` tag (which is better not be defined in a local
+   * scope):
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * for (auto&& track: tracks) {
+   *   decltype(auto) trackMom = track.get<recob::TrackMomentum>();
+   *   decltype(auto) trackMCSmom = track.get<MCS>();
+   *   // ...
+   * }
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * 
+   * The default implementation of parallel data proxy returns for each element
+   * query an object with the same interface as the element of the parallel data
+   * collection. In the previous examples, that would be a constant reference to
+   * an object with `recob::TrackMomentum` interface.
+   * 
+   * 
+   * Customization of the parallel data proxy
+   * =========================================
+   * 
+   * To have a call like:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto tracks = getCollection<SpecialTracks>
+   *   (event, tag, withParallelData<recob::TrackMomentum>(momTag, "special"));
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * to create something different than the standard parallel data proxy,
+   * one needs to specialize `proxy::ParallelDataProxyMaker`, e.g.:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * namespace proxy {
+   *   template <>
+   *   struct ParallelDataProxyMaker<recob::Track, recob::TrackMomentum, SpecialTracks>
+   *     : public ParallelDataProxyMakerBase<recob::Track, std::vector<recob::TrackMomentum>, recob::TrackMomentum>
+   *   {
+   *     
+   *     template<typename Event, typename MainArgs>
+   *     static auto make(
+   *       Event const& event,
+   *       MainArgs const&,
+   *       art::InputTag assnTag,
+   *       std::string quality = "default"
+   *       )
+   *       {
+   *         ::SpecialTrackHitsProxy myAuxProxy;
+   *         // ... make it, and make it right
+   *         return myAuxProxy;
+   *       }
+   *     
+   *   }; // struct ParallelDataProxyMaker<recob::Track, recob::TrackMomentum, SpecialTracks>
+   *   
+   * } // namespace proxy
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * TODO this is the stub for withCollection()
+   */
+  template <typename Aux, typename... Args>
+  auto withCollection(Args&&... args)
+    { return withCollectionAs<Aux, Aux>(std::forward<Args>(args)...); }
+  
+  
+  //----------------------------------------------------------------------------
   /**
    * @brief Collection of data type definitions for collection proxies.
    * @tparam Proxy type of proxy the traits refer to
@@ -1731,7 +2015,7 @@ namespace proxy {
         auto mainHandle = event.template getValidHandle<main_collection_t>(tag);
         return makeCollectionProxy(
           *mainHandle,
-          withArgs.template createAssnProxyMaker<main_collection_proxy_t>
+          withArgs.template createAuxProxyMaker<main_collection_proxy_t>
             (event, mainHandle, tag)...
           );
       } // make()
@@ -1838,7 +2122,7 @@ namespace proxy {
     using main_collection_t = std::vector<T>;
     
     /// Type returned by the main collection indexing operator.
-    using main_element_t = typename main_collection_t::value_type;
+    using main_element_t = collection_value_t<main_collection_t>;
     
     /// Type of main collection proxy.
     using main_collection_proxy_t
@@ -1888,7 +2172,7 @@ namespace proxy {
         public:
       using container_t = Cont;
       
-      using value_type = typename container_t::value_type;
+      using value_type = collection_value_t<container_t>;
       using const_iterator = IndexBasedIterator;
       
       /// Default constructor (required by iterator protocol): an unusable iterator.
@@ -2090,7 +2374,7 @@ namespace proxy {
       using main_collection_t = MainColl;
       
       /// Type of the elements in the original collection.
-      using main_element_t = typename MainColl::value_type;
+      using main_element_t = collection_value_t<MainColl>;
       
       /// Constructor: wraps the specified collection.
       MainCollectionProxy(main_collection_t const& main): fMain(&main) {}
@@ -2144,9 +2428,6 @@ namespace proxy {
     
     
     //--------------------------------------------------------------------------
-    //--- stuff for parallel collections (a form of auxiliary data)
-    //--------------------------------------------------------------------------
-    
     /**
      * @brief Helper to create associated data proxy.
      * @tparam Aux type of data associated to the main one
@@ -2195,16 +2476,16 @@ namespace proxy {
         = typename proxy_maker_t<CollProxy>::aux_collection_proxy_t;
       
       /// Constructor: steals the arguments, to be used by
-      /// `createAssnProxyMaker()`.
+      /// `createAuxProxyMaker()`.
       WithAssociatedStructBase(ArgTuple&& args): args(std::move(args)) {}
       
       /// Creates the associated data proxy by means of `ProxyMaker`.
       template
         <typename CollProxy, typename Event, typename Handle, typename MainArgs>
-      auto createAssnProxyMaker
+      auto createAuxProxyMaker
         (Event const& event, Handle&& mainHandle, MainArgs const& mainArgs)
         { 
-          return createAssnProxyMakerImpl<CollProxy>(
+          return createAssnProxyMaker<CollProxy>(
             event, std::forward<Handle>(mainHandle), mainArgs,
             std::make_index_sequence<NArgs>()
             );
@@ -2223,7 +2504,7 @@ namespace proxy {
         typename CollProxy, typename Event, typename Handle, typename MainArgs,
         std::size_t... I
         >
-      auto createAssnProxyMakerImpl(
+      auto createAssnProxyMaker(
         Event const& event, Handle&& mainHandle, MainArgs const& mainArgs,
         std::index_sequence<I...>
         )
@@ -2263,7 +2544,7 @@ namespace proxy {
      */
     template <
       typename AuxColl,
-      typename Aux /* = typename AuxColl::value_type */,
+      typename Aux /* = collection_value_t<value_type> */,
       typename Tag /* = Aux */
       >
     class ParallelData {
@@ -2847,6 +3128,30 @@ namespace proxy {
   //----------------------------------------------------------------------------
   //--- makeAssociatedData() implementations
   //----------------------------------------------------------------------------
+  template <typename Tag, typename Assns>
+  auto makeAssociatedData(Assns const& assns, std::size_t minSize /* = 0 */)
+  {
+    using Main_t = typename Assns::left_t;
+    using Aux_t = typename Assns::right_t;
+    using AssociatedData_t = details::AssociatedData<Main_t, Aux_t, Tag>;
+    
+    // associationRangeBoundaries() produces iterators to association elements,
+    // (i.e. tuples)
+    using std::begin;
+    using std::end;
+    auto ranges = details::associationRangeBoundaries<0U>
+      (begin(assns), end(assns), minSize);
+    // we convert those iterators into iterators to the right associated item
+    // (it takes a few steps)
+    using group_ranges_t = typename AssociatedData_t::group_ranges_t;
+    return AssociatedData_t(
+      group_ranges_t
+        (typename group_ranges_t::boundaries_t(ranges.begin(), ranges.end()))
+      );
+  } // makeAssociatedData(assns)
+  
+  
+  //----------------------------------------------------------------------------
   template <typename Main, typename Aux, typename Tag, typename Event>
   auto makeAssociatedData
     (Event const& event, art::InputTag tag, std::size_t minSize /* = 0 */)
@@ -2856,19 +3161,10 @@ namespace proxy {
     using AssociatedData_t = details::AssociatedData<Main_t, Aux_t, Tag>;
     using Assns_t = typename AssociatedData_t::assns_t;
     
-    auto const& assns = *(event.template getValidHandle<Assns_t>(tag));
-    // associationRangeBoundaries() produces iterators to association elements,
-    // (i.e. tuples)
-    auto ranges = details::associationRangeBoundaries<0U>
-      (assns.begin(), assns.end(), minSize);
-    // we convert those iterators into iterators to the right associated item
-    // (it takes a few steps)
-    using group_ranges_t = typename AssociatedData_t::group_ranges_t;
-    return AssociatedData_t(
-      group_ranges_t
-        (typename group_ranges_t::boundaries_t(ranges.begin(), ranges.end()))
-      );
-  } // makeAssociatedData(size)
+    return
+      makeAssociatedData<Tag>(*(event.template getValidHandle<Assns_t>(tag)));
+    
+  } // makeAssociatedData(tag)
   
   
   //----------------------------------------------------------------------------
@@ -2877,7 +3173,7 @@ namespace proxy {
     (Handle&& handle, Event const& event, art::InputTag tag)
   {
     // Handle::value_type is the main data product type (a collection)
-    using Main_t = typename Handle::value_type::value_type;
+    using Main_t = collection_value_t<typename Handle::value_type>;
     using Aux_t = Aux;
     return makeAssociatedData<Main_t, Aux_t, Tag>(event, tag, handle->size());
   } // makeAssociatedData(handle)
@@ -2887,14 +3183,24 @@ namespace proxy {
   //----------------------------------------------------------------------------
   //--- makeParallelData() implementations
   //----------------------------------------------------------------------------
-  template <typename AuxColl, typename Aux, typename Tag, typename Event>
-  auto makeParallelData(Event const& event, art::InputTag tag)
-  {
-    using AuxColl_t = AuxColl;
-    using Aux_t = Aux;
-    using ParallelData_t = details::ParallelData<AuxColl_t, Aux_t, Tag>;
+  template <
+    typename AuxColl,
+    typename Aux /* = collection_value_t<AuxColl>*/,
+    typename Tag /* = Aux */
+    >
+  auto makeParallelData(AuxColl const& data) {
     
-    return ParallelData_t(*(event.template getValidHandle<AuxColl_t>(tag)));
+    // Ahh, simplicity.
+    return details::ParallelData<AuxColl, Aux, Tag>(data);
+    
+  } // makeParallelData(AuxColl)
+  
+  
+  //----------------------------------------------------------------------------
+  template <typename AuxColl, typename Aux, typename Tag, typename Event>
+  auto makeParallelData(Event const& event, art::InputTag tag) {
+    return makeParallelData<AuxColl, Aux, Tag>
+      (*(event.template getValidHandle<AuxColl>(tag)));
   } // makeParallelData()
   
   

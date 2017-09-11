@@ -862,9 +862,9 @@ namespace proxy {
         auto proxy = makeCollectionProxy(
           *mainHandle,
           withAssociatedAs<recob::Hit, Tracks::HitTag>()
-            .template createAssnProxyMaker<main_collection_proxy_t>
+            .template createAuxProxyMaker<main_collection_proxy_t>
             (event, mainHandle, tag),
-          withArgs.template createAssnProxyMaker<main_collection_proxy_t>
+          withArgs.template createAuxProxyMaker<main_collection_proxy_t>
             (event, mainHandle, tag)...
           );
         return proxy;
