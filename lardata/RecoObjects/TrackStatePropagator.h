@@ -28,6 +28,9 @@ namespace trkf {
   /// the code and the interface are optimized for usage with classes based on SMatrix (e.g. TrackState) and
   /// for the needs of TrackKalmanFitter.
   ///
+  /// While the propagated position can be directly computed, accounting for the material effects
+  /// in the covariance matrix requires an iterative procedure in case of long propagations distances.
+  ///
   /// For configuration options see TrackStatePropagator#Config
   ///
 
@@ -55,7 +58,7 @@ namespace trkf {
        };
       fhicl::Atom<int> maxNit {
 	Name("maxNit"),
-	Comment("Maximum number of iterations."),
+	Comment("Maximum number of iterations when applying material effects."),
 	10
        };
       fhicl::Atom<double> tcut {
