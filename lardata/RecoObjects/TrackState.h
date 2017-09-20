@@ -25,11 +25,14 @@ namespace trkf {
    const double pmass = 0.938272;      // Proton
   }
 
+  /// \file  lardata/RecoObjects/TrackState.h
   /// \class HitState
   ///
-  /// \brief Class for a measurement on a recob::tracking::Plane defined by a wire and the drift direction.
+  /// \brief Class for a measurement on a recob::tracking::Plane (plane defined by a wire and the drift direction).
   ///
-  /// \author G. Cerati
+  /// \author  G. Cerati (FNAL, MicroBooNE)
+  /// \date    2017
+  /// \version 1.0
   ///
   /// This class collects the measurement information from a Hit on wire.
   /// The information are the measured (1D) position, its error, and the measurement plane (defined by the wire and the drift direction)
@@ -58,11 +61,14 @@ namespace trkf {
     Plane             fPlane;
   };
 
+  /// \file  lardata/RecoObjects/TrackState.h
   /// \class TrackState
   ///
   /// \brief Class for track parameters (and errors) defined on a recob::tracking::Plane.
   ///
-  /// \author G. Cerati
+  /// \author  G. Cerati (FNAL, MicroBooNE)
+  /// \date    2017
+  /// \version 1.0
   ///
   /// This class collects the track parameters (and errors) defined on a recob::tracking::Plane.
   /// It stores the 5d parameters and covariance, plus the global position and momentum.
@@ -78,12 +84,20 @@ namespace trkf {
       fPos = Point_t(par6d[0],par6d[1],par6d[2]);
       fMom = Point_t(par6d[3],par6d[4],par6d[5]);
     }
+    //
+    /// track parameters defined on the plane
     const SVector5&     parameters() const { return fTrackStatePar; }
+    /// track parameter covariance matrix on the plane
     const SMatrixSym55& covariance() const { return fTrackStateCov; }
+    /// plane where the parameters are defined
     const Plane&        plane()      const { return fPlane; }
+    /// position of the track
     const Point_t&      position()   const { return fPos; }
+    /// momentum of the track
     const Vector_t&     momentum()   const { return fMom; }
+    /// particle id hypthesis of the track
     int                 pID()        const { return fPid; }
+    /// mass hypthesis of the track
     double              mass()       const {
       if (abs(fPid)==13) { return mumass; } 
       if (abs(fPid)==211) { return pimass; }
@@ -91,11 +105,15 @@ namespace trkf {
       if (abs(fPid)==2212) { return pmass; }
       return util::kBogusD;
     }
+    /// track parameters in global cartesian coordinates
     SVector6     parameters6D() const { return SVector6(fPos.X(),fPos.Y(),fPos.Z(),fMom.X(),fMom.Y(),fMom.Z()); }
+    /// track parameter covariance matrix in global cartesian coordinates
     SMatrixSym66 covariance6D() const { return fPlane.Local5DToGlobal6DCovariance(fTrackStateCov, true, fMom); }
     //
+    /// is the track momentum along the plane direction?
     bool isTrackAlongPlaneDir() const { return fMom.Dot(fPlane.direction())>0; }
     //
+    /// Printout information
     std::ostream& dump(std::ostream& out = std::cout) const {
       out << "TrackState with pID=" << pID() << " mass=" << mass()
 	  << "\npars=" << parameters() << " position=" << position() << " momentum=" << momentum()
@@ -128,12 +146,12 @@ namespace trkf {
     }
     //
   private:
-    SVector5     fTrackStatePar;
-    SMatrixSym55 fTrackStateCov;
-    Plane        fPlane;
-    int          fPid;
-    Point_t      fPos;
-    Vector_t     fMom;
+    SVector5     fTrackStatePar; ///< track parameters defined on the plane
+    SMatrixSym55 fTrackStateCov; ///< track parameter covariance matrix on the plane
+    Plane        fPlane; ///< plane where the parameters are defined
+    int          fPid; ///< particle id hypthesis of the track
+    Point_t      fPos; ///< position of the track (cached)
+    Vector_t     fMom; ///< momentum of the track (cached)
   };
 
 }
