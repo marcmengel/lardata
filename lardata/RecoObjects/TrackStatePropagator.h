@@ -1,18 +1,6 @@
 #ifndef TRACKSTATEPROPAGATOR_H
 #define TRACKSTATEPROPAGATOR_H
 
-/// \class TrackStatePropagator
-///
-/// \brief Class for propagation of a trkf::TrackState to a recob::tracking::Plane
-///
-/// \author G. Cerati
-///
-/// This class holds the functionalities needed to propagate a trkf::TrackState to a recob::tracking::Plane.
-/// While the core physics is mainly duplicated from trkf::Propagator and its derived classes (kudos to H. Greenlee),
-/// the code and the interface are optimized for usage with classes based on SMatrix (e.g. TrackState) and
-/// for the needs of TrackKalmanFitter.
-///
-
 #include <memory>
 
 #include "lardata/RecoObjects/TrackState.h"
@@ -26,6 +14,25 @@ namespace detinfo {
 }
 
 namespace trkf {
+
+  /// \class TrackStatePropagator
+  ///
+  /// \brief Class for propagation of a trkf::TrackState to a recob::tracking::Plane
+  ///
+  /// \author  G. Cerati (FNAL, MicroBooNE)
+  /// \date    2017
+  /// \version 1.0
+  ///
+  /// This class holds the functionalities needed to propagate a trkf::TrackState to a recob::tracking::Plane.
+  /// While the core physics is mainly duplicated from trkf::Propagator and its derived classes (kudos to H. Greenlee),
+  /// the code and the interface are optimized for usage with classes based on SMatrix (e.g. TrackState) and
+  /// for the needs of TrackKalmanFitter.
+  ///
+  /// While the propagated position can be directly computed, accounting for the material effects
+  /// in the covariance matrix requires an iterative procedure in case of long propagations distances.
+  ///
+  /// For configuration options see TrackStatePropagator#Config
+  ///
 
   class TrackStatePropagator
   {
@@ -41,27 +48,33 @@ namespace trkf {
       using Comment = fhicl::Comment;
       fhicl::Atom<double> minStep {
 	Name("minStep"),
-	Comment("Minimum propagation step length guaranteed.")
+	Comment("Minimum propagation step length guaranteed."),
+	1.0
        };
       fhicl::Atom<double> maxElossFrac {
 	Name("maxElossFrac"),
-	Comment("Maximum propagation step length based on fraction of energy loss.")
+	Comment("Maximum propagation step length based on fraction of energy loss."),
+	0.1
        };
       fhicl::Atom<int> maxNit {
 	Name("maxNit"),
-	Comment("Maximum number of iterations.")
+	Comment("Maximum number of iterations when applying material effects."),
+	10
        };
       fhicl::Atom<double> tcut {
 	Name("tcut"),
-	Comment("Maximum delta ray energy for dE/dx.")
+	Comment("Maximum delta ray energy for dE/dx."),
+	10.
        };
       fhicl::Atom<double> wrongDirDistTolerance {
 	Name("wrongDirDistTolerance"),
-	Comment("Allowed propagation distance in the wrong direction.")
+	Comment("Allowed propagation distance in the wrong direction."),
+	0.01
        };
       fhicl::Atom<bool> propPinvErr {
 	Name("propPinvErr"),
-	Comment("Propagate error on 1/p or not (in order to avoid infs, it should be set to false when 1/p not updated).")
+	Comment("Propagate error on 1/p or not (in order to avoid infs, it should be set to false when 1/p not updated)."),
+	false
        };
     };
     using Parameters = fhicl::Table<Config>;
