@@ -90,6 +90,15 @@
  * 
  * It also explains some implementation choices.
  * 
+ * @bug The current design is flawed in the support of (sub)proxies as direct
+ *      elements of a proxy. The merged elements are implemented as base classes
+ *      of the proxies, to allow their potentially customized interface to
+ *      percolate to the proxy. Since an indirect base class can't appear also
+ *      as direct base class, trying to merge a proxy causes all sorts of
+ *      conflicts between base classes. The stub code `withCollectionProxyAs()`
+ *      and related is showing that problem on some (all?) usages.
+ *      [the author hasn't tried to create a working combination for it]
+ * 
  * @section LArSoftProxySimple The simplest new proxy
  * 
  * In its simplest form, a proxy may be created with no customization at all:
@@ -353,6 +362,43 @@ namespace proxy {
   using collection_value_t = typename collection_value_type<Coll>::type;
   
   
+  /// Trait of type returned when accessing an element of collection `Coll`.
+  template <typename Coll>
+  struct collection_value_access_type {
+      private:
+    static auto getBegin(Coll&& coll) { using std::begin; return begin(coll); }
+    
+      public:
+    using type = decltype(*getBegin(std::declval<Coll>()));
+    using value_type = collection_value_t<Coll>;
+    
+  }; // struct collection_value_access_type
+  
+  /// Type returned when accessing an element of collection `Coll`.
+  template <typename Coll>
+  using collection_value_access_t
+    = typename collection_value_access_type<Coll>::type;
+  
+  
+  /// Trait of type returned when accessing an element of collection `Coll`.
+  template <typename Coll>
+  struct collection_value_constant_access_type {
+      private:
+    static auto getCBegin(Coll&& coll)
+      { using std::cbegin; return cbegin(coll); }
+    
+      public:
+    using type = decltype(*getCBegin(std::declval<Coll>()));
+    using value_type = collection_value_t<Coll>;
+    
+  }; // struct collection_value_constant_access_type
+  
+  /// Type returned when accessing an element of collection `Coll`.
+  template <typename Coll>
+  using collection_value_constant_access_t
+    = typename collection_value_constant_access_type<Coll>::type;
+  
+  
   //----------------------------------------------------------------------------
   namespace details {
     
@@ -401,7 +447,7 @@ namespace proxy {
       AuxTag
       >;
 
-    template <typename Aux, typename AuxTag = Aux>
+    template <typename Aux, typename AuxTag, typename AuxColl = void>
     struct ParallelDataProxyMakerWrapper;
     
     template <typename Aux, typename ArgTuple, typename AuxTag = Aux>
@@ -411,8 +457,33 @@ namespace proxy {
       ParallelDataProxyMakerWrapper<Aux, AuxTag>::template maker_t,
       AuxTag
       >;
-
-
+    
+    template
+      <typename Aux, typename ArgTuple, typename AuxColl, typename AuxTag = Aux>
+    using WithWrappedParallelCollectionStruct = WithAssociatedStructBase<
+      Aux,
+      ArgTuple,
+      ParallelDataProxyMakerWrapper<Aux, AuxTag, AuxColl>::template maker_t,
+      AuxTag
+      >;
+    
+    
+    //--------------------------------------------------------------------------
+    template <
+      typename AuxProxyColl,
+      typename Aux = collection_value_t<AuxProxyColl>,
+      typename Tag = Aux
+      >
+    struct ProxyAsParallelData;
+    
+    template <
+      typename AuxProxy,
+      typename ArgTuple,
+      typename AuxTag = AuxProxy
+      >
+    class WithProxyAsAuxStructBase;
+    
+    
     //--------------------------------------------------------------------------
     template <typename ProxyElement, typename... AuxData>
     auto makeCollectionProxyElement(
@@ -428,6 +499,12 @@ namespace proxy {
     //--------------------------------------------------------------------------
     
   } // namespace details
+  
+  
+  //----------------------------------------------------------------------------
+  // forward declarations
+  template <typename CollProxy, typename Event, typename... OptionalArgs>
+  auto getCollection(Event const&, OptionalArgs&&...);
   
   
   //----------------------------------------------------------------------------
@@ -1011,7 +1088,8 @@ namespace proxy {
    * @tparam Aux type of datum (element) to associate to ("right")
    * @tparam CollProxy type of proxy this associated data works for
    * @tparam Tag tag for the association proxy to be created
-   * @see `withAssociated()`
+   * @tparam AuxColl type of the auxiliary data (default: `std::vector<Aux>`)
+   * @see `withParallelDataAs()`, `wrapParallelDataAs()`
    * 
    * This class is (indirectly) called when using `proxy::withParallelData()`
    * in `getCollection()`.
@@ -1036,17 +1114,19 @@ namespace proxy {
    * The last template argument is designed for specialization of auxiliary data
    * in the context of a specific proxy type.
    */
-  template
-    <typename Main, typename Aux, typename CollProxy, typename Tag = Aux>
+  template<
+    typename Main, typename Aux, typename CollProxy, typename Tag = Aux,
+    typename AuxColl = std::vector<Aux>
+    >
   class ParallelDataProxyMaker
-    : public ParallelDataProxyMakerBase<Main, std::vector<Aux>, Aux, Tag>
+    : public ParallelDataProxyMakerBase<Main, AuxColl, Aux, Tag>
   {
     //
     // Note that this implementation is here only to document how to derive
     // a ParallelDataProxyMaker (specialization) from
     // ParallelDataProxyMakerBase. It's just mirroring the base class.
     //
-    using base_t = ParallelDataProxyMakerBase<Main, std::vector<Aux>, Aux, Tag>;
+    using base_t = ParallelDataProxyMakerBase<Main, AuxColl, Aux, Tag>;
     
       public:
     
@@ -1104,6 +1184,160 @@ namespace proxy {
   
   /// @}
   // end Parallel data
+  
+  
+  /**
+   * @defgroup LArSoftProxiesAuxProxy Infrastructure for proxies as auxiliary
+   *           data.
+   * @ingroup LArSoftProxyCustom
+   * @brief Infrastructure to use a collection proxy as auxiliary data for
+   *        another proxy.
+   * 
+   * @{
+   */
+  
+  //----------------------------------------------------------------------------
+  template <
+    typename Tag /* = Aux */,
+    typename Aux /* = collection_value_t<AuxProxyColl>*/,
+    typename AuxProxyColl
+    >
+  auto makeProxyAsParallelData(AuxProxyColl&& auxProxy)
+    {
+      return details::ProxyAsParallelData<AuxProxyColl, Aux, Tag>
+        (std::move(auxProxy));
+    } // makeProxyAsParallelData()
+  
+  
+  
+  //----------------------------------------------------------------------------
+  /**
+   * @brief Creates an parallel data wrapper for the specified types.
+   * @tparam Main type of main datum (element)
+   * @tparam AuxColl type of the parallel data collection
+   * @tparam Aux type of the parallel data element
+   * @tparam AuxTag tag labelling the parallel data collection
+   * 
+   * Usually, `AuxTag` is also the type of datum (element) in the parallel
+   * collection.
+   * 
+   * This class works as a base class for `ParallelDataProxyMaker` so that
+   * the specializations of the latter can still inherit from this one if they
+   * its facilities.
+   */
+  template <
+    typename Main,
+    typename AuxProxy,
+    typename AuxTag = AuxProxy
+    >
+  struct ProxyAsAuxProxyMakerBase {
+    
+    /// Tag labelling the associated data we are going to produce.
+    using data_tag = AuxTag;
+    
+    /// Type of the main datum.
+    using main_element_t = Main;
+    
+    /// Tag-type of the auxiliary proxy (not the type of the proxy!).
+    using aux_proxy_t = AuxProxy;
+    
+    /**
+     * @brief Create a parallel data proxy collection using the specified tag.
+     * @tparam Event type of the event to read data from
+     * @tparam Handle (_unused_) type of handle to the main data product
+     * @tparam MainArgs (_unused_) any type convertible to `art::InputTag`
+     * @tparam AuxArgs type of arguments for the creation of the auxiliary proxy
+     * @param event event to create the proxy from
+     * @param auxProxyTag tag for the creation of the auxiliary collection proxy
+     * @param args other arguments for the creation of the auxiliary proxy
+     * @return a auxiliary proxy data object
+     * 
+     * The returned object exposes a random access container interface, with
+     * data indexed by the index of the corresponding object in the main
+     * collection.
+     * 
+     * The tag of the main collection proxy is ignored even if present, and
+     * the caller must specify it.
+     */
+    template
+      <typename Event, typename Handle, typename MainArgs, typename... AuxArgs>
+    static auto make(
+      Event const& event, Handle&&, MainArgs const&, art::InputTag auxProxyTag,
+      AuxArgs&&... args
+      )
+      {
+        auto auxProxy = makeAuxiliaryProxy
+          (event, auxProxyTag, std::forward<AuxArgs>(args)...);
+        return makeProxyAsParallelData
+          <data_tag, collection_value_t<decltype(auxProxy)>>
+          (std::move(auxProxy));
+      }
+    
+    
+      private:
+    
+    /// Creates the proxy to be used as parallel data.
+    template <typename Event, typename... AuxArgs>
+    static auto makeAuxiliaryProxy(
+      Event const& event,
+      art::InputTag auxProxyTag,
+      AuxArgs&&... args
+    )
+      { 
+        return getCollection<aux_proxy_t>
+          (event, auxProxyTag, std::forward<AuxArgs>(args)...);
+      }
+    
+    
+  }; // struct ProxyAsAuxProxyMakerBase<>
+  
+  
+  //--------------------------------------------------------------------------
+  /**
+   * @brief Creates an auxiliary proxy wrapper for the specified types.
+   * @tparam Main type of main datum (element) to associate from ("left")
+   * @tparam AuxProxy type of proxy collection to be associated
+   * @tparam CollProxy type of proxy this associated data works for
+   * @tparam Tag tag for the association proxy to be created
+   * @see `withCollectionProxy()`
+   * 
+   * This class is (indirectly) called when using `proxy::withCollectionProxy()`
+   * in `getCollection()`.
+   * Its task is to supervise the creation of the collection proxy that is used
+   * as auxiliary data for the main data type.
+   * The interface required by `withCollectionProxy()` includes:
+   * TODO
+   * * a static `make()` method creating and returning the auxiliary data
+   *   proxy with arguments an event, the main data product handle, a template
+   *   argument representing the main collection information, and all the
+   *   arguments required for the creation of the auxiliary collection proxy
+   *   (coming from `withCollectionProxy()`); equivalent to the signature:
+   *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   *   template <typename Event, typename Handle, typename MainArg, typename... Args>
+   *   auto make(Event const&, Handle&&, MainArg const&, Args&&...);
+   *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * 
+   * This class can be specialized.
+   * The default implementation just uses `getCollection()` to create the
+   * auxiliary proxy, and merges it to the main collection proxy in a fashion
+   * similar to parallel data.
+   * 
+   * The template argument `CollProxy` is designed for specialization of
+   * auxiliary data in the context of a specific proxy type.
+   */
+  template <
+    typename Main,
+    typename AuxProxy,
+    typename CollProxy,
+    typename Tag = collection_value_t<AuxProxy>
+    >
+  class ProxyAsAuxProxyMaker
+    : public ProxyAsAuxProxyMakerBase<Main, AuxProxy, Tag>
+    {};
+  
+  
+  /// @}
+  // end Proxy as auxiliary data
   
   
   /**
@@ -1225,7 +1459,7 @@ namespace proxy {
     
     /// Tuple of elements (expected to be tagged types).
     using aux_elements_t = typename details::SubstituteWithAuxList
-      <typename CollProxy::aux_collections_t>::type;
+      <typename collection_proxy_t::aux_collections_t>::type;
     
     /// Constructor: sets the element index, the main element and steals
     /// auxiliary data.
@@ -1382,6 +1616,7 @@ namespace proxy {
    * @{
    */
   
+  
   //----------------------------------------------------------------------------
   /**
    * @brief Base representation of a collection of proxied objects.
@@ -1471,7 +1706,7 @@ namespace proxy {
      * The structure exposes the `i`-th element in the main collection, plus all
      * objects that are associated to it.
      */
-    element_proxy_t operator[] (std::size_t i) const
+    element_proxy_t const operator[] (std::size_t i) const
       {
         return details::makeCollectionProxyElement<element_proxy_t>
           (i, getMainAt(i), aux<AuxColls>().operator[](i)...);
@@ -1695,15 +1930,17 @@ namespace proxy {
   /// Like `withParallelDataAs()`, but directly using the specified collection.
   template <typename AuxTag, typename AuxColl>
   auto wrapParallelDataAs(AuxColl const& auxColl) {
-    return details::WithParallelCollectionStruct
-      <collection_value_t<AuxColl>, std::tuple<>, AuxTag>({});
+    std::tuple<AuxColl const&> args = { auxColl };
+    return details::WithWrappedParallelCollectionStruct
+      <collection_value_t<AuxColl>, decltype(args), AuxColl, AuxTag>
+      (std::move(args));
   } // wrapParallelDataAs()
-  
+  /*
   /// Like `withParallelData()`, but directly using the specified collection.
   template <typename AuxTag, typename AuxColl>
   auto wrapParallelData(AuxColl const& auxColl)
     { return wrapParallelDataAs<AuxTag>(auxColl); }
-  
+  */
   /// Like `withParallelData()`, but directly using the specified collection.
   template <typename AuxColl>
   auto wrapParallelData(AuxColl const& auxColl)
@@ -1841,96 +2078,54 @@ namespace proxy {
   
   
   //----------------------------------------------------------------------------
-  /// The same as `withParallelData()`, but it also specified a tag.
-  template <typename Aux, typename AuxTag, typename... Args>
-  auto withCollectionAs(Args&&... args) {
+  /// The same as `withCollectionProxy()`, but it also specified a tag.
+  /// @bug Broken in many ways. Do not use.
+  template <typename AuxProxy, typename AuxTag, typename... Args>
+  auto withCollectionProxyAs(Args&&... args) {
     using ArgTuple_t = std::tuple<Args&&...>;
+    static_assert(
+      std::is_convertible
+        <std::decay_t<std::tuple_element_t<0U, ArgTuple_t>>, art::InputTag>(),
+      "The first argument of withCollectionProxyAs() must be art::InputTag."
+      );
     ArgTuple_t argsTuple(std::forward<Args>(args)...);
-    return details::WithParallelCollectionStruct<Aux, ArgTuple_t, AuxTag>
+    return details::WithProxyAsAuxStructBase<AuxProxy, ArgTuple_t, AuxTag>
       (std::move(argsTuple));
-  } // withParallelDataAs()
+  } // withCollectionProxyAs()
   
   //----------------------------------------------------------------------------
   /**
-   * @brief Helper function to merge an auxiliary data product into the proxy.
-   * @tparam Aux type of parallel data product requested
+   * @brief Helper function to merge an auxiliary proxy into the proxy.
+   * @tparam AuxProxy type (proxy tag) of auxiliary collection proxy requested
    * @tparam Args types of constructor arguments for parallel data proxy
    * @param args constructor arguments for the parallel data collection proxy
    * @return a temporary object that `getCollection()` knows to handle
+   * @bug Broken in many ways. Do not use.
    * 
    * This function is meant to convey to `getCollection()` function the request
-   * for merging a collection proxy to carry auxiliary data structured as a
-   * collection parallel to the main collection.
+   * for merging a collection proxy to carry auxiliary data structured as
+   * another collection proxy, parallel to the main collection.
    * The function also bridges the information required to create a proxy to
    * that auxiliary data.
    * 
-   * This data will be tagged with the type `Aux`. To use a different type as
-   * tag, use `withParallelDataAs()` instead, specifying the tag as second
-   * template argument, e.g.:
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * struct MCS {};
-   * auto tracks = proxy::getCollection<proxy::Tracks>(event, trackTag,
-   *   withParallelData<recob::TrackMomentum>(defaultMomTag),
-   *   withParallelDataAs<recob::TrackMomentum, MCS>(MCSmomTag)
-   *   );
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * The first momentum association (`"defaultMomTag"`) will be accessed by
-   * using the type `recob::TrackMomentum` as tag, while the second one will
-   * be accessed by the `MCS` tag (which is better not be defined in a local
-   * scope):
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * for (auto&& track: tracks) {
-   *   decltype(auto) trackMom = track.get<recob::TrackMomentum>();
-   *   decltype(auto) trackMCSmom = track.get<MCS>();
-   *   // ...
-   * }
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * 
-   * The default implementation of parallel data proxy returns for each element
-   * query an object with the same interface as the element of the parallel data
-   * collection. In the previous examples, that would be a constant reference to
-   * an object with `recob::TrackMomentum` interface.
+   * This data will be tagged with the type `AuxProxy`. To use a different type
+   * as tag, use `withCollectionProxyAs()` instead, specifying the tag as second
+   * template argument.
    * 
    * 
-   * Customization of the parallel data proxy
-   * =========================================
+   * Customization of the auxiliary collection proxy
+   * ================================================
    * 
-   * To have a call like:
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * auto tracks = getCollection<SpecialTracks>
-   *   (event, tag, withParallelData<recob::TrackMomentum>(momTag, "special"));
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * to create something different than the standard parallel data proxy,
-   * one needs to specialize `proxy::ParallelDataProxyMaker`, e.g.:
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * namespace proxy {
-   *   template <>
-   *   struct ParallelDataProxyMaker<recob::Track, recob::TrackMomentum, SpecialTracks>
-   *     : public ParallelDataProxyMakerBase<recob::Track, std::vector<recob::TrackMomentum>, recob::TrackMomentum>
-   *   {
-   *     
-   *     template<typename Event, typename MainArgs>
-   *     static auto make(
-   *       Event const& event,
-   *       MainArgs const&,
-   *       art::InputTag assnTag,
-   *       std::string quality = "default"
-   *       )
-   *       {
-   *         ::SpecialTrackHitsProxy myAuxProxy;
-   *         // ... make it, and make it right
-   *         return myAuxProxy;
-   *       }
-   *     
-   *   }; // struct ParallelDataProxyMaker<recob::Track, recob::TrackMomentum, SpecialTracks>
-   *   
-   * } // namespace proxy
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * TODO this is the stub for withCollection()
+   * The customization of auxiliary collection proxy happens in a fashion
+   * similar to the customization presented in `withParallelData()`.
+   * The customization point here is `ProxyAsAuxProxyMaker`.
    */
-  template <typename Aux, typename... Args>
-  auto withCollection(Args&&... args)
-    { return withCollectionAs<Aux, Aux>(std::forward<Args>(args)...); }
+  template <typename AuxProxy, typename... Args>
+  auto withCollectionProxy(Args&&... args)
+    {
+      return
+        withCollectionProxyAs<AuxProxy, AuxProxy>(std::forward<Args>(args)...);
+    }
   
   
   //----------------------------------------------------------------------------
@@ -2470,7 +2665,7 @@ namespace proxy {
       
         public:
       
-      /// Type association proxy type created for the specified `CollProxy`.
+      /// Type of association proxy created for the specified `CollProxy`.
       template <typename CollProxy>
       using aux_collection_proxy_t
         = typename proxy_maker_t<CollProxy>::aux_collection_proxy_t;
@@ -2522,12 +2717,20 @@ namespace proxy {
     //--------------------------------------------------------------------------
     //--- stuff for parallel data collection (a form of auxiliary data)
     //--------------------------------------------------------------------------
-    template <typename Aux, typename AuxTag /* = Aux */>
+    template <typename Aux, typename AuxTag, typename AuxColl /* = void */>
     struct ParallelDataProxyMakerWrapper {
       template <typename CollProxy>
       using maker_t = ParallelDataProxyMaker
+        <typename CollProxy::main_element_t, Aux, CollProxy, AuxTag, AuxColl>;
+    }; // struct ParallelDataProxyMakerWrapper<Aux, AuxColl>
+    
+    template <typename Aux, typename AuxTag>
+    struct ParallelDataProxyMakerWrapper<Aux, AuxTag, void> {
+      template <typename CollProxy>
+      using maker_t = ParallelDataProxyMaker
         <typename CollProxy::main_element_t, Aux, CollProxy, AuxTag>;
-    };
+    }; // struct ParallelDataProxyMakerWrapper<Aux>
+    
     
     
     /**
@@ -2544,23 +2747,31 @@ namespace proxy {
      */
     template <
       typename AuxColl,
-      typename Aux /* = collection_value_t<value_type> */,
+      typename Aux /* = collection_value_t<AuxColl> */,
       typename Tag /* = Aux */
       >
     class ParallelData {
       using This_t = ParallelData<AuxColl, Aux, Tag>; ///< This type.
       
+      /// Type of auxiliary collection.
       using parallel_data_t = AuxColl;
-      using aux_t = Aux;
+      
+      /// Type of the value of auxiliary collection element.
+      using aux_t = Aux; // unused
+      
+      /// Type returned when accessing an auxiliary collection element.
+      using aux_element_t = collection_value_constant_access_t<AuxColl>;
       
       using parallel_data_iterator_t = typename parallel_data_t::const_iterator;
       
         public:
       using tag = Tag; ///< Tag of this association proxy.
       
-      /// Type of auxiliary data associated with a main item.
-      using auxiliary_data_t = util::add_tag_t<aux_t, tag> const&;
+      /// Type returned when accessing auxiliary data.
+      using auxiliary_data_t
+        = decltype(util::makeTagged<tag>(std::declval<aux_element_t>()));
       
+      /// Constructor: points to the specified data collection.
       ParallelData(parallel_data_t const& data)
         : fData(&data)
         {}
@@ -2580,7 +2791,7 @@ namespace proxy {
             std::is_convertible<decltype(getElement(index)), auxiliary_data_t>(),
             "Inconsistent data types."
             );
-          return getElement(index); 
+          return getElement(index);
         }
       
       /// Returns whether this data is labeled with the specified tag.
@@ -3015,6 +3226,132 @@ namespace proxy {
       group_ranges_t fGroups;
       
     }; // class AssociatedData<>
+    
+    
+    
+    //--------------------------------------------------------------------------
+    //---  Stuff for collection proxy as auxiliary data
+    //--------------------------------------------------------------------------
+    /**
+     * @brief Object presenting a proxy as parallel data for another one.
+     * @tparam AuxProxyColl type of the parallel data collection
+     * @tparam Aux type of the associated object
+     * @tparam Tag tag this data is labeled with
+     * 
+     * This object inherits its interface from `proxy::ParallelData`.
+     * In addition, it owns the proxy it wraps.
+     */
+    template <
+      typename AuxProxyColl,
+      typename Aux /* = collection_value_t<AuxProxyColl> */,
+      typename Tag /* = Aux */
+      >
+    struct ProxyAsParallelData
+      : private AuxProxyColl
+      , public ParallelData<AuxProxyColl, Aux, Tag>
+    {
+      /// Steals and wraps collection `proxy`.
+      ProxyAsParallelData(AuxProxyColl&& proxy)
+        : AuxProxyColl(std::move(proxy))
+        , ParallelData<AuxProxyColl, Aux, Tag>
+          (static_cast<AuxProxyColl const*>(this))
+        {}
+      
+      // explicitly select the tag from the parallel data (same as Tag)
+      using typename ParallelData<AuxProxyColl, Aux, Tag>::tag;
+    }; // class ProxyAsParallelData<>
+    
+    
+    //--------------------------------------------------------------------------
+    /**
+     * @brief Helper to create a proxy as auxiliary data for another proxy.
+     * @tparam AuxProxy type of collection proxy associated to the main one
+     * @tparam ArgTuple type of arguments required for the creation of proxy
+     * @tparam AuxTag tag for the associated data (default: as `Aux`)
+     * TODO
+     * 
+     * This class stores user arguments for the construction of a collection
+     * proxy to be used as auxiliary data for another proxy.
+     * It can use those arguments plus some additional one to create the
+     * collection proxy data itself. This additional information is provided by
+     * `getCollection()`.
+     * 
+     * The auxiliary data will be identified by type `AuxTag`.
+     * 
+     * This is not a customization point: to have a custom associated data
+     * produced, choose and then specialize the `ProxyAsAuxProxyMaker` class.
+     */
+    template <
+      typename AuxProxy,
+      typename ArgTuple,
+      typename AuxTag /* = AuxProxy */
+      >
+    class WithProxyAsAuxStructBase {
+      
+      static_assert(
+        std::is_convertible
+          <std::decay_t<std::tuple_element_t<0U, ArgTuple>>, art::InputTag>(),
+        "The first argument of WithProxyAsAuxStructBase must be art::InputTag."
+        );
+      
+      /// Type of main data product element from a proxy of type `CollProxy`.
+      template <typename CollProxy>
+      using main_t = typename CollProxy::main_element_t;
+      
+      /// Type of auxiliary proxy.
+      using aux_proxy_t = AuxProxy;
+      
+      /// Tag for the associated data (same as the data type itself).
+      using tag = AuxTag;
+      
+      /// Class to create the data proxy associated to a `CollProxy`.
+      template <typename CollProxy>
+      using proxy_maker_t
+        = ProxyAsAuxProxyMaker<main_t<CollProxy>, aux_proxy_t, CollProxy, tag>;
+      
+        public:
+      
+      /// Constructor: steals the arguments, to be used by
+      /// `createAuxProxyMaker()`.
+      WithProxyAsAuxStructBase(ArgTuple&& args): args(std::move(args)) {}
+      
+      /// Creates the associated data proxy by means of `ProxyAsAuxProxyMaker`.
+      template
+        <typename CollProxy, typename Event, typename Handle, typename MainArgs>
+      auto createAuxProxyMaker
+        (Event const& event, Handle&& mainHandle, MainArgs const& mainArgs)
+        {
+          return createAuxProxyImpl<CollProxy>(
+            event, std::forward<Handle>(mainHandle), mainArgs,
+            std::make_index_sequence<NArgs>()
+            );
+        } // construct()
+      
+      
+        protected:
+      
+      ArgTuple args; ///< Argument construction storage as tuple.
+      
+      /// Number of arguments stored.
+      static constexpr std::size_t NArgs = std::tuple_size<ArgTuple>();
+      
+      // this method allows unpacking the arguments from the tuple
+      template<
+        typename CollProxy, typename Event, typename Handle, typename MainArgs,
+        std::size_t... I
+        >
+      auto createAuxProxyImpl(
+        Event const& event, Handle&& mainHandle, MainArgs const& mainArgs,
+        std::index_sequence<I...>
+        )
+        {
+          return proxy_maker_t<CollProxy>::make(
+            event, mainHandle, mainArgs,
+            std::get<I>(std::forward<ArgTuple>(args))...
+            );
+        }
+      
+    }; // struct WithProxyAsAuxStructBase
     
     
     

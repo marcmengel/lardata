@@ -117,6 +117,16 @@ void ProxyBaseTest::processTrack(Track const& track) const {
 
 
 //------------------------------------------------------------------------------
+namespace tag {
+  struct SpecialHits {};
+  struct DirectHitAssns {};
+  struct DirectFitInfo {};
+  struct TrackSubproxy {};
+  struct FitInfoProxy {};
+}
+
+
+//------------------------------------------------------------------------------
 void ProxyBaseTest::proxyUsageExample(art::Event const& event) const {
   
   auto tracks = proxy::getCollection<std::vector<recob::Track>>
@@ -180,101 +190,74 @@ auto ProxyBaseTest::getLongTracks
 
 //------------------------------------------------------------------------------
 void ProxyBaseTest::testProxyComposition(art::Event const& event) const {
-#if 0
-  auto expectedTracksHandle
-    = event.getValidHandle<std::vector<recob::Track>>(tracksTag);
-  auto const& expectedTracks = *expectedTracksHandle;
+  
+  auto const& expectedTracks
+    = *(event.getValidHandle<std::vector<recob::Track>>(tracksTag));
   
   mf::LogInfo("ProxyBaseTest")
     << "Starting test on " << expectedTracks.size() << " tracks from '"
     << tracksTag.encode() << "'";
   
-  art::FindManyP<recob::Hit> hitsPerTrack
-    (expectedTracksHandle, event, tracksTag);
-  
-  auto const& expectedTrackFitHitInfo
-    = *(event.getValidHandle<std::vector<std::vector<recob::TrackFitHitInfo>>>
-    (tracksTag));
-  
-  auto moreTracks = proxy::getCollection<std::vector<recob::Track>>(
+  auto directTracks = proxy::getCollection<std::vector<recob::Track>>(
     event, tracksTag
     , proxy::withParallelData<std::vector<recob::TrackFitHitInfo>>()
     );
-  
-  auto tracks
-    = proxy::getCollection<std::vector<recob::Track>>(event, tracksTag);
-  
-  //
-  // we try to access something we did not "register" in the proxy: space points
-  //
-  static_assert(!tracks.has<recob::SpacePoint>(),
-    "Track proxy does NOT have space points available!!!"); 
-  BOOST_CHECK_THROW(tracks.getIf<recob::SpacePoint>(), std::logic_error);
-  
-  static_assert(
-    tracks.has<std::vector<recob::TrackFitHitInfo>>(),
-    "recob::TrackFitHitInfo not found!!!"
-    );
-  
-  
-  BOOST_CHECK_EQUAL(tracks.empty(), expectedTracks.empty());
-  BOOST_CHECK_EQUAL(tracks.size(), expectedTracks.size());
-  
-  BOOST_CHECK_EQUAL(tracks.size(), expectedTrackFitHitInfo.size());
-  decltype(auto) allFitHitInfo
-    = tracks.get<std::vector<recob::TrackFitHitInfo>>();
-  static_assert(
-    std::is_lvalue_reference<decltype(allFitHitInfo)>(),
-    "Copy of parallel data!"
+
+  auto tracks = proxy::getCollection<std::vector<recob::Track>>(
+    event, tracksTag
+    , proxy::withParallelData<std::vector<recob::TrackFitHitInfo>>()
+    , proxy::wrapParallelDataAs<tag::TrackSubproxy>(directTracks)
+    /*
+    , proxy::withCollectionProxyAs
+      <std::vector<recob::TrackFitHitInfo>, tag::FitInfoProxy>
+      (tracksTag, proxy::withParallelData<std::vector<recob::Track>>())
+    */
     );
   BOOST_CHECK_EQUAL
-    (allFitHitInfo.data(), std::addressof(expectedTrackFitHitInfo));
+    (tracks.get<tag::TrackSubproxy>().data(), std::addressof(directTracks));
   
-  auto fitHitInfoSize
-    = std::distance(allFitHitInfo.begin(), allFitHitInfo.end());
-  BOOST_CHECK_EQUAL(fitHitInfoSize, expectedTrackFitHitInfo.size());
+  static_assert(
+    std::is_lvalue_reference<decltype(tracks.get<tag::TrackSubproxy>())>(),
+    "Not reference!"
+    );
+  
+  auto const& expectedFitHitInfo
+    = *(event.getValidHandle<std::vector<std::vector<recob::TrackFitHitInfo>>>
+    (tracksTag));
   
   std::size_t iExpectedTrack = 0;
   for (auto trackProxy: tracks) {
     auto const& expectedTrack = expectedTracks[iExpectedTrack];
-    auto const& expectedHits = hitsPerTrack.at(iExpectedTrack);
-    auto const& expectedFitHitInfo = expectedTrackFitHitInfo[iExpectedTrack];
+    auto const& expectedTrackFitInfo = expectedFitHitInfo[iExpectedTrack];
     
-    recob::Track const& trackRef = *trackProxy;
-    
+    auto directTrackProxy = trackProxy.get<tag::TrackSubproxy>();
     BOOST_CHECK_EQUAL
-      (std::addressof(trackRef), std::addressof(expectedTrack));
-    BOOST_CHECK_EQUAL
-      (std::addressof(*trackProxy), std::addressof(expectedTrack));
-    BOOST_CHECK_EQUAL(trackProxy.get<recob::Hit>().size(), expectedHits.size());
-    BOOST_CHECK_EQUAL(trackProxy.index(), iExpectedTrack);
+      (std::addressof(*directTrackProxy), std::addressof(expectedTrack));
+    BOOST_CHECK_EQUAL(directTrackProxy->ID(), expectedTrack.ID());
+    BOOST_CHECK_EQUAL(directTrackProxy->Length(), expectedTrack.Length());
     
-    std::vector<recob::TrackFitHitInfo> const& fitHitInfo
-      = trackProxy.get<std::vector<recob::TrackFitHitInfo>>();
-    static_assert(
-      std::is_lvalue_reference<decltype(fitHitInfo)>(),
-      "Copy of parallel data element!"
+    BOOST_CHECK_EQUAL(
+      std::addressof
+        (directTrackProxy.get<std::vector<recob::TrackFitHitInfo>>()),
+      std::addressof(expectedTrackFitInfo)
       );
+    /*
+    auto fitInfoProxy = trackProxy.get<tag::FitInfoProxy>();
     BOOST_CHECK_EQUAL
-      (std::addressof(fitHitInfo), std::addressof(expectedFitHitInfo));
-    BOOST_CHECK_EQUAL(fitHitInfo.size(), expectedFitHitInfo.size());
-    
-    // direct interface to recob::Track
-    BOOST_CHECK_EQUAL(trackProxy->NPoints(), expectedTrack.NPoints());
-    
+      (std::addressof(*fitInfoProxy), std::addressof(expectedFitHitInfo));
+    BOOST_CHECK_EQUAL(
+      std::addressof(fitInfoProxy.get<recob::Track>()),
+      std::addressof(expectedTrack)
+      );
+    */
     ++iExpectedTrack;
   } // for
+  
   BOOST_CHECK_EQUAL(iExpectedTrack, expectedTracks.size());
-#endif // 0
+  
 } // ProxyBaseTest::testProxyComposition()
 
 //------------------------------------------------------------------------------
-namespace tag {
-  struct SpecialHits {};
-  struct DirectHitAssns {};
-  struct DirectFitInfo {};
-}
-
 void ProxyBaseTest::testTracks(art::Event const& event) const {
   
   auto expectedTracksHandle
@@ -295,13 +278,22 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
     = *(event.getValidHandle<std::vector<std::vector<recob::TrackFitHitInfo>>>
     (tracksTag));
   
+  auto directTracks = proxy::getCollection<std::vector<recob::Track>>(
+    event, tracksTag,
+    proxy::withParallelData<std::vector<recob::TrackFitHitInfo>>()
+    );
+    
   auto tracks = proxy::getCollection<std::vector<recob::Track>>(
     event, tracksTag
     , proxy::withAssociated<recob::Hit>()
     , proxy::withAssociatedAs<recob::Hit, tag::SpecialHits>()
     , proxy::withParallelData<std::vector<recob::TrackFitHitInfo>>()
+//     , proxy::withCollectionProxyAs
+//         <std::vector<recob::Track>, tag::TrackSubproxy>
+//         (tracksTag, proxy::withParallelData<std::vector<recob::TrackFitHitInfo>>())
     , proxy::wrapAssociatedAs<tag::DirectHitAssns>(expectedTrackHitAssns)
     , proxy::wrapParallelDataAs<tag::DirectFitInfo>(expectedTrackFitHitInfo)
+    , proxy::wrapParallelDataAs<tag::TrackSubproxy>(directTracks)
     );
   
   //
@@ -335,6 +327,16 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
     std::addressof(expectedTrackFitHitInfo)
     );
   
+  BOOST_CHECK_EQUAL(
+    directTracks.get<std::vector<recob::TrackFitHitInfo>>().data(),
+    std::addressof(expectedTrackFitHitInfo)
+    );
+  
+  BOOST_CHECK_EQUAL(
+    tracks.get<tag::TrackSubproxy>().data(),
+    std::addressof(directTracks)
+    );
+  
   auto fitHitInfoSize
     = std::distance(allFitHitInfo.begin(), allFitHitInfo.end());
   BOOST_CHECK_EQUAL(fitHitInfoSize, expectedTrackFitHitInfo.size());
@@ -345,7 +347,17 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
     auto const& expectedHits = hitsPerTrack.at(iExpectedTrack);
     auto const& expectedFitHitInfo = expectedTrackFitHitInfo[iExpectedTrack];
     
+    // proxies deliver temporary objects as elements, each time a new one
+    // (although an exceedingly smart compiler might decide otherwise)
+    BOOST_CHECK_NE(
+      std::addressof(tracks[iExpectedTrack]),
+      std::addressof(tracks[iExpectedTrack])
+      );
+    
     recob::Track const& trackRef = *trackProxy;
+    
+    auto const trackProxyCopy = trackProxy;
+    BOOST_CHECK_NE(std::addressof(trackProxyCopy), std::addressof(trackProxy));
     
     BOOST_CHECK_EQUAL
       (std::addressof(trackRef), std::addressof(expectedTrack));
@@ -363,6 +375,33 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
     BOOST_CHECK_EQUAL
       (std::addressof(fitHitInfo), std::addressof(expectedFitHitInfo));
     BOOST_CHECK_EQUAL(fitHitInfo.size(), expectedFitHitInfo.size());
+    
+    BOOST_CHECK_EQUAL(
+      std::addressof(trackProxy.get<tag::DirectFitInfo>()),
+      std::addressof(expectedTrackFitHitInfo[iExpectedTrack])
+      );
+    
+    BOOST_CHECK_EQUAL(
+      std::addressof(trackProxyCopy.get<tag::DirectFitInfo>()),
+      std::addressof(trackProxy.get<tag::DirectFitInfo>())
+      );
+    
+    // subproxy elements are typically temporaries
+    BOOST_CHECK_NE(
+      std::addressof(trackProxyCopy.get<tag::TrackSubproxy>()),
+      std::addressof(trackProxy.get<tag::TrackSubproxy>())
+      );
+    
+    auto directTrackProxy = trackProxy.get<tag::TrackSubproxy>();
+    BOOST_CHECK_EQUAL
+      (std::addressof(*directTrackProxy), std::addressof(expectedTrack));
+    BOOST_CHECK_EQUAL(directTrackProxy->ID(), expectedTrack.ID());
+    BOOST_CHECK_EQUAL(directTrackProxy->Length(), expectedTrack.Length());
+    BOOST_CHECK_EQUAL(
+      std::addressof
+        (directTrackProxy.get<std::vector<recob::TrackFitHitInfo>>()),
+      std::addressof(fitHitInfo)
+      );
     
     BOOST_CHECK_EQUAL
       (trackProxy.get<tag::SpecialHits>().size(), expectedHits.size());

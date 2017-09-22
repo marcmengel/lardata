@@ -48,6 +48,22 @@
 #include <type_traits>
 #include <cstddef> // std::size_t
 
+/**
+ * @addtogroup Utilities General utilities
+ * @brief General programming utilities.
+ * @{
+ */
+/**
+ * @namespace util
+ * @brief Namespace for general, not LArSoft-specific utilities.
+ */
+/**
+ * @addtogroup Metaprogramming General utilities for metaprogramming
+ * @brief General utilities for use with templates and metaprogramming.
+ */
+/**
+ * @}
+ */
 
 namespace util {
   
@@ -87,6 +103,7 @@ namespace util {
   //----------------------------------------------------------------------------
   /// @{
   /// @name General utility traits.
+  /// @ingroup Metaprogramming
   
   //----------------------------------------------------------------------------
   /// Trait returning the very same type as in the template argument.
@@ -155,6 +172,14 @@ namespace util {
   constexpr unsigned int count_type_in_list_v
     = count_type_in_list<Target, T...>();
   
+  /// Returns the `N` type of the type list.
+  template <std::size_t N, typename... T>
+  using typelist_element_type = std::tuple_element<N, std::tuple<T...>>;
+  
+  /// Direct access to the value in `typelist_element_type`.
+  template <std::size_t N, typename... T>
+  using typelist_element_t = typename typelist_element_type<N, T...>::type;
+  
   
   /// Holds whether the `Target` type is among the ones in the `T` pack.
   template <typename Target, typename... T>
@@ -174,6 +199,7 @@ namespace util {
   //----------------------------------------------------------------------------
   /// @{
   /// @name Courtesy traits acting on generic types.
+  /// @ingroup Metaprogramming
   /// 
   /// These traits are used in the implementation of the tag-related traits,
   /// but they are general enough that are deemed worth being exposed.
@@ -217,7 +243,6 @@ namespace util {
    * @note The extractor must be able to return a type for each and every type
    *       in `SrcTuple`.
    * 
-   * TODO make this trait accept a type which is not tuple-like (too!)
    */
   template <
     typename SrcTuple,
@@ -580,6 +605,7 @@ namespace util {
   
   /**
    * @name Tag-related traits.
+   * @ingroup Metaprogramming
    * 
    * Tag-related traits operate on "tagged" types. A tagged type is a type
    * which contains a `tag` type definition, and that type is the tag type.
@@ -629,7 +655,9 @@ namespace util {
     template <typename... Args>
     TaggedType(Args&&... args): T(std::forward<Args>(args)...) {}
     
-    using tag = Tag; ///< Tag of this object
+    using tag = Tag;       ///< Tag of this object.
+    using tagged_type = T; ///< Type of the object which was tagged.
+    
   };  // struct TaggedType
   
   
@@ -644,20 +672,101 @@ namespace util {
   using add_tag_t = typename add_tag<T, Tag>::type;
   
   
-  /// "Converts" an object of type `T` in one derived from `T` with tag `Tag`.
+  /// Trait holding the type contained in a `TaggedType` (or the type itself).
+  template <typename Tagged>
+  struct remove_tag { using type = Tagged; };
+  
+  template <typename T, typename Tag>
+  struct remove_tag<TaggedType<T, Tag>>
+    { using type = typename TaggedType<T, Tag>::tagged_type; };
+  
+  /// Direct access to the type contained in `remove_tag`.
+  template <typename Tagged>
+  using remove_tag_t = typename remove_tag<Tagged>::type;
+  
+  
+  /**
+   * @brief "Converts" `obj` to an object with tag `Tag`.
+   * @tparam Tag tag to be added to the object
+   * @tparam T type of the object to be tagged (implicitly deduced)
+   * @param obj (l-value) reference to the object to be tagged
+   * @return a reference to `obj`, reinterpreted as tagged
+   * @see `TaggedType`, `add_tag`
+   * 
+   * The returned object is the same as `obj`, reinterpreted as a different type
+   * derived from `T` and tagged with `Tag`.
+   */
   template <typename Tag, typename T>
   auto makeTagged(T& obj) -> decltype(auto)
     { return static_cast<add_tag_t<T, Tag>&>(obj); }
   
-  /// "Converts" an object of type `T` in one derived from `T` with tag `Tag`.
+  /**
+   * @brief "Converts" `obj` to an object with tag `Tag`.
+   * @tparam Tag tag to be added to the object
+   * @tparam T type of the object to be tagged (implicitly deduced)
+   * @param obj (l-value) constant reference to the object to be tagged
+   * @return a reference to `obj`, reinterpreted as tagged
+   * @see `TaggedType`, `add_tag`
+   * 
+   * The returned object is the same as `obj`, reinterpreted as a different type
+   * derived from `T` and tagged with `Tag`.
+   */
   template <typename Tag, typename T>
   auto makeTagged(T const& obj) -> decltype(auto)
-    { return static_cast<add_tag_t<T, Tag> const&>(obj); }
+    { return static_cast<add_tag_t<T const, Tag> const&>(obj); }
   
-  /// "Converts" an object of type `T` in one derived from `T` with tag `Tag`.
+  /**
+   * @brief "Converts" `obj` to an object with tag `Tag`.
+   * @tparam Tag tag to be added to the object
+   * @tparam T type of the object to be tagged (implicitly deduced)
+   * @param obj (r-value) reference to the object to be tagged
+   * @return a reference to `obj`, reinterpreted as tagged
+   * @see `TaggedType`, `add_tag`
+   * 
+   * The returned object is an object of a new type, derived from `T` , with
+   * data copied from `obj`, and tagged with `Tag`.
+   * The argument object may be a temporary.
+   */
+  template <typename Tag, typename T>
+  auto makeTagged(T const&& obj) -> decltype(auto)
+    { return add_tag_t<T, Tag>(obj); /* copy, since it's constant */ }
+  
+  /**
+   * @brief "Converts" `obj` to an object with tag `Tag`.
+   * @tparam Tag tag to be added to the object
+   * @tparam T type of the object to be tagged (implicitly deduced)
+   * @param obj the object to be tagged
+   * @return a reference to `obj`, reinterpreted as tagged
+   * @see `TaggedType`, `add_tag`
+   * 
+   * The returned object is the same as `obj`, reinterpreted as a different type
+   * derived from `T` and tagged with `Tag`.
+   * The returned object is a temporary of the new type, whose content is moved
+   * (`std::move()`) from the argument object `obj`.
+   */
   template <typename Tag, typename T>
   auto makeTagged(T&& obj) -> decltype(auto)
     { return add_tag_t<T, Tag>(std::move(obj)); }
+  
+  /// "Converts" a tagged type back to its original type.
+  template <typename Tagged>
+  auto removeTag(Tagged& tagged) -> decltype(auto)
+    { return static_cast<remove_tag_t<Tagged>&>(tagged); }
+  
+  /// "Converts" a tagged type back to its original type.
+  template <typename Tagged>
+  auto removeTag(Tagged const& tagged) -> decltype(auto)
+    { return static_cast<remove_tag_t<Tagged> const&>(tagged); }
+  
+  /// "Converts" a tagged type back to its original type.
+  template <typename Tagged>
+  auto removeTag(Tagged const&& tagged) -> decltype(auto)
+    { return static_cast<remove_tag_t<Tagged> const&&>(tagged); }
+  
+  /// "Converts" a tagged type back to its original type.
+  template <typename Tagged>
+  auto removeTag(Tagged&& tagged) -> decltype(auto)
+    { return static_cast<remove_tag_t<Tagged>&&>(tagged); }
   
   
   /// Tag class parametrized by a sequence of numbers.

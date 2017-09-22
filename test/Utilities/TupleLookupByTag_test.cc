@@ -71,6 +71,20 @@ static_assert( std::is_same<util::self_t<TestTaggedA>, TestTaggedA>(), "Bug :'("
 static_assert(!std::is_same<util::self_t<TestTaggedA>, TestTaggedB>(), "Bug :'(");
 
 //
+// util::typelist_element_type
+//
+static_assert( std::is_same<util::typelist_element_type<0U, int, int&, int>::type, int >(), "Bug :O");
+static_assert( std::is_same<util::typelist_element_type<1U, int, int&, int>::type, int&>(), "Bug :O");
+static_assert( std::is_same<util::typelist_element_type<2U, int, int&, int>::type, int >(), "Bug :O");
+// static_assert( std::is_same<util::typelist_element_type<3U, int, int&, int>::type, void>(), "Bug :O");
+
+static_assert( std::is_same<util::typelist_element_t<0U, int, int&, int>, int >(), "Bug :O");
+static_assert( std::is_same<util::typelist_element_t<1U, int, int&, int>, int&>(), "Bug :O");
+static_assert( std::is_same<util::typelist_element_t<2U, int, int&, int>, int >(), "Bug :O");
+// static_assert( std::is_same<util::typelist_element_t<3U, int, int&, int>, void>(), "Bug :O");
+
+
+//
 // util::details::index_of_extracted_type_checked,
 // util::details::index_of_extracted_type_impl
 //
