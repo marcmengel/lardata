@@ -19,11 +19,6 @@
  * of `data` is in fact a tuple). This means that the type must respond to
  * `std::tuple_element` and `std::tuple_size`.
  * 
- * The utilities provided here are:
- * * 
- * * 
- * * 
- * 
  * Beside these utilities, equivalent utilities are exposed that allow a
  * different definition of the tag (via a class "returning" the tag of its
  * only template argument), and that operate on the types directly rather than
@@ -51,6 +46,7 @@
 /**
  * @addtogroup Utilities General utilities
  * @brief General programming utilities.
+ * 
  * @{
  */
 /**
@@ -101,9 +97,12 @@ namespace util {
   
   
   //----------------------------------------------------------------------------
-  /// @{
-  /// @name General utility traits.
-  /// @ingroup Metaprogramming
+  /**
+   * @defgroup MetaprogrammingBase Simple utility traits
+   * @brief Simple traits for the implementation of other traits.
+   * @ingroup Metaprogramming
+   * @{
+   */
   
   //----------------------------------------------------------------------------
   /// Trait returning the very same type as in the template argument.
@@ -194,16 +193,18 @@ namespace util {
   template <typename Target, typename Tuple>
   struct count_type_in_tuple;
   
-  
+  /// @}
   
   //----------------------------------------------------------------------------
-  /// @{
-  /// @name Courtesy traits acting on generic types.
-  /// @ingroup Metaprogramming
-  /// 
-  /// These traits are used in the implementation of the tag-related traits,
-  /// but they are general enough that are deemed worth being exposed.
-  /// 
+  /**
+   * @defgroup MetaprogrammingGeneral General utility traits
+   * @brief Traits of general utility.
+   * @ingroup Metaprogramming
+   * @{
+   * 
+   * @details These traits are used in the implementation of the tag-related
+   * traits, but they are general enough that are deemed worth being exposed.
+   */ 
 
   
   //----------------------------------------------------------------------------
@@ -604,11 +605,12 @@ namespace util {
   
   
   /**
-   * @name Tag-related traits.
+   * @defgroup MetaprogrammingTagged Tag-related traits
+   * @brief  Traits for types with a `tag`.
    * @ingroup Metaprogramming
    * 
-   * Tag-related traits operate on "tagged" types. A tagged type is a type
-   * which contains a `tag` type definition, and that type is the tag type.
+   * @details Tag-related traits operate on "tagged" types. A tagged type is a
+   * type which contains a `tag` type definition, and that type is the tag type.
    * 
    * In the examples, the types used are defined as:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
@@ -629,8 +631,9 @@ namespace util {
    * 
    * @note All the traits and function here will generate a compilation error
    *       if any of the elements is not tagged.
+   * 
+   * @{
    */
-  /// @{
   
   /**
    * @brief A type with a specified tag.

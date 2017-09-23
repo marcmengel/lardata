@@ -600,26 +600,40 @@ namespace proxy {
     
       public:
     
-    /// Returns the position of the trajectory point.
-    auto track() const -> decltype(auto) { return *get<TrackIndex>(); }
+    /// Returns the track this point belongs to.
+    recob::Track const& track() const
+      { return *get<TrackIndex>(); }
     
     /// Returns the position of the trajectory point.
+    /// @see `recob::Track::LocationAtPoint()`
     auto position() const -> decltype(auto)
       { return track().Trajectory().LocationAtPoint(index()); }
 
     /// Returns the momentum vector of the trajectory point.
+    /// @see `recob::Track::MomentumVectorAtPoint()`
     auto momentum() const -> decltype(auto)
       { return track().Trajectory().MomentumVectorAtPoint(index()); }
     
     /// Returns the flags associated with the trajectory point.
+    /// @see `recob::Track::FlagsAtPoint()`
     auto flags() const -> decltype(auto)
       { return track().Trajectory().FlagsAtPoint(index()); }
     
-    /// Returns the hit associated with the trajectory point, as _art_ pointer.
-    auto hitPtr() const -> decltype(auto) { return *get<HitIndex>(); }
+    /**
+     * @brief Returns the hit associated with the trajectory point
+     * @return an _art_ pointer to the hit associated to this point
+     */
+    art::Ptr<recob::Hit> const& hitPtr() const { return *get<HitIndex>(); }
     
-    /// Returns fit info associated with the trajectory point
-    /// (`nullptr` if not available).
+    /**
+     * @brief Returns fit info associated with the trajectory point.
+     * @return a pointer to the fit info, or `nullptr` if not merged in proxy
+     * 
+     * If the track proxy this point comes from had no fit information,
+     * `nullptr` is returned.
+     * The fit information is extracted using the tag in
+     * `proxy::Tracks::TrackFitHitInfoTag`.
+     */
     recob::TrackFitHitInfo const* fitInfoPtr() const
       { return get<FitHitInfoIndex>(); }
     
@@ -851,7 +865,7 @@ namespace proxy {
       {
         auto mainHandle = event.template getValidHandle<main_collection_t>(tag);
         // automatically add associated hits with the same input tag;
-        // TODO allow a withAssociated<recob::Hit>() from withArgs to override
+        // IDEA: allow a withAssociated<recob::Hit>() from withArgs to override
         // this one; the pattern may be:
         // - if withArgs contains a withAssociated<recob::Hit>(), produce a new
         //   withArgs with that one pushed first

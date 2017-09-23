@@ -1192,6 +1192,7 @@ namespace proxy {
    * @ingroup LArSoftProxyCustom
    * @brief Infrastructure to use a collection proxy as auxiliary data for
    *        another proxy.
+   * @bug Broken in many ways. Do not use.
    * 
    * @{
    */
@@ -1212,16 +1213,14 @@ namespace proxy {
   
   //----------------------------------------------------------------------------
   /**
-   * @brief Creates an parallel data wrapper for the specified types.
-   * @tparam Main type of main datum (element)
-   * @tparam AuxColl type of the parallel data collection
-   * @tparam Aux type of the parallel data element
-   * @tparam AuxTag tag labelling the parallel data collection
+   * @brief Creates a proxy wrapper for merging into another proxy ("main").
+   * @tparam Main type of main datum (element) of the main proxy
+   * @tparam AuxProxy type ("proxy name") of the proxy being wrapped
+   * @tparam AuxTag tag of the auxiliary proxy in the context of the main one
    * 
-   * Usually, `AuxTag` is also the type of datum (element) in the parallel
-   * collection.
+   * By default, `AuxTag` is the same as the proxy name.
    * 
-   * This class works as a base class for `ParallelDataProxyMaker` so that
+   * This class works as a base class for `ProxyAsAuxProxyMaker` so that
    * the specializations of the latter can still inherit from this one if they
    * its facilities.
    */
@@ -1294,7 +1293,7 @@ namespace proxy {
   
   //--------------------------------------------------------------------------
   /**
-   * @brief Creates an auxiliary proxy wrapper for the specified types.
+   * @brief Creates an auxiliary proxy wrapper for the specified proxy.
    * @tparam Main type of main datum (element) to associate from ("left")
    * @tparam AuxProxy type of proxy collection to be associated
    * @tparam CollProxy type of proxy this associated data works for
@@ -1306,7 +1305,6 @@ namespace proxy {
    * Its task is to supervise the creation of the collection proxy that is used
    * as auxiliary data for the main data type.
    * The interface required by `withCollectionProxy()` includes:
-   * TODO
    * * a static `make()` method creating and returning the auxiliary data
    *   proxy with arguments an event, the main data product handle, a template
    *   argument representing the main collection information, and all the
@@ -3268,7 +3266,6 @@ namespace proxy {
      * @tparam AuxProxy type of collection proxy associated to the main one
      * @tparam ArgTuple type of arguments required for the creation of proxy
      * @tparam AuxTag tag for the associated data (default: as `Aux`)
-     * TODO
      * 
      * This class stores user arguments for the construction of a collection
      * proxy to be used as auxiliary data for another proxy.
