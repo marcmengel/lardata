@@ -759,9 +759,13 @@ namespace proxy {
     /// Returns the iterator past the last point.
     point_iterator endPoint() const { return { *this, nPoints() }; }
     
+    /// @{
     /// Extracts information from the specified point.
-    TrackPoint operator[](std::size_t index) const
+    TrackPoint point(std::size_t index) const
       { return { makeTrackPointData(track(), index) }; }
+    
+    TrackPoint operator[](std::size_t index) const
+      { return point(index); }
     
     /// @}
     
