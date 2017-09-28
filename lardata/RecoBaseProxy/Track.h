@@ -1,5 +1,5 @@
 /**
- * @file   Track.h
+ * @file   lardata/RecoBaseProxy/Track.h
  * @brief  Offers `proxy::Tracks` and `proxy::Track` class for
  *         `recob::Track` access.
  * @author Gianluca Petrillo (petrillo@fnal.gov)
@@ -650,6 +650,7 @@ namespace proxy {
   /**
    * @brief Type of track point information.
    * @ingroup LArSoftProxyTracks
+   * @see `proxy::TrackPointWrapper`
    * 
    * For its interface, see `proxy::TrackPointWrapper`.
    */
@@ -691,7 +692,10 @@ namespace proxy {
   /**
     * @brief Class for track proxy elements.
     * @tparam CollProxy type of track proxy collection to get data from
+    * @see `proxy::TrackPoint`, `proxy::TrackPointWrapper`
     * @ingroup LArSoftProxyTracks
+    *
+    * For details on the track point interface see `proxy::TrackPoint`.
     */
   template <typename CollProxy>
   struct TrackCollectionProxyElement
@@ -700,7 +704,7 @@ namespace proxy {
     using base_t = CollectionProxyElement<CollProxy>; ///< Base type.
     using base_t::base_t; // inherit constructors
     
-    ///< This type.
+    /// This type.
     using track_proxy_t = TrackCollectionProxyElement<CollProxy>;
     
       public:
@@ -744,9 +748,12 @@ namespace proxy {
     /// The points on track can be accessed individually with a special,
     /// non-extensible proxy.
     /// 
+    /// @see `proxy::TrackPoint` 
+    /// 
     
     /// Returns an iterable range with point-by-point information
     /// (`TrackPointWrapper`).
+    /// @see `proxy::TrackPoint`, `proxy::TrackPointWrapper`
     auto points() const
       { return details::TrackPointIteratorBox<CollProxy>(*this); }
     

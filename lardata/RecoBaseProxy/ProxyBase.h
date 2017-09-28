@@ -1,5 +1,5 @@
 /**
- * @file   ProxyBase.h
+ * @file   lardata/RecoBaseProxy/ProxyBase.h
  * @brief  Base utilities for the implementation of data product facades.
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   July 27, 2017
@@ -1527,21 +1527,21 @@ namespace proxy {
      *       the function. That information is needed because this method needs
      *       to return the same type (or compatible types) whether the required
      *       tag is present or not, in order for user code like
-     *       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
      *       if (elem.has<recob::SpacePoint>()) {
      *         recob::SpacePoint const* spacepoints
      *           = elem.getIf<recob::SpacePoint>(); // won't do
      *         // ...
      *       }
-     *       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      *       to work; it becomes:
-     *       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
      *       if (elem.has<recob::SpacePoint>()) {
      *         recob::SpacePoint const* spacepoints
      *           = elem.getIf<recob::SpacePoint, recob::SpacePoint const*>();
      *         // ...
      *       }
-     *       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      *       This is necessary because when the tag (in the example,
      *       `recob::SpacePoint`) is not registered in the proxy, `getIf()` has
      *       no clue of what the return value should be ("which is the type of
