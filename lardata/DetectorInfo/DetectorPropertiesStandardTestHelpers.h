@@ -133,12 +133,14 @@ namespace testing {
   {
     static detinfo::DetectorPropertiesStandard* setup(TestEnv& env)
       {
-        return env.template SetupProviderFor
+        auto* detp = env.template SetupProviderFor
           <detinfo::DetectorProperties, detinfo::DetectorPropertiesStandard>
           (
             env.ServiceParameters("DetectorPropertiesService"),
             env.template ProviderPackFor<detinfo::DetectorPropertiesStandard>()
           );
+        detp->UpdateClocks(env.template Provider<detinfo::DetectorClocks>());
+        return detp;
       } // setup()
     
   }; // SimpleEnvironmentSetupClass<detinfo::DetectorPropertiesStandard>
