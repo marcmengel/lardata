@@ -322,6 +322,9 @@ using Hit3DToEdgeMap   = std::unordered_map<const reco::ClusterHit3D*, reco::Edg
 /**
  *  @brief Class wrapping the above and containing volatile information to characterize the cluster
  */
+class ClusterParameters;
+using ClusterParametersList = std::list<ClusterParameters>;
+    
 class ClusterParameters
 {
 public:
@@ -332,6 +335,7 @@ public:
         m_hit3DToEdgeMap.clear();
         m_bestHitPairListPtr.clear();
         m_bestEdgeList.clear();
+        m_clusterParameters.clear();
     }
     
     ClusterParameters(reco::HitPairClusterMap::iterator& mapItr) : m_hitPairListPtr(mapItr->second)
@@ -349,6 +353,8 @@ public:
         m_bestHitPairListPtr.clear();
         m_bestEdgeList.clear();
     }
+    
+    ClusterParametersList& daughterList() {return m_clusterParameters;}
     
     void UpdateParameters(const reco::ClusterHit2D* hit)
     {
@@ -370,15 +376,15 @@ public:
 
 private:
     PlaneToClusterParamsMap   m_clusterParams;
-    reco::HitPairListPtr      m_hitPairListPtr;    // This contains the list of 3D hits in the cluster
+    reco::HitPairListPtr      m_hitPairListPtr;      // This contains the list of 3D hits in the cluster
     reco::PrincipalComponents m_fullPCA;
     reco::PrincipalComponents m_skeletonPCA;
     reco::Hit3DToEdgeMap      m_hit3DToEdgeMap;
     reco::HitPairListPtr      m_bestHitPairListPtr;
     reco::EdgeList            m_bestEdgeList;
+    ClusterParametersList     m_clusterParameters;   // For possible daughter clusters
 };
 
-using ClusterParametersList   = std::list<ClusterParameters>;
 using ClusterToHitPairSetPair = std::pair<reco::ClusterParameters*,HitPairSetPtr>;
 using ClusterToHitPairSetMap  = std::unordered_map<reco::ClusterParameters*,HitPairSetPtr>;
 using Hit2DToHit3DSetMap      = std::unordered_map<const reco::ClusterHit2D*,HitPairSetPtr>;
