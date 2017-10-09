@@ -229,6 +229,7 @@
 // LArSoft libraries
 #include "lardata/RecoBaseProxy/ProxyBase.h" // proxy namespace
 #include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/TrackTrajectory.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/TrackFitHitInfo.h"
 
@@ -491,6 +492,9 @@ namespace proxy {
     /// Type of the main collection.
     using TrackDataProduct_t = std::vector<recob::Track>;
     
+    /// Tag used for the "standard" track trajectory information.
+    using TrackTrajectoryTag = recob::TrackTrajectory;
+    
     /// Tag used for the "standard" track fit information.
     using TrackFitHitInfoTag = recob::TrackFitHitInfo;
     
@@ -614,10 +618,25 @@ namespace proxy {
     auto momentum() const -> decltype(auto)
       { return track().Trajectory().MomentumVectorAtPoint(index()); }
     
+    /**
+     * @{
+     * @name Flags interface
+     */
+    
     /// Returns the flags associated with the trajectory point.
     /// @see `recob::Track::FlagsAtPoint()`
     auto flags() const -> decltype(auto)
       { return track().Trajectory().FlagsAtPoint(index()); }
+    
+    /**
+     * @brief Returns whether the trajectory point is valid.
+     * 
+     * Even if the trajectory point (position and momentum) are not valid,
+     * the hit is still associated to the track/tracjectory.
+     */
+    bool isPointValid() const { return flags().isPointValid(); }
+    
+    /// @}
     
     /**
      * @brief Returns the hit associated with the trajectory point
@@ -700,7 +719,7 @@ namespace proxy {
     using base_t = CollectionProxyElement<CollProxy>; ///< Base type.
     using base_t::base_t; // inherit constructors
     
-    ///< This type.
+    /// This type.
     using track_proxy_t = TrackCollectionProxyElement<CollProxy>;
     
       public:
@@ -710,10 +729,41 @@ namespace proxy {
     /// Returns the pointed track.
     recob::Track const& track() const { return base_t::operator*(); }
     
-    /// @{
-    /// @name Direct hit interface.
+    /**
+     * @{
+     * @name Direct hit interface.
+     * 
+     * The track prescription requires one hit per trajectory point.
+     * 
+     * @note Remember that in particular cases there might be a hit without
+     *       point of vice versa. In those cases, the point will have a dummy
+     *       value, or the hit pointer will have `isNull()` true. In the former
+     *       case, the point flag `isPointValid()` should be unset.
+     * 
+     * The interface at track proxy level allows for both access to the whole
+     * sequence of hits, or to the hit of a specific point:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * assert(track.nHits() > 0);
+     * auto const& hits = track.hits();
+     * art::Ptr<recob::Hit> maxHit = hits[0]; // direct access
+     * for (art::Ptr<recob::Hit> const& hit: hits) {
+     *   if (hit.isNull()) continue;
+     *   if (maxHit.isNull() || maxHit->Charge() < hit->Charge())
+     *     maxHit = hit;
+     * } // for
+     * 
+     * art::Ptr<recob::Hit> lastHit = track.hitAtPoint(track.nHits() - 1U);
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     */
     
-    /// Returns a collection-like range of hits of this track, at point order.
+    /**
+     * @brief Returns a collection-like range of hits of this track, at point
+     *        order.
+     * @return a range of _art_ pointers to hits
+     * 
+     * One hit is expected per trajectory point. Hits can be missing, in which
+     * case the art pointer will have `isNull()` as `true`.
+     */
     auto hits() const -> decltype(auto)
       { return base_t::template get<Tracks::HitTag>(); }
     
@@ -738,12 +788,80 @@ namespace proxy {
       }
     
     
-    /// @{
-    /// @name Point-by-point iteration interface
-    /// 
-    /// The points on track can be accessed individually with a special,
-    /// non-extensible proxy.
-    /// 
+    /**
+     * @{
+     * @name Direct track trajectory interface
+     * 
+     * The interface allows to check if this track has a trajectory associated
+     * with it, and to obtain a reference to it or its _art_ pointer.
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * bool hasTraj = proxy.hasTrajectory();
+     * if (hasTraj) {
+     *   recob::TrackTrajectory const& trajectory = proxy.trajectory();
+     *   // ...
+     * }
+     * art::Ptr<recob::TrackTrajectory> const& trajectoryPtr
+     *   = proxy.trajectoryPtr();
+     * if (!trajectoryPtr.isNull()) {
+     *   recob::TrackTrajectory const& trajectory = *trajectoryPtr;
+     *   // ...
+     * }
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * 
+     * @note This interface can't be used if the track trajectory information
+     *       has not been merged into the proxy (typically via
+     *       `proxy::withTrajectory()`).
+     */
+    
+    /// Returns whether this track is associated to a trajectory.
+    bool hasTrajectory() const
+      { return !trajectoryPtr().isNull(); }
+    
+    /// Returns an _art_ pointer to the associated trajectory.
+    /// @return pointer to the associated trajectory (`isNull()` `true` if none)
+    art::Ptr<recob::TrackTrajectory> const& trajectoryPtr() const
+      { return base_t::template get<Tracks::TrackTrajectoryTag>(); }
+    
+    /**
+     * @brief Returns a reference to the associated trajectory.
+     * @return the associated trajectory as a constant reference
+     * @see `trajectoryPtr()`, `hasTrajectory()`
+     * 
+     * If the track is not associated to any trajectory, the return value is
+     * undefined. This condition should be checked beforehand, e.g. with
+     * `hasTrajectory()`.
+     */
+    recob::TrackTrajectory const& trajectory() const
+      { return *trajectoryPtr(); }
+    
+    /// @}
+    
+    
+    /**
+     * @{
+     * @name Point-by-point iteration interface
+     * 
+     * The points on track can be accessed individually with a special,
+     * non-extensible proxy.
+     * 
+     * In this example, points are accessed via iteration:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * unsigned int nPoints = track.nPoints();
+     * unsigned int nValidHits = 0;
+     * for (auto point: track.points()) {
+     *   if (!point.hit().isNull()) ++nValidHits;
+     * }
+     * unsigned int nValidPoints = std::count_if
+     *   (track.beginPoint(), track.endPoint(), &TrackPoint::isPointValid);
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * Random (index-based) access is also available:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * if (track.nPoints() > 1) {
+     *   auto point = track.point(1); // or track[1]
+     *   // ...
+     * }
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     */
     
     /// Returns an iterable range with point-by-point information
     /// (`TrackPointWrapper`).
@@ -794,6 +912,43 @@ namespace proxy {
   
   //----------------------------------------------------------------------------
   /**
+   * @brief Adds `recob::TrackTrajectory` information to the proxy.
+   * @param inputTag the data product label to read the data from
+   * @return an object driving `getCollection()` to use `recob::TrackTrajectory`
+   * @ingroup LArSoftProxyTracks
+   * @see TrackCollectionProxyElement::hasTrajectory(),
+   *      TrackCollectionProxyElement::trajectory(),
+   *      TrackCollectionProxyElement::trajectoryPtr()
+   * 
+   * The `recob::TrackTrajectory` information is required to be from a _art_
+   * association with `recob::Track`. The association must fulfil the
+   * @ref LArSoftProxyDefinitionOneToZeroOrOneSeqAssn "one-to-(zero-or-one) sequential association"
+   * requirements.
+   * 
+   * The data is available through the regular interface via tag
+   * `recob::TrackTrajectory`, or via custom interface, e.g.:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * recob::TrackTrajectory const* trajectory
+   *   = trackProxy.hasTrajectory()? &(trackProxy.trajectory()): nullptr;
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * 
+   */
+  inline auto withTrajectory(art::InputTag inputTag)
+    {
+      return proxy::withZeroOrOneAs
+        <recob::TrackTrajectory, Tracks::TrackTrajectoryTag>(inputTag);
+    }
+  
+  /// Like `withTrajectory(art::InputTag)`, using the same label as for tracks.
+  /// @ingroup LArSoftProxyTracks
+  inline auto withTrajectory()
+    {
+      return proxy::withZeroOrOneAs
+        <recob::TrackTrajectory, Tracks::TrackTrajectoryTag>();
+    }
+  
+  //----------------------------------------------------------------------------
+  /**
    * @brief Adds `recob::TrackFitHitInfo` information to the proxy.
    * @param inputTag the data product label to read the data from
    * @return an object driving `getCollection()` to use `recob::TrackFitHitInfo`
@@ -804,11 +959,12 @@ namespace proxy {
    * addresses which track the information is about, and the second index which
    * point within that track.
    * 
-   * The data is avaialble through the regular interface via tag
+   * The data is available through the regular interface via tag
    * `recob::TrackFitHitInfo`.
    * 
-   * The data must satisfy the "parallel data product" requirement described in
-   * `ProxyBase.h`.
+   * The data must satisfy the
+   * @ref LArSoftProxyDefinitionParallelData "parallel data product"
+   * requirement.
    * 
    */
   inline auto withFitHitInfo(art::InputTag inputTag)
