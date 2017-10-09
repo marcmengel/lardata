@@ -11,6 +11,7 @@
 #include "art/Persistency/Common/PtrMaker.h"
 #include "lardataobj/RecoBase/TrackFitHitInfo.h"
 #include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/TrackTrajectory.h"
 #include "lardataobj/RecoBase/Hit.h"
 
 // framework libraries
@@ -81,9 +82,12 @@ namespace lar {
         : hitsTag(config().hitsTag())
         , hitsPerTrack(config().hitsPerTrack())
         {
+          produces<std::vector<recob::TrackTrajectory>>();
+          produces<art::Assns<recob::TrackTrajectory, recob::Hit>>();
           produces<std::vector<recob::Track>>();
           produces<std::vector<std::vector<recob::TrackFitHitInfo>>>();
           produces<art::Assns<recob::Track, recob::Hit>>();
+          produces<art::Assns<recob::Track, recob::TrackTrajectory>>();
         }
 
       virtual void produce(art::Event& event) override;
@@ -104,14 +108,20 @@ namespace lar {
 // -----------------------------------------------------------------------------
 void lar::test::TrackProxyTrackMaker::produce(art::Event& event) {
   
+  auto trajectories = std::make_unique<std::vector<recob::TrackTrajectory>>();
   auto tracks = std::make_unique<std::vector<recob::Track>>();
   auto trackFitInfo
     = std::make_unique<std::vector<std::vector<recob::TrackFitHitInfo>>>();
   auto hitTrackAssn = std::make_unique<art::Assns<recob::Track, recob::Hit>>();
+  auto hitTrajectoryAssn
+    = std::make_unique<art::Assns<recob::TrackTrajectory, recob::Hit>>();
+  auto trackTrajectoryAssn
+    = std::make_unique<art::Assns<recob::Track, recob::TrackTrajectory>>();
   
   auto hitHandle = event.getValidHandle<std::vector<recob::Hit>>(hitsTag);
   auto const& hits = *hitHandle;
   
+  art::PtrMaker<recob::TrackTrajectory> trajectoryPtrMaker(event, *this);
   art::PtrMaker<recob::Track> trackPtrMaker(event, *this);
   unsigned int iTrack = 0;
   unsigned int usedHits = 0;
@@ -149,13 +159,26 @@ void lar::test::TrackProxyTrackMaker::produce(art::Event& event) {
         hits[usedHits + iPoint].WireID()   // aWireId
         });
     } // for
-    recob::TrackTrajectory traj
+    
+    // produce some "additional" trajectory (pretty much invalid)
+    trajectories->emplace_back();
+    
+    trajectories->emplace_back
       (std::move(pos), std::move(mom), std::move(flags), true);
+    
+    //
+    // create the trajectory-hit associations
+    // (no hits for the invalid trajectory)
+    //
+    auto const trajPtr = trajectoryPtrMaker(trajectories->size() - 1U);
+    for (std::size_t iHit = firstHit; iHit < usedHits; ++iHit)
+      hitTrajectoryAssn->addSingle(trajPtr, { hitHandle, iHit });
     
     //
     // create the track
     //
-    recob::Track track(std::move(traj), 2112, 1.0, nTrackHits, {}, {}, iTrack);
+    recob::Track track
+      (trajectories->back(), 2112, 1.0, nTrackHits, {}, {}, iTrack);
     tracks->push_back(std::move(track));
     
     //
@@ -169,6 +192,11 @@ void lar::test::TrackProxyTrackMaker::produce(art::Event& event) {
     auto const trackPtr = trackPtrMaker(iTrack);
     for (std::size_t iHit = firstHit; iHit < usedHits; ++iHit)
       hitTrackAssn->addSingle(trackPtr, { hitHandle, iHit });
+    
+    //
+    // create the track-trajectory associations
+    //
+    trackTrajectoryAssn->addSingle(trackPtr, trajPtr);
     
     mf::LogVerbatim("TrackProxyTrackMaker")
       << "New track #" << tracks->back().ID()
@@ -184,9 +212,12 @@ void lar::test::TrackProxyTrackMaker::produce(art::Event& event) {
   mf::LogInfo("TrackProxyTrackMaker")
     << "Produced " << tracks->size() << " tracks from " << usedHits << " hits.";
   
+  event.put(std::move(trajectories));
+  event.put(std::move(hitTrajectoryAssn));
   event.put(std::move(tracks));
   event.put(std::move(trackFitInfo));
   event.put(std::move(hitTrackAssn));
+  event.put(std::move(trackTrajectoryAssn));
   
 } // lar::test::TrackProxyTrackMaker::produce()
 
