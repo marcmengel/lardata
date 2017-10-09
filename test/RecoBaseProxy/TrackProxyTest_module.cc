@@ -11,6 +11,7 @@
 #include "lardata/RecoBaseProxy/Track.h" // proxy namespace
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/TrackTrajectory.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/TrackFitHitInfo.h"
 
@@ -23,6 +24,7 @@
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "canvas/Persistency/Common/FindManyP.h"
+#include "canvas/Persistency/Common/FindOneP.h"
 #include "canvas/Utilities/InputTag.h"
 
 // utility libraries
@@ -199,6 +201,9 @@ void TrackProxyTest::testTracks(art::Event const& event) {
   art::FindManyP<recob::Hit> hitsPerTrack
     (expectedTracksHandle, event, tracksTag);
   
+  art::FindOneP<recob::TrackTrajectory> trajectoryPerTrack
+    (expectedTracksHandle, event, tracksTag);
+  
   auto const& expectedTrackFitHitInfo
     = *(event.getValidHandle<std::vector<std::vector<recob::TrackFitHitInfo>>>
     (tracksTag));
@@ -206,6 +211,7 @@ void TrackProxyTest::testTracks(art::Event const& event) {
   auto tracks = proxy::getCollection<proxy::Tracks>(event, tracksTag
     , proxy::withAssociatedAs<recob::Hit, tag::SpecialHits>()
     , proxy::withFitHitInfo()
+    , proxy::withTrajectory()
     );
   
   //
@@ -242,6 +248,7 @@ void TrackProxyTest::testTracks(art::Event const& event) {
     auto const& expectedTrack = expectedTracks[iExpectedTrack];
     auto const& expectedHits = hitsPerTrack.at(iExpectedTrack);
     auto const& expectedFitHitInfo = expectedTrackFitHitInfo[iExpectedTrack];
+    auto const& expectedTrajPtr = trajectoryPerTrack.at(iExpectedTrack);
     
     recob::Track const& trackRef = *trackProxy;
     
@@ -263,6 +270,17 @@ void TrackProxyTest::testTracks(art::Event const& event) {
     
     BOOST_CHECK_EQUAL
       (trackProxy.get<tag::SpecialHits>().size(), expectedHits.size());
+    
+    // trajectory?
+    BOOST_CHECK_EQUAL
+      (trackProxy.hasTrajectory(), !expectedTrajPtr.isNull());
+    if (expectedTrajPtr.isNull()) {
+      BOOST_CHECK(!(trackProxy.trajectoryPtr()));
+    }
+    else {
+      BOOST_CHECK_EQUAL(trackProxy.trajectoryPtr(), expectedTrajPtr);
+      BOOST_CHECK_EQUAL(&trackProxy.trajectory(), expectedTrajPtr.get());
+    }
     
     // direct interface to recob::Track
     BOOST_CHECK_EQUAL(trackProxy->NPoints(), expectedTrack.NPoints());
