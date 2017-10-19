@@ -1,5 +1,5 @@
 /**
- * @file   ProxyBase.h
+ * @file   lardata/RecoBaseProxy/ProxyBase.h
  * @brief  Base utilities for the implementation of data product facades.
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   July 27, 2017
@@ -31,6 +31,7 @@
 #include <limits> // std::numeric_limits<>
 #include <cstdlib> // std::size_t
 #include <cassert>
+
 
 /**
  * @defgroup LArSoftProxies LArSoft data proxies
@@ -75,6 +76,17 @@
  *       two data products, so that an element at position _i_ of the parallel
  *       data product pertains to the element at position _i_ of the main
  *       data product
+ * * *one-to-(zero-or-one) sequential association*:
+ *   @anchor LArSoftProxyDefinitionOneToZeroOrOneSeqAssn
+ *   an association between `L` and `R` types where:
+ *     * `L` objects come from a single data product
+ *     * there is at most one `R` associated to each single `L`
+ *     * the sequence of associations is such that if `L1` is before `L2` in the
+ *       original data product, `L1`-`R1` association is listed before the
+ *       `L2`-`R2` association; in other words, the association list follows the
+ *       original order of the `L` data product.
+ *   This does require associations to be one-to-one, bit it does _not_ require
+ *   that all `L` be associated to at least one `R`.
  * 
  * 
  */
@@ -428,6 +440,10 @@ namespace proxy {
     class AssociatedData;
     
     //--------------------------------------------------------------------------
+    template <typename Main, typename Aux, typename Tag = Aux>
+    class OneTo01Data;
+    
+    //--------------------------------------------------------------------------
     template <
       typename Aux,
       typename ArgTuple,
@@ -444,6 +460,17 @@ namespace proxy {
       Aux,
       ArgTuple,
       AssociatedDataProxyMakerWrapper<Aux, AuxTag>::template maker_t,
+      AuxTag
+      >;
+
+    template <typename Aux, typename AuxTag = Aux>
+    struct OneTo01DataProxyMakerWrapper;
+    
+    template <typename Aux, typename ArgTuple, typename AuxTag = Aux>
+    using WithOneTo01AssociatedStruct = WithAssociatedStructBase<
+      Aux,
+      ArgTuple,
+      OneTo01DataProxyMakerWrapper<Aux, AuxTag>::template maker_t,
       AuxTag
       >;
 
@@ -523,6 +550,357 @@ namespace proxy {
    * @{
    */
   
+  //----------------------------------------------------------------------------
+  //--- one-to-(zero/one) associations
+  //----------------------------------------------------------------------------
+  /**
+   * @brief Processes and returns an one-to-(zero/one) associated data object.
+   * @tparam Tag the tag labelling this associated data
+   *             (if omitted: second type of the association: `right_t`)
+   * @tparam Assns type of association to be processed
+   * @param assns association object to be processed
+   * @param minSize minimum number of entries in the produced association data
+   * @return a new `OneTo01Data` filled with associations from `tag`
+   * 
+   * The content of the association object must fulfill the requirements of
+   * @ref LArSoftProxyDefinitionOneToZeroOrOneSeqAssn "one-to-(zero or one) sequential association".
+   * The `Assns` type is expected to be a `art::Assns` instance. At least,
+   * the `Assns` type is required to have `left_t` and `right_t` definitions
+   * representing respectively the main data type and the associated one, and
+   * to respond to `begin()` and `end()` functions. The iterated object must
+   * also respond to `std::get<0>()` with a `art::Ptr<left_t>` and to
+   * `std::get<1>()` with a `art::Ptr<right_t>`.
+   * 
+   * Elements in the main collection not associated with any object will present
+   * an invalid _art_ pointer (`isNull()` true). If there is information for
+   * less than `minSize` main objects, more records will be added to mark the
+   * missing objects as not associated to anything.
+   * 
+   * Example:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * art::Assns<recob::Track, recob::Vertex> trackVertexAssns;
+   * // ...
+   * auto assData = makeAssociatedTo01data(assns);
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * will have `assData` tagged as `recob::Vertex`.
+   */
+  template <typename Tag, typename Assns>
+  auto makeAssociatedTo01data(Assns const& assns, std::size_t minSize = 0);
+  
+  template <typename Assns>
+  auto makeAssociatedTo01data(Assns const& assns, std::size_t minSize = 0)
+    { return makeAssociatedTo01data<typename Assns::right_t>(assns, minSize); }
+  
+  /**
+   * @brief Creates and returns an one-to-(zero/one) associated data object.
+   * @tparam Main type of main object to be associated
+   * @tparam Aux type of data to be associated to the main objects
+   * @tparam Tag the tag labelling this associated data (if omitted: `Aux`)
+   * @tparam Event type of event to read associations from
+   * @param event event to read associations from
+   * @param tag input tag of the association object
+   * @param minSize minimum number of entries in the produced association data
+   * @return a new `OneTo01Data` filled with associations from `tag`
+   * @see `makeAssociatedTo01data(Assns, std::size_t)`
+   * 
+   * The association being retrieved must fulfill the requirements of
+   * @ref LArSoftProxyDefinitionOneToZeroOrOneSeqAssn "one-to-(zero or one) sequential association".
+   * 
+   * Two template types must be explicitly specified, e.g.
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto assData = makeAssociatedTo01data<recob::Track, recob::Vertex>(event, tag);
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   */
+  template <typename Main, typename Aux, typename Tag, typename Event>
+  auto makeAssociatedTo01data
+    (Event const& event, art::InputTag tag, std::size_t minSize = 0);
+  
+  template <typename Main, typename Aux, typename Event>
+  auto makeAssociatedTo01data
+    (Event const& event, art::InputTag tag, std::size_t minSize = 0)
+    { 
+      return makeAssociatedTo01data<Main, Aux, Aux, Event>(event, tag, minSize);
+    }
+  
+  /**
+   * @brief Creates and returns an one-to-(zero/one) associated data object.
+   * @tparam Aux type of data to be associated to the main objects
+   * @tparam Tag the tag labelling this associated data (if omitted: `Aux`)
+   * @tparam Handle type of handle to the main collection object
+   * @tparam Event type of event to read associations from
+   * @param handle handle to the main collection object
+   * @param event event to read associations from
+   * @param tag input tag of the association object
+   * @return a new `OneTo01Data` wrapping the information in `assns`
+   * @see `makeAssociatedData(Event const&, art::InputTag, std::size_t)`
+   * 
+   * This function operates like
+   * `makeAssociatedTo01data(Event const&, art::InputTag, std::size_t)`, but it
+   * extracts the information about the type of main object and the minimum
+   * number of them from a handle.
+   * The handle object is expected to behave as a smart pointer to a
+   * collection of elements of the associated type.
+   * 
+   * One template type must be explicitly specified, e.g.
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto assData = makeAssociatedTo01data<recob::Vertex>(handle, event, tag);
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   */
+  template <typename Aux, typename Tag, typename Handle, typename Event>
+  auto makeAssociatedTo01data
+    (Handle&& handle, Event const& event, art::InputTag tag);
+  
+  template <typename Aux, typename Handle, typename Event>
+  auto makeAssociatedTo01data
+    (Handle&& handle, Event const& event, art::InputTag tag)
+    {
+      return makeAssociatedTo01data<Aux, Aux, Handle, Event>
+        (std::forward<Handle>(handle), event, tag);
+    }
+  
+  
+  /**
+   * @brief Creates and returns an one-to-(zero/one) associated data object.
+   * @tparam Tag the tag labelling this associated data (if omitted: `Aux`)
+   * @tparam MainColl type of the main collection object
+   * @tparam Assns type of the association object
+   * @param mainColl the main collection object
+   * @param assns association data object
+   * @return a new `OneTo01Data` wrapping the information in `assns`
+   * @see `makeAssociatedTo01data(Assns const&, std::size_t)`
+   * 
+   * This function operates like
+   * `makeAssociatedTo01data(Assns const&, std::size_t)`, where the size is
+   * extracted from the main data collection.
+   */
+  template <typename Tag, typename MainColl, typename Assns>
+  auto makeAssociatedTo01data(MainColl const& mainColl, Assns const& assns)
+    { return makeAssociatedTo01data<Tag>(assns, mainColl.size()); }
+  
+  template <typename MainColl, typename Assns>
+  auto makeAssociatedTo01data(MainColl const& mainColl, Assns const& assns)
+    { return makeAssociatedTo01data<typename Assns::right_t>(mainColl, assns); }
+  
+  
+  //----------------------------------------------------------------------------
+  /**
+   * @brief Creates an one-to-(zero-or-one) wrapper for the specified types.
+   * @tparam Main type of main datum (element) to associate from ("left")
+   * @tparam Aux type of datum (element) to associate to ("right")
+   * @tparam AuxTag tag labelling this association
+   * 
+   * Usually, `AuxTag` is also the type of datum (element) to associate to
+   * ("right").
+   * 
+   * This class works as a base class for `OneTo01DataProxyMaker` so that
+   * the specializations of the latter can still inherit from this one if they
+   * its facilities.
+   */
+  template <typename Main, typename Aux, typename AuxTag = Aux>
+  struct OneTo01DataProxyMakerBase {
+    
+    /// Tag labelling the associated data we are going to produce.
+    using data_tag = AuxTag;
+    
+    /// Type of the main datum ("left").
+    using main_element_t = Main;
+    
+    /// Type of the auxiliary associated datum ("right").
+    using aux_element_t = Aux;
+    
+    /// Type of associated data proxy being created.
+    using aux_collection_proxy_t
+       = details::OneTo01Data<main_element_t, aux_element_t, data_tag>;
+    
+    /// Type of _art_ association being used as input.
+    using assns_t = typename aux_collection_proxy_t::assns_t;
+    
+    /**
+     * @brief Create a association proxy collection using main collection tag.
+     * @tparam Event type of the event to read associations from
+     * @tparam Handle type of handle to the main data product
+     * @tparam MainArgs any type convertible to `art::InputTag`
+     * @param event the event to read associations from
+     * @param mainHandle handle to the main collection data product
+     * @param mainArgs an object describing the main data product
+     * @return an auxiliary data proxy object
+     * 
+     * The returned object exposes a random access container interface, with
+     * data indexed by the index of the corresponding object in the main
+     * collection.
+     * 
+     * The `mainArgs` object is of an arbitrary type that must be convertible
+     * by explicit type cast into a `art::InputTag`; that input tag will be
+     * used to fetch the association.
+     */
+    template<typename Event, typename Handle, typename MainArgs>
+    static auto make
+      (Event const& event, Handle&& mainHandle, MainArgs const& mainArgs)
+      {
+        return createFromTag
+          (event, std::forward<Handle>(mainHandle), art::InputTag(mainArgs));
+      }
+    
+    /**
+     * @brief Create a association proxy collection using the specified tag.
+     * @tparam Event type of the event to read associations from
+     * @tparam Handle type of handle to the main data product
+     * @tparam MainArgs any type convertible to `art::InputTag` (unused)
+     * @param event the event to read associations from
+     * @param mainHandle handle to the main collection data product
+     * @param auxInputTag the tag of the association to be read
+     * @return a auxiliary data proxy object
+     * 
+     * The returned object exposes a random access container interface, with
+     * data indexed by the index of the corresponding object in the main
+     * collection.
+     */
+    template<typename Event, typename Handle, typename MainArgs>
+    static auto make(
+      Event const& event, Handle&& mainHandle,
+      MainArgs const&, art::InputTag auxInputTag
+      )
+      {
+        return
+          createFromTag(event, std::forward<Handle>(mainHandle), auxInputTag);
+      }
+    
+    /**
+     * @brief Create a association proxy collection using the specified tag.
+     * @tparam Event type of the event to read associations from (unused)
+     * @tparam Handle type of handle to the main data product
+     * @tparam MainArgs any type convertible to `art::InputTag` (unused)
+     * @param handle handle to the main data collection
+     * @param assns the associations to be wrapped
+     * @return a auxiliary data proxy object
+     * 
+     * The returned object exposes a random access container interface, with
+     * data indexed by the index of the corresponding object in the main
+     * collection.
+     */
+    template<typename Event, typename Handle, typename MainArgs, typename Assns>
+    static auto make
+      (Event const&, Handle&& handle, MainArgs const&, Assns const& assns)
+      {
+        static_assert(
+          std::is_convertible<typename Assns::right_t, aux_element_t>(),
+          "Improper right type for one-to-(zero-or-one) association."
+          );
+        return makeAssociatedTo01data<data_tag>(assns, handle->size());
+      }
+    
+    
+      private:
+    template<typename Event, typename Handle>
+    static auto createFromTag
+      (Event const& event, Handle&& mainHandle, art::InputTag auxInputTag)
+      {
+        return makeAssociatedTo01data<main_element_t, aux_element_t, data_tag>
+          (event, auxInputTag, mainHandle->size());
+      }
+    
+  }; // struct OneTo01DataProxyMakerBase<>
+  
+  
+  //--------------------------------------------------------------------------
+  /**
+   * @brief Creates an one-to-(zero-or-one) wrapper for the specified types.
+   * @tparam Main type of main datum (element) to associate from ("left")
+   * @tparam Aux type of datum (element) to associate to ("right")
+   * @tparam CollProxy type of proxy this associated data works for
+   * @tparam Tag tag for the association proxy to be created
+   * @see `withZeroOrOne()`
+   * This class is (indirectly) called when using `proxy::withZeroOrOne()`
+   * in `getCollection()`.
+   * Its task is to supervise the creation of the proxy to the data
+   * association between the main data type and an auxiliary one.
+   * The interface required by `withZeroOrOne()` includes:
+   * * a static `make()` method creating and returning the associated data
+   *   proxy with arguments an event, the main data product handle, a template
+   *   argument representing the main collection information, and all the
+   *   arguments required for the creation of the associated proxy (coming from
+   *   `withZeroOrOne()`); equivalent to the signature:
+   *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   *   template <typename Event, typename Handle, typename MainArg, typename... Args>
+   *   auto make(Event const&, Handle&&, MainArg const&, Args&&...);
+   *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * 
+   * This class can be specialized (see `withAssociated()` for an example
+   * of the general procedure).
+   * The default implementation just wraps a one-to-(zero-or-one)
+   * `art::Assns<Main, Aux>` data product fulfilling
+   * @ref LArSoftProxyDefinitionOneToZeroOrOneSeqAssn "one-to-(zero or one) sequential association"
+   * requirement.
+   * 
+   * The last template argument is designed for specialization of associations
+   * in the context of a specific proxy type.
+   */
+  template
+    <typename Main, typename Aux, typename CollProxy, typename Tag = Aux>
+  class OneTo01DataProxyMaker
+    : public OneTo01DataProxyMakerBase<Main, Aux, Tag>
+  {
+    //
+    // Note that this implementation is here only to document how to derive
+    // a AssociatedDataProxyMaker (specialization) from
+    // AssociatedDataProxyMakerBase. It's just mirroring the base class.
+    //
+    using base_t = OneTo01DataProxyMakerBase<Main, Aux, Tag>;
+    
+      public:
+    
+    /// Type of the main datum ("left").
+    using typename base_t::main_element_t;
+    
+    /// Type of the auxiliary associated datum ("right").
+    using typename base_t::aux_element_t;
+    
+    /// Type of associated data proxy being created.
+    using typename base_t::aux_collection_proxy_t;
+    
+    /// Type of _art_ association being used as input.
+    using typename base_t::assns_t;
+    
+    /**
+     * @brief Create a association proxy collection using main collection tag.
+     * @tparam Event type of the event to read associations from
+     * @tparam Handle type of data product handle
+     * @tparam MainArgs any type convertible to `art::InputTag`
+     * @tparam Args optional single type (`art::InputTag` required)
+     * @param event the event to read associations from
+     * @param mainHandle handle of the main collection data product
+     * @param margs an object describing the main data product
+     * @param args input tag for associated data, if different from main
+     * @return an auxiliary data proxy object
+     * 
+     * The returned object exposes a random access container interface, with
+     * data indexed by the index of the corresponding object in the main
+     * collection.
+     * 
+     * This implementation requires `margs` object to be convertible
+     * by explicit type cast into a `art::InputTag`; that input tag will be
+     * used to fetch the association.
+     */
+    template
+      <typename Event, typename Handle, typename MainArgs, typename... Args>
+    static auto make(
+      Event const& event, Handle&& mainHandle, MainArgs const& margs,
+      Args&&... args
+      )
+      {
+        return base_t::make(
+          event,
+          std::forward<Handle>(mainHandle),
+          margs,
+          std::forward<Args>(args)...
+          );
+      }
+    
+  }; // struct OneTo01DataProxyMaker<>
+  
+  
+  //----------------------------------------------------------------------------
+  //--- one-to-many associations
   //----------------------------------------------------------------------------
   /**
    * @brief Processes and returns an associated data object.
@@ -1527,21 +1905,21 @@ namespace proxy {
      *       the function. That information is needed because this method needs
      *       to return the same type (or compatible types) whether the required
      *       tag is present or not, in order for user code like
-     *       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
      *       if (elem.has<recob::SpacePoint>()) {
      *         recob::SpacePoint const* spacepoints
      *           = elem.getIf<recob::SpacePoint>(); // won't do
      *         // ...
      *       }
-     *       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      *       to work; it becomes:
-     *       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
      *       if (elem.has<recob::SpacePoint>()) {
      *         recob::SpacePoint const* spacepoints
      *           = elem.getIf<recob::SpacePoint, recob::SpacePoint const*>();
      *         // ...
      *       }
-     *       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      *       This is necessary because when the tag (in the example,
      *       `recob::SpacePoint`) is not registered in the proxy, `getIf()` has
      *       no clue of what the return value should be ("which is the type of
@@ -1946,6 +2324,72 @@ namespace proxy {
   
   
   //----------------------------------------------------------------------------
+  /// The same as `withZeroOrOne()`, but it also specified a tag for the data.
+  template <typename Aux, typename AuxTag, typename... Args>
+  auto withZeroOrOneAs(Args&&... args) {
+    using ArgTuple_t = std::tuple<Args&&...>;
+    ArgTuple_t argsTuple(std::forward<Args>(args)...);
+    return details::WithOneTo01AssociatedStruct<Aux, ArgTuple_t, AuxTag>
+      (std::move(argsTuple));
+  } // withZeroOrOneAs()
+  
+  
+  //----------------------------------------------------------------------------
+  /**
+   * @brief Helper function to merge one-to-(zero-or-one) associated data.
+   * @tparam Aux type of associated data requested
+   * @tparam Args types of constructor arguments for associated data collection
+   * @param args constructor arguments for the associated data collection
+   * @return a temporary object that `getCollection()` knows to handle
+   * 
+   * This function is meant to convey to `getCollection()` function the request
+   * for the delivered collection proxy to carry auxiliary data from an
+   * association fulfilling the
+   * @ref LArSoftProxyDefinitionOneToManySeqAssn "one-to-many sequential association"
+   * requirements.
+   * 
+   * This data will be tagged with the type `Aux`. To use a different type as
+   * tag, use `withZeroOrOneAs()` instead, specifying the tag as second
+   * template argument, e.g.:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * struct QuestionableVertex {};
+   * auto tracks = proxy::getCollection<proxy::Tracks>(event, trackTag,
+   *   withZeroOrOne<recob::Vertex>(defaultVertexTag),
+   *   withZeroOrOneAs<recob::Vertex, QuestionableVertex>(stinkyVertexTag)
+   *   );
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * The first vertex association (`"defaultVertexTag"`) will be accessed by
+   * using the type `recob::Vertex` as tag, while the second one will be
+   * accessed by the `QuestionableVertex` tag (which is better not be defined
+   * in a local scope):
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * for (auto&& track: tracks) {
+   *   decltype(auto) vertex = track.get<recob::Vertex>();
+   *   decltype(auto) maybeVertex = track.get<QuestionableVertex>();
+   *   // ...
+   * }
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * 
+   * 
+   * Customization of the association proxy
+   * =======================================
+   * 
+   * See the technical details about `withAssociated()`, which hold for this
+   * function and related classes too.
+   * 
+   * 
+   * Technical details
+   * ==================
+   * 
+   * See the technical details about `withAssociated()`, which hold for this
+   * function and related classes too.
+   */
+  template <typename Aux, typename... Args>
+  auto withZeroOrOne(Args&&... args)
+    { return withZeroOrOneAs<Aux, Aux>(std::forward<Args>(args)...); }
+  
+  
+  //----------------------------------------------------------------------------
   /// The same as `withAssociated()`, but it also specified a tag for the data.
   template <typename Aux, typename AuxTag, typename... Args>
   auto withAssociatedAs(Args&&... args) {
@@ -2033,7 +2477,7 @@ namespace proxy {
    * 
    * The main purpose of this function and the related `WithAssociatedData`
    * class is to save the user from specifying the main type the auxiliary data
-   * is * associated with, when using it as `getCollection()` argument:
+   * is associated with, when using it as `getCollection()` argument:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * auto tracks = getCollection<proxy::Tracks>
    *   (event, tag, withAssociated<recob::Hit>(hitAssnTag));
@@ -3161,7 +3605,7 @@ namespace proxy {
      * 
      * The `AssociatedData` object, on creation, finds the borders surrounding
      * the associated `Aux` objects for each `Main` one, and keep a record of
-     * them.
+     * them (this is actually delegated to `BoundaryList` class).
      * The `AssociatedData` object also provides a container-like view of this
      * information, where each element in the container is associated to a
      * single `Main` and it is a container (actually, another view) of `Right`.
@@ -3224,6 +3668,101 @@ namespace proxy {
       group_ranges_t fGroups;
       
     }; // class AssociatedData<>
+    
+    
+    
+    //--------------------------------------------------------------------------
+    //---  Stuff for one-to-(zero or one) associated data
+    //--------------------------------------------------------------------------
+    template <typename Aux, typename AuxTag /* = Aux */>
+    struct OneTo01DataProxyMakerWrapper {
+      template <typename CollProxy>
+      using maker_t = OneTo01DataProxyMaker
+        <typename CollProxy::main_element_t, Aux, CollProxy, AuxTag>;
+    };
+    
+    
+    /**
+     * @brief Object for one-to-zero/or/one associated data interface.
+     * @tparam Main type of the main associated object (one)
+     * @tparam Aux type of the additional associated objects (zero or one)
+     * @tparam Tag tag this data is labeled with
+     * 
+     * Allows:
+     *  * random access (no index check guarantee)
+     *  * forward iteration
+     * 
+     * Construction is not part of the interface.
+     * 
+     * The `OneTo01Data` object acquires a vector of _art_ pointers, one for
+     * each element in the main collection.
+     * It is an implementation detail for associations fulfilling the
+     * @ref LArSoftProxyDefinitionOneToZeroOrOneSeqAssn "one-to-(zero-or-one) sequential association"
+     * requirement.
+     * 
+     * @note This data structure marks the main elements which have no
+     *       associated data with an invalid _art_ pointer (default-constructed)
+     *       and it does not distinguish that from the element being actually
+     *       associated to a default-constructed _art_ pointer.
+     * 
+     * The `OneTo01Data` object also provides a container-like view of this
+     * information, where each element in the container is associated to a
+     * single `Main` and it is an _art_ pointer to the `Right` element.
+     * 
+     * Association metadata is not accessible from this object.
+     */
+    template <typename Main, typename Aux, typename Tag /* = Aux */>
+    class OneTo01Data {
+      using This_t = OneTo01Data<Main, Aux, Tag>; ///< This type.
+      
+        public:
+      /// Type of associated datum.
+      using aux_t = Aux;
+      
+      /// Type of tag.
+      using tag = Tag;
+      
+      /// Type of main datum.
+      using main_t = Main;
+      
+      /// Type of _art_ pointer to associated datum.
+      using aux_ptr_t = art::Ptr<aux_t>;
+      
+      /// Type of auxiliary data associated with a main item.
+      using auxiliary_data_t = util::add_tag_t<aux_ptr_t, tag>;
+      
+      /// Type of collection of auxiliary data for all main elements.
+      using aux_coll_t = std::vector<aux_ptr_t>;
+      
+      /// Type of the source association.
+      using assns_t = art::Assns<main_t, aux_t>;
+      
+      
+      OneTo01Data(aux_coll_t&& data): auxData(std::move(data)) {}
+      
+      /// Returns whether the element `i` is associated with auxiliary datum.
+      bool has(std::size_t i) const
+        { return get(i) == aux_ptr_t(); }
+      
+      /// Returns a copy of the pointer to data associated with element `i`.
+      auxiliary_data_t get(std::size_t i) const
+        { return auxiliary_data_t(auxData[i]); }
+      
+      
+      /// Returns the range with the specified index (no check performed).
+      auto operator[] (std::size_t index) const -> decltype(auto)
+        {
+          static_assert(
+            std::is_convertible<decltype(get(index)), auxiliary_data_t>(),
+            "Inconsistent data types."
+            );
+          return get(index);
+        }
+      
+        private:
+      aux_coll_t auxData; ///< Data associated to the main collection.
+      
+    }; // class OneTo01Data<>
     
     
     
@@ -3384,6 +3923,40 @@ namespace proxy {
   namespace details {
     
     //--------------------------------------------------------------------------
+    // Extends vector v with default-constructed data
+    // and executes v[index]=value
+    template <typename T>
+    void extendAndAssign(
+      std::vector<T>& v,
+      typename std::vector<T>::size_type index, 
+      typename std::vector<T>::value_type const& value
+    ) {
+      if (index >= v.size()) {
+        v.reserve(index + 1);
+        v.resize(index);
+        v.push_back(value);
+      }
+      else v[index] = value;
+    } // extendAndAssign()
+    
+    // Extends vector v with default-constructed data
+    // and executes v[index]=move(value)
+    template <typename T>
+    void extendAndAssign(
+      std::vector<T>& v,
+      typename std::vector<T>::size_type index, 
+      typename std::vector<T>::value_type&& value
+    ) {
+      if (index >= v.size()) {
+        v.reserve(index + 1);
+        v.resize(index);
+        v.push_back(std::move(value));
+      }
+      else v[index] = std::move(value);
+    } // extendAndAssign()
+    
+    
+    //--------------------------------------------------------------------------
     //--- associationRanges() implementation
     //--------------------------------------------------------------------------
     template <std::size_t GroupKey, typename Iter>
@@ -3455,6 +4028,26 @@ namespace proxy {
     
     
     //--------------------------------------------------------------------------
+    template <std::size_t Key, std::size_t Data, typename Iter>
+    auto associationOneToOneFullSequence(Iter begin, Iter end, std::size_t n) {
+      //
+      // Here we are actually not using the assumption that the keys are in
+      // increasing order; which is just as good as long as we use a fast random
+      // access container as STL vector.
+      // We do assume the key side of the association to be valid, though.
+      //
+      using value_type = typename Iter::value_type;
+      using data_t = std::tuple_element_t<Data, value_type>;
+      std::vector<data_t> data(n); // all default-constructed
+      for (auto it = begin; it != end; ++it) {
+        auto const& keyPtr = std::get<Key>(*it);
+        details::extendAndAssign(data, keyPtr.key(), std::get<Data>(*it));
+      }
+      return data;
+    } // associationOneToOneFullSequence(Iter, Iter, std::size_t)
+    
+    
+    //--------------------------------------------------------------------------
     
   } // namespace details
   
@@ -3511,6 +4104,55 @@ namespace proxy {
     using Aux_t = Aux;
     return makeAssociatedData<Main_t, Aux_t, Tag>(event, tag, handle->size());
   } // makeAssociatedData(handle)
+  
+  
+  
+  //----------------------------------------------------------------------------
+  //--- makeAssociatedData() implementations
+  //----------------------------------------------------------------------------
+  template <typename Tag, typename Assns>
+  auto makeAssociatedTo01data(Assns const& assns, std::size_t minSize /* = 0 */)
+  {
+    using Main_t = typename Assns::left_t;
+    using Aux_t = typename Assns::right_t;
+    using AssociatedData_t = details::OneTo01Data<Main_t, Aux_t, Tag>;
+    
+    using std::cbegin;
+    using std::cend;
+    return AssociatedData_t(
+      details::associationOneToOneFullSequence<0U, 1U>
+        (cbegin(assns), cend(assns), minSize)
+      );
+  } // makeAssociatedTo01data(assns)
+  
+  
+  //----------------------------------------------------------------------------
+  template <typename Main, typename Aux, typename Tag, typename Event>
+  auto makeAssociatedTo01data
+    (Event const& event, art::InputTag tag, std::size_t minSize /* = 0 */)
+  {
+    using Main_t = Main;
+    using Aux_t = Aux;
+    using AssociatedData_t = details::OneTo01Data<Main_t, Aux_t, Tag>;
+    using Assns_t = typename AssociatedData_t::assns_t;
+    
+    return makeAssociatedTo01data<Tag>
+      (*(event.template getValidHandle<Assns_t>(tag)), minSize);
+    
+  } // makeAssociatedTo01data(tag)
+  
+  
+  //----------------------------------------------------------------------------
+  template <typename Aux, typename Tag, typename Handle, typename Event>
+  auto makeAssociatedTo01data
+    (Handle&& handle, Event const& event, art::InputTag tag)
+  {
+    // Handle::value_type is the main data product type (a collection)
+    using Main_t = collection_value_t<typename Handle::value_type>;
+    using Aux_t = Aux;
+    return makeAssociatedTo01data<Main_t, Aux_t, Tag>
+      (event, tag, handle->size());
+  } // makeAssociatedTo01data(handle)
   
   
   
