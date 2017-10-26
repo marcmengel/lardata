@@ -63,7 +63,7 @@ namespace detinfo{
     ValidateAndConfigure(pset, ignore_params);
     
     fTPCClock = fClocks->TPCClock();
-    
+    DoUpdateClocks();
   }
     
   //--------------------------------------------------------------------
@@ -80,10 +80,10 @@ namespace detinfo{
     {}
   
   //--------------------------------------------------------------------
-  bool DetectorPropertiesStandard::Update(uint64_t t) 
+  bool DetectorPropertiesStandard::Update(uint64_t) 
   {
 
-    CalculateXTicksParams();
+    DoUpdateClocks();
     return true;
   }
 
@@ -93,7 +93,7 @@ namespace detinfo{
     fClocks = clks;
     
     fTPCClock = fClocks->TPCClock();
-    CalculateXTicksParams();
+    DoUpdateClocks();
     return true;
   }
   
@@ -133,7 +133,7 @@ namespace detinfo{
 
     fSimpleBoundary = config.SimpleBoundary();
 
-    CalculateXTicksParams();
+    DoUpdateClocks();
     
   } // DetectorPropertiesStandard::Configure()
   
@@ -655,6 +655,12 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
     
   } // DetectorPropertiesStandard::CheckConfigurationAfterSetup()
   
+  //--------------------------------------------------------------------
+  void DetectorPropertiesStandard::DoUpdateClocks() 
+  {
+    CalculateXTicksParams();
+  }
+
   //--------------------------------------------------------------------
   
   

@@ -347,6 +347,8 @@ namespace detinfo{
       /// information.
       void CheckConfigurationAfterSetup() const;
       
+      /// Time-independent implementation of clock updates.
+      void DoUpdateClocks();
       
     }; // class DetectorPropertiesStandard
 } //namespace detinfo
