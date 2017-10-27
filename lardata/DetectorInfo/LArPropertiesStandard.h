@@ -182,8 +182,8 @@ namespace detinfo {
     void SetReflectiveSurfaceDiffuseFractions(std::vector<std::vector<double> > f) { fReflectiveSurfaceDiffuseFractions = f;}
 
     void SetExtraMatProperties(bool l)        { fExtraMatProperties = l;}
-    virtual bool ExtraMatProperties() const { return fExtraMatProperties; }
-    virtual double TpbTimeConstant()  const { return fTpbTimeConstant;     }
+    virtual bool ExtraMatProperties() const override { return fExtraMatProperties; }
+    virtual double TpbTimeConstant()  const override { return fTpbTimeConstant;     }
 
     virtual std::map<double, double>  TpbAbs() const override;
     virtual std::map<double, double>  TpbEm() const override;
