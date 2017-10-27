@@ -800,13 +800,13 @@ namespace proxy {
      * The interface allows to check if this track has a trajectory associated
      * with it, and to obtain a reference to it or its _art_ pointer.
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-     * bool hasTraj = proxy.hasTrajectory();
+     * bool hasTraj = proxy.hasOriginalTrajectory();
      * if (hasTraj) {
-     *   recob::TrackTrajectory const& trajectory = proxy.trajectory();
+     *   recob::TrackTrajectory const& trajectory = proxy.originalTrajectory();
      *   // ...
      * }
      * art::Ptr<recob::TrackTrajectory> const& trajectoryPtr
-     *   = proxy.trajectoryPtr();
+     *   = proxy.originalTrajectoryPtr();
      * if (!trajectoryPtr.isNull()) {
      *   recob::TrackTrajectory const& trajectory = *trajectoryPtr;
      *   // ...
@@ -815,29 +815,29 @@ namespace proxy {
      * 
      * @note This interface can't be used if the track trajectory information
      *       has not been merged into the proxy (typically via
-     *       `proxy::withTrajectory()`).
+     *       `proxy::withOriginalTrajectory()`).
      */
     
     /// Returns whether this track is associated to a trajectory.
-    bool hasTrajectory() const
-      { return !trajectoryPtr().isNull(); }
+    bool hasOriginalTrajectory() const
+      { return !originalTrajectoryPtr().isNull(); }
     
     /// Returns an _art_ pointer to the associated trajectory.
     /// @return pointer to the associated trajectory (`isNull()` `true` if none)
-    art::Ptr<recob::TrackTrajectory> const& trajectoryPtr() const
+    art::Ptr<recob::TrackTrajectory> const& originalTrajectoryPtr() const
       { return base_t::template get<Tracks::TrackTrajectoryTag>(); }
     
     /**
      * @brief Returns a reference to the associated trajectory.
      * @return the associated trajectory as a constant reference
-     * @see `trajectoryPtr()`, `hasTrajectory()`
+     * @see `originalTrajectoryPtr()`, `hasOriginalTrajectory()`
      * 
      * If the track is not associated to any trajectory, the return value is
      * undefined. This condition should be checked beforehand, e.g. with
      * `hasTrajectory()`.
      */
-    recob::TrackTrajectory const& trajectory() const
-      { return *trajectoryPtr(); }
+    recob::TrackTrajectory const& originalTrajectory() const
+      { return *originalTrajectoryPtr(); }
     
     /// @}
     
@@ -922,9 +922,9 @@ namespace proxy {
    * @param inputTag the data product label to read the data from
    * @return an object driving `getCollection()` to use `recob::TrackTrajectory`
    * @ingroup LArSoftProxyTracks
-   * @see TrackCollectionProxyElement::hasTrajectory(),
-   *      TrackCollectionProxyElement::trajectory(),
-   *      TrackCollectionProxyElement::trajectoryPtr()
+   * @see TrackCollectionProxyElement::hasOriginalTrajectory(),
+   *      TrackCollectionProxyElement::originalTrajectory(),
+   *      TrackCollectionProxyElement::originalTrajectoryPtr()
    * 
    * The `recob::TrackTrajectory` information is required to be from a _art_
    * association with `recob::Track`. The association must fulfil the
@@ -935,19 +935,21 @@ namespace proxy {
    * `recob::TrackTrajectory`, or via custom interface, e.g.:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * recob::TrackTrajectory const* trajectory
-   *   = trackProxy.hasTrajectory()? &(trackProxy.trajectory()): nullptr;
+   *   = trackProxy.hasOriginalTrajectory()
+   *   ? &(trackProxy.originalTrajectory()): nullptr;
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * 
    */
-  inline auto withTrajectory(art::InputTag inputTag)
+  inline auto withOriginalTrajectory(art::InputTag inputTag)
     {
       return proxy::withZeroOrOneAs
         <recob::TrackTrajectory, Tracks::TrackTrajectoryTag>(inputTag);
     }
   
-  /// Like `withTrajectory(art::InputTag)`, using the same label as for tracks.
+  /// Like `withOriginalTrajectory(art::InputTag)`, using the same label as for
+  /// tracks.
   /// @ingroup LArSoftProxyTracks
-  inline auto withTrajectory()
+  inline auto withOriginalTrajectory()
     {
       return proxy::withZeroOrOneAs
         <recob::TrackTrajectory, Tracks::TrackTrajectoryTag>();

@@ -211,7 +211,7 @@ void TrackProxyTest::testTracks(art::Event const& event) {
   auto tracks = proxy::getCollection<proxy::Tracks>(event, tracksTag
     , proxy::withAssociatedAs<recob::Hit, tag::SpecialHits>()
     , proxy::withFitHitInfo()
-    , proxy::withTrajectory()
+    , proxy::withOriginalTrajectory()
     );
   
   //
@@ -273,13 +273,13 @@ void TrackProxyTest::testTracks(art::Event const& event) {
     
     // trajectory?
     BOOST_CHECK_EQUAL
-      (trackProxy.hasTrajectory(), !expectedTrajPtr.isNull());
+      (trackProxy.hasOriginalTrajectory(), !expectedTrajPtr.isNull());
     if (expectedTrajPtr.isNull()) {
-      BOOST_CHECK(!(trackProxy.trajectoryPtr()));
+      BOOST_CHECK(!(trackProxy.originalTrajectoryPtr()));
     }
     else {
-      BOOST_CHECK_EQUAL(trackProxy.trajectoryPtr(), expectedTrajPtr);
-      BOOST_CHECK_EQUAL(&trackProxy.trajectory(), expectedTrajPtr.get());
+      BOOST_CHECK_EQUAL(trackProxy.originalTrajectoryPtr(), expectedTrajPtr);
+      BOOST_CHECK_EQUAL(&trackProxy.originalTrajectory(), expectedTrajPtr.get());
     }
     
     // direct interface to recob::Track
