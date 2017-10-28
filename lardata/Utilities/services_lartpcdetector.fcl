@@ -20,7 +20,8 @@
 #include "simulationservices.fcl"
 #include "magfield_larsoft.fcl"
 #include "databaseutil.fcl"
-#include "backtracker.fcl"
+#include "backtrackerservice.fcl"
+#include "particleinventoryservice.fcl"
 #include "detectorclocks.fcl"
 #include "channelstatus.fcl"
 
@@ -33,7 +34,8 @@ lartpcdetector_services:
   DetectorPropertiesService: @local::standard_detproperties
   LArPropertiesService:      @local::standard_properties
   LArFFT:                    @local::standard_larfft
-  BackTracker:               @local::standard_backtracker
+  BackTrackerService:       @local::standard_backtrackerservice
+  ParticleInventoryService: @local::standard_particleinventoryservice
   DetectorClocksService:     @local::standard_detectorclocks
   ChannelStatusService:      @local::standard_channelstatus
 }
