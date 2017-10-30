@@ -34,8 +34,8 @@ lartpcdetector_services:
   DetectorPropertiesService: @local::standard_detproperties
   LArPropertiesService:      @local::standard_properties
   LArFFT:                    @local::standard_larfft
-  BackTrackerService:       @local::standard_backtrackerservice
-  ParticleInventoryService: @local::standard_particleinventoryservice
+  BackTrackerService:        @local::standard_backtrackerservice
+  ParticleInventoryService:  @local::standard_particleinventoryservice
   DetectorClocksService:     @local::standard_detectorclocks
   ChannelStatusService:      @local::standard_channelstatus
 }
