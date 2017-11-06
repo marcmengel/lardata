@@ -139,7 +139,6 @@ namespace testing {
             env.ServiceParameters("DetectorPropertiesService"),
             env.template ProviderPackFor<detinfo::DetectorPropertiesStandard>()
           );
-        detp->UpdateClocks(env.template Provider<detinfo::DetectorClocks>());
         return detp;
       } // setup()
     
