@@ -313,11 +313,11 @@ using HitPairList        = std::list<std::unique_ptr<reco::ClusterHit3D>>;
     
 using PCAHitPairClusterMapPair = std::pair<reco::PrincipalComponents, reco::HitPairClusterMap::iterator>;
 using PlaneToClusterParamsMap  = std::map<size_t, RecobClusterParameters>;
-    
-using EdgeTuple        = std::tuple<const reco::ClusterHit3D*,const reco::ClusterHit3D*,double>;
-using EdgeList         = std::list<EdgeTuple>;
-using Hit3DToEdgePair  = std::pair<const reco::ClusterHit3D*, reco::EdgeList>;
-using Hit3DToEdgeMap   = std::unordered_map<const reco::ClusterHit3D*, reco::EdgeList>;
+using EdgeTuple                = std::tuple<const reco::ClusterHit3D*,const reco::ClusterHit3D*,double>;
+using EdgeList                 = std::list<EdgeTuple>;
+using Hit3DToEdgePair          = std::pair<const reco::ClusterHit3D*, reco::EdgeList>;
+using Hit3DToEdgeMap           = std::unordered_map<const reco::ClusterHit3D*, reco::EdgeList>;
+using Hit2DToHit3DListMap      = std::unordered_map<const reco::ClusterHit2D*, reco::HitPairListPtr>;
 
 /**
  *  @brief Class wrapping the above and containing volatile information to characterize the cluster
@@ -332,6 +332,7 @@ public:
     {
         m_clusterParams.clear();
         m_hitPairListPtr.clear();
+        m_hit2DToHit3DListMap.clear();
         m_hit3DToEdgeMap.clear();
         m_bestHitPairListPtr.clear();
         m_bestEdgeList.clear();
@@ -341,6 +342,7 @@ public:
     ClusterParameters(reco::HitPairClusterMap::iterator& mapItr) : m_hitPairListPtr(mapItr->second)
     {
         m_clusterParams.clear();
+        m_hit2DToHit3DListMap.clear();
         m_hit3DToEdgeMap.clear();
         m_bestHitPairListPtr.clear();
         m_bestEdgeList.clear();
@@ -349,6 +351,7 @@ public:
     ClusterParameters(reco::HitPairListPtr& hitList) : m_hitPairListPtr(hitList)
     {
         m_clusterParams.clear();
+        m_hit2DToHit3DListMap.clear();
         m_hit3DToEdgeMap.clear();
         m_bestHitPairListPtr.clear();
         m_bestEdgeList.clear();
@@ -361,13 +364,31 @@ public:
         m_clusterParams[hit->getHit().WireID().Plane].UpdateParameters(hit);
     }
     
-    reco::PlaneToClusterParamsMap& getClusterParams()      {return m_clusterParams;}
-    reco::HitPairListPtr&          getHitPairListPtr()     {return m_hitPairListPtr;}
-    reco::PrincipalComponents&     getFullPCA()            {return m_fullPCA;}
-    reco::PrincipalComponents&     getSkeletonPCA()        {return m_skeletonPCA;}
-    reco::Hit3DToEdgeMap&          getHit3DToEdgeMap()     {return m_hit3DToEdgeMap;}
-    reco::HitPairListPtr&          getBestHitPairListPtr() {return m_bestHitPairListPtr;}
-    reco::EdgeList&                getBestEdgeList()       {return m_bestEdgeList;}
+    void addHit3D(const reco::ClusterHit3D* hit3D)
+    {
+        m_hitPairListPtr.emplace_back(hit3D);
+        
+        for(const auto& hit2D : hit3D->getHits())
+            if (hit2D) m_hit2DToHit3DListMap[hit2D].emplace_back(hit3D);
+    }
+    
+    void fillHit2DToHit3DListMap()
+    {
+        for(const auto& hit3D : m_hitPairListPtr)
+        {
+            for(const auto& hit2D : hit3D->getHits())
+                if (hit2D) m_hit2DToHit3DListMap[hit2D].emplace_back(hit3D);
+        }
+    }
+    
+    reco::PlaneToClusterParamsMap& getClusterParams()       {return m_clusterParams;}
+    reco::Hit2DToHit3DListMap&     getHit2DToHit3DListMap() {return m_hit2DToHit3DListMap;}
+    reco::HitPairListPtr&          getHitPairListPtr()      {return m_hitPairListPtr;}
+    reco::PrincipalComponents&     getFullPCA()             {return m_fullPCA;}
+    reco::PrincipalComponents&     getSkeletonPCA()         {return m_skeletonPCA;}
+    reco::Hit3DToEdgeMap&          getHit3DToEdgeMap()      {return m_hit3DToEdgeMap;}
+    reco::HitPairListPtr&          getBestHitPairListPtr()  {return m_bestHitPairListPtr;}
+    reco::EdgeList&                getBestEdgeList()        {return m_bestEdgeList;}
     
     friend bool operator < (const ClusterParameters &a, const ClusterParameters& b)
     {
@@ -377,8 +398,9 @@ public:
 private:
     PlaneToClusterParamsMap   m_clusterParams;
     reco::HitPairListPtr      m_hitPairListPtr;      // This contains the list of 3D hits in the cluster
-    reco::PrincipalComponents m_fullPCA;
-    reco::PrincipalComponents m_skeletonPCA;
+    reco::Hit2DToHit3DListMap m_hit2DToHit3DListMap; // Provides a mapping between 2D hits and 3D hits they make
+    reco::PrincipalComponents m_fullPCA;             // PCA run over full set of 3D hits
+    reco::PrincipalComponents m_skeletonPCA;         // PCA run over just the "skeleton" 3D hits
     reco::Hit3DToEdgeMap      m_hit3DToEdgeMap;
     reco::HitPairListPtr      m_bestHitPairListPtr;
     reco::EdgeList            m_bestEdgeList;
