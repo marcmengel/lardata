@@ -17,25 +17,6 @@ art_make( NO_PLUGINS
                         ${ROOT_BASIC_LIB_LIST}
         )
 
-#simple_plugin(TimeService "service"
-#	      lardataobj_RawData
-#             lardata_Utilities_DatabaseUtil_service
-# 	      art_Utilities
-#	      ${ART_FRAMEWORK_CORE}
-# 	      ${ART_FRAMEWORK_PRINCIPAL}
-# 	      ${ART_PERSISTENCY_ROOTDB}
-# 	      art_Persistency_Common
-# 	      art_Persistency_Provenance canvas
-# 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
-# 	      ${MF_MESSAGELOGGER}
-# 	      ${MF_UTILITIES}
-# 	      ${FHICLCPP}
-# 	      cetlib cetlib_except
-# 	      ${SQLITE3}
-# 	      ${ROOT_BASIC_LIB_LIST}
-#              
-#)
-
 simple_plugin(DatabaseUtil "service"
 	      ${MF_MESSAGELOGGER}
 	      ${MF_UTILITIES}
@@ -98,19 +79,6 @@ simple_plugin(LArFFT "service"
 	      cetlib cetlib_except
 	      ${ROOT_FFTW}
 	      ${ROOT_BASIC_LIB_LIST}
-)
-
-simple_plugin(MemoryPeakReporter "service"
-              art_Utilities
-              ${ART_FRAMEWORK_SERVICES_REGISTRY}
-              ${ART_FRAMEWORK_PRINCIPAL}
-              art_Persistency_Provenance
-	      canvas
-              ${MF_MESSAGELOGGER}
-              ${MF_UTILITIES}
-              ${FHICLCPP}
-              cetlib cetlib_except
- 	      ${ROOT_CORE}
 )
 
 simple_plugin(ComputePi "module"
