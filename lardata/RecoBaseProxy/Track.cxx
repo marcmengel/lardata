@@ -1,5 +1,5 @@
 /**
- * @file   Track.cxx
+ * @file   lardata/RecoBaseProxy/Track.cxx
  * @brief  Implementation file for `proxy::Track`.
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   July 27, 2017
