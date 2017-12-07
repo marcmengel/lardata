@@ -9,7 +9,6 @@ standard_debug:
   {
    type:      "file"       # record the messages in a file, could also be cout, cerr, archive, dds
    filename:  "debug.log"  # name of the file in which to place the messages
-   append:    false        # if set to true will append messages to named file if it exists
    threshold: "DEBUG"      # threshold of what level of messages to use
    categories:             # place to list named categories, if you want to customize, 
                            # I think the categories are what are the strings given to mf::LogXXX() commands
@@ -65,7 +64,6 @@ standard_warning:
   {
    type:      "cout"	
    threshold: "WARNING"
-   append:    true        
    categories: 
    {
      default:             
@@ -97,7 +95,6 @@ standard_error:
   {
    type:      "cerr"	
    threshold: "ERROR"
-   append:    true        
    categories: 
    {
      default: {} 
