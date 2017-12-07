@@ -501,6 +501,13 @@ namespace proxy {
     /// Tag used for the associated hits.
     using HitTag = recob::Hit;
     
+    /// Types of tracks and trajectories.
+    typedef enum {
+      Unfitted, ///< Represents a track trajectory before the final fit.
+      Fitted,   ///< Represents a track trajectory from the final fit.
+      NTypes    ///< Number of supported track types.
+    } TrackType_t;
+    
   }; // struct Tracks
   
   
@@ -734,6 +741,15 @@ namespace proxy {
     recob::Track const& track() const { return base_t::operator*(); }
     
     /**
+     * @brief Returns the requested trajectory from the proxy.
+     * @param type type of the track trajectory to be returned
+     * @return a reference to the requested track trajectory
+     * 
+     */
+    recob::TrackTrajectory const* operator()
+      (proxy::Tracks::TrackType_t type) const noexcept;
+    
+    /**
      * @{
      * @name Direct hit interface.
      * 
@@ -780,17 +796,7 @@ namespace proxy {
     /// @}
     
     /// Returns fit info for the specified point (`nullptr` if not available).
-    recob::TrackFitHitInfo const* fitInfoAtPoint(std::size_t index) const
-      {
-        if (!base_t::template has<Tracks::TrackFitHitInfoTag>())
-          return nullptr;
-        auto&& fitInfo = base_t::template getIf<
-          Tracks::TrackFitHitInfoTag,
-          std::vector<recob::TrackFitHitInfo> const&
-          >();
-        return &(fitInfo[index]);
-      }
-    
+    recob::TrackFitHitInfo const* fitInfoAtPoint(std::size_t index) const;
     
     /**
      * @{
@@ -892,6 +898,10 @@ namespace proxy {
       { return point(index); }
     
     /// @}
+    
+      private:
+    recob::TrackTrajectory const* originalTrajectoryCPtr() const noexcept
+      { return hasOriginalTrajectory()? &originalTrajectory(): nullptr; }
     
   }; // TrackCollectionProxyElement<>
   
@@ -1143,6 +1153,42 @@ namespace proxy {
     
   } // namespace details
   
+  //----------------------------------------------------------------------------
+  template <typename CollProxy>
+  recob::TrackFitHitInfo const*
+  TrackCollectionProxyElement<CollProxy>::fitInfoAtPoint
+    (std::size_t index) const
+  {
+    if (!base_t::template has<Tracks::TrackFitHitInfoTag>())
+      return nullptr;
+    auto&& fitInfo = base_t::template getIf<
+      Tracks::TrackFitHitInfoTag,
+      std::vector<recob::TrackFitHitInfo> const&
+      >();
+    return &(fitInfo[index]);
+  } // TrackCollectionProxyElement<>::fitInfoAtPoint()
+  
+  
+  //----------------------------------------------------------------------------
+  template <typename CollProxy>
+  recob::TrackTrajectory const*
+  TrackCollectionProxyElement<CollProxy>::operator()
+    (proxy::Tracks::TrackType_t type) const noexcept
+  {
+     switch (type) {
+       case proxy::Tracks::Fitted:
+         return &(track().Trajectory());
+       case proxy::Tracks::Unfitted:
+         return originalTrajectoryCPtr();
+       default:
+         return nullptr;
+     } // switch
+  } // TrackCollectionProxyElement<>::operator()
+  
+  
+  
+  //----------------------------------------------------------------------------
+
 } // namespace proxy
 
   

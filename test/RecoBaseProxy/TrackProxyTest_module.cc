@@ -249,6 +249,8 @@ void TrackProxyTest::testTracks(art::Event const& event) {
     auto const& expectedHits = hitsPerTrack.at(iExpectedTrack);
     auto const& expectedFitHitInfo = expectedTrackFitHitInfo[iExpectedTrack];
     auto const& expectedTrajPtr = trajectoryPerTrack.at(iExpectedTrack);
+    recob::TrackTrajectory const* expectedTrajCPtr
+      = expectedTrajPtr.isNull()? nullptr: expectedTrajPtr.get();
     
     recob::Track const& trackRef = *trackProxy;
     
@@ -274,13 +276,20 @@ void TrackProxyTest::testTracks(art::Event const& event) {
     // trajectory?
     BOOST_CHECK_EQUAL
       (trackProxy.hasOriginalTrajectory(), !expectedTrajPtr.isNull());
-    if (expectedTrajPtr.isNull()) {
-      BOOST_CHECK(!(trackProxy.originalTrajectoryPtr()));
-    }
-    else {
+    if (expectedTrajCPtr) {
       BOOST_CHECK_EQUAL(trackProxy.originalTrajectoryPtr(), expectedTrajPtr);
       BOOST_CHECK_EQUAL(&trackProxy.originalTrajectory(), expectedTrajPtr.get());
     }
+    else {
+      BOOST_CHECK(!(trackProxy.originalTrajectoryPtr()));
+    }
+    
+    BOOST_CHECK_EQUAL(
+      trackProxy(proxy::Tracks::Fitted),
+      std::addressof(expectedTrack.Trajectory())
+      );
+    BOOST_CHECK_EQUAL(trackProxy(proxy::Tracks::Unfitted), expectedTrajCPtr);
+    BOOST_CHECK_EQUAL(trackProxy(proxy::Tracks::NTypes), nullptr);
     
     // direct interface to recob::Track
     BOOST_CHECK_EQUAL(trackProxy->NPoints(), expectedTrack.NPoints());
