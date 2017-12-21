@@ -3243,6 +3243,9 @@ namespace proxy {
       /// Returns a pointer to the whole data collection.
       parallel_data_t const* data() const { return fData; }
       
+      /// Returns a reference to the whole data collection.
+      parallel_data_t const& dataRef() const { return *(data()); }
+      
         private:
       
       parallel_data_t const* fData; ///< Reference to the original data product.
