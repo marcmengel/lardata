@@ -14,6 +14,7 @@ set(RecoBaseDumpers
   "DumpPCAxes"
   "DumpPFParticles"
   "DumpSpacePoints"
+  "DumpChargedSpacePoints"
   "DumpTracks"
   "DumpVertices"
   )
@@ -62,6 +63,7 @@ foreach(Dumper IN LISTS RecoBaseDumpers)
   simple_plugin(${Dumper} "module"
       lardataobj_RecoBase
       lardata_ArtDataHelper_Dumpers
+      lardata_RecoBaseProxy
       art_Framework_Principal
       canvas
       ${MF_MESSAGELOGGER}
