@@ -65,8 +65,10 @@ simple_plugin(ChargedSpacePointProxyTest "module"
 
 simple_plugin(ChargedSpacePointProxyInputMaker "module"
   lardataobj_RecoBase
+  lardata_ArtDataHelper
   ${MF_MESSAGELOGGER}
   ${MF_UTILITIES}
+  USE_BOOST_UNIT
   )
 
 cet_test(ChargedSpacePointProxy_test

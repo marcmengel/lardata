@@ -7,8 +7,9 @@
  */
 
 // LArSoft libraries
+#include "lardata/ArtDataHelper/ChargedSpacePointCreator.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
-#include "lardataobj/RecoBase/Charge.h"
+#include "lardataobj/RecoBase/PointCharge.h"
 
 // framework libraries
 #include "art/Framework/Core/EDProducer.h"
@@ -19,6 +20,9 @@
 #include "fhiclcpp/types/Atom.h"
 #include "fhiclcpp/types/Name.h"
 #include "fhiclcpp/types/Comment.h"
+
+// Boost libraries
+#include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // C/C++ standard libraries
 #include <vector>
@@ -60,13 +64,8 @@ namespace lar {
       
       using Parameters = art::EDProducer::Table<Config>;
       
-      explicit ChargedSpacePointProxyInputMaker(Parameters const& config)
-        : nPoints(config().nPoints())
-        {
-          produces<std::vector<recob::SpacePoint>>();
-          produces<std::vector<recob::Charge>>();
-        }
-
+      explicit ChargedSpacePointProxyInputMaker(Parameters const& config);
+      
       virtual void produce(art::Event& event) override;
       
         private:
@@ -82,10 +81,59 @@ namespace lar {
 
 
 // -----------------------------------------------------------------------------
+lar::test::ChargedSpacePointProxyInputMaker::ChargedSpacePointProxyInputMaker
+  (Parameters const& config)
+  : nPoints(config().nPoints())
+{
+  
+  // declare production of recob::SpacePoint and recob::PointCharge collections:
+  recob::ChargedSpacePointCollectionCreator::produces(*this);
+  
+} // ChargedSpacePointProxyInputMaker::ChargedSpacePointProxyInputMaker()
+
+// -----------------------------------------------------------------------------
+void lar::test::ChargedSpacePointProxyInputMaker::produce(art::Event& event) {
+  
+  recob::ChargedSpacePointCollectionCreator spacePoints(event, *this);
+  
+  BOOST_CHECK(spacePoints.empty());
+  
+  const double err[6U] = { 1.0, 0.0, 1.0, 0.0, 0.0, 1.0 };
+  
+  for (unsigned int iPoint = 0; iPoint < nPoints; ++iPoint) {
+    BOOST_CHECK_EQUAL(spacePoints.size(), (std::size_t) iPoint);
+    
+    double const pos[3U]
+      = { double(iPoint), double(2.0 * iPoint), double(4.0 * iPoint) };
+    
+    spacePoints.add(
+      { pos, err, 1.0 /* chisq */, int(iPoint) /* id */ }, // space point
+      { recob::PointCharge::Charge_t(iPoint) }                  // charge
+      );
+    
+    mf::LogVerbatim("ChargedSpacePointProxyInputMaker")
+      << "[#" << iPoint << "] point: " << spacePoints.lastSpacePoint()
+      << " (ptr: " << spacePoints.lastSpacePointPtr()
+      << "); charge: " << spacePoints.lastCharge()
+      << " (ptr: " << spacePoints.lastChargePtr() << ")";
+    
+  } // for (iPoint)
+  BOOST_CHECK_EQUAL(spacePoints.size(), (std::size_t) nPoints);
+  
+  mf::LogInfo("ChargedSpacePointProxyInputMaker")
+    << "Produced " << spacePoints.size() << " points and charges.";
+  
+  spacePoints.put();
+  BOOST_CHECK(spacePoints.empty());
+  
+} // lar::test::ChargedSpacePointProxyInputMaker::produce()
+
+#if 0
+// -----------------------------------------------------------------------------
 void lar::test::ChargedSpacePointProxyInputMaker::produce(art::Event& event) {
   
   auto points = std::make_unique<std::vector<recob::SpacePoint>>();
-  auto charges = std::make_unique<std::vector<recob::Charge>>();
+  auto charges = std::make_unique<std::vector<recob::PointCharge>>();
   
   const double err[6U] = { 1.0, 0.0, 1.0, 0.0, 0.0, 1.0 };
   
@@ -101,7 +149,7 @@ void lar::test::ChargedSpacePointProxyInputMaker::produce(art::Event& event) {
     //
     // charge
     //
-    charges->emplace_back(recob::Charge::Charge_t(iPoint));
+    charges->emplace_back(recob::PointCharge::Charge_t(iPoint));
     
     mf::LogVerbatim("ChargedSpacePointProxyInputMaker")
       << "[#" << iPoint << "] point: " << points->back()
@@ -116,6 +164,7 @@ void lar::test::ChargedSpacePointProxyInputMaker::produce(art::Event& event) {
   event.put(std::move(charges));
   
 } // lar::test::ChargedSpacePointProxyInputMaker::produce()
+#endif // 0
 
 // -----------------------------------------------------------------------------
 DEFINE_ART_MODULE(lar::test::ChargedSpacePointProxyInputMaker)

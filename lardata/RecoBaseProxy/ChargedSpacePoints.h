@@ -19,7 +19,7 @@
  * products:
  * 1. a collection of points (`std::vector<recob::SpacePoint>`) containing the
  *    location of each reconstructed activity
- * 2. a collection of charge information (`std::vector<recob::Charge>`)
+ * 2. a collection of charge information (`std::vector<recob::PointCharge>`)
  *    containing the reconstructed charge for each activity.
  * 
  * The two data products are _implicitly_ associated by counting the same number
@@ -52,7 +52,7 @@
  * are in fact equivalent to:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
  * proxy::getCollection<proxy::ChargedSpacePoints>
- *   (event, tag, proxy::withParallelData<recob::Charge>(), ...);
+ *   (event, tag, proxy::withParallelData<recob::PointCharge>(), ...);
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * 
  * 
@@ -83,7 +83,7 @@
 // LArSoft libraries
 #include "lardata/RecoBaseProxy/ProxyBase.h" // proxy namespace
 #include "lardataobj/RecoBase/SpacePoint.h"
-#include "lardataobj/RecoBase/Charge.h"
+#include "lardataobj/RecoBase/PointCharge.h"
 #include "larcorealg/Geometry/geo_vectors_utils.h" // geo::vect namespace
 
 // framework libraries
@@ -154,7 +154,6 @@ namespace proxy {
    * } // MyAnalyzer::processPoint()
    * 
    * 
-   * //------------------------------------------------------------------------------
    * void MyAnalyzer::proxyUsageExample(art::Event const& event) {
    *   
    *   auto points = proxy::getChargedSpacePoints(event, pointsTag);
@@ -197,7 +196,7 @@ namespace proxy {
     using SpacePointDataProduct_t = std::vector<recob::SpacePoint>;
     
     /// Tag used for the "standard" charge information.
-    using ChargeTag = recob::Charge;
+    using ChargeTag = recob::PointCharge;
     
   }; // struct ChargedSpacePoints
   
@@ -206,7 +205,8 @@ namespace proxy {
   /// Define the traits of `proxy::ChargedSpacePoints` proxy.
   template <>
   struct CollectionProxyMakerTraits<ChargedSpacePoints>
-    : public CollectionProxyMakerTraits<ChargedSpacePoints::SpacePointDataProduct_t>
+    : public
+      CollectionProxyMakerTraits<ChargedSpacePoints::SpacePointDataProduct_t>
   {};
   
   
@@ -236,8 +236,9 @@ namespace proxy {
     /// @}
     // --- END data object access ----------------------------------------------
     
-    /// Returns the `recob::Charge` object with the complete charge information.
-    recob::Charge const& chargeInfo() const
+    /// Returns the `recob::PointCharge` object with the complete charge
+    /// information.
+    recob::PointCharge const& chargeInfo() const
       { return base_t::template get<ChargedSpacePoints::ChargeTag>(); }
     
     // --- BEGIN space point access --------------------------------------------
@@ -260,8 +261,9 @@ namespace proxy {
     /// @name Direct charge interface
     
     /// Returns the charge associated to this point
-    /// @see `recob::Charge::charge()`
-    recob::Charge::Charge_t charge() const { return chargeInfo().charge(); }
+    /// @see `recob::PointCharge::charge()`
+    recob::PointCharge::Charge_t charge() const
+      { return chargeInfo().charge(); }
     
     /// Returns the position of the space point.
     bool hasCharge() const { return chargeInfo().hasCharge(); }
@@ -306,16 +308,18 @@ namespace proxy {
     
     /// Returns the original collection of charge information.
     auto const& charges() const
-      { return base_t::template get<ChargedSpacePoints::ChargeTag>().dataRef(); }
+      {
+        return base_t::template get<ChargedSpacePoints::ChargeTag>().dataRef();
+      }
     
   }; // ChargedSpacePointsCollectionProxy
   
   
   //----------------------------------------------------------------------------
   /**
-   * @brief Adds additional `recob::Charge` information to the proxy.
+   * @brief Adds additional `recob::PointCharge` information to the proxy.
    * @param inputTag the data product label to read the data from
-   * @return an object driving `getCollection()` to use a `recob::Charge`
+   * @return an object driving `getCollection()` to use a `recob::PointCharge`
    * @ingroup LArSoftProxyReco
    * 
    * The `proxy::ChargedSpacePoints` returned by
@@ -325,13 +329,13 @@ namespace proxy {
    * auto points = proxy::getCollection<proxy::ChargedSpacePoints>
    *   (event, pointsTag, proxy::withCharge(calibrationTag));
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * The charge from the data product of type `std::vector<recob::Charge>` with
-   * input tag `calibrationTag` will be used as default charge of the proxy
+   * The charge from the data product of type `std::vector<recob::PointCharge>`
+   * with input tag `calibrationTag` will be used as default charge of the proxy
    * instead of the one from `pointsTag`.
    */
   template <typename Tag = proxy::ChargedSpacePoints::ChargeTag>
   auto withCharge(art::InputTag inputTag)
-    { return proxy::withParallelDataAs<recob::Charge, Tag>(inputTag); }
+    { return proxy::withParallelDataAs<recob::PointCharge, Tag>(inputTag); }
   
   
   /**
@@ -348,8 +352,8 @@ namespace proxy {
    * This function initializes and return a space point proxy with associated
    * charge.
    * The proxy has a `recob::SpacePoint` as main data product, and it comes with
-   * an association of a single `recob::Charge` per space point, that can be
-   * accessed with thag `proxy::ChargedSpacePoints::ChargeTag` (although the
+   * an association of a single `recob::PointCharge` per space point, that can
+   * be accessed with thag `proxy::ChargedSpacePoints::ChargeTag` (although the
    * specific interface documented in `proxy::ChargedSpacePoints` and
    * `proxy::SpacePointWithCharge` is more convenient).
    * 
@@ -434,6 +438,4 @@ namespace proxy {
 } // namespace proxy
 
 
-
-  
 #endif // LARDATA_RECOBASEPROXY_CHARGEDSPACEPOINTS_H

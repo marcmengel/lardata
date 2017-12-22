@@ -11,7 +11,7 @@
 #include "lardata/RecoBaseProxy/ChargedSpacePoints.h" // proxy namespace
 #include "larcorealg/Geometry/geo_vectors_utils.h" // geo::vect namespace
 #include "lardataobj/RecoBase/SpacePoint.h"
-#include "lardataobj/RecoBase/Charge.h"
+#include "lardataobj/RecoBase/PointCharge.h"
 
 // framework libraries
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -52,7 +52,8 @@ class ChargedSpacePointProxyTest: public art::EDAnalyzer {
     
     fhicl::Atom<art::InputTag> pointsTag{
       Name("points"),
-      Comment("tag of the recob::SpacePoint and recob::Charge data products.")
+      Comment
+        ("tag of the recob::SpacePoint and recob::PointCharge data products.")
       };
     
   }; // struct Config
@@ -67,7 +68,8 @@ class ChargedSpacePointProxyTest: public art::EDAnalyzer {
   // Plugins should not be copied or assigned.
   ChargedSpacePointProxyTest(ChargedSpacePointProxyTest const &) = delete;
   ChargedSpacePointProxyTest(ChargedSpacePointProxyTest&&) = delete;
-  ChargedSpacePointProxyTest& operator= (ChargedSpacePointProxyTest const &) = delete;
+  ChargedSpacePointProxyTest& operator=
+    (ChargedSpacePointProxyTest const &) = delete;
   ChargedSpacePointProxyTest& operator= (ChargedSpacePointProxyTest&&) = delete;
   
   virtual void analyze(art::Event const& event) override;
@@ -113,13 +115,15 @@ void ChargedSpacePointProxyTest::proxyUsageExample
 
 
 //------------------------------------------------------------------------------
-void ChargedSpacePointProxyTest::testChargedSpacePoints(art::Event const& event) {
+void ChargedSpacePointProxyTest::testChargedSpacePoints
+  (art::Event const& event)
+{
   
   auto const& expectedSpacePoints
     = *(event.getValidHandle<std::vector<recob::SpacePoint>>(pointsTag));
   
   auto const& expectedCharges
-    = *(event.getValidHandle<std::vector<recob::Charge>>(pointsTag));
+    = *(event.getValidHandle<std::vector<recob::PointCharge>>(pointsTag));
   
   mf::LogInfo("ProxyTest")
     << "Starting test on " << expectedSpacePoints.size() << " points and "
@@ -131,7 +135,7 @@ void ChargedSpacePointProxyTest::testChargedSpacePoints(art::Event const& event)
   
   auto points = proxy::getChargedSpacePoints(event, pointsTag);
   
-  static_assert(points.has<recob::Charge>(), "recob::Charge not found!!!");
+  static_assert(points.has<recob::PointCharge>(), "recob::Charge not found!!!");
   
   BOOST_CHECK_EQUAL(points.empty(), expectedSpacePoints.empty());
   BOOST_CHECK_EQUAL(points.size(), expectedSpacePoints.size());
@@ -161,7 +165,7 @@ void ChargedSpacePointProxyTest::testChargedSpacePoints(art::Event const& event)
     BOOST_CHECK_EQUAL(pointProxy.hasCharge(), expectedChargeInfo.hasCharge());
     BOOST_CHECK_EQUAL(pointProxy.charge(), expectedChargeInfo.charge());
     
-    decltype(auto) chargeInfo = pointProxy.get<recob::Charge>();
+    decltype(auto) chargeInfo = pointProxy.get<recob::PointCharge>();
     static_assert(
       std::is_lvalue_reference<decltype(chargeInfo)>(),
       "Copy of parallel data element!"
