@@ -26,7 +26,7 @@ simple_plugin(DatabaseUtil "service"
 	      art_Utilities
               ${ART_FRAMEWORK_CORE}
               ${ART_FRAMEWORK_PRINCIPAL}
-              ${ART_PERSISTENCY_ROOTDB}
+              ${ART_FRAMEWORK_IO_ROOT_ROOTDB}
               art_Persistency_Common
               art_Persistency_Provenance
               ${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -35,7 +35,7 @@ simple_plugin(DatabaseUtil "service"
 )
 simple_plugin(FileCatalogMetadataExtras "service"
 	      art_Utilities
-	      ${ART_PERSISTENCY_ROOTDB}
+	      ${ART_FRAMEWORK_IO_ROOT_ROOTDB}
 	      ${ART_FRAMEWORK_CORE}
 	      ${ART_FRAMEWORK_PRINCIPAL}
 	      ${ART_FRAMEWORK_SERVICES_SYSTEM_FILECATALOGMETADATA_SERVICE}
@@ -62,7 +62,7 @@ simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
               lardata_Utilities_DatabaseUtil_service
               larcore_Geometry_Geometry_service
               larcorealg_Geometry
-              ${ART_PERSISTENCY_ROOTDB}
+              ${ART_FRAMEWORK_IO_ROOT_ROOTDB}
               ${SQLITE3}
               ${MF_MESSAGELOGGER}
               ${MF_UTILITIES}
