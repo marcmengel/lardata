@@ -48,7 +48,7 @@ class lris::LArRawInputDriverJP250L {
  private:
 
   // --- data members:
-  art::SourceHelper            principalMaker_;
+  art::SourceHelper const& principalMaker_;
   
   // added by E.Iwai
   TTree*          m_eventTree;   ///< TTree containing information from each trigger
