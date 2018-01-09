@@ -59,7 +59,8 @@
  * Types of proxies, and what to do with them
  * ===========================================
  * 
- * Currently there are three different type of proxy-like objects for tracks.
+ * Currently there are two different type of proxy-like objects for space points
+ * with added charge.
  * Each one supports a specific concept:
  * 
  * * `proxy::ChargedSpacePoints` represents the whole collection of space
@@ -265,7 +266,8 @@ namespace proxy {
     recob::PointCharge::Charge_t charge() const
       { return chargeInfo().charge(); }
     
-    /// Returns the position of the space point.
+    /// Returns whether the charge associated to the space point is valid.
+    /// @see recob::PointCharge::hasCharge()
     bool hasCharge() const { return chargeInfo().hasCharge(); }
     
     /// @}
