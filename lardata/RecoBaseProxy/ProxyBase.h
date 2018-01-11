@@ -349,6 +349,8 @@
  * @ingroup LArSoftProxies
  * @brief Data proxies for LArSoft reconstruction data products.
  * 
+ * Each proxy is documented in its own "module" (see the list above).
+ * 
  */
 // LArSoftProxyReco group is only defined here, no content is provided.
 // We selectively add to LArSoftProxies group via @ingroup directives.
@@ -3242,9 +3244,6 @@ namespace proxy {
       
       /// Returns a pointer to the whole data collection.
       parallel_data_t const* data() const { return fData; }
-      
-      /// Returns a reference to the whole data collection.
-      parallel_data_t const& dataRef() const { return *(data()); }
       
         private:
       

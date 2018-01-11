@@ -9,6 +9,7 @@
 
 /**
  * @brief Proxy for a `recob::SpacePoint` collection with associated charge.
+ * @defgroup LArSoftProxyChargedSpacePoint Space points with charge
  * @ingroup LArSoftProxyReco
  * 
  * Some algorithms can reconstruct the position of some activity in the active
@@ -97,13 +98,11 @@ namespace proxy {
   /**
    * @brief Proxy tag for a `recob::SpacePoint` collection with charge.
    * @see `proxy::SpacePointWithCharge`, `proxy::getChargedSpacePoints()`
-   * @ingroup LArSoftProxyReco
+   * @ingroup LArSoftProxyChargedSpacePoint
    *
    * This type can be used to get a proxy for `recob::SpacePoint` collection
    * with charge. Normally, you want to use
-   * `proxy::getChargedSpacePoints()` directly instead.
-   */
-  /*
+   * `proxy::getChargedSpacePoints()` directly instead:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * auto spacePoints = proxy::getChargedSpacePoints(event, pointsTag);
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -215,7 +214,7 @@ namespace proxy {
   /**
     * @brief Proxy class for charged space point proxy elements.
     * @tparam CollProxy type of point proxy collection to get data from
-    * @ingroup LArSoftProxyReco
+    * @ingroup LArSoftProxyChargedSpacePoint
     *
     * For details on the space point interface see `proxy::ChargedSpacePoints`.
     */
@@ -322,7 +321,7 @@ namespace proxy {
    * @brief Adds additional `recob::PointCharge` information to the proxy.
    * @param inputTag the data product label to read the data from
    * @return an object driving `getCollection()` to use a `recob::PointCharge`
-   * @ingroup LArSoftProxyReco
+   * @ingroup LArSoftProxyChargedSpacePoint
    * 
    * The `proxy::ChargedSpacePoints` returned by
    * `proxy::getChargedSpacePoints()` comes with its charge by default.
@@ -355,9 +354,10 @@ namespace proxy {
    * charge.
    * The proxy has a `recob::SpacePoint` as main data product, and it comes with
    * an association of a single `recob::PointCharge` per space point, that can
-   * be accessed with thag `proxy::ChargedSpacePoints::ChargeTag` (although the
-   * specific interface documented in `proxy::ChargedSpacePoints` and
-   * `proxy::SpacePointWithCharge` is more convenient).
+   * be accessed with tag `proxy::ChargedSpacePoints::ChargeTag` (although the
+   * specific interface documented in `proxy::ChargedSpacePoints` -- proxy to
+   * the whole collection -- and `proxy::SpacePointWithCharge` -- proxy to an
+   * individual space point -- is more convenient).
    * 
    * Additional elements can be merged into the proxy, in the usual way of
    * `proxy::getCollection()`.
