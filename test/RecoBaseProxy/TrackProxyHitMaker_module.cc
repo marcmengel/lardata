@@ -107,7 +107,7 @@ void lar::test::TrackProxyHitMaker::produce(art::Event& event) {
       1.0,                       // goodness_of_fit
       37,                        // DOF
       geo::kUnknown,             // view
-      geo::kMysteryType,         // signal_type
+      geo::kCollection,          // signal_type
       geo::WireID{ 0, 1, 2, i }  // wire ID
       );
       

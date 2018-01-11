@@ -13,6 +13,7 @@
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/TrackTrajectory.h"
 #include "lardataobj/RecoBase/Hit.h"
+#include "lardataobj/RecoBase/TrackHitMeta.h"
 
 // framework libraries
 #include "art/Framework/Core/EDProducer.h"
@@ -86,7 +87,7 @@ namespace lar {
           produces<art::Assns<recob::TrackTrajectory, recob::Hit>>();
           produces<std::vector<recob::Track>>();
           produces<std::vector<std::vector<recob::TrackFitHitInfo>>>();
-          produces<art::Assns<recob::Track, recob::Hit>>();
+          produces<art::Assns<recob::Track, recob::Hit, recob::TrackHitMeta>>();
           produces<art::Assns<recob::Track, recob::TrackTrajectory>>();
         }
 
@@ -112,7 +113,8 @@ void lar::test::TrackProxyTrackMaker::produce(art::Event& event) {
   auto tracks = std::make_unique<std::vector<recob::Track>>();
   auto trackFitInfo
     = std::make_unique<std::vector<std::vector<recob::TrackFitHitInfo>>>();
-  auto hitTrackAssn = std::make_unique<art::Assns<recob::Track, recob::Hit>>();
+  auto hitTrackAssn
+    = std::make_unique<art::Assns<recob::Track, recob::Hit, recob::TrackHitMeta>>();
   auto hitTrajectoryAssn
     = std::make_unique<art::Assns<recob::TrackTrajectory, recob::Hit>>();
   auto trackTrajectoryAssn
@@ -190,8 +192,13 @@ void lar::test::TrackProxyTrackMaker::produce(art::Event& event) {
     // create the track-hit associations
     //
     auto const trackPtr = trackPtrMaker(iTrack);
-    for (std::size_t iHit = firstHit; iHit < usedHits; ++iHit)
-      hitTrackAssn->addSingle(trackPtr, { hitHandle, iHit });
+    for (std::size_t iHit = firstHit; iHit < usedHits; ++iHit) {
+      
+      auto const hitIndex = iHit - firstHit;
+      recob::TrackHitMeta const hitInfo(hitIndex, 2.0 * hitIndex);
+      hitTrackAssn->addSingle(trackPtr, { hitHandle, iHit }, hitInfo);
+      
+    } // for
     
     //
     // create the track-trajectory associations
