@@ -1,5 +1,5 @@
 /**
- * @file    StatCollector.h
+ * @file    lardata/Utilities/StatCollector.h
  * @brief   Classes gathering simple statistics
  * @author  Gianluca Petrillo (petrillo@fnal.gov)
  * @date    December 23rd, 2014
@@ -10,8 +10,8 @@
  * 
  */
 
-#ifndef STATCOLLECTOR_H
-#define STATCOLLECTOR_H 1
+#ifndef LARDATA_UTILITIES_STATCOLLECTOR_H
+#define LARDATA_UTILITIES_STATCOLLECTOR_H
 
 // C/C++ standard libraries
 #include <cmath> // std::sqrt()
@@ -182,25 +182,26 @@ namespace lar {
      * @tparam W type of the weight (as T by default)
      * 
      * This is a convenience class, as easy to use as:
-     *     
-     *     lar::util::StatCollector<double> stat;
-     *     stat.add(3.0, 2.0);
-     *     stat.add(4.0, 2.0);
-     *     stat.add(5.0, 1.0);
-     *     std::cout << "Statistics from " << stat.N() << " entries: "
-     *       << stat.Average() << std::endl;
-     *     
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * lar::util::StatCollector<double> stat;
+     * stat.add(3.0, 2.0);
+     * stat.add(4.0, 2.0);
+     * stat.add(5.0, 1.0);
+     * std::cout << "Statistics from " << stat.N() << " entries: "
+     *   << stat.Average() << std::endl;
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * or also
-     *     std::vector<std::pair<double, double>> values({
-     *       { 3.0, 2.0 },
-     *       { 4.0, 2.0 },
-     *       { 5.0, 1.0 },
-     *       });
-     *     lar::util::StatCollector<double> stat;
-     *     stat.add_weighted(values.begin(), values.end());
-     *     std::cout << "Statistics from " << stat.N() << " entries: "
-     *       << stat.Average() << std::endl;
-     *     
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * std::vector<std::pair<double, double>> values({
+     *   { 3.0, 2.0 },
+     *   { 4.0, 2.0 },
+     *   { 5.0, 1.0 },
+     *   });
+     * lar::util::StatCollector<double> stat;
+     * stat.add_weighted(values.begin(), values.end());
+     * std::cout << "Statistics from " << stat.N() << " entries: "
+     *   << stat.Average() << std::endl;
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * that should both print: "Statistics from 3 entries: 3.8".
      * 
      * Other functions are available allowing addition of weighted and
@@ -217,18 +218,18 @@ namespace lar {
      * the input value; you'll have to shift the average back, while the
      * variance will not be affected;
      * also the sums will be shifted. Example:
-     *     
-     *     // fill the values, shifted
-     *     for (auto element: elements)
-     *       sc.add(element - elements[0], (*weight)++);
-     *     
-     *     auto sum_weights = sc.Weights();
-     *     auto sum_values = sc.Sum() - elements[0] * sc.Weights();
-     *     auto sum_values2 = sc.SumSq() + sqr(elements[0]) * sc.Weights()
-     *       + 2. * elements[0] * sc.Sum();
-     *     auto average = sc.Average() + elements[0];
-     *     auto variance = sc.Variance();
-     *     
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * // fill the values, shifted
+     * for (auto element: elements)
+     *   sc.add(element - elements[0], (*weight)++);
+     * 
+     * auto sum_weights = sc.Weights();
+     * auto sum_values = sc.Sum() - elements[0] * sc.Weights();
+     * auto sum_values2 = sc.SumSq() + sqr(elements[0]) * sc.Weights()
+     *   + 2. * elements[0] * sc.Sum();
+     * auto average = sc.Average() + elements[0];
+     * auto variance = sc.Variance();
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * A small variance implies values of similar magnitude, and therefore
      * subtracting any single one of them (in the example, the first one) is
      * more effective than it seems.
@@ -239,7 +240,7 @@ namespace lar {
      * than `double`, typically 25 or 50% more).
      */
     template <typename T, typename W = T>
-    class StatCollector: public details::WeightTracker<W> {
+    class StatCollector: protected details::WeightTracker<W> {
       using Base_t = details::WeightTracker<W>;
       using Base_t::sqr;
         public:
@@ -334,10 +335,10 @@ namespace lar {
        * will have weight `*(begin_weight + 1)`, etc.
        * 
        * The predicates are required to react to a call like with:
-       *     
-       *     Data_t VPred::operator() (typename VIter::value_type);
-       *     Weight_t WPred::operator() (typename WIter::value_type);
-       *     
+       * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+       * Data_t VPred::operator() (typename VIter::value_type);
+       * Weight_t WPred::operator() (typename WIter::value_type);
+       * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
        */
       template <
         typename VIter, typename WIter,
@@ -446,25 +447,26 @@ namespace lar {
      * @tparam W type of the weight (as T by default)
      * 
      * This is a convenience class, as easy to use as:
-     *     
-     *     lar::util::StatCollector2D<double> stat;
-     *     stat.add(3.0, 4.0, 2.0);
-     *     stat.add(4.0, 3.0, 2.0);
-     *     stat.add(5.0, 5.0, 1.0);
-     *     std::cout << "Statistics from " << stat.N() << " entries: "
-     *       << stat.AverageX() << ", " << stat.AverageY() << std::endl;
-     *     
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * lar::util::StatCollector2D<double> stat;
+     * stat.add(3.0, 4.0, 2.0);
+     * stat.add(4.0, 3.0, 2.0);
+     * stat.add(5.0, 5.0, 1.0);
+     * std::cout << "Statistics from " << stat.N() << " entries: "
+     *   << stat.AverageX() << ", " << stat.AverageY() << std::endl;
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * or also
-     *     std::vector<std::pair<double, double>> values({
-     *       { 3.0, 4.0, 2.0 },
-     *       { 4.0, 3.0, 2.0 },
-     *       { 5.0, 5.0, 1.0 },
-     *       });
-     *     lar::util::StatCollector<double> stat;
-     *     stat.add_weighted(values.begin(), values.end());
-     *     std::cout << "Statistics from " << stat.N() << " entries: "
-     *       << stat.AverageX() << ", " << stat.AverageY() << std::endl;
-     *     
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * std::vector<std::pair<double, double>> values({
+     *   { 3.0, 4.0, 2.0 },
+     *   { 4.0, 3.0, 2.0 },
+     *   { 5.0, 5.0, 1.0 },
+     *   });
+     * lar::util::StatCollector<double> stat;
+     * stat.add_weighted(values.begin(), values.end());
+     * std::cout << "Statistics from " << stat.N() << " entries: "
+     *   << stat.AverageX() << ", " << stat.AverageY() << std::endl;
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      * that should both print: "Statistics from 3 entries: 3.8, 3.8".
      * 
      * Other functions are available allowing addition of weighted and
@@ -522,9 +524,9 @@ namespace lar {
        * @param extractor the predicate extracting the value to be inserted
        *
        * The predicate is required to react to a call like with:
-       *     
-       *     Pair_t Pred::operator() (typename Iter::value_type);
-       *     
+       * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+       * Pair_t Pred::operator() (typename Iter::value_type);
+       * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
        */
       template <typename Iter, typename Pred>
       void add_unweighted(Iter begin, Iter end, Pred extractor);
@@ -537,9 +539,9 @@ namespace lar {
        * @param extractor the predicate extracting the value to be inserted
        * 
        * The predicate is required to react to a call like with:
-       *     
-       *     Pair_t Pred::operator() (typename Cont::value_type);
-       *     
+       * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+       * Pair_t Pred::operator() (typename Cont::value_type);
+       * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
        * The container must support the range-based for loop syntax, that is
        * is must have std::begin<Cont>() and std::end<Cont>() defined.
        */
@@ -579,10 +581,10 @@ namespace lar {
        * will have weight `*(begin_weight + 1)`, etc.
        * 
        * The predicates are required to react to a call like with:
-       *     
-       *     Pair_t VPred::operator() (typename VIter::value_type);
-       *     Weight_t WPred::operator() (typename WIter::value_type);
-       *     
+       * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+       * Pair_t VPred::operator() (typename VIter::value_type);
+       * Weight_t WPred::operator() (typename WIter::value_type);
+       * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
        */
       template <
         typename VIter, typename WIter,
@@ -1117,4 +1119,4 @@ inline void lar::util::MinMaxCollector<T>::clear() {
 //******************************************************************************
 
 
-#endif // STATCOLLECTOR_H
+#endif // LARDATA_UTILITIES_STATCOLLECTOR_H
