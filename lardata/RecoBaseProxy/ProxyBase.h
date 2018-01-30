@@ -163,7 +163,7 @@
  * proxy::CollectionProxyBase<
  *     proxy::CollectionProxyElement,
  *     std::vector<recob::Track>,
- *     proxy::details::AssociatedData<recob::Track, recob::Hit, recob::Hit>
+ *     proxy::details::AssociatedData<recob::Track, recob::Hit, void, recob::Hit>
  *   >
  *   tracks = proxy::getCollection<std::vector<recob::Track>>
  *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
@@ -178,7 +178,7 @@
  *   proxy::CollectionProxyBase<
  *     proxy::CollectionProxyElement,
  *     std::vector<recob::Track>,
- *     proxy::details::AssociatedData<recob::Track, recob::Hit, recob::Hit> >
+ *     proxy::details::AssociatedData<recob::Track, recob::Hit, void, recob::Hit> >
  *   > trackInfo: tracks)
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * More important, the type depends on which elements we merged into the
@@ -349,12 +349,70 @@
  * @ingroup LArSoftProxies
  * @brief Data proxies for LArSoft reconstruction data products.
  * 
+ * Each proxy is documented in its own "module" (see the list above).
+ * 
  */
 // LArSoftProxyReco group is only defined here, no content is provided.
 // We selectively add to LArSoftProxies group via @ingroup directives.
 /**
  * @}
  */
+
+// FIXME simplify this code if issue #18769 is accepted
+namespace std {
+  
+  //----------------------------------------------------------------------------
+  //--- specializations of std::tuple interface for art::AssnsNode
+  //----------------------------------------------------------------------------
+  
+  // specialize for indices 0, 1, and 2; for all others, it's an incomplete type
+  template <typename L, typename R, typename D>
+  struct tuple_element<0U, art::AssnsNode<L, R, D>>
+    { using type = art::Ptr<L>; };
+  
+  template <typename L, typename R, typename D>
+  struct tuple_element<1U, art::AssnsNode<L, R, D>>
+    { using type = art::Ptr<R>; };
+  
+  template <typename L, typename R, typename D>
+  struct tuple_element<2U, art::AssnsNode<L, R, D>>
+    { using type = D const*; };
+  
+  
+  //----------------------------------------------------------------------------
+  template< std::size_t I, typename L, typename R, typename D>
+  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>>&
+  get( art::AssnsNode<L, R, D>& t ) noexcept;
+  
+  template< std::size_t I, typename L, typename R, typename D>
+  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>>&&
+      get( art::AssnsNode<L, R, D>&& t ) noexcept;
+  
+  template< std::size_t I, typename L, typename R, typename D>
+  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>>const&
+      get( const art::AssnsNode<L, R, D>& t ) noexcept;
+  
+  template< std::size_t I, typename L, typename R, typename D>
+  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D> >const&&
+      get( const art::AssnsNode<L, R, D>&& t ) noexcept;
+  
+  template< class T, typename L, typename R, typename D>
+  constexpr T& get(art::AssnsNode<L, R, D>& t) noexcept;
+  
+  template< class T, typename L, typename R, typename D>
+  constexpr T&& get(art::AssnsNode<L, R, D>&& t) noexcept;
+  
+  template< class T, typename L, typename R, typename D>
+  constexpr const T& get(const art::AssnsNode<L, R, D>& t) noexcept;
+  
+  template< class T, typename L, typename R, typename D>
+  constexpr const T&& get(const art::AssnsNode<L, R, D>&& t) noexcept;
+  
+  //----------------------------------------------------------------------------
+  
+  
+} // namespace std
+
 
 
 /// Encloses LArSoft data product proxy objects and utilities.
@@ -420,6 +478,21 @@ namespace proxy {
     
     //--------------------------------------------------------------------------
     // forward declarations
+    //--------------------------------------------------------------------------
+    // FIXME simplify this code if issue #18769 is accepted
+    template <typename Assns, typename = void>
+    struct AssnsMetadataTypeStruct;
+    
+    template <typename Assns>
+    using AssnsMetadata_t = typename AssnsMetadataTypeStruct<Assns>::type;
+    
+    template <typename Assns, typename = void>
+    struct AssnsIteratorTypeStruct;
+    
+    template <typename Assns>
+    using AssnsIterator_t = typename AssnsIteratorTypeStruct<Assns>::type;
+    
+    //--------------------------------------------------------------------------
     template <typename MainColl>
     struct MainCollectionProxy;
     
@@ -436,41 +509,56 @@ namespace proxy {
     class ParallelData;
     
     //--------------------------------------------------------------------------
-    template <typename Main, typename Aux, typename Tag = Aux>
+    template<
+      typename Main, typename Aux, typename Metadata = void,
+      typename Tag = Aux
+      >
     class AssociatedData;
     
     //--------------------------------------------------------------------------
-    template <typename Main, typename Aux, typename Tag = Aux>
+    template <
+      typename Main, typename Aux, typename Metadata = void,
+      typename Tag = Aux
+      >
     class OneTo01Data;
     
     //--------------------------------------------------------------------------
     template <
       typename Aux,
+      typename Metadata,
       typename ArgTuple,
       template <typename CollProxy> class ProxyMaker,
       typename AuxTag = Aux
       >
     class WithAssociatedStructBase;
     
-    template <typename Aux, typename AuxTag = Aux>
+    template <typename Aux, typename Metadata = void, typename AuxTag = Aux>
     struct AssociatedDataProxyMakerWrapper;
     
-    template <typename Aux, typename ArgTuple, typename AuxTag = Aux>
+    template <
+      typename Aux, typename Metadata,
+      typename ArgTuple, typename AuxTag = Aux
+      >
     using WithAssociatedStruct = WithAssociatedStructBase<
       Aux,
+      Metadata,
       ArgTuple,
-      AssociatedDataProxyMakerWrapper<Aux, AuxTag>::template maker_t,
+      AssociatedDataProxyMakerWrapper<Aux, Metadata, AuxTag>::template maker_t,
       AuxTag
       >;
 
-    template <typename Aux, typename AuxTag = Aux>
+    template <typename Aux, typename Metadata = void, typename AuxTag = Aux>
     struct OneTo01DataProxyMakerWrapper;
     
-    template <typename Aux, typename ArgTuple, typename AuxTag = Aux>
+    template <
+      typename Aux, typename Metadata, typename ArgTuple,
+      typename AuxTag = Aux
+      >
     using WithOneTo01AssociatedStruct = WithAssociatedStructBase<
       Aux,
+      Metadata,
       ArgTuple,
-      OneTo01DataProxyMakerWrapper<Aux, AuxTag>::template maker_t,
+      OneTo01DataProxyMakerWrapper<Aux, Metadata, AuxTag>::template maker_t,
       AuxTag
       >;
 
@@ -480,6 +568,7 @@ namespace proxy {
     template <typename Aux, typename ArgTuple, typename AuxTag = Aux>
     using WithParallelCollectionStruct = WithAssociatedStructBase<
       Aux,
+      void, // no metadata concept for parallel collections
       ArgTuple,
       ParallelDataProxyMakerWrapper<Aux, AuxTag>::template maker_t,
       AuxTag
@@ -489,6 +578,7 @@ namespace proxy {
       <typename Aux, typename ArgTuple, typename AuxColl, typename AuxTag = Aux>
     using WithWrappedParallelCollectionStruct = WithAssociatedStructBase<
       Aux,
+      void, // no metadata concept for parallel collections
       ArgTuple,
       ParallelDataProxyMakerWrapper<Aux, AuxTag, AuxColl>::template maker_t,
       AuxTag
@@ -595,6 +685,7 @@ namespace proxy {
    * @brief Creates and returns an one-to-(zero/one) associated data object.
    * @tparam Main type of main object to be associated
    * @tparam Aux type of data to be associated to the main objects
+   * @tparam Metadata type of metadata in the association
    * @tparam Tag the tag labelling this associated data (if omitted: `Aux`)
    * @tparam Event type of event to read associations from
    * @param event event to read associations from
@@ -611,15 +702,18 @@ namespace proxy {
    * auto assData = makeAssociatedTo01data<recob::Track, recob::Vertex>(event, tag);
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
-  template <typename Main, typename Aux, typename Tag, typename Event>
+  template <
+    typename Main, typename Aux, typename Metadata, typename Tag, typename Event
+    >
   auto makeAssociatedTo01data
     (Event const& event, art::InputTag tag, std::size_t minSize = 0);
   
-  template <typename Main, typename Aux, typename Event>
+  template <typename Main, typename Aux, typename Metadata, typename Event>
   auto makeAssociatedTo01data
     (Event const& event, art::InputTag tag, std::size_t minSize = 0)
-    { 
-      return makeAssociatedTo01data<Main, Aux, Aux, Event>(event, tag, minSize);
+    {
+      return makeAssociatedTo01data<Main, Aux, Metadata, Aux, Event>
+        (event, tag, minSize);
     }
   
   /**
@@ -646,15 +740,18 @@ namespace proxy {
    * auto assData = makeAssociatedTo01data<recob::Vertex>(handle, event, tag);
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
-  template <typename Aux, typename Tag, typename Handle, typename Event>
+  template <
+    typename Aux, typename Metadata, typename Tag,
+    typename Handle, typename Event
+    >
   auto makeAssociatedTo01data
     (Handle&& handle, Event const& event, art::InputTag tag);
   
-  template <typename Aux, typename Handle, typename Event>
+  template <typename Aux, typename Metadata, typename Handle, typename Event>
   auto makeAssociatedTo01data
     (Handle&& handle, Event const& event, art::InputTag tag)
     {
-      return makeAssociatedTo01data<Aux, Aux, Handle, Event>
+      return makeAssociatedTo01data<Aux, Metadata, Aux, Handle, Event>
         (std::forward<Handle>(handle), event, tag);
     }
   
@@ -687,6 +784,7 @@ namespace proxy {
    * @brief Creates an one-to-(zero-or-one) wrapper for the specified types.
    * @tparam Main type of main datum (element) to associate from ("left")
    * @tparam Aux type of datum (element) to associate to ("right")
+   * @tparam Metadata type of metadata coming with the association
    * @tparam AuxTag tag labelling this association
    * 
    * Usually, `AuxTag` is also the type of datum (element) to associate to
@@ -696,7 +794,10 @@ namespace proxy {
    * the specializations of the latter can still inherit from this one if they
    * its facilities.
    */
-  template <typename Main, typename Aux, typename AuxTag = Aux>
+  template <
+    typename Main, typename Aux, typename Metadata = void,
+    typename AuxTag = Aux
+    >
   struct OneTo01DataProxyMakerBase {
     
     /// Tag labelling the associated data we are going to produce.
@@ -708,9 +809,12 @@ namespace proxy {
     /// Type of the auxiliary associated datum ("right").
     using aux_element_t = Aux;
     
+    /// Type of associated metadata.
+    using metadata_t = Metadata;
+    
     /// Type of associated data proxy being created.
-    using aux_collection_proxy_t
-       = details::OneTo01Data<main_element_t, aux_element_t, data_tag>;
+    using aux_collection_proxy_t = details::OneTo01Data
+       <main_element_t, aux_element_t, metadata_t, data_tag>;
     
     /// Type of _art_ association being used as input.
     using assns_t = typename aux_collection_proxy_t::assns_t;
@@ -795,7 +899,8 @@ namespace proxy {
     static auto createFromTag
       (Event const& event, Handle&& mainHandle, art::InputTag auxInputTag)
       {
-        return makeAssociatedTo01data<main_element_t, aux_element_t, data_tag>
+        return makeAssociatedTo01data
+          <main_element_t, aux_element_t, metadata_t, data_tag>
           (event, auxInputTag, mainHandle->size());
       }
     
@@ -807,6 +912,7 @@ namespace proxy {
    * @brief Creates an one-to-(zero-or-one) wrapper for the specified types.
    * @tparam Main type of main datum (element) to associate from ("left")
    * @tparam Aux type of datum (element) to associate to ("right")
+   * @tparam Metadata type of metadata in the association
    * @tparam CollProxy type of proxy this associated data works for
    * @tparam Tag tag for the association proxy to be created
    * @see `withZeroOrOne()`
@@ -835,17 +941,19 @@ namespace proxy {
    * The last template argument is designed for specialization of associations
    * in the context of a specific proxy type.
    */
-  template
-    <typename Main, typename Aux, typename CollProxy, typename Tag = Aux>
+  template <
+    typename Main, typename Aux, typename Metadata,
+    typename CollProxy, typename Tag = Aux
+    >
   class OneTo01DataProxyMaker
-    : public OneTo01DataProxyMakerBase<Main, Aux, Tag>
+    : public OneTo01DataProxyMakerBase<Main, Aux, Metadata, Tag>
   {
     //
     // Note that this implementation is here only to document how to derive
-    // a AssociatedDataProxyMaker (specialization) from
-    // AssociatedDataProxyMakerBase. It's just mirroring the base class.
+    // a OneTo01DataProxyMaker (specialization) from
+    // OneTo01DataProxyMakerBase. It's just mirroring the base class.
     //
-    using base_t = OneTo01DataProxyMakerBase<Main, Aux, Tag>;
+    using base_t = OneTo01DataProxyMakerBase<Main, Aux, Metadata, Tag>;
     
       public:
     
@@ -854,6 +962,9 @@ namespace proxy {
     
     /// Type of the auxiliary associated datum ("right").
     using typename base_t::aux_element_t;
+    
+    /// Type of metadata in the association.
+    using typename base_t::metadata_t;
     
     /// Type of associated data proxy being created.
     using typename base_t::aux_collection_proxy_t;
@@ -944,6 +1055,7 @@ namespace proxy {
    * @brief Creates and returns an associated data object.
    * @tparam Main type of main object to be associated
    * @tparam Aux type of data to be associated to the main objects
+   * @tparam Metadata type of metadata in the association (if omitted: `void`)
    * @tparam Tag the tag labelling this associated data (if omitted: `Aux`)
    * @tparam Event type of event to read associations from
    * @param event event to read associations from
@@ -964,18 +1076,33 @@ namespace proxy {
    * auto assData = makeAssociatedData<recob::Track, recob::Hit>(event, tag);
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
-  template <typename Main, typename Aux, typename Tag, typename Event>
+  template <
+    typename Main, typename Aux, typename Metadata, typename Tag,
+    typename Event
+    >
   auto makeAssociatedData
     (Event const& event, art::InputTag tag, std::size_t minSize = 0);
+  
+  template <typename Main, typename Aux, typename Metadata, typename Event>
+  auto makeAssociatedData
+    (Event const& event, art::InputTag tag, std::size_t minSize = 0)
+    {
+      return makeAssociatedData<Main, Aux, Metadata, Aux, Event>
+        (event, tag, minSize);
+    }
   
   template <typename Main, typename Aux, typename Event>
   auto makeAssociatedData
     (Event const& event, art::InputTag tag, std::size_t minSize = 0)
-    { return makeAssociatedData<Main, Aux, Aux, Event>(event, tag, minSize); }
+    {
+      return makeAssociatedData<Main, Aux, void, Aux, Event>
+        (event, tag, minSize);
+    }
   
   /**
    * @brief Creates and returns an associated data object.
    * @tparam Aux type of data to be associated to the main objects
+   * @tparam Metadata type of metadata in the association (if omitted: `void`)
    * @tparam Tag the tag labelling this associated data (if omitted: `Aux`)
    * @tparam Handle type of handle to the main collection object
    * @tparam Event type of event to read associations from
@@ -997,15 +1124,26 @@ namespace proxy {
    * auto assData = makeAssociatedData<recob::Hit>(handle, event, tag);
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
-  template <typename Aux, typename Tag, typename Handle, typename Event>
+  template <
+    typename Aux, typename Metadata, typename Tag,
+    typename Handle, typename Event
+    >
   auto makeAssociatedData
     (Handle&& handle, Event const& event, art::InputTag tag);
+  
+  template <typename Aux, typename Metadata, typename Handle, typename Event>
+  auto makeAssociatedData
+    (Handle&& handle, Event const& event, art::InputTag tag)
+    {
+      return makeAssociatedData<Aux, Metadata, Aux, Handle, Event>
+        (std::forward<Handle>(handle), event, tag);
+    }
   
   template <typename Aux, typename Handle, typename Event>
   auto makeAssociatedData
     (Handle&& handle, Event const& event, art::InputTag tag)
     {
-      return makeAssociatedData<Aux, Aux, Handle, Event>
+      return makeAssociatedData<Aux, void, Aux, Handle, Event>
         (std::forward<Handle>(handle), event, tag);
     }
   
@@ -1047,7 +1185,8 @@ namespace proxy {
    * the specializations of the latter can still inherit from this one if they
    * its facilities.
    */
-  template <typename Main, typename Aux, typename AuxTag = Aux>
+  template
+    <typename Main, typename Aux, typename Metadata, typename AuxTag = Aux>
   struct AssociatedDataProxyMakerBase {
     
     /// Tag labelling the associated data we are going to produce.
@@ -1059,9 +1198,12 @@ namespace proxy {
     /// Type of the auxiliary associated datum ("right").
     using aux_element_t = Aux;
     
+    /// Type of metadata in the association.
+    using metadata_t = Metadata;
+    
     /// Type of associated data proxy being created.
-    using aux_collection_proxy_t
-       = details::AssociatedData<main_element_t, aux_element_t, data_tag>;
+    using aux_collection_proxy_t = details::AssociatedData
+      <main_element_t, aux_element_t, metadata_t, data_tag>;
     
     /// Type of _art_ association being used as input.
     using assns_t = typename aux_collection_proxy_t::assns_t;
@@ -1145,7 +1287,8 @@ namespace proxy {
     static auto createFromTag
       (Event const& event, Handle&& mainHandle, art::InputTag auxInputTag)
       {
-        return makeAssociatedData<main_element_t, aux_element_t, data_tag>
+        return makeAssociatedData
+          <main_element_t, aux_element_t, metadata_t, data_tag>
           (event, auxInputTag, mainHandle->size());
       }
     
@@ -1184,17 +1327,19 @@ namespace proxy {
    * The last template argument is designed for specialization of associations
    * in the context of a specific proxy type.
    */
-  template
-    <typename Main, typename Aux, typename CollProxy, typename Tag = Aux>
+  template <
+    typename Main, typename Aux, typename Metadata,
+    typename CollProxy, typename Tag = Aux
+    >
   class AssociatedDataProxyMaker
-    : public AssociatedDataProxyMakerBase<Main, Aux, Tag>
+    : public AssociatedDataProxyMakerBase<Main, Aux, Metadata, Tag>
   {
     //
     // Note that this implementation is here only to document how to derive
     // a AssociatedDataProxyMaker (specialization) from
     // AssociatedDataProxyMakerBase. It's just mirroring the base class.
     //
-    using base_t = AssociatedDataProxyMakerBase<Main, Aux, Tag>;
+    using base_t = AssociatedDataProxyMakerBase<Main, Aux, Metadata, Tag>;
     
       public:
     
@@ -1203,6 +1348,9 @@ namespace proxy {
     
     /// Type of the auxiliary associated datum ("right").
     using typename base_t::aux_element_t;
+    
+    /// Type of the associated metadata.
+    using typename base_t::metadata_t;
     
     /// Type of associated data proxy being created.
     using typename base_t::aux_collection_proxy_t;
@@ -2324,23 +2472,33 @@ namespace proxy {
   
   
   //----------------------------------------------------------------------------
-  /// The same as `withZeroOrOne()`, but it also specified a tag for the data.
-  template <typename Aux, typename AuxTag, typename... Args>
-  auto withZeroOrOneAs(Args&&... args) {
+  /// The same as `withZeroOrOneMeta()`, but it also specified a tag.
+  template <typename Aux, typename Metadata, typename AuxTag, typename... Args>
+  auto withZeroOrOneMetaAs(Args&&... args) {
     using ArgTuple_t = std::tuple<Args&&...>;
     ArgTuple_t argsTuple(std::forward<Args>(args)...);
-    return details::WithOneTo01AssociatedStruct<Aux, ArgTuple_t, AuxTag>
+    return
+      details::WithOneTo01AssociatedStruct<Aux, Metadata, ArgTuple_t, AuxTag>
       (std::move(argsTuple));
   } // withZeroOrOneAs()
   
   
-  //----------------------------------------------------------------------------
+  /// The same as `withZeroOrOne()`, but it also specified a tag for the data.
+  template <typename Aux, typename AuxTag, typename... Args>
+  auto withZeroOrOneAs(Args&&... args)
+    {
+      return
+        withZeroOrOneMetaAs<Aux, void, AuxTag>(std::forward<Args>(args)...);
+    }
+  
   /**
    * @brief Helper function to merge one-to-(zero-or-one) associated data.
    * @tparam Aux type of associated data requested
+   * @tparam Metadata type of metadata coming with the associated data
    * @tparam Args types of constructor arguments for associated data collection
    * @param args constructor arguments for the associated data collection
    * @return a temporary object that `getCollection()` knows to handle
+   * @see withZeroOrOneMetaAs(), withZeroOrOne()
    * 
    * This function is meant to convey to `getCollection()` function the request
    * for the delivered collection proxy to carry auxiliary data from an
@@ -2351,6 +2509,15 @@ namespace proxy {
    * This data will be tagged with the type `Aux`. To use a different type as
    * tag, use `withZeroOrOneAs()` instead, specifying the tag as second
    * template argument, e.g.:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * struct QuestionableVertex {};
+   * auto tracks = proxy::getCollection<proxy::Tracks>(event, trackTag,
+   *   withZeroOrOneMeta<recob::Vertex, void>(defaultVertexTag),
+   *   withZeroOrOneMetaAs<recob::Vertex, void, QuestionableVertex>
+   *     (stinkyVertexTag)
+   *   );
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * and, since we are not requesting any metadata, this is equivalent to
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * struct QuestionableVertex {};
    * auto tracks = proxy::getCollection<proxy::Tracks>(event, trackTag,
@@ -2384,38 +2551,74 @@ namespace proxy {
    * See the technical details about `withAssociated()`, which hold for this
    * function and related classes too.
    */
+  template <typename Aux, typename Metadata, typename... Args>
+  auto withZeroOrOneMeta(Args&&... args)
+    {
+      return
+        withZeroOrOneMetaAs<Aux, Metadata, Aux>(std::forward<Args>(args)...); 
+    }
+  
+  /// Works like `withZeroOrOneMeta()`, but for associations with no metadata.
+  /// @see withZeroOrOneAs(), withZeroOrOneMeta()
   template <typename Aux, typename... Args>
   auto withZeroOrOne(Args&&... args)
-    { return withZeroOrOneAs<Aux, Aux>(std::forward<Args>(args)...); }
+    { return withZeroOrOneMeta<Aux, void>(std::forward<Args>(args)...); }
+  
+  
+  //----------------------------------------------------------------------------
+  /// The same as `withAssociated()`, but it also specified a tag for the data
+  /// and one for the metadata.
+  template <typename Aux, typename Metadata, typename AuxTag, typename... Args>
+  auto withAssociatedMetaAs(Args&&... args) {
+    using ArgTuple_t = std::tuple<Args&&...>;
+    ArgTuple_t argsTuple(std::forward<Args>(args)...);
+    return details::WithAssociatedStruct<Aux, Metadata, ArgTuple_t, AuxTag>
+      (std::move(argsTuple));
+  } // withAssociatedMetaAs()
   
   
   //----------------------------------------------------------------------------
   /// The same as `withAssociated()`, but it also specified a tag for the data.
   template <typename Aux, typename AuxTag, typename... Args>
-  auto withAssociatedAs(Args&&... args) {
-    using ArgTuple_t = std::tuple<Args&&...>;
-    ArgTuple_t argsTuple(std::forward<Args>(args)...);
-    return details::WithAssociatedStruct<Aux, ArgTuple_t, AuxTag>
-      (std::move(argsTuple));
-  } // withAssociatedAs()
+  auto withAssociatedAs(Args&&... args)
+    {
+      return withAssociatedMetaAs<Aux, void, AuxTag>
+        (std::forward<Args>(args)...);
+    }
   
   
   //----------------------------------------------------------------------------
   /**
    * @brief Helper function to merge associated data.
    * @tparam Aux type of associated data requested
+   * @tparam Metadata type of associated metadata requested
    * @tparam Args types of constructor arguments for associated data collection
    * @param args constructor arguments for the associated data collection
    * @return a temporary object that `getCollection()` knows to handle
+   * @see withAssociated(), withAssociatedAs(), withAssociatedMetaAs()
    * 
    * This function is meant to convey to `getCollection()` function the request
-   * for the delivered collection proxy to carry auxiliary data.
+   * for the delivered collection proxy to carry auxiliary data. The associated
+   * data is normally extracted from an _art_ association
+   * `art::Assns<Main, Aux, Metadata>`, where `Main` is the main type of the
+   * proxy collection. If no metadata is required, `Metadata` can be set to
+   * `void`, or `withAssociated()` can be used instead.
+   * 
    * The function also transfers the information required to create a proxy to
    * that auxiliary data.
    * 
    * This data will be tagged with the type `Aux`. To use a different type as
-   * tag, use `withAssociatedAs()` instead, specifying the tag as second
-   * template argument, e.g.:
+   * tag, use `withAssociatedAs()` or `withAssociatedMetaAs()` instead,
+   * specifying the tag as second template argument, e.g.:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * struct DubiousClusters {};
+   * auto tracks = proxy::getCollection<proxy::Tracks>(event, trackTag,
+   *   withAssociatedMeta<recob::Cluster, void>(defaultClusterTag),
+   *   withAssociatedMetaAs<recob::Cluster, void, DubiousClusters>
+   *     (maybeClusterTag)
+   *   );
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * or, equivalently (because we asked for no metadata):
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * struct DubiousClusters {};
    * auto tracks = proxy::getCollection<proxy::Tracks>(event, trackTag,
@@ -2442,15 +2645,17 @@ namespace proxy {
    * To have a call like:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * auto tracks = getCollection<SpecialTracks>
-   *   (event, tag, withAssociated<recob::Hit>(hitAssnTag, "special"));
+   *   (event, tag, withAssociatedMeta<recob::Hit, void>(hitAssnTag, "special"));
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * create something different than the standard association proxy, specialize
    * `proxy::AssociatedDataProxyMaker`, e.g.:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * namespace proxy {
    *   template <>
-   *   struct AssociatedDataProxyMaker<recob::Track, recob::Hit, SpecialTracks>
-   *     : public AssociatedDataProxyMakerBase<recob::Track, recob::Hit>
+   *   struct AssociatedDataProxyMaker
+   *     <recob::Track, recob::Hit, void, SpecialTracks>
+   *     : public AssociatedDataProxyMakerBase
+   *       <recob::Track, recob::Hit, void, SpecialTracks>
    *   {
    *     
    *     template<typename Event, typename MainArgs>
@@ -2466,16 +2671,17 @@ namespace proxy {
    *         return myAuxProxy;
    *       }
    *     
-   *   }; // struct AssociatedDataProxyMaker<recob::Track, recob::Hit>
+   *   }; // struct AssociatedDataProxyMaker<..., SpecialTracks>
    *   
    * } // namespace proxy
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * (the `void` template type signifies the association has no metadata).
    * 
    * 
    * Technical details
    * ==================
    * 
-   * The main purpose of this function and the related `WithAssociatedData`
+   * The main purpose of this function and the related `WithAssociatedStruct`
    * class is to save the user from specifying the main type the auxiliary data
    * is associated with, when using it as `getCollection()` argument:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
@@ -2487,25 +2693,47 @@ namespace proxy {
    * example) is not known. In principle, to fully define the association, two
    * template arguments are needed, e.g.
    * `withAssociated<recob::Track, recob::Hit>(hitAssnTag)`.
-   * The class `WithAssociatedData` holds the information of which associated
+   * The class `WithAssociatedStruct` holds the information of which associated
    * type is requested (`recob::Hit`) and the information needed to create a
    * proxy to such association (all arguments, here just `hitAssnTag`).
    * The function `getCollection()` will have this object as argument, and when
    * executing will be able to supply the missing information, that
    * `recob::Track` is the main data product element we are associating to.
    */
+  template <typename Aux, typename Metadata, typename... Args>
+  auto withAssociatedMeta(Args&&... args)
+    {
+      return withAssociatedMetaAs<Aux, Metadata, Aux>
+        (std::forward<Args>(args)...); 
+    }
+  
+  /**
+   * @brief Helper function to merge associated data with no metadata.
+   * @tparam Aux type of associated data requested
+   * @tparam Args types of constructor arguments for associated data collection
+   * @param args constructor arguments for the associated data collection
+   * @return a temporary object that `getCollection()` knows to handle
+   * @see withAssociatedMeta(), withAssociatedMetaAs()
+   * 
+   * This function is equivalent to `withAssociatedMeta()` but with the request
+   * of no associated metadata (`Metadata` be `void`).
+   */
   template <typename Aux, typename... Args>
   auto withAssociated(Args&&... args)
-    { return withAssociatedAs<Aux, Aux>(std::forward<Args>(args)...); }
+    { return withAssociatedMeta<Aux, void>(std::forward<Args>(args)...); }
   
   
   //----------------------------------------------------------------------------
   /// Like `withAssociatedAs()`, but directly using the specified association.
   template <typename AuxTag, typename Assns>
-  auto wrapAssociatedAs(Assns const& assns) {
-    using Aux_t = typename Assns::right_t;
-    return details::WithAssociatedStruct<Aux_t, std::tuple<>, AuxTag>({});
-  } // wrapAssociatedAs()
+  auto wrapAssociatedAs(Assns const& assns)
+    {
+      using Aux_t = typename Assns::right_t;
+      using Metadata_t = details::AssnsMetadata_t<Assns>;
+      return
+        details::WithAssociatedStruct<Aux_t, Metadata_t, std::tuple<>, AuxTag>
+        ({});
+    } // wrapAssociatedAs()
   
   
   /// Like `withAssociated()`, but directly using the specified association.
@@ -2523,17 +2751,18 @@ namespace proxy {
   /// The same as `withCollectionProxy()`, but it also specified a tag.
   /// @bug Broken in many ways. Do not use.
   template <typename AuxProxy, typename AuxTag, typename... Args>
-  auto withCollectionProxyAs(Args&&... args) {
-    using ArgTuple_t = std::tuple<Args&&...>;
-    static_assert(
-      std::is_convertible
-        <std::decay_t<std::tuple_element_t<0U, ArgTuple_t>>, art::InputTag>(),
-      "The first argument of withCollectionProxyAs() must be art::InputTag."
-      );
-    ArgTuple_t argsTuple(std::forward<Args>(args)...);
-    return details::WithProxyAsAuxStructBase<AuxProxy, ArgTuple_t, AuxTag>
-      (std::move(argsTuple));
-  } // withCollectionProxyAs()
+  auto withCollectionProxyAs(Args&&... args)
+    {
+      using ArgTuple_t = std::tuple<Args&&...>;
+      static_assert(
+        std::is_convertible
+          <std::decay_t<std::tuple_element_t<0U, ArgTuple_t>>, art::InputTag>(),
+        "The first argument of withCollectionProxyAs() must be art::InputTag."
+        );
+      ArgTuple_t argsTuple(std::forward<Args>(args)...);
+      return details::WithProxyAsAuxStructBase<AuxProxy, ArgTuple_t, AuxTag>
+        (std::move(argsTuple));
+    } // withCollectionProxyAs()
   
   //----------------------------------------------------------------------------
   /**
@@ -2890,6 +3119,7 @@ namespace proxy {
       typename ValueType = typename DataIter::value_type
       >
     class IteratorWrapperBase: private DataIter {
+        protected:
       using data_iterator_t = DataIter;
       
         public:
@@ -2964,6 +3194,8 @@ namespace proxy {
     }; // IteratorWrapperBase<>
     
     
+#if 0
+    
     /// Modified iterator returning the `N`-th element out of the pointed tuple.
     template <std::size_t N, typename TupleIter>
     class tuple_element_iterator:
@@ -2990,6 +3222,350 @@ namespace proxy {
         {return std::get<N>(*v); }
       
     }; // tuple_element_iterator
+    
+#endif // 0
+    
+    //--------------------------------------------------------------------------
+    //--- BEGIN iterators for art::Assns
+    //--------------------------------------------------------------------------
+    
+    // will be present in C++17 as std::bool_constant
+    template <bool Value>
+    using bool_constant = std::integral_constant<bool, Value>;
+    
+    // will be present in C++17 as std::negation
+    template <typename BoolTrait>
+    using negation = bool_constant<!BoolTrait::value>;
+    
+    template <typename A, typename B>
+    using is_not_same = negation<std::is_same<A, B>>;
+    
+    //--------------------------------------------------------------------------
+    template <typename T>
+    using isAssnMetadata = is_not_same<T, void>;
+    
+    template <typename T>
+    struct AssnNodeMetadataType;
+    
+    template <typename T>
+    using AssnNodeMetadata_t = typename AssnNodeMetadataType<T>::type;
+    
+    template <typename L, typename R, typename D>
+    struct AssnNodeMetadataType<art::Assns<L, R, D>> { using type = D; };
+    
+    template <typename L, typename R, typename D>
+    struct AssnNodeMetadataType<art::AssnsNode<L, R, D>> { using type = D; };
+    
+    template <typename LPtr, typename RPtr>
+    struct AssnNodeMetadataType<std::pair<LPtr, RPtr>> { using type = void; };
+    
+    template <typename T>
+    using hasMetadata = isAssnMetadata<AssnNodeMetadata_t<T>>;
+    
+    //--------------------------------------------------------------------------
+    template <typename L, typename R, typename D = void>
+    struct AssnsNodeTraitsBase {
+      
+      using left_t = L; ///< Type at the left side of the association.
+      using right_t = R; ///< Type at the right side of the association.
+      using data_t = D; ///< Type of data bound to the association.
+      using leftptr_t = art::Ptr<left_t>; ///< Art pointer to the left side.
+      using rightptr_t = art::Ptr<right_t>; ///< Art pointer to the right side.
+      using dataptr_t = data_t const*; ///< Pointer to the bound metadata.
+      
+      /// Shortcut to know whether this node supports any metadata,
+      static constexpr bool hasMetadata = isAssnMetadata<data_t>();
+      
+    }; // struct AssnsNodeTraitsBase
+    
+    /// Data types for the specified association node type.
+    template <typename AssnsNode>
+    struct AssnsNodeTraits;
+    
+    template <typename L, typename R, typename D>
+    struct AssnsNodeTraits<art::AssnsNode<L, R, D>>
+      : public AssnsNodeTraitsBase<L, R, D>
+    {
+      using art_assns_node_t = art::AssnsNode<L, R, D>;
+    };
+    
+    template <typename L, typename R>
+    struct AssnsNodeTraits<std::pair<art::Ptr<L>, art::Ptr<R>>>
+      : public AssnsNodeTraitsBase<L, R>
+    {
+      using art_assns_node_t = std::pair<art::Ptr<L>, art::Ptr<R>>;
+    };
+    
+    
+    /// This type extends the interface of the art pointer to Assns right side.
+    template <typename ArtAssnsIterValue>
+    class AssnsNode: private ArtAssnsIterValue {
+      
+      using base_t = ArtAssnsIterValue; ///< Base class type.
+      using this_t = AssnsNode<ArtAssnsIterValue>; ///< This class.
+      using node_t = ArtAssnsIterValue; ///< Type of the wrapped node.
+      
+      /// Set of traits of the node.
+      using assns_node_traits_t = AssnsNodeTraits<node_t>;
+      
+        public:
+      
+      /// Type of the main (left) object in the association.
+      using main_t = typename assns_node_traits_t::left_t;
+      
+      /// Type of the associated (right) object.
+      using value_t = typename assns_node_traits_t::right_t;
+      
+      /// Type of the associated additional data (`void` if none).
+      using data_t = typename assns_node_traits_t::data_t;
+      
+      /// Type of _art_ pointer to the main (left) object in the association.
+      using mainptr_t = typename assns_node_traits_t::leftptr_t;
+      
+      /// Type of _art_ pointer to the associated (right) object.
+      using valueptr_t = typename assns_node_traits_t::rightptr_t;
+      
+      /// Type of the pointer to associated additional data.
+      using dataptr_t = typename assns_node_traits_t::dataptr_t;
+      
+      /// @{
+      /// @name Access to the associated (right) value
+      
+      /// Returns the _art_ pointer to the associated value.
+      valueptr_t const& valuePtr() const { return base_t::second; }
+      
+      /// Returns a reference to the associated value.
+      value_t const& value() const { return *valuePtr(); }
+      
+      /// @}
+      
+      /// @{
+      /// @name Access to the key (left) value
+      
+      /// Returns the _art_ pointer to the main value, key of the association.
+      mainptr_t const& mainPtr() const { return base_t::first; }
+      
+      /// Returns the main value, key of the association.
+      main_t const& main() const { return *mainPtr(); }
+      
+      /// @}
+      
+      /// @{
+      /**
+       * @name Metadata access
+       * 
+       * The complete interface is available only if the association has
+       * metadata. Otherwise, only the static member `hasMetadata()` is
+       * available.
+       */
+      
+      // the templates are needed to activate "SFINAE" on std::enable_if
+      /// Returns whether this node type supports metadata.
+      template <typename Node = node_t>
+      static constexpr bool hasMetadata()
+        { return details::hasMetadata<Node>(); }
+      
+      /// Returns the pointer to the metadata on this association node.
+      template <typename Node = node_t>
+      std::enable_if_t<hasMetadata<Node>(), dataptr_t> dataPtr() const
+        { return base_t::data; }
+      
+      // this is even more complicate, since if `data_t` is void we can't write
+      // `data_t const&` as type of enable_if, because it does not depend on
+      // templates and therefore it may be unconditionally evaluated;
+      // and C++ does not like references to `void`...
+      /// Returns a reference to the metadata on this association node.
+      template <typename Node = node_t>
+      std::enable_if_t
+        <hasMetadata<Node>(), typename AssnsNodeTraits<Node>::data_t const&>
+      data() const { return *dataPtr(); }
+      
+      /// @}
+      
+      
+      /// @{
+      /// @name Interface to the _art_ pointer to the associated (right) value
+      
+      /// Implicit conversion to _art_ pointer of the associated object.
+      operator valueptr_t const& () const& { return valuePtr(); }
+      
+      /// Implicit conversion to _art_ pointer of the associated object.
+      operator valueptr_t() const&& { return valuePtr(); }
+      
+      /// Returns a reference to the associated value (alias of `value()`).
+      value_t const& operator*() const { return value(); }
+      
+      /// Returns the associated value (alias of `valuePtr()`).
+      valueptr_t operator-> () const { return valuePtr(); }
+      
+      /// Returns the key of the _art_ pointer to the value.
+      auto key() const -> decltype(auto) { return valuePtr().key(); }
+      
+      /// Returns the product ID of the _art_ pointer to the value.
+      auto id() const -> decltype(auto) { return valuePtr().id(); }
+      /// @}
+      
+      
+      /// Reinterprets the specified association node as a `AssnsNode`.
+      static this_t const& makeFrom(node_t const& from)
+        { return static_cast<this_t const&>(from); }
+      
+    }; // class AssnsNode<>
+    
+    
+    template <typename ArtAssnsIterValue>
+    bool operator== (
+      AssnsNode<ArtAssnsIterValue> const& A,
+      typename AssnsNode<ArtAssnsIterValue>::valueptr_t const& B
+      )
+      { return A.valuePtr() == B; }
+    template <typename ArtAssnsIterValue>
+    bool operator== (
+      typename AssnsNode<ArtAssnsIterValue>::valueptr_t const& A,
+      AssnsNode<ArtAssnsIterValue> const& B
+      )
+      { return A == B.valuePtr(); }
+    template <typename ArtAssnsIterValue>
+    bool operator!= (
+      AssnsNode<ArtAssnsIterValue> const& A,
+      typename AssnsNode<ArtAssnsIterValue>::valueptr_t const& B
+      )
+      { return A.valuePtr() != B; }
+    template <typename ArtAssnsIterValue>
+    bool operator!= (
+      typename AssnsNode<ArtAssnsIterValue>::valueptr_t const& A,
+      AssnsNode<ArtAssnsIterValue> const& B
+      )
+      { return A != B.valuePtr(); }
+    
+    
+    /// Reinterprets the specified association node as a `AssnsNode`.
+    template <typename ArtAssnsIterValue>
+    AssnsNode<ArtAssnsIterValue> const& makeAssnsNode(ArtAssnsIterValue const& from)
+        { return AssnsNode<ArtAssnsIterValue>::makeFrom(from); }
+    
+    // specialization for the art node wrapper
+    template <typename ArtAssnsIterValue>
+    struct AssnNodeMetadataType<AssnsNode<ArtAssnsIterValue>>
+      : AssnNodeMetadataType<ArtAssnsIterValue>
+      {};
+    
+    
+    //--------------------------------------------------------------------------
+    /// Traits for a association iterator.
+    template <typename ArtAssnsIter>
+    struct AssnsIterTraits
+      : public AssnsNodeTraits<typename ArtAssnsIter::value_type>
+    {
+      using art_node_t = typename ArtAssnsIter::value_type;
+      using node_t = AssnsNode<art_node_t>;
+    }; // struct AssnsIterTraits
+    
+    
+    /// Modified iterator returning a association node interface.
+    /// The basic iterator interface is to the associated (right) _art_ pointer.
+    template <typename ArtAssnsIter>
+    class assns_node_iterator:
+      public IteratorWrapperBase<
+        assns_node_iterator<ArtAssnsIter>,
+        ArtAssnsIter,
+        typename AssnsIterTraits<ArtAssnsIter>::node_t
+        >
+    {
+      using base_iterator_t = IteratorWrapperBase<
+        assns_node_iterator<ArtAssnsIter>,
+        ArtAssnsIter,
+        typename AssnsIterTraits<ArtAssnsIter>::node_t
+        >;
+      
+      using art_assns_iter_t = ArtAssnsIter;
+      using traits_t = AssnsIterTraits<art_assns_iter_t>;
+      
+      /// Type of node for this association iterator.
+      using AssnsNode_t = typename traits_t::node_t;
+      using ArtAssnsNode_t = typename traits_t::art_node_t;
+      
+        public:
+      using base_iterator_t::base_iterator_t;
+      
+      /// Constructor from a base iterator (explicitly allowed).
+      assns_node_iterator(base_iterator_t const& from)
+        : base_iterator_t(from) {}
+      
+      /// Returns the full information the iterator points to.
+      AssnsNode_t const& info() const { return base_iterator_t::operator*(); }
+      
+      /// Returns the full information the iterator points to.
+      AssnsNode_t const& operator() () const { return info(); }
+      
+      //--- BEGIN Access to the full association information -------------------
+      /// @name Access to the full association information
+      /// This interface is a replica of the one of `AssnsNode_t`.
+      /// @{
+      
+      using main_t     = typename AssnsNode_t::main_t;
+      using value_t    = typename AssnsNode_t::value_t;
+      using data_t     = typename AssnsNode_t::data_t;
+      using mainptr_t  = typename AssnsNode_t::mainptr_t;
+      using valueptr_t = typename AssnsNode_t::valueptr_t;
+      using dataptr_t  = typename AssnsNode_t::dataptr_t;
+      
+      /// Returns the _art_ pointer to the associated value.
+      valueptr_t valuePtr() const { return info().valuePtr(); }
+      
+      /// Returns the _art_ pointer to the associated value.
+      value_t const& value() const { return info().value(); }
+      
+      /// Returns the _art_ pointer to the main value, key of the association.
+      mainptr_t mainPtr() const { return info().mainPtr(); }
+      
+      /// Returns the main value, key of the association.
+      main_t const& main() const { return info().main(); }
+      
+      // see the comments on AssnsNode for the need of all these decorations
+      /// Returns whether this node type supports metadata.
+      template <typename Node = AssnsNode_t>
+      static constexpr bool hasMetadata()
+        { return details::hasMetadata<Node>(); }
+      
+      /// Returns the pointer to the metadata on this association node.
+      template <typename ArtNode = ArtAssnsNode_t>
+      std::enable_if_t<hasMetadata<ArtNode>(), dataptr_t> dataPtr() const
+        { return info().dataPtr(); }
+      
+      /// Returns a reference to the metadata on this association node.
+      template <typename ArtNode = ArtAssnsNode_t>
+      std::enable_if_t
+        <hasMetadata<ArtNode>(), typename AssnsNodeTraits<ArtNode>::data_t const&>
+      data() const
+        { return info().data(); }
+      
+      /// @}
+      //--- END Access to the full association information ---------------------
+      
+      /*
+       * Associations with metadata have an iterator with value type
+       * art::AssnsNode, while the value for the ones without have just a
+       * std::pair.
+       * The std::pair returned by the one without metadata is a reference to an
+       * element of the original collection.
+       * Instead, the art::AssnsNode returned by the art::Assns iterator is a
+       * temporary put together copying information from the original pair
+       * collection and from the parallel metadata collection.
+       * Therefore, in the first case we can return references to the existing
+       * data, while in the latter we can't and we have to return the results by
+       * value.
+       * In this implementation we compromise and return always the data by
+       * value; the values are art pointers, or plain pointers, so the copy
+       * should not be extremely taxing. It is possible to change this, at the
+       * cost of additional complexity of the implementation.
+       */
+      static AssnsNode_t const& transform(art_assns_iter_t const& v)
+        { return makeAssnsNode(*v); }
+      
+    }; // class assns_node_iterator<>
+    
+    //--- END iterators for art::Assns ---------------------------------------
     
     
     //--------------------------------------------------------------------------
@@ -3068,6 +3644,7 @@ namespace proxy {
     /**
      * @brief Helper to create associated data proxy.
      * @tparam Aux type of data associated to the main one
+     * @tparam Metadata type of metadata of the association
      * @tparam ArgTuple type of arguments required for the creation of proxy
      * @tparam ProxyMaker template type of the proxy maker class
      * @tparam AuxTag tag for the associated data (default: as `Aux`)
@@ -3085,6 +3662,7 @@ namespace proxy {
      */
     template <
       typename Aux,
+      typename Metadata,
       typename ArgTuple,
       template <typename CollProxy> class ProxyMaker,
       typename AuxTag /* = Aux */
@@ -3097,6 +3675,9 @@ namespace proxy {
       
       /// Type of associated data.
       using aux_t = Aux;
+      
+      /// Type of associated metadata.
+      using metadata_t = Metadata;
       
       /// Tag for the associated data (same as the data type itself).
       using tag = AuxTag;
@@ -3243,6 +3824,9 @@ namespace proxy {
       /// Returns a pointer to the whole data collection.
       parallel_data_t const* data() const { return fData; }
       
+      /// Returns a reference to the whole data collection.
+      parallel_data_t const& dataRef() const { return *(data()); }
+      
         private:
       
       parallel_data_t const* fData; ///< Reference to the original data product.
@@ -3258,11 +3842,14 @@ namespace proxy {
     //--------------------------------------------------------------------------
     //--- stuff for associated data (a form of auxiliary data)
     //--------------------------------------------------------------------------
-    template <typename Aux, typename AuxTag /* = Aux */>
+    template <
+      typename Aux, typename Metadata /* = void */,
+      typename AuxTag /* = Aux */
+      >
     struct AssociatedDataProxyMakerWrapper {
       template <typename CollProxy>
       using maker_t = AssociatedDataProxyMaker
-        <typename CollProxy::main_element_t, Aux, CollProxy, AuxTag>;
+        <typename CollProxy::main_element_t, Aux, Metadata, CollProxy, AuxTag>;
     };
     
     
@@ -3270,11 +3857,12 @@ namespace proxy {
      * @class WithAssociatedStruct
      * @brief Helper to create associated data proxy.
      * @tparam Aux type of data associated to the main one
+     * @tparam Metadata type of metadata of the association
      * @tparam ArgTuple type of arguments required for the creation of proxy
      * @tparam AuxTag tag for the associated data (default: as `Aux`)
      * 
      * This class stores user arguments for the construction of a proxy to
-     * associated data of type `Aux`.
+     * associated data of type `Aux` and with metadata `Metadata`.
      * It can use that information plus some additional one to create the
      * associated data itself. This additional information is provided by
      * `getCollection()`.
@@ -3586,15 +4174,12 @@ namespace proxy {
     template <std::size_t GroupKey, typename Iter>
     BoundaryList<Iter> associationRanges(Iter begin, Iter end, std::size_t n);
     
-    template <typename Assns>
-    using AssociatedGroupRanges
-      = BoundaryList<typename Assns::assn_iterator>;
-    
     
     /**
      * @brief Object to draft associated data interface.
      * @tparam Main type of the main associated object (one)
      * @tparam Aux type of the additional associated objects (many)
+     * @tparam Metadata type of metadata in the association (default: `void`)
      * @tparam Tag tag this data is labeled with
      * 
      * Allows:
@@ -3612,17 +4197,24 @@ namespace proxy {
      * Both levels of containers are random access, so that the set of `Right`
      * objects associated to a `Left` can be accessed by index, and the `Right`
      * objects within can be accessed with `Right` index in the `Left`.
+     * 
+     * @todo Metadata for `proxy::details::AssociatedData` is not supported yet.
      */
-    template <typename Main, typename Aux, typename Tag /* = Aux */>
+    template <
+      typename Main, typename Aux, typename Metadata /* = void */,
+      typename Tag /* = Aux */
+      >
     class AssociatedData {
-      using This_t = AssociatedData<Main, Aux, Tag>; ///< This type.
+      using This_t = AssociatedData<Main, Aux, Metadata, Tag>; ///< This type.
       
         public:
-      using assns_t = art::Assns<Main, Aux>; ///< Type of _art_ association.
+      /// Type of _art_ association.
+      using assns_t = art::Assns<Main, Aux, Metadata>;
       
         private:
       using associated_data_iterator_t
-        = tuple_element_iterator<1U, typename assns_t::assn_iterator>;
+        = assns_node_iterator<AssnsIterator_t<assns_t>>;
+      //  = tuple_element_iterator<1U, AssnsIterator_t<assns_t>>;
       
         public:
       using tag = Tag; ///< Tag of this association proxy.
@@ -3674,11 +4266,14 @@ namespace proxy {
     //--------------------------------------------------------------------------
     //---  Stuff for one-to-(zero or one) associated data
     //--------------------------------------------------------------------------
-    template <typename Aux, typename AuxTag /* = Aux */>
+    template <
+       typename Aux, typename Metadata /* = void */,
+       typename AuxTag /* = Aux */
+       >
     struct OneTo01DataProxyMakerWrapper {
       template <typename CollProxy>
       using maker_t = OneTo01DataProxyMaker
-        <typename CollProxy::main_element_t, Aux, CollProxy, AuxTag>;
+        <typename CollProxy::main_element_t, Aux, Metadata, CollProxy, AuxTag>;
     };
     
     
@@ -3686,6 +4281,7 @@ namespace proxy {
      * @brief Object for one-to-zero/or/one associated data interface.
      * @tparam Main type of the main associated object (one)
      * @tparam Aux type of the additional associated objects (zero or one)
+     * @tparam Metadata type of associated metadata
      * @tparam Tag tag this data is labeled with
      * 
      * Allows:
@@ -3710,14 +4306,22 @@ namespace proxy {
      * single `Main` and it is an _art_ pointer to the `Right` element.
      * 
      * Association metadata is not accessible from this object.
+     * 
+     * @todo Metadata for `proxy::details::OneTo01Data` is not supported yet.
      */
-    template <typename Main, typename Aux, typename Tag /* = Aux */>
+    template <
+      typename Main, typename Aux, typename Metadata /* = void */,
+      typename Tag /* = Aux */
+      >
     class OneTo01Data {
-      using This_t = OneTo01Data<Main, Aux, Tag>; ///< This type.
+      using This_t = OneTo01Data<Main, Aux, Metadata, Tag>; ///< This type.
       
         public:
       /// Type of associated datum.
       using aux_t = Aux;
+      
+      /// Type of associated metadata.
+      using metadata_t = Metadata;
       
       /// Type of tag.
       using tag = Tag;
@@ -3923,6 +4527,49 @@ namespace proxy {
   namespace details {
     
     //--------------------------------------------------------------------------
+    template <typename Assns, typename = void>
+    struct AssnWithMetadata: std::false_type {};
+      
+    template <typename Assns>
+    struct AssnWithMetadata
+      <Assns, std::enable_if_t<util::always_true_v<typename Assns::data_t>>>
+      : std::true_type
+    {};
+    
+    template <typename Assns>
+    constexpr bool AssnWithMetadata_v = AssnWithMetadata<Assns>();
+    
+    
+    //--------------------------------------------------------------------------
+    template <typename Assns, typename /* = void */>
+    struct AssnsMetadataTypeStruct {
+      using type = void;
+    }; // struct AssnsMetadataTypeStruct
+    
+    template <typename Assns>
+    struct AssnsMetadataTypeStruct
+      <Assns, std::enable_if_t<AssnWithMetadata_v<Assns>>>
+    {
+      using type = typename Assns::data_t;
+    };
+    
+    
+    //--------------------------------------------------------------------------
+    template <typename Assns, typename /* = void */>
+    struct AssnsIteratorTypeStruct {
+      using type = typename Assns::assn_iterator;
+    }; // struct AssnsIteratorTypeStruct
+    
+    
+    template <typename Assns>
+    struct AssnsIteratorTypeStruct
+      <Assns, std::enable_if_t<AssnWithMetadata_v<Assns>>>
+    {
+      using type = typename Assns::const_iterator;
+    };
+    
+    
+    //--------------------------------------------------------------------------
     // Extends vector v with default-constructed data
     // and executes v[index]=value
     template <typename T>
@@ -4060,7 +4707,9 @@ namespace proxy {
   {
     using Main_t = typename Assns::left_t;
     using Aux_t = typename Assns::right_t;
-    using AssociatedData_t = details::AssociatedData<Main_t, Aux_t, Tag>;
+    using Metadata_t = details::AssnsMetadata_t<Assns>;
+    using AssociatedData_t
+      = details::AssociatedData<Main_t, Aux_t, Metadata_t, Tag>;
     
     // associationRangeBoundaries() produces iterators to association elements,
     // (i.e. tuples)
@@ -4079,13 +4728,18 @@ namespace proxy {
   
   
   //----------------------------------------------------------------------------
-  template <typename Main, typename Aux, typename Tag, typename Event>
+  template <
+    typename Main, typename Aux, typename Metadata, typename Tag,
+    typename Event
+    >
   auto makeAssociatedData
     (Event const& event, art::InputTag tag, std::size_t minSize /* = 0 */)
   {
     using Main_t = Main;
     using Aux_t = Aux;
-    using AssociatedData_t = details::AssociatedData<Main_t, Aux_t, Tag>;
+    using Metadata_t = Metadata;
+    using AssociatedData_t
+      = details::AssociatedData<Main_t, Aux_t, Metadata_t, Tag>;
     using Assns_t = typename AssociatedData_t::assns_t;
     
     return
@@ -4095,27 +4749,34 @@ namespace proxy {
   
   
   //----------------------------------------------------------------------------
-  template <typename Aux, typename Tag, typename Handle, typename Event>
+  template <
+    typename Aux, typename Metadata, typename Tag,
+    typename Handle, typename Event
+    >
   auto makeAssociatedData
     (Handle&& handle, Event const& event, art::InputTag tag)
   {
     // Handle::value_type is the main data product type (a collection)
     using Main_t = collection_value_t<typename Handle::value_type>;
     using Aux_t = Aux;
-    return makeAssociatedData<Main_t, Aux_t, Tag>(event, tag, handle->size());
+    using Metadata_t = Metadata;
+    return makeAssociatedData<Main_t, Aux_t, Metadata_t, Tag>
+      (event, tag, handle->size());
   } // makeAssociatedData(handle)
   
   
   
   //----------------------------------------------------------------------------
-  //--- makeAssociatedData() implementations
+  //--- makeAssociatedTo01data() implementations
   //----------------------------------------------------------------------------
   template <typename Tag, typename Assns>
   auto makeAssociatedTo01data(Assns const& assns, std::size_t minSize /* = 0 */)
   {
     using Main_t = typename Assns::left_t;
     using Aux_t = typename Assns::right_t;
-    using AssociatedData_t = details::OneTo01Data<Main_t, Aux_t, Tag>;
+    using Metadata_t = details::AssnsMetadata_t<Assns>;
+    using AssociatedData_t
+      = details::OneTo01Data<Main_t, Aux_t, Metadata_t, Tag>;
     
     using std::cbegin;
     using std::cend;
@@ -4127,13 +4788,19 @@ namespace proxy {
   
   
   //----------------------------------------------------------------------------
-  template <typename Main, typename Aux, typename Tag, typename Event>
+  template <
+    typename Main, typename Aux, typename Metadata,
+    typename Tag,
+    typename Event
+    >
   auto makeAssociatedTo01data
     (Event const& event, art::InputTag tag, std::size_t minSize /* = 0 */)
   {
     using Main_t = Main;
     using Aux_t = Aux;
-    using AssociatedData_t = details::OneTo01Data<Main_t, Aux_t, Tag>;
+    using Metadata_t = Metadata;
+    using AssociatedData_t
+      = details::OneTo01Data<Main_t, Aux_t, Metadata_t, Tag>;
     using Assns_t = typename AssociatedData_t::assns_t;
     
     return makeAssociatedTo01data<Tag>
@@ -4143,14 +4810,19 @@ namespace proxy {
   
   
   //----------------------------------------------------------------------------
-  template <typename Aux, typename Tag, typename Handle, typename Event>
+  template <
+    typename Aux, typename Metadata,
+    typename Tag,
+    typename Handle, typename Event
+    >
   auto makeAssociatedTo01data
     (Handle&& handle, Event const& event, art::InputTag tag)
   {
     // Handle::value_type is the main data product type (a collection)
     using Main_t = collection_value_t<typename Handle::value_type>;
     using Aux_t = Aux;
-    return makeAssociatedTo01data<Main_t, Aux_t, Tag>
+    using Metadata_t = Metadata;
+    return makeAssociatedTo01data<Main_t, Aux_t, Metadata_t, Tag>
       (event, tag, handle->size());
   } // makeAssociatedTo01data(handle)
   
@@ -4252,6 +4924,131 @@ namespace proxy {
   
   
 } // namespace proxy
+
+
+//------------------------------------------------------------------------------
+//--- implementation of specializations of std::get() for art::AssnsNode
+//------------------------------------------------------------------------------
+namespace proxy {
+  namespace details {
+    
+    template <std::size_t I, typename L, typename R, typename D>
+    struct AssnsNodeGetter; // incomplete type, except for specializations...
+    
+    
+    template <typename L, typename R, typename D>
+    struct AssnsNodeGetter<0U, L, R, D> {
+      
+      using AssnsNode_t = art::AssnsNode<L, R, D>;
+      using Element_t = std::tuple_element_t<0U, AssnsNode_t>;
+      
+      static constexpr Element_t& get(AssnsNode_t& node) noexcept
+        { return node.first; }
+      
+      static constexpr Element_t const& get(AssnsNode_t const& node) noexcept
+        { return node.first; }
+      
+      static constexpr Element_t&& get(AssnsNode_t&& node) noexcept
+        { return std::move(node.first); }
+      
+      static constexpr Element_t const&& get(AssnsNode_t const&& node) noexcept
+        { return std::move(node.first); }
+      
+    }; // struct AssnsNodeGetter<0U>
+    
+    
+    template <typename L, typename R, typename D>
+    struct AssnsNodeGetter<1U, L, R, D> {
+      
+      using AssnsNode_t = art::AssnsNode<L, R, D>;
+      using Element_t = std::tuple_element_t<1U, AssnsNode_t>;
+      
+      static constexpr Element_t& get(AssnsNode_t& node) noexcept
+        { return node.second; }
+      
+      static constexpr Element_t const& get(AssnsNode_t const& node) noexcept
+        { return node.second; }
+      
+      static constexpr Element_t&& get(AssnsNode_t&& node) noexcept
+        { return std::move(node.second); }
+      
+      static constexpr Element_t const&& get(AssnsNode_t const&& node) noexcept
+        { return std::move(node.second); }
+      
+    }; // struct AssnsNodeGetter<1U>
+    
+    template <typename L, typename R, typename D>
+    struct AssnsNodeGetter<2U, L, R, D> {
+      
+      using AssnsNode_t = art::AssnsNode<L, R, D>;
+      using Element_t = std::tuple_element_t<2U, AssnsNode_t>;
+      
+      static constexpr Element_t& get(AssnsNode_t& node) noexcept
+        { return node.data; }
+      
+      static constexpr Element_t const& get(AssnsNode_t const& node) noexcept
+        { return node.data; }
+      
+      static constexpr Element_t&& get(AssnsNode_t&& node) noexcept
+        { return std::move(node.data); }
+      
+      static constexpr Element_t const&& get(AssnsNode_t const&& node) noexcept
+        { return std::move(node.data); }
+      
+    }; // struct AssnsNodeGetter<2U>
+    
+    
+  } // namespace details
+} // namespace proxy
+
+
+// FIXME simplify this code if issue #18769 is accepted
+namespace std {
+  
+  //----------------------------------------------------------------------------
+  //--- implementation of specializations of std::get() for art::AssnsNode
+  //----------------------------------------------------------------------------
+  
+  template< std::size_t I, typename L, typename R, typename D>
+  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>>&
+  get(art::AssnsNode<L, R, D>& node) noexcept
+    { return proxy::details::AssnsNodeGetter<I, L, R, D>::get(node); }
+  
+  template< std::size_t I, typename L, typename R, typename D>
+  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>>&&
+  get(art::AssnsNode<L, R, D>&& node) noexcept
+    {
+      return proxy::details::AssnsNodeGetter<I, L, R, D>::get(std::move(node));
+    }
+  
+  template< std::size_t I, typename L, typename R, typename D>
+  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>> const&
+  get(art::AssnsNode<L, R, D> const& node) noexcept
+    { return proxy::details::AssnsNodeGetter<I, L, R, D>::get(node); }
+  
+  template< std::size_t I, typename L, typename R, typename D>
+  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>> const&&
+  get(art::AssnsNode<L, R, D> const&& node) noexcept
+    {
+      return proxy::details::AssnsNodeGetter<I, L, R, D>::get(std::move(node));
+    }
+  
+  template< class T, typename L, typename R, typename D>
+  constexpr T& get(art::AssnsNode<L, R, D>& t) noexcept;
+  
+  template< class T, typename L, typename R, typename D>
+  constexpr T&& get(art::AssnsNode<L, R, D>&& t) noexcept;
+  
+  template< class T, typename L, typename R, typename D>
+  constexpr const T& get(const art::AssnsNode<L, R, D>& t) noexcept;
+  
+  template< class T, typename L, typename R, typename D>
+  constexpr const T&& get(const art::AssnsNode<L, R, D>&& t) noexcept;
+  
+  //----------------------------------------------------------------------------
+  
+  
+} // namespace std
 
 
 #endif // LARDATA_RECOBASEPROXY_PROXYBASE_H

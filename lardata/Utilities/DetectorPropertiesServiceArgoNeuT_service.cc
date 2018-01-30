@@ -17,7 +17,7 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // Art includes
-#include "art/Persistency/RootDB/SQLite3Wrapper.h"
+#include "art/Framework/IO/Root/RootDB/SQLite3Wrapper.h"
 #include "canvas/Utilities/Exception.h"
 #include "fhiclcpp/make_ParameterSet.h"
 

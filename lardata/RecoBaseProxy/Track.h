@@ -549,7 +549,7 @@ namespace proxy {
    */
   using TrackPointData = std::tuple<
     recob::Track const*,
-    art::Ptr<recob::Hit> const*,
+    art::Ptr<recob::Hit>,
     recob::TrackFitHitInfo const*,
     std::size_t
     >;
@@ -646,10 +646,10 @@ namespace proxy {
     /// @}
     
     /**
-     * @brief Returns the hit associated with the trajectory point
+     * @brief Returns the hit associated with the trajectory point.
      * @return an _art_ pointer to the hit associated to this point
      */
-    art::Ptr<recob::Hit> const& hitPtr() const { return *get<HitIndex>(); }
+    art::Ptr<recob::Hit> hitPtr() const { return get<HitIndex>(); }
     
     /**
      * @brief Returns fit info associated with the trajectory point.
@@ -707,7 +707,7 @@ namespace proxy {
       static_assert(details::isTrackProxy<TrackProxy>(), "Not a proxy::Track!");
       return {
         &(track.track()),
-        &(track.hitAtPoint(index)),
+        track.hitAtPoint(index),
         track.fitInfoAtPoint(index),
         index
       };
@@ -788,7 +788,8 @@ namespace proxy {
       { return base_t::template get<Tracks::HitTag>(); }
     
     /// Returns an art pointer to the hit associated with the specified point.
-    auto const& hitAtPoint(std::size_t index) const { return hits()[index]; }
+    auto hitAtPoint(std::size_t index) const -> decltype(auto)
+      { return hits()[index]; }
     
     /// Returns the number of hits associated with this track.
     std::size_t nHits() const { return hits().size(); }

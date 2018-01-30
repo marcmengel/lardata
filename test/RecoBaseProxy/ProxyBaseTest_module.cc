@@ -9,10 +9,12 @@
 
 // LArSoft libraries
 #include "lardata/RecoBaseProxy/Track.h" // proxy namespace
+#include "lardata/Utilities/StatCollector.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/TrackFitHitInfo.h"
+#include "lardataobj/RecoBase/TrackHitMeta.h"
 
 #include "larcorealg/CoreUtils/DebugUtils.h" // lar::debug::demangle()
 #include "larcorealg/CoreUtils/UncopiableAndUnmovableClass.h"
@@ -37,7 +39,7 @@
 
 // C/C++ libraries
 #include <vector>
-#include <algorithm> // std::for_each()
+#include <algorithm> // std::for_each(), std::find()
 #include <initializer_list>
 #include <memory> // std::unique_ptr<>
 #include <cstring> // std::strlen(), std::strcpy()
@@ -102,6 +104,22 @@ class ProxyBaseTest : public art::EDAnalyzer {
 
 
 //------------------------------------------------------------------------------
+namespace {
+  
+  template <typename Cont, typename Value>
+  std::size_t indexOf(Cont const& cont, Value const& value) {
+    using std::begin;
+    using std::end;
+    auto const cbegin = begin(cont);
+    auto const cend = end(cont);
+    auto const it = std::find(cbegin, cend, value);
+    return (it == cend)? std::numeric_limits<std::size_t>::max(): (it - cbegin);
+  } // indexOf()
+  
+} // local namespace
+
+
+//------------------------------------------------------------------------------
 template <typename Track>
 void ProxyBaseTest::processTrack(Track const& track) const {
   
@@ -120,6 +138,7 @@ void ProxyBaseTest::processTrack(Track const& track) const {
 //------------------------------------------------------------------------------
 namespace tag {
   struct SpecialHits {};
+  struct MetadataHits {};
   struct DirectHitAssns {};
   struct DirectFitInfo {};
   struct TrackSubproxy {};
@@ -130,8 +149,10 @@ namespace tag {
 //------------------------------------------------------------------------------
 void ProxyBaseTest::proxyUsageExample(art::Event const& event) const {
   
-  auto tracks = proxy::getCollection<std::vector<recob::Track>>
-    (event, tracksTag, proxy::withAssociated<recob::Hit>());
+  auto tracks = proxy::getCollection<std::vector<recob::Track>>(
+    event, tracksTag,
+    proxy::withAssociatedMeta<recob::Hit, recob::TrackHitMeta>()
+    );
   
   if (tracks.empty()) {
     mf::LogVerbatim("ProxyBaseTest") << "No tracks in '" << tracksTag.encode()
@@ -141,6 +162,9 @@ void ProxyBaseTest::proxyUsageExample(art::Event const& event) const {
   
   mf::LogVerbatim("ProxyBaseTest") << "Collection '" << tracksTag.encode()
     << "' contains " << tracks.size() << " tracks.";
+  
+  auto onCollection
+    = [](recob::Hit const& hit){ return hit.SignalType() == geo::kCollection; };
   
   for (auto trackInfo: tracks) {
     
@@ -152,16 +176,31 @@ void ProxyBaseTest::proxyUsageExample(art::Event const& event) const {
     // access to associated data (returns random-access collection-like object)
     decltype(auto) hits = trackInfo.get<recob::Hit>();
     
+    lar::util::StatCollector<float> dQds;
     double charge = 0.0;
-    for (auto const& hitPtr: hits) {
-      charge += hitPtr->Integral();
+    for (auto const& hitInfo: hits) {
+      // hitInfo is equivalent to a art::Ptr<recob::Hit>
+      double const hitCharge = hitInfo->Integral();
+      charge += hitCharge;
+      
+      if (onCollection(*hitInfo)) { // 
+        double const ds = hitInfo.data().Dx(); // access recob::TrackHitMeta
+        if (ds > 0.0) dQds.add(hitCharge / ds);
+      } // if on collection
+      
     } // for hits
     
-    mf::LogVerbatim("Info")
+    mf::LogVerbatim log("ProxyBaseTest");
+    log
       << "[#" << trackInfo.index() << "] track ID=" << track.ID()
       << " (" << length << " cm, starting with theta=" << startTheta
       << " rad) deposited charge=" << charge
       << " with " << hits.size() << " hits";
+    if (dQds.N() > 0) {
+      log << " (<dQ/ds> = "
+        << dQds.Average() << " +/- " << dQds.RMS() << " Q/cm from "
+        << dQds.N() << " hits in collection planes)";
+    }
     
   } // for tracks
  
@@ -186,7 +225,7 @@ auto ProxyBaseTest::getLongTracks
   } // for track
   return longTracks;
   
-} // ProxyBaseTest::proxyUsageExample()
+} // ProxyBaseTest::getLongTracks()
 
 
 //------------------------------------------------------------------------------
@@ -265,14 +304,16 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
     = event.getValidHandle<std::vector<recob::Track>>(tracksTag);
   auto const& expectedTracks = *expectedTracksHandle;
   
-  auto const& expectedTrackHitAssns
-    = *(event.getValidHandle<art::Assns<recob::Track, recob::Hit>>(tracksTag));
+  auto const& expectedTrackHitAssns = *(
+    event.getValidHandle
+      <art::Assns<recob::Track, recob::Hit, recob::TrackHitMeta>>(tracksTag)
+    );
   
   mf::LogInfo("ProxyBaseTest")
     << "Starting test on " << expectedTracks.size() << " tracks from '"
     << tracksTag.encode() << "'";
   
-  art::FindManyP<recob::Hit> hitsPerTrack
+  art::FindManyP<recob::Hit, recob::TrackHitMeta> hitsPerTrack
     (expectedTracksHandle, event, tracksTag);
   
   art::FindOneP<recob::TrackTrajectory> trajectoryPerTrack
@@ -291,6 +332,8 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
     event, tracksTag
     , proxy::withAssociated<recob::Hit>()
     , proxy::withAssociatedAs<recob::Hit, tag::SpecialHits>()
+    , proxy::withAssociatedMetaAs
+        <recob::Hit, recob::TrackHitMeta, tag::MetadataHits>()
     , proxy::withParallelData<std::vector<recob::TrackFitHitInfo>>()
 //     , proxy::withCollectionProxyAs
 //         <std::vector<recob::Track>, tag::TrackSubproxy>
@@ -350,7 +393,10 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
   std::size_t iExpectedTrack = 0;
   for (auto trackProxy: tracks) {
     auto const& expectedTrack = expectedTracks[iExpectedTrack];
+    art::Ptr<recob::Track> const expectedTrackPtr
+      { expectedTracksHandle, iExpectedTrack };
     auto const& expectedHits = hitsPerTrack.at(iExpectedTrack);
+    auto const& expectedHitMeta = hitsPerTrack.data(iExpectedTrack);
     auto const& expectedFitHitInfo = expectedTrackFitHitInfo[iExpectedTrack];
     art::Ptr<recob::TrackTrajectory> const expectedTrajPtr
       = trajectoryPerTrack.at(iExpectedTrack);
@@ -371,7 +417,20 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
       (std::addressof(trackRef), std::addressof(expectedTrack));
     BOOST_CHECK_EQUAL
       (std::addressof(*trackProxy), std::addressof(expectedTrack));
+    
+    // hits
     BOOST_CHECK_EQUAL(trackProxy.get<recob::Hit>().size(), expectedHits.size());
+    for (art::Ptr<recob::Hit> const& hitPtr: trackProxy.get<recob::Hit>()) {
+      
+      // with this check we just ask the hit is there
+      // (the order is not guaranteed to be the same in expected and fetched)
+      BOOST_CHECK_NE(
+        indexOf(expectedHits, hitPtr),
+        std::numeric_limits<std::size_t>::max()
+        );
+      
+    } // for hit
+    
     BOOST_CHECK_EQUAL(trackProxy.index(), iExpectedTrack);
     
     std::vector<recob::TrackFitHitInfo> const& fitHitInfo
@@ -411,8 +470,116 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
       std::addressof(fitHitInfo)
       );
     
+    // "special" hits
     BOOST_CHECK_EQUAL
       (trackProxy.get<tag::SpecialHits>().size(), expectedHits.size());
+    for (auto const& hitPtr: trackProxy.get<tag::SpecialHits>()) {
+      // hitPtr is actually not a art::Ptr, but it can be compared to one
+      
+      static_assert
+        (!hitPtr.hasMetadata(), "Expected no metadata for tag::SpecialHits");
+      
+      // with this check we just ask the hit is there
+      // (the order is not guaranteed to be the same in expected and fetched)
+      BOOST_CHECK_NE(
+        indexOf(expectedHits, hitPtr),
+        std::numeric_limits<std::size_t>::max()
+        );
+      
+    } // for special hit
+    
+    // hits with metadata
+    auto const& hits = trackProxy.get<tag::MetadataHits>();
+    BOOST_CHECK_EQUAL(hits.size(), expectedHits.size());
+    // - range-for loop
+    unsigned int nSpecialHits = 0U;
+    for (auto const& hitInfo: hits) {
+      ++nSpecialHits;
+      // hitPtr is actually not a art::Ptr,
+      // but it can be implicitly converted into one
+      
+      static_assert
+        (hitInfo.hasMetadata(), "Expected metadata for tag::MetadataHits");
+      
+      // conversion, as reference
+      art::Ptr<recob::Hit> const& hitPtr = hitInfo;
+      
+      // with this check we just ask the hit is there
+      // (the order is not guaranteed to be the same in expected and fetched)
+      auto const index = indexOf(expectedHits, hitPtr);
+      BOOST_CHECK_NE(index, std::numeric_limits<std::size_t>::max());
+      
+      BOOST_CHECK_EQUAL(&(hitInfo.main()), &expectedTrack);
+      BOOST_CHECK_EQUAL(hitInfo.mainPtr(), expectedTrackPtr);
+      
+      if (index < expectedHitMeta.size()) {
+        art::Ptr<recob::Hit> const& expectedHitPtr = expectedHits.at(index);
+        auto const& expectedMetadata = expectedHitMeta.at(index);
+        
+        BOOST_CHECK_EQUAL(hitInfo.valuePtr(), hitPtr);
+        BOOST_CHECK_EQUAL
+          (std::addressof(hitInfo.value()), std::addressof(*hitPtr));
+        BOOST_CHECK_EQUAL(hitInfo.key(), hitPtr.key());
+        BOOST_CHECK_EQUAL(hitInfo.id(), hitPtr.id());
+        
+        if (expectedHitPtr) {
+          BOOST_CHECK(hitPtr);
+          BOOST_CHECK_EQUAL(hitInfo.operator->(), hitPtr);
+          recob::Hit const& hit = *expectedHitPtr;
+          BOOST_CHECK_EQUAL(std::addressof(*hitInfo), std::addressof(hit));
+        }
+        
+        BOOST_CHECK_EQUAL(hitInfo.dataPtr(), expectedMetadata);
+        BOOST_CHECK_EQUAL(&(hitInfo.data()), expectedMetadata);
+        
+        auto hitInfoCopy = hitInfo; // copy
+        BOOST_CHECK_EQUAL
+          (static_cast<art::Ptr<recob::Hit> const&>(hitInfo), hitPtr);
+        BOOST_CHECK_EQUAL
+          (&(static_cast<art::Ptr<recob::Hit> const&>(hitInfo)), &hitPtr);
+        BOOST_CHECK_EQUAL
+          (static_cast<art::Ptr<recob::Hit>>(std::move(hitInfoCopy)), hitPtr);
+        
+      } // if the hit is correct
+      
+    } // for special hit
+    BOOST_CHECK_EQUAL(nSpecialHits, expectedHits.size());
+    // - iterator loop
+    nSpecialHits = 0U;
+    for (auto iHit = hits.begin(); iHit != hits.end(); ++iHit) {
+      ++nSpecialHits;
+      static_assert
+        (iHit.hasMetadata(), "Expected metadata for tag::MetadataHits");
+      
+      // conversion, as reference
+      art::Ptr<recob::Hit> const& hitPtr = *iHit;
+      
+      // with this check we just ask the hit is there
+      // (the order is not guaranteed to be the same in expected and fetched)
+      auto const index = indexOf(expectedHits, hitPtr);
+      BOOST_CHECK_NE(index, std::numeric_limits<std::size_t>::max());
+      
+      BOOST_CHECK_EQUAL(&(iHit.main()), &expectedTrack);
+      BOOST_CHECK_EQUAL(iHit.mainPtr(), expectedTrackPtr);
+      
+      if (index < expectedHitMeta.size()) {
+        art::Ptr<recob::Hit> const& expectedHitPtr = expectedHits.at(index);
+        auto const* expectedMetadata = expectedHitMeta.at(index);
+        
+        BOOST_CHECK_EQUAL(iHit.valuePtr(), hitPtr);
+        BOOST_CHECK_EQUAL
+          (std::addressof(iHit.value()), std::addressof(*hitPtr));
+        
+        BOOST_CHECK_EQUAL(iHit.dataPtr(), expectedMetadata);
+        BOOST_CHECK_EQUAL(std::addressof(iHit.data()), expectedMetadata);
+        
+        BOOST_CHECK_EQUAL(iHit.valuePtr(), expectedHitPtr);
+        BOOST_CHECK_EQUAL(iHit.dataPtr(), expectedMetadata);
+        
+      } // if the hit is correct
+      
+    } // for special hit (iterator)
+    BOOST_CHECK_EQUAL(nSpecialHits, expectedHits.size());
     
     BOOST_CHECK_EQUAL
       (trackProxy.get<tag::DirectHitAssns>().size(), expectedHits.size());

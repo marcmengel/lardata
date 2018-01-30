@@ -46,7 +46,7 @@ class lris::LArRawInputDriverShortBo {
   // --- data members:
   typedef  std::vector<std::string>  stringvec_t;
 
-  art::SourceHelper            principalMaker_;
+  art::SourceHelper const&       principalMaker_;
   std::string                    currentDir_;
   stringvec_t                    inputfiles_;
   stringvec_t::const_iterator    nextfile_;

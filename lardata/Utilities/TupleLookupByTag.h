@@ -37,6 +37,8 @@
 #ifndef LARDATA_UTILITIES_TUPLELOOKUPBYTAG_H
 #define LARDATA_UTILITIES_TUPLELOOKUPBYTAG_H
 
+// LArSoft libraries
+#include "larcorealg/CoreUtils/MetaUtils.h"
 
 // C/C++ standard libraries
 #include <tuple>
@@ -96,71 +98,9 @@ namespace util {
   } // namespace details
   
   
-  //----------------------------------------------------------------------------
-  /**
-   * @defgroup MetaprogrammingBase Simple utility traits
-   * @brief Simple traits for the implementation of other traits.
-   * @ingroup Metaprogramming
-   * @{
-   */
-  
-  //----------------------------------------------------------------------------
-  /// Trait returning the very same type as in the template argument.
-  template <typename T>
-  struct self_type { using type = T; };
-  
-  /// The very same type as in the template argument.
-  template <typename T>
-  using self_t = typename self_type<T>::type;
-  
-  
-  //----------------------------------------------------------------------------
-  /**
-   * @brief A `std::false_type` with a template argument.
-   * 
-   * This type allows a `static_assert` to fail only when the template type it's
-   * in is being instantiated:
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * template <typename T>
-   * class MandatoryCustomizationPoint {
-   *   static_assert(util::always_false_type<T>(), "You have to specialize!");
-   * };
-   * 
-   * template <typename T>
-   * class MandatoryCustomizationPoint<std::vector<T>> {
-   *   using type = typename std::vector<T>::reference;
-   * };
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * In this example, using `std::false_type` might tip the compiler to trigger
-   * the assertion failure even if the class is not instantiated.
-   */
-  template <typename>
-  struct always_false_type: public std::false_type {};
-  
-  
-  /**
-   * @brief A `std::true_type` with a template argument.
-   * 
-   * This is one way to allow to specialize for classes with a certain type:
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * template <typename T, typename = void>
-   * class ReferenceTypeExtractor {
-   *   static_assert(util::always_false_type<T>(), "Type has no reference!");
-   * };
-   * 
-   * template <typename Cont>
-   * class ReferenceTypeExtractor<
-   *   Cont,
-   *   std::enable_if_t<util::always_true_type<typename Cont::value_type>>
-   *   >
-   * {
-   *   using type = typename Cont::reference;
-   * };
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   */
-  template <typename>
-  struct always_true_type: public std::true_type {};
-  
+  //--- BEGIN Metaprogramming --------------------------------------------------
+  /// @ingroup MetaprogrammingBase
+  /// @{
   
   /// Returns how many of the types in `T` exactly match `Target`.
   template <typename Target, typename... T>
@@ -194,6 +134,8 @@ namespace util {
   struct count_type_in_tuple;
   
   /// @}
+  //--- END Metaprogramming ----------------------------------------------------
+  
   
   //----------------------------------------------------------------------------
   /**
