@@ -1,11 +1,9 @@
-////////////////////////////////////////////////////////////////////////
-//
-//  \file DetectorProperties.cxx
-//
-// Separation of service from Detector info class:
-// jpaley@fnal.gov
-//
-////////////////////////////////////////////////////////////////////////
+/**
+ * @file lardata/DetectorInfo/DetectorProperties.cxx
+ * @brief Separation of service from Detector info class.
+ * @author Jonathan Paley (jpaley@fnal.gov)
+ */
+
 // Framework includes
 
 #include <cassert>

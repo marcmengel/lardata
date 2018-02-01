@@ -47,6 +47,32 @@ namespace detinfo{
    *   readout is 2 MHz, these two settings are equivalent.
    * 
    * _[this list is incomplete]_
+   * 
+   * 
+   * Timing specifics
+   * =================
+   * 
+   * For the general timing requirements, see the documentation of
+   * `detinfo::DetectorClocks`.
+   * 
+   * Clocks
+   * -------
+   * 
+   * This implementation sets the default time of the clocks (the ones returned 
+   * by the methods with no arguments `TriggerClock()`, `TPCClock()` and
+   * `OpticalClock()`, but not `ExternalClock()`) to the trigger time. This
+   * setting is overridden when using the versions with arguments of the clock
+   * retrieval methods.
+   * 
+   * clock name        | frame size    | frequency            | current time
+   * ----------------- | ------------- | -------------------- | ---------------
+   * `TPCClock()`      | `FramePeriod` | `ClockSpeedTPC`      | `TriggerTime()`
+   * `OpticalClock()`  | `FramePeriod` | `ClockSpeedOptical`  | `TriggerTime()`
+   * `TriggerClock()`  | `FramePeriod` | `ClockSpeedTrigger`  | `TriggerTime()`
+   * `ExternalClock()` |               | `ClockSpeedExternal` | 
+   * 
+   * @bug `ExternalClock()` clock is never initialized!
+   * 
    */
   class DetectorClocksStandard : public DetectorClocks {
 
@@ -151,6 +177,7 @@ namespace detinfo{
     { return fExternalClock; }
 
     /// Create a External clock for a given time [us] from clock counting start
+    /// @bug The frequency is taken from `TriggerClock()`, not `ExternalClock()`
     virtual detinfo::ElecClock ExternalClock(double time) const
       { return detinfo::ElecClock(time,fExternalClock.FramePeriod(),fTriggerClock.Frequency());}
     
@@ -167,6 +194,7 @@ namespace detinfo{
     virtual double TPCTick2TrigTime(double tick) const
     { return fTPCClock.TickPeriod() * tick + TriggerOffsetTPC(); }
     /// Given TPC time-tick (waveform index), returns time [us] w.r.t. beam gate time
+    /// @todo Use `TPCTick2TrigTime()` in the implementation
     virtual double TPCTick2BeamTime(double tick) const
     { return fTPCClock.TickPeriod() * tick + TriggerOffsetTPC() + TriggerTime() - BeamGateTime(); }
     /// Given Optical time-tick (waveform index), sample and frame number, returns time [us] w.r.t. trigger time stamp

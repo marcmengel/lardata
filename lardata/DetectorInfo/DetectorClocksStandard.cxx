@@ -94,7 +94,8 @@ bool detinfo::DetectorClocksStandard::IsRightConfig(const fhicl::ParameterSet& p
 {
   std::string s;
   double d;
-
+  
+  // TODO replace with has_key()
   bool result = !ps.get_if_present("module_label", s);
   for(size_t i=0; result && i<kInheritConfigTypeMax; ++i)
 

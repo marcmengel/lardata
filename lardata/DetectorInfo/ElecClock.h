@@ -43,10 +43,12 @@ namespace detinfo {
    * as long as the units of frame period and time are the same, and reciprocal
    * to the frequency unit.
    * 
-   * The clock started at time 0, with the sample 0 of the frame 0 (that is also
-   * tick 0).
-   * 
    * The clock can update its time directly (`SetTime()`) or through operators.
+   * 
+   * The clock started at time 0, with the sample 0 of the frame 0 (that is also
+   * tick 0). This implies that *all times and ticks returned by the clock
+   * implicitly have the same reference as the input time specified by the
+   * constructors or by the last call to `SetTime()`*.
    * 
    * Some usage examples:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}

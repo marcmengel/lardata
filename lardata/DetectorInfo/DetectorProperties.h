@@ -53,7 +53,17 @@ namespace detinfo{
       /// dQ/dX in electrons/cm, returns dE/dX in MeV/cm.
       virtual double BirksCorrection(double dQdX) const = 0;
       virtual double ModBoxCorrection(double dQdX) const = 0;
-
+      
+      /**
+       * @brief Returns the attenuation constant for ionization electrons.
+       * @return the attenuation constant [&micro;s]
+       * 
+       * The returned constant &tau; can be used to know the attenuation the
+       * ionization charge undergoes after drifting for a certain time _t_:
+       * @f$ A(t) = e^{-t/\tau} @f$ (_t_ is measured in microseconds).
+       * 
+       * This is a uniform, constant value for the detector.
+       */
       virtual double ElectronLifetime() const = 0;
       
       /**
@@ -88,7 +98,13 @@ namespace detinfo{
       /// Returns argon density at the temperature from Temperature()
       virtual double Density() const { return Density(Temperature()); }
       
+      /**
+       * @brief Returns the period of the TPC readout electronics clock.
+       * @returns the period of the TPC readout electronics clock [&micro;s]
+       * @see `detinfo::DetectorClocks::TPCClock()`
+       */
       virtual double       SamplingRate()      const = 0;
+      
       virtual double       ElectronsToADC()    const = 0;
       virtual unsigned int NumberTimeSamples() const = 0;
       virtual unsigned int ReadOutWindowSize() const = 0;
