@@ -9,7 +9,7 @@
  */
 
 // LArSoft libraries
-#include "lardata/Utilities/FindAllP.h"
+#include "lardata/Utilities/FindManyInChainP.h"
 #include "lardataobj/RecoBase/Shower.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/Cluster.h"
@@ -186,8 +186,8 @@ void lar::test::AssnsChainTest::printAssociatedHits
   //
   // get the associated hits
   //
-  lar::FindAllP<recob::Hit, recob::Cluster, recob::PFParticle> showerHits
-    (showers, event, showerTag);
+  lar::FindManyInChainP<recob::Hit, recob::Cluster, recob::PFParticle>
+    showerHits(showers, event, showerTag);
   assert(showerHits.size() == showers->size());
   
   //
@@ -265,7 +265,7 @@ void lar::test::AssnsChainTest::printAssociatedClusters
   //
   // get the associated objects
   //
-  lar::FindAllP<recob::Cluster, recob::PFParticle> showerObjects
+  lar::FindManyInChainP<recob::Cluster, recob::PFParticle> showerObjects
     (showers, event, showerTag);
   assert(showerObjects.size() == showers->size());
   
@@ -346,7 +346,7 @@ void lar::test::AssnsChainTest::printAssociatedPFOs
   //
   // get the associated objects
   //
-  lar::FindAllP<recob::PFParticle> showerObjects
+  lar::FindManyInChainP<recob::PFParticle> showerObjects
     (showers, event, showerTag);
   assert(showerObjects.size() == showers->size());
   

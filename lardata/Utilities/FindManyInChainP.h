@@ -1,5 +1,5 @@
 /**
- * @file   lardata/Utilities/FindAllP.h
+ * @file   lardata/Utilities/FindManyInChainP.h
  * @brief  Utility to navigate chains of associations.
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   June 26, 2017
@@ -8,8 +8,8 @@
  * 
  */
 
-#ifndef LARDATA_UTILITIES_FINDALLP_H
-#define LARDATA_UTILITIES_FINDALLP_H
+#ifndef LARDATA_UTILITIES_FINDMANYINCHAINP_H
+#define LARDATA_UTILITIES_FINDMANYINCHAINP_H
 
 // framework
 #include "canvas/Persistency/Common/Ptr.h"
@@ -40,10 +40,10 @@ namespace lar {
   } // namespace details
   
   
-  /// Type for default tag in `FindAllP` constructors.
+  /// Type for default tag in `FindManyInChainP` constructors.
   struct SameAsDataTag {};
   
-  /// Value for default tag in `FindAllP` constructors.
+  /// Value for default tag in `FindManyInChainP` constructors.
   constexpr SameAsDataTag SameAsData;
   
   /**
@@ -60,7 +60,7 @@ namespace lar {
    * associated to a shower collection (_not recommended_):
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * auto showers = event.getValidHandle<std::vector<recob::Shower>>(showerTag);
-   * lar::FindAllP<recob::Hit, recob::Cluster> showerToHits
+   * lar::FindManyInChainP<recob::Hit, recob::Cluster> showerToHits
    *   (showers, event, showerTag);
    * 
    * for (std::size_t iShower = 0; iShower < showers.size(); ++iShower) {
@@ -86,8 +86,9 @@ namespace lar {
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * auto showers = event.getValidHandle<std::vector<recob::Shower>>(showerTag);
    * std::size_t iShower = 0;
-   * for (auto const& showerHits
-   *   : lar::FindAllP<recob::Hit, recob::Cluster>(showers, event, showerTag)
+   * for (auto const& showerHits:
+   *   lar::FindManyInChainP<recob::Hit, recob::Cluster>
+   *     (showers, event, showerTag)
    *   )
    * {
    *   recob::Shower const& shower = (*showers)[iShower++];
@@ -97,15 +98,15 @@ namespace lar {
    *   
    * } // for each shower
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * This is the recommended approach, as long as `lar::FindAllP()` has to be
-   * called only once.
+   * This is the recommended approach, as long as `lar::FindManyInChainP()` has
+   * to be called only once.
    * 
    * @note Due to the inability to retrieve provenance information in _gallery_,
    *       this class is not compatible with _gallery_.
    * 
    */
   template <typename Target, typename... Intermediate>
-  class FindAllP {
+  class FindManyInChainP {
     
       public:
     using Target_t = Target; ///< Type of the associated objects.
@@ -131,7 +132,7 @@ namespace lar {
      * 
      */
     template <typename Source, typename Event, typename... InputTags>
-    FindAllP(Source&& source, Event const& event, InputTags... tags)
+    FindManyInChainP(Source&& source, Event const& event, InputTags... tags)
       : results(find(std::forward<Source>(source), event, tags...))
       {}
     
@@ -149,8 +150,9 @@ namespace lar {
      * The specified index matches the index of the element in the collection
      * this query object was constructed with. For example:
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-     * auto showers = event.getValidHandle<std::vector<recob::Shower>>(showerTag);
-     * lar::FindAllP<recob::Hit, recob::Cluster> showerToHits
+     * auto showers
+     *   = event.getValidHandle<std::vector<recob::Shower>>(showerTag);
+     * lar::FindManyInChainP<recob::Hit, recob::Cluster> showerToHits
      *   (shower, event, showerTag);
      * 
      * for (std::size_t iShower = 0; iShower < showers.size(); ++iShower) {
@@ -222,7 +224,7 @@ namespace lar {
       private:
     std::vector<TargetPtrCollection_t> results; ///< Stored results.
     
-  }; // class FindAllP<>
+  }; // class FindManyInChainP<>
   
   
 } // namespace lar
@@ -231,9 +233,9 @@ namespace lar {
 //------------------------------------------------------------------------------
 //---  template implementation
 //---
-#include "FindAllP.tcc" // expected in the same directory as this file
+#include "FindManyInChainP.tcc" // expected in the same directory as this file
 
 //------------------------------------------------------------------------------
 
 
-#endif // LARDATA_UTILITIES_FINDALLP_H
+#endif // LARDATA_UTILITIES_FINDMANYINCHAINP_H

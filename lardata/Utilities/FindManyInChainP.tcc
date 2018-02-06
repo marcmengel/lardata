@@ -1,17 +1,17 @@
 /**
- * @file   lardata/Utilities/FindAllP.tcc
- * @brief  Template implementation for `FindAllP.h`.
+ * @file   lardata/Utilities/FindManyInChainP.tcc
+ * @brief  Template implementation for `FindManyInChainP.h`.
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   June 26, 2017
  * 
  */
 
-#ifndef LARDATA_UTILITIES_FINDALLP_TCC
-#define LARDATA_UTILITIES_FINDALLP_TCC
+#ifndef LARDATA_UTILITIES_FINDMANYINCHAINP_TCC
+#define LARDATA_UTILITIES_FINDMANYINCHAINP_TCC
 
-#ifndef LARDATA_UTILITIES_FINDALLP_H
-#error "FindAllP.tcc must not be included directly. Include FindAllP.h instead."
-#endif // LARDATA_UTILITIES_FINDALLP_H
+#ifndef LARDATA_UTILITIES_FINDMANYINCHAINP_H
+#error "FindManyInChainP.tcc must not be included directly. Include FindManyInChainP.h instead."
+#endif // LARDATA_UTILITIES_FINDMANYINCHAINP_H
 
 // framework
 #include "art/Framework/Principal/Handle.h"
@@ -750,7 +750,8 @@ namespace lar {
         
         using SourcePtr_t = std::decay_t<decltype(*sbegin)>;
         static_assert(is_art_ptr<SourcePtr_t>(),
-          "Collection for AssociationFinder (FindAllP) is not art pointers!");
+          "Collection for AssociationFinder (FindManyInChainP) is not art pointers!"
+          );
         
         // type of the source object (hidden in PtrColl)
         using Source_t = typename SourcePtr_t::value_type;
@@ -811,7 +812,8 @@ namespace lar {
         
         using SourcePtr_t = std::decay_t<decltype(*sbegin)>;
         static_assert(is_art_ptr<SourcePtr_t>(),
-          "Collection for AssociationFinder (FindAllP) is not art pointers!");
+          "Collection for AssociationFinder (FindManyInChainP) is not art pointers!"
+          );
         
         // type of the source object (hidden in PtrColl)
         using Source_t = typename SourcePtr_t::value_type;
@@ -954,7 +956,7 @@ namespace lar {
      * @tparam Intermediate intermediate types, leftmost is closest to `Target`
      */
     template <typename Target, unsigned int Tier, typename... Intermediate>
-    struct FindAllPimpl {
+    struct FindManyInChainPimpl {
       
       /// Total number of tiers (original source + all intermediates).
       static constexpr unsigned int Tiers = sizeof...(Intermediate) + 1;
@@ -989,8 +991,9 @@ namespace lar {
         
         // process the next tier: Intermediate <==> Target;
         // this is also a ConnectionList
-        auto oq = FindAllPimpl<Target, (Tier - 1U), Intermediate...>::find
-          (intermediateData, event, tags);
+        auto oq
+          = FindManyInChainPimpl<Target, (Tier - 1U), Intermediate...>::find
+            (intermediateData, event, tags);
         
         // combine the result into jet another connection list:
         // Source <==> Intermediate (+) Intermediate <==> Target
@@ -999,13 +1002,13 @@ namespace lar {
       } // find()
       
       
-    }; // FindAllPimpl<>
+    }; // FindManyInChainPimpl<>
     
     
     // Specialization for tier 0
     // (target association to first intermediate in list)
     template <typename Target, typename... Intermediate>
-    struct FindAllPimpl<Target, 0U, Intermediate...> {
+    struct FindManyInChainPimpl<Target, 0U, Intermediate...> {
       
       /// Total number of tiers (original source + all intermediates).
       static constexpr unsigned int Tiers = sizeof...(Intermediate) + 1;
@@ -1022,7 +1025,7 @@ namespace lar {
           (source, event, std::get<Tiers - 1>(tags));
       } // find()
       
-    }; // FindAllPimpl
+    }; // FindManyInChainPimpl
     
     
     
@@ -1035,11 +1038,11 @@ namespace lar {
 //------------------------------------------------------------------------------
 //
 // Implementation note:
-// - FindAllP is the front-end utility with minimal template arguments;
-//     it sets up and runs FindAllPimpl...
-// - FindAllPimpl is the implementation of recursion where associations are
-//     extracted for the results of the previous level ("tier") of associated
-//     objects; it juggles with tags and parameters, and relies on
+// - FindManyInChainP is the front-end utility with minimal template arguments;
+//     it sets up and runs FindManyInChainPimpl...
+// - FindManyInChainPimpl is the implementation of recursion where associations
+//     are extracted for the results of the previous level ("tier") of
+//     associated objects; it juggles with tags and parameters, and relies on
 //     findAssociations()...
 // - findAssociations() implements the extraction of a single association tier,
 //     from a (flattened) collection of input objects
@@ -1047,7 +1050,7 @@ namespace lar {
 //------------------------------------------------------------------------------
 template <typename Target, typename... Intermediate>
 template <typename Source, typename Event, typename... InputTags>
-auto lar::FindAllP<Target, Intermediate...>::find
+auto lar::FindManyInChainP<Target, Intermediate...>::find
   (Source&& source, Event const& event, InputTags... tags)
   -> std::vector<TargetPtrCollection_t> 
 {
@@ -1058,26 +1061,27 @@ auto lar::FindAllP<Target, Intermediate...>::find
     = details::AssociationFinderBase::makeTagsTuple<Tiers>
     (SameAsData, std::forward<InputTags>(tags)...);
   
-  return details::FindAllPimpl<Target, (Tiers - 1), Intermediate...>
+  return details::FindManyInChainPimpl<Target, (Tiers - 1), Intermediate...>
     ::find(source, event, allTags).values();
   
-} // lar::FindAllP<Target, Intermediate...>::FindAllP()
+} // lar::FindManyInChainP<Target, Intermediate...>::FindManyInChainP()
 
 
 //------------------------------------------------------------------------------
 template <typename Target, typename... Intermediate>
-std::size_t lar::FindAllP<Target, Intermediate...>::size() const noexcept
+std::size_t
+lar::FindManyInChainP<Target, Intermediate...>::size() const noexcept
   { return results.size(); }
 
 
 //------------------------------------------------------------------------------
 template <typename Target, typename... Intermediate>
-typename lar::FindAllP<Target, Intermediate...>::TargetPtrCollection_t const&
-lar::FindAllP<Target, Intermediate...>::at(std::size_t i) const
+typename lar::FindManyInChainP<Target, Intermediate...>::TargetPtrCollection_t const&
+lar::FindManyInChainP<Target, Intermediate...>::at(std::size_t i) const
   { return results.at(i); }
 
 
 //------------------------------------------------------------------------------
 
 
-#endif // LARDATA_UTILITIES_FINDALLP_TCC
+#endif // LARDATA_UTILITIES_FINDMANYINCHAINP_TCC
