@@ -99,6 +99,10 @@ namespace lar {
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * This is the recommended approach, as long as `lar::FindAllP()` has to be
    * called only once.
+   * 
+   * @note Due to the inability to retrieve provenance information in _gallery_,
+   *       this class is not compatible with _gallery_.
+   * 
    */
   template <typename Target, typename... Intermediate>
   class FindAllP {
