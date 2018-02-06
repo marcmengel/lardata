@@ -7,7 +7,7 @@
  */
 
 // LArSoft libraries
-#include "lardata/Utilities/PtrMaker.h"
+#include "art/Persistency/Common/PtrMaker.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 
@@ -118,7 +118,7 @@ void lar::test::AssnsChainPFParticleMaker::produce(art::Event& event) {
   unsigned int nPFOs = clusters.size() / nClustersPerPFO;
   if (nPFOs * nClustersPerPFO < clusters.size()) ++nPFOs;
   
-  lar::PtrMaker<recob::PFParticle> ptrMaker(event, *this);
+  art::PtrMaker<recob::PFParticle> ptrMaker(event, *this);
   
   unsigned int nDaughtersPerParticle = 2;
   unsigned int nParticlesInTier = 1;

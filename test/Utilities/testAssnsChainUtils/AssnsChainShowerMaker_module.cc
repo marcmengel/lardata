@@ -7,7 +7,7 @@
  */
 
 // LArSoft libraries
-#include "lardata/Utilities/PtrMaker.h"
+#include "art/Persistency/Common/PtrMaker.h"
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/Shower.h"
 
@@ -108,7 +108,7 @@ void lar::test::AssnsChainShowerMaker::produce(art::Event& event) {
   //
   unsigned int nShowers = particles.size();
   
-  lar::PtrMaker<recob::Shower> ptrMaker(event, *this);
+  art::PtrMaker<recob::Shower> ptrMaker(event, *this);
   
   for (unsigned int i = 0; i < nShowers; ++i) {
     

@@ -6,7 +6,7 @@
  */
 
 // LArSoft libraries
-#include "lardata/Utilities/PtrMaker.h"
+#include "art/Persistency/Common/PtrMaker.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo namespace
@@ -128,7 +128,7 @@ void lar::test::AssnsChainClusterMaker::produce(art::Event& event) {
   unsigned int nClusters = hits.size() / nHitsPerCluster;
   if (nClusters * nHitsPerCluster < hits.size()) ++nClusters;
   
-  lar::PtrMaker<recob::Cluster> ptrMaker(event, *this);
+  art::PtrMaker<recob::Cluster> ptrMaker(event, *this);
   
   for (unsigned int i = 0; i < nClusters; ++i) {
     
