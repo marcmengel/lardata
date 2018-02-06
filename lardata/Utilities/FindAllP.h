@@ -1,5 +1,5 @@
 /**
- * @file   FindAllP.h
+ * @file   lardata/Utilities/FindAllP.h
  * @brief  Utility to navigate chains of associations.
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   June 26, 2017
@@ -227,7 +227,7 @@ namespace lar {
 //------------------------------------------------------------------------------
 //---  template implementation
 //---
-#include "FindAllP.icc" // expected in the same directory as this file
+#include "FindAllP.tcc" // expected in the same directory as this file
 
 //------------------------------------------------------------------------------
 

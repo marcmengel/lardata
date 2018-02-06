@@ -1,16 +1,16 @@
 /**
- * @file   FindAllP.icc
+ * @file   lardata/Utilities/FindAllP.tcc
  * @brief  Template implementation for `FindAllP.h`.
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   June 26, 2017
  * 
  */
 
-#ifndef LARDATA_UTILITIES_FINDALLP_ICC
-#define LARDATA_UTILITIES_FINDALLP_ICC
+#ifndef LARDATA_UTILITIES_FINDALLP_TCC
+#define LARDATA_UTILITIES_FINDALLP_TCC
 
 #ifndef LARDATA_UTILITIES_FINDALLP_H
-#error "FindAllP.icc must not be included directly. Include FindAllP.h instead."
+#error "FindAllP.tcc must not be included directly. Include FindAllP.h instead."
 #endif // LARDATA_UTILITIES_FINDALLP_H
 
 // framework
@@ -1076,4 +1076,4 @@ lar::FindAllP<Target, Intermediate...>::at(std::size_t i) const
 //------------------------------------------------------------------------------
 
 
-#endif // LARDATA_UTILITIES_FINDALLP_ICC
+#endif // LARDATA_UTILITIES_FINDALLP_TCC
