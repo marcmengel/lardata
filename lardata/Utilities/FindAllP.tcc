@@ -14,9 +14,10 @@
 #endif // LARDATA_UTILITIES_FINDALLP_H
 
 // framework
-#include "art/Framework/Principal/Event.h"
+#include "art/Framework/Principal/Handle.h"
 #include "canvas/Persistency/Common/FindManyP.h"
 #include "canvas/Persistency/Common/Assns.h"
+#include "canvas/Utilities/Exception.h"
 
 // C/C++ standard library
 #include <map>
@@ -128,7 +129,10 @@ namespace lar {
       (art::ProductID const& id, Event const& event)
     {
       art::Handle<Data> handle;
-      event.template get<Data>(id, handle);
+      if (!event.template get<Data>(id, handle)) {
+        throw art::Exception(art::errors::ProductNotFound)
+          << "Couldn't find data product with product ID " << id;
+      }
       return tagFromHandle(handle);
     } // tagFromProductID()
     
