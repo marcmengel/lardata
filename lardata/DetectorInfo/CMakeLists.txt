@@ -2,8 +2,8 @@
 art_make( NO_PLUGINS
           
           LIB_LIBRARIES
-			larcore_Geometry
-			larcore_CoreUtils
+			larcorealg_Geometry
+			larcorealg_CoreUtils
                         ${MF_MESSAGELOGGER}
                         ${MF_UTILITIES}
                         cetlib cetlib_except

@@ -19,7 +19,7 @@
 
 // LArSoft libraries
 #include "lardata/DetectorInfo/DetectorPropertiesStandard.h"
-#include "larcore/TestUtils/ProviderTestHelpers.h"
+#include "larcorealg/TestUtils/ProviderTestHelpers.h"
 
 // framework and utility libraries
 #include "fhiclcpp/ParameterSet.h"
@@ -133,12 +133,13 @@ namespace testing {
   {
     static detinfo::DetectorPropertiesStandard* setup(TestEnv& env)
       {
-        return env.template SetupProviderFor
+        auto* detp = env.template SetupProviderFor
           <detinfo::DetectorProperties, detinfo::DetectorPropertiesStandard>
           (
             env.ServiceParameters("DetectorPropertiesService"),
             env.template ProviderPackFor<detinfo::DetectorPropertiesStandard>()
           );
+        return detp;
       } // setup()
     
   }; // SimpleEnvironmentSetupClass<detinfo::DetectorPropertiesStandard>

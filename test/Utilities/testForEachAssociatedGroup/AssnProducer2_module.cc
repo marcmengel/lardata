@@ -16,7 +16,7 @@
 #include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "lardata/Utilities/PtrMaker.h"
+#include "art/Persistency/Common/PtrMaker.h"
 
 namespace lartest {
    class AssnProducer2;
@@ -61,8 +61,8 @@ void AssnProducer2::produce(art::Event & e)
    art::Handle<std::vector<std::string>> sh;
    e.getByLabel(fInputLabel, sh);
    
-   lar::PtrMaker<int> make_intptr(e, ih.id());
-   lar::PtrMaker<std::string> make_strptr(e, sh.id());
+   art::PtrMaker<int> make_intptr(e, ih.id());
+   art::PtrMaker<std::string> make_strptr(e, sh.id());
    
    auto assns = std::make_unique<art::Assns<int, std::string>>();
    for (size_t i=0; i < 3; ++i) {

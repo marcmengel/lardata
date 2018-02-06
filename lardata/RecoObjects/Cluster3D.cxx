@@ -25,12 +25,12 @@ ClusterHit2D::ClusterHit2D() : m_statusBits(0),
                                m_timeTicks(0.),
                                m_hit(recob::Hit()) {}
 
-ClusterHit2D::ClusterHit2D(unsigned          statusBits,
-                           double            doca,
-                           double            poca,
-                           double            xPosition,
-                           double            timeTicks,
-                           const recob::Hit& hit) :
+ClusterHit2D::ClusterHit2D(unsigned           statusBits,
+                           float              doca,
+                           float              poca,
+                           float              xPosition,
+                           float              timeTicks,
+                           const recob::Hit&  hit) :
                            m_statusBits(statusBits),
                            m_docaToAxis(doca),
                            m_arcLenToPoca(poca),
@@ -59,23 +59,26 @@ ClusterHit3D::ClusterHit3D() : m_id(std::numeric_limits<size_t>::max()),
                                m_avePeakTime(0.),
                                m_deltaPeakTime(99999.),
                                m_sigmaPeakTime(99999.),
-                               m_overlapFraction(0.),
                                m_docaToAxis(0.),
                                m_arclenToPoca(0.)
 {
+    m_wireIDVector.clear();
     m_hitVector.clear();
+    
+    m_wireIDVector.resize(3, geo::WireID());
 }
     
 ClusterHit3D::ClusterHit3D(size_t                                        id,
-                           unsigned                                      statusBits,
-                           const double*                                 position,
-                           double                                        totalCharge,
-                           double                                        avePeakTime,
-                           double                                        deltaPeakTime,
-                           double                                        sigmaPeakTime,
-                           double                                        overlapFraction,
-                           double                                        docaToAxis,
-                           double                                        arclenToPoca,
+                           unsigned int                                  statusBits,
+                           const float*                                  position,
+                           float                                         totalCharge,
+                           float                                         avePeakTime,
+                           float                                         deltaPeakTime,
+                           float                                         sigmaPeakTime,
+                           float                                         docaToAxis,
+                           float                                         arclenToPoca,
+                           const std::vector<float>&                     hitDelTSigVec,
+                           const std::vector<geo::WireID>&               wireIDs,
                            const std::vector<const reco::ClusterHit2D*>& hitVec) :
               m_id(id),
               m_statusBits(statusBits),
@@ -84,11 +87,18 @@ ClusterHit3D::ClusterHit3D(size_t                                        id,
               m_avePeakTime(avePeakTime),
               m_deltaPeakTime(deltaPeakTime),
               m_sigmaPeakTime(sigmaPeakTime),
-              m_overlapFraction(overlapFraction),
               m_docaToAxis(docaToAxis),
               m_arclenToPoca(arclenToPoca),
+              m_hitDelTSigVec(hitDelTSigVec),
+              m_wireIDVector(wireIDs),
               m_hitVector(hitVec)
-    {}
+{
+}
+    
+void ClusterHit3D::setWireID(const geo::WireID& wid) const
+{
+    m_wireIDVector[wid.Plane] = wid;
+}
     
 std::ostream& operator<< (std::ostream& o, const ClusterHit3D& c)
 {
@@ -111,7 +121,7 @@ PrincipalComponents::PrincipalComponents() :
        m_aveHitDoca(9999.)
 {}    
     
-PrincipalComponents::PrincipalComponents(bool ok, int nHits, const double* eigenValues, const EigenVectors& eigenVecs, const double* avePos, const double aveHitDoca) :
+PrincipalComponents::PrincipalComponents(bool ok, int nHits, const float* eigenValues, const EigenVectors& eigenVecs, const float* avePos, const float aveHitDoca) :
            m_svdOK(ok),
            m_numHitsUsed(nHits),
            m_eigenVectors(eigenVecs),
@@ -127,7 +137,7 @@ PrincipalComponents::PrincipalComponents(bool ok, int nHits, const double* eigen
     
 void PrincipalComponents::flipAxis(size_t axisDir)
 {
-    std::vector<double>& axis = m_eigenVectors.at(axisDir);
+    std::vector<float>& axis = m_eigenVectors.at(axisDir);
     
     for(auto& val : axis) val *= -1.;
     
@@ -166,15 +176,15 @@ Cluster3D::Cluster3D() : m_statusBits(0),
                          m_pcaResults(PrincipalComponents()),
                          m_totalCharge(0.),
                          m_startPosition{0.,0.,0.},
-		         m_endPosition{0.,0.,0.},
-		         m_clusterIdx(0)
+		                 m_endPosition{0.,0.,0.},
+		                 m_clusterIdx(0)
 {}
 
 Cluster3D::Cluster3D(unsigned                   statusBits,
                      const PrincipalComponents& pcaResults,
-                     double                     totalCharge,
-                     const double*              startPosition,
-                     const double*              endPosition,
+                     float                     totalCharge,
+                     const float*              startPosition,
+                     const float*              endPosition,
                      int                        idx) :
         m_statusBits(statusBits),
         m_pcaResults(pcaResults),
@@ -190,19 +200,19 @@ Cluster3D::Cluster3D(unsigned                   statusBits,
 Cluster3D Cluster3D::operator +(Cluster3D a)
 {
 /*
-    // throw exception if the clusters are not from the same view
+    // throw exception if the clusters are not from the same plane
     if( a.View() != this->View() )
       throw cet::exception("Cluster+operator") << "Attempting to sum clusters from "
                  << "different views is not allowed\n";
 
     // check the start and end positions - for now the
     // smallest wire number means start position, largest means end position
-    std::vector<double> astart(a.StartPos());
-    std::vector<double> aend  (a.EndPos()  );
-    std::vector<double> start(StartPos());
-    std::vector<double> end  (EndPos()  );
-    std::vector<double> sigstart(SigmaStartPos());
-    std::vector<double> sigend  (SigmaEndPos()  );
+    std::vector<float> astart(a.StartPos());
+    std::vector<float> aend  (a.EndPos()  );
+    std::vector<float> start(StartPos());
+    std::vector<float> end  (EndPos()  );
+    std::vector<float> sigstart(SigmaStartPos());
+    std::vector<float> sigend  (SigmaEndPos()  );
 
     if(astart[0] < fStartPos[0]){
       start = astart;
@@ -216,12 +226,12 @@ Cluster3D Cluster3D::operator +(Cluster3D a)
 
     //take weighted mean in obtaining average slope and differential charge,
     //based on total charge each cluster
-    double dtdw = ((this->Charge()*dTdW()) + (a.Charge()*a.dTdW()))/(this->Charge() + a.Charge());
-    double dqdw = ((this->Charge()*dQdW()) + (a.Charge()*a.dQdW()))/(this->Charge() + a.Charge());
+    float dtdw = ((this->Charge()*dTdW()) + (a.Charge()*a.dTdW()))/(this->Charge() + a.Charge());
+    float dqdw = ((this->Charge()*dQdW()) + (a.Charge()*a.dQdW()))/(this->Charge() + a.Charge());
 
     //hits.sort();//sort the PtrVector to organize Hits of new Cluster
-    double sigdtdw = TMath::Max(SigmadTdW(), a.SigmadTdW());
-    double sigdqdw = TMath::Max(SigmadQdW(), a.SigmadQdW());
+    float sigdtdw = TMath::Max(SigmadTdW(), a.SigmadTdW());
+    float sigdqdw = TMath::Max(SigmadQdW(), a.SigmadQdW());
 
     Cluster sum(//hits,
     start[0], sigstart[0],
@@ -276,6 +286,40 @@ bool operator < (const Cluster3D & a, const Cluster3D & b)
     if (a.getStartPosition()[2] < b.getStartPosition()[2]) return true;
 
     return false; //They are equal
+}
+    
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+void RecobClusterParameters::UpdateParameters(const reco::ClusterHit2D* clusterHit)
+{
+    /**
+     *  @brief a utility routine for building 3D clusters to keep basic info up to date
+     *         (a candidate for a better way to do this)
+     */
+    const recob::Hit& hit = clusterHit->getHit();
+    
+    // Need to keep track of stuff so we can form cluster
+    if (hit.WireID().Wire < m_startWire)
+    {
+        m_startWire      = hit.WireID().Wire;
+        m_startTime      = hit.PeakTimeMinusRMS();
+        m_sigmaStartTime = hit.SigmaPeakTime();
+    }
+    
+    if (hit.WireID().Wire > m_endWire)
+    {
+        m_endWire      = hit.WireID().Wire;
+        m_endTime      = hit.PeakTimePlusRMS();
+        m_sigmaEndTime = hit.SigmaPeakTime();
+    }
+    
+    m_totalCharge += hit.Integral();
+    m_plane        = hit.WireID().Plane;
+    m_view         = hit.View();
+    
+    m_hitVector.push_back(clusterHit);
+    
+    return;
 }
 
 }// namespace

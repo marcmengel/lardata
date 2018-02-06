@@ -5,7 +5,7 @@ simple_plugin(DetectorClocksServiceStandard "service"
 	      art_Utilities
               ${ART_FRAMEWORK_CORE}
 	      ${ART_FRAMEWORK_PRINCIPAL}
-	      ${ART_PERSISTENCY_ROOTDB}
+	      ${ART_FRAMEWORK_IO_ROOT_ROOTDB}
 	      art_Persistency_Common
 	      art_Persistency_Provenance
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -22,8 +22,8 @@ simple_plugin(DetectorClocksServiceStandard "service"
 simple_plugin(DetectorPropertiesServiceStandard "service"
               lardata_DetectorInfo
               larcore_Geometry_Geometry_service
-              larcore_Geometry
-	      ${ART_PERSISTENCY_ROOTDB}
+              larcorealg_Geometry
+	      ${ART_FRAMEWORK_IO_ROOT_ROOTDB}
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
 	      art_Utilities
 	      canvas

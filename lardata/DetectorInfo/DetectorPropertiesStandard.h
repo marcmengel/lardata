@@ -12,8 +12,8 @@
 #define DETINFO_DETECTORPROPERTIESSTD_H
 
 // LArSoft libraries
-#include "larcore/Geometry/GeometryCore.h"
-#include "larcore/CoreUtils/ProviderPack.h"
+#include "larcorealg/Geometry/GeometryCore.h"
+#include "larcorealg/CoreUtils/ProviderPack.h"
 #include "lardata/DetectorInfo/LArProperties.h"
 #include "lardata/DetectorInfo/DetectorClocks.h"
 #include "lardata/DetectorInfo/DetectorProperties.h"
@@ -88,6 +88,10 @@ namespace detinfo{
           Name("TimeOffsetY"             ),
           Comment("tick offset subtracted to to convert spacepoint coordinates to hit times on view Y")
         };
+        fhicl::OptionalAtom<double      > TimeOffsetX              {
+          Name("TimeOffsetX"             ),
+          Comment("tick offset subtracted to to convert spacepoint coordinates to hit times on view X")
+        };
         
         fhicl::Atom<double      > SternheimerA             {
           Name("SternheimerA"),
@@ -109,6 +113,8 @@ namespace detinfo{
           Name("SternheimerCbar"),
           Comment("parameter cbar of Sternheimer correction delta = 2log(10) x - cbar + { a (x_1-x)^k } theta(x1-x), x = log10(p/m)")
         };
+
+	fhicl::Atom<bool> SimpleBoundary { Name("SimpleBoundaryProcess" ), Comment("") };
       
       }; // Configuration_t
  
@@ -122,7 +128,10 @@ namespace detinfo{
       /**
        * @brief Constructs the provider and sets up the dependencies
        * @param pset FHiCL parameter set for provider configuration
-       * @param providers pack of providers DetectorPropertiesStandard depends on
+       * @param providers pack of providers `DetectorPropertiesStandard` depends
+       *        on
+       * @param ignore_params unknown configuration keys in `pset` to be
+       *        tolerated
        * @see Setup()
        */
       DetectorPropertiesStandard(fhicl::ParameterSet const& pset,
@@ -238,9 +247,10 @@ namespace detinfo{
       /**
        * @brief Energy loss fluctuation (@f$ \sigma_{E}^2 / x @f$)
        * @param mom  momentum of incident particle in [GeV/c]
+       * @param mass mass of incident particle [GeV/c^2]
        * @return energy loss fluctuation in MeV^2/cm
        *
-       * Based on Bichsel formula referred to but not given in pdg.
+       * Based on Bichsel formula referred to but not given in PDG.
        */
       virtual double ElossVar(double mom, double mass) const override;
 
@@ -274,6 +284,8 @@ namespace detinfo{
       virtual double       ConvertTDCToTicks(double tdc) const override;
       virtual double       ConvertTicksToTDC(double ticks) const override;
       
+
+      virtual bool SimpleBoundary()     const { return fSimpleBoundary; }
       
       /// Verifies that the provider is in a fully configured status
       /// @throw cet::exception (category DetectorPropertiesStandard) if not ok
@@ -310,10 +322,12 @@ namespace detinfo{
       double       fTimeOffsetV;       ///< time offset to convert spacepoint coordinates to hit times on view V
       double       fTimeOffsetZ;       ///< time offset to convert spacepoint coordinates to hit times on view Z
       double       fTimeOffsetY;       ///< time offset to convert spacepoint coordinates to hit times on view Y
+      double       fTimeOffsetX;       ///< time offset to convert spacepoint coordinates to hit times on view X
       double       fHasTimeOffsetU = false; ///< whether time offset was configured for view U
       double       fHasTimeOffsetV = false; ///< whether time offset was configured for view V
       double       fHasTimeOffsetZ = false; ///< whether time offset was configured for view Z
       double       fHasTimeOffsetY = false; ///< whether time offset was configured for view Y
+      double       fHasTimeOffsetX = false; ///< whether time offset was configured for view X
       
       SternheimerParameters_t fSternheimerParameters; ///< Sternheimer parameters
       
@@ -324,6 +338,8 @@ namespace detinfo{
 
       ::detinfo::ElecClock fTPCClock;     ///< TPC electronics clock
       
+      bool fSimpleBoundary;
+
       /// Checks the configuration of time offsets.
       std::string CheckTimeOffsetConfigurationAfterSetup() const;
       
@@ -331,6 +347,8 @@ namespace detinfo{
       /// information.
       void CheckConfigurationAfterSetup() const;
       
+      /// Time-independent implementation of clock updates.
+      void DoUpdateClocks();
       
     }; // class DetectorPropertiesStandard
 } //namespace detinfo

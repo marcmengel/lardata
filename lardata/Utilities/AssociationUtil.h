@@ -3,6 +3,9 @@
  * @author brebel@fnal.gov
  * @brief  Utility object to perform functions of association 
  * 
+ * @attention Please considering using the lightweight utility `art::PtrMaker`
+ *            instead.
+ * 
  * This library provides a number of util::CreateAssn() functions;
  * for convenience, the ones supported as of January 2015 are listed here:
  * 
@@ -31,8 +34,8 @@
  *   one-to-many association, between an element of a collection and the
  *   elements of another collection, whose indices are specified by the values
  *   in a subrange of a third collection (of indices)
- * -# `CreateAssnD(PRODUCER const&, art::Event&, art::Assns<T,U>&, size_t, size_t, typename art::Assns<T,U,D>::data_t const&)`,
- *   `CreateAssnD(PRODUCER const&, art::Event&, art::Assns<T,U>&, size_t, size_t, typename art::Assns<T,U,D>::data_t&&)`
+ * -# @code CreateAssnD(PRODUCER const&, art::Event&, art::Assns<T,U>&, size_t, size_t, typename art::Assns<T,U,D>::data_t const&) @endcode,
+ *   @code CreateAssnD(PRODUCER const&, art::Event&, art::Assns<T,U>&, size_t, size_t, typename art::Assns<T,U,D>::data_t&&) @endcode
  *   one-to-one association, between an element of a collection and the element
  *   of another collection, both specified by index, with additional data
  * 
@@ -540,7 +543,7 @@ namespace util {
   // for example if you want to get all recob::Hits
   // that are not associated to recob::Clusters
   // std::vector<const recob::Hit*> hits = FindUNotAssociatedToU<recob::Cluster>(art::Handle<recob::Hit>, ...);
-  template<class T, class U> static std::vector<const U*> FindUNotAssociatedToT(art::Handle<U>     b, 
+  template<class T, class U> std::vector<const U*> FindUNotAssociatedToT(art::Handle<U>     b, 
 										art::Event  const& evt,
 										std::string const& label);
 
@@ -551,7 +554,7 @@ namespace util {
   // for example if you want to get all recob::Hits
   // that are not associated to recob::Clusters
   // std::vector< art::Ptr<recob::Hit> > hits = FindUNotAssociatedToTP<recob::Cluster>(art::Handle<recob::Hit>, ...);
-  template<class T, class U> static std::vector< art::Ptr<U> > FindUNotAssociatedToTP(art::Handle<U>     b, 
+  template<class T, class U> std::vector< art::Ptr<U> > FindUNotAssociatedToTP(art::Handle<U>     b, 
 										      art::Event  const& evt,
 										      std::string const& label);
 
@@ -569,14 +572,14 @@ namespace util {
   //     The ouput is a vector of with the same number of entries as the handle to the product, containing a vector 
   //     of pointers to all associated products.
 
-  template<class T,class U> static std::vector<size_t> GetAssociatedVectorOneI(art::Handle< art::Assns<T,U> > h,
+  template<class T,class U> std::vector<size_t> GetAssociatedVectorOneI(art::Handle< art::Assns<T,U> > h,
 									      art::Handle< std::vector<T> > index_p);
-  template<class T,class U> static std::vector<const U*> GetAssociatedVectorOneP(art::Handle< art::Assns<T,U> > h,
+  template<class T,class U> std::vector<const U*> GetAssociatedVectorOneP(art::Handle< art::Assns<T,U> > h,
 										 art::Handle< std::vector<T> > index_p);
 
-  template<class T,class U> static std::vector< std::vector<size_t> > GetAssociatedVectorManyI(art::Handle< art::Assns<T,U> > h,
+  template<class T,class U> std::vector< std::vector<size_t> > GetAssociatedVectorManyI(art::Handle< art::Assns<T,U> > h,
 											       art::Handle< std::vector<T> > index_p);
-  template<class T,class U> static std::vector< std::vector<const U*> > GetAssociatedVectorManyP(art::Handle< art::Assns<T,U> > h,
+  template<class T,class U> std::vector< std::vector<const U*> > GetAssociatedVectorManyP(art::Handle< art::Assns<T,U> > h,
 												 art::Handle< std::vector<T> > index_p);
 
 
@@ -598,7 +601,7 @@ bool util::CreateAssn(
   if (indx == UINT_MAX) indx = a.size()-1;
   
   try{
-    art::ProductID aid = prod.template getProductID< std::vector<T>>(evt, a_instance);
+    art::ProductID aid = prod.template getProductID< std::vector<T>>( a_instance);
     art::Ptr<T> aptr(aid, indx, evt.productGetter(aid));
     assn.addSingle(b, aptr);
     return true;
@@ -650,7 +653,7 @@ bool util::CreateAssn(
   if(indx == UINT_MAX) indx = a.size() - 1;
   
   try{
-    art::ProductID aid = prod.template getProductID< std::vector<T> >(evt);
+    art::ProductID aid = prod.template getProductID< std::vector<T> >();
     art::Ptr<T> aptr(aid, indx, evt.productGetter(aid));
     for(art::Ptr<U> const& b_item: b) assn.addSingle(aptr, b_item);
   }
@@ -701,7 +704,7 @@ bool util::CreateAssn(
   if (indx == UINT_MAX) indx = a.size() - 1;
   
   try{
-    art::ProductID aid = prod.template getProductID< std::vector<T> >(evt);
+    art::ProductID aid = prod.template getProductID< std::vector<T> >();
     art::Ptr<T> aptr(aid, indx, evt.productGetter(aid));
     for (art::Ptr<U> const& b_item: b) assn.addSingle(aptr, b_item);
   }
@@ -731,8 +734,8 @@ bool util::CreateAssn(
   if(indx == UINT_MAX) indx = a.size() - 1;
   
   try{
-    art::ProductID aid = prod.template getProductID< std::vector<T> >(evt);
-    art::ProductID bid = prod.template getProductID< std::vector<U> >(evt);
+    art::ProductID aid = prod.template getProductID< std::vector<T> >();
+    art::ProductID bid = prod.template getProductID< std::vector<U> >();
     art::Ptr<T> aptr(aid, indx, evt.productGetter(aid));
     auto const* getter = evt.productGetter(bid); // I don't want to know what it is
     for(size_t i = startU; i < endU; ++i){
@@ -765,8 +768,8 @@ bool util::CreateAssn(
   if(indx == UINT_MAX) indx = a.size() - 1;
   
   try{
-    art::ProductID aid = prod.template getProductID< std::vector<T> >(evt);
-    art::ProductID bid = prod.template getProductID< std::vector<U> >(evt);
+    art::ProductID aid = prod.template getProductID< std::vector<T> >();
+    art::ProductID bid = prod.template getProductID< std::vector<U> >();
     art::Ptr<T> aptr(aid, indx, evt.productGetter(aid));
     auto const* getter = evt.productGetter(bid); // I don't want to know what it is
     for(size_t index: indices){
@@ -800,8 +803,8 @@ bool util::CreateAssn(
     // The data product ID is unique for the combination of process, producer,
     // data type and product (instance) label.
     // 
-    art::ProductID first_id = prod.template getProductID< std::vector<T> >(evt);
-    art::ProductID second_id = prod.template getProductID< std::vector<U> >(evt);
+    art::ProductID first_id = prod.template getProductID< std::vector<T> >();
+    art::ProductID second_id = prod.template getProductID< std::vector<U> >();
     
     // we declare here that we want to associate the element first_index of the
     // (only) data product of type std::vector<T> with other objects.
@@ -846,12 +849,12 @@ bool util::CreateAssnD(
     // 
     // we declare here that we want to associate the element first_index of the
     // (only) data product of type std::vector<T> with the other object
-    art::ProductID first_id = prod.template getProductID< std::vector<T> >(evt);
+    art::ProductID first_id = prod.template getProductID< std::vector<T> >();
     art::Ptr<T> first_ptr(first_id, first_index, evt.productGetter(first_id));
     
     // the same to associate the element second_index of the (only)
     // data product of type std::vector<U> with the first object.
-    art::ProductID second_id = prod.template getProductID< std::vector<U> >(evt);
+    art::ProductID second_id = prod.template getProductID< std::vector<U> >();
     art::Ptr<U> second_ptr
       (second_id, second_index, evt.productGetter(second_id));
     
@@ -883,12 +886,12 @@ bool util::CreateAssnD(
     // 
     // we declare here that we want to associate the element first_index of the
     // (only) data product of type std::vector<T> with the other object
-    art::ProductID first_id = prod.template getProductID< std::vector<T> >(evt);
+    art::ProductID first_id = prod.template getProductID< std::vector<T> >();
     art::Ptr<T> first_ptr(first_id, first_index, evt.productGetter(first_id));
     
     // the same to associate the element second_index of the (only)
     // data product of type std::vector<U> with the first object.
-    art::ProductID second_id = prod.template getProductID< std::vector<U> >(evt);
+    art::ProductID second_id = prod.template getProductID< std::vector<U> >();
     art::Ptr<U> second_ptr
       (second_id, second_index, evt.productGetter(second_id));
     

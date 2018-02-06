@@ -79,8 +79,8 @@ namespace detinfo {
     
     /**
      * @brief Configures the provider
-     * @param p configuration parameter set
-     * @param ignore_params parameters to be ignored (optional)
+     * @param pset configuration parameter set
+     * @param ignore_params unknown parameters to be tolerated (optional)
      * 
      * This method will validate the parameter set (except for the parameters
      * it's explicitly told to ignore) and extract the useful information out
@@ -182,8 +182,8 @@ namespace detinfo {
     void SetReflectiveSurfaceDiffuseFractions(std::vector<std::vector<double> > f) { fReflectiveSurfaceDiffuseFractions = f;}
 
     void SetExtraMatProperties(bool l)        { fExtraMatProperties = l;}
-    virtual bool ExtraMatProperties() const { return fExtraMatProperties; }
-    virtual double TpbTimeConstant()  const { return fTpbTimeConstant;     }
+    virtual bool ExtraMatProperties() const override { return fExtraMatProperties; }
+    virtual double TpbTimeConstant()  const override { return fTpbTimeConstant;     }
 
     virtual std::map<double, double>  TpbAbs() const override;
     virtual std::map<double, double>  TpbEm() const override;

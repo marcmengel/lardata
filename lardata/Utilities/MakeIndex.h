@@ -27,13 +27,13 @@ namespace util {
    * The key is converted into a unsigned integer (`size_t`).
    * If multiple items have the same key, the outcome for that key is undefined.
    * If no items has a specific key, the index of that key is assigned as
-   * `std::numeric_limits<size_t>::max()`, i.e. an index larger than the size
-   * of the original data collection.
+   * @code std::numeric_limits<size_t>::max() @endcode, i.e. an index larger
+   * than the size of the original data collection.
    * 
    * The returned vector is big enough to accommodate indices corresponding to
    * the keys of all the items in data. It may contain "holes" (that is, some
    * keys that have no corresponding items have a
-   * `std::numeric_limits<size_t>::max()` value).
+   * @code std::numeric_limits<size_t>::max() @endcode value).
    * The memory allocated for the vector may be larger than necessary (if that
    * is a problem, `std::vector::shrink_to_fit()` can be used, but it may create
    * more problems than it solves).

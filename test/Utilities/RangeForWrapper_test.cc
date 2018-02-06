@@ -20,28 +20,44 @@
 // C/C++ standard libraries
 #include <iterator>
 #include <numeric> // std::accumulate()
+#include <limits> // std::numeric_limits<>
 #include <vector>
 #include <type_traits> // std::is_same<>, std::is_lvalue_reference<>, ...
 #include <initializer_list>
-#include <iostream>
+
 
 //------------------------------------------------------------------------------
 //--- make up a class with begin and end iterators with different types
 //--- (and provide it with begin() and end() free functions)
 //--- 
 template <typename Value>
-struct base_iterator {
-  using value_type = Value;
+class base_iterator {
+  using traits_t = std::iterator_traits<Value*>;
+  using content_type = Value;
+    public:
+  using difference_type   = typename traits_t::difference_type;
+  using value_type        = typename traits_t::value_type;
+  using pointer           = typename traits_t::pointer;
+  using reference         = typename traits_t::reference;
+  using iterator_category = typename traits_t::iterator_category;
   
-  value_type* ptr = nullptr;
+  pointer ptr = nullptr;
   
-  base_iterator(value_type* ptr = nullptr): ptr(ptr) {}
+  base_iterator(pointer ptr = nullptr): ptr(ptr) {}
   
-  value_type& operator* () const { return *ptr; }
-  value_type* operator-> () const { return ptr; }
+  reference operator* () const { return *ptr; }
+  pointer operator-> () const { return ptr; }
   
   base_iterator& operator++ () { ++ptr; return *this; }
+  base_iterator& operator-- () { --ptr; return *this; }
+  
+  reference operator[] (difference_type offset) const { return ptr[offset]; }
+  
+  difference_type operator- (base_iterator const& other) const
+    { return ptr - other.ptr; }
+  
 };
+
 
 template <typename Value>
 struct begin_iterator_base: public base_iterator<Value> {
@@ -53,7 +69,8 @@ struct begin_iterator_base: public base_iterator<Value> {
 template <typename Value>
 struct end_iterator_base: public base_iterator<Value> {
   using base_iterator<Value>::base_iterator;
-  end_iterator_base<Value>& operator++ () = delete;
+  end_iterator_base<Value>& operator++ ()
+    { base_iterator<Value>::operator++(); return *this; }
 };
 
 template <typename ValueL, typename ValueR>
@@ -69,15 +86,23 @@ struct Data {
   
   using begin_iterator = begin_iterator_base<value_type>;
   using end_iterator = end_iterator_base<value_type>;
-  using begin_const_iterator = begin_iterator_base<value_type const>;
-  using end_const_iterator = end_iterator_base<value_type const>;
+  using begin_const_iterator = begin_iterator_base<std::add_const_t<value_type>>;
+  using end_const_iterator = end_iterator_base<std::add_const_t<value_type>>;
   
-  Data(std::initializer_list<value_type> const& data): data(data) {}
+  Data(std::initializer_list<value_type>&& data): data(std::move(data)) {}
   
   begin_const_iterator do_begin() const { return { &*data.cbegin() }; }
   begin_iterator do_begin() { return { &*data.begin() }; }
   end_const_iterator do_end() const { return { &*data.cend() }; }
   end_iterator do_end() { return { &*data.end() }; }
+  
+  bool empty() const { return data.empty(); }
+  auto size() const { return data.size(); }
+  auto operator[](std::size_t index) -> decltype(auto)
+    { return data[index]; }
+  auto operator[](std::size_t index) const -> decltype(auto)
+    { return data[index]; }
+  
 }; // class Data
 
 template <typename Value>
@@ -185,6 +210,447 @@ void test(DataColl& data, typename DataColl::value_type expected_total) {
 } // test()
 
 
+//-----------------------------------------------------------------------------
+// iterator tests
+
+template <typename Iter, typename RefIter>
+void iterator_tests
+  (Iter iter, RefIter refIter, RefIter refEnd)
+{
+  // these asserts do not completely test the concepts;
+  // for example, the copy-constructable concept requires that the value of
+  // the copy-constructed object and the one it was constructed from are
+  // "equivalent", while std::is_copy_constructable only guarantees that
+  // copy construction can happen, not testing the equivalence.
+  static_assert
+    (std::is_move_constructible<Iter>(), "Iterator concept violation");
+  static_assert
+    (std::is_copy_constructible<Iter>(), "Iterator concept violation");
+  static_assert
+    (std::is_copy_assignable<Iter>(), "Iterator concept violation");
+  static_assert
+    (std::is_destructible<Iter>(), "Iterator concept violation");
+  // C++17
+//  static_assert
+//    (std::is_swappable<Iter>(), "Iterator concept violation");
+  
+  const bool isEnd = refIter == refEnd;
+  const bool isSingular = (iter == Iter());
+  const bool isDereferenciable = !isEnd && !isSingular;
+  const bool isLast = (std::next(refIter) == refEnd);
+  
+  Iter ia = iter;
+  BOOST_CHECK(bool(ia == iter));
+  
+  if (isDereferenciable) {
+    BOOST_CHECK_EQUAL(*iter, *refIter);
+  }
+  if (!isLast && !isEnd && !isSingular) {
+    BOOST_CHECK_EQUAL(*++iter, *++refIter);
+  }
+  
+} // iterator_tests()
+
+
+template <typename Iter, typename RefIter>
+void const_input_iterator_tests
+  (Iter iter, RefIter refIter, RefIter refEnd)
+{
+  const bool isEnd = refIter == refEnd;
+  const bool isSingular = (iter == Iter());
+  const bool isNormal = !isEnd && !isSingular;
+//  const bool isDereferenciable = isNormal;
+  const bool isLast = (std::next(refIter) == refEnd);
+  
+  static_assert(std::is_same<
+    typename std::iterator_traits<Iter>::reference,
+    decltype(Iter(iter).operator*())
+    >(), "Inconsistent return type for dereference operator");
+  
+  if (!isEnd) {
+    auto ia = iter;
+    if (!isSingular) BOOST_CHECK(++ia != iter);
+  }
+  
+  if (isNormal) {
+    auto ia = iter, ib = iter;
+    ia++; ++ib;
+    BOOST_CHECK(ia == ib);
+    if (!isLast) {
+      auto ia = iter;
+      BOOST_CHECK(*(ia++) == *iter);
+    }
+  }
+  
+  {
+    auto ia = iter;
+    if (!isEnd)
+      (void)ia++;
+  }
+  
+  
+} // const_input_iterator_tests()
+
+template <typename Iter, typename RefIter>
+void input_iterator_tests
+  (Iter iter, RefIter refIter, RefIter refEnd)
+{
+  const_input_iterator_tests(iter, refIter, refEnd);
+} // input_iterator_tests()
+
+
+template <typename Iter, typename RefIter>
+void const_output_iterator_tests
+  (Iter iter, RefIter refIter, RefIter refEnd)
+{
+  const bool isEnd = refIter == refEnd;
+  const bool isSingular = (iter == Iter());
+  const bool isNormal = !isEnd && !isSingular;
+//  const bool isDereferenciable = isNormal;
+//  const bool isLast = (std::next(refIter) == refEnd);
+  
+  static_assert(std::is_same<
+    typename std::iterator_traits<Iter>::reference,
+    decltype(Iter(iter).operator*())
+    >(), "Inconsistent return type for dereference operator");
+  
+  if (!isEnd) {
+    auto ia = iter;
+    auto addr = &ia;
+    if (!isSingular) {
+      BOOST_CHECK(++ia != iter);
+      BOOST_CHECK_EQUAL(&++ia, addr);
+    }
+  }
+  
+  if (isNormal) {
+    auto ia = iter, ib = iter;
+    ia++; ++ib;
+    BOOST_CHECK(ia == ib);
+  }
+  
+  {
+    auto ia = iter;
+    if (!isEnd) (void)ia++;
+  }
+  
+  
+} // const_output_iterator_tests()
+
+template <typename Iter, typename RefIter>
+void output_iterator_tests
+  (Iter iter, RefIter refIter, RefIter refEnd)
+{
+  const bool isEnd = refIter == refEnd;
+  
+  const_output_iterator_tests(iter, refIter, refEnd);
+  
+  if (!isEnd) {
+    auto value = *iter;
+    
+    auto newValue = std::numeric_limits<typename Iter::value_type>::max();
+    
+    *iter = newValue;
+    
+    // we couldn't check the result since an output operator is not expected
+    // to return anything useful with *iter; but since we have already used it
+    // to store the old value...
+    BOOST_CHECK_EQUAL(*iter, newValue);
+    
+    *iter = value;
+    BOOST_CHECK_EQUAL(*iter, value);
+    
+    auto ia = iter, ib = iter;
+    
+    *ia++ = newValue;
+    ++ib;
+    BOOST_CHECK_EQUAL(*iter, newValue);
+    BOOST_CHECK(ia == ib);
+    
+    *iter = value;
+    BOOST_CHECK_EQUAL(*iter, value);
+  }
+  
+} // output_iterator_tests()
+
+
+template <typename Iter, typename RefIter>
+void const_forward_iterator_tests
+  (Iter iter, RefIter refIter, RefIter refEnd)
+{
+  const bool isEnd = refIter == refEnd;
+  const bool isSingular = (iter == Iter());
+  const bool isNormal = !isEnd && !isSingular;
+  const bool isDereferenciable = isNormal;
+  
+  static_assert(std::is_default_constructible<Iter>(),
+    "Forward iterator concept violation");
+  
+  using traits_t = std::iterator_traits<Iter>;
+  using dereference_t = std::remove_reference_t<decltype(*iter)>;
+  constexpr bool isConst = std::is_const<dereference_t>();
+  
+  static_assert(
+    std::is_same<
+      typename traits_t::reference,
+      std::add_lvalue_reference_t<
+        std::conditional_t<isConst,
+          std::add_const_t<typename traits_t::value_type>,
+          typename traits_t::value_type
+        >
+      >
+    >(),
+    "Forward iterator concept violation"
+    );
+  
+  if (isDereferenciable) {
+    auto ia = iter, ib = iter;
+    
+    BOOST_CHECK(ia == ib);
+    
+    BOOST_CHECK_EQUAL(&*ia, &*ib);
+    
+    BOOST_CHECK(++ia == ++ib);
+    
+  }
+  
+} // const_forward_iterator_tests()
+
+template <typename Iter, typename RefIter>
+void forward_iterator_tests
+  (Iter iter, RefIter refIter, RefIter refEnd)
+{
+  const_forward_iterator_tests(iter, refIter, refEnd);
+} // forward_iterator_tests()
+
+
+template <typename Iter, typename RefIter>
+void const_bidirectional_iterator_tests
+  (Iter iter, RefIter refIter, RefIter refEnd)
+{
+  const bool isEnd = refIter == refEnd;
+//  const bool isLast = std::next(refIter) == refEnd;
+  const bool isSingular = (iter == Iter());
+  const bool isNormal = !isEnd && !isSingular;
+  const bool isDereferenciable = isNormal;
+  
+  auto ia = isEnd? iter: std::next(iter);
+  auto iaRef = isEnd? refIter: std::next(refIter);
+  
+  auto ib = ia;
+  --ib;
+  BOOST_CHECK(ib != ia);
+  BOOST_CHECK_EQUAL(*ib, *std::prev(iaRef));
+  BOOST_CHECK(++ib == ia);
+  if (isDereferenciable) BOOST_CHECK_EQUAL(*ib, *iaRef);
+  
+  ib--;
+  BOOST_CHECK(ib != ia);
+  BOOST_CHECK_EQUAL(*ib, *std::prev(iaRef));
+  BOOST_CHECK(++ib == ia);
+  if (isDereferenciable) BOOST_CHECK_EQUAL(*ib, *iaRef);
+  
+} // const_bidirectional_iterator_tests()
+
+template <typename Iter, typename RefIter>
+void bidirectional_iterator_tests
+  (Iter iter, RefIter refIter, RefIter refEnd)
+{
+  const_bidirectional_iterator_tests(iter, refIter, refEnd);
+} // bidirectional_iterator_tests()
+
+
+template <typename Iter, typename RefIter>
+void const_random_access_iterator_tests
+  (Iter iter, RefIter refIter, RefIter refEnd)
+{
+} // const_random_access_iterator_tests()
+
+template <typename Iter, typename RefIter>
+void random_access_iterator_tests
+  (Iter iter, RefIter refIter, RefIter refEnd)
+{
+  const_random_access_iterator_tests(iter, refIter, refEnd);
+} // random_access_iterator_tests()
+
+
+//
+// dispatching
+//
+template <bool IsConst, typename Iter, typename RefIter>
+std::enable_if_t<IsConst> iterator_test_impl
+  (Iter iter, RefIter refIter, RefIter refEnd, std::input_iterator_tag)
+{
+  iterator_tests(iter, refIter, refEnd);
+  const_input_iterator_tests(iter, refIter, refEnd);
+} // iterator_test_impl<const>(input iterator)
+
+
+template <bool IsConst, typename Iter, typename RefIter>
+std::enable_if_t<!IsConst> iterator_test_impl
+  (Iter iter, RefIter refIter, RefIter refEnd, std::input_iterator_tag tag)
+{
+  iterator_tests(iter, refIter, refEnd);
+  input_iterator_tests(iter, refIter, refEnd);
+} // iterator_test_impl<non-const>(input iterator)
+
+
+template <bool IsConst, typename Iter, typename RefIter>
+std::enable_if_t<IsConst> iterator_test_impl
+  (Iter iter, RefIter refIter, RefIter refEnd, std::output_iterator_tag)
+{
+  iterator_tests(iter, refIter, refEnd);
+  const_output_iterator_tests(iter, refIter, refEnd);
+} // iterator_test_impl<const>(output iterator)
+
+
+template <bool IsConst, typename Iter, typename RefIter>
+std::enable_if_t<!IsConst> iterator_test_impl
+  (Iter iter, RefIter refIter, RefIter refEnd, std::output_iterator_tag tag)
+{
+  iterator_tests(iter, refIter, refEnd);
+  output_iterator_tests(iter, refIter, refEnd);
+} // iterator_test_impl<non-const>(output iterator)
+
+
+template <bool IsConst, typename Iter, typename RefIter>
+std::enable_if_t<IsConst> iterator_test_impl
+  (Iter iter, RefIter refIter, RefIter refEnd, std::forward_iterator_tag)
+{
+  iterator_test_impl<IsConst>(iter, refIter, refEnd, std::input_iterator_tag{});
+  iterator_test_impl<IsConst>(iter, refIter, refEnd, std::output_iterator_tag{});
+  const_forward_iterator_tests(iter, refIter, refEnd);
+} // iterator_test_impl<const>(random access iterator)
+
+
+template <bool IsConst, typename Iter, typename RefIter>
+std::enable_if_t<!IsConst> iterator_test_impl
+  (Iter iter, RefIter refIter, RefIter refEnd, std::forward_iterator_tag tag)
+{
+  iterator_test_impl<IsConst>(iter, refIter, refEnd, std::input_iterator_tag{});
+  iterator_test_impl<IsConst>(iter, refIter, refEnd, std::output_iterator_tag{});
+  forward_iterator_tests(iter, refIter, refEnd);
+} // iterator_test_impl<non-const>(forward iterator)
+
+
+template <bool IsConst, typename Iter, typename RefIter>
+std::enable_if_t<IsConst> iterator_test_impl
+  (Iter iter, RefIter refIter, RefIter refEnd, std::bidirectional_iterator_tag)
+{
+  iterator_test_impl<IsConst>(iter, refIter, refEnd, std::forward_iterator_tag{});
+  const_random_access_iterator_tests(iter, refIter, refEnd);
+} // iterator_test_impl<const>(forward iterator)
+
+
+template <bool IsConst, typename Iter, typename RefIter>
+std::enable_if_t<!IsConst> iterator_test_impl
+  (Iter iter, RefIter refIter, RefIter refEnd, std::bidirectional_iterator_tag tag)
+{
+  iterator_test_impl<IsConst>(iter, refIter, refEnd, std::forward_iterator_tag{});
+  bidirectional_iterator_tests(iter, refIter, refEnd);
+} // iterator_test_impl<non-const>(bidirectional iterator)
+
+
+template <bool IsConst, typename Iter, typename RefIter>
+std::enable_if_t<IsConst> iterator_test_impl
+  (Iter iter, RefIter refIter, RefIter refEnd, std::random_access_iterator_tag)
+{
+  iterator_test_impl<IsConst>(iter, refIter, refEnd, std::bidirectional_iterator_tag{});
+  const_bidirectional_iterator_tests(iter, refIter, refEnd);
+} // iterator_test_impl<const>(bidirectional iterator)
+
+
+template <bool IsConst, typename Iter, typename RefIter>
+std::enable_if_t<!IsConst> iterator_test_impl
+  (Iter iter, RefIter refIter, RefIter refEnd, std::random_access_iterator_tag tag)
+{
+  iterator_test_impl<IsConst>(iter, refIter, refEnd, std::bidirectional_iterator_tag{});
+  random_access_iterator_tests(iter, refIter, refEnd);
+} // iterator_test_impl<non-const>(random access iterator)
+
+
+template <typename Iter, typename RefIter>
+void iterator_test(Iter iter, RefIter refIter, RefIter refEnd) {
+  // 
+  // dispatcher
+  //
+  using traits_t = std::iterator_traits<Iter>;
+  constexpr bool IsConst
+    = std::is_const<std::remove_reference_t<decltype(*iter)>>();
+  
+  iterator_test_impl<IsConst>
+    (iter, refIter, refEnd, typename traits_t::iterator_category{});
+  
+} // iterator_test()
+
+
+template <bool IsConst>
+void RangeForWrapperIteratorStandardsTest() {
+  
+  using value_type = int;
+  using base_reference_container_t = std::vector<value_type>;
+  using reference_container_t = std::conditional_t
+    <IsConst, base_reference_container_t const, base_reference_container_t>;
+  reference_container_t vdata = { 2, 3, 4 };
+  using basic_container_t = Data<value_type>;
+  
+  static_assert(std::is_same<typename basic_container_t::begin_iterator::reference, value_type&>(), "!!!!");
+  static_assert(std::is_same<typename std::iterator_traits<typename basic_container_t::begin_iterator>::reference, value_type&>(), "!!!!");
+  
+  static_assert(std::is_same<typename basic_container_t::begin_const_iterator::reference, std::add_const_t<value_type>&>(), "!!!!");
+  static_assert(std::is_same<typename std::iterator_traits<typename basic_container_t::begin_const_iterator>::reference, std::add_const_t<value_type>&>(), "!!!!");
+  
+  using container_t
+    = std::conditional_t<IsConst, basic_container_t const, basic_container_t>;
+  //
+  // non-const iterator interface (iterators may still be constant)
+  //
+  container_t data = { 2, 3, 4 };
+  auto range = data | util::range_for;
+  using std::begin;
+  decltype(auto) rbegin = begin(range);
+  using std::end;
+  decltype(auto) rend = end(range);
+    
+  auto vbegin = vdata.begin();
+  auto vend = vdata.end();
+  
+  BOOST_CHECK_EQUAL(std::distance(rbegin, rend), vdata.size());
+  
+  iterator_test(rbegin, vbegin, vend);
+  iterator_test(rend, vend, vend);
+  
+  
+  //
+  // const iterator interface
+  //
+  using std::cbegin;
+  decltype(auto) rcbegin = cbegin(range);
+  using std::cend;
+  decltype(auto) rcend = cend(range);
+    
+  auto vcbegin = vdata.cbegin();
+  auto vcend = vdata.cend();
+  
+  BOOST_CHECK_EQUAL(std::distance(rcbegin, rcend), vdata.size());
+  
+  iterator_test(rcbegin, vcbegin, vcend);
+  iterator_test(rcend, vcend, vcend);
+  
+  //
+  // extra access (partial support for random access)
+  //
+  BOOST_CHECK_EQUAL(range.size(), data.size());
+  BOOST_CHECK_EQUAL(range.empty(), data.empty());
+  for (std::size_t i = 0; i < data.size(); ++i) {
+    decltype(auto) value = range[i];
+    BOOST_CHECK_EQUAL(value, data[i]);
+  }
+  
+} // RangeForWrapperIteratorStandardsTest()
+
+
+//-----------------------------------------------------------------------------
 BOOST_AUTO_TEST_CASE(RangeForWrapperSameIterator_test) {
   
   using value_type = int;
@@ -219,7 +685,7 @@ BOOST_AUTO_TEST_CASE(RangeForWrapperSameIterator_test) {
 } // BOOST_AUTO_TEST_CASE(RangeForWrapperSameIterator_test_test)
 
 
-BOOST_AUTO_TEST_CASE(RangeForWrapperDiffIterator_test) {
+BOOST_AUTO_TEST_CASE(RangeForWrapperDifferentIterator_test) {
   
   using value_type = int;
   std::vector<value_type> vdata = { 2, 3, 4 };
@@ -242,4 +708,13 @@ BOOST_AUTO_TEST_CASE(RangeForWrapperDiffIterator_test) {
 
   test(data, expected_total);
   
-} // BOOST_AUTO_TEST_CASE(RangeForWrapperDiffIterator_test_test)
+} // BOOST_AUTO_TEST_CASE(RangeForWrapperDifferentIterator_test_test)
+
+
+BOOST_AUTO_TEST_CASE(RangeForWrapperIteratorStandardsTestCase) {
+
+  RangeForWrapperIteratorStandardsTest<false>(); // mutable range test
+  RangeForWrapperIteratorStandardsTest<true>(); // constant range test
+
+} // BOOST_AUTO_TEST_CASE(RangeForWrapperIteratorStandardsTestCase)
+

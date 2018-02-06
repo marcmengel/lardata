@@ -12,11 +12,11 @@
 
 // LArSoft includes
 #include "lardata/DetectorInfo/DetectorPropertiesStandard.h"
-#include "larcore/CoreUtils/ProviderUtil.h" // lar::IgnorableProviderConfigKeys()
-#include "larcore/Geometry/GeometryCore.h"
-#include "larcore/Geometry/CryostatGeo.h"
-#include "larcore/Geometry/TPCGeo.h"
-#include "larcore/Geometry/PlaneGeo.h"
+#include "larcorealg/CoreUtils/ProviderUtil.h" // lar::IgnorableProviderConfigKeys()
+#include "larcorealg/Geometry/GeometryCore.h"
+#include "larcorealg/Geometry/CryostatGeo.h"
+#include "larcorealg/Geometry/TPCGeo.h"
+#include "larcorealg/Geometry/PlaneGeo.h"
 #include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -63,7 +63,7 @@ namespace detinfo{
     ValidateAndConfigure(pset, ignore_params);
     
     fTPCClock = fClocks->TPCClock();
-    
+    DoUpdateClocks();
   }
     
   //--------------------------------------------------------------------
@@ -80,10 +80,10 @@ namespace detinfo{
     {}
   
   //--------------------------------------------------------------------
-  bool DetectorPropertiesStandard::Update(uint64_t t) 
+  bool DetectorPropertiesStandard::Update(uint64_t) 
   {
 
-    CalculateXTicksParams();
+    DoUpdateClocks();
     return true;
   }
 
@@ -93,7 +93,7 @@ namespace detinfo{
     fClocks = clks;
     
     fTPCClock = fClocks->TPCClock();
-    CalculateXTicksParams();
+    DoUpdateClocks();
     return true;
   }
   
@@ -109,42 +109,7 @@ namespace detinfo{
     return fClocks->TPCTick2TDC(ticks);
   }
   
-#if 0
-  //--------------------------------------------------------------------
-  void DetectorPropertiesStandard::Configure(fhicl::ParameterSet const& p)
-  {
-    //fSamplingRate             = p.get< double        >("SamplingRate"     );
-    if(p.has_key("SamplingRate"))
-      throw cet::exception(__FUNCTION__) << "SamplingRate is a deprecated fcl parameter for DetectorPropertiesStandard!";
-    if(p.has_key("TriggerOffset"))
-      throw cet::exception(__FUNCTION__) << "TriggerOffset is a deprecated fcl parameter for DetectorPropertiesStandard!";
-    if(p.has_key("InheritTriggerOffset"))
-      throw cet::exception(__FUNCTION__) << "InheritTriggerOffset is a deprecated fcl parameter for DetectorPropertiesStandard!";
-    
-    fEfield                   = p.get< std::vector<double> >("Efield");
-    fElectronlifetime         = p.get< double       >("Electronlifetime");
-    fTemperature              = p.get< double       >("Temperature");
-    fElectronsToADC    	      = p.get< double 	    >("ElectronsToADC"   );
-    fNumberTimeSamples 	      = p.get< unsigned int >("NumberTimeSamples");
-    fReadOutWindowSize 	      = p.get< unsigned int >("ReadOutWindowSize");
-    fTimeOffsetU       	      = p.get< double 	    >("TimeOffsetU"      );
-    fTimeOffsetV       	      = p.get< double 	    >("TimeOffsetV"      );
-    fTimeOffsetZ       	      = p.get< double 	    >("TimeOffsetZ",0.0  );
-    fTimeOffsetY       	      = p.get< double 	    >("TimeOffsetY",0.0  );
-    fInheritNumberTimeSamples = p.get<bool          >("InheritNumberTimeSamples", false);
-    
-    fSternheimerParameters.a    = p.get< double >("SternheimerA");
-    fSternheimerParameters.k    = p.get< double >("SternheimerK");
-    fSternheimerParameters.x0   = p.get< double >("SternheimerX0");
-    fSternheimerParameters.x1   = p.get< double >("SternheimerX1");
-    fSternheimerParameters.cbar = p.get< double >("SternheimerCbar");
-
-    CalculateXTicksParams();
-    
-    return;
-  }
-#endif // 0
-  
+ 
   //--------------------------------------------------------------------
   void DetectorPropertiesStandard::Configure(Configuration_t const& config) {
     
@@ -158,6 +123,7 @@ namespace detinfo{
     fHasTimeOffsetV = config.TimeOffsetV(fTimeOffsetV);
     fHasTimeOffsetZ = config.TimeOffsetZ(fTimeOffsetZ);
     fHasTimeOffsetY = config.TimeOffsetY(fTimeOffsetY);
+    fHasTimeOffsetX = config.TimeOffsetX(fTimeOffsetX);
     
     fSternheimerParameters.a    = config.SternheimerA();
     fSternheimerParameters.k    = config.SternheimerK();
@@ -165,7 +131,9 @@ namespace detinfo{
     fSternheimerParameters.x1   = config.SternheimerX1();
     fSternheimerParameters.cbar = config.SternheimerCbar();
 
-    CalculateXTicksParams();
+    fSimpleBoundary = config.SimpleBoundary();
+
+    DoUpdateClocks();
     
   } // DetectorPropertiesStandard::Configure()
   
@@ -577,19 +545,29 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 	  }
 	  
 	  // Add view dependent offset
+	  // FIXME the offset should be plane-dependent
 	  geo::View_t view = pgeom.View();
-	  if(view == geo::kU)
-	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetU;
-	  else if(view == geo::kV)
-	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetV;
-	  else if(view == geo::kZ)
-	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetZ;
-	  else if(view == geo::kY)
-	    fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetY;
-	  else
-	    throw cet::exception(__FUNCTION__) << "Bad view = "
-						       << view << "\n" ;
-	}	
+	  switch (view) {
+	    case geo::kU:
+	      fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetU;
+	      break;
+	    case geo::kV:
+	      fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetV;
+	      break;
+	    case geo::kZ:
+	      fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetZ;
+	      break;
+	    case geo::kY:
+	      fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetY;
+	      break;
+	    case geo::kX:
+	      fXTicksOffsets[cstat][tpc][plane] += fTimeOffsetX;
+	      break;
+	    default:
+	      throw cet::exception(__FUNCTION__) << "Bad view = " << view << "\n" ;
+	  } // switch
+	}
+
       }
     }
 
@@ -652,6 +630,12 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
       else
         errors << "TimeOffsetY missing for view Y.\n";
     }
+    if ((views.count(geo::kX) != 0) != fHasTimeOffsetX) {
+      if (fHasTimeOffsetX)
+        errors << "TimeOffsetX has been specified, but no X view is present.\n";
+      else
+        errors << "TimeOffsetX missing for view X.\n";
+    }
     
     return errors.str();
     
@@ -671,6 +655,12 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
     
   } // DetectorPropertiesStandard::CheckConfigurationAfterSetup()
   
+  //--------------------------------------------------------------------
+  void DetectorPropertiesStandard::DoUpdateClocks() 
+  {
+    CalculateXTicksParams();
+  }
+
   //--------------------------------------------------------------------
   
   

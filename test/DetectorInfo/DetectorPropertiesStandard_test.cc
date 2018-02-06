@@ -7,12 +7,17 @@
 
 // LArSoft libraries
 #include "test/Geometry/geometry_unit_test_base.h"
-#include "larcore/Geometry/ChannelMapStandardAlg.h"
+#include "larcorealg/Geometry/ChannelMapStandardAlg.h"
+#include "larcorealg/Geometry/GeometryCore.h"
 #include "lardata/DetectorInfo/LArPropertiesStandardTestHelpers.h"
 #include "lardata/DetectorInfo/DetectorClocksStandardTestHelpers.h"
 #include "lardata/DetectorInfo/DetectorPropertiesStandard.h"
 #include "lardata/DetectorInfo/DetectorPropertiesStandardTestHelpers.h"
 
+// C/C++ standard libraries
+#include <iomanip>
+#include <vector>
+#include <array>
 
 //------------------------------------------------------------------------------
 //---  The test environment
@@ -107,11 +112,51 @@ int main(int argc, char const** argv) {
 //  Tester.Setup(*(TestEnv.Provider<detinfo::DetectorProperties>()));
   
   // 3. then we run it!
+  auto const& geom = *(TestEnv.Provider<geo::GeometryCore>());
+  auto const& detp = *(TestEnv.Provider<detinfo::DetectorProperties>());
   mf::LogVerbatim("detp_test")
-    << "Electric field in the active volume: "
-    << TestEnv.Provider<detinfo::DetectorProperties>()->Efield() << " kV/cm"
+    <<   "Electric field in the active volume: " << detp.Efield() << " kV/cm"
+    << "\nSampling rate:     " << detp.SamplingRate() << " ns"
+    << "\nArgon temperature: " << detp.Temperature() << " K"
+    << "\nDrift velocity:    " << detp.DriftVelocity() << " cm/us"
     ;
   
+  // number of ticks
+  unsigned int const nTicks = detp.NumberTimeSamples();
+  constexpr unsigned int nPrintedTicks = 11;
+  mf::LogVerbatim("detp_test")
+    << "Conversion of tick number to x position [cm]"
+    " (detinfo::DetectorProperties::ConvertTicksToX()):";
+  
+  // accumulate the plane IDs
+  unsigned int const colWidth = 9U;
+  unsigned int headerColWidth = 0U;
+  for (auto planeID: geom.IteratePlaneIDs()) {
+    auto const l = std::string(planeID).length();
+    if (headerColWidth < l) headerColWidth = l;
+  }
+  
+  std::array<double, nPrintedTicks> ticks;
+  for (unsigned int iTick = 0; iTick < nPrintedTicks; ++iTick)
+    ticks[iTick] = iTick * nTicks / (nPrintedTicks - 1);
+  
+  // print table header
+  {
+    mf::LogVerbatim log("detp_test");
+    log << std::setw(headerColWidth) << "tick #:";
+    for (double tick: ticks) log << " | " << std::setw(colWidth) << tick;
+  }
+  
+  for (auto planeID: geom.IteratePlaneIDs()) {
+    mf::LogVerbatim log("detp_test");
+    log << std::setw(headerColWidth) << std::string(planeID);
+    
+    for (double tick: ticks) {
+      double const x = detp.ConvertTicksToX(tick, planeID);
+      log << " | " << std::setw(colWidth) << x;
+    } // for tick
+  } // for planes
+
   // 4. And finally we cross fingers.
   if (nErrors > 0) {
     mf::LogError("detp_test") << nErrors << " errors detected!";

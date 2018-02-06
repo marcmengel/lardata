@@ -9,16 +9,16 @@
 #include "lardata/DetectorInfoServices/DetectorPropertiesServiceStandard.h"
 #include "lardata/DetectorInfo/LArProperties.h"
 #include "larcore/Geometry/Geometry.h"
-#include "larcore/Geometry/CryostatGeo.h"
-#include "larcore/Geometry/TPCGeo.h"
-#include "larcore/Geometry/PlaneGeo.h"
+#include "larcorealg/Geometry/CryostatGeo.h"
+#include "larcorealg/Geometry/TPCGeo.h"
+#include "larcorealg/Geometry/PlaneGeo.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "lardata/DetectorInfoServices/ServicePack.h" // lar::extractProviders()
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
 // Art includes
-#include "art/Persistency/RootDB/SQLite3Wrapper.h"
+#include "art/Framework/IO/Root/RootDB/SQLite3Wrapper.h"
 #include "fhiclcpp/make_ParameterSet.h"
 
 namespace detinfo{

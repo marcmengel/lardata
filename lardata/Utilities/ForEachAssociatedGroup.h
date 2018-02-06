@@ -27,6 +27,10 @@
 #include "range/v3/view/map.hpp" // range::view::values
 #include "range/v3/view/all.hpp"
 
+// C/C++ standard libraries
+#include <iterator> // std::next()
+
+
 namespace util {
   /**
    * @brief  Helper functions to access associations in order
@@ -72,11 +76,11 @@ namespace util {
    *        other (via `addSingle`); if the order of the hits is relevant (it is
    *        not in this specific example), hits must be associated in that order
    *      * each track must have at least one associated hit;
-   *      * the original association has to be stored with recob::Track` as
+   *      * the original association has to be stored with `recob::Track` as
    *        _left_ key and `recob::Hit` as _right_ key;
-   *  * we use here a lambda function as `func`; any object behaving as a
-   *    function and able to accept the range of hits as its only argument will
-   *    work just as well;
+   *  * we use here a lambda function as `func`; any object
+   *    behaving as a function and able to accept the range of hits as its only
+   *    argument will work just as well;
    *  * `func` will be called once for every track (but if a track has no
    *    associated hit, that track will be skipped, and if a track appears in
    *    more than one association sequence, like in (T1,H1) (T1,H2) (T2,H4)
@@ -163,6 +167,22 @@ namespace util {
             util::range_for
             ;
   } // associated_groups()
+
+
+  /**
+   * @brief  Returns the group within `groups` with the specified index.
+   * @tparam Groups the type of collection of groups
+   * @param groups the collection of all groups
+   * @param index the index of the group to be accessed
+   * @return the group with specified index (may be a reference)
+   * @see `associated_groups()`
+   *
+   * The `groups` argument is expected to be the one returned by
+   * `associated_groups`.
+   */
+  template <typename Groups>
+  auto groupByIndex(Groups&& groups, std::size_t index) -> decltype(auto)
+    { return *(std::next(groups.begin(), index)); }
 
 } // namespace util
 

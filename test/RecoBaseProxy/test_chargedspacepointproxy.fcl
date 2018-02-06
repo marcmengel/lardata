@@ -1,0 +1,49 @@
+#
+# File:    test_chargedspacepointproxy.fcl
+# Purpose: exercise the proxy::ChargedSpacePoints proxy
+# Author:  Gianluca Petrillo (petrillo@fnal.gov)
+# Date:    December 20, 2017
+# Version: 1.0
+# 
+# Run with `lar_ut`!
+#
+
+process_name: ChargedSpacePointProxyTest
+
+
+source: {
+  module_type: EmptyEvent
+  maxEvents:   2
+} # source
+
+
+physics: {
+  
+  producers: {
+    
+    pointmaker: {
+      
+      module_type: ChargedSpacePointProxyInputMaker
+      
+      nPoints: 5
+      
+    } # pointmaker
+    
+  } # producers
+  
+  analyzers: {
+    pointproxytest: {
+      module_type: ChargedSpacePointProxyTest
+      
+      points: pointmaker
+      
+    }
+  } # analyzers
+  
+  reco:  [ pointmaker ]
+  tests: [ pointproxytest ]
+  
+  trigger_paths: [ reco ]
+  end_paths:     [ tests ]
+  
+} # physics

@@ -153,6 +153,7 @@ namespace lar {
         
         /**
          * @brief Reads the specified association from the event
+         * @param event the event to read the associations from
          * @param assnTag the input tag for the association
          * @throw art::Exception if multiple dest objects are found for one
          *   source object
@@ -166,6 +167,7 @@ namespace lar {
         
         /**
          * @brief Reads the specified association from the event
+         * @param event the event to read the associations from
          * @param assnTag the input tag for the association
          * @throw art::Exception if multiple dest objects are found for one
          *   source object
@@ -374,16 +376,17 @@ namespace lar {
       {
         // make sure we have enough bits in result_type;
         // if not, we need a more clever algorithm
-        static_assert(
-          sizeof(id.processIndex()) + sizeof(id.productIndex())
-            <= sizeof(result_type),
-          "hash return type not large enough for hashing art::ProductID"
-          );
+        //static_assert(
+        //  sizeof(id.processIndex()) + sizeof(id.productIndex())
+        //    <= sizeof(result_type),
+        //  "hash return type not large enough for hashing art::ProductID"
+          //);
         // stack the process and product IDs in one integer
-        return result_type(
-          (id.processIndex() << sizeof(id.productIndex() * CHAR_BIT))
-          + id.productIndex()
-          );
+        //return result_type(
+          //(id.processIndex() << sizeof(id.productIndex() * CHAR_BIT))
+          //+ id.productIndex()
+          //);
+	  return result_type( id.value() );
       } // hash<art::ProductID>::operator()
       
       

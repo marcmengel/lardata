@@ -59,7 +59,7 @@ namespace trkf {
     // Extract time information from hit.
 
     double t = hit->PeakTime();
-    double terr = hit->SigmaPeakTime();
+    double terr = hit->RMS(); //hit->SigmaPeakTime();
 
     // Don't let the time error be less than 1./sqrt(12.) ticks.
     // This should be removed when hit errors are fixed.

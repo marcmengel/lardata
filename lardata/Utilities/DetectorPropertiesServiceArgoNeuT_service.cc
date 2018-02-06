@@ -10,14 +10,14 @@
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "larcore/Geometry/Geometry.h"
-#include "larcore/Geometry/CryostatGeo.h"
-#include "larcore/Geometry/TPCGeo.h"
-#include "larcore/Geometry/PlaneGeo.h"
+#include "larcorealg/Geometry/CryostatGeo.h"
+#include "larcorealg/Geometry/TPCGeo.h"
+#include "larcorealg/Geometry/PlaneGeo.h"
 #include "lardata/Utilities/DatabaseUtil.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // Art includes
-#include "art/Persistency/RootDB/SQLite3Wrapper.h"
+#include "art/Framework/IO/Root/RootDB/SQLite3Wrapper.h"
 #include "canvas/Utilities/Exception.h"
 #include "fhiclcpp/make_ParameterSet.h"
 
@@ -79,6 +79,9 @@ namespace util{
     fTimeOffsetV       	      = p.get< double 	     >("TimeOffsetV"      );
     fTimeOffsetZ       	      = p.get< double 	     >("TimeOffsetZ"      );
     fInheritNumberTimeSamples = p.get<bool           >("InheritNumberTimeSamples", false);
+    
+    fSimpleBoundary           = p.get<bool           >("SimpleBoundaryProcess", true);
+
     fXTicksParamsLoaded = false;
 
     fTPCClock = lar::providerFrom<detinfo::DetectorClocksService>()->TPCClock();

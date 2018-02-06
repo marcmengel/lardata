@@ -128,10 +128,6 @@ namespace trkf {
   void KGTrack::fillTrack(recob::Track& track, 
 			  int id) const
   {
-    // Get geometry service.
-
-    art::ServiceHandle<geo::Geometry> geom;
-    int nview = geom->Nviews();
 
     // Make propagator for propating to standard track surface.
 
@@ -139,20 +135,19 @@ namespace trkf {
 
     // Fill collections of trajectory points and direction vectors.
 
-    std::vector<TVector3> xyz;
-    std::vector<TVector3> dxdydz;
-    std::vector<TMatrixD> cov;
-    std::vector<double> momentum;
-    std::vector<std::vector<double> > dqdx(nview);
+    std::vector<recob::tracking::Point_t> xyz;
+    std::vector<recob::tracking::Vector_t> pxpypz;
+    std::vector<recob::tracking::SMatrixSym55> cov;
+    std::vector<recob::TrajectoryPointFlags> outFlags;
 
     xyz.reserve(fTrackMap.size());
-    dxdydz.reserve(fTrackMap.size());
-    momentum.reserve(fTrackMap.size());
-    for(int iview=0; iview<nview; ++iview)
-      dqdx[iview].reserve(fTrackMap.size());
+    pxpypz.reserve(fTrackMap.size());
+    outFlags.reserve(fTrackMap.size());
 
     // Loop over KHitTracks.
 
+    int ndof = 0;
+    float totChi2 = 0.;
     unsigned int n = 0;
     for(std::multimap<double, KHitTrack>::const_iterator itr = fTrackMap.begin();
 	itr != fTrackMap.end(); ++itr, ++n) {
@@ -162,7 +157,7 @@ namespace trkf {
 
       double pos[3];
       trh.getPosition(pos);
-      xyz.push_back(TVector3(pos[0], pos[1], pos[2]));
+      xyz.push_back({pos[0], pos[1], pos[2]});
 
       // Get momentum vector.
       // Fill direction unit vector and momentum.
@@ -172,12 +167,15 @@ namespace trkf {
       double p = std::sqrt(mom[0]*mom[0] + mom[1]*mom[1] + mom[2]*mom[2]);
       if (p == 0.)
         throw cet::exception("KGTrack") << __func__ << ": null momentum\n";
-      dxdydz.push_back(TVector3(mom[0]/p, mom[1]/p, mom[2]/p));
-      momentum.push_back(p);
+      pxpypz.push_back({mom[0], mom[1], mom[2]});
+
+      ndof += 1;
+      totChi2 += trh.getChisq();
+      outFlags.emplace_back(n, recob::TrajectoryPointFlags::makeMask());
 
       // Fill error matrix.
 
-      TMatrixD covar(5,5);
+      recob::tracking::SMatrixSym55 covar;
 
       // Construct surface perpendicular to track momentun, and
       // propagate track to that surface (zero distance).
@@ -200,36 +198,16 @@ namespace trkf {
       else
 	cov.back() = covar;
 
-      // Get charge.
-      // Only implemented for KHitWireX and KHitWireLine type measurements.
-
-      for(int iview=0; iview<nview; ++iview)
-	dqdx[iview].push_back(0.);
-      const std::shared_ptr<const KHitBase>& phit = trh.getHit();
-      if(phit.get() != 0) {
-	art::Ptr<recob::Hit> parthit;
-	if(const KHitWireX* phitx = dynamic_cast<const KHitWireX*>(&*phit))
-	  parthit = phitx->getHit();
-	else if(const KHitWireLine* phitl = dynamic_cast<const KHitWireLine*>(&*phit))
-	  parthit = phitl->getHit();
-	if(parthit.get() != 0) {
-	  const recob::Hit& arthit = *parthit;
-	  geo::View_t view = arthit.View();
-	  double pitch = geom->WirePitch(view);
-	  double charge = arthit.PeakAmplitude();
-	  double dudw = trh.getVector()[2];
-	  double dvdw = trh.getVector()[3];
-	  double dist = pitch * std::sqrt(1. + dudw * dudw + dvdw * dvdw);
-	  double qdist = charge / dist;
-	  dqdx.at(view).back() = qdist;
-	}
-      }
     }
 
     // Fill track.
 
-    if(xyz.size() >= 2)
-      track = recob::Track(xyz, dxdydz, cov, dqdx, momentum, id);
+    ndof = ndof - 4; //fit measures 4 parameters: position and direction on plane
+    if(xyz.size() >= 2) {
+      track = recob::Track(std::move(xyz), std::move(pxpypz), std::move(outFlags),
+			   true, this->startTrack().PdgCode(), totChi2, ndof,
+			   std::move(cov.front()), std::move(cov.back()), id);
+    }
   }
 
   /// Fill a PtrVector of Hits.

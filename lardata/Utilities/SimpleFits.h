@@ -552,7 +552,19 @@ namespace lar {
         /// @}
         
         
-        //@{
+        /**
+         * @brief Fills the specified parameters
+         * @param params the fitted values of the parameters
+         * @param Xmat the matrix of the x^n/s^2 sums
+         * @param Smat the covariance matrix
+         * @param det the determinant of Xmat
+         * @return true if the fit is valid (i.e. if a unique solution exists)
+         */
+        virtual bool FillResults(
+          FitParameters_t& params,
+          FitMatrix_t& Xmat, Data_t& det, FitMatrix_t& Smat
+          ) const = 0;
+        
         /**
          * @brief Fills the specified parameters
          * @param params the fitted values of the parameters
@@ -563,16 +575,18 @@ namespace lar {
          * @return true if the fit is valid (i.e. if a unique solution exists)
          */
         virtual bool FillResults(
-          FitParameters_t& params,
-          FitMatrix_t& Xmat, Data_t& det, FitMatrix_t& Smat
-          ) const = 0;
-        virtual bool FillResults(
           FitParameters_t& params, FitParameters_t& paramerrors,
           FitMatrix_t& Xmat, Data_t& det, FitMatrix_t& Smat
           ) const = 0;
+        
+        /**
+         * @brief Fills the specified parameters
+         * @param params the fitted values of the parameters
+         * @param paramerrors the uncertainty on the fitted parameters
+         * @return true if the fit is valid (i.e. if a unique solution exists)
+         */
         virtual bool FillResults
           (FitParameters_t& params, FitParameters_t& paramerrors) const = 0;
-        //@}
         
         
         /**
@@ -719,7 +733,19 @@ namespace lar {
         /// @}
         
         
-        //@{
+        /**
+         * @brief Fills the specified parameters
+         * @param params the fitted values of the parameters
+         * @param Xmat the matrix of the x^n/s^2 sums
+         * @param Smat the covariance matrix
+         * @param det the determinant of Xmat
+         * @return true if the fit is valid (i.e. if a unique solution exists)
+         */
+        bool FillResults(
+          FitParameters_t& params,
+          FitMatrix_t& Xmat, Data_t& det, FitMatrix_t& Smat
+          ) const override;
+        
         /**
          * @brief Fills the specified parameters
          * @param params the fitted values of the parameters
@@ -730,17 +756,19 @@ namespace lar {
          * @return true if the fit is valid (i.e. if a unique solution exists)
          */
         bool FillResults(
-          FitParameters_t& params,
-          FitMatrix_t& Xmat, Data_t& det, FitMatrix_t& Smat
-          ) const override;
-        bool FillResults(
           FitParameters_t& params, FitParameters_t& paramerrors,
           FitMatrix_t& Xmat, Data_t& det, FitMatrix_t& Smat
           ) const override;
+        
+        /**
+         * @brief Fills the specified parameters
+         * @param params the fitted values of the parameters
+         * @param paramerrors the uncertainty on the fitted parameters
+         * @return true if the fit is valid (i.e. if a unique solution exists)
+         */
         bool FillResults
           (FitParameters_t& params, FitParameters_t& paramerrors)
           const override;
-        //@}
         
         
         /**
@@ -807,7 +835,7 @@ namespace lar {
      * not affected by uncertainty.
      * The returned parameters describe a straight line @f$ y = a x + b @f$
      * obtained by minimization of
-     * @f$ \chi^{2} = \sum_{i} \frac{ \left(y_{i} - a x_{i} - b \right^{2}) }{ \sigma^{2}_{y,i} }@f$
+     * @f$ \chi^{2} = \sum_{i} \frac{ \left(y_{i} - a x_{i} - b \right)^{2} }{ \sigma^{2}_{y,i} }@f$
      * 
      * This saves having to link to ROOT for the simplest cases.
      * 
@@ -911,7 +939,7 @@ namespace lar {
      * not affected by uncertainty.
      * The returned parameters describe a quadratic curve
      * @f$ f(x) = a_{0} + a_{1} x + a_{2} x^{2} @f$ obtained by minimization of
-     * @f$ \chi^{2} = \sum_{i} \frac{ \left(y_{i} - f(x_{i}) \right^{2}) }{ \sigma^{2}_{y,i} }@f$
+     * @f$ \chi^{2} = \sum_{i} \frac{ \left(y_{i} - f(x_{i}) \right)^{2} }{ \sigma^{2}_{y,i} }@f$
      * 
      * This saves having to link to ROOT for the simplest cases.
      * 
@@ -1144,7 +1172,21 @@ namespace lar {
       /// @}
       
       
-      //@{
+      /**
+       * @brief Fills the specified parameters
+       * @param params the fitted values of the parameters
+       * @param Xmat the matrix of the x^n/s^2 sums
+       * @param Smat the covariance matrix
+       * @param det the determinant of Xmat
+       * @return true if the fit is valid (i.e. if a unique solution exists)
+       * 
+       * Unsupported.
+       */
+      
+      virtual bool FillResults(
+        FitParameters_t& params,
+        FitMatrix_t& Xmat, Data_t& det, FitMatrix_t& Smat
+        ) const override;
       /**
        * @brief Fills the specified parameters
        * @param params the fitted values of the parameters
@@ -1154,19 +1196,23 @@ namespace lar {
        * @param det the determinant of Xmat
        * @return true if the fit is valid (i.e. if a unique solution exists)
        * 
-       * Only the version returning the parameters and errors is supported.
+       * Unsupported.
        */
-      virtual bool FillResults(
-        FitParameters_t& params,
-        FitMatrix_t& Xmat, Data_t& det, FitMatrix_t& Smat
-        ) const override;
       virtual bool FillResults(
         FitParameters_t& params, FitParameters_t& paramerrors,
         FitMatrix_t& Xmat, Data_t& det, FitMatrix_t& Smat
         ) const override;
+      
+      /**
+       * @brief Fills the specified parameters
+       * @param params the fitted values of the parameters
+       * @param paramerrors the uncertainty on the fitted parameters
+       * @return true if the fit is valid (i.e. if a unique solution exists)
+       * 
+       * Only the version returning the parameters and errors is supported.
+       */
       virtual bool FillResults
         (FitParameters_t& params, FitParameters_t& paramerrors) const override;
-      //@}
       
       
       /**
@@ -1347,7 +1393,7 @@ namespace lar {
        * @param qpars the quadratic fit parameters
        * @param qparerrmat the quadratic fit parameter error matrix
        * @param params the Gaussian fit parameters
-       * @param paramerrors2 the Gaussian fit parameter variance
+       * @param paramvariances the Gaussian fit parameter variance
        */
       static void ConvertParametersAndVariances(
         FitParameters_t const& qpars, FitMatrix_t const& qparerrmat,
