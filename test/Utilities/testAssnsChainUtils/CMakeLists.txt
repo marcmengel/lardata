@@ -3,6 +3,8 @@ simple_plugin(
     lardataobj_RecoBase
     art_Framework_Core
     art_Framework_Principal
+    ${MF_MESSAGELOGGER}
+    ${MF_UTILITIES}
     ${FHICLCPP}
     cetlib_except
   NO_INSTALL
@@ -12,6 +14,8 @@ simple_plugin(
     lardataobj_RecoBase
     art_Framework_Core
     art_Framework_Principal
+    ${MF_MESSAGELOGGER}
+    ${MF_UTILITIES}
     ${FHICLCPP}
     cetlib_except
   NO_INSTALL
@@ -21,6 +25,8 @@ simple_plugin(
     lardataobj_RecoBase
     art_Framework_Core
     art_Framework_Principal
+    ${MF_MESSAGELOGGER}
+    ${MF_UTILITIES}
     ${FHICLCPP}
     cetlib_except
   NO_INSTALL
@@ -30,8 +36,11 @@ simple_plugin(
     lardataobj_RecoBase
     art_Framework_Core
     art_Framework_Principal
+    ${MF_MESSAGELOGGER}
+    ${MF_UTILITIES}
     ${FHICLCPP}
     cetlib_except
+    ${ROOT_BASIC_LIB_LIST}
   NO_INSTALL
   )
 simple_plugin(
@@ -39,6 +48,8 @@ simple_plugin(
     lardataobj_RecoBase
     art_Framework_Core
     art_Framework_Principal
+    ${MF_MESSAGELOGGER}
+    ${MF_UTILITIES}
     ${FHICLCPP}
     cetlib_except
   )
