@@ -1,0 +1,159 @@
+# 
+# File:    assnschainutils_test.fcl
+# Purpose: test of lar::FindManyPinChain().
+# Author:  Gianluca Petrillo (petrillo@fnal.gov)
+# Date:    June 23, 2017
+# 
+# Description:
+# This jobs creates hits, clusters, showers, particle flow objects and their
+# associations.
+# Finally, the analyser exercises the chained query.
+# 
+# Output: no output file is produced.
+#
+
+#include "messageservice.fcl"
+
+
+process_name: AssnsChainTest
+
+
+services: {
+  message: @local::standard_info
+} # services
+
+
+source: {
+  module_type: EmptyEvent
+  maxEvents:   2
+}
+
+
+physics: {
+  
+  producers: {
+    
+    hitmakerone: {
+      module_type: AssnsChainHitMaker
+      nHits:       1000
+    } # hitmakerone
+    
+    hitmakertwo: {
+      module_type: AssnsChainHitMaker
+      nHits:        800
+    } # hitmakertwo
+    
+    hitmakerthree: {
+      module_type: AssnsChainHitMaker
+      nHits:        600
+    } # hitmakerthree
+    
+    hitmakerfour: {
+      module_type: AssnsChainHitMaker
+      nHits:        400
+    } # hitmakerfour
+    
+    hitmakerfive: {
+      module_type: AssnsChainHitMaker
+      nHits:        200
+    } # hitmakerfive
+    
+    
+    clustermakerone: {
+      module_type:     AssnsChainClusterMaker
+      hits:           [ "hitmakerone" ]
+      hitsPerCluster:  50
+    } # clustermakerone
+    
+    clustermakertwo: {
+      module_type:     AssnsChainClusterMaker
+      hits:           [ "hitmakertwo" ]
+      hitsPerCluster:  50
+    } # clustermakertwo
+    
+    clustermakerthree: {
+      module_type:     AssnsChainClusterMaker
+      hits:           [ "hitmakerthree" ]
+      hitsPerCluster:  50
+    } # clustermakerthree
+    
+    clustermakerfour: {
+      module_type:     AssnsChainClusterMaker
+      hits:           [ "hitmakerfour", "hitmakerfive" ]
+      hitsPerCluster:  50
+    } # clustermakerfour
+    
+    
+    pfparticlemakerone: {
+      module_type:     AssnsChainPFParticleMaker
+      clusters:       [ "clustermakerone" ]
+      clustersPerPFO:  3
+    } # pfparticlemakerone
+    
+    pfparticlemakertwo: {
+      module_type:     AssnsChainPFParticleMaker
+      clusters:       [ "clustermakertwo" ]
+      clustersPerPFO:  3
+    } # pfparticlemakertwo
+    
+    pfparticlemakerthree: {
+      module_type:     AssnsChainPFParticleMaker
+      clusters:       [ "clustermakerthree", "clustermakerfour" ]
+      clustersPerPFO:  3
+    } # pfparticlemakerthree
+    
+    
+    showermakerone: {
+      module_type:     AssnsChainShowerMaker
+      particles:      [ "pfparticlemakerone" ]
+    } # showermakerone
+    
+    showermakertwo: {
+      module_type:     AssnsChainShowerMaker
+      particles:      [ "pfparticlemakertwo", "pfparticlemakerthree" ]
+    } # showermakertwo
+    
+    
+  } # producers
+  
+  analyzers: {
+    
+    checkone: {
+      module_type: AssnsChainTest
+      showers:     showermakerone
+      nHits:       1000
+      nClusters:     20
+      nParticles:     7 # the last one misses one cluster
+      nShowers:       7
+    } # checkone
+    
+    checktwo: {
+      module_type: AssnsChainTest
+      showers:     showermakertwo
+      nHits:       2000 # [two] 800 + [three] 600 + [four] 400 + [five] 200
+      nClusters:     40 # [two] 16 + [three] 12 + [four] (8 + 4)
+      nParticles:    14 # [two] 6 (last one with 2 clusters) + [three] (4 + 4)
+      nShowers:      14 # [two] 6 + 8
+    } # checktwo
+    
+  } # analyzers
+  
+  hitmakers:        [ hitmakerone, hitmakertwo, hitmakerthree, hitmakerfour, hitmakerfive ]
+  clustermakers:    [ clustermakerone, clustermakertwo, clustermakerthree, clustermakerfour ]
+  pfparticlemakers: [ pfparticlemakerone, pfparticlemakertwo, pfparticlemakerthree ]
+  showermakers:     [ showermakerone, showermakertwo ]
+  
+  makers: [] # redefined later
+  test: [ checkone, checktwo ]
+  
+  trigger_paths: [ makers ]
+  end_paths: [ test ]
+  
+} # physics
+
+physics.makers: [
+  @sequence::physics.hitmakers,
+  @sequence::physics.clustermakers,
+  @sequence::physics.pfparticlemakers,
+  @sequence::physics.showermakers
+  ]
