@@ -15,6 +15,7 @@
 
 // framework
 #include "art/Framework/Principal/Handle.h"
+#include "art/Persistency/Provenance/ProductMetaData.h"
 #include "canvas/Persistency/Common/FindManyP.h"
 #include "canvas/Persistency/Common/Assns.h"
 #include "canvas/Utilities/Exception.h"
@@ -122,18 +123,27 @@ namespace lar {
     art::InputTag tagFromHandle(Handle&& handle)
       { return handle.provenance()->inputTag(); }
     
-    
     /// Returns the input tag of the product identified by `id`.
     template <typename Data, typename Event>
     art::InputTag tagFromProductID
-      (art::ProductID const& id, Event const& event)
+      (art::ProductID const& id, Event const& /* event */)
     {
-      art::Handle<Data> handle;
-      if (!event.template get<Data>(id, handle)) {
-        throw art::Exception(art::errors::ProductNotFound)
-          << "Couldn't find data product with product ID " << id << "\n";
-      }
-      return tagFromHandle(handle);
+      //
+      // This implementation will need to be revisited with art 3.0 and in
+      // general with multithreading (note the singleton product list).
+      // 
+      // Also note that this is not efficient for repeated queries, in which
+      // case the product list should be resorted into some map with product ID
+      // as key.
+      //
+      auto const& products = art::ProductMetaData::instance().productList();
+      for (auto const& productInfoPair: products) {
+        auto const& bd = productInfoPair.second; // branch description here
+        if (bd.productID() != id) continue;
+        return { bd.moduleLabel(), bd.productInstanceName(), bd.processName() };
+      } // for
+      throw art::Exception(art::errors::ProductNotFound)
+        << "Couldn't find data product with product ID " << id << "\n";
     } // tagFromProductID()
     
     
@@ -831,14 +841,8 @@ namespace lar {
         std::map<art::ProductID, SourceVector_t<std::size_t>>
           sourcesLeft;
         std::size_t iSource = 0;
-        for (auto it = sbegin; it != send; ++it, ++iSource) {
-          // workaround for issue #18979: force reading the intermediate data product
-          auto& sourcesFromID = sourcesLeft[it->id()];
-          if (sourcesFromID.empty()) it->get(); // forced reading is here
-          sourcesFromID.emplace_back(it->key(), iSource);
-          // this is the code to be restored as for issue #18980 when issue #18979 is resolved:
-        //  sourcesLeft[it->id()].emplace_back(it->key(), iSource);
-        }
+        for (auto it = sbegin; it != send; ++it, ++iSource)
+          sourcesLeft[it->id()].emplace_back(it->key(), iSource);
         for (auto& sourcesWithinID: sourcesLeft)
           sourcesWithinID.second.sort();
         
