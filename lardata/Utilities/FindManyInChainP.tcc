@@ -131,7 +131,7 @@ namespace lar {
       art::Handle<Data> handle;
       if (!event.template get<Data>(id, handle)) {
         throw art::Exception(art::errors::ProductNotFound)
-          << "Couldn't find data product with product ID " << id;
+          << "Couldn't find data product with product ID " << id << "\n";
       }
       return tagFromHandle(handle);
     } // tagFromProductID()
@@ -324,6 +324,7 @@ namespace lar {
         using Base_t::begin;
         using Base_t::end;
         using Base_t::size;
+        using Base_t::empty;
         using Base_t::reserve;
         
         struct MatchConstIterator_t: public std::pair<const_iterator, bool> {
@@ -830,8 +831,14 @@ namespace lar {
         std::map<art::ProductID, SourceVector_t<std::size_t>>
           sourcesLeft;
         std::size_t iSource = 0;
-        for (auto it = sbegin; it != send; ++it, ++iSource)
-          sourcesLeft[it->id()].emplace_back(it->key(), iSource);
+        for (auto it = sbegin; it != send; ++it, ++iSource) {
+          // workaround for issue #18979: force reading the intermediate data product
+          auto& sourcesFromID = sourcesLeft[it->id()];
+          if (sourcesFromID.empty()) it->get(); // forced reading is here
+          sourcesFromID.emplace_back(it->key(), iSource);
+          // this is the code to be restored as for issue #18980 when issue #18979 is resolved:
+        //  sourcesLeft[it->id()].emplace_back(it->key(), iSource);
+        }
         for (auto& sourcesWithinID: sourcesLeft)
           sourcesWithinID.second.sort();
         
