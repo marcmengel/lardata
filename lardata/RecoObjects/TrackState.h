@@ -19,6 +19,7 @@ namespace trkf {
   using Vector_t     = recob::tracking::Vector_t;
 
   namespace {
+   const double elmass = 0.000510998;  // Electron
    const double mumass = 0.105658367;  // Muon
    const double pimass = 0.13957;      // Charged pion
    const double kmass = 0.493677;      // Charged kaon
@@ -99,9 +100,10 @@ namespace trkf {
     int                 pID()        const { return fPid; }
     /// mass hypthesis of the track
     double              mass()       const {
-      if (abs(fPid)==13) { return mumass; } 
+      if (abs(fPid)==11) { return elmass; }
+      if (abs(fPid)==13) { return mumass; }
       if (abs(fPid)==211) { return pimass; }
-      if (abs(fPid)==321) { return kmass; } 
+      if (abs(fPid)==321) { return kmass; }
       if (abs(fPid)==2212) { return pmass; }
       return util::kBogusD;
     }
