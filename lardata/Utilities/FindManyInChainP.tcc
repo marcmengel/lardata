@@ -15,6 +15,7 @@
 
 // framework
 #include "art/Framework/Principal/Handle.h"
+#include "art/Persistency/Provenance/ProductMetaData.h"
 #include "canvas/Persistency/Common/FindManyP.h"
 #include "canvas/Persistency/Common/Assns.h"
 #include "canvas/Utilities/Exception.h"
@@ -122,18 +123,27 @@ namespace lar {
     art::InputTag tagFromHandle(Handle&& handle)
       { return handle.provenance()->inputTag(); }
     
-    
     /// Returns the input tag of the product identified by `id`.
     template <typename Data, typename Event>
     art::InputTag tagFromProductID
-      (art::ProductID const& id, Event const& event)
+      (art::ProductID const& id, Event const& /* event */)
     {
-      art::Handle<Data> handle;
-      if (!event.template get<Data>(id, handle)) {
-        throw art::Exception(art::errors::ProductNotFound)
-          << "Couldn't find data product with product ID " << id;
-      }
-      return tagFromHandle(handle);
+      //
+      // This implementation will need to be revisited with art 3.0 and in
+      // general with multithreading (note the singleton product list).
+      // 
+      // Also note that this is not efficient for repeated queries, in which
+      // case the product list should be resorted into some map with product ID
+      // as key.
+      //
+      auto const& products = art::ProductMetaData::instance().productList();
+      for (auto const& productInfoPair: products) {
+        auto const& bd = productInfoPair.second; // branch description here
+        if (bd.productID() != id) continue;
+        return { bd.moduleLabel(), bd.productInstanceName(), bd.processName() };
+      } // for
+      throw art::Exception(art::errors::ProductNotFound)
+        << "Couldn't find data product with product ID " << id << "\n";
     } // tagFromProductID()
     
     
@@ -324,6 +334,7 @@ namespace lar {
         using Base_t::begin;
         using Base_t::end;
         using Base_t::size;
+        using Base_t::empty;
         using Base_t::reserve;
         
         struct MatchConstIterator_t: public std::pair<const_iterator, bool> {

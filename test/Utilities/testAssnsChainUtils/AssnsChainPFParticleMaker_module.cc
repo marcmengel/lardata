@@ -126,7 +126,7 @@ void lar::test::AssnsChainPFParticleMaker::produce(art::Event& event) {
   std::size_t firstPFOinNextTier = firstPFOinThisTier + nParticlesInTier;
   std::size_t nextDaughter = firstPFOinNextTier;
   std::vector<std::size_t> parents
-    (nPFOs, recob::PFParticle::kPFParticlePrimary);
+    (nPFOs, std::size_t(recob::PFParticle::kPFParticlePrimary));
   for (unsigned int i = 0; i < nPFOs; ++i) {
     
     // prepare for the next tier, if needed
