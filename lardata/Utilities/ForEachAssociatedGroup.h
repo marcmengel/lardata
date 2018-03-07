@@ -68,7 +68,7 @@ namespace util {
    * 
    * std::vector<double> totalCharge;
    * 
-   * for (auto hits: util::associated_groups(*assns)) {
+   * for (auto const& hits: util::associated_groups(*assns)) {
    *   double total = 0.;
    *   for (art::Ptr<recob::Hit> const& hit: hits)
    *     total += hit->Integral();
