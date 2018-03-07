@@ -149,12 +149,9 @@ namespace util {
    */
   template <class A>
   auto associated_groups_with_left(A const & assns) {
-     auto groups 
-        = assns
+     return assns
         | ranges::view::all
         | ranges::view::group_by([](auto a1, auto a2) { return a1.first == a2.first;})
-        ;
-     return groups
         | ranges::view::transform([] (auto pairs)
            {
              return std::make_pair(
