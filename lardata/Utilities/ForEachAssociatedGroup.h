@@ -56,8 +56,8 @@ namespace util {
    * @see for_each_associated_group()
    *
    * This function provides a functionality equivalent to
-   * `for_each_associated_group()`, but it allows the caller additional control
-   * on the external loop and on the function.
+   * `art::for_each_group()`, but it grants the caller additional control on the
+   * external loop and on the function.
    * 
    * Example: assuming that a module with input tag stored in `fTrackTag` has
    * created associations of each track to its hits, the total charge for each
@@ -78,7 +78,7 @@ namespace util {
    * A number of important points need to be realised about this example:
    * 
    *  * the requirements of this function on its input association are the same
-   *    as for `for_each_associated_group()`
+   *    as for `art::for_each_group()`
    *  * we can code the action on each group of hits directly in a loop, if
    *    like in this case the code is succinct
    *  * again, there is one outer loop iteration for every track;
