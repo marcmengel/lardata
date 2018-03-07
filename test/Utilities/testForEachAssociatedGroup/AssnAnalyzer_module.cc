@@ -28,7 +28,6 @@
 
 class AssnAnalyzer;
 
-
 class AssnAnalyzer : public art::EDAnalyzer {
 public:
   typedef  std::vector<int>             intvec_t;
@@ -55,19 +54,30 @@ private:
    
    void for_each_associated_group_test(art::Event const & e) const;
    void associated_groups_test(art::Event const & e) const;
+   void associated_groups_with_left_test(art::Event const & e) const;
    
 };
+
+
+namespace {
+   
+   bool starts_with(std::string const& s, std::string const& key)
+     { return s.substr(0, key.length()) == key; }
+   
+} // local namespace
 
 
 AssnAnalyzer::AssnAnalyzer(fhicl::ParameterSet const & p)
   :
   EDAnalyzer(p)
   , fInputLabel(p.get<art::InputTag>("input_label"))
- // More initializers here.
 {
   auto enableTests = p.get<std::vector<std::string>>("enableTests");
-  if (enableTests.empty())
-    fEnabledTests = { "forEachAssociatedGroup", "associatedGroups" };
+  if (enableTests.empty()) {
+    fEnabledTests = {
+      "forEachAssociatedGroup", "associatedGroups", "associatedGroupsWithLeft"
+    };
+  }
   else {
     std::copy(enableTests.begin(), enableTests.end(),
       std::inserter(fEnabledTests, fEnabledTests.begin()));
@@ -81,6 +91,8 @@ void AssnAnalyzer::analyze(art::Event const & e)
      AssnAnalyzer::for_each_associated_group_test(e);
    if (fEnabledTests.count("associatedGroups"))
      AssnAnalyzer::associated_groups_test(e);
+   if (fEnabledTests.count("associatedGroupsWithLeft"))
+     AssnAnalyzer::associated_groups_with_left_test(e);
 }
 
 void AssnAnalyzer::for_each_associated_group_test(art::Event const & e) const
@@ -135,6 +147,61 @@ void AssnAnalyzer::associated_groups_test(art::Event const & e) const
           << "String #" << k << " expected to be '" << vs[k]
           << "', got '" << strvec[k] << "' instead!\n";
       }
+   }
+   
+} // associated_groups_test()
+
+
+void AssnAnalyzer::associated_groups_with_left_test(art::Event const & e) const
+{
+   // this is the exact same test as associated_groups_test(),
+   // but passing around also the key
+   
+   typedef typename art::Assns<int, std::string> istr_assns;
+   auto const & int_to_str_assns = *e.getValidHandle<istr_assns> (fInputLabel);
+   std::vector<std::pair<int, std::string>> vs = {
+     { 1, "one"     },
+     { 1, "one-a"   },
+     { 2, "two"     },
+     { 2, "two-a"   },
+     { 3, "three"   },
+     { 3, "three-a" }
+   };
+   
+   std::vector<std::pair<int, std::string>> strvec;
+   for (auto const& group: util::associated_groups_with_left(int_to_str_assns))
+   {
+      // user code here: 
+      auto const& key = std::get<0>(group);  // group.first also ok
+      auto const& strs = std::get<1>(group); // group.second also ok
+      
+      std::cout << "#" << (*key) << " (" << key << ")" << std::endl;
+      for(art::Ptr<std::string> const& s: strs) {
+         std::cout << " - " << s << " \"" << *s << "\"" << std::endl;
+         strvec.emplace_back(*key, *s);
+      }
+   } // for associated groups
+   
+   //strings should be same as vs
+   for(auto k=0; k<6;++k) {
+      std::string const& s = strvec[k].second;
+      int key = 0; // (unknown)
+      if      (starts_with(s, "one"  )) key = 1;
+      else if (starts_with(s, "two"  )) key = 2;
+      else if (starts_with(s, "three")) key = 3;
+      
+      if (key != vs[k].first) {
+        throw art::Exception(art::errors::LogicError)
+          << "String #" << k << " expected to have key '" << vs[k].first
+          << "', got '" << key << "' instead!\n";
+      }
+      
+      if (s != vs[k].second) {
+        throw art::Exception(art::errors::LogicError)
+          << "String #" << k << " expected to be '" << vs[k].second
+          << "', got '" << s << "' instead!\n";
+      }
+      
    }
    
 } // associated_groups_test()

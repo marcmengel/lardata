@@ -86,7 +86,8 @@ namespace util {
    *    (`art::Ptr<recob::Hit>`) which can be navigated with the
    *    `begin()`/`end()` free functions, or in a range-for loop;
    *  * on each iteration, the information of which track the hits are
-   *    associated to is not available.
+   *    associated to is not available; if that is also needed, use
+   *    `util::associated_groups_with_left()` instead.
    */
   template <class A>
   auto associated_groups(A const & assns) {
@@ -97,6 +98,73 @@ namespace util {
             util::range_for
             ;
   } // associated_groups()
+
+
+  /**
+   * @brief  Helper functions to access associations in order, also with key.
+   * @tparam A type of association being read
+   * @param assns the association being read
+   * @see for_each_associated_group()
+   *
+   * This function provides a functionality equivalent to
+   * `art::for_each_group_with_left()`, but it grants the caller additional
+   * control on the external loop and on the function.
+   * 
+   * Example: assuming that a module with input tag stored in `fTrackTag` has
+   * created associations of each track to its hits, the total charge for each
+   * track can be extracted by:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto assns = art::getValidHandle<art::Assns<recob::Track, recob::Hit>>
+   *   (fTrackTag);
+   * 
+   * std::map<int, double> totalCharge;
+   * 
+   * for (auto const& trackWithHits: util::associated_groups_with_left(*assns))
+   * {
+   *   art::Ptr<recob::Track> const& track = trackWithHits.first;
+   *   auto const& hits = trackWithHits.second;
+   *   
+   *   if (totalCharge.count(track->ID()) > 0) {
+   *     throw art::Exception(art::errors::LogicError)
+   *       << "Multiple tracks have ID " << track->ID() << "!\n";
+   *   }
+   *   
+   *   double& total = totalCharge[track->ID()];
+   *   total = 0.0;
+   *   for (art::Ptr<recob::Hit> const& hit: hits)
+   *     total += hit->Integral();
+   *   
+   * } // for
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * A number of important points need to be realised about this example:
+   * 
+   *  * the requirements of this function on its input association are the same
+   *    as for `art::for_each_group_with_left()`
+   *  * we can code the action on each group of hits directly in a loop, if
+   *    like in this case the code is succinct
+   *  * again, there is one outer loop iteration for every track;
+   *  * the value of `hits` is an object representing a range of _art_ pointers
+   *    (`art::Ptr<recob::Hit>`) which can be navigated with the
+   *    `begin()`/`end()` free functions, or in a range-for loop.
+   */
+  template <class A>
+  auto associated_groups_with_left(A const & assns) {
+     auto groups 
+        = assns
+        | ranges::view::all
+        | ranges::view::group_by([](auto a1, auto a2) { return a1.first == a2.first;})
+        ;
+     return groups
+        | ranges::view::transform([] (auto pairs)
+           {
+             return std::make_pair(
+               pairs.front().first, // assuming they're all the same, pick first
+               pairs | ranges::view::values | util::range_for
+               );
+           })
+        | util::range_for
+        ;
+  } // associated_groups_with_left()
 
 
   /**

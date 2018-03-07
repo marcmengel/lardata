@@ -32,7 +32,20 @@ cet_test(test_associatedgroups HANDBUILT
   TEST_EXEC lar 
   TEST_ARGS --rethrow-all --config test_associatedgroups.fcl
   DATAFILES test_associatedgroups.fcl
-  TEST_PROPERTIES DEPENDS test_associatedgroups_full
+  TEST_PROPERTIES DEPENDS test_feag2
+)
+
+cet_test(test_associatedgroupswithleft_full HANDBUILT
+  TEST_EXEC lar 
+  TEST_ARGS --rethrow-all --config test_associatedgroupswithleft_full.fcl
+  DATAFILES test_associatedgroupswithleft_full.fcl
+)
+
+cet_test(test_associatedgroupswithleft HANDBUILT
+  TEST_EXEC lar 
+  TEST_ARGS --rethrow-all --config test_associatedgroupswithleft.fcl
+  DATAFILES test_associatedgroupswithleft.fcl
+  TEST_PROPERTIES DEPENDS test_feag2
 )
 
 art_dictionary(DICTIONARY_LIBRARIES cetlib cetlib_except NO_INSTALL )
