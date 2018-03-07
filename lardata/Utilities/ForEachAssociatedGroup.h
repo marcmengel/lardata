@@ -29,6 +29,7 @@
 #include "range/v3/view/all.hpp"
 
 // C/C++ standard libraries
+#include <utility> // std::make_pair()
 #include <iterator> // std::next()
 
 
