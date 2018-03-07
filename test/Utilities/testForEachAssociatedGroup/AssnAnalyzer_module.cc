@@ -13,6 +13,7 @@
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/SubRun.h"
+#include "canvas/Persistency/Common/AssnsAlgorithms.h" // art::for_each_group()
 #include "canvas/Persistency/Common/Assns.h"
 #include "canvas/Persistency/Common/Ptr.h"
 #include "canvas/Utilities/InputTag.h"
@@ -96,8 +97,7 @@ void AssnAnalyzer::for_each_associated_group_test(art::Event const & e) const
       }
    };
    
-   util::for_each_associated_group(int_to_str_assns,
-                                   strings);
+   art::for_each_group(int_to_str_assns, strings);
    
    //strings should be same as vs
    for(auto k=0; k<6;++k) {
