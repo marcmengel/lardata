@@ -64,8 +64,10 @@ namespace recob {
       
     }; // struct Config
     
+    using Parameters = art::EDAnalyzer::Table<Config>;
+    
     /// Default constructor
-    explicit DumpPCAxes(art::EDAnalyzer::Table<Config> const& config); 
+    explicit DumpPCAxes(Parameters const& config); 
     
     /// Does the printing
     virtual void analyze (const art::Event& evt) override;
@@ -181,7 +183,7 @@ namespace {
 namespace recob {
   
   //----------------------------------------------------------------------------
-  DumpPCAxes::DumpPCAxes(art::EDAnalyzer::Table<Config> const& config)
+  DumpPCAxes::DumpPCAxes(Parameters const& config)
     : EDAnalyzer(config)
     , fInputTag(config().PCAxisModuleLabel())
     , fOutputCategory(config().OutputCategory())
