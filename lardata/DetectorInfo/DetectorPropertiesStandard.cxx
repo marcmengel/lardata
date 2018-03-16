@@ -1,5 +1,5 @@
 /**
- * @file lardata/DetectorInfo/DetectorProperties.cxx
+ * @file lardata/DetectorInfo/DetectorPropertiesStandard.cxx
  * @brief Separation of service from Detector info class.
  * @author Jonathan Paley (jpaley@fnal.gov)
  */
