@@ -16,7 +16,6 @@
 #include "fhiclcpp/ParameterSet.h"
 
 #include "lardata/DetectorInfo/DetectorClocks.h"
-#include "lardataobj/RawData/TriggerData.h"
 
 namespace detinfo{
 
@@ -152,6 +151,9 @@ namespace detinfo{
      * `TrigModuleName`.
      */
     std::string TrigModuleName() const { return fTrigModuleName; }
+    
+    /// Sets trigger and beam gate time from default configuration values.
+    void SetDefaultTriggerTime();
 
     /// Given Geant4 time [ns], returns relative time [us] w.r.t. electronics time T0 
     virtual double G4ToElecTime(double g4_time) const {return g4_time * 1.e-3 - fG4RefTime; }

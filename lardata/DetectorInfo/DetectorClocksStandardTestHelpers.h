@@ -33,7 +33,7 @@
 namespace testing {
   
   /**
-   * @brief Set up a detinfo::DetectorClocksStandard from a parameter set
+   * @brief Set up a detinfo::DetectorClocksStandard from a parameter set.
    * @return pointer to a newly created and set up DetectorClocksService
    * 
    * This function specialization enables the support of `SetupProvider()`
@@ -70,14 +70,25 @@ namespace testing {
         //
         // create the new DetectorClocksStandard service provider
         //
-        return std::make_unique<detinfo::DetectorClocksStandard>(pset);
+        auto detClocks
+          = std::make_unique<detinfo::DetectorClocksStandard>(pset);
+        
+        //
+        // do the actual setup (when issue #19446 is solved, this should become redundant)
+        //
+        detClocks->SetDefaultTriggerTime();
+        
+        //
+        // all done
+        //
+        return detClocks;
       } // setup()
     
   }; // ProviderSetupClass<DetectorClocksStandard>
   
   
   /**
-   * @brief Environment setup helper for DetectorClocksStandard
+   * @brief Environment setup helper for DetectorClocksStandard.
    * @tparam TestEnv type of environment to set up
    * @see simpleEnvironmentSetup
    * 

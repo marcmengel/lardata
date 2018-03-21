@@ -133,3 +133,17 @@ void detinfo::DetectorClocksStandard::debugReport() const
   
 }
 
+//-----------------------------------------
+void detinfo::DetectorClocksStandard::SetDefaultTriggerTime()
+//-----------------------------------------
+{
+  std::vector<double> const& cfgValues = ConfigValues();
+  
+  SetTriggerTime(
+    cfgValues.at(detinfo::kDefaultTrigTime),
+		cfgValues.at(detinfo::kDefaultBeamTime)
+    );
+  
+} // detinfo::DetectorClocksStandard::SetDefaultTriggerTime()
+
+
