@@ -24,29 +24,73 @@ namespace detinfo{
    * @brief Implementation of `detinfo::DetectorClocks` interface with fixed
    *        settings from configuration.
    * 
-   * In this implementation, the trigger time is always defined to match the
-   * beam gate time, and both are at 0.0 &micro;s.
-   * 
+   * In this implementation, all quantities are defined at configuration time
+   * and are unchanged for the duration of the entire job, with the exception
+   * of the trigger time (see below).
    * 
    * Configuration parameters
-   * -------------------------
+   * =========================
    * 
-   * * *TriggerOffsetTPC*: time elapsed between the start of the TPC readout
-   *   clock and the trigger; it can be expressed in one of two ways:
-   *     * negative number [&micro;s]: the offset of the start of the TPC
-   *       readout clock start respect to the trigger time (where negative means
-   *       that the clock starts _before_ the trigger arrives)
-   *     * positive number [ticks]: the number of TPC readout clock tick at
-   *       which the trigger arrives; despite this being a tick number, it can
-   *       be fractional for added precision
-   *   
-   *   For example, `TriggerOffsetTPC` of `-1600.0` means that the TDC clock
-   *   starts 1.6 milliseconds before the trigger time. `TriggerOffsetTPC` of
-   *   `3200.0` means that the trigger arrives at the exact start of tick 3200
-   *   of the TPC readout. In this example, if the sampling frequency of that
-   *   readout is 2 MHz, these two settings are equivalent.
+   * All configuration parameters are mandatory, unless explicitly stated.
    * 
-   * _[this list is incomplete]_
+   * * *G4RefTime* (_nanoseconds_):
+   *     @ref DetectorClocksSimulationTime "simulation (Geant4) start time" in
+   *     @ref DetectorClocksElectronicsTime "electronics time scale", i.e. when
+   *     time `0.0` of simulation happens in the electronics time scale
+   * * *TriggerOffsetTPC*: time elapsed between the
+   *     @ref DetectorClocksTPCelectronicsStartTime "start of the TPC readout clock"
+   *     and the @ref DetectorClocksHardwareTrigger "hardware trigger"; it can
+   *     be expressed in one of two ways:
+   *       * negative number [&micro;s]: the offset of the start of the TPC
+   *         readout clock start respect to the trigger time (where negative
+   *         means that the clock starts _before_ the trigger arrives)
+   *       * positive number [ticks]: the number of TPC readout clock tick at
+   *         which the trigger arrives; despite this being a tick number, it can
+   *         be fractional for added precision
+   *     
+   *     For example, `TriggerOffsetTPC` of `-1600.0` means that the TDC clock
+   *     starts 1.6 milliseconds before the hardware trigger. `TriggerOffsetTPC`
+   *     of `3200.0` means that the trigger arrives at the exact start of tick
+   *     3200 of the TPC readout. In this example, if the sampling frequency of
+   *     that readout is 2 MHz, these two settings are equivalent.
+   * * *FramePeriod* (_microseconds_): duration of an electronics clock frame;
+   *     @ref DetectorClocksIntroClocks "all clocks" share the same frame period
+   * * *ClockSpeedTPC* (_megahertz_): frequency of the
+   *     @ref DetectorClocksIntroClocks "TPC electronics clock"
+   * * *ClockSpeedOptical* (_megahertz_): frequency of the
+   *     @ref DetectorClocksIntroClocks "optical electronics clock"
+   * * *ClockSpeedTrigger* (_megahertz_): frequency of the
+   *     @ref DetectorClocksIntroClocks "trigger electronics clock"
+   * * *ClockSpeedExternal* (_megahertz_): frequency of the
+   *     @ref DetectorClocksIntroClocks "external electronics clock"
+   * * *DefaultTrigTime* (_microseconds_): the default
+   *     @ref DetectorClocksHardwareTrigger "hardware trigger time", measured in
+   *     the @ref DetectorClocksElectronicsTime "electronics time frame"
+   * * *DefaultBeamTime* (_microseconds_): the default
+   *     @ref DetectorClocksBeamGateOpening "beam gate opening time", measured
+   *     in the @ref DetectorClocksElectronicsTime "electronics time frame"
+   * * *TrigModuleName* (_string_): input tag for the trigger data product
+   *     (see "Trigger time" section below)
+   * * *InheritClockConfig* (_boolean_): whether to inherit the configuration
+   *     from previous jobs (see "Consistency check" below)
+   * 
+   * 
+   * Consistency check
+   * ------------------
+   * 
+   * The consistency check feature verifies that the current configuration of
+   * `detinfo::DetectorClocksStandard` is compatible with the one from previous
+   * jobs. It is expected that when this feature is enabled
+   * (`InheritClockConfig` is configured to be `true`), either the configuration
+   * is overridden to follow the previous ones, or an exception is thrown in
+   * case of inconsistency.
+   * 
+   * The service provider (`detinfo::DetectorClocksStandard`) does not provide
+   * a facility to inherit configuration from a previous job, but it stores the
+   * expectation whether this should happen (`InheritClockConfig()`).
+   * The service provider manager is in charge of implementing this feature
+   * (see `detinfo::DetectorClocksStandardService` for the manager in the _art_
+   * environment).
    * 
    * 
    * Timing specifics
@@ -55,21 +99,21 @@ namespace detinfo{
    * For the general timing requirements, see the documentation of
    * `detinfo::DetectorClocks`.
    * 
-   * Clocks
-   * -------
    * 
-   * This implementation sets the default time of the clocks (the ones returned 
-   * by the methods with no arguments `TriggerClock()`, `TPCClock()` and
-   * `OpticalClock()`, but not `ExternalClock()`) to the trigger time. This
-   * setting is overridden when using the versions with arguments of the clock
-   * retrieval methods.
+   * Trigger time
+   * -------------
    * 
-   * clock name        | frame size    | frequency            | current time
-   * ----------------- | ------------- | -------------------- | ---------------
-   * `TPCClock()`      | `FramePeriod` | `ClockSpeedTPC`      | `TriggerTime()`
-   * `OpticalClock()`  | `FramePeriod` | `ClockSpeedOptical`  | `TriggerTime()`
-   * `TriggerClock()`  | `FramePeriod` | `ClockSpeedTrigger`  | `TriggerTime()`
-   * `ExternalClock()` |               | `ClockSpeedExternal` | 
+   * In this implementation, the trigger time is always defined to match the
+   * beam gate time, and both are at 0.0 &micro;s. Despite the fact that two
+   * values are required in the configuration for default trigger and beam time,
+   * these values are not propagated to the current trigger and bean gate
+   * opening times (unless [issue #19446](https://cdcvs.fnal.gov/redmine/issues/19446) is solved).
+   * 
+   * The manager of this provider is expected to set those values by calling
+   * `detinfo::DetectorClocksStandard::SetTriggerTime()`. See
+   * `detinfo::DetectorClocksStandardService` for the manager in the _art_
+   * environment.
+   * 
    * 
    * @bug `ExternalClock()` clock is never initialized!
    * 
@@ -85,6 +129,11 @@ namespace detinfo{
     bool Configure(fhicl::ParameterSet const& pset);
     bool Update(uint64_t ts=0);
     
+    /**
+     * @see `detinfo::DetectorClocks::TriggerOffsetTPC()`
+     * 
+     * This offset is set via configuration parameter `TriggerOffsetTPC`.
+     */
     virtual double TriggerOffsetTPC() const
     { 
       if (fTriggerOffsetTPC<0)
@@ -95,6 +144,13 @@ namespace detinfo{
     
     void debugReport() const;
     
+    /**
+     * @brief Returns the input tag of the trigger data product.
+     * @return the input tag of the trigger data product (as string)
+     * 
+     * The trigger module name is set directly in the configuration as
+     * `TrigModuleName`.
+     */
     std::string TrigModuleName() const { return fTrigModuleName; }
 
     /// Given Geant4 time [ns], returns relative time [us] w.r.t. electronics time T0 
@@ -111,7 +167,15 @@ namespace detinfo{
 
     void SetConfigValue(size_t i, double val) { fConfigValue[i] = val; }
 
-        /// Setter for trigger times
+    /**
+     * @brief Setter for trigger times.
+     * @param trig_time @ref DetectorClocksHardwareTrigger "hardware trigger time" in @ref DetectorClocksElectronicsTime "electronics time scale"
+     * @param beam_time @ref DetectorClocksBeamGateOpening "beam gate opening time" in @ref DetectorClocksElectronicsTime "electronics time scale"
+     * 
+     * The @ref DetectorClocksHardwareTrigger "hardware trigger" and
+     * @ref DetectorClocksBeamGateOpening "beam gate opening" times are set, and
+     * the electronic clocks are updated to store the new trigger time.
+     */
     virtual void SetTriggerTime(double trig_time, double beam_time)
     { 
       fTriggerTime  = trig_time;
