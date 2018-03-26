@@ -294,8 +294,6 @@ namespace detinfo{
    * 
    * 
    * @todo Add a method to convert electronics time tick into electronics time.
-   * @todo Add a method returning the @ref DetectorClocksTPCelectronicsStartTime "TPC electronics start time" in @ref DetectorClocksElectronicsTime "electronics time" (that is `TriggerTime() + TriggerOffsetTPC()`).
-   * 
    */
   class DetectorClocks {
 
@@ -346,6 +344,9 @@ namespace detinfo{
     
     /// @ref DetectorClocksHardwareTrigger "Harware trigger time" (in @ref DetectorClocksElectronicsTime "electronics time frame") [&micro;s].
     virtual double TriggerTime() const = 0;
+    
+    /// Returns the @ref DetectorClocksTPCelectronicsStartTime "TPC electronics start time" in @ref DetectorClocksElectronicsTime "electronics time".
+    virtual double TPCTime() const = 0;
     
     /// @ref DetectorClocksBeamGateOpening "Beam gate opening time" (in @ref DetectorClocksElectronicsTime "electronics time frame") [&micro;s].
     virtual double BeamGateTime() const = 0;

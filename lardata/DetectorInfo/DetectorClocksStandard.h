@@ -141,6 +141,9 @@ namespace detinfo{
 	return -fTriggerOffsetTPC/fTPCClock.Frequency(); //convert ticks to us
     }
     
+    /// Returns the @ref DetectorClocksTPCelectronicsStartTime "TPC electronics start time" in @ref DetectorClocksElectronicsTime "electronics time".
+    virtual double TPCTime() const override { return doTPCTime(); }
+    
     void debugReport() const;
     
     /**
@@ -260,9 +263,8 @@ namespace detinfo{
     virtual double TPCTick2TrigTime(double tick) const
     { return fTPCClock.TickPeriod() * tick + TriggerOffsetTPC(); }
     /// Given TPC time-tick (waveform index), returns time [us] w.r.t. beam gate time
-    /// @todo Use `TPCTick2TrigTime()` in the implementation
     virtual double TPCTick2BeamTime(double tick) const
-    { return fTPCClock.TickPeriod() * tick + TriggerOffsetTPC() + TriggerTime() - BeamGateTime(); }
+    { return TPCTick2TrigTime(tick) + TriggerTime() - BeamGateTime(); }
     /// Given Optical time-tick (waveform index), sample and frame number, returns time [us] w.r.t. trigger time stamp
     virtual double OpticalTick2TrigTime(double tick, size_t sample, size_t frame) const
     { return fOpticalClock.TickPeriod() * tick + fOpticalClock.Time(sample,frame) - TriggerTime();  }
@@ -282,7 +284,7 @@ namespace detinfo{
 
     /// Given TPC time-tick (waveform index), returns electronics clock count [tdc]
     virtual double TPCTick2TDC(double tick) const
-    { return ( (TriggerTime() + TriggerOffsetTPC()) / fTPCClock.TickPeriod() + tick ); }
+    { return ( doTPCTime() / fTPCClock.TickPeriod() + tick ); }
     /// Given G4 time [ns], returns corresponding TPC electronics clock count [tdc]
     virtual double TPCG4Time2TDC(double g4time) const
     { return G4ToElecTime(g4time) / fTPCClock.TickPeriod(); }
@@ -304,7 +306,7 @@ namespace detinfo{
     //
     /// Given TPC time-tick (waveform index), returns electronics clock [us]
     virtual double TPCTick2Time(double tick) const
-    { return TriggerTime() + TriggerOffsetTPC() + tick * fTPCClock.TickPeriod(); }
+    { return doTPCTime() + tick * fTPCClock.TickPeriod(); }
     /// Given Optical time-tick (waveform index), sample and frame number, returns electronics clock [us]
     virtual double OpticalTick2Time(double tick, size_t sample, size_t frame) const
     { return fOpticalClock.Time(sample,frame) + tick * fOpticalClock.TickPeriod(); }
@@ -318,10 +320,10 @@ namespace detinfo{
 
     /// Given electronics clock count [tdc] returns TPC time-tick
     virtual double TPCTDC2Tick(double tdc) const
-    { return ( tdc - (TriggerTime() + TriggerOffsetTPC()) / fTPCClock.TickPeriod() ); }
+    { return ( tdc - doTPCTime() / fTPCClock.TickPeriod() ); }
     /// Given G4 time returns electronics clock count [tdc]
     virtual double TPCG4Time2Tick(double g4time) const
-    { return (G4ToElecTime(g4time) - (TriggerTime() + TriggerOffsetTPC())) / fTPCClock.TickPeriod(); }
+    { return (G4ToElecTime(g4time) - doTPCTime()) / fTPCClock.TickPeriod(); }
 
     bool InheritClockConfig() { return fInheritClockConfig; }
     
@@ -367,7 +369,10 @@ namespace detinfo{
 
     /// BeamGate time in [us]
     double fBeamGateTime;
-
+    
+    /// Implementation of `TPCTime()`.
+    double doTPCTime() const { return TriggerTime() + TriggerOffsetTPC(); }
+    
   }; // class DetectorClocksStandard
 
 } //namespace detinfo
