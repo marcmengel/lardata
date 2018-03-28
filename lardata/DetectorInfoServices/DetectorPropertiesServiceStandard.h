@@ -79,7 +79,7 @@ namespace detinfo{
       DetectorPropertiesServiceStandard(fhicl::ParameterSet const& pset,
 				art::ActivityRegistry& reg);
 
-      virtual void   reconfigure(fhicl::ParameterSet const& pset) ;
+      virtual void   reconfigure(fhicl::ParameterSet const& pset) override;
       void   preProcessEvent(const art::Event& evt);
       void   postOpenFile(const std::string& filename);
       

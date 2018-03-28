@@ -44,7 +44,7 @@ namespace util{
       /// type of service provider, that is this very same
       using provider_type = DetectorPropertiesServiceArgoNeuT;
 
-      virtual void   reconfigure(fhicl::ParameterSet const& pset) ;
+      virtual void   reconfigure(fhicl::ParameterSet const& pset) override;
       
       /// Returns our service provider, that is this very same class
       virtual const  detinfo::DetectorProperties* provider() const override
@@ -73,7 +73,7 @@ namespace util{
       
       virtual double Density(double temperature) const override
         { return fLP->Density(temperature); }
-      virtual double Density() const { return Density(Temperature()); }
+      virtual double Density() const override { return Density(Temperature()); }
 
       virtual double Eloss(double mom, double mass, double tcut) const override
         { return fLP->Eloss(mom, mass, tcut); }

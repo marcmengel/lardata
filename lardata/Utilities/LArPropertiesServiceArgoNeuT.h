@@ -62,8 +62,8 @@ namespace util{
       
       virtual ~LArPropertiesServiceArgoNeuT() = default;
       
-      virtual void   reconfigure(fhicl::ParameterSet const& pset);
-      virtual const  detinfo::LArProperties* provider() const { return this; }
+      virtual void   reconfigure(fhicl::ParameterSet const& pset) override;
+      virtual const  detinfo::LArProperties* provider() const override { return this; }
       
       //------------------------------------------------------------------------
       //--- service provider interface
@@ -133,8 +133,8 @@ namespace util{
       /// dQ/dX in electrons/cm, returns dE/dX in MeV/cm.
       double BirksCorrection(double dQdX) const;
       double ModBoxCorrection(double dQdX) const;
-      bool ExtraMatProperties() const { return fExtraMatProperties; }
-      double TpbTimeConstant()  const { return fTpbTimeConstant; }      
+      virtual bool ExtraMatProperties() const override { return fExtraMatProperties; }
+      virtual double TpbTimeConstant()  const override { return fTpbTimeConstant; }      
       
     private:
 
