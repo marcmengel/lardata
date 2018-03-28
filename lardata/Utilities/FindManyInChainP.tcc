@@ -48,10 +48,7 @@ namespace lar {
     struct is_handle: public std::false_type {};
     
     template <typename H>
-    struct is_handle
-      <H, enable_if_is_handle_t<typename std::decay_t<H>::HandleTag>>
-      : public std::true_type
-      {};
+    struct is_handle<H, enable_if_is_handle_t<H>>: public std::true_type {};
     
     template <typename H>
     constexpr bool is_handle_v = is_handle<H>::value;
