@@ -22,7 +22,7 @@ namespace trkf {
   public:
     //
   KFTrackState(const SVector5& trackStatePar, const SMatrixSym55& trackStateCov, const Plane& plane, bool trackAlongPlaneDir, int pid)
-    : fTrackState( std::move(TrackState(trackStatePar, trackStateCov, plane, trackAlongPlaneDir, pid)) ) {}
+    : fTrackState(trackStatePar, trackStateCov, plane, trackAlongPlaneDir, pid) {}
   KFTrackState(TrackState&& trackState)
     : fTrackState(std::move(trackState)) { }
 
