@@ -14,6 +14,7 @@
 #include "lardataobj/RecoBase/PFParticle.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "lardataobj/RecoBase/Hit.h"
+#include "larcorealg/CoreUtils/MetaUtils.h" // std::always_true_v
 
 // framework libraries
 #include "art/Framework/Core/EDAnalyzer.h"
