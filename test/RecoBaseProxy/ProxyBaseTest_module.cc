@@ -549,8 +549,9 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
           (static_cast<art::Ptr<recob::Hit> const&>(hitInfo), hitPtr);
         BOOST_CHECK_EQUAL
           (&(static_cast<art::Ptr<recob::Hit> const&>(hitInfo)), &hitPtr);
-        BOOST_CHECK_EQUAL
-          (static_cast<art::Ptr<recob::Hit>>(std::move(hitInfoCopy)), hitPtr);
+        
+        art::Ptr<recob::Hit> hitPtrMoved = std::move(hitInfoCopy);
+        BOOST_CHECK_EQUAL(hitPtrMoved, hitPtr);
         
       } // if the hit is correct
       
