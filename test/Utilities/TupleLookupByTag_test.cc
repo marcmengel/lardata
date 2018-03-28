@@ -328,12 +328,13 @@ namespace std {
   // specialization of tuple-like operations for the new type
   
   template <std::size_t I, typename... T>
-  struct tuple_element<I, my::MyTuple<T...>> {
+  class tuple_element<I, my::MyTuple<T...>> {
+      public:
     using type = typename my::MyTuple<T...>::template element_type<I>;
-  }; // struct tuple_element<MyTuple>
+  }; // class tuple_element<MyTuple>
   
   template <typename... T>
-  struct tuple_size<my::MyTuple<T...>>
+  class tuple_size<my::MyTuple<T...>>
     : public std::integral_constant<std::size_t, my::MyTuple<T...>::tuple_size()>
     {};
   
