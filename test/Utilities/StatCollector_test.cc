@@ -448,7 +448,9 @@ void MinMaxCollectorTest() {
   using Data_t = T;
   
   std::initializer_list<Data_t> more_data{ 7, -20,  44, 78, 121 }; // [-20,121]
-  std::array<Data_t, 5> even_more_data   { 7,  -2, 123, 78, 121 }; // [-2,123]
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<Data_t, 5> even_more_data   {{ 7,  -2, 123, 78, 121 }}; // [-2,123]
   
   // for easier notation
   std::unique_ptr<lar::util::MinMaxCollector<Data_t>> collector;
@@ -503,7 +505,9 @@ void MinMaxCollectorTest() {
   //
   // 3. from initializer list constructor
   //
-  std::array<Data_t, 3> init_data{ -25, 3, 1 };
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<Data_t, 3> init_data{{ -25, 3, 1 }};
   collector.reset(
     new lar::util::MinMaxCollector<Data_t>(init_data.begin(), init_data.end())
     );

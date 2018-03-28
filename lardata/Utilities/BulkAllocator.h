@@ -474,7 +474,9 @@ namespace lar {
       std::array<typename BulkAllocatorBase<T>::size_type, 2>
         BulkAllocatorBase<T>::GetCounts() const
       {
-        std::array<BulkAllocatorBase<T>::size_type, 2> stats = { 0U, 0U };
+        // BUG the double brace syntax is required to work around clang bug 21629
+        // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+        std::array<BulkAllocatorBase<T>::size_type, 2> stats = {{ 0U, 0U }};
         for (const auto& chunk: MemoryPool) {
           stats[0] += chunk.used();
           stats[1] += chunk.available();
