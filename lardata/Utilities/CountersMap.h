@@ -29,6 +29,68 @@ namespace lar {
   constexpr int LowestSetBit(unsigned long long int v);
   
   
+  namespace details {
+    
+    /// Type of block of counters (just a STL array until SUBCOUNTERS are in)
+    template <typename COUNTER, std::size_t NCounters>
+    class CounterBlock: public std::array<COUNTER, NCounters> {
+        public:
+      using Counter_t = COUNTER;
+      
+      using Array_t = std::array<Counter_t, NCounters>; ///< type of base class
+      using value_type = typename Array_t::value_type;
+      
+      /// Default constructor: initializes the array to 0
+      CounterBlock(): Array_t() { Array_t::fill(0); }
+      
+      /// Convenience constructor: initializes all counters to 0, except one
+      CounterBlock(size_t index, Counter_t value): CounterBlock()
+        { Array_t::operator[](index) = value; }
+      
+      void fill(const value_type& value) { Array_t::fill(value); }
+      void fill(size_t begin, size_t n, const value_type& value)
+        {
+          std::fill
+            (Array_t::data() + begin, Array_t::data() + begin + n, value);
+        }
+      
+    }; // CounterBlock
+    
+    template <
+      typename KEY,
+      typename COUNTER,
+      size_t SIZE
+      >
+    struct CountersMapTraits {
+      
+      using Key_t = KEY; ///< Type of counter key in the map.
+      using Counter_t = COUNTER; ///< Type of the single counter.
+      
+      /// Number of counters in one counter block.
+      static constexpr size_t NCounters = SIZE;
+      
+      /// Type of counter block actually stored.
+      using CounterBlock_t = CounterBlock<Counter_t, NCounters>;
+      
+      /// General type of map (no special allocator specified).
+      using PlainBaseMap_t = std::map<Key_t, CounterBlock_t, std::less<Key_t>>;
+      
+      /// Type of allocator for the plain map.
+      using DefaultAllocator_t = typename PlainBaseMap_t::allocator_type;
+      
+      /// Base type of map, allowing a custom allocator.
+      template <typename Alloc>
+      using BaseMap_t
+        = std::map<Key_t, CounterBlock_t, std::less<Key_t>, Alloc>;
+      
+      /// Type of value in the map.
+      using MapValue_t = typename PlainBaseMap_t::value_type;
+      
+    }; // struct CountersMapTraits
+
+  } // namespace details
+  
+  
   
   /**
    * @brief Map storing counters in a compact way
@@ -69,7 +131,8 @@ namespace lar {
     typename KEY,
     typename COUNTER,
     size_t SIZE,
-    typename ALLOC = std::allocator<std::pair<KEY,std::array<COUNTER, SIZE>>>,
+    typename ALLOC
+      = typename details::CountersMapTraits<KEY, COUNTER, SIZE>::DefaultAllocator_t,
     unsigned int SUBCOUNTERS=1
     >
   class CountersMap {
@@ -77,17 +140,20 @@ namespace lar {
     static_assert(IsPowerOf2(SIZE),
       "the size of the cluster of counters must be a power of 2");
     
+    /// Set of data types pertaining this counter.
+    using Traits_t = details::CountersMapTraits<KEY, COUNTER, SIZE>;
+    
       public:
     using Key_t = KEY; ///< type of counter key in the map
     using Counter_t = COUNTER; ///< type of the single counter
     using Allocator_t = ALLOC; ///< type of the single counter
-
+    
     /// This class
     using CounterMap_t = CountersMap<KEY, COUNTER, SIZE, ALLOC, SUBCOUNTERS>;
     
     
     /// Number of counters in one counter block
-    static constexpr size_t NCounters = SIZE;
+    static constexpr size_t NCounters = Traits_t::NCounters;
     
     /// Number of subcounters in one counter block
     static constexpr size_t NSubcounters = NCounters * SUBCOUNTERS;
@@ -95,31 +161,14 @@ namespace lar {
     /// Type of the subcounter (that is, the actual counter)
     using SubCounter_t = Counter_t;
     
-    /// Type of block of counters (just a STL array until SUBCOUNTERS are in)
-    class CounterBlock_t: public std::array<Counter_t, NCounters> {
-        public:
-      using Array_t = std::array<Counter_t, NCounters>; ///< type of base class
-      using value_type = typename Array_t::value_type;
-      
-      /// Default constructor: initializes the array to 0
-      CounterBlock_t(): Array_t() { Array_t::fill(0); }
-      
-      /// Convenience constructor: initializes all counters to 0, except one
-      CounterBlock_t(size_t index, Counter_t value): CounterBlock_t()
-        { Array_t::operator[](index) = value; }
-      
-      void fill(const value_type& value) { Array_t::fill(value); }
-      void fill(size_t begin, size_t n, const value_type& value)
-        {
-          std::fill
-            (Array_t::data() + begin, Array_t::data() + begin + n, value);
-        }
-      
-    }; // CounterBlock_t
+    
+    using CounterBlock_t = typename Traits_t::CounterBlock_t;
     
     /// Type of the map used in the implementation
-    using BaseMap_t
-       = std::map<Key_t, CounterBlock_t, std::less<Key_t>, Allocator_t>;
+    using BaseMap_t = typename Traits_t::template BaseMap_t<
+      typename std::allocator_traits<Allocator_t>::template rebind_alloc
+        <typename Traits_t::MapValue_t>
+      >;
     
     /*
     /// Iterator through the allocated elements

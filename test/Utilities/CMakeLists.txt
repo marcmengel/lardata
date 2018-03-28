@@ -4,7 +4,10 @@ add_subdirectory( testAssnsChainUtils )
 
 # BulkAllocator_test, NestedIterator_test, CountersMap_test 
 # and test pure header libraries (they are templates)
-cet_test(BulkAllocator_test USE_BOOST_UNIT)
+
+# test removed per issue #19494
+# cet_test(BulkAllocator_test USE_BOOST_UNIT)
+
 cet_test(NestedIterator_test USE_BOOST_UNIT)
 cet_test(CountersMap_test USE_BOOST_UNIT)
 cet_test(StatCollector_test USE_BOOST_UNIT)

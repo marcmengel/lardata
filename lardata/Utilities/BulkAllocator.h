@@ -5,6 +5,15 @@
  * @date   August 17th, 2014
  */
 
+
+//--- BEGIN issue #19494 -------------------------------------------------------
+/// @bug BulkAllocator.h is currently broken; see issue #19494.
+// We are leaving it here because, being a header, it will not bother unless
+// explicitly invoked. Note that there is a unit test for it too.
+#error ("BulkAllocator.h is currently broken; see issue #19494.")
+//--- END issue #19494 ---------------------------------------------------------
+
+
 #ifndef BULKALLOCATOR_H
 #define BULKALLOCATOR_H
 
@@ -42,6 +51,14 @@ namespace lar {
    * 
    * This allocator appropriates memory in large chunks of GetChunkSize()
    * elements of type T. The memory will never be deleted! (but read further)
+   * 
+   * @note With C++17, an allocator called `std::pmr::monotonic_buffer_resource`
+   *       is available that seems to have pretty much the same functionality as
+   *       this one (but STL quality).
+   *       When C++17 is adopted by LArSoft (and the supported compilers have a
+   *       complete enough support for it), the users of `BulkAllocator` should
+   *       migrate to that one. Note that the interface is different, and
+   *       probably the way to use it is also different.
    * 
    * <h3>Deletion policy</h3>
    * 
