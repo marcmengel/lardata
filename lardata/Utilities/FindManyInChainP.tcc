@@ -307,7 +307,7 @@ namespace lar {
         /// Returns the index of this source element within the source list.
         std::size_t position() const { return std::get<1>(*this); }
         
-        using Base_t::tuple; // inherit constructor
+        using Base_t::Base_t; // inherit constructor
         
         /// Comparison functor: compares art pointer keys.
         struct Comparer_t {
