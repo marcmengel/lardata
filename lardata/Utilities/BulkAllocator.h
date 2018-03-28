@@ -363,7 +363,7 @@ namespace lar {
           /// Returns a pointer to n free items, or nullptr if not available
           pointer get(size_t n)
             {
-              register pointer ptr = free;
+              pointer ptr = free;
               if ((free += n) <= end) return ptr;
               free = ptr;
               return nullptr;
