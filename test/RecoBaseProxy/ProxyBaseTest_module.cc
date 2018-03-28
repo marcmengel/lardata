@@ -43,6 +43,7 @@
 #include <initializer_list>
 #include <memory> // std::unique_ptr<>
 #include <cstring> // std::strlen(), std::strcpy()
+#include <type_traits> // std::is_rvalue_reference<>
 
 
 //------------------------------------------------------------------------------
@@ -115,6 +116,19 @@ namespace {
     auto const it = std::find(cbegin, cend, value);
     return (it == cend)? std::numeric_limits<std::size_t>::max(): (it - cbegin);
   } // indexOf()
+  
+  
+  // this is not a very good test, since it assumes that R-values are
+  // necessarily different; which may be not the case
+  template <typename T>
+  bool areSameObject(T const& a, T const& b)
+    { return std::addressof(a) == std::addressof(b); }
+  
+  template <typename T>
+  std::enable_if_t<std::is_rvalue_reference<T>::value, bool>
+  areSameObject(T&& a, T&& b)
+    { return false; }
+  
   
 } // local namespace
 
@@ -403,10 +417,8 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
     
     // proxies deliver temporary objects as elements, each time a new one
     // (although an exceedingly smart compiler might decide otherwise)
-    BOOST_CHECK_NE(
-      std::addressof(tracks[iExpectedTrack]),
-      std::addressof(tracks[iExpectedTrack])
-      );
+    BOOST_CHECK
+      (!areSameObject(tracks[iExpectedTrack], tracks[iExpectedTrack]));
     
     recob::Track const& trackRef = *trackProxy;
     
