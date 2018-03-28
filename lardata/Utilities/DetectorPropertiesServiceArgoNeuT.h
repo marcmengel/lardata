@@ -130,7 +130,7 @@ namespace util{
 
       static bool  isDetectorPropertiesServiceArgoNeuT(const fhicl::ParameterSet& ps);
 
-      double       fSamplingRate;      ///< in ns
+    //  double       fSamplingRate;      ///< in ns
       double 	   fElectronsToADC;    ///< conversion factor for # of ionization electrons to 1 ADC count
       unsigned int fNumberTimeSamples; ///< number of clock ticks per event
       unsigned int fReadOutWindowSize; ///< number of clock ticks per readout window

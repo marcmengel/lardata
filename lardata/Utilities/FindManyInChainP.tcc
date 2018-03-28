@@ -769,7 +769,7 @@ namespace lar {
         using namespace AssociationFinderBase;
         
         Result_t<Source_t> result(KeysFrom, sbegin, send);
-        std::size_t const nSources = result.size();
+      //  std::size_t const nSources = result.size();
         
         // use this index for fast lookup of the sources
         auto match = makeSimpleIndex(sbegin, send);
