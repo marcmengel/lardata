@@ -488,15 +488,12 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
     for (auto const& hitPtr: trackProxy.get<tag::SpecialHits>()) {
       // hitPtr is actually not a art::Ptr, but it can be compared to one
       
-      // THE HORROR!!! the one commented out is the intended syntax;
-      // Clang 5.0 does not like it, thinks since hitPtr is a reference whatever
-      // comes out of it can't be a constexpr, and protests its use in
-      // static_assert. It's not clear who's right according to The Law.
-        static_assert
-    //    (!hitPtr.hasMetadata(), "Expected no metadata for tag::SpecialHits");
-        (!std::decay_t<decltype(hitPtr)>::hasMetadata(), "Expected no metadata for tag::SpecialHits");
-      // as workaround, we verify that the intended syntax works at least in a
-      // non-constexpr context:
+      // the syntax of the static check is pretty horrible...
+      static_assert(
+        !std::decay_t<decltype(hitPtr)>::hasMetadata(),
+        "Expected no metadata for tag::SpecialHits"
+        );
+      // easier when non-static:
       BOOST_CHECK(!hitPtr.hasMetadata());
       
       // with this check we just ask the hit is there
@@ -518,10 +515,11 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
       // hitPtr is actually not a art::Ptr,
       // but it can be implicitly converted into one
       
-      // THE SAME HORROR! (as above: see the comments in there)
-      static_assert
-    //    (hitInfo.hasMetadata(), "Expected metadata for tag::MetadataHits");
-        (std::decay_t<decltype(hitInfo)>::hasMetadata(), "Expected metadata for tag::MetadataHits");
+      // the syntax of the static check is still pretty horrible...
+      static_assert(
+        std::decay_t<decltype(hitInfo)>::hasMetadata(),
+        "Expected metadata for tag::MetadataHits"
+        );
       BOOST_CHECK(hitInfo.hasMetadata());
       
       // conversion, as reference
