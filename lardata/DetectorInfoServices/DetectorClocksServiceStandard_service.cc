@@ -36,8 +36,6 @@ void detinfo::DetectorClocksServiceStandard::preBeginRun(art::Run const& run)
 //------------------------------------------------------
 {
 
-  if (run.id().run() < 0) return;
-  
   fClocks->ApplyParams();
 
 }

@@ -415,8 +415,10 @@ void QuadraticFitTest() {
     };
   
   const int                   n            =         4;
-  const std::array<Data_t, 3> solution     = { -1.0, -0.5, 0.5 };
-  const std::array<Data_t, 3> perf_errors2 = { 149./199., 163./6368., 59./25472. };
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  const std::array<Data_t, 3> solution     = {{ -1.0, -0.5, 0.5 }};
+  const std::array<Data_t, 3> perf_errors2 = {{ 149./199., 163./6368., 59./25472. }};
   const Data_t                perf_chisq   = Data_t( 0);
   const int                   perf_DoF     =         1;
   
@@ -428,7 +430,9 @@ void QuadraticFitTest() {
     });
   
   const Data_t                unc_chisq  = Data_t( 0);
-  const std::array<Data_t, 3> unc_errors2 = { 517./617., 769./9872., 209./39488. };
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  const std::array<Data_t, 3> unc_errors2 = {{ 517./617., 769./9872., 209./39488. }};
   const int                   unc_DoF    =         1;
   
   //
@@ -541,7 +545,9 @@ void GaussianFitTest() {
   using PerfectData_t = std::vector<PerfectItem_t>;
   using UncertainData_t = std::vector<UncertainItem_t>;
   
-  const std::array<Data_t, 3> solution = { 5.0, 1.0, 2.0 };
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  const std::array<Data_t, 3> solution = {{ 5.0, 1.0, 2.0 }};
   
   // prepare input data
   PerfectData_t perfect_data{
@@ -552,7 +558,9 @@ void GaussianFitTest() {
     };
   
   const int                   n            =         4;
-  const std::array<Data_t, 3> perf_errors2 = { 0., 0., 0. };
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  const std::array<Data_t, 3> perf_errors2 = {{ 0., 0., 0. }};
   const Data_t                perf_chisq   = Data_t( 0);
   const int                   perf_DoF     =         1;
   
@@ -564,7 +572,9 @@ void GaussianFitTest() {
     });
   
   const Data_t                unc_chisq  = Data_t( 0);
-  const std::array<Data_t, 3> unc_errors2 = { 0., 0., 0. };
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  const std::array<Data_t, 3> unc_errors2 = {{ 0., 0., 0. }};
   const int                   unc_DoF    =         1;
   
   //

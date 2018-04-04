@@ -285,7 +285,7 @@ namespace detinfo{
       virtual double       ConvertTicksToTDC(double ticks) const override;
       
 
-      virtual bool SimpleBoundary()     const { return fSimpleBoundary; }
+      virtual bool SimpleBoundary()     const override  { return fSimpleBoundary; }
       
       /// Verifies that the provider is in a fully configured status
       /// @throw cet::exception (category DetectorPropertiesStandard) if not ok

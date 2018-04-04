@@ -201,10 +201,12 @@ void TestMatrix2x2() {
   using Data_t = T;
   constexpr unsigned int Dim = 2; // we are testing 2x2 matrices
   
-  std::array<Data_t, Dim*Dim> matrix = {
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<Data_t, Dim*Dim> matrix = {{
     Data_t(2), Data_t(3),
     Data_t(4), Data_t(1)
-  }; // matrix
+  }}; // matrix
   const Data_t true_det = Data_t(-10);
   
   PrintMatrix(std::cout, matrix, "Matrix");
@@ -217,10 +219,12 @@ void TestSymmetricMatrix2x2() {
   using Data_t = T;
   constexpr unsigned int Dim = 2; // we are testing 2x2 matrices
   
-  std::array<Data_t, Dim*Dim> matrix = {
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<Data_t, Dim*Dim> matrix = {{
     Data_t(2), Data_t(3),
     Data_t(3), Data_t(1)
-  }; // matrix
+  }}; // matrix
   const Data_t true_det = Data_t(-7);
   
   PrintMatrix(std::cout, matrix, "Symmetric matrix");
@@ -235,11 +239,13 @@ void TestMatrix3x3_1() {
   using Data_t = T;
   constexpr unsigned int Dim = 3; // we are testing 3x3 matrices
   
-  std::array<Data_t, Dim*Dim> matrix = {
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<Data_t, Dim*Dim> matrix = {{
     Data_t(2), Data_t(0), Data_t(3),
     Data_t(0), Data_t(3), Data_t(0),
     Data_t(4), Data_t(0), Data_t(1),
-  }; // matrix
+  }}; // matrix
   const Data_t true_det = Data_t(-30);
   
   PrintMatrix(std::cout, matrix, "Matrix");
@@ -254,11 +260,13 @@ void TestMatrix3x3_2() {
   using Data_t = T;
   constexpr unsigned int Dim = 3; // we are testing 3x3 matrices
   
-  std::array<Data_t, Dim*Dim> matrix = {
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<Data_t, Dim*Dim> matrix = {{
     Data_t(2), Data_t(4), Data_t(3),
     Data_t(0), Data_t(3), Data_t(0),
     Data_t(4), Data_t(0), Data_t(1),
-  }; // matrix
+  }}; // matrix
   const Data_t true_det = Data_t(-30);
   
   PrintMatrix(std::cout, matrix, "Matrix");
@@ -274,11 +282,13 @@ void TestSymmetricMatrix3x3() {
   using Data_t = T;
   constexpr unsigned int Dim = 3; // we are testing 3x3 matrices
   
-  std::array<Data_t, Dim*Dim> matrix = {
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<Data_t, Dim*Dim> matrix = {{
     Data_t(2), Data_t(0), Data_t(3),
     Data_t(0), Data_t(3), Data_t(0),
     Data_t(3), Data_t(0), Data_t(1),
-  }; // matrix
+  }}; // matrix
   const Data_t true_det = Data_t(-21);
   
   PrintMatrix(std::cout, matrix, "Symmetric matrix");
@@ -293,12 +303,14 @@ void TestMatrix4x4_1() {
   using Data_t = T;
   constexpr unsigned int Dim = 4; // we are testing 4x4 matrices
   
-  std::array<Data_t, Dim*Dim> matrix = {
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<Data_t, Dim*Dim> matrix = {{
     Data_t(2), Data_t(0), Data_t(3), Data_t(0),
     Data_t(0), Data_t(3), Data_t(0), Data_t(6),
     Data_t(4), Data_t(0), Data_t(1), Data_t(0),
     Data_t(0), Data_t(2), Data_t(0), Data_t(7)
-  }; // matrix
+  }}; // matrix
   const Data_t true_det = Data_t(-90);
   
   PrintMatrix(std::cout, matrix, "Matrix");
@@ -313,12 +325,14 @@ void TestMatrix4x4_2() {
   using Data_t = T;
   constexpr unsigned int Dim = 4; // we are testing 4x4 matrices
   
-  std::array<Data_t, Dim*Dim> matrix = {
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<Data_t, Dim*Dim> matrix = {{
     Data_t(2), Data_t(0), Data_t(3), Data_t(0),
     Data_t(5), Data_t(3), Data_t(0), Data_t(6),
     Data_t(4), Data_t(0), Data_t(1), Data_t(0),
     Data_t(3), Data_t(2), Data_t(0), Data_t(7)
-  }; // matrix
+  }}; // matrix
   const Data_t true_det = Data_t(-90);
   
   PrintMatrix(std::cout, matrix, "Matrix");
@@ -372,12 +386,14 @@ void TestSymmetricMatrix4x4() {
   using Data_t = T;
   constexpr unsigned int Dim = 4; // we are testing 4x4 matrices
   
-  std::array<Data_t, Dim*Dim> matrix = {
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<Data_t, Dim*Dim> matrix = {{
     Data_t(2), Data_t(0), Data_t(3), Data_t(0),
     Data_t(0), Data_t(3), Data_t(0), Data_t(2),
     Data_t(3), Data_t(0), Data_t(1), Data_t(0),
     Data_t(0), Data_t(2), Data_t(0), Data_t(7)
-  }; // matrix
+  }}; // matrix
   const Data_t true_det = Data_t(-119);
   
   PrintMatrix(std::cout, matrix, "Symmetric matrix");

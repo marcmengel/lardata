@@ -35,7 +35,7 @@ namespace lar {
     
     template <typename H, typename R = void>
     using enable_if_is_handle_t
-      = enable_if_type_exists_t<typename H::HandleTag, R>;
+      = enable_if_type_exists_t<typename std::decay_t<H>::HandleTag, R>;
     
   } // namespace details
   
