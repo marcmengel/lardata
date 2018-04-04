@@ -48,10 +48,7 @@ namespace lar {
     struct is_handle: public std::false_type {};
     
     template <typename H>
-    struct is_handle
-      <H, enable_if_is_handle_t<typename std::decay_t<H>::HandleTag>>
-      : public std::true_type
-      {};
+    struct is_handle<H, enable_if_is_handle_t<H>>: public std::true_type {};
     
     template <typename H>
     constexpr bool is_handle_v = is_handle<H>::value;
@@ -307,7 +304,7 @@ namespace lar {
         /// Returns the index of this source element within the source list.
         std::size_t position() const { return std::get<1>(*this); }
         
-        using Base_t::tuple; // inherit constructor
+        using Base_t::Base_t; // inherit constructor
         
         /// Comparison functor: compares art pointer keys.
         struct Comparer_t {
@@ -769,7 +766,7 @@ namespace lar {
         using namespace AssociationFinderBase;
         
         Result_t<Source_t> result(KeysFrom, sbegin, send);
-        std::size_t const nSources = result.size();
+      //  std::size_t const nSources = result.size();
         
         // use this index for fast lookup of the sources
         auto match = makeSimpleIndex(sbegin, send);

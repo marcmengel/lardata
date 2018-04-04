@@ -55,7 +55,9 @@ void VectorTest() {
   //
   // indexing
   //
-  std::array<char, 1> ii { 1 }; // char is for test; it should be size_t
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<char, 1> ii {{ 1 }}; // char is for test; it should be size_t
 /* TODO
   BOOST_CHECK_EQUAL(indices[0], 0U);
   BOOST_CHECK_EQUAL(indices[1], 1U);
@@ -98,7 +100,9 @@ void VectorTest() {
   BOOST_CHECK_EQUAL(indices.size(), 4U);
   
   // check that the function also works
-  std::array<int, 1> ia { 4 };
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<int, 1> ia {{ 4 }};
   util::TensorIndices<1> indicesAgain(ia.begin());
   util::TensorIndices<1> indicesOther = util::makeTensorIndices(3);
   util::TensorIndices<2> indicesRank  = util::makeTensorIndices(4, 3);
@@ -140,7 +144,9 @@ void MatrixTest() {
   //
   // indexing
   //
-  std::array<char, 2> ii { 1, 2 }; // char is for test; it should be size_t
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<char, 2> ii {{ 1, 2 }}; // char is for test; it should be size_t
 /* TODO
   BOOST_CHECK_EQUAL(indices[0], 0U);
   BOOST_CHECK_EQUAL(indices[1], 1U);
@@ -184,7 +190,9 @@ void MatrixTest() {
   // comparisons
   //
   // check that the function and other constructors also works
-  std::array<int, 2> ia { 4, 3 };
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<int, 2> ia {{ 4, 3 }};
   util::TensorIndices<2> indicesAgain(ia.begin());
   util::TensorIndices<2> indicesOther = util::makeTensorIndices(4, 4);
   util::TensorIndices<3> indicesRank  = util::makeTensorIndices(5, 4, 3);
@@ -227,7 +235,9 @@ void TensorRank3Test() {
   //
   // indexing
   //
-  std::array<char, 3> ii { 1, 2, 3 }; // char is for test; it should be size_t
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<char, 3> ii {{ 1, 2, 3 }}; // char is for test; it should be size_t
 /* TODO
   BOOST_CHECK_EQUAL(indices[0], 0U);
   BOOST_CHECK_EQUAL(indices[1], 1U);
@@ -277,7 +287,9 @@ void TensorRank3Test() {
   // comparisons
   //
   // check that the function also works
-  std::array<int, 3> ia { 2, 3, 4 };
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  std::array<int, 3> ia {{ 2, 3, 4 }};
   util::TensorIndices<3> indicesAgain(ia.begin());
   util::TensorIndices<3> indicesOther = util::makeTensorIndices(2, 3, 5);
   util::TensorIndices<2> indicesRank  = util::makeTensorIndices(2, 3);

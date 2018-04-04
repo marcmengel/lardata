@@ -44,7 +44,7 @@ namespace util{
       /// type of service provider, that is this very same
       using provider_type = DetectorPropertiesServiceArgoNeuT;
 
-      virtual void   reconfigure(fhicl::ParameterSet const& pset) ;
+      virtual void   reconfigure(fhicl::ParameterSet const& pset) override;
       
       /// Returns our service provider, that is this very same class
       virtual const  detinfo::DetectorProperties* provider() const override
@@ -73,7 +73,7 @@ namespace util{
       
       virtual double Density(double temperature) const override
         { return fLP->Density(temperature); }
-      virtual double Density() const { return Density(Temperature()); }
+      virtual double Density() const override { return Density(Temperature()); }
 
       virtual double Eloss(double mom, double mass, double tcut) const override
         { return fLP->Eloss(mom, mass, tcut); }
@@ -130,7 +130,7 @@ namespace util{
 
       static bool  isDetectorPropertiesServiceArgoNeuT(const fhicl::ParameterSet& ps);
 
-      double       fSamplingRate;      ///< in ns
+    //  double       fSamplingRate;      ///< in ns
       double 	   fElectronsToADC;    ///< conversion factor for # of ionization electrons to 1 ADC count
       unsigned int fNumberTimeSamples; ///< number of clock ticks per event
       unsigned int fReadOutWindowSize; ///< number of clock ticks per readout window

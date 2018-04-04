@@ -685,6 +685,9 @@ namespace proxy {
     , public TrackPointWrapper<TrackPointData>
   {
     using TrackPointData::TrackPointData;
+    TrackPoint(TrackPointData const& data): TrackPointData(data) {}
+    TrackPoint(TrackPointData&& data): TrackPointData(std::move(data)) {}
+    
       private:
     static constexpr bool asserts
       = details::StaticAsserts<TrackPointWrapper<TrackPointData>>::value;

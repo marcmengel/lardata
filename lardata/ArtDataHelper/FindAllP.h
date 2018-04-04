@@ -263,9 +263,6 @@ namespace lar {
         LOG_DEBUG("FindAllP") << "Read(): read " << assns_list.size()
           << " association sets";
         
-        // product ID of the last source object; initialized invalid
-        art::ProductID LastProductID = art::Ptr<Source_t>().id();
-        
         unsigned int count = 0;
         // parse all the associations, and translate them into a local cache
         for (art::Handle<Assns_t> handle: assns_list)

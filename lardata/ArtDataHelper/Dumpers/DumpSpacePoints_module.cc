@@ -69,8 +69,10 @@ namespace recob {
         
     }; // struct Config
     
+    using Parameters = art::EDAnalyzer::Table<Config>;
+    
     /// Default constructor
-    explicit DumpSpacePoints(art::EDAnalyzer::Table<Config> const& config); 
+    explicit DumpSpacePoints(Parameters const& config); 
     
     /// Does the printing
     virtual void analyze (const art::Event& evt) override;
@@ -227,7 +229,7 @@ namespace {
 namespace recob {
   
   //----------------------------------------------------------------------------
-  DumpSpacePoints::DumpSpacePoints(art::EDAnalyzer::Table<Config> const& config)
+  DumpSpacePoints::DumpSpacePoints(Parameters const& config)
     : EDAnalyzer(config)
     , fInputTag(config().SpacePointModuleLabel())
     , fOutputCategory(config().OutputCategory())

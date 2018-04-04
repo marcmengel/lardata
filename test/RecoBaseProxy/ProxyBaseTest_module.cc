@@ -43,6 +43,7 @@
 #include <initializer_list>
 #include <memory> // std::unique_ptr<>
 #include <cstring> // std::strlen(), std::strcpy()
+#include <type_traits> // std::is_rvalue_reference<>
 
 
 //------------------------------------------------------------------------------
@@ -115,6 +116,19 @@ namespace {
     auto const it = std::find(cbegin, cend, value);
     return (it == cend)? std::numeric_limits<std::size_t>::max(): (it - cbegin);
   } // indexOf()
+  
+  
+  // this is not a very good test, since it assumes that R-values are
+  // necessarily different; which may be not the case
+  template <typename T>
+  bool areSameObject(T const& a, T const& b)
+    { return std::addressof(a) == std::addressof(b); }
+  
+  template <typename T>
+  std::enable_if_t<std::is_rvalue_reference<T>::value, bool>
+  areSameObject(T&& a, T&& b)
+    { return false; }
+  
   
 } // local namespace
 
@@ -403,10 +417,8 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
     
     // proxies deliver temporary objects as elements, each time a new one
     // (although an exceedingly smart compiler might decide otherwise)
-    BOOST_CHECK_NE(
-      std::addressof(tracks[iExpectedTrack]),
-      std::addressof(tracks[iExpectedTrack])
-      );
+    BOOST_CHECK
+      (!areSameObject(tracks[iExpectedTrack], tracks[iExpectedTrack]));
     
     recob::Track const& trackRef = *trackProxy;
     
@@ -476,8 +488,13 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
     for (auto const& hitPtr: trackProxy.get<tag::SpecialHits>()) {
       // hitPtr is actually not a art::Ptr, but it can be compared to one
       
-      static_assert
-        (!hitPtr.hasMetadata(), "Expected no metadata for tag::SpecialHits");
+      // the syntax of the static check is pretty horrible...
+      static_assert(
+        !std::decay_t<decltype(hitPtr)>::hasMetadata(),
+        "Expected no metadata for tag::SpecialHits"
+        );
+      // easier when non-static:
+      BOOST_CHECK(!hitPtr.hasMetadata());
       
       // with this check we just ask the hit is there
       // (the order is not guaranteed to be the same in expected and fetched)
@@ -498,8 +515,12 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
       // hitPtr is actually not a art::Ptr,
       // but it can be implicitly converted into one
       
-      static_assert
-        (hitInfo.hasMetadata(), "Expected metadata for tag::MetadataHits");
+      // the syntax of the static check is still pretty horrible...
+      static_assert(
+        std::decay_t<decltype(hitInfo)>::hasMetadata(),
+        "Expected metadata for tag::MetadataHits"
+        );
+      BOOST_CHECK(hitInfo.hasMetadata());
       
       // conversion, as reference
       art::Ptr<recob::Hit> const& hitPtr = hitInfo;
@@ -537,8 +558,9 @@ void ProxyBaseTest::testTracks(art::Event const& event) const {
           (static_cast<art::Ptr<recob::Hit> const&>(hitInfo), hitPtr);
         BOOST_CHECK_EQUAL
           (&(static_cast<art::Ptr<recob::Hit> const&>(hitInfo)), &hitPtr);
-        BOOST_CHECK_EQUAL
-          (static_cast<art::Ptr<recob::Hit>>(std::move(hitInfoCopy)), hitPtr);
+        
+        art::Ptr<recob::Hit> hitPtrMoved = std::move(hitInfoCopy);
+        BOOST_CHECK_EQUAL(hitPtrMoved, hitPtr);
         
       } // if the hit is correct
       

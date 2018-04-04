@@ -1281,7 +1281,7 @@ namespace lar {
       /// Converts a value from the quadratic fit into a proper value
       static Value_t DecodeValue(Value_t const& value)
         {
-          register const Data_t v = std::exp(value.value());
+          const Data_t v = std::exp(value.value());
           return { v, v * value.error() };
         } // DecodeValue()
       

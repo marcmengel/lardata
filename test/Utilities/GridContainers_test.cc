@@ -43,7 +43,11 @@ void GridContainer2DTest() {
   // initialise
   //
   using Container_t = util::GridContainer2D<int>;
-  Container_t grid({ 2U, 3U });
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  // not sure precisely why this is required a second time... it has to do
+  // with using the constructor of a base class
+  Container_t grid({{{ 2U, 3U }}});
   
   //
   // container structure and indexing
@@ -54,16 +58,20 @@ void GridContainer2DTest() {
   BOOST_CHECK_EQUAL(grid.sizeX(), 2U);
   BOOST_CHECK_EQUAL(grid.sizeY(), 3U);
   
-  BOOST_CHECK_EQUAL(grid.index({ 0, 0 }), 0U);
-  BOOST_CHECK_EQUAL(grid.index({ 1, 2 }), 5U);
-  BOOST_CHECK_NO_THROW(grid.index({ 2, 2 })); // out-of-bound
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  BOOST_CHECK_EQUAL(grid.index({{ 0, 0 }}), 0U);
+  BOOST_CHECK_EQUAL(grid.index({{ 1, 2 }}), 5U);
+  BOOST_CHECK_NO_THROW(grid.index({{ 2, 2 }})); // out-of-bound
   
   BOOST_CHECK( grid.has(0));
   BOOST_CHECK( grid.has(grid.size() - 1));
   BOOST_CHECK(!grid.has(grid.size()));
   
-  BOOST_CHECK_EQUAL(grid.indexOffset({ 0, 1 }, { 1, 2 }), 4);
-  BOOST_CHECK_EQUAL(grid.indexOffset({ 1, 2 }, { 0, 1 }), -4);
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  BOOST_CHECK_EQUAL(grid.indexOffset({{ 0, 1 }}, {{ 1, 2 }}), 4);
+  BOOST_CHECK_EQUAL(grid.indexOffset({{ 1, 2 }}, {{ 0, 1 }}), -4);
   
   //
   // fill the container
@@ -125,7 +133,11 @@ void GridContainer3DTest() {
   // initialise
   //
   using Container_t = util::GridContainer3D<int>;
-  Container_t grid({ 2U, 3U, 4U });
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629);
+  // not sure precisely why this is required a second time... it has to do
+  // with using the constructor of a base class
+  Container_t grid({{{ 2U, 3U, 4U }}});
   
   //
   // container structure and indexing
@@ -137,16 +149,20 @@ void GridContainer3DTest() {
   BOOST_CHECK_EQUAL(grid.sizeY(), 3U);
   BOOST_CHECK_EQUAL(grid.sizeZ(), 4U);
   
-  BOOST_CHECK_EQUAL(grid.index({ 0, 0, 0 }), 0U);
-  BOOST_CHECK_EQUAL(grid.index({ 1, 2, 3 }), 23U);
-  BOOST_CHECK_NO_THROW(grid.index({ 2, 2, 3 })); // out-of-bound
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  BOOST_CHECK_EQUAL(grid.index({{ 0, 0, 0 }}), 0U);
+  BOOST_CHECK_EQUAL(grid.index({{ 1, 2, 3 }}), 23U);
+  BOOST_CHECK_NO_THROW(grid.index({{ 2, 2, 3 }})); // out-of-bound
   
   BOOST_CHECK( grid.has(0));
   BOOST_CHECK( grid.has(grid.size() - 1));
   BOOST_CHECK(!grid.has(grid.size()));
   
-  BOOST_CHECK_EQUAL(grid.indexOffset({ 0, 1, 2 }, { 1, 2, 3 }), 17);
-  BOOST_CHECK_EQUAL(grid.indexOffset({ 1, 2, 3 }, { 0, 1, 2 }), -17);
+  // BUG the double brace syntax is required to work around clang bug 21629
+  // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+  BOOST_CHECK_EQUAL(grid.indexOffset({{ 0, 1, 2 }}, {{ 1, 2, 3 }}), 17);
+  BOOST_CHECK_EQUAL(grid.indexOffset({{ 1, 2, 3 }}, {{ 0, 1, 2 }}), -17);
   
   //
   // fill the container

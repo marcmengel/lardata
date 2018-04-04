@@ -8,7 +8,7 @@ physics:
       input_label: pm2
       
       # supported: "forEachAssociatedGroup", "associatedGroups", "associatedGroupsWithLeft"
-      enableTests: [ "associatedGroups" ]
+      enableTests: [ "associatedGroups", "associatedGroupsWithLeft" ]
     }
   }
   e1: [ am ]

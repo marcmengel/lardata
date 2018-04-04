@@ -367,16 +367,22 @@ namespace std {
   
   // specialize for indices 0, 1, and 2; for all others, it's an incomplete type
   template <typename L, typename R, typename D>
-  struct tuple_element<0U, art::AssnsNode<L, R, D>>
-    { using type = art::Ptr<L>; };
+  class tuple_element<0U, art::AssnsNode<L, R, D>> {
+      public:
+    using type = art::Ptr<L>;
+  };
   
   template <typename L, typename R, typename D>
-  struct tuple_element<1U, art::AssnsNode<L, R, D>>
-    { using type = art::Ptr<R>; };
+  class tuple_element<1U, art::AssnsNode<L, R, D>> {
+      public:
+    using type = art::Ptr<R>;
+  };
   
   template <typename L, typename R, typename D>
-  struct tuple_element<2U, art::AssnsNode<L, R, D>>
-    { using type = D const*; };
+  class tuple_element<2U, art::AssnsNode<L, R, D>> {
+      public:
+    using type = D const*;
+  };
   
   
   //----------------------------------------------------------------------------
@@ -389,11 +395,11 @@ namespace std {
       get( art::AssnsNode<L, R, D>&& t ) noexcept;
   
   template< std::size_t I, typename L, typename R, typename D>
-  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>>const&
+  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>> const&
       get( const art::AssnsNode<L, R, D>& t ) noexcept;
   
   template< std::size_t I, typename L, typename R, typename D>
-  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D> >const&&
+  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>> const&&
       get( const art::AssnsNode<L, R, D>&& t ) noexcept;
   
   template< class T, typename L, typename R, typename D>

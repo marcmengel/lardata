@@ -20,6 +20,7 @@
 #include <utility> // std::forward()
 #include <type_traits> // std::is_same<>
 #include <cstdio> // std::snprintf()
+#include <iosfwd> // std::ostream
 
 
 namespace lar {
@@ -75,9 +76,10 @@ namespace lar {
          
       }; // OptionalHexFloatFormatter
       
-      template <typename Stream, typename T>   
-      Stream& operator<< (Stream&& os, details::OptionalHexFloatFormatter<T> fmt)
-         { return fmt(std::forward<Stream>(os)); }
+      template <typename T>   
+      std::ostream& operator<<
+        (std::ostream& os, details::OptionalHexFloatFormatter<T> fmt)
+        { return fmt(os); }
       
    } // namespace details
    

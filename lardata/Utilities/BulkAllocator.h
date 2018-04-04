@@ -5,6 +5,15 @@
  * @date   August 17th, 2014
  */
 
+
+//--- BEGIN issue #19494 -------------------------------------------------------
+/// @bug BulkAllocator.h is currently broken; see issue #19494.
+// We are leaving it here because, being a header, it will not bother unless
+// explicitly invoked. Note that there is a unit test for it too.
+#error ("BulkAllocator.h is currently broken; see issue #19494.")
+//--- END issue #19494 ---------------------------------------------------------
+
+
 #ifndef BULKALLOCATOR_H
 #define BULKALLOCATOR_H
 
@@ -42,6 +51,14 @@ namespace lar {
    * 
    * This allocator appropriates memory in large chunks of GetChunkSize()
    * elements of type T. The memory will never be deleted! (but read further)
+   * 
+   * @note With C++17, an allocator called `std::pmr::monotonic_buffer_resource`
+   *       is available that seems to have pretty much the same functionality as
+   *       this one (but STL quality).
+   *       When C++17 is adopted by LArSoft (and the supported compilers have a
+   *       complete enough support for it), the users of `BulkAllocator` should
+   *       migrate to that one. Note that the interface is different, and
+   *       probably the way to use it is also different.
    * 
    * <h3>Deletion policy</h3>
    * 
@@ -346,7 +363,7 @@ namespace lar {
           /// Returns a pointer to n free items, or nullptr if not available
           pointer get(size_t n)
             {
-              register pointer ptr = free;
+              pointer ptr = free;
               if ((free += n) <= end) return ptr;
               free = ptr;
               return nullptr;
@@ -474,7 +491,9 @@ namespace lar {
       std::array<typename BulkAllocatorBase<T>::size_type, 2>
         BulkAllocatorBase<T>::GetCounts() const
       {
-        std::array<BulkAllocatorBase<T>::size_type, 2> stats = { 0U, 0U };
+        // BUG the double brace syntax is required to work around clang bug 21629
+        // (https://bugs.llvm.org/show_bug.cgi?id=21629)
+        std::array<BulkAllocatorBase<T>::size_type, 2> stats = {{ 0U, 0U }};
         for (const auto& chunk: MemoryPool) {
           stats[0] += chunk.used();
           stats[1] += chunk.available();
