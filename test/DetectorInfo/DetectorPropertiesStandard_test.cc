@@ -159,7 +159,7 @@ int main(int argc, char const** argv) {
     // print drift distance table header
     mf::LogVerbatim log("detp_test");
     std::array<unsigned int, 4U> const columnSizes
-      = { headerColWidth, 9U, 13U, 7U };
+      = {{ headerColWidth, 9U, 13U, 7U }};
     log << std::setw(columnSizes[0]) << "Drift:"
       << " | " << std::setw(columnSizes[1]) << "time [us]"
       << " | " << std::setw(columnSizes[2]) << "distance [cm]"
