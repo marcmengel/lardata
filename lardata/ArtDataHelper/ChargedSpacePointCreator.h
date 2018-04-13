@@ -304,7 +304,7 @@ namespace recob {
      * @brief Inserts all the space points and associated data from the vectors
      *        into the collection.
      * @param spacePoints the space point to be copied into the collection
-     * @param charge the charge to be copied into the collection
+     * @param charges the charges to be copied into the collection
      * @throw cet::exception (category `ChargedSpacePointCollectionCreator`)
      *                       if the input collections are inconsistent
      * 

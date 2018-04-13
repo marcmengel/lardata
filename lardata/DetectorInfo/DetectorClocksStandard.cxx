@@ -94,7 +94,8 @@ bool detinfo::DetectorClocksStandard::IsRightConfig(const fhicl::ParameterSet& p
 {
   std::string s;
   double d;
-
+  
+  // TODO replace with has_key()
   bool result = !ps.get_if_present("module_label", s);
   for(size_t i=0; result && i<kInheritConfigTypeMax; ++i)
 
@@ -131,4 +132,18 @@ void detinfo::DetectorClocksStandard::debugReport() const
     << std::endl;
   
 }
+
+//-----------------------------------------
+void detinfo::DetectorClocksStandard::SetDefaultTriggerTime()
+//-----------------------------------------
+{
+  std::vector<double> const& cfgValues = ConfigValues();
+  
+  SetTriggerTime(
+    cfgValues.at(detinfo::kDefaultTrigTime),
+		cfgValues.at(detinfo::kDefaultBeamTime)
+    );
+  
+} // detinfo::DetectorClocksStandard::SetDefaultTriggerTime()
+
 

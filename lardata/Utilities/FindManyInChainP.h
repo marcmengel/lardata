@@ -119,10 +119,10 @@ namespace lar {
     /**
      * @brief Constructor: extracts target objects associated to all objects
      *        under the specified handle.
-     * @tparam Handle type of handle to be used
+     * @tparam Source type of source: art Handle or collection of art pointers
      * @tparam Event type of event to be used (either _art_ or gallery `Event`)
      * @tparam InputTags a variable number of `art::InputTag` objects
-     * @param handle _art_ handle to a collection of source objects
+     * @param source art Handle or collection of art pointers to source objects
      * @param event the event to read associations and objects from
      * @param tags input tags for each one of the required associations
      * @see find()

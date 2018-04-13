@@ -1,4 +1,5 @@
 #include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h"
+#include "lardata/DetectorInfo/DetectorClocksStandardTriggerLoader.h"
 #include "TFile.h"
 #include "art/Framework/IO/Root/RootDB/SQLite3Wrapper.h"
 #include "fhiclcpp/make_ParameterSet.h"
@@ -27,30 +28,7 @@ void detinfo::DetectorClocksServiceStandard::reconfigure(fhicl::ParameterSet con
 void detinfo::DetectorClocksServiceStandard::preProcessEvent(const art::Event& evt)
 //------------------------------------------------------------
 {
-  art::Handle<std::vector<raw::Trigger> > trig_handle;
-  evt.getByLabel(fClocks->TrigModuleName(), trig_handle);
-
-  std::vector<std::string> cfgNames = fClocks->ConfigNames();
-  std::vector<double> cfgValues = fClocks->ConfigValues();
-  
-  if(!trig_handle.isValid() || trig_handle->empty()) {
-    // Trigger simulation has not run yet!
-    fClocks->SetTriggerTime(cfgValues.at(detinfo::kDefaultTrigTime),
-			    cfgValues.at(detinfo::kDefaultBeamTime) );
-    return;
-  }
-
-  if(trig_handle->size()>1)
-    
-    throw cet::exception("DetectorClocksServiceStandard::preProcessEvent")
-      << "Found " << trig_handle->size() << " triggers (only 1 trigger/event supported)\n";
-  
-  const art::Ptr<raw::Trigger> trig_ptr(trig_handle,0);
-
-  fClocks->SetTriggerTime(trig_ptr->TriggerTime(),
-			  trig_ptr->BeamGateTime() );
-  
-  return;
+  detinfo::setDetectorClocksStandardTrigger(*fClocks, evt);
 }
 
 //------------------------------------------------------

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////
-// \file DetectorProperties.h
+// \file DetectorPropertiesStandard.h
 //
 // \brief service to contain information about detector electronics, etc
 //
