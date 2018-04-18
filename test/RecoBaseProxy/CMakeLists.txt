@@ -1,6 +1,8 @@
 ###############################################################################
 ###  ProxyBase tests
 ###
+add_subdirectory(ProxyBase)
+
 simple_plugin(ProxyBaseTest "module"
   lardata_RecoBaseProxy
   lardataobj_RecoBase

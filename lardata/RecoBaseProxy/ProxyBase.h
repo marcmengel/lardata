@@ -11,8 +11,17 @@
 #define LARDATA_RECOBASEPROXY_PROXYBASE_H
 
 // LArSoft libraries
+#include "lardata/RecoBaseProxy/ProxyBase/ParallelData.h"
+#include "lardata/RecoBaseProxy/ProxyBase/OneTo01Data.h"
+#include "lardata/RecoBaseProxy/ProxyBase/AssociatedData.h"
+#include "lardata/RecoBaseProxy/ProxyBase/AssnsNodeAsTuple.h"
+#include "lardata/RecoBaseProxy/ProxyBase/AssnsTraits.h"
+#include "lardata/RecoBaseProxy/ProxyBase/MainCollectionProxy.h"
+#include "lardata/RecoBaseProxy/ProxyBase/CollectionProxyElement.h"
+#include "lardata/RecoBaseProxy/ProxyBase/CollectionProxy.h"
 #include "lardata/Utilities/CollectionView.h"
 #include "lardata/Utilities/TupleLookupByTag.h" // util::getByTag(), ...
+#include "larcorealg/CoreUtils/ContainerMeta.h" // util::collection_value_t, ...
 #include "larcorealg/CoreUtils/DebugUtils.h" // lar::debug::demangle()
 
 // framework libraries
@@ -33,501 +42,17 @@
 #include <cassert>
 
 
-/**
- * @defgroup LArSoftProxies LArSoft data proxies
- * @brief Helper classes for easier access to connected data.
- * 
- * Proxies are objects that expose multiple connected data products with a
- * single interface, implicitly browsing the interconnections.
- * The connections may be explicit (via some type of data product association,
- * like `art::Assns`, or element indices) or implicit, following an agreed rule
- * (like in @ref LArSoftProxyDefinitionParallelData "parallel data products").
- * 
- * More complex proxy implementations are provided for some LArSoft data
- * products.
- * New proxies can be created as well.
- * 
- * 
- * @{
- */
-/**
- * @page LArSoftProxiesIntro Introduction to LArSoft data product proxy objects.
- * 
- * 
- * @section LArSoftProxyDefinitions Definitions
- * 
- * * *one-to-many sequential association*:
- *   @anchor LArSoftProxyDefinitionOneToManySeqAssn
- *   an association between `L` and `R` types where:
- *     * `L` objects come from a single data product
- *     * the sequence of associations is such that if `L1` is before `L2` in the
- *       original data product, all `L1`-`Rx` associations of `L1` are listed
- *       before any of the `L2`-`Rx` associations of `L2`; in other words, the
- *       association list follows the original order of the `L` data product;
- *       note that this preclude actual many-to-many associations.
- *   This does _not_ require associations to be one-to-one (it allows one `L` to
- *   many `R`), nor that all `L` be associated to at least one `R`.
- * * *parallel data product*:
- *   @anchor LArSoftProxyDefinitionParallelData
- *   a data product collection of elements extending
- *   the information from another data product collection ("main"), where
- *     * the two data products have the same number of elements
- *     * there is an implicit one-to-one association between the elements of the
- *       two data products, so that an element at position _i_ of the parallel
- *       data product pertains to the element at position _i_ of the main
- *       data product
- * * *one-to-(zero-or-one) sequential association*:
- *   @anchor LArSoftProxyDefinitionOneToZeroOrOneSeqAssn
- *   an association between `L` and `R` types where:
- *     * `L` objects come from a single data product
- *     * there is at most one `R` associated to each single `L`
- *     * the sequence of associations is such that if `L1` is before `L2` in the
- *       original data product, `L1`-`R1` association is listed before the
- *       `L2`-`R2` association; in other words, the association list follows the
- *       original order of the `L` data product.
- *   This does require associations to be one-to-one, bit it does _not_ require
- *   that all `L` be associated to at least one `R`.
- * 
- * 
- */
-/**
- * @defgroup LArSoftProxyCustom LArSoft data proxy infrastructure
- * @ingroup LArSoftProxies
- * @brief Classes for implementation and customization of LArsoft proxies.
- * 
- * This documentation section contains hints for the creation or customization
- * of data product proxies. The creation of new proxies is not overly hard, but
- * it is nevertheless not straightforward, and following the example of already
- * implemented proxies may be the best starting point.
- * 
- * It also explains some implementation choices.
- * 
- * @bug The current design is flawed in the support of (sub)proxies as direct
- *      elements of a proxy. The merged elements are implemented as base classes
- *      of the proxies, to allow their potentially customized interface to
- *      percolate to the proxy. Since an indirect base class can't appear also
- *      as direct base class, trying to merge a proxy causes all sorts of
- *      conflicts between base classes. The stub code `withCollectionProxyAs()`
- *      and related is showing that problem on some (all?) usages.
- *      [the author hasn't tried to create a working combination for it]
- * 
- * @section LArSoftProxySimple The simplest new proxy
- * 
- * In its simplest form, a proxy may be created with no customization at all:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * auto tracks = proxy::getCollection<std::vector<recob::Track>>
- *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * makes a proxy object called `tracks` which accesses a `recob::Track`
- * collection data product and its associated hits, assuming that tracks and
- * their association with hits be created by the same module (`trackTag`).
- * From this, it is possible to access tracks and their hits:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * for (auto trackInfo: tracks) {
- *   
- *   recob::Track const& track = *trackInfo; // access to the track
- *   double const startTheta = track.Theta();
- *   
- *   double const length = trackInfo->Length(); // access to track members
- * 
- *   // access to associated data (returns random-access collection-like object)
- *   decltype(auto) hits = trackInfo.get<recob::Hit>();
- *   
- *   double charge = 0.0;
- *   for (auto const& hitPtr: hits) {
- *     charge += hitPtr->Integral();
- *   } // for hits
- *   
- *   mf::LogVerbatim("Info")
- *     << "[#" << trackInfo.index() << "] track ID=" << track.ID()
- *     << " (" << length << " cm, starting with theta=" << startTheta
- *     << " rad) deposited charge=" << charge
- *     << " with " << hits.size() << " hits";
- *   
- * } // for tracks
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * 
- * 
- * @subsection LArSoftProxyQuirks Quirks of proxy usage (a.k.a. "C++ is not python")
- * 
- * There are a number of things one should remember when using proxies.
- * 
- * First, the type of the proxy collection, and the type of the proxy collection
- * element, are not trivial. That is the reason why we use
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * auto tracks = proxy::getCollection<std::vector<recob::Track>>
- *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * instead of
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * proxy::CollectionProxyBase<
- *     proxy::CollectionProxyElement,
- *     std::vector<recob::Track>,
- *     proxy::details::AssociatedData<recob::Track, recob::Hit, void, recob::Hit>
- *   >
- *   tracks = proxy::getCollection<std::vector<recob::Track>>
- *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * and even more so
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * for (auto trackInfo: tracks)
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * instead of the full class name
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * for (proxy::CollectionProxyElement<
- *   proxy::CollectionProxyBase<
- *     proxy::CollectionProxyElement,
- *     std::vector<recob::Track>,
- *     proxy::details::AssociatedData<recob::Track, recob::Hit, void, recob::Hit> >
- *   > trackInfo: tracks)
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * More important, the type depends on which elements we merged into the
- * collection proxy (in the example, `proxy::details::AssociatedData` reveals
- * that we merged an associated data). This means that a C++ function in general
- * can't reliably take a proxy argument by specifying its type, and it needs to
- * use templated arguments instead:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * template <typename Track>
- * unsigned int nHitsOnView(Track const& track, geo::View view);
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Also remember that template class methods are allowed but they can't be
- * virtual.
- * 
- * Second quirk, which yields a confused compilation message (at least with GCC
- * 6), is that template class methods of objects of a template type need the
- * `template` keyword for C++ to understand what's going on:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * template <typename Track>
- * unsigned int nHitsOnView(Track const& track, geo::View view) {
- *   unsigned int count = 0U;
- *   for (art::Ptr<recob::Hit> const& hitPtr: track.template get<recob::Hit>())
- *     if (hitPtr->View() == view) ++count;
- *   return count;
- * } // nHitsOnView()
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Here, `track` is a constant reference to type `Track`, which is a template
- * type, so that when we ask for `track.get<recob::Hit>()` the compiler does not
- * know that the object `track` of type `Track` has a method `get()` which is a
- * template method, and it gets confused (in fact, it thinks the expression
- * might be a comparison, `track.get < recob::Hit`, and hilarity ensues).
- * This is not true when the type of the object is immediately known:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * auto tracks = proxy::getCollection<std::vector<recob::Track>>
- *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
- * 
- * for (auto track: tracks) {
- *   unsigned int count = 0U;
- *   for (art::Ptr<recob::Hit> const& hitPtr: track.get<recob::Hit>())
- *     if (hitPtr->View() == view) ++count;
- *   mf::LogVerbatim("") << "Track ID=" << track->ID() << ": " << count
- *     << " hits on view " << view;
- * } // for
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * where `tracks` is a well-known (to the compiler) type, and `track` as well.
- * 
- * 
- * @section LArSoftProxyCustomization Customization of collection proxies
- * 
- * The "customization" of a collection proxy consists of writing classes and
- * functions specific for a use case, to be used as components of a collection
- * proxy in place of the standard ones.
- * 
- * The options of customization are numerous, and it is recommended that
- * customization start from the code of an existing customized proxy
- * implementing functionalities similar to the desired ones.
- * In the same spirit, customization hints are not provided here, but rather
- * in the
- * @ref LArSoftProxyTracksCustom "documentation of the proxy::Tracks collection proxy".
- * 
- * 
- * 
- * @section LArSoftProxyImplementation Technical details
- * 
- * @subsection LArSoftProxyOverhead Overhead
- * 
- * The proxies have been developed with an eye on minimising the replication of
- * information. The proxies are therefore light-weight objects relying on
- * pointers to the original data. One exception is that an additional structure
- * is created for each one-to-many association (i.e., to hits), which includes
- * a number of entries proportional to the number of tracks.
- * 
- * In general, anyway, copy of any proxies is not recommended, as it is usually
- * better just to pass around a reference to them.
- * 
- * Since this interface (and implementation) is still in development, there
- * might be flaws that make it non-performant. Please report any suspicious
- * behaviour.
- * 
- * 
- * @subsection LArSoftProxyInterfaceSubstitition Interface substitution
- * 
- * A technique that is used in this implementation is to replace (or extend) the
- * interface of an existing object.
- * The @ref InterfaceSubstitution "documentation of file CollectionView.h"
- * includes a more in-depth description of it.
- * 
- * 
- * @subsection IteratorWrappers Iterator wrappers and "static polymorphism"
- * 
- * A widely used interface change is the substitution of the dereference
- * operator of an iterator:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * struct address_iterator: public iterator { // DON'T DO THIS (won't work)
- *   auto operator*() -> decltype(auto)
- *     { return std::addressof(iterator::operator*()); }
- * }; // my_iterator
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * There are two important pitfalls to be aware of in this specific case, well
- * illustrated in this example.
- * 
- * If the caller tries to use e.g. `ait->name()` on a `address_iterator ait`
- * (or other members, like `ait[0]`), they will be picked from the base class,
- * and the overloaded `operator*()` is ignored. This can be avoided with private
- * inheritance, forcing the explicit implementation of everything we want to
- * use, which will be at very least an increment operator and a comparison one.
- * 
- * The second pitfall is that the base class methods return base class
- * references. For example, `*ait++` will call the inherited increment operator,
- * which returns an object of type `iterator`, and the following dereference
- * will be called on it, again bypassing the overridden dereference method.
- * This means that to implement the increment operator is not enough to import
- * the inherited one (`using iterator::operator++;`).
- * 
- * This task of wrapping a `base_iterator` involves a lot of "boilerplate" code:
- * the prefix increment operator will always be
- * `auto& operator++() { base_iterator::operator++(); return *this; }`, the
- * indexing operator will always be
- * `auto operator[](std::size_t i) -> decltype(auto) { return std::addressof(base_iterator::operator[](i)); }`
- * etc. The usual solution is to derive the iterator class from one that
- * implements the boilerplate. Unfortunately part of the boilerplate is from
- * the derived class and so it can't appear in the base class. With run-time
- * polymorphism, the base iterator might define an abstract value transformation
- * method (`transform()`) and use it in its other methods; the linker will take
- * care later on of plugging the right `transform()` method from the derived
- * class. To obtain the same effect at compile time, the base class needs to
- * know in advance the `transform()` function. Plugging it as a templated
- * literal argument (a function pointer) requires quite some gymnastic in
- * predicting the right data type, especially the return type.
- * A weird alternative is to have this base class inherit from the derived
- * class, specified as template argument. The derived iterator looks like:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * struct address_iterator: public iterator_base<address_iterator, iterator> {
- *   using iterator_base_t = iterator_base<address_iterator>;
- *   using iterator_base_t::iterator_base_t;
- *   static auto transform(iterator const& it) { return std::addressof(*it); }
- * };
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * and the weirdness is concentrated in the `iterator_base`:
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
- * template <typename FinalIter, typename WrappedIter>
- * class iterator_base: private WrappedIter {
- *   WrappedIter& asWrapped() const
- *     { return static_const<WrappedIter&>(*this); }
- *   FinalIter& asFinal() { return static_const<FinalIter&>(*this); }
- *     public:
- *   iterator_base() = default;
- *   iterator_base(WrappedIter const& from): WrapperIter(from) {}
- *   FinalIter& operator++() { WrappedIter::operator++(); return asFinal(); }
- *   auto operator*() const -> decltype(auto)
- *     { return asFinal().transform(*asWrapped()); }
- *   bool operator!= (iterator_base const& other) const
- *     { return asWrapped() != other.asWrapped(); }
- * }; // class iterator_base
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * With this class, it's possible to transform an `iterator` into an
- * `address_iterator`, in a similar way to how described in the "Interface
- * substitution" section (there are some workaround needed because of private
- * inheritance and to ensure that the iterator traits are correct).
- * 
- * @note I learned afterward about the existence of `boost::iterator_adapter`,
- *       which might provide similar functionality and also be dealing correctly
- *       with non-constant iterators. Worth considering.
- * 
- */
-/**
- * @defgroup LArSoftProxyReco Reconstructed object data proxy
- * @ingroup LArSoftProxies
- * @brief Data proxies for LArSoft reconstruction data products.
- * 
- * Each proxy is documented in its own "module" (see the list above).
- * 
- */
-// LArSoftProxyReco group is only defined here, no content is provided.
-// We selectively add to LArSoftProxies group via @ingroup directives.
-/**
- * @}
- */
-
-// FIXME simplify this code if issue #18769 is accepted
-namespace std {
-  
-  //----------------------------------------------------------------------------
-  //--- specializations of std::tuple interface for art::AssnsNode
-  //----------------------------------------------------------------------------
-  
-  // specialize for indices 0, 1, and 2; for all others, it's an incomplete type
-  template <typename L, typename R, typename D>
-  class tuple_element<0U, art::AssnsNode<L, R, D>> {
-      public:
-    using type = art::Ptr<L>;
-  };
-  
-  template <typename L, typename R, typename D>
-  class tuple_element<1U, art::AssnsNode<L, R, D>> {
-      public:
-    using type = art::Ptr<R>;
-  };
-  
-  template <typename L, typename R, typename D>
-  class tuple_element<2U, art::AssnsNode<L, R, D>> {
-      public:
-    using type = D const*;
-  };
-  
-  
-  //----------------------------------------------------------------------------
-  template< std::size_t I, typename L, typename R, typename D>
-  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>>&
-  get( art::AssnsNode<L, R, D>& t ) noexcept;
-  
-  template< std::size_t I, typename L, typename R, typename D>
-  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>>&&
-      get( art::AssnsNode<L, R, D>&& t ) noexcept;
-  
-  template< std::size_t I, typename L, typename R, typename D>
-  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>> const&
-      get( const art::AssnsNode<L, R, D>& t ) noexcept;
-  
-  template< std::size_t I, typename L, typename R, typename D>
-  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>> const&&
-      get( const art::AssnsNode<L, R, D>&& t ) noexcept;
-  
-  template< class T, typename L, typename R, typename D>
-  constexpr T& get(art::AssnsNode<L, R, D>& t) noexcept;
-  
-  template< class T, typename L, typename R, typename D>
-  constexpr T&& get(art::AssnsNode<L, R, D>&& t) noexcept;
-  
-  template< class T, typename L, typename R, typename D>
-  constexpr const T& get(const art::AssnsNode<L, R, D>& t) noexcept;
-  
-  template< class T, typename L, typename R, typename D>
-  constexpr const T&& get(const art::AssnsNode<L, R, D>&& t) noexcept;
-  
-  //----------------------------------------------------------------------------
-  
-  
-} // namespace std
-
-
 
 /// Encloses LArSoft data product proxy objects and utilities.
 /// @ingroup LArSoftProxies
 namespace proxy {
-  
-  //----------------------------------------------------------------------------
-  /// Trait of value contained in the template collection.
-  template <typename Coll>
-  struct collection_value_type {
-    using type = typename Coll::value_type;
-    using value_type = type;
-  }; // struct collection_value_type
-  
-  /// Type contained in the collection `Coll`.
-  template <typename Coll>
-  using collection_value_t = typename collection_value_type<Coll>::type;
-  
-  
-  /// Trait of type returned when accessing an element of collection `Coll`.
-  template <typename Coll>
-  struct collection_value_access_type {
-      private:
-    static auto getBegin(Coll&& coll) { using std::begin; return begin(coll); }
-    
-      public:
-    using type = decltype(*getBegin(std::declval<Coll>()));
-    using value_type = collection_value_t<Coll>;
-    
-  }; // struct collection_value_access_type
-  
-  /// Type returned when accessing an element of collection `Coll`.
-  template <typename Coll>
-  using collection_value_access_t
-    = typename collection_value_access_type<Coll>::type;
-  
-  
-  /// Trait of type returned when accessing an element of collection `Coll`.
-  template <typename Coll>
-  struct collection_value_constant_access_type {
-      private:
-    static auto getCBegin(Coll&& coll)
-      { using std::cbegin; return cbegin(coll); }
-    
-      public:
-    using type = decltype(*getCBegin(std::declval<Coll>()));
-    using value_type = collection_value_t<Coll>;
-    
-  }; // struct collection_value_constant_access_type
-  
-  /// Type returned when accessing an element of collection `Coll`.
-  template <typename Coll>
-  using collection_value_constant_access_t
-    = typename collection_value_constant_access_type<Coll>::type;
   
   
   //----------------------------------------------------------------------------
   namespace details {
     
     //--------------------------------------------------------------------------
-    template <bool B>
-    using YesNoStruct = std::integral_constant<bool, B>;
-    
-    //--------------------------------------------------------------------------
     // forward declarations
-    //--------------------------------------------------------------------------
-    // FIXME simplify this code if issue #18769 is accepted
-    template <typename Assns, typename = void>
-    struct AssnsMetadataTypeStruct;
-    
-    template <typename Assns>
-    using AssnsMetadata_t = typename AssnsMetadataTypeStruct<Assns>::type;
-    
-    template <typename Assns, typename = void>
-    struct AssnsIteratorTypeStruct;
-    
-    template <typename Assns>
-    using AssnsIterator_t = typename AssnsIteratorTypeStruct<Assns>::type;
-    
-    //--------------------------------------------------------------------------
-    template <typename MainColl>
-    struct MainCollectionProxy;
-    
-    //--------------------------------------------------------------------------
-    template <typename AuxCollTuple>
-    struct SubstituteWithAuxList;
-    
-    //--------------------------------------------------------------------------
-    template <
-      typename AuxColl,
-      typename Aux = collection_value_t<AuxColl>,
-      typename Tag = Aux
-      >
-    class ParallelData;
-    
-    //--------------------------------------------------------------------------
-    template<
-      typename Main, typename Aux, typename Metadata = void,
-      typename Tag = Aux
-      >
-    class AssociatedData;
-    
-    //--------------------------------------------------------------------------
-    template <
-      typename Main, typename Aux, typename Metadata = void,
-      typename Tag = Aux
-      >
-    class OneTo01Data;
-    
     //--------------------------------------------------------------------------
     template <
       typename Aux,
@@ -594,7 +119,7 @@ namespace proxy {
     //--------------------------------------------------------------------------
     template <
       typename AuxProxyColl,
-      typename Aux = collection_value_t<AuxProxyColl>,
+      typename Aux = util::collection_value_t<AuxProxyColl>,
       typename Tag = Aux
       >
     struct ProxyAsParallelData;
@@ -606,18 +131,6 @@ namespace proxy {
       >
     class WithProxyAsAuxStructBase;
     
-    
-    //--------------------------------------------------------------------------
-    template <typename ProxyElement, typename... AuxData>
-    auto makeCollectionProxyElement(
-      std::size_t index,
-      typename ProxyElement::main_element_t const& main,
-      AuxData&&... auxData
-      );
-    
-    //--------------------------------------------------------------------------
-    template <typename Cont>
-    class IndexBasedIterator;
     
     //--------------------------------------------------------------------------
     
@@ -642,6 +155,9 @@ namespace proxy {
    * * @ref LArSoftProxyDefinitionOneToManySeqAssn "one-to-many sequential association"
    *   implicitly supporting also one-to-any (one-to-one, one-to-zero/or/one) in
    *   a non-optimized way
+   * * @ref LArSoftProxyDefinitionOneToZeroOrOneSeqAssn "one-to-(zero-or-one) sequential association"
+   * * @ref LArSoftProxyDefinitionParallelData "parallel data product", implicit
+   *     one-to-one associations
    * 
    * @{
    */
@@ -676,16 +192,17 @@ namespace proxy {
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * art::Assns<recob::Track, recob::Vertex> trackVertexAssns;
    * // ...
-   * auto assData = makeAssociatedTo01data(assns);
+   * auto assData = makeOneTo01dataFrom(assns);
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * will have `assData` tagged as `recob::Vertex`.
    */
   template <typename Tag, typename Assns>
-  auto makeAssociatedTo01data(Assns const& assns, std::size_t minSize = 0);
+  auto makeOneTo01dataFrom(Assns const& assns, std::size_t minSize = 0)
+    { return proxy::makeOneTo01data<Tag>(assns, minSize); }
   
   template <typename Assns>
-  auto makeAssociatedTo01data(Assns const& assns, std::size_t minSize = 0)
-    { return makeAssociatedTo01data<typename Assns::right_t>(assns, minSize); }
+  auto makeOneTo01dataFrom(Assns const& assns, std::size_t minSize = 0)
+    { return proxy::makeOneTo01data(assns, minSize); }
   
   /**
    * @brief Creates and returns an one-to-(zero/one) associated data object.
@@ -698,27 +215,27 @@ namespace proxy {
    * @param tag input tag of the association object
    * @param minSize minimum number of entries in the produced association data
    * @return a new `OneTo01Data` filled with associations from `tag`
-   * @see `makeAssociatedTo01data(Assns, std::size_t)`
+   * @see `makeOneTo01dataFrom(Assns, std::size_t)`
    * 
    * The association being retrieved must fulfill the requirements of
    * @ref LArSoftProxyDefinitionOneToZeroOrOneSeqAssn "one-to-(zero or one) sequential association".
    * 
    * Two template types must be explicitly specified, e.g.
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * auto assData = makeAssociatedTo01data<recob::Track, recob::Vertex>(event, tag);
+   * auto assData = makeOneTo01dataFrom<recob::Track, recob::Vertex>(event, tag);
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
   template <
     typename Main, typename Aux, typename Metadata, typename Tag, typename Event
     >
-  auto makeAssociatedTo01data
+  auto makeOneTo01dataFrom
     (Event const& event, art::InputTag tag, std::size_t minSize = 0);
   
   template <typename Main, typename Aux, typename Metadata, typename Event>
-  auto makeAssociatedTo01data
+  auto makeOneTo01dataFrom
     (Event const& event, art::InputTag tag, std::size_t minSize = 0)
     {
-      return makeAssociatedTo01data<Main, Aux, Metadata, Aux, Event>
+      return makeOneTo01dataFrom<Main, Aux, Metadata, Aux, Event>
         (event, tag, minSize);
     }
   
@@ -732,10 +249,10 @@ namespace proxy {
    * @param event event to read associations from
    * @param tag input tag of the association object
    * @return a new `OneTo01Data` wrapping the information in `assns`
-   * @see `makeAssociatedData(Event const&, art::InputTag, std::size_t)`
+   * @see `makeAssociatedDataFrom(Event const&, art::InputTag, std::size_t)`
    * 
    * This function operates like
-   * `makeAssociatedTo01data(Event const&, art::InputTag, std::size_t)`, but it
+   * `makeOneTo01dataFrom(Event const&, art::InputTag, std::size_t)`, but it
    * extracts the information about the type of main object and the minimum
    * number of them from a handle.
    * The handle object is expected to behave as a smart pointer to a
@@ -743,21 +260,21 @@ namespace proxy {
    * 
    * One template type must be explicitly specified, e.g.
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * auto assData = makeAssociatedTo01data<recob::Vertex>(handle, event, tag);
+   * auto assData = makeOneTo01dataFrom<recob::Vertex>(handle, event, tag);
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
   template <
     typename Aux, typename Metadata, typename Tag,
     typename Handle, typename Event
     >
-  auto makeAssociatedTo01data
+  auto makeOneTo01dataFrom
     (Handle&& handle, Event const& event, art::InputTag tag);
   
   template <typename Aux, typename Metadata, typename Handle, typename Event>
-  auto makeAssociatedTo01data
+  auto makeOneTo01dataFrom
     (Handle&& handle, Event const& event, art::InputTag tag)
     {
-      return makeAssociatedTo01data<Aux, Metadata, Aux, Handle, Event>
+      return makeOneTo01dataFrom<Aux, Metadata, Aux, Handle, Event>
         (std::forward<Handle>(handle), event, tag);
     }
   
@@ -770,19 +287,19 @@ namespace proxy {
    * @param mainColl the main collection object
    * @param assns association data object
    * @return a new `OneTo01Data` wrapping the information in `assns`
-   * @see `makeAssociatedTo01data(Assns const&, std::size_t)`
+   * @see `makeOneTo01dataFrom(Assns const&, std::size_t)`
    * 
    * This function operates like
-   * `makeAssociatedTo01data(Assns const&, std::size_t)`, where the size is
+   * `makeOneTo01dataFrom(Assns const&, std::size_t)`, where the size is
    * extracted from the main data collection.
    */
   template <typename Tag, typename MainColl, typename Assns>
-  auto makeAssociatedTo01data(MainColl const& mainColl, Assns const& assns)
-    { return makeAssociatedTo01data<Tag>(assns, mainColl.size()); }
+  auto makeOneTo01dataFrom(MainColl const& mainColl, Assns const& assns)
+    { return proxy::makeOneTo01data<Tag>(assns, mainColl.size()); }
   
   template <typename MainColl, typename Assns>
-  auto makeAssociatedTo01data(MainColl const& mainColl, Assns const& assns)
-    { return makeAssociatedTo01data<typename Assns::right_t>(mainColl, assns); }
+  auto makeOneTo01dataFrom(MainColl const& mainColl, Assns const& assns)
+    { return proxy::makeOneTo01data<typename Assns::right_t>(mainColl, assns); }
   
   
   //----------------------------------------------------------------------------
@@ -896,7 +413,7 @@ namespace proxy {
           std::is_convertible<typename Assns::right_t, aux_element_t>(),
           "Improper right type for one-to-(zero-or-one) association."
           );
-        return makeAssociatedTo01data<data_tag>(assns, handle->size());
+        return proxy::makeOneTo01data<data_tag>(assns, handle->size());
       }
     
     
@@ -905,7 +422,7 @@ namespace proxy {
     static auto createFromTag
       (Event const& event, Handle&& mainHandle, art::InputTag auxInputTag)
       {
-        return makeAssociatedTo01data
+        return makeOneTo01dataFrom
           <main_element_t, aux_element_t, metadata_t, data_tag>
           (event, auxInputTag, mainHandle->size());
       }
@@ -1046,16 +563,17 @@ namespace proxy {
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * art::Assns<recob::Track, recob::Hit> trackHitAssns;
    * // ...
-   * auto assData = makeAssociatedData(assns);
+   * auto assData = makeAssociatedDataFrom(assns);
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * will have `assData` tagged as `recob::Hit`.
    */
   template <typename Tag, typename Assns>
-  auto makeAssociatedData(Assns const& assns, std::size_t minSize = 0);
+  auto makeAssociatedDataFrom(Assns const& assns, std::size_t minSize = 0)
+    { return proxy::makeAssociatedData<Tag>(assns, minSize); }
   
   template <typename Assns>
-  auto makeAssociatedData(Assns const& assns, std::size_t minSize = 0)
-    { return makeAssociatedData<typename Assns::right_t>(assns, minSize); }
+  auto makeAssociatedDataFrom(Assns const& assns, std::size_t minSize = 0)
+    { return makeAssociatedDataFrom<typename Assns::right_t>(assns, minSize); }
   
   /**
    * @brief Creates and returns an associated data object.
@@ -1079,29 +597,29 @@ namespace proxy {
    * 
    * Two template types must be explicitly specified, e.g.
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * auto assData = makeAssociatedData<recob::Track, recob::Hit>(event, tag);
+   * auto assData = makeAssociatedDataFrom<recob::Track, recob::Hit>(event, tag);
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
   template <
     typename Main, typename Aux, typename Metadata, typename Tag,
     typename Event
     >
-  auto makeAssociatedData
+  auto makeAssociatedDataFrom
     (Event const& event, art::InputTag tag, std::size_t minSize = 0);
   
   template <typename Main, typename Aux, typename Metadata, typename Event>
-  auto makeAssociatedData
+  auto makeAssociatedDataFrom
     (Event const& event, art::InputTag tag, std::size_t minSize = 0)
     {
-      return makeAssociatedData<Main, Aux, Metadata, Aux, Event>
+      return makeAssociatedDataFrom<Main, Aux, Metadata, Aux, Event>
         (event, tag, minSize);
     }
   
   template <typename Main, typename Aux, typename Event>
-  auto makeAssociatedData
+  auto makeAssociatedDataFrom
     (Event const& event, art::InputTag tag, std::size_t minSize = 0)
     {
-      return makeAssociatedData<Main, Aux, void, Aux, Event>
+      return makeAssociatedDataFrom<Main, Aux, void, Aux, Event>
         (event, tag, minSize);
     }
   
@@ -1116,10 +634,10 @@ namespace proxy {
    * @param event event to read associations from
    * @param tag input tag of the association object
    * @return a new `AssociatedData` filled with associations from `tag`
-   * @see `makeAssociatedData(Event const&, art::InputTag, std::size_t)`
+   * @see `makeAssociatedDataFrom(Event const&, art::InputTag, std::size_t)`
    * 
    * This function operates like
-   * `makeAssociatedData(Event const&, art::InputTag, std::size_t)`, but it
+   * `makeAssociatedDataFrom(Event const&, art::InputTag, std::size_t)`, but it
    * extracts the information about the type of main object and the minimum
    * number of them from a handle.
    * The handle object is expected to behave as a smart pointer to a
@@ -1127,29 +645,29 @@ namespace proxy {
    * 
    * One template type must be explicitly specified, e.g.
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * auto assData = makeAssociatedData<recob::Hit>(handle, event, tag);
+   * auto assData = makeAssociatedDataFrom<recob::Hit>(handle, event, tag);
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    */
   template <
     typename Aux, typename Metadata, typename Tag,
     typename Handle, typename Event
     >
-  auto makeAssociatedData
+  auto makeAssociatedDataFrom
     (Handle&& handle, Event const& event, art::InputTag tag);
   
   template <typename Aux, typename Metadata, typename Handle, typename Event>
-  auto makeAssociatedData
+  auto makeAssociatedDataFrom
     (Handle&& handle, Event const& event, art::InputTag tag)
     {
-      return makeAssociatedData<Aux, Metadata, Aux, Handle, Event>
+      return makeAssociatedDataFrom<Aux, Metadata, Aux, Handle, Event>
         (std::forward<Handle>(handle), event, tag);
     }
   
   template <typename Aux, typename Handle, typename Event>
-  auto makeAssociatedData
+  auto makeAssociatedDataFrom
     (Handle&& handle, Event const& event, art::InputTag tag)
     {
-      return makeAssociatedData<Aux, void, Aux, Handle, Event>
+      return makeAssociatedDataFrom<Aux, void, Aux, Handle, Event>
         (std::forward<Handle>(handle), event, tag);
     }
   
@@ -1162,19 +680,19 @@ namespace proxy {
    * @param mainColl the main collection object
    * @param assns association data object
    * @return a new `AssociatedData` wrapping the information in `assns`
-   * @see `makeAssociatedData(Assns const&, std::size_t)`
+   * @see `makeAssociatedDataFrom(Assns const&, std::size_t)`
    * 
    * This function operates like
-   * `makeAssociatedData(Assns const&, std::size_t)`, where the size is
+   * `makeAssociatedDataFrom(Assns const&, std::size_t)`, where the size is
    * extracted from the main data collection.
    */
   template <typename Tag, typename MainColl, typename Assns>
-  auto makeAssociatedData(MainColl const& mainColl, Assns const& assns)
-    { return makeAssociatedData<Tag>(assns, mainColl.size()); }
+  auto makeAssociatedDataFrom(MainColl const& mainColl, Assns const& assns)
+    { return proxy::makeAssociatedData<Tag>(assns, mainColl.size()); }
   
   template <typename MainColl, typename Assns>
-  auto makeAssociatedData(MainColl const& mainColl, Assns const& assns)
-    { return makeAssociatedData<typename Assns::right_t>(mainColl, assns); }
+  auto makeAssociatedDataFrom(MainColl const& mainColl, Assns const& assns)
+    { return makeAssociatedDataFrom<typename Assns::right_t>(mainColl, assns); }
   
   
   //----------------------------------------------------------------------------
@@ -1284,7 +802,7 @@ namespace proxy {
           std::is_convertible<typename Assns::right_t, aux_element_t>(),
           "Improper right type for association."
           );
-        return makeAssociatedData<data_tag>(assns);
+        return makeAssociatedDataFrom<data_tag>(assns);
       }
     
     
@@ -1293,7 +811,7 @@ namespace proxy {
     static auto createFromTag
       (Event const& event, Handle&& mainHandle, art::InputTag auxInputTag)
       {
-        return makeAssociatedData
+        return makeAssociatedDataFrom
           <main_element_t, aux_element_t, metadata_t, data_tag>
           (event, auxInputTag, mainHandle->size());
       }
@@ -1440,7 +958,7 @@ namespace proxy {
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * std::vector<recob::TrackFitHitInfo> trackData;
    * // ...
-   * auto auxData = makeParallelData(trackData);
+   * auto auxData = makeParallelDataFrom(trackData);
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * where the tag of the parallel data is now `recob::TrackFitHitInfo` and
    * `auxData` behaviour becomes undefined as soon as `trackData` falls out of
@@ -1448,10 +966,11 @@ namespace proxy {
    */
   template <
     typename AuxColl,
-    typename Aux = collection_value_t<AuxColl>,
+    typename Aux = util::collection_value_t<AuxColl>,
     typename Tag = Aux
     >
-  auto makeParallelData(AuxColl const& data);
+  auto makeParallelDataFrom(AuxColl const& data)
+    { return proxy::makeParallelData<AuxColl, Aux, Tag>(data); }
   
   
   /**
@@ -1471,22 +990,22 @@ namespace proxy {
    * At least one template type must be explicitly specified, e.g.
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * auto auxData
-   *   = makeParallelData<std::vector<recob::TrackFitHitInfo>>(event, tag);
+   *   = makeParallelDataFrom<std::vector<recob::TrackFitHitInfo>>(event, tag);
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * In this case, the `Aux` type is defined as `recob::TrackFitHitInfo`, as is
    * the tag.
    */
   template <typename AuxColl, typename Aux, typename Tag, typename Event>
-  auto makeParallelData(Event const& event, art::InputTag tag);
+  auto makeParallelDataFrom(Event const& event, art::InputTag tag);
   
   template <typename AuxColl, typename Aux, typename Event>
-  auto makeParallelData(Event const& event, art::InputTag tag)
-    { return makeParallelData<AuxColl, Aux, Aux, Event>(event, tag); }
+  auto makeParallelDataFrom(Event const& event, art::InputTag tag)
+    { return makeParallelDataFrom<AuxColl, Aux, Aux, Event>(event, tag); }
   
   template <typename AuxColl, typename Event>
-  auto makeParallelData(Event const& event, art::InputTag tag)
+  auto makeParallelDataFrom(Event const& event, art::InputTag tag)
     {
-      return makeParallelData<AuxColl, collection_value_t<AuxColl>, Event>
+      return makeParallelDataFrom<AuxColl, util::collection_value_t<AuxColl>, Event>
         (event, tag);
     }
   
@@ -1510,7 +1029,7 @@ namespace proxy {
     typename Main,
     typename AuxColl,
     typename Aux,
-    typename AuxTag = collection_value_t<AuxColl>
+    typename AuxTag = util::collection_value_t<AuxColl>
     >
   struct ParallelDataProxyMakerBase {
     
@@ -1597,7 +1116,7 @@ namespace proxy {
       (Event const&, Handle&&, MainArgs const&, aux_collection_t const& auxColl)
       {
         return
-          makeParallelData<aux_collection_t, aux_element_t, data_tag>(auxColl);
+          makeParallelDataFrom<aux_collection_t, aux_element_t, data_tag>(auxColl);
       }
     
     
@@ -1606,7 +1125,7 @@ namespace proxy {
     static auto createFromTag
       (Event const& event, Handle&&, art::InputTag auxInputTag)
       {
-        return makeParallelData<aux_collection_t, aux_element_t, data_tag>
+        return makeParallelDataFrom<aux_collection_t, aux_element_t, data_tag>
           (event, auxInputTag);
       }
     
@@ -1732,7 +1251,7 @@ namespace proxy {
   //----------------------------------------------------------------------------
   template <
     typename Tag /* = Aux */,
-    typename Aux /* = collection_value_t<AuxProxyColl>*/,
+    typename Aux /* = util::collection_value_t<AuxProxyColl>*/,
     typename AuxProxyColl
     >
   auto makeProxyAsParallelData(AuxProxyColl&& auxProxy)
@@ -1800,7 +1319,7 @@ namespace proxy {
         auto auxProxy = makeAuxiliaryProxy
           (event, auxProxyTag, std::forward<AuxArgs>(args)...);
         return makeProxyAsParallelData
-          <data_tag, collection_value_t<decltype(auxProxy)>>
+          <data_tag, util::collection_value_t<decltype(auxProxy)>>
           (std::move(auxProxy));
       }
     
@@ -1859,7 +1378,7 @@ namespace proxy {
     typename Main,
     typename AuxProxy,
     typename CollProxy,
-    typename Tag = collection_value_t<AuxProxy>
+    typename Tag = util::collection_value_t<AuxProxy>
     >
   class ProxyAsAuxProxyMaker
     : public ProxyAsAuxProxyMakerBase<Main, AuxProxy, Tag>
@@ -1870,498 +1389,9 @@ namespace proxy {
   // end Proxy as auxiliary data
   
   
-  /**
-   * @defgroup LArSoftProxiesElement Proxy element infrastructure
-   * @ingroup LArSoftProxyCustom
-   * @brief Infrastructure to describe the element of a proxy
-   * 
-   * A collection proxy element is a complex entity in that it has to figure out
-   * all the data it can return, and their type.
-   * 
-   * The default type of a collection proxy element is
-   * `proxy::CollectionProxyElement`.
-   * 
-   * @{
-   */
-  
-  //----------------------------------------------------------------------------
-  /**
-   * @brief An element of a collection proxy.
-   * @tparam CollProxy the type of collection proxy this is the element of
-   * 
-   * The collection proxy element represents, unsurprisingly, a single element
-   * of the collection proxy.
-   * It exposes all the connections between the components merged into the
-   * collection proxy, for a specific element.
-   * 
-   * The interface of a proxy element allows it to access the main and auxiliary
-   * data as follows:
-   * * main data element (always present!):
-   *     * the whole object, by dereference method (`*track`)
-   *     * methods and fields, by member access (`track->Length()`)
-   * * auxiliary data: accessed by tag (usually it's the default, that is the
-   *   same as the data type):
-   *     * check if available: `has()` method, static
-   *       (`track.has<recob::Hit>()`)
-   *     * get the data:
-   *         * `get()` method; the data *must* be available or this
-   *           call will not compile (`track.get<recob::Hit>()`)
-   *         * `getIf()` method; if the data is not available, an exception is
-   *           thrown
-   * * _index_ of the element in the collection (a bonus!): `index()` method
-   * 
-   * The for loop block illustrates how to use some of them:
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * auto tracks = proxy::getCollection<std::vector<recob::Track>>
-   *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
-   * 
-   * for (auto track: tracks) {
-   *   
-   *   recob::Track const& trackObj = *track; // access to the track
-   *   
-   *   double const length = track->Length(); // access to track members
-   * 
-   *   // access to associated data
-   *   // (returns random-access collection-like object)
-   *   decltype(auto) hits = track.get<recob::Hit>();
-   *   double charge = 0.0;
-   *   for (auto const& hitPtr: hits) charge += hitPtr->Integral();
-   *   
-   *   std::vector<recob::TrackFitHitInfo> const* fitInfo
-   *     = track.has<std::vector<recob::TrackFitHitInfo>>()
-   *     ? &(track.getIf<std::vector<recob::TrackFitHitInfo>>())
-   *     : nullptr
-   *     ;
-   *   
-   *   mf::LogVerbatim("Info")
-   *     << "[#" << trackInfo.index() << "] track ID=" << trackObj.ID()
-   *     << " (" << length << " cm) deposited charge=" << charge
-   *     << " with " << hits.size() << " hits and"
-   *     << (fitInfo? "": " no") << " fit information";
-   *   
-   * } // for tracks
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * Please note that `getIf()` method is _not easy to use correctly_.
-   * In this example, we rely on the knowledge that `track.getIf()` would return
-   * a reference to a (non-temporary) object, and we take the address of that
-   * object: this is not necessarily the case (e.g., it is not the case for
-   * `getIf<recob::Hit>()`).
-   * 
-   * 
-   * Customization
-   * ==============
-   * 
-   * A proxy element class can (and should) be derived from
-   * `proxy::CollectionProxyElement`.
-   * On top of it, the derived class can extend or completely rewrite the
-   * interface:
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * template <typename CollProxy>
-   * class TrackProxy: public proxy::CollectionProxyElement<CollProxy> {
-   *   using base_t = proxy::CollectionProxyElement<CollProxy>;
-   *     public:
-   *   unsigned int nHits() const
-   *     { return base_t::template get<recob::Hit>().size(); }
-   * }; // class TrackProxy
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * Specialization is also possible, but discouraged.
-   * 
-   * A `proxy::CollectionProxyElement` has knowledge of the type of collection
-   * proxy it's an element of, but it has no connection to a collection proxy
-   * object and in fact it never interacts with any, not even during
-   * construction.
-   * 
-   * Once the element is customized, a `proxy::CollectionProxy` can use it by
-   * having it as first template argument:
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * template <typename MainColl, typename... AuxColl>
-   * using Proxy_t
-   *   = proxy::CollectionProxyBase<TrackProxy, MainColl, AuxColl...>;
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * A `CollectionProxyMaker` specialization will have to `make()` such objects.
-   */
-  template <typename CollProxy>
-  struct CollectionProxyElement {
-    
-      public:
-    using collection_proxy_t = CollProxy;
-    using main_element_t = typename collection_proxy_t::main_element_t;
-    
-    /// Tuple of elements (expected to be tagged types).
-    using aux_elements_t = typename details::SubstituteWithAuxList
-      <typename collection_proxy_t::aux_collections_t>::type;
-    
-    /// Constructor: sets the element index, the main element and steals
-    /// auxiliary data.
-    CollectionProxyElement
-      (std::size_t index, main_element_t const& main, aux_elements_t&& auxData)
-      : fIndex(index), fMain(&main) , fAuxData(std::move(auxData))
-      {}
-    
-    /// Returns a pointer to the main element.
-    main_element_t const* operator->() const { return fMain; }
-    
-    /// Returns a reference to the main element.
-    main_element_t const& operator*() const { return *fMain; }
-    
-    /// Returns the index of this element in the collection.
-    std::size_t index() const { return fIndex; };
-    
-    /// Returns the auxiliary data specified by type (`Tag`).
-    template <typename Tag>
-    auto get() const -> decltype(auto)
-      { return std::get<util::index_of_tag_v<Tag, aux_elements_t>>(fAuxData); }
-    
-    
-    /**
-     * @brief Returns the auxiliary data specified by type (`Tag`).
-     * @tparam Tag tag of the data to fetch (usually, its type)
-     * @tparam T type to return (by default, a constant reference to `Tag`)
-     * @return the auxiliary data specified by type (`Tag`).
-     * @throw std::logic_error if the tag is not available.
-     * @see get(), has()
-     * 
-     * This method is a `get()` which forgives when the requested type is not
-     * available (because this proxy was configured not to hold it).
-     * 
-     * The difference with `get()` is the following:
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-     * decltype(auto) elem = tracks[0];
-     * if (elem.has<recob::Hit>()) {
-     *   auto hits = elem.get<recob::Hit>();
-     *   // ...
-     * }
-     * if (elem.has<recob::SpacePoint>()) {
-     *   auto spacepoints = elem.getIf<recob::SpacePoint>();
-     *   // ...
-     * }
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     * If the proxy `tracks` has _not_ been coded with `recob::Hit` data,
-     * the code snippet will _not_ compile, because `get()` will not compile
-     * for tags that were not coded in. On the other end, if `recob::Hit`
-     * is coded in `tracks` but `recob::SpacePoint` is not, the snippet _will_
-     * compile. In that case, if the `has()` check had been omitted, `getIt()`
-     * would throw a `std::logic_error` exception when executed.
-     * With C++17, this will not be necessary any more by using "constexpr if":
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-     * decltype(auto) elem = tracks[0];
-     * if constexpr (elem.has<recob::Hit>()) {
-     *   auto hits = elem.get<recob::Hit>();
-     *   // ...
-     * }
-     * if constexpr (elem.has<recob::SpacePoint>()) {
-     *   auto spacepoints = elem.get<recob::SpacePoint>();
-     *   // ...
-     * }
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     * 
-     * @note The second template argument contains the *exact* type returned by
-     *       the function. That information is needed because this method needs
-     *       to return the same type (or compatible types) whether the required
-     *       tag is present or not, in order for user code like
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-     *       if (elem.has<recob::SpacePoint>()) {
-     *         recob::SpacePoint const* spacepoints
-     *           = elem.getIf<recob::SpacePoint>(); // won't do
-     *         // ...
-     *       }
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     *       to work; it becomes:
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-     *       if (elem.has<recob::SpacePoint>()) {
-     *         recob::SpacePoint const* spacepoints
-     *           = elem.getIf<recob::SpacePoint, recob::SpacePoint const*>();
-     *         // ...
-     *       }
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     *       This is necessary because when the tag (in the example,
-     *       `recob::SpacePoint`) is not registered in the proxy, `getIf()` has
-     *       no clue of what the return value should be ("which is the type of
-     *       the data that does not exist?").
-     * 
-     */
-    template <typename Tag, typename T = Tag const&>
-    auto getIf() const -> decltype(auto);
-    
-    
-    /// Returns whether this class knowns about the specified type (`Tag`).
-    template <typename Tag>
-    static constexpr bool has() { return util::has_tag_v<Tag, aux_elements_t>; }
-    
-      private:
-    
-    std::size_t fIndex; ///< Index of this element in the proxy.
-    main_element_t const* fMain; ///< Pointer to the main object of the element.
-    
-    // note that the auxiliary data is not tagged, we need to learn which
-    // the tags are from the collection.
-    aux_elements_t fAuxData; ///< Data associated to the main object.
-    
-    template <typename Tag, typename>
-    auto getIfHas(details::YesNoStruct<true>) const -> decltype(auto);
-    
-    template <typename Tag, typename T>
-    [[noreturn]] auto getIfHas(details::YesNoStruct<false>) const -> T;
-    
-  }; // CollectionProxyElement<>
-
-
-  /// @}
-  // end Collection proxy element infrastructure
-  
-  
-  /**
-   * @defgroup LArSoftProxyCollections Collection proxy infrastructure
-   * @ingroup LArSoftProxyCustom
-   * @brief Infrastructure to define a proxy of collection data product.
-   * 
-   * A data collection proxy connects a main collection data product with other
-   * data products whose elements have relation with one of the main product
-   * elements.
-   * 
-   * A collection proxy is created via a call to `getCollection()`, in a fashion
-   * non dissimilar from calling, e.g., `art::Event::getValidHandle()`.
-   * 
-   * A proxy is characterized by a proxy tag, which is the type used in the
-   * `getCollection()` call, but that is not necessarily in direct relation with
-   * the type of the collection proxy itself. In other words, calling
-   * `proxy::getCollection<proxy::Tracks>(event, trackTag)` will return a proxy
-   * object whose type is likely not `proxy::Tracks`.
-   * 
-   * Proxy collections are created by _merging_ auxiliary data into a main
-   * collection data product. See `getCollection()` for more details.
-   * 
-   * Proxies can be customized, meaning that collection proxies may be written
-   * to have a specific interface. There are different levels of customization,
-   * of the collection proxy itself, of its element type, and of the auxiliary
-   * data merged. Customization may require quite a bit of coding, and the
-   * easiest approach is to start from an already customized proxy implementing
-   * features similar to the desired ones.
-   * 
-   * It's worth stressing @ref LArSoftProxyQuirks "again" that collection
-   * proxies composed by merging different auxiliary data have different C++
-   * types, and that if such proxies need to be propagated as function arguments
-   * those arguments need to be of template type.
-   * 
-   * @{
-   */
-  
-  
-  //----------------------------------------------------------------------------
-  /**
-   * @brief Base representation of a collection of proxied objects.
-   * @tparam Element type of element of the collection proxy
-   * @tparam MainColl type of the collection of the main data product
-   * @tparam AuxColls type of all included auxiliary data proxies
-   * @see proxy::CollectionProxyElement
-   * 
-   * This object exposes a collection interface.
-   * The collection proxy is driven by a data product containing the main
-   * objects. The size of the collection proxy is the same as the one of this
-   * main data product, and all associated data is referring to its elements.
-   * 
-   * Thus, the elements of this collection proxy are objects that collect the
-   * information of a single element in the main data product and all the data
-   * associated with it.
-   * 
-   * The `AuxColls` types are tagged types: all must define a `tag` type.
-   * Their data is accessed specifying that tag, i.e. via `get<Tag>()`.
-   * Therefore, tags must be unique.
-   * 
-   * The type `Element` is expected to expose the same interface of
-   * `CollectionProxyElement`, from which it can derive. It is a template
-   * that needs to take as only argument the type of collection proxy it is the
-   * element of. This is a way to customize the interface of access to single
-   * element of proxy.
-   * 
-   * 
-   */
-  template <
-    template <typename CollProxy> class Element,
-    typename MainColl,
-    typename... AuxColls
-    >
-  class CollectionProxyBase
-    : public details::MainCollectionProxy<MainColl>, public AuxColls...
-  {
-    /// This type.
-    using collection_proxy_t
-      = CollectionProxyBase<Element, MainColl, AuxColls...>;
-    
-    /// Type of wrapper used for the main data product.
-    using main_collection_proxy_t = details::MainCollectionProxy<MainColl>;
-    
-      public:
-    /// Type of element of the main data product.
-    using typename main_collection_proxy_t::main_element_t;
-    
-    /// Type of collection in the main data product.
-    using typename main_collection_proxy_t::main_collection_t;
-    
-    /// Type of element of this collection proxy.
-    using element_proxy_t = Element<collection_proxy_t>;
-    
-    /// Tuple of all auxiliary data collections (wrappers).
-    using aux_collections_t = std::tuple<AuxColls...>;
-    
-    /// Type of element of this collection proxy.
-    using value_type = element_proxy_t;
-    
-    /// Type of iterator to this collection (constant).
-    using const_iterator = details::IndexBasedIterator<collection_proxy_t>;
-    
-    /// Type of iterator to this collection (still constant).
-    using iterator = const_iterator;
-    
-    /**
-     * @brief Constructor: uses the specified data.
-     * @param main the original main data product collection
-     * @param aux all auxiliary data collections and structures
-     * 
-     * The auxiliary data structures are stolen (moved) from the arguments.
-     * They are expected to be wrappers around the original associated data,
-     * not owning the auxiliary data itself.
-     */
-    CollectionProxyBase(main_collection_t const& main, AuxColls&&... aux)
-      : main_collection_proxy_t(main), AuxColls(std::move(aux))...
-      {}
-    
-    /**
-     * @brief Returns the element of this collection with the specified index.
-     * @param i the index in the collection
-     * @return a value representing an element of the collection
-     * 
-     * The returned value is an object created on the spot, not a reference to
-     * an existing structure.
-     * The structure exposes the `i`-th element in the main collection, plus all
-     * objects that are associated to it.
-     */
-    element_proxy_t const operator[] (std::size_t i) const
-      {
-        return details::makeCollectionProxyElement<element_proxy_t>
-          (i, getMainAt(i), aux<AuxColls>().operator[](i)...);
-      }
-    
-    /// Returns an iterator to the first element of the collection.
-    const_iterator begin() const { return makeIterator(0); }
-    
-    /// Returns an iterator past the last element of the collection.
-    const_iterator end() const { return makeIterator(size()); }
-    
-    /// Returns whether this collection is empty.
-    bool empty() const { return main().empty(); }
-    
-    /// Returns the size of this collection.
-    std::size_t size() const { return main().size(); }
-    
-    
-    /// Returns the associated data proxy specified by `AuxTag`.
-    template <typename AuxTag>
-    auto get() const -> decltype(auto) { return auxByTag<AuxTag>(); }
-    
-    
-    /**
-     * @brief Returns the auxiliary data specified by type (`Tag`).
-     * @tparam Tag tag of the data to fetch (usually, its type)
-     * @tparam T exact type returned by the method (by default a vector of tags)
-     * @return the auxiliary data specified by type (`Tag`).
-     * @throw std::logic_error if the tag is not available.
-     * @see get(), has()
-     * 
-     * This method is a `get()` which forgives when the requested type is not
-     * available (because this proxy was configured not to hold it).
-     * 
-     * The difference with `get()` is the following:
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-     * if (tracks.has<recob::Hit>()) {
-     *   auto hits = tracks.get<recob::Hit>();
-     *   // ...
-     * }
-     * if (tracks.has<recob::SpacePoint>()) {
-     *   auto spacepoints = tracks.getIf<recob::SpacePoint>();
-     *   // ...
-     * }
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     * If the proxy `tracks` has _not_ been coded with `recob::Hit` data,
-     * the code snippet will _not_ compile, because `get()` will not compile
-     * for tags that were not coded in. On the other end, if `recob::Hit`
-     * is coded in `tracks` but `recob::SpacePoint` is not, the snippet _will_
-     * compile. In that case, if the `has()` check had been omitted, `getIt()`
-     * would throw a `std::logic_error` exception when executed.
-     * With C++17, this will not be necessary any more by using "constexpr if":
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-     * if constexpr (tracks.has<recob::Hit>()) {
-     *   auto hits = tracks.get<recob::Hit>();
-     *   // ...
-     * }
-     * if constexpr (tracks.has<recob::SpacePoint>()) {
-     *   auto spacepoints = tracks.get<recob::SpacePoint>();
-     *   // ...
-     * }
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     * 
-     * @note If the wrapped data product is something different than a vector
-     *       of space points (which in the example is likely, if space points
-     *       are associated to tracks), the almost-correct type of return value
-     *       needs to be specified as second template parameter `T`.
-     * 
-     * @warning This functionality is not trivial to use!
-     *          It's mostly meant for implementation of higher level wrappers.
-     */
-    template <typename Tag, typename T = std::vector<Tag> const&>
-    auto getIf() const -> decltype(auto);
-    
-    
-    /// Returns whether this class knowns about the specified type (`Tag`).
-    template <typename Tag>
-    static constexpr bool has()
-      { return util::has_tag_v<Tag, aux_collections_t>; }
-    
-    
-      protected:
-    using main_collection_proxy_t::main;
-    using main_collection_proxy_t::mainProxy;
-    using main_collection_proxy_t::getMainAt;
-    
-    /// Returns the auxiliary data specified by type.
-    template <typename AuxColl>
-    AuxColl const& aux() const { return static_cast<AuxColl const&>(*this); }
-    
-    /// Returns the auxiliary data specified by type.
-    template <typename AuxTag>
-    auto auxByTag() const -> decltype(auto)
-      { return aux<util::type_with_tag_t<AuxTag, aux_collections_t>>(); }
-    
-    
-    template <typename Tag, typename>
-    auto getIfHas(details::YesNoStruct<true>) const -> decltype(auto);
-    template <typename Tag, typename T>
-    [[noreturn]] auto getIfHas(details::YesNoStruct<false>) const -> T;
-    
-    /// Returns an iterator pointing to the specified index of this collection.
-    const_iterator makeIterator(std::size_t i) const { return { *this, i }; }
-    
-    
-    static_assert(!util::has_duplicate_tags<aux_collections_t>(),
-      "Some auxiliary data collections share the same tag. They should not.");
-    
-  }; // struct CollectionProxyBase
-  
-  
-  //----------------------------------------------------------------------------
-  /**
-   * @brief Base representation of a collection of proxied objects.
-   * @tparam MainColl type of the collection of the main data product
-   * @tparam AuxColls type of all included auxiliary data proxies
-   * @see proxy::CollectionProxyElement
-   * 
-   * This object is a "specialization" of `proxy::CollectionProxyBase` using
-   * `proxy::CollectionProxyElement` as element type.
-   */
-  template <typename MainColl, typename... AuxColls>
-  using CollectionProxy
-    = CollectionProxyBase<CollectionProxyElement, MainColl, AuxColls...>;
-  
+  // --- BEGIN Collection proxy infrastructure ---------------------------------
+  /// @ingroup LArSoftProxyCollections
+  /// @{
   
   //----------------------------------------------------------------------------
   /// The same as `withParallelData()`, but it also specified a tag.
@@ -2462,7 +1492,7 @@ namespace proxy {
   auto wrapParallelDataAs(AuxColl const& auxColl) {
     std::tuple<AuxColl const&> args = { auxColl };
     return details::WithWrappedParallelCollectionStruct
-      <collection_value_t<AuxColl>, decltype(args), AuxColl, AuxTag>
+      <util::collection_value_t<AuxColl>, decltype(args), AuxColl, AuxTag>
       (std::move(args));
   } // wrapParallelDataAs()
   /*
@@ -2474,7 +1504,7 @@ namespace proxy {
   /// Like `withParallelData()`, but directly using the specified collection.
   template <typename AuxColl>
   auto wrapParallelData(AuxColl const& auxColl)
-    { return wrapParallelDataAs<collection_value_t<AuxColl>>(auxColl); }
+    { return wrapParallelDataAs<util::collection_value_t<AuxColl>>(auxColl); }
   
   
   //----------------------------------------------------------------------------
@@ -2735,7 +1765,7 @@ namespace proxy {
   auto wrapAssociatedAs(Assns const& assns)
     {
       using Aux_t = typename Assns::right_t;
-      using Metadata_t = details::AssnsMetadata_t<Assns>;
+      using Metadata_t = lar::util::assns_metadata_t<Assns>;
       return
         details::WithAssociatedStruct<Aux_t, Metadata_t, std::tuple<>, AuxTag>
         ({});
@@ -2845,6 +1875,7 @@ namespace proxy {
    * function. Note that the type of proxy returned does not need to be
    * `CollProxy`, but is in fact an instance of `proxy::CollectionProxy`.
    * 
+   * @attention This class is not meant to be specialized.
    */
   template <typename CollProxy>
   struct CollectionProxyMakerBase {
@@ -2981,7 +2012,7 @@ namespace proxy {
   
   
   /// @}
-  // end group Data product proxy infrastructure
+  // --- END Collection proxy infrastructure -----------------------------------
   
   
   //----------------------------------------------------------------------------
@@ -2994,13 +2025,13 @@ namespace proxy {
     using main_collection_t = std::vector<T>;
     
     /// Type returned by the main collection indexing operator.
-    using main_element_t = collection_value_t<main_collection_t>;
+    using main_element_t = util::collection_value_t<main_collection_t>;
     
     /// Type of main collection proxy.
     using main_collection_proxy_t
       = details::MainCollectionProxy<main_collection_t>;
     
-  }; // CollectionProxyMakerTraits<CollectionProxy>
+  }; // CollectionProxyMakerTraits<std::vector<T>>
   
   
   template <typename MainColl>
@@ -3032,620 +2063,8 @@ namespace proxy {
     
     
     //--------------------------------------------------------------------------
-    /**
-     * @brief Iterator to random access collection storing a current index.
-     * @tparam Cont type of random-access container to iterate
-     * 
-     * `Cont` is a type providing a public `operator[](std::size_t)` method.
-     */
-    template <typename Cont>
-    class IndexBasedIterator {
-      
-        public:
-      using container_t = Cont;
-      
-      using value_type = collection_value_t<container_t>;
-      using const_iterator = IndexBasedIterator;
-      
-      /// Default constructor (required by iterator protocol): an unusable iterator.
-      IndexBasedIterator() = default;
-      
-      /// Constructor: initializes from an iterator of the proxy main collection.
-      IndexBasedIterator(container_t const& cont, std::size_t index = 0)
-        : fCont(&cont), fIndex(index) {}
-      
-      /// Returns the value pointed by this iterator.
-      auto operator* () const -> decltype(auto)
-        { return fCont->operator[](fIndex); }
-      
-      /// Returns the value pointed by this iterator.
-      const_iterator& operator++ () { ++fIndex; return *this; }
-      
-      /// Returns whether the iterators point to the same element.
-      bool operator!= (const_iterator const& other) const
-        { return (other.fIndex != fIndex) || (other.fCont != fCont); }
-      
-        protected:
-      container_t const* fCont = nullptr; ///< Pointer to the original container.
-      
-      /// Current index in the main collection.
-      std::size_t fIndex = std::numeric_limits<std::size_t>::max();
-      
-    }; // IndexBasedIterator<>
-    
-    
-    /**
-     * @brief Simple iterator wrapper for manipulation of dereferenced result.
-     * @tparam Iter final iterator
-     * @tparam BaseIter base iterator
-     * @tparam ValueType type returned by the new dereference operator
-     * 
-     * This class is designed to be used as base class for an iterator that
-     * redefines the dereference operations without changing anything else.
-     * An example of such iterator is:
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-     * using int_iterator_t = std::vector<int>::const_iterator;
-     * 
-     * class twice_iterator
-     *   : public IteratorWrapperBase<twice_iterator, int_iterator_t, float>
-     * {
-     *   using base_iterator_t
-     *     = IteratorWrapperBase<twice_iterator, int_iterator_t, float>;
-     *   
-     *     public:
-     *   
-     *   using base_iterator_t::base_iterator_t; // inherit constructors
-     *   
-     *   float operator*() const -> decltype(auto)
-     *     { return 2.0F * base_iterator_t::operator*(); }
-     *   
-     * }; // twice_iterator
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     * This new iterator `twice_iterator` effectively inherits `int_iterator_t`
-     * constructors (via `base_iterator_t`). Its `operator++()` returns a
-     * `twice_iterator`, so that operations like `*++it` are correctly handled.
-     * 
-     * Note that the derived classes need to redefine all the dereferencing
-     * operators that are supported:
-     * 
-     * * operator*()
-     * 
-     * The `operator->()` is not supported. Typically, `operator*()` returns a
-     * reference and `operator->()` a pointer to an existing structure.
-     * The `operator*()` is not required to return a reference when the iterator
-     * does not allow to modify the pointed data, and the wrapper can manipulate
-     * values and return temporary results. To have a similar feature for
-     * `operator->()` requires more work, as it should return a smart pointer
-     * that would perform the transformation on dereference.
-     * 
-     */
-    template <
-      typename Iter,
-      typename DataIter,
-      typename ValueType = typename DataIter::value_type
-      >
-    class IteratorWrapperBase: private DataIter {
-        protected:
-      using data_iterator_t = DataIter;
-      
-        public:
-      using iterator = Iter; ///!< The type of base iterator wrapper.
-      
-      /// @{
-      /// @name Iterator traits
-      using typename data_iterator_t::difference_type;
-      using value_type = ValueType;
-      using pointer = std::add_pointer_t<value_type>;
-      using reference = std::add_lvalue_reference_t<value_type>;
-      using iterator_category = std::forward_iterator_tag;
-      /// @}
-      
-      /// Default constructor: default-constructs the underlying iterator.
-      IteratorWrapperBase() = default;
-      
-      /// Copy-from-base constructor.
-      IteratorWrapperBase(data_iterator_t const& from): data_iterator_t(from) {}
-      
-      /// Prefix increment operator.
-      iterator& operator++()
-        { data_iterator_t::operator++(); return asIterator(); }
-      
-      /// Comparison with a data iterator (makes unnecessary to wrap end iterators).
-      bool operator!=(data_iterator_t const& other) const
-        { return other != asDataIterator(); }
-      
-      /// Comparison with another iterator.
-      bool operator!=(iterator const& other) const
-        { return operator!=(other.asDataIterator()); }
-      
-      auto operator[](std::size_t index) const -> decltype(auto)
-        { return asIterator().transform(asDataIterator() + index); }
-      
-      /// Dereference operator; need to be redefined by derived classes.
-      auto operator*() const -> decltype(auto)
-        { return asIterator().transform(asDataIterator()); }
-      
-      /// Dereference operator; need to be redefined by derived classes.
-      auto operator->() const -> decltype(auto)
-        { return makeValuePointer(operator*()); }
-      
-      
-        protected:
-      /// Transforms and returns the value at the specified data iterator.
-      static auto transform(data_iterator_t const&) -> decltype(auto)
-        { return data_iterator_t::operator*(); }
-      
-      data_iterator_t const& asDataIterator() const
-        { return static_cast<data_iterator_t const&>(*this); }
-      
-        private:
-      /// Value box for use with pointer dereference `operator->()`.
-      template <typename Value>
-      class ValuePtr {
-        Value value; ///< Value to return the address of (may be reference).
-          public:
-        ValuePtr(Value const& value): value(value) {}
-        /// Access the contained value via its pointer.
-        auto operator->() const -> decltype(auto)
-          { return std::addressof(value); }
-      }; // class ValuePtr<>
-      template <typename Value>
-      static ValuePtr<Value> makeValuePointer(Value&& value)
-        { return { std::forward<Value>(value) }; }
-      
-      iterator const& asIterator() const
-        { return static_cast<iterator const&>(*this); }
-      iterator& asIterator() { return static_cast<iterator&>(*this); }
-      
-    }; // IteratorWrapperBase<>
-    
-    
-#if 0
-    
-    /// Modified iterator returning the `N`-th element out of the pointed tuple.
-    template <std::size_t N, typename TupleIter>
-    class tuple_element_iterator:
-      public IteratorWrapperBase<
-        tuple_element_iterator<N, TupleIter>,
-        TupleIter,
-        std::tuple_element_t<N, typename TupleIter::value_type>
-        >
-    {
-      using base_iterator_t = IteratorWrapperBase<
-        tuple_element_iterator<N, TupleIter>,
-        TupleIter,
-        std::tuple_element_t<N, typename TupleIter::value_type>
-        >;
-      
-        public:
-      using base_iterator_t::base_iterator_t;
-      
-      /// Constructor from a base iterator (explicitly allowed).
-      tuple_element_iterator(base_iterator_t const& from)
-        : base_iterator_t(from) {}
-      
-      static auto transform(TupleIter const& v) -> decltype(auto)
-        {return std::get<N>(*v); }
-      
-    }; // tuple_element_iterator
-    
-#endif // 0
-    
-    //--------------------------------------------------------------------------
-    //--- BEGIN iterators for art::Assns
-    //--------------------------------------------------------------------------
-    
-    // will be present in C++17 as std::bool_constant
-    template <bool Value>
-    using bool_constant = std::integral_constant<bool, Value>;
-    
-    // will be present in C++17 as std::negation
-    template <typename BoolTrait>
-    using negation = bool_constant<!BoolTrait::value>;
-    
-    template <typename A, typename B>
-    using is_not_same = negation<std::is_same<A, B>>;
-    
-    //--------------------------------------------------------------------------
-    template <typename T>
-    using isAssnMetadata = is_not_same<T, void>;
-    
-    template <typename T>
-    struct AssnNodeMetadataType;
-    
-    template <typename T>
-    using AssnNodeMetadata_t = typename AssnNodeMetadataType<T>::type;
-    
-    template <typename L, typename R, typename D>
-    struct AssnNodeMetadataType<art::Assns<L, R, D>> { using type = D; };
-    
-    template <typename L, typename R, typename D>
-    struct AssnNodeMetadataType<art::AssnsNode<L, R, D>> { using type = D; };
-    
-    template <typename LPtr, typename RPtr>
-    struct AssnNodeMetadataType<std::pair<LPtr, RPtr>> { using type = void; };
-    
-    template <typename T>
-    using hasMetadata = isAssnMetadata<AssnNodeMetadata_t<T>>;
-    
-    //--------------------------------------------------------------------------
-    template <typename L, typename R, typename D = void>
-    struct AssnsNodeTraitsBase {
-      
-      using left_t = L; ///< Type at the left side of the association.
-      using right_t = R; ///< Type at the right side of the association.
-      using data_t = D; ///< Type of data bound to the association.
-      using leftptr_t = art::Ptr<left_t>; ///< Art pointer to the left side.
-      using rightptr_t = art::Ptr<right_t>; ///< Art pointer to the right side.
-      using dataptr_t = data_t const*; ///< Pointer to the bound metadata.
-      
-      /// Shortcut to know whether this node supports any metadata,
-      static constexpr bool hasMetadata = isAssnMetadata<data_t>();
-      
-    }; // struct AssnsNodeTraitsBase
-    
-    /// Data types for the specified association node type.
-    template <typename AssnsNode>
-    struct AssnsNodeTraits;
-    
-    template <typename L, typename R, typename D>
-    struct AssnsNodeTraits<art::AssnsNode<L, R, D>>
-      : public AssnsNodeTraitsBase<L, R, D>
-    {
-      using art_assns_node_t = art::AssnsNode<L, R, D>;
-    };
-    
-    template <typename L, typename R>
-    struct AssnsNodeTraits<std::pair<art::Ptr<L>, art::Ptr<R>>>
-      : public AssnsNodeTraitsBase<L, R>
-    {
-      using art_assns_node_t = std::pair<art::Ptr<L>, art::Ptr<R>>;
-    };
-    
-    
-    /// This type extends the interface of the art pointer to Assns right side.
-    template <typename ArtAssnsIterValue>
-    class AssnsNode: private ArtAssnsIterValue {
-      
-      using base_t = ArtAssnsIterValue; ///< Base class type.
-      using this_t = AssnsNode<ArtAssnsIterValue>; ///< This class.
-      using node_t = ArtAssnsIterValue; ///< Type of the wrapped node.
-      
-      /// Set of traits of the node.
-      using assns_node_traits_t = AssnsNodeTraits<node_t>;
-      
-        public:
-      
-      /// Type of the main (left) object in the association.
-      using main_t = typename assns_node_traits_t::left_t;
-      
-      /// Type of the associated (right) object.
-      using value_t = typename assns_node_traits_t::right_t;
-      
-      /// Type of the associated additional data (`void` if none).
-      using data_t = typename assns_node_traits_t::data_t;
-      
-      /// Type of _art_ pointer to the main (left) object in the association.
-      using mainptr_t = typename assns_node_traits_t::leftptr_t;
-      
-      /// Type of _art_ pointer to the associated (right) object.
-      using valueptr_t = typename assns_node_traits_t::rightptr_t;
-      
-      /// Type of the pointer to associated additional data.
-      using dataptr_t = typename assns_node_traits_t::dataptr_t;
-      
-      /// @{
-      /// @name Access to the associated (right) value
-      
-      /// Returns the _art_ pointer to the associated value.
-      valueptr_t const& valuePtr() const { return base_t::second; }
-      
-      /// Returns a reference to the associated value.
-      value_t const& value() const { return *valuePtr(); }
-      
-      /// @}
-      
-      /// @{
-      /// @name Access to the key (left) value
-      
-      /// Returns the _art_ pointer to the main value, key of the association.
-      mainptr_t const& mainPtr() const { return base_t::first; }
-      
-      /// Returns the main value, key of the association.
-      main_t const& main() const { return *mainPtr(); }
-      
-      /// @}
-      
-      /// @{
-      /**
-       * @name Metadata access
-       * 
-       * The complete interface is available only if the association has
-       * metadata. Otherwise, only the static member `hasMetadata()` is
-       * available.
-       */
-      
-      // the templates are needed to activate "SFINAE" on std::enable_if
-      /// Returns whether this node type supports metadata.
-      template <typename Node = node_t>
-      static constexpr bool hasMetadata()
-        { return details::hasMetadata<Node>(); }
-      
-      /// Returns the pointer to the metadata on this association node.
-      template <typename Node = node_t>
-      std::enable_if_t<hasMetadata<Node>(), dataptr_t> dataPtr() const
-        { return base_t::data; }
-      
-      // this is even more complicate, since if `data_t` is void we can't write
-      // `data_t const&` as type of enable_if, because it does not depend on
-      // templates and therefore it may be unconditionally evaluated;
-      // and C++ does not like references to `void`...
-      /// Returns a reference to the metadata on this association node.
-      template <typename Node = node_t>
-      std::enable_if_t
-        <hasMetadata<Node>(), typename AssnsNodeTraits<Node>::data_t const&>
-      data() const { return *dataPtr(); }
-      
-      /// @}
-      
-      
-      /// @{
-      /// @name Interface to the _art_ pointer to the associated (right) value
-      
-      /// Implicit conversion to _art_ pointer of the associated object.
-      operator valueptr_t const& () const& { return valuePtr(); }
-      
-      /// Implicit conversion to _art_ pointer of the associated object.
-      operator valueptr_t() const&& { return valuePtr(); }
-      
-      /// Returns a reference to the associated value (alias of `value()`).
-      value_t const& operator*() const { return value(); }
-      
-      /// Returns the associated value (alias of `valuePtr()`).
-      valueptr_t operator-> () const { return valuePtr(); }
-      
-      /// Returns the key of the _art_ pointer to the value.
-      auto key() const -> decltype(auto) { return valuePtr().key(); }
-      
-      /// Returns the product ID of the _art_ pointer to the value.
-      auto id() const -> decltype(auto) { return valuePtr().id(); }
-      /// @}
-      
-      
-      /// Reinterprets the specified association node as a `AssnsNode`.
-      static this_t const& makeFrom(node_t const& from)
-        { return static_cast<this_t const&>(from); }
-      
-    }; // class AssnsNode<>
-    
-    
-    template <typename ArtAssnsIterValue>
-    bool operator== (
-      AssnsNode<ArtAssnsIterValue> const& A,
-      typename AssnsNode<ArtAssnsIterValue>::valueptr_t const& B
-      )
-      { return A.valuePtr() == B; }
-    template <typename ArtAssnsIterValue>
-    bool operator== (
-      typename AssnsNode<ArtAssnsIterValue>::valueptr_t const& A,
-      AssnsNode<ArtAssnsIterValue> const& B
-      )
-      { return A == B.valuePtr(); }
-    template <typename ArtAssnsIterValue>
-    bool operator!= (
-      AssnsNode<ArtAssnsIterValue> const& A,
-      typename AssnsNode<ArtAssnsIterValue>::valueptr_t const& B
-      )
-      { return A.valuePtr() != B; }
-    template <typename ArtAssnsIterValue>
-    bool operator!= (
-      typename AssnsNode<ArtAssnsIterValue>::valueptr_t const& A,
-      AssnsNode<ArtAssnsIterValue> const& B
-      )
-      { return A != B.valuePtr(); }
-    
-    
-    /// Reinterprets the specified association node as a `AssnsNode`.
-    template <typename ArtAssnsIterValue>
-    AssnsNode<ArtAssnsIterValue> const& makeAssnsNode(ArtAssnsIterValue const& from)
-        { return AssnsNode<ArtAssnsIterValue>::makeFrom(from); }
-    
-    // specialization for the art node wrapper
-    template <typename ArtAssnsIterValue>
-    struct AssnNodeMetadataType<AssnsNode<ArtAssnsIterValue>>
-      : AssnNodeMetadataType<ArtAssnsIterValue>
-      {};
-    
-    
-    //--------------------------------------------------------------------------
-    /// Traits for a association iterator.
-    template <typename ArtAssnsIter>
-    struct AssnsIterTraits
-      : public AssnsNodeTraits<typename ArtAssnsIter::value_type>
-    {
-      using art_node_t = typename ArtAssnsIter::value_type;
-      using node_t = AssnsNode<art_node_t>;
-    }; // struct AssnsIterTraits
-    
-    
-    /// Modified iterator returning a association node interface.
-    /// The basic iterator interface is to the associated (right) _art_ pointer.
-    template <typename ArtAssnsIter>
-    class assns_node_iterator:
-      public IteratorWrapperBase<
-        assns_node_iterator<ArtAssnsIter>,
-        ArtAssnsIter,
-        typename AssnsIterTraits<ArtAssnsIter>::node_t
-        >
-    {
-      using base_iterator_t = IteratorWrapperBase<
-        assns_node_iterator<ArtAssnsIter>,
-        ArtAssnsIter,
-        typename AssnsIterTraits<ArtAssnsIter>::node_t
-        >;
-      
-      using art_assns_iter_t = ArtAssnsIter;
-      using traits_t = AssnsIterTraits<art_assns_iter_t>;
-      
-      /// Type of node for this association iterator.
-      using AssnsNode_t = typename traits_t::node_t;
-      using ArtAssnsNode_t = typename traits_t::art_node_t;
-      
-        public:
-      using base_iterator_t::base_iterator_t;
-      
-      /// Constructor from a base iterator (explicitly allowed).
-      assns_node_iterator(base_iterator_t const& from)
-        : base_iterator_t(from) {}
-      
-      /// Returns the full information the iterator points to.
-      AssnsNode_t const& info() const { return base_iterator_t::operator*(); }
-      
-      /// Returns the full information the iterator points to.
-      AssnsNode_t const& operator() () const { return info(); }
-      
-      //--- BEGIN Access to the full association information -------------------
-      /// @name Access to the full association information
-      /// This interface is a replica of the one of `AssnsNode_t`.
-      /// @{
-      
-      using main_t     = typename AssnsNode_t::main_t;
-      using value_t    = typename AssnsNode_t::value_t;
-      using data_t     = typename AssnsNode_t::data_t;
-      using mainptr_t  = typename AssnsNode_t::mainptr_t;
-      using valueptr_t = typename AssnsNode_t::valueptr_t;
-      using dataptr_t  = typename AssnsNode_t::dataptr_t;
-      
-      /// Returns the _art_ pointer to the associated value.
-      valueptr_t valuePtr() const { return info().valuePtr(); }
-      
-      /// Returns the _art_ pointer to the associated value.
-      value_t const& value() const { return info().value(); }
-      
-      /// Returns the _art_ pointer to the main value, key of the association.
-      mainptr_t mainPtr() const { return info().mainPtr(); }
-      
-      /// Returns the main value, key of the association.
-      main_t const& main() const { return info().main(); }
-      
-      // see the comments on AssnsNode for the need of all these decorations
-      /// Returns whether this node type supports metadata.
-      template <typename Node = AssnsNode_t>
-      static constexpr bool hasMetadata()
-        { return details::hasMetadata<Node>(); }
-      
-      /// Returns the pointer to the metadata on this association node.
-      template <typename ArtNode = ArtAssnsNode_t>
-      std::enable_if_t<hasMetadata<ArtNode>(), dataptr_t> dataPtr() const
-        { return info().dataPtr(); }
-      
-      /// Returns a reference to the metadata on this association node.
-      template <typename ArtNode = ArtAssnsNode_t>
-      std::enable_if_t
-        <hasMetadata<ArtNode>(), typename AssnsNodeTraits<ArtNode>::data_t const&>
-      data() const
-        { return info().data(); }
-      
-      /// @}
-      //--- END Access to the full association information ---------------------
-      
-      /*
-       * Associations with metadata have an iterator with value type
-       * art::AssnsNode, while the value for the ones without have just a
-       * std::pair.
-       * The std::pair returned by the one without metadata is a reference to an
-       * element of the original collection.
-       * Instead, the art::AssnsNode returned by the art::Assns iterator is a
-       * temporary put together copying information from the original pair
-       * collection and from the parallel metadata collection.
-       * Therefore, in the first case we can return references to the existing
-       * data, while in the latter we can't and we have to return the results by
-       * value.
-       * In this implementation we compromise and return always the data by
-       * value; the values are art pointers, or plain pointers, so the copy
-       * should not be extremely taxing. It is possible to change this, at the
-       * cost of additional complexity of the implementation.
-       */
-      static AssnsNode_t const& transform(art_assns_iter_t const& v)
-        { return makeAssnsNode(*v); }
-      
-    }; // class assns_node_iterator<>
-    
-    //--- END iterators for art::Assns ---------------------------------------
-    
-    
-    //--------------------------------------------------------------------------
-    //--- stuff for the main collection
-    //--------------------------------------------------------------------------
-    /**
-     * @brief Wrapper for the main collection of a proxy.
-     * @tparam MainColl type of the collection being wrapped
-     * 
-     * The wrapper contains a pointer to the original collection, which must
-     * persist. The original collection is not modified.
-     * 
-     * The `MainColl` type must expose a random access container interface.
-     */
-    template <typename MainColl>
-    struct MainCollectionProxy {
-      
-      /// Type of the original collection.
-      using main_collection_t = MainColl;
-      
-      /// Type of the elements in the original collection.
-      using main_element_t = collection_value_t<MainColl>;
-      
-      /// Constructor: wraps the specified collection.
-      MainCollectionProxy(main_collection_t const& main): fMain(&main) {}
-      
-      /// Returns the wrapped collection.
-      main_collection_t const& main() const { return mainRef(); }
-      
-      /// Returns a reference to the wrapped collection.
-      main_collection_t const& mainRef() const { return *fMain; }
-      
-      /// Returns a pointer to the wrapped collection.
-      main_collection_t const* mainPtr() const { return fMain; }
-      
-      
-        protected:
-      /// This type.
-      using this_t = MainCollectionProxy<main_collection_t>;
-      
-      /// Return this object as main collection proxy.
-      this_t& mainProxy() { return *this; }
-      
-      /// Return this object as main collection proxy.
-      this_t const& mainProxy() const { return *this; }
-      
-      /// Returns the specified item in the original collection.
-      auto getMainAt(std::size_t i) const -> decltype(auto)
-        { return fMain->operator[](i); }
-      
-        private:
-      main_collection_t const* fMain; /// Pointer to the original collection.
-      
-    }; // struct MainCollectionProxy
-    
-    
-    
-    //--------------------------------------------------------------------------
     //--- stuff for auxiliary data
     //--------------------------------------------------------------------------
-    // Trait replacing each element of the specified tuple with its
-    // `auxiliary_data_t`
-    template <typename Tuple>
-    struct SubstituteWithAuxList {
-      static_assert
-        (util::always_true_type<Tuple>(), "Template argument must be a tuple");
-    }; // SubstituteWithAuxList<>
-    
-    template <typename... T>
-    struct SubstituteWithAuxList<std::tuple<T...>> {
-      using type = std::tuple<typename T::auxiliary_data_t...>;
-    }; // SubstituteWithAuxList<tuple>
-    
-    
     //--------------------------------------------------------------------------
     /**
      * @brief Helper to create associated data proxy.
@@ -3762,87 +2181,6 @@ namespace proxy {
     
     
     
-    /**
-     * @brief Object to draft parallel data interface.
-     * @tparam AuxColl type of the parallel data collection
-     * @tparam Aux type of the associated object
-     * @tparam Tag tag this data is labeled with
-     * 
-     * Allows:
-     *  * random access (no index check guarantee)
-     *  * forward iteration
-     * 
-     * Construction is not part of the interface.
-     */
-    template <
-      typename AuxColl,
-      typename Aux /* = collection_value_t<AuxColl> */,
-      typename Tag /* = Aux */
-      >
-    class ParallelData {
-      using This_t = ParallelData<AuxColl, Aux, Tag>; ///< This type.
-      
-      /// Type of auxiliary collection.
-      using parallel_data_t = AuxColl;
-      
-      /// Type of the value of auxiliary collection element.
-      using aux_t = Aux; // unused
-      
-      /// Type returned when accessing an auxiliary collection element.
-      using aux_element_t = collection_value_constant_access_t<AuxColl>;
-      
-      using parallel_data_iterator_t = typename parallel_data_t::const_iterator;
-      
-        public:
-      using tag = Tag; ///< Tag of this association proxy.
-      
-      /// Type returned when accessing auxiliary data.
-      using auxiliary_data_t
-        = decltype(util::makeTagged<tag>(std::declval<aux_element_t>()));
-      
-      /// Constructor: points to the specified data collection.
-      ParallelData(parallel_data_t const& data)
-        : fData(&data)
-        {}
-      
-      /// Returns an iterator pointing to the first data element.
-      auto begin() const -> decltype(auto)
-        { return fData->begin(); }
-      
-      /// Returns an iterator pointing past the last data element.
-      auto end() const -> decltype(auto)
-        { return fData->end(); }
-      
-      /// Returns the element with the specified index (no check performed).
-      auto operator[] (std::size_t index) const -> decltype(auto)
-        {
-          static_assert(
-            std::is_convertible<decltype(getElement(index)), auxiliary_data_t>(),
-            "Inconsistent data types."
-            );
-          return getElement(index);
-        }
-      
-      /// Returns whether this data is labeled with the specified tag.
-      template <typename TestTag>
-      static constexpr bool hasTag() { return std::is_same<TestTag, tag>(); }
-      
-      /// Returns a pointer to the whole data collection.
-      parallel_data_t const* data() const { return fData; }
-      
-      /// Returns a reference to the whole data collection.
-      parallel_data_t const& dataRef() const { return *(data()); }
-      
-        private:
-      
-      parallel_data_t const* fData; ///< Reference to the original data product.
-      
-      auto getElement(std::size_t index) const -> decltype(auto)
-        { return util::makeTagged<tag>(fData->operator[](index)); }
-      
-    }; // class ParallelData<>
-    
-    
     
     
     //--------------------------------------------------------------------------
@@ -3881,394 +2219,6 @@ namespace proxy {
     // the class is actually an alias whose definition was above
     
     
-    /// Interface providing begin and end iterator of a range.
-    /// @tparam BoundaryIter iterator to the first of the range iterators.
-    template <typename BoundaryIter>
-    class BoundaryListRangeBase: private BoundaryIter {
-      using boundary_iterator_t = BoundaryIter;
-      
-      /// Returns the iterator to the begin iterator.
-      auto boundaryIter() const
-        { return static_cast<BoundaryIter const&>(*this); }
-      
-        public:
-      /// Constructor: copies the specified base iterator.
-      BoundaryListRangeBase(boundary_iterator_t const& it)
-        : boundary_iterator_t(it) {}
-      
-      /// Returns the begin iterator of the range.
-      auto begin() const -> decltype(auto)
-        { return *(boundaryIter()); }
-      
-      /// Returns the end iterator of the range (next to the begin iterator).
-      auto end() const -> decltype(auto)
-        { return *(std::next(boundaryIter())); }
-      
-    }; // BoundaryListRangeBase<>
-    
-    
-    /// A `BoundaryListRangeBase` with a full container interface.
-    template <typename BoundaryIter>
-    class BoundaryListRange
-      : public lar::CollectionView<BoundaryListRangeBase<BoundaryIter>>
-    {
-      // A CollectionView can't be constructed except from deriver classes;
-      // we define here such a class.
-      
-      using rangebase_t = BoundaryListRangeBase<BoundaryIter>;
-      using base_t = lar::CollectionView<rangebase_t>;
-        public:
-      using boundary_iterator_t = BoundaryIter;
-      
-      /// Constructor: from an iterator to the begin iterator.
-      BoundaryListRange(boundary_iterator_t const& iBegin)
-        : base_t(rangebase_t(iBegin))
-        {}
-      
-    }; // class BoundaryListRange<>
-    
-    
-    /**
-     * @brief Reinterprets a iterator to boundaries list as a range collection.
-     * @tparam BoundaryIter type of iterator to boundary collection
-     * @param iBegin iterator to the begin iterator of a range
-     * @return a collection view (`lar::CollectionView`) of the range
-     * 
-     * A range is conceptually defined as a sequence of data between a begin and
-     * and end iterator.
-     * The argument of this function is an iterator to the begin iterator of the
-     * range. The begin iterator itself is obtained by dereferencing the
-     * argument: `*iBegin`. The end iterator of the range is required to be
-     * immediately after the begin iterator (@code *std::next(iBegin) @endcode).
-     * This pair of iterators is exposed via the `lar::CollectionView` view,
-     * that presents a vector-like interface.
-     * For this to fully work, the data iterators (e.g., `*iBegin`) must comply
-     * with the random-access iterator requirements.
-     * 
-     * An example of `BoundaryIter` is the iterator to the list of boundaries
-     * in `BoundaryList`: `BoundaryList::boundaries_t::const_iterator`.
-     */
-    template <typename BoundaryIter>
-    BoundaryListRange<BoundaryIter> makeBoundaryListRange
-      (BoundaryIter const& iBegin)
-      { return { iBegin }; }
-    
-    
-    /**
-     * @brief Iterator exposing elements of a boundary list as ranges.
-     * @tparam BoundaryIter type of iterator to boundary iterators
-     * 
-     * This iterator wraps an iterator (`BoundaryIter`) to a sequence of
-     * iterators representing ranges of data.
-     * As an example, let the data be a collection of real numbers:
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-     * std::vector<float> data;
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     * and we have a list of iterators that define subranges within that data:
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-     * using data_iterator_t = std::vector<data>::const_iterator;
-     * std::vector<data_iterator_t> rangeStart;
-     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     * Here `rangeStart` holds the begin iterator of each of the subranges,
-     * plus a "global" end iterator, as in the convention described in
-     * `lar::makeBoundaryListRange()` (which takes an iterator to `rangeStart`
-     * as argument).
-     * The `BoundaryIter` type in this example would be
-     * @code std::vector<data_iterator_t>::const_iterator @endcode.
-     * 
-     * When dereferenced, this iterator returns a view of the range currently
-     * pointed. This view has a STL-vector-like interface (again, see
-     * `lar::makeBoundaryListRange()`).
-     */
-    template <typename BoundaryIter>
-    class BoundaryListRangeIterator
-      : public IteratorWrapperBase
-        <BoundaryListRangeIterator<BoundaryIter>, BoundaryIter>
-    {
-      using base_t = IteratorWrapperBase
-        <BoundaryListRangeIterator<BoundaryIter>, BoundaryIter>;
-      
-        public:
-      using boundary_iterator_t = BoundaryIter; ///< Type of boundary iterator.
-      
-      /// Type of range returned when dereferencing.
-      using rangeview_t
-        = decltype(makeBoundaryListRange(std::declval<boundary_iterator_t>()));
-      
-      using value_type = rangeview_t;
-      using pointer = std::add_pointer_t<std::decay_t<value_type>>;
-      using reference = std::add_lvalue_reference_t<std::decay_t<value_type>>;
-      
-      
-      using base_t::base_t; // import constructors (explicitly allowed)
-      
-      /**
-       * @brief Returns the pointed range.
-       * @return the pointed range, as a view
-       * 
-       * The returned value may be a view object, that is a pure interface
-       * overlaid on a different data structure.
-       * As such, it may be not copiable and need to be propagated by reference.
-       */
-      static auto transform(BoundaryIter const& iter)
-        { return makeBoundaryListRange(iter); }
-      
-    }; // class BoundaryListRangeIterator<>
-    
-    
-    /**
-     * @brief Builds and keeps track of internal boundaries in a sequence.
-     * @tparam Iter type of iterators to the original sequence
-     * 
-     * This class manages a sequence of boundary iterators defining the
-     * beginning of contiguous subsequences. Each iterator marks the begin of a
-     * subsequence, whose end is marked by the beginning of the next one.
-     * The last iterator in the boundary list marks the end of the last
-     * subsequence, but it does not mark the beginning of a following one.
-     * Therefore, for a list of _N_ subsequences there will be _N + 1_ boundary
-     * iterators in the list: _N_ marking the beginning of the respective
-     * subsequences, plus another marking the end of the last subsequence.
-     * 
-     * It is likely that the first iterator in the boundary list is the begin
-     * iterator of the underlying sequence (usually a container) being
-     * partitioned, while the last one is the end iterator of that sequence.
-     * 
-     * This is a data class which does not contain any logic to define the
-     * subsequences, but rather acquires the result of an algorithm which is
-     * expected to have established which the boundaries are.
-     * 
-     * The underlying representation of the class is a random-access sequence
-     * of boundaries. The exposed value, `range_t`, is a range of data elements
-     * (a view with the interface of a random access container), which is
-     * internally represented as a single iterator pointing to the begin
-     * iterator of the range.
-     */
-    template <typename Iter>
-    class BoundaryList {
-      using boundarylist_t = BoundaryList<Iter>;
-        public:
-      using data_iterator_t = Iter;
-      using boundaries_t = std::vector<data_iterator_t>;
-      
-      /// Iterator on the ranges contained in the collection.
-      using range_iterator_t
-        = BoundaryListRangeIterator<typename boundaries_t::const_iterator>;
-      
-      /// Structure holding begin and end iterator for a single range.
-      // BoundaryListRange<data_iterator_t> const&
-      using range_ref_t = typename range_iterator_t::value_type;
-      
-      /// Range object directly containing the boundary iterators.
-      using range_t = lar::RangeAsCollection_t<data_iterator_t>;
-      
-      
-      /// Constructor: steals the specified boundary list.
-      explicit BoundaryList(boundaries_t&& boundaries)
-        : boundaries(std::move(boundaries))
-        { assert(this->boundaries.size() >= 1); }
-      
-      /// Returns the number of ranges contained in the list.
-      std::size_t nRanges() const
-        { return boundaries.size() - 1; }
-      /// Returns the begin iterator of the `i`-th range (end if overflow).
-      data_iterator_t const& rangeBegin(std::size_t i) const
-        { return boundaries[std::min(i, nRanges())]; }
-      /// Returns the end iterator of the `i`-th range (end if overflow).
-      data_iterator_t const& rangeEnd(std::size_t i) const
-        { return rangeBegin(i + 1); }
-      
-      /// Returns the number of ranges contained in the list.
-      std::size_t size() const { return nRanges(); }
-      /// Returns the begin iterator of the first range.
-      range_iterator_t begin() const
-        { return { boundaries.begin() }; }
-      /// Returns the end iterator of the last range.
-      range_iterator_t end() const
-        { return { std::prev(boundaries.end()) }; }
-      /**
-       * @brief Returns the specified range.
-       * @param i index of the range to be returned
-       * @return a proxy object with container interface
-       * @see `range()`
-       * 
-       * The returned object exposes the range as a random access container
-       * interface.
-       * 
-       * Internally, it refers to the relevant information from this
-       * `BoundaryList` object, and therefore it becomes invalid when this 
-       * `BoundaryList` object is destroyed.
-       * If this is not acceptable, use `range()` instead.
-       */
-      range_ref_t rangeRef(std::size_t i) const
-        { return { std::next(boundaries.begin(), i) }; }
-      /**
-       * @brief Returns the specified range in an object holding the iterators.
-       * @param i index of the range to be returned
-       * @return a new object with container interface
-       * @see `rangeRef()`
-       * 
-       * The returned object contains copies of the begin and end iterators of
-       * the range. This object is self-contained and valid even after this
-       * BoundaryList object is destroyed.
-       * 
-       * Note the content of the range itself is _not_ copied: just the boundary
-       * iterators of the range are.
-       */
-      range_t range(std::size_t i) const
-        { return lar::makeCollectionView(rangeBegin(i), rangeEnd(i)); }
-      
-      /// Returns the begin iterator of the `i`-th range (unchecked).
-      /// @see `range()`
-      auto operator[](std::size_t i) const -> decltype(auto)
-        { return range(i); }
-      
-        private:
-      /// Begin iterator of each range, plus end iterator of whole sequence.
-      boundaries_t boundaries;
-      
-    }; // class BoundaryList
-    
-    
-    /// Algorithm implementation for `associationRanges()` functions.
-    template <std::size_t GroupKey, typename Iter>
-    typename BoundaryList<Iter>::boundaries_t associationRangesImpl
-      (Iter begin, Iter end, std::size_t expectedSize = 0);
-    
-    /**
-     * @brief Groups associations by the first key.
-     * @tparam GroupKey index of the key in the tuple pointed by the iterator
-     * @tparam Iter type of iterators delimiting the data (same type required)
-     * @param begin iterator to the first association in the list
-     * @param end iterator past the last association in the list
-     * @return a list of range boundaries marking the different groups.
-     * @throw std::runtime_error if input key is not monotonic
-     * 
-     * The input iterators are expected to point to a tuple-like structure whose
-     * key element can be accessed as `std::get<GroupKey>()` and is an _art_
-     * pointer of some sort.
-     * 
-     * The index of the grouping key is expected to be monotonically increasing.
-     * Gaps are supported except that at the end: if e.g. an association of 5
-     * keys associates objects to only elements #0, #1 and #3, the resulting
-     * list will cover 4 ranges for elements #0 to #3 included, but excluding
-     * the end elements, the existence of which can't be inferred from the
-     * association list in input. In this example, the range #2 will exist and
-     * be empty. To enforce a minimum number of elements, use
-     * `associationRanges(Iter, Iter, std::size_t)`.
-     */
-    template <std::size_t GroupKey, typename Iter>
-    BoundaryList<Iter> associationRanges(Iter begin, Iter end);
-    
-    /**
-     * @brief Groups associations by the first key.
-     * @tparam GroupKey index of the key in the tuple pointed by the iterator
-     * @tparam Iter type of iterators delimiting the data (same type required)
-     * @param begin iterator to the first association in the list
-     * @param end iterator past the last association in the list
-     * @param n minimum number of ranges to be produced.
-     * @return a list of range boundaries marking the different groups.
-     * @throw std::runtime_error if input key is not monotonic
-     * @see `associationRanges(Iter, Iter)`
-     * 
-     * This function operates almost like `associationRanges(Iter, Iter)`.
-     * The only difference is that at least `n` ranges are guaranteed to be
-     * produced: if the input defines less than `n`, the missing ones will be
-     * added at the end, empty.
-     * This allows to work around the possibility of empty ranges at the end,
-     * which the `associationRanges(Iter, Iter)` algorithm does not support.
-     */
-    template <std::size_t GroupKey, typename Iter>
-    BoundaryList<Iter> associationRanges(Iter begin, Iter end, std::size_t n);
-    
-    
-    /**
-     * @brief Object to draft associated data interface.
-     * @tparam Main type of the main associated object (one)
-     * @tparam Aux type of the additional associated objects (many)
-     * @tparam Metadata type of metadata in the association (default: `void`)
-     * @tparam Tag tag this data is labeled with
-     * 
-     * Allows:
-     *  * random access (no index check guarantee)
-     *  * forward iteration
-     * 
-     * Construction is not part of the interface.
-     * 
-     * The `AssociatedData` object, on creation, finds the borders surrounding
-     * the associated `Aux` objects for each `Main` one, and keep a record of
-     * them (this is actually delegated to `BoundaryList` class).
-     * The `AssociatedData` object also provides a container-like view of this
-     * information, where each element in the container is associated to a
-     * single `Main` and it is a container (actually, another view) of `Right`.
-     * Both levels of containers are random access, so that the set of `Right`
-     * objects associated to a `Left` can be accessed by index, and the `Right`
-     * objects within can be accessed with `Right` index in the `Left`.
-     * 
-     * @todo Metadata for `proxy::details::AssociatedData` is not supported yet.
-     */
-    template <
-      typename Main, typename Aux, typename Metadata /* = void */,
-      typename Tag /* = Aux */
-      >
-    class AssociatedData {
-      using This_t = AssociatedData<Main, Aux, Metadata, Tag>; ///< This type.
-      
-        public:
-      /// Type of _art_ association.
-      using assns_t = art::Assns<Main, Aux, Metadata>;
-      
-        private:
-      using associated_data_iterator_t
-        = assns_node_iterator<AssnsIterator_t<assns_t>>;
-      //  = tuple_element_iterator<1U, AssnsIterator_t<assns_t>>;
-      
-        public:
-      using tag = Tag; ///< Tag of this association proxy.
-      
-      using group_ranges_t = BoundaryList<associated_data_iterator_t>;
-      
-      /// Type of collection of auxiliary data associated with a main item.
-      using auxiliary_data_t
-        = util::add_tag_t<typename group_ranges_t::range_t, tag>;
-      
-      // constructor is not part of the interface
-      AssociatedData(group_ranges_t&& groups)
-        : fGroups(std::move(groups))
-        {}
-      
-      /// Returns an iterator pointing to the first associated data range.
-      auto begin() const -> decltype(auto)
-        { return fGroups.begin(); }
-      
-      /// Returns an iterator pointing past the last associated data range.
-      auto end() const -> decltype(auto)
-        { return fGroups.end(); }
-      
-      /// Returns the range with the specified index (no check performed).
-      auto getRange(std::size_t i) const -> decltype(auto)
-        { return util::makeTagged<tag>(fGroups.range(i)); }
-      
-      /// Returns the range with the specified index (no check performed).
-      auto operator[] (std::size_t index) const -> decltype(auto)
-        {
-          static_assert(
-            std::is_convertible<decltype(getRange(index)), auxiliary_data_t>(),
-            "Inconsistent data types."
-            );
-          return getRange(index);
-        }
-      
-      /// Returns whether this data is labeled with the specified tag
-      template <typename TestTag>
-      static constexpr bool hasTag() { return std::is_same<TestTag, tag>(); }
-      
-        private:
-      group_ranges_t fGroups;
-      
-    }; // class AssociatedData<>
-    
-    
-    
     //--------------------------------------------------------------------------
     //---  Stuff for one-to-(zero or one) associated data
     //--------------------------------------------------------------------------
@@ -4281,99 +2231,6 @@ namespace proxy {
       using maker_t = OneTo01DataProxyMaker
         <typename CollProxy::main_element_t, Aux, Metadata, CollProxy, AuxTag>;
     };
-    
-    
-    /**
-     * @brief Object for one-to-zero/or/one associated data interface.
-     * @tparam Main type of the main associated object (one)
-     * @tparam Aux type of the additional associated objects (zero or one)
-     * @tparam Metadata type of associated metadata
-     * @tparam Tag tag this data is labeled with
-     * 
-     * Allows:
-     *  * random access (no index check guarantee)
-     *  * forward iteration
-     * 
-     * Construction is not part of the interface.
-     * 
-     * The `OneTo01Data` object acquires a vector of _art_ pointers, one for
-     * each element in the main collection.
-     * It is an implementation detail for associations fulfilling the
-     * @ref LArSoftProxyDefinitionOneToZeroOrOneSeqAssn "one-to-(zero-or-one) sequential association"
-     * requirement.
-     * 
-     * @note This data structure marks the main elements which have no
-     *       associated data with an invalid _art_ pointer (default-constructed)
-     *       and it does not distinguish that from the element being actually
-     *       associated to a default-constructed _art_ pointer.
-     * 
-     * The `OneTo01Data` object also provides a container-like view of this
-     * information, where each element in the container is associated to a
-     * single `Main` and it is an _art_ pointer to the `Right` element.
-     * 
-     * Association metadata is not accessible from this object.
-     * 
-     * @todo Metadata for `proxy::details::OneTo01Data` is not supported yet.
-     */
-    template <
-      typename Main, typename Aux, typename Metadata /* = void */,
-      typename Tag /* = Aux */
-      >
-    class OneTo01Data {
-      using This_t = OneTo01Data<Main, Aux, Metadata, Tag>; ///< This type.
-      
-        public:
-      /// Type of associated datum.
-      using aux_t = Aux;
-      
-      /// Type of associated metadata.
-      using metadata_t = Metadata;
-      
-      /// Type of tag.
-      using tag = Tag;
-      
-      /// Type of main datum.
-      using main_t = Main;
-      
-      /// Type of _art_ pointer to associated datum.
-      using aux_ptr_t = art::Ptr<aux_t>;
-      
-      /// Type of auxiliary data associated with a main item.
-      using auxiliary_data_t = util::add_tag_t<aux_ptr_t, tag>;
-      
-      /// Type of collection of auxiliary data for all main elements.
-      using aux_coll_t = std::vector<aux_ptr_t>;
-      
-      /// Type of the source association.
-      using assns_t = art::Assns<main_t, aux_t>;
-      
-      
-      OneTo01Data(aux_coll_t&& data): auxData(std::move(data)) {}
-      
-      /// Returns whether the element `i` is associated with auxiliary datum.
-      bool has(std::size_t i) const
-        { return get(i) == aux_ptr_t(); }
-      
-      /// Returns a copy of the pointer to data associated with element `i`.
-      auxiliary_data_t get(std::size_t i) const
-        { return auxiliary_data_t(auxData[i]); }
-      
-      
-      /// Returns the range with the specified index (no check performed).
-      auto operator[] (std::size_t index) const -> decltype(auto)
-        {
-          static_assert(
-            std::is_convertible<decltype(get(index)), auxiliary_data_t>(),
-            "Inconsistent data types."
-            );
-          return get(index);
-        }
-      
-        private:
-      aux_coll_t auxData; ///< Data associated to the main collection.
-      
-    }; // class OneTo01Data<>
-    
     
     
     //--------------------------------------------------------------------------
@@ -4390,7 +2247,7 @@ namespace proxy {
      */
     template <
       typename AuxProxyColl,
-      typename Aux /* = collection_value_t<AuxProxyColl> */,
+      typename Aux /* = util::collection_value_t<AuxProxyColl> */,
       typename Tag /* = Aux */
       >
     struct ProxyAsParallelData
@@ -4502,22 +2359,6 @@ namespace proxy {
     
     
     //--------------------------------------------------------------------------
-    //---  Stuff for the whole collection proxy
-    //--------------------------------------------------------------------------
-    template <typename ProxyElement, typename... AuxData>
-    auto makeCollectionProxyElement(
-      std::size_t index,
-      typename ProxyElement::main_element_t const& main,
-      AuxData&&... auxData
-    ) {
-      return ProxyElement(
-        index, main,
-        typename ProxyElement::aux_elements_t(std::forward<AuxData>(auxData)...)
-        );
-    } // makeCollectionProxyElement()
-    
-    
-    //--------------------------------------------------------------------------
     
   } // namespace details
   
@@ -4576,169 +2417,18 @@ namespace proxy {
     
     
     //--------------------------------------------------------------------------
-    // Extends vector v with default-constructed data
-    // and executes v[index]=value
-    template <typename T>
-    void extendAndAssign(
-      std::vector<T>& v,
-      typename std::vector<T>::size_type index, 
-      typename std::vector<T>::value_type const& value
-    ) {
-      if (index >= v.size()) {
-        v.reserve(index + 1);
-        v.resize(index);
-        v.push_back(value);
-      }
-      else v[index] = value;
-    } // extendAndAssign()
-    
-    // Extends vector v with default-constructed data
-    // and executes v[index]=move(value)
-    template <typename T>
-    void extendAndAssign(
-      std::vector<T>& v,
-      typename std::vector<T>::size_type index, 
-      typename std::vector<T>::value_type&& value
-    ) {
-      if (index >= v.size()) {
-        v.reserve(index + 1);
-        v.resize(index);
-        v.push_back(std::move(value));
-      }
-      else v[index] = std::move(value);
-    } // extendAndAssign()
-    
-    
-    //--------------------------------------------------------------------------
-    //--- associationRanges() implementation
-    //--------------------------------------------------------------------------
-    template <std::size_t GroupKey, typename Iter>
-    typename BoundaryList<Iter>::boundaries_t associationRangesImpl
-      (Iter begin, Iter end, std::size_t expectedSize /* = 0 */)
-    {
-      constexpr auto KeyIndex = GroupKey;
-      
-      auto extractKey
-        = [](auto const& assn){ return std::get<KeyIndex>(assn).key(); };
-      
-      typename BoundaryList<Iter>::boundaries_t boundaries;
-      boundaries.reserve(expectedSize + 1);
-      boundaries.push_back(begin);
-      std::size_t current = 0;
-      for (auto it = begin; it != end; ++it) {
-        auto const key = extractKey(*it);
-        if (key == current) continue;
-        if (key < current) {
-          auto index = std::distance(begin, it);
-          throw std::runtime_error("associationRanges() got input element #"
-            + std::to_string(index - 1) + " with key " + std::to_string(current)
-            + " and the next with key " + std::to_string(key) + "!"
-            );
-        }
-        boundaries.insert(boundaries.end(), key - current, it);
-        current = key;
-      } // for
-      boundaries.push_back(end);
-      return boundaries;
-    } // associationRangesImpl()
-    
-    
-    //--------------------------------------------------------------------------
-    template <std::size_t GroupKey, typename Iter>
-    auto associationRangeBoundaries(Iter begin, Iter end)
-      { return associationRangesImpl<GroupKey, Iter>(begin, end); }
-    
-    
-    //--------------------------------------------------------------------------
-    template <std::size_t GroupKey, typename Iter>
-    auto associationRangeBoundaries(Iter begin, Iter end, std::size_t n) {
-      auto boundaries = associationRangesImpl<GroupKey, Iter>(begin, end, n);
-      if (boundaries.size() <= n) {
-        boundaries.insert
-          (boundaries.end(), n + 1 - boundaries.size(), boundaries.back()); 
-        assert(boundaries.size() == (n + 1));
-      }
-      return boundaries;
-    } // associationRangeBoundaries(Iter, Iter, std::size_t)
-    
-    
-    //--------------------------------------------------------------------------
-    template <std::size_t GroupKey, typename Iter>
-    BoundaryList<Iter> associationRanges(Iter begin, Iter end)
-      {
-        return BoundaryList<Iter>
-          (associationRangeBoundaries<GroupKey>(begin, end));
-      }
-    
-    
-    //--------------------------------------------------------------------------
-    template <std::size_t GroupKey, typename Iter>
-    BoundaryList<Iter> associationRanges(Iter begin, Iter end, std::size_t n)
-      {
-        return BoundaryList<Iter>
-          (associationRangeBoundaries<GroupKey>(begin, end, n));
-      }
-    
-    
-    //--------------------------------------------------------------------------
-    template <std::size_t Key, std::size_t Data, typename Iter>
-    auto associationOneToOneFullSequence(Iter begin, Iter end, std::size_t n) {
-      //
-      // Here we are actually not using the assumption that the keys are in
-      // increasing order; which is just as good as long as we use a fast random
-      // access container as STL vector.
-      // We do assume the key side of the association to be valid, though.
-      //
-      using value_type = typename Iter::value_type;
-      using data_t = std::tuple_element_t<Data, value_type>;
-      std::vector<data_t> data(n); // all default-constructed
-      for (auto it = begin; it != end; ++it) {
-        auto const& keyPtr = std::get<Key>(*it);
-        details::extendAndAssign(data, keyPtr.key(), std::get<Data>(*it));
-      }
-      return data;
-    } // associationOneToOneFullSequence(Iter, Iter, std::size_t)
-    
-    
-    //--------------------------------------------------------------------------
     
   } // namespace details
   
   
   //----------------------------------------------------------------------------
-  //--- makeAssociatedData() implementations
-  //----------------------------------------------------------------------------
-  template <typename Tag, typename Assns>
-  auto makeAssociatedData(Assns const& assns, std::size_t minSize /* = 0 */)
-  {
-    using Main_t = typename Assns::left_t;
-    using Aux_t = typename Assns::right_t;
-    using Metadata_t = details::AssnsMetadata_t<Assns>;
-    using AssociatedData_t
-      = details::AssociatedData<Main_t, Aux_t, Metadata_t, Tag>;
-    
-    // associationRangeBoundaries() produces iterators to association elements,
-    // (i.e. tuples)
-    using std::begin;
-    using std::end;
-    auto ranges = details::associationRangeBoundaries<0U>
-      (begin(assns), end(assns), minSize);
-    // we convert those iterators into iterators to the right associated item
-    // (it takes a few steps)
-    using group_ranges_t = typename AssociatedData_t::group_ranges_t;
-    return AssociatedData_t(
-      group_ranges_t
-        (typename group_ranges_t::boundaries_t(ranges.begin(), ranges.end()))
-      );
-  } // makeAssociatedData(assns)
-  
-  
+  //--- makeAssociatedDataFrom() implementations
   //----------------------------------------------------------------------------
   template <
     typename Main, typename Aux, typename Metadata, typename Tag,
     typename Event
     >
-  auto makeAssociatedData
+  auto makeAssociatedDataFrom
     (Event const& event, art::InputTag tag, std::size_t minSize /* = 0 */)
   {
     using Main_t = Main;
@@ -4749,9 +2439,9 @@ namespace proxy {
     using Assns_t = typename AssociatedData_t::assns_t;
     
     return
-      makeAssociatedData<Tag>(*(event.template getValidHandle<Assns_t>(tag)));
+      makeAssociatedDataFrom<Tag>(*(event.template getValidHandle<Assns_t>(tag)));
     
-  } // makeAssociatedData(tag)
+  } // makeAssociatedDataFrom(tag)
   
   
   //----------------------------------------------------------------------------
@@ -4759,47 +2449,28 @@ namespace proxy {
     typename Aux, typename Metadata, typename Tag,
     typename Handle, typename Event
     >
-  auto makeAssociatedData
+  auto makeAssociatedDataFrom
     (Handle&& handle, Event const& event, art::InputTag tag)
   {
     // Handle::value_type is the main data product type (a collection)
-    using Main_t = collection_value_t<typename Handle::value_type>;
+    using Main_t = util::collection_value_t<typename Handle::value_type>;
     using Aux_t = Aux;
     using Metadata_t = Metadata;
-    return makeAssociatedData<Main_t, Aux_t, Metadata_t, Tag>
+    return makeAssociatedDataFrom<Main_t, Aux_t, Metadata_t, Tag>
       (event, tag, handle->size());
-  } // makeAssociatedData(handle)
+  } // makeAssociatedDataFrom(handle)
   
   
   
   //----------------------------------------------------------------------------
-  //--- makeAssociatedTo01data() implementations
-  //----------------------------------------------------------------------------
-  template <typename Tag, typename Assns>
-  auto makeAssociatedTo01data(Assns const& assns, std::size_t minSize /* = 0 */)
-  {
-    using Main_t = typename Assns::left_t;
-    using Aux_t = typename Assns::right_t;
-    using Metadata_t = details::AssnsMetadata_t<Assns>;
-    using AssociatedData_t
-      = details::OneTo01Data<Main_t, Aux_t, Metadata_t, Tag>;
-    
-    using std::cbegin;
-    using std::cend;
-    return AssociatedData_t(
-      details::associationOneToOneFullSequence<0U, 1U>
-        (cbegin(assns), cend(assns), minSize)
-      );
-  } // makeAssociatedTo01data(assns)
-  
-  
+  //--- makeOneTo01dataFrom() implementations
   //----------------------------------------------------------------------------
   template <
     typename Main, typename Aux, typename Metadata,
     typename Tag,
     typename Event
     >
-  auto makeAssociatedTo01data
+  auto makeOneTo01dataFrom
     (Event const& event, art::InputTag tag, std::size_t minSize /* = 0 */)
   {
     using Main_t = Main;
@@ -4809,10 +2480,10 @@ namespace proxy {
       = details::OneTo01Data<Main_t, Aux_t, Metadata_t, Tag>;
     using Assns_t = typename AssociatedData_t::assns_t;
     
-    return makeAssociatedTo01data<Tag>
+    return makeOneTo01dataFrom<Tag>
       (*(event.template getValidHandle<Assns_t>(tag)), minSize);
     
-  } // makeAssociatedTo01data(tag)
+  } // makeOneTo01dataFrom(tag)
   
   
   //----------------------------------------------------------------------------
@@ -4821,104 +2492,27 @@ namespace proxy {
     typename Tag,
     typename Handle, typename Event
     >
-  auto makeAssociatedTo01data
+  auto makeOneTo01dataFrom
     (Handle&& handle, Event const& event, art::InputTag tag)
   {
     // Handle::value_type is the main data product type (a collection)
-    using Main_t = collection_value_t<typename Handle::value_type>;
+    using Main_t = util::collection_value_t<typename Handle::value_type>;
     using Aux_t = Aux;
     using Metadata_t = Metadata;
-    return makeAssociatedTo01data<Main_t, Aux_t, Metadata_t, Tag>
+    return makeOneTo01dataFrom<Main_t, Aux_t, Metadata_t, Tag>
       (event, tag, handle->size());
-  } // makeAssociatedTo01data(handle)
+  } // makeOneTo01dataFrom(handle)
   
   
   
   //----------------------------------------------------------------------------
-  //--- makeParallelData() implementations
-  //----------------------------------------------------------------------------
-  template <
-    typename AuxColl,
-    typename Aux /* = collection_value_t<AuxColl>*/,
-    typename Tag /* = Aux */
-    >
-  auto makeParallelData(AuxColl const& data) {
-    
-    // Ahh, simplicity.
-    return details::ParallelData<AuxColl, Aux, Tag>(data);
-    
-  } // makeParallelData(AuxColl)
-  
-  
+  //--- makeParallelDataFrom() implementations
   //----------------------------------------------------------------------------
   template <typename AuxColl, typename Aux, typename Tag, typename Event>
-  auto makeParallelData(Event const& event, art::InputTag tag) {
-    return makeParallelData<AuxColl, Aux, Tag>
+  auto makeParallelDataFrom(Event const& event, art::InputTag tag) {
+    return makeParallelDataFrom<AuxColl, Aux, Tag>
       (*(event.template getValidHandle<AuxColl>(tag)));
-  } // makeParallelData()
-  
-  
-  //----------------------------------------------------------------------------
-  //---  CollectionProxyElement
-  //----------------------------------------------------------------------------
-  template <typename CollProxy>
-  template <typename Tag, typename T>
-  auto CollectionProxyElement<CollProxy>::getIf() const -> decltype(auto)
-    { return getIfHas<Tag, T>(details::YesNoStruct<has<Tag>()>{}); }
-  
-  
-  template <typename CollProxy>
-  template <typename Tag, typename>
-  auto CollectionProxyElement<CollProxy>::getIfHas
-    (details::YesNoStruct<true>) const -> decltype(auto)
-    { return get<Tag>(); }
-  
-  template <typename CollProxy>
-  template <typename Tag, typename T>
-  auto CollectionProxyElement<CollProxy>::getIfHas
-    (details::YesNoStruct<false>) const -> T
-    {
-      throw std::logic_error
-        ("Tag '" + lar::debug::demangle<Tag>() + "' not available."); 
-    }
-  
-  
-  //----------------------------------------------------------------------------
-  //---  CollectionProxyBase
-  //----------------------------------------------------------------------------
-  template <
-    template <typename CollProxy> class Element,
-    typename MainColl,
-    typename... AuxColls
-    >
-  template <typename Tag, typename T>
-  auto CollectionProxyBase<Element, MainColl, AuxColls...>::getIf() const
-    -> decltype(auto)
-    { return getIfHas<Tag, T>(details::YesNoStruct<has<Tag>()>{}); }
-  
-  
-  template <
-    template <typename CollProxy> class Element,
-    typename MainColl,
-    typename... AuxColls
-    >
-  template <typename Tag, typename>
-  auto CollectionProxyBase<Element, MainColl, AuxColls...>::getIfHas
-    (details::YesNoStruct<true>) const -> decltype(auto)
-    { return get<Tag>(); }
-  
-  template <
-    template <typename CollProxy> class Element,
-    typename MainColl,
-    typename... AuxColls
-    >
-  template <typename Tag, typename T>
-  auto CollectionProxyBase<Element, MainColl, AuxColls...>::getIfHas
-    (details::YesNoStruct<false>) const -> T
-    {
-      throw std::logic_error
-        ("Tag '" + lar::debug::demangle<Tag>() + "' not available."); 
-    }
+  } // makeParallelDataFrom()
   
   
   //----------------------------------------------------------------------------
@@ -5006,55 +2600,6 @@ namespace proxy {
     
   } // namespace details
 } // namespace proxy
-
-
-// FIXME simplify this code if issue #18769 is accepted
-namespace std {
-  
-  //----------------------------------------------------------------------------
-  //--- implementation of specializations of std::get() for art::AssnsNode
-  //----------------------------------------------------------------------------
-  
-  template< std::size_t I, typename L, typename R, typename D>
-  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>>&
-  get(art::AssnsNode<L, R, D>& node) noexcept
-    { return proxy::details::AssnsNodeGetter<I, L, R, D>::get(node); }
-  
-  template< std::size_t I, typename L, typename R, typename D>
-  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>>&&
-  get(art::AssnsNode<L, R, D>&& node) noexcept
-    {
-      return proxy::details::AssnsNodeGetter<I, L, R, D>::get(std::move(node));
-    }
-  
-  template< std::size_t I, typename L, typename R, typename D>
-  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>> const&
-  get(art::AssnsNode<L, R, D> const& node) noexcept
-    { return proxy::details::AssnsNodeGetter<I, L, R, D>::get(node); }
-  
-  template< std::size_t I, typename L, typename R, typename D>
-  constexpr std::tuple_element_t<I, art::AssnsNode<L, R, D>> const&&
-  get(art::AssnsNode<L, R, D> const&& node) noexcept
-    {
-      return proxy::details::AssnsNodeGetter<I, L, R, D>::get(std::move(node));
-    }
-  
-  template< class T, typename L, typename R, typename D>
-  constexpr T& get(art::AssnsNode<L, R, D>& t) noexcept;
-  
-  template< class T, typename L, typename R, typename D>
-  constexpr T&& get(art::AssnsNode<L, R, D>&& t) noexcept;
-  
-  template< class T, typename L, typename R, typename D>
-  constexpr const T& get(const art::AssnsNode<L, R, D>& t) noexcept;
-  
-  template< class T, typename L, typename R, typename D>
-  constexpr const T&& get(const art::AssnsNode<L, R, D>&& t) noexcept;
-  
-  //----------------------------------------------------------------------------
-  
-  
-} // namespace std
 
 
 #endif // LARDATA_RECOBASEPROXY_PROXYBASE_H
