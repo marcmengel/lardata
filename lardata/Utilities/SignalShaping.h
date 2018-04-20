@@ -66,8 +66,8 @@
 
 namespace util {
 
-  class SignalShaping {
-  public:
+class SignalShaping {
+public:
 
     // Constructor, destructor.
     SignalShaping();
@@ -132,6 +132,7 @@ namespace util {
   private:
 
     // Attributes.
+    double fMinConvKernelFrac;  ///< minimum value of convKernel/peak for deconvolution
 
     // Lock flags.
     mutable bool fResponseLocked;
@@ -157,7 +158,8 @@ namespace util {
 
     // Xin added */
     bool fNorm; 
-  };
+};
+
 }
 
 //----------------------------------------------------------------------

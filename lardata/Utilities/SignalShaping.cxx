@@ -17,8 +17,9 @@
 //----------------------------------------------------------------------
 // Constructor.
 //
-util::SignalShaping::SignalShaping() 
-  : fResponseLocked(false)
+util::SignalShaping::SignalShaping()
+  : fMinConvKernelFrac(1.e-6)
+  , fResponseLocked(false)
   , fFilterLocked  (false)
   , fNorm (true)
 {}
@@ -229,20 +230,31 @@ void util::SignalShaping::CalculateDeconvKernel() const
 
     // Make sure filter function has the correct size.
     // (Should always be the case if we get here.)
-    unsigned int n = fft->FFTSize();
-    if (2 * (fFilter.size() - 1) != n && fFilter.size() != fConvKernel.size())
+    if (fFilter.size() != fConvKernel.size())
     {
         throw cet::exception("SignalShaping") << __func__ << ": inconsistent size, "
                 << fFilter.size() << " vs. " << fConvKernel.size() << "\n";
     }
   
-    // Calculate deconvolution kernel as the ratio of the
-    // filter function and the convolution kernel.
+    // Note that to avoid crazy large values in the range where the convolution kernel tends to zero
+    // we need to recover the peak value which we can use to determine when we are near the end
+    TComplex convComplex    = fConvKernel.at(0);
+    TComplex convMaxComplex = *std::max_element(fConvKernel.begin(),fConvKernel.end(),[](const auto& a, const auto& b){return a.Rho() < b.Rho();});
+    double   convMax        = convMaxComplex.Rho();
+    
+    // Now form the deconvolution kernel which will be the ratio of the filter function and
+    // the convolution kernel but where we suppress those regions where the convolution kernel
+    // is below our cutoff
     fDeconvKernel = fFilter;
-    for(unsigned int i=0; i<fDeconvKernel.size(); ++i)
+    for(unsigned int idx=0; idx<fDeconvKernel.size(); ++idx)
     {
-        if(std::abs(fConvKernel[i].Re()) <= 0.0001 && std::abs(fConvKernel[i].Im()) <= 0.0001) fDeconvKernel[i] = 0.;
-        else                                                                                   fDeconvKernel[i] /= fConvKernel[i];
+        // The idea is to use the latest "valid" value of the response function
+        // At some point it is assumed this will start to remain constant, at this point
+        // it is assumed that the filter will be tending to zero and will squash this
+        // constant value but will do so in a "continuous" way.
+        if (fConvKernel[idx].Rho() > fMinConvKernelFrac * convMax) convComplex = fConvKernel[idx];
+        
+        fDeconvKernel[idx] /= convComplex;
     }
 
     // Normalize the deconvolution kernel.
@@ -250,7 +262,7 @@ void util::SignalShaping::CalculateDeconvKernel() const
     {
         // Calculate the unnormalized deconvoluted response
         // (inverse FFT of filter function).
-        std::vector<double> deconv(n, 0.);
+        std::vector<double> deconv(fFilter.size(), 0.);
         fft->DoInvFFT(const_cast<std::vector<TComplex>&>(fFilter), deconv);
         
         // Find the peak value of the response
@@ -280,7 +292,7 @@ void util::SignalShaping::CalculateDeconvKernel() const
         // Multiply the deconvolution kernel by a factor such that
         // (Peak of response) = (Peak of deconvoluted response).
         double ratio = peak_response / peak_deconv;
-    std::transform(fDeconvKernel.begin(),fDeconvKernel.end(),fDeconvKernel.begin(),std::bind(std::multiplies<double>(),std::placeholders::_1,ratio));
+        std::transform(fDeconvKernel.begin(),fDeconvKernel.end(),fDeconvKernel.begin(),std::bind(std::multiplies<double>(),std::placeholders::_1,ratio));
     }
     // Set the lock flag.
 
