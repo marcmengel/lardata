@@ -340,7 +340,7 @@ namespace util {
     // Example: "SELECT get_map_double_sec(1438430400);"
     PQclear(res);
 
-    char dbquery[1] = {' '};  //I hate C++ strong typing and string handling so very, very much. 
+    char dbquery[200];
     sprintf(dbquery, "SELECT get_map_double_sec(%i,%i);", data_taking_timestamp, swizzling_timestamp);
     res = PQexec(conn, dbquery); 
 
