@@ -302,6 +302,14 @@ namespace proxy {
   namespace details {
     
     //--------------------------------------------------------------------------
+    template <typename MainColl, typename... AuxColl>
+    auto makeCollectionProxy(MainColl const& main, AuxColl&&... aux)
+      {
+        return CollectionProxy<MainColl, AuxColl...>
+          (main, std::forward<AuxColl>(aux)...);
+      }
+    
+    //--------------------------------------------------------------------------
     /**
      * @brief Iterator to random access collection storing a current index.
      * @tparam Cont type of random-access container to iterate
