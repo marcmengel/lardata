@@ -34,8 +34,6 @@
 #include <cassert>
 
 
-/// Encloses LArSoft data product proxy objects and utilities.
-/// @ingroup LArSoftProxies
 namespace proxy {
   
   

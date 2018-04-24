@@ -19,11 +19,11 @@
 
 
 /// Encloses LArSoft data product proxy objects and utilities.
-/// @ingroup LArSoftProxies
+/// @addtogroup LArSoftProxies
 namespace proxy {
   
   // --- BEGIN Collection proxy infrastructure ---------------------------------
-  /// @ingroup LArSoftProxyCollections
+  /// @addtogroup LArSoftProxyCollections
   /// @{
   
   /**

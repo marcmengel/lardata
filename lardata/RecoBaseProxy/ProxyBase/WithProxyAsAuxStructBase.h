@@ -29,7 +29,7 @@ namespace proxy {
   namespace details {
     
     /// --- BEGIN LArSoftProxiesAuxProxy ---------------------------------------
-    /// @ingroup LArSoftProxiesAuxProxy
+    /// @addtogroup LArSoftProxiesAuxProxy
     /// @{
     
     //--------------------------------------------------------------------------

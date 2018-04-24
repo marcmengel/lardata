@@ -28,7 +28,7 @@ namespace lar {
     
     //--- BEGIN Traits for art associations ------------------------------------
     /**
-     * @defgroup ArtAssociationsMetaprogramming Traits for _art_ associations
+     * @defgroup ArtAssociationsMetaprogramming Traits for art associations
      * @ingroup Metaprogramming
      * 
      * A small set of metaprogramming classes is meant to hide the small

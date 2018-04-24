@@ -26,7 +26,7 @@
 namespace proxy {
   
   // --- BEGIN Collection proxy infrastructure ---------------------------------
-  /// @ingroup LArSoftProxyCollections
+  /// @addtogroup LArSoftProxyCollections
   /// @{
   
   //----------------------------------------------------------------------------

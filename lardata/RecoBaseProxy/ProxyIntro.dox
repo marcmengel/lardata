@@ -15,6 +15,15 @@
  * 
  * @{
  */
+
+/**
+ * @namespace proxy
+ * @brief Encloses LArSoft data product proxy objects and utilities.
+ * 
+ * See @ref LArSoftProxiesIntro "this doxygen module" for an introduction to
+ * data proxies in LArSoft.
+ */
+
 /**
  * @page LArSoftProxiesIntro Introduction to LArSoft data product proxy objects.
  * 
@@ -53,6 +62,15 @@
  *   This does require associations to be one-to-one, bit it does _not_ require
  *   that all `L` be associated to at least one `R`.
  * 
+ * @section LArSoftProxyPlug What's next
+ * 
+ * * check out the @ref LArSoftProxyReco "proxies provided by LArSoft"
+ * * if you need to interact with other data, you can tailor a proxy on your
+ *     data: check out the @ref LArSoftProxyCustom "data proxy infrastructure"
+ *     section
+ * * if you need to make a new proxy available to other users, take inspiration
+ *     from one of the @ref LArSoftProxyReco "proxies provided by LArSoft" 
+ * 
  * 
  */
 /**
@@ -61,11 +79,21 @@
  * @brief Classes for implementation and customization of LArsoft proxies.
  * 
  * This documentation section contains hints for the creation or customization
- * of data product proxies. The creation of new proxies is not overly hard, but
- * it is nevertheless not straightforward, and following the example of already
- * implemented proxies may be the best starting point.
+ * of data product proxies.
+ * These are two slightly different use cases:
+ * * if you need a way to facilitate the association between data products,
+ *     a simple proxy may be your solution: you want to
+ *     @ref LArSoftProxySimple "create a proxy object", which is fairly easy
+ * * if your needs are more complex, including for example an extended interface
+ *     to give friendly names to the associated data or to create a new data
+ *     concept to be published for general use, then you want to create a new
+ *     _class_ describing the proxy, and you are looking for
+ *     @ref LArSoftProxyCustomization "customizing a proxy". This customization
+ *     is not necessarily hard, but it is nevertheless not straightforward, and
+ *     following the example of already implemented proxies may be the best
+ *     starting point.
  * 
- * It also explains some implementation choices.
+ * Some implementation choices are also explained here.
  * 
  * @bug The current design is flawed in the support of (sub)proxies as direct
  *      elements of a proxy. The merged elements are implemented as base classes
@@ -96,7 +124,7 @@
  *   double const length = trackInfo->Length(); // access to track members
  * 
  *   // access to associated data (returns random-access collection-like object)
- *   decltype(auto) hits = trackInfo.get<recob::Hit>();
+ *   auto const& hits = trackInfo.get<recob::Hit>();
  *   
  *   double charge = 0.0;
  *   for (auto const& hitPtr: hits) {
@@ -111,6 +139,9 @@
  *   
  * } // for tracks
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * If instead of using `trackInfo.get<recob::Hit>()` you want to use something
+ * more friendly, like `trackInfo.Hits()`, then you need to
+ * @ref LArSoftProxyCustomization "create and customize a new proxy class".
  * 
  * 
  * @subsection LArSoftProxyQuirks Quirks of proxy usage (a.k.a. "C++ is not python")
@@ -228,7 +259,7 @@
  * 
  * A technique that is used in this implementation is to replace (or extend) the
  * interface of an existing object.
- * The @ref InterfaceSubstitution "documentation of file CollectionView.h"
+ * The @ref LArSoftProxyInterfaceSubstitition "documentation of file CollectionView.h"
  * includes a more in-depth description of it.
  * 
  * 

@@ -26,7 +26,7 @@
 namespace proxy {
   
   // --- BEGIN LArSoftProxiesAssociatedData ------------------------------------
-  /// @ingroup LArSoftProxiesAssociatedData
+  /// @addtogroup LArSoftProxiesAssociatedData
   /// @{
   
   //----------------------------------------------------------------------------

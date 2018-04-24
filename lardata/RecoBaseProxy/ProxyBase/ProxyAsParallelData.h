@@ -34,7 +34,7 @@ namespace proxy {
   } // namespace details
   
   
-  /// --- BEGIN Infrastructure for proxies as auxiliary data -------------------
+  // --- BEGIN Infrastructure for proxies as auxiliary data --------------------
   /**
    * @defgroup LArSoftProxiesAuxProxy Infrastructure for proxies as auxiliary
    *           data.

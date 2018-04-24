@@ -24,9 +24,9 @@ namespace proxy {
   
   
   // -- BEGIN Parallel data infrastructure -------------------------------------
-  /// @ingroup LArSoftProxiesParallelData
+  /// @addtogroup LArSoftProxiesParallelData
   /// @{
-
+  
   /**
    * @brief Wraps a collection into a parallel data collection object.
    * @tparam AuxColl type of parallel data data product container
