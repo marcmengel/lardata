@@ -32,6 +32,9 @@ namespace proxy {
     template <typename Cont>
     class IndexBasedIterator;
     
+    template <template <typename, typename...> class F, typename...>
+    struct TemplateAdaptorOnePlus;
+    
   } // namespace details
   
   
@@ -295,6 +298,13 @@ namespace proxy {
     = CollectionProxyBase<CollectionProxyElement, MainColl, AuxColls...>;
   
   
+  // this joke is necessary because expanding directly CollectionProxy<Args...>
+  // into CollectionProxy<Main, Aux...>  template arguments does not work
+  template <typename... Args>
+  using CollectionProxyFromArgs
+    = typename details::TemplateAdaptorOnePlus<CollectionProxy, Args...>::type;
+  
+  
   /// @}
   // --- END Collection proxy infrastructure -----------------------------------
   
@@ -302,10 +312,23 @@ namespace proxy {
   namespace details {
     
     //--------------------------------------------------------------------------
+    /// Creates a collection proxy of a specified type with the given arguments.
+    template <
+      template <typename...> class CollProxy,
+      typename MainColl, typename... AuxColl
+      >
+    auto createCollectionProxy(MainColl const& main, AuxColl&&... aux)
+      {
+        return CollProxy<MainColl, AuxColl...>
+          (main, std::forward<AuxColl>(aux)...);
+      }
+    
+    //--------------------------------------------------------------------------
+    /// Creates a `CollectionProxy` object with the given arguments.
     template <typename MainColl, typename... AuxColl>
     auto makeCollectionProxy(MainColl const& main, AuxColl&&... aux)
       {
-        return CollectionProxy<MainColl, AuxColl...>
+        return createCollectionProxy<CollectionProxy>
           (main, std::forward<AuxColl>(aux)...);
       }
     
@@ -360,6 +383,19 @@ namespace proxy {
 //--- template implementation
 //------------------------------------------------------------------------------
 namespace proxy {
+  
+  namespace details {
+    
+    //--------------------------------------------------------------------------
+    template <
+      template <typename, typename...> class F,
+      typename First, typename... Others
+      >
+    struct TemplateAdaptorOnePlus<F, First, Others...>
+      { using type = F<First, Others...>; };
+      
+  } // namespace details
+  
   
   //----------------------------------------------------------------------------
   //---  CollectionProxyBase

@@ -202,14 +202,6 @@ namespace proxy {
   
   
   
-  /// Define the traits of `proxy::ChargedSpacePoints` proxy.
-  template <>
-  struct CollectionProxyMakerTraits<ChargedSpacePoints>
-    : public
-      CollectionProxyMakerTraits<ChargedSpacePoints::SpacePointDataProduct_t>
-  {};
-  
-  
   //--------------------------------------------------------------------------
   /**
     * @brief Proxy class for charged space point proxy elements.
@@ -380,60 +372,13 @@ namespace proxy {
   /// The specialization uses the customized proxy element
   /// `proxy::SpacePointWithCharge`.
   template <>
-  struct CollectionProxyMaker<ChargedSpacePoints>
-    : public CollectionProxyMakerBase<ChargedSpacePoints>
+  struct CollectionProxyMakerTraits<ChargedSpacePoints>
+    : public
+      CollectionProxyMakerTraits<ChargedSpacePoints::SpacePointDataProduct_t>
   {
-    
-    /// Traits of the collection proxy for the collection proxy maker.
-    using maker_base_t = CollectionProxyMakerBase<ChargedSpacePoints>;
-    
-    /// Type of main collection proxy.
-    using typename maker_base_t::main_collection_proxy_t;
-    
-    /// Type of element of the main collection.
-    using typename maker_base_t::main_collection_t;
-    
-    /**
-     * @brief Creates and returns a collection proxy for `recob::SpacePoint`
-     *        based on `proxy::ChargedSpacePoints` tag and with the requested
-     *        associated data.
-     * @tparam Event type of the event to read the information from
-     * @tparam WithArgs type of arguments for associated data
-     * @param event event to read the information from
-     * @param tag input tag of the `recob::SpacePoint` collection data product
-     * @param withArgs optional associated objects to be included
-     * @return a collection proxy to `recob::SpacePoint` collection with `tag`
-     * 
-     * For each argument in `withArgs`, an action is taken. Usually that is to
-     * add an association to the proxy.
-     */
-    template <typename Event, typename... WithArgs>
-    static auto make
-      (Event const& event, art::InputTag tag, WithArgs&&... withArgs)
-      {
-        auto mainHandle = event.template getValidHandle<main_collection_t>(tag);
-        auto proxy = makeCollectionProxy(
-          *mainHandle,
-          withArgs.template createAuxProxyMaker<main_collection_proxy_t>
-            (event, mainHandle, tag)...
-          );
-        return proxy;
-      } // make()
-    
-      private:
-    template <typename MainColl, typename... AuxColl>
-    using coll_proxy_t
-      = ChargedSpacePointsCollectionProxy<MainColl, AuxColl...>;
-    
-    // helper function to avoid typing the exact types of auxiliary collections
-    template <typename MainColl, typename... AuxColl>
-    static auto makeCollectionProxy(MainColl const& main, AuxColl&&... aux)
-      {
-        return coll_proxy_t<MainColl, AuxColl...>
-          (main, std::forward<AuxColl>(aux)...);
-      }
-    
-  }; // struct CollectionProxyMaker<ChargedSpacePoints>
+    template <typename... Args>
+    using collection_proxy_impl_t = ChargedSpacePointsCollectionProxy<Args...>;
+  };
   
   
   
