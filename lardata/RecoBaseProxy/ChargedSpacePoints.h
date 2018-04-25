@@ -5,6 +5,29 @@
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   December 20, 2017
  * 
+ * This file defined the proxy of a space point collection with associated
+ * reconstructed charge. It contains:
+ * 
+ * * `proxy::ChargedSpacePoints`: the formal name of the proxy, also containing
+ *     information about its main collection and the definition of the standard
+ *     tags
+ * * `proxy::getChargedSpacePoints()`: a function to create a collection proxy
+ *     of that type
+ * * `proxy::withCharge()`: a function that can be used as an argument of
+ *     `proxy::getChargedSpacePoints()` (or `proxy::getCollection()`) to add
+ *     further associated charge collections
+ * * `proxy::SpacePointWithCharge`: the interface that users see when accessing
+ *     one element of the collection proxy (derived and extended from the
+ *     standard one)
+ * * `proxy::ChargedSpacePointsCollectionProxy`: the interface of the collection
+ *     proxy (derived and extended from the standard one)
+ * * a specialization of `proxy::CollectionProxyMakerTraits` for this collection
+ *     proxy, which informs the infrastructure about the two customized classes
+ *     above (in fact, only about the latter, which in turn contains the
+ *     information about the other one)
+ * 
+ * See the documentation about @ref LArSoftProxyChargedSpacePoint "this proxy"
+ * for examples on how to use it.
  */
 
 /**
@@ -97,7 +120,9 @@ namespace proxy {
   
   /**
    * @brief Proxy tag for a `recob::SpacePoint` collection with charge.
-   * @see `proxy::SpacePointWithCharge`, `proxy::getChargedSpacePoints()`
+   * @see `proxy::getChargedSpacePoints()`,
+   *      `proxy::SpacePointWithCharge`,
+   *      `proxy::ChargedSpacePointsCollectionProxy`
    * @ingroup LArSoftProxyChargedSpacePoint
    *
    * This type can be used to get a proxy for `recob::SpacePoint` collection
@@ -134,6 +159,10 @@ namespace proxy {
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    * In this example, the charged space point proxy accesses the information
    * exclusively via its specific interface.
+   * The complete documentation of the interface is split between
+   * `proxy::ChargedSpacePointsCollectionProxy` (treating the collection as a
+   * whole) and `proxy::SpacePointWithCharge` (accessing the individual element
+   * of the collection).
    * 
    * Unfortunately, the proxy object (`point` in the example) can be of a
    * different class depending on which data is merged into it (via optional
@@ -204,12 +233,13 @@ namespace proxy {
   
   //--------------------------------------------------------------------------
   /**
-    * @brief Proxy class for charged space point proxy elements.
-    * @tparam CollProxy type of point proxy collection to get data from
-    * @ingroup LArSoftProxyChargedSpacePoint
-    *
-    * For details on the space point interface see `proxy::ChargedSpacePoints`.
-    */
+   * @brief Proxy class for charged space point proxy elements.
+   * @tparam CollProxy type of point proxy collection to get data from
+   * @see `proxy::CollectionProxyElement`,
+   *      `proxy::ChargedSpacePointsCollectionProxy`
+   * 
+   * For details on the space point interface see `proxy::ChargedSpacePoints`.
+   */
   template <typename CollProxy>
   struct SpacePointWithCharge: public CollectionProxyElement<CollProxy> {
     
@@ -258,7 +288,7 @@ namespace proxy {
       { return chargeInfo().charge(); }
     
     /// Returns whether the charge associated to the space point is valid.
-    /// @see recob::PointCharge::hasCharge()
+    /// @see `recob::PointCharge::hasCharge()`
     bool hasCharge() const { return chargeInfo().hasCharge(); }
     
     /// @}
@@ -273,7 +303,7 @@ namespace proxy {
    * @brief Proxy collection class for space points associated to charge.
    * @tparam MainColl type of space point collection
    * @tparam AuxColl types of auxiliary data collections
-   * @see `proxy::CollectionProxyBase`
+   * @see `proxy::SpacePointWithCharge`, `proxy::CollectionProxyBase`
    * 
    * This proxy collection allows access to space point and charge collection
    * directly:
@@ -282,8 +312,12 @@ namespace proxy {
    * auto const& spacePoints = points.spacePoints();
    * auto const& charges = points.charges();
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * When accessing the collection proxy element by element (that is, charged
+   * space point by charged space point), the available interface is documented
+   * in `proxy::SpacePointWithCharge`.
    * 
-   * For the rest of the specific interface, see `proxy::SpacePointWithCharge`.
+   * The standard proxy interface is also available
+   * (see `proxy::CollectionProxyBase`).
    */
   template <typename MainColl, typename... AuxColl>
   class ChargedSpacePointsCollectionProxy
@@ -310,7 +344,7 @@ namespace proxy {
   
   //----------------------------------------------------------------------------
   /**
-   * @brief Adds additional `recob::PointCharge` information to the proxy.
+[   * @brief Adds additional `recob::PointCharge` information to the proxy.
    * @param inputTag the data product label to read the data from
    * @return an object driving `getCollection()` to use a `recob::PointCharge`
    * @ingroup LArSoftProxyChargedSpacePoint
@@ -339,17 +373,18 @@ namespace proxy {
    * @param inputTag tag for the reconstructed space points and charge data
    * @param withArgs additional elements to be merged into the proxy
    * @return a proxy to space points with associated charge
+   * @ingroup LArSoftProxyChargedSpacePoint
    * @see `proxy::ChargedSpacePoints`, `proxy::SpacePointWithCharge`,
-   *      `proxy::getCollection()`
+   *      `proxy::ChargedSpacePointsCollectionProxy`, `proxy::getCollection()`
    * 
    * This function initializes and return a space point proxy with associated
    * charge.
    * The proxy has a `recob::SpacePoint` as main data product, and it comes with
-   * an association of a single `recob::PointCharge` per space point, that can
-   * be accessed with tag `proxy::ChargedSpacePoints::ChargeTag` (although the
-   * specific interface documented in `proxy::ChargedSpacePoints` -- proxy to
-   * the whole collection -- and `proxy::SpacePointWithCharge` -- proxy to an
-   * individual space point -- is more convenient).
+   * an association of a single `recob::PointCharge` per space point.
+   * It is recommended that the interface documented in
+   * `proxy::ChargedSpacePoints` is used to interact with this proxy.
+   * The standard proxy interface is nevertheless also available (the charge
+   * is associated with the tag `proxy::ChargedSpacePoints::ChargeTag`).
    * 
    * Additional elements can be merged into the proxy, in the usual way of
    * `proxy::getCollection()`.
@@ -366,11 +401,24 @@ namespace proxy {
   
   
   //----------------------------------------------------------------------------
-  /// Specialization to create a proxy for `recob::ChargedSpacePoints`
-  /// collection.
-  /// 
-  /// The specialization uses the customized proxy element
-  /// `proxy::SpacePointWithCharge`.
+  /**
+   * @brief Traits of `proxy::ChargedSpacePoints` proxy
+   * 
+   * The `proxy::ChargedSpacePoints` is special in that it uses a custom
+   * collection proxy, `ChargedSpacePointsCollectionProxy`, which in turns uses
+   * a custom collection proxy element, `SpacePointWithCharge`.
+   * The former allows to access all the charges and space points with
+   * meaningful methods (`spacePoints()` and `charges()`), and the latter allows
+   * the same when addressing the single element of the collection
+   * (`position()`, `charge()`, etc.).
+   * 
+   * The price for this candy is that those interfaces need to be written, and
+   * then the traits of the proxy needs to be specialized to register that
+   * customization.
+   * 
+   * Specifying `collection_proxy_impl_t` is the way to do that. The other
+   * traits are inherited from "default" values of an unflavoured proxy.
+   */
   template <>
   struct CollectionProxyMakerTraits<ChargedSpacePoints>
     : public
@@ -380,6 +428,7 @@ namespace proxy {
     using collection_proxy_impl_t = ChargedSpacePointsCollectionProxy<Args...>;
   };
   
+  //----------------------------------------------------------------------------
   
   
 } // namespace proxy
