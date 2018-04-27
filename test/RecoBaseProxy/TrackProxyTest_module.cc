@@ -244,7 +244,7 @@ void TrackProxyTest::testTracks(art::Event const& event) {
   BOOST_CHECK_EQUAL(fitHitInfoSize, expectedTrackFitHitInfo.size());
   
   std::size_t iExpectedTrack = 0;
-  for (auto trackProxy: tracks) {
+  for (auto const& trackProxy: tracks) {
     auto const& expectedTrack = expectedTracks[iExpectedTrack];
     auto const& expectedHits = hitsPerTrack.at(iExpectedTrack);
     auto const& expectedFitHitInfo = expectedTrackFitHitInfo[iExpectedTrack];
@@ -295,7 +295,7 @@ void TrackProxyTest::testTracks(art::Event const& event) {
     BOOST_CHECK_EQUAL(trackProxy->NPoints(), expectedTrack.NPoints());
     
     std::size_t iPoint = 0;
-    for (auto pointInfo: trackProxy.points()) {
+    for (auto const& pointInfo: trackProxy.points()) {
       
       decltype(auto) expectedPointFlags = expectedTrack.FlagsAtPoint(iPoint);
       
