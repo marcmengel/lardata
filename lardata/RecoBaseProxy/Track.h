@@ -173,13 +173,18 @@
  * single place.
  * Traits (`CollectionProxyMakerTraits<Tracks>`) are specialized to inform that
  * this `proxy::Tracks` proxy relies on `std::vector<recob::Track>` as main
- * data product collection type (`std::vector<recob::Track>` is read as
- * `proxy::Tracks`, but again, this is a contingent detail).
- * Then, the creation of the collection proxy is customised by specializing
- * `CollectionProxyMaker` (`CollectionProxyMaker<Tracks>`). The purpose is for
- * it to create a `proxy::CollectionProxyBase` object, and the simple
- * customization just automatically adds the hits, using `withAssociated()`.
- * Finally, some customized functions may be provided for convenience, like
+ * data product collection type (`std::vector<recob::Track>` is learned from
+ * `proxy::Tracks`, but again, this is a contingent detail). The only other
+ * customization we need is to have for our proxy our element class above: since
+ * we can use the standard collection base, just with the custom element, we
+ * define `collection_proxy_impl_t` in that way.
+ * Finally, the creation of the collection proxy is customised by specializing
+ * `CollectionProxyMaker` (`CollectionProxyMaker<Tracks>`). That class normally
+ * takes care of creating the whole proxy, and our purpose is to have it always
+ * add the associated hits as auxiliary data, so that the caller does not have
+ * to explicitly use `withAssociated<recob::Hit>()` in `getCollection()`.
+ * The simple customization does exactly that, under the hood.
+ * As candy, some customized functions may be provided for convenience, like
  * `withFitHitInfo()` as alias of `withAssociated<recob::TrackFitHitInfo>()`.
  * 
  * 
@@ -198,21 +203,20 @@
  * -# define the tag to identify the proxy (`proxy::Tracks`)
  * -# choose what type of object that will be (`proxy::CollectionProxyBase`
  *      should do for most)
- * -# define the main data product type (`std::vector<recob::Track>`) and set
- *     the traits of the collection proxy (often, deriving them from
- *     `proxy::CollectionProxyMakerTraits` with the main data product type as
- *     template argument is enough)
  * -# (_optional_) customize the element type; deriving it from
  *      `proxy::CollectionProxyElement` is recommended
- * -# customize the creation of the proxy collection, if either:
- *     * the proxy element is being customised; if using
- *       `proxy::CollectionProxyBase` as collection proxy, its first template
- *       argument must be the element type (here, `proxy::Track`)
- *     * special logic or default components are specified for the proxy
- *       (here, `withAssociated<recob::Hit>()`)
- *   In this case, `proxy::CollectionProxyMaker` must be specialized (for
- *   `proxy::Tracks`), and a starting point may be to derive the specialization
- *   from `proxy::CollectionProxyMakerBase` and redefine its `make()` member
+ * -# define the main data product type (`std::vector<recob::Track>`) and set
+ *     the traits of the collection proxy, often deriving them from
+ *     `proxy::CollectionProxyMakerTraits` with the main data product type as
+ *     template argument is enough; in this example, we specified a collection
+ *     proxy object with customized element though
+ * -# customize the creation of the proxy collection, if special logic or
+ *     default components are specified for the proxy (here,
+ *     `withAssociated<recob::Hit>()`);
+ *     in this case, `proxy::CollectionProxyMaker` must be specialized (for
+ *     `proxy::Tracks`), and a starting point may be to derive the
+ *     specialization from `proxy::CollectionProxyMakerBase` and redefine its
+ *     `make()` member
  * 
  * 
  * @subsection LArSoftProxyTracksOverhead Overhead
@@ -510,13 +514,6 @@ namespace proxy {
     
   }; // struct Tracks
   
-  
-  
-  /// Define the traits of `proxy::Tracks` proxy.
-  template <>
-  struct CollectionProxyMakerTraits<Tracks>
-    : public CollectionProxyMakerTraits<Tracks::TrackDataProduct_t>
-  {};
   
   
   //----------------------------------------------------------------------------
@@ -1005,20 +1002,27 @@ namespace proxy {
     }
   
   //----------------------------------------------------------------------------
+  /// Define the traits of `proxy::Tracks` proxy.
+  template <>
+  struct CollectionProxyMakerTraits<Tracks>
+    : public CollectionProxyMakerTraits<Tracks::TrackDataProduct_t>
+  {
+    // default traits, plus a collection proxy class with a custom element:
+    template <typename MainColl, typename... AuxColl>
+    using collection_proxy_impl_t
+      = CollectionProxyBase<Track, MainColl, AuxColl...>;
+  };
+  
+  
+  //----------------------------------------------------------------------------
   /// Specialization to create a proxy for `recob::Track` collection.
   template <>
   struct CollectionProxyMaker<Tracks>
     : public CollectionProxyMakerBase<Tracks>
   {
     
-    /// Traits of the collection proxy for the collection proxy maker.
+    /// Base class.
     using maker_base_t = CollectionProxyMakerBase<Tracks>;
-    
-    /// Type of main collection proxy.
-    using typename maker_base_t::main_collection_proxy_t;
-    
-    /// Type of element of the main collection.
-    using typename maker_base_t::main_collection_t;
     
     /**
      * @brief Creates and returns a collection proxy for `recob::Track` based on
@@ -1034,18 +1038,11 @@ namespace proxy {
      * add an association to the proxy.
      * Associated hits (tag: `recob::Hit`) are automatically added to the proxy
      * and must not be explicitly specified.
-     * 
-     * Only a few associated data collections are supported:
-     * * `withAssociated<Aux>()` (optional argument: hit-track association
-     *     tag, as track by default): adds to the proxy an association to the
-     *     `Aux` data product (see `withAssociated()`)
-     * 
      */
     template <typename Event, typename... WithArgs>
     static auto make
-      (Event const& event, art::InputTag tag, WithArgs&&... withArgs)
+      (Event const& event, art::InputTag const& tag, WithArgs&&... withArgs)
       {
-        auto mainHandle = event.template getValidHandle<main_collection_t>(tag);
         // automatically add associated hits with the same input tag;
         // IDEA: allow a withAssociated<recob::Hit>() from withArgs to override
         // this one; the pattern may be:
@@ -1055,28 +1052,12 @@ namespace proxy {
         //   withAssociated<recob::Hit>(tag) as first element
         // In principle there is no need for these hits to be first; code might
         // be simpler when assuming that though.
-        auto proxy = makeCollectionProxy(
-          *mainHandle,
-          withAssociatedAs<recob::Hit, Tracks::HitTag>()
-            .template createAuxProxyMaker<main_collection_proxy_t>
-            (event, mainHandle, tag),
-          withArgs.template createAuxProxyMaker<main_collection_proxy_t>
-            (event, mainHandle, tag)...
+        return maker_base_t::make(
+          event, tag,
+          withAssociatedAs<recob::Hit, Tracks::HitTag>(),
+          std::forward<WithArgs>(withArgs)...
           );
-        return proxy;
       } // make()
-    
-      private:
-    template <typename MainColl, typename... AuxColl>
-    using coll_proxy_t = CollectionProxyBase<Track, MainColl, AuxColl...>;
-    
-    // helper function to avoid typing the exact types of auxiliary collections
-    template <typename MainColl, typename... AuxColl>
-    static auto makeCollectionProxy(MainColl const& main, AuxColl&&... aux)
-      {
-        return coll_proxy_t<MainColl, AuxColl...>
-          (main, std::forward<AuxColl>(aux)...);
-      }
     
   }; // struct CollectionProxyMaker<>
   
