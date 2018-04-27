@@ -18,7 +18,6 @@
 // LArSoft libraries
 #include "lardata/RecoBaseProxy/ProxyBase/WithAssociatedStructBase.h"
 #include "lardata/RecoBaseProxy/ProxyBase/AssociatedDataProxyMaker.h"
-// #include "lardata/RecoBaseProxy/ProxyBase/AssociatedData.h"
 
 // C/C++ standard libraries
 #include <tuple>
@@ -38,6 +37,7 @@ namespace proxy {
      * @tparam Metadata type of metadata of the association
      * @tparam ArgTuple type of arguments required for the creation of proxy
      * @tparam AuxTag tag for the associated data (default: as `Aux`)
+     * @ingroup LArSoftProxiesAssociatedData
      * 
      * This class stores user arguments for the construction of a proxy to
      * associated data of type `Aux` and with metadata `Metadata`.
@@ -67,13 +67,84 @@ namespace proxy {
   } // namespace details
   
   
-  // --- BEGIN Collection proxy infrastructure ---------------------------------
-  /// @addtogroup LArSoftProxyCollections
-  /// @{
+  // --- BEGIN One-to-many sequential associations -----------------------------
+  /**
+   * @name One-to-many sequential associations
+   * 
+   * These functions allow to merge into a data collection proxy auxiliary data
+   * via an _art_ association fulfilling the
+   * @ref LArSoftProxyDefinitionOneToManySeqAssn "one-to-many sequential association requirement".
+   * 
+   * Two categories of functions are available depending on the data source:
+   *  * `proxy::withAssociated()` reads the relevant association from an event
+   *  * `proxy::wrapAssociated()` uses an existing association objects
+   * 
+   * Variants of `proxy::withAssociated()` called `proxy::withAssociatedMeta()`
+   * allow merging the metadata of an association too. The
+   * `proxy::wrapAssociated()` functions always merge the metadata if the
+   * wrapped association has it.
+   * 
+   * Also, variants are available to customize the tag class.
+   * 
+   * The implementation of this feature is documented in
+   * @ref LArSoftProxiesAssociatedData "its own doxygen module".
+   * 
+   * @{
+   */
   
   //----------------------------------------------------------------------------
-  /// The same as `withAssociated()`, but it also specified a tag for the data
-  /// and one for the metadata.
+  /**
+   * @brief Helper function to merge associated data with metadata.
+   * @tparam Aux type of associated data requested
+   * @tparam Metadata type of associated metadata requested
+   * @tparam AuxTag tag to access the associated data within the proxy
+   * @tparam Args types of constructor arguments for associated data collection
+   * @param args constructor arguments for the associated data collection
+   * @return a temporary object that `getCollection()` knows to handle
+   * @see `withAssociatedMeta()`, `withAssociatedMetaAs()`, `wrapAssociated()`
+   * @ingroup LArSoftProxyBase
+   * 
+   * This function is similar to `withAssociated()`, but it also merges the
+   * specified metadata and defines a tag for the data.
+   * In this example we fetch from `event` an association between `recob::Track`
+   * (which is the @ref LArSoftProxyDefinitionMainDataColl "main type" of the
+   * collection proxy `proxy::Tracks`) and `recob::Cluster` objects, each one
+   * with an index as metadata:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * struct MyClusters {};
+   * 
+   * void analyze(art::Event const& event) {
+   *   
+   *   // ...
+   *   auto tracks = proxy::getCollection<proxy::Tracks>
+   *     (event, trackTag, withAssociatedMetaAs<int, MyCluster>(clusterTag));
+   *   
+   *   // ...
+   *   for (auto const& track: tracks) {
+   *   
+   *     auto const& clusters = track.get<MyCluster>();
+   *   
+   *     for (auto const& clusterInfo: clusters) {
+   *       
+   *       // implicit conversion:
+   *       art::Ptr<recob::Cluster> const& clusterPtr = clusterInfo;
+   *       
+   *       // access to the cluster itself
+   *       recob::Cluster const& cluster = *clusterInfo;
+   *       
+   *       // access to the metadata
+   *       int index = clusterInfo.data();
+   *       
+   *     } // for clusters
+   *     
+   * } // for tracks
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * The interface of `clusters` is documented in `lar::CollectionView`.
+   * The interface of `clusterInfo` is documented in
+   * `proxy::details::AssnsNode`.
+   * 
+   * For more extensive information, see `proxy::withAssociatedMeta()`.
+   */
   template <typename Aux, typename Metadata, typename AuxTag, typename... Args>
   auto withAssociatedMetaAs(Args&&... args) {
     using ArgTuple_t = std::tuple<Args&&...>;
@@ -84,7 +155,53 @@ namespace proxy {
   
   
   //----------------------------------------------------------------------------
-  /// The same as `withAssociated()`, but it also specified a tag for the data.
+  /**
+   * @brief Helper function to merge associated data with no metadata.
+   * @tparam Aux type of associated data requested
+   * @tparam AuxTag tag to access the associated data within the proxy
+   * @tparam Args types of constructor arguments for associated data collection
+   * @param args constructor arguments for the associated data collection
+   * @return a temporary object that `getCollection()` knows to handle
+   * @see `withAssociatedMeta()`, `withAssociatedAs()`, `wrapAssociatedAs()`
+   * @ingroup LArSoftProxyBase
+   * 
+   * This function is similar to `withAssociated()`, but it defines a tag for
+   * the data.
+   * In this example we fetch from `event` an association between `recob::Track`
+   * (which is the @ref LArSoftProxyDefinitionMainDataColl "main type" of the
+   * collection proxy `proxy::Tracks`) and `recob::Cluster` objects:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * struct MyClusters {};
+   * 
+   * void analyze(art::Event const& event) {
+   *   
+   *   // ...
+   *   auto tracks = proxy::getCollection<proxy::Tracks>
+   *     (event, trackTag, withAssociatedAs<MyCluster>(clusterTag));
+   *   
+   *   // ...
+   *   for (auto const& track: tracks) {
+   *   
+   *     auto const& clusters = track.get<MyCluster>();
+   *   
+   *     for (auto const& clusterInfo: clusters) {
+   *       
+   *       // implicit conversion:
+   *       art::Ptr<recob::Cluster> const& clusterPtr = clusterInfo;
+   *       
+   *       // access to the cluster itself
+   *       recob::Cluster const& cluster = *clusterInfo;
+   *       
+   *     } // for clusters
+   *     
+   * } // for tracks
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * The interface of `clusters` is documented in `lar::CollectionView`.
+   * The interface of `clusterInfo` is documented in
+   * `proxy::details::AssnsNode`.
+   * 
+   * For more extensive information, see `proxy::withAssociatedMeta()`.
+   */
   template <typename Aux, typename AuxTag, typename... Args>
   auto withAssociatedAs(Args&&... args)
     {
@@ -101,14 +218,19 @@ namespace proxy {
    * @tparam Args types of constructor arguments for associated data collection
    * @param args constructor arguments for the associated data collection
    * @return a temporary object that `getCollection()` knows to handle
-   * @see withAssociated(), withAssociatedAs(), withAssociatedMetaAs()
+   * @ingroup LArSoftProxyBase
+   * @see `withAssociated()`, `withAssociatedAs()`, `withAssociatedMetaAs()`
    * 
    * This function is meant to convey to `getCollection()` function the request
-   * for the delivered collection proxy to carry auxiliary data. The associated
-   * data is normally extracted from an _art_ association
-   * `art::Assns<Main, Aux, Metadata>`, where `Main` is the main type of the
-   * proxy collection. If no metadata is required, `Metadata` can be set to
-   * `void`, or `withAssociated()` can be used instead.
+   * for the delivered collection proxy to carry
+   * @ref LArSoftProxyDefinitionAuxiliaryData "data from an association".
+   * This association _must_ fulfil the
+   * @ref LArSoftProxyDefinitionOneToManySeqAssn "one-to-many sequential association"
+   * requirement. The associated data is normally extracted from an _art_
+   * association `art::Assns<Main, Aux, Metadata>`, where `Main` is the
+   * @ref LArSoftProxyDefinitionMainDataColl "main type" of the proxy
+   * collection. If no metadata is required, `Metadata` can be set to `void`, or
+   * `withAssociated()` can be used instead.
    * 
    * The function also transfers the information required to create a proxy to
    * that auxiliary data.
@@ -137,12 +259,15 @@ namespace proxy {
    * accessed by the `DubiousClusters` tag (which is better not be defined in a
    * local scope):
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * for (auto&& track: tracks) {
-   *   decltype(auto) clusters = track.get<recob::Clusters>();
-   *   decltype(auto) maybeClusters = track.get<DubiousClusters>();
+   * for (auto const& track: tracks) {
+   *   auto const& clusters = track.get<recob::Clusters>();
+   *   auto const& maybeClusters = track.get<DubiousClusters>();
    *   // ...
    * }
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * The full interface of `track` is documented in `lar::CollectionView`.
+   * The interface of `clusters` and `maybeClusters` is documented in
+   * `proxy::details::AssnsNode`.
    * 
    * 
    * Customization of the association proxy
@@ -220,10 +345,34 @@ namespace proxy {
    * @tparam Args types of constructor arguments for associated data collection
    * @param args constructor arguments for the associated data collection
    * @return a temporary object that `getCollection()` knows to handle
-   * @see withAssociatedMeta(), withAssociatedMetaAs()
+   * @see `withAssociatedMeta()`, `withAssociatedMetaAs()`, `wrapAssociated()`
+   * @ingroup LArSoftProxyBase
    * 
    * This function is equivalent to `withAssociatedMeta()` but with the request
-   * of no associated metadata (`Metadata` be `void`).
+   * of no associated metadata (`Metadata` be `void`). Example of usage:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto tracks = proxy::getCollection<proxy::Tracks>
+   *   (event, trackTag, withAssociated<recob::Cluster>(clusterTag));
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * The cluster association (`"clusterTag"`) will be accessed by
+   * using the type `recob::Cluster` as tag:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * for (auto const& track: tracks) {
+   *   
+   *   auto const& clusters = track.get<recob::Cluster>();
+   *   
+   *   for (art::Ptr<recob::Cluster> const& cluster: clusters) {
+   *     
+   *     // ...
+   *     
+   *   } // for clusters
+   *   
+   * } // for tracks
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * The interface of `clusters` is documented in `lar::CollectionView`.
+   * The interface of `cluster` is documented in `proxy::details::AssnsNode`.
+   * 
+   * For more extensive information, see `proxy::withAssociatedMeta()`.
    */
   template <typename Aux, typename... Args>
   auto withAssociated(Args&&... args)
@@ -231,7 +380,48 @@ namespace proxy {
   
   
   //----------------------------------------------------------------------------
-  /// Like `withAssociatedAs()`, but directly using the specified association.
+  /**
+   * @brief Helper function to merge associated data from a given association.
+   * @tparam AuxTag tag to access the associated data within the proxy
+   * @tparam Assns type of the association being merged;
+   *               needs `art::Assns` interface
+   * @param assns the association being merged
+   * @return a temporary object that `getCollection()` knows to handle
+   * @see `withAssociatedMeta()`, `withAssociatedMetaAs()`, `wrapAssociated()`
+   * @ingroup LArSoftProxyBase
+   * 
+   * This function instructs the proxy to use the specified association `assns`
+   * directly. The specified association `assns` must remain valid for all the
+   * lifetime of the proxy.
+   * 
+   * If `Assns` contains metadata, that is also merged into the proxy.
+   * 
+   * Usage example:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * struct Clusters {};
+   * 
+   * void checkClusters
+   *   (art::Assns<recob::Track, recob::Cluster> const& clusters)
+   * {
+   *   auto tracks = proxy::getCollection<proxy::Tracks>
+   *     (event, trackTag, wrapAssociatedAs<::Clusters>(clusters));
+   * 
+   *   for (auto const& track: tracks) {
+   *     
+   *     auto const& clusters = track.get<::Clusters>();
+   *     
+   *     for (art::Ptr<recob::Cluster> const& cluster: clusters) {
+   *       
+   *       // ...
+   *       
+   *     } // for clusters
+   *   
+   *   } // for tracks
+   *   
+   * } // checkClusters()
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * For more extensive information, see `proxy::withAssociatedMeta()`.
+   */
   template <typename AuxTag, typename Assns>
   auto wrapAssociatedAs(Assns const& assns)
     {
@@ -243,19 +433,71 @@ namespace proxy {
     } // wrapAssociatedAs()
   
   
-  /// Like `withAssociated()`, but directly using the specified association.
-  template <typename AuxTag, typename Assns>
-  auto wrapAssociated(Assns const& assns)
-    { return wrapAssociatedAs<AuxTag>(assns); }
-  
-  /// Like `withAssociated()`, but directly using the specified association.
+  /**
+   * @brief Helper function to merge associated data from a given association.
+   * @tparam Assns type of the association being merged;
+   *               needs `art::Assns` interface
+   * @param assns the association being merged
+   * @return a temporary object that `getCollection()` knows to handle
+   * @see `withAssociatedMeta()`, `wrapAssociatedAs()`
+   * @ingroup LArSoftProxyBase
+   * 
+   * This function instructs the proxy to use the specified association `assns`
+   * directly. The specified association `assns` must remain valid for all the
+   * lifetime of the proxy.
+   * 
+   * The difference with `wrapAssociated()` is only that the tag is implicitly
+   * assigned to be the one of the associated data.
+   * 
+   * If `Assns` contains metadata, that is also merged into the proxy.
+   * 
+   * Usage example:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * void checkClusters
+   *   (art::Assns<recob::Track, recob::Cluster> const& clusters)
+   * {
+   *   auto tracks = proxy::getCollection<proxy::Tracks>
+   *     (event, trackTag, wrapAssociated(clusters));
+   * 
+   *   for (auto const& track: tracks) {
+   *     
+   *     auto const& clusters = track.get<recob::Cluster>();
+   *     
+   *     for (art::Ptr<recob::Cluster> const& cluster: clusters) {
+   *       
+   *       // ...
+   *       
+   *     } // for clusters
+   *   
+   *   } // for tracks
+   *   
+   * } // checkClusters()
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * For more extensive information, see `proxy::withAssociatedMeta()`.
+   */
   template <typename Assns>
   auto wrapAssociated(Assns const& assns)
     { return wrapAssociatedAs<typename Assns::right_t>(assns); }
   
   
-  /// @{
-  // --- END Collection proxy infrastructure -----------------------------------
+  /**
+   * @brief Helper function to merge associated data from a given association.
+   * @tparam AuxTag tag to access the associated data within the proxy
+   * @tparam Assns type of the association being merged;
+   *               needs `art::Assns` interface
+   * @param assns the association being merged
+   * @return a temporary object that `getCollection()` knows to handle
+   * @see `withAssociatedMeta()`, `wrapAssociatedAs()`
+   * @ingroup LArSoftProxyBase
+   * 
+   * This function instructs the proxy to use the specified association `assns`
+   * directly. It is fully equivalent to `proxy::wrapAssociatedAs()`.
+   */
+  template <typename AuxTag, typename Assns>
+  auto wrapAssociated(Assns const& assns)
+    { return wrapAssociatedAs<AuxTag>(assns); }
+  
+  //----------------------------------------------------------------------------
   
 } // namespace proxy
 

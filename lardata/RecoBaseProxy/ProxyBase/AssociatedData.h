@@ -300,7 +300,7 @@ namespace proxy {
       
       
       /// @{
-      /// @name Interface to the _art_ pointer to the associated (right) value
+      /// @name Interface to the art pointer to the associated (right) value
       
       /// Implicit conversion to _art_ pointer of the associated object.
       operator valueptr_t const& () const& { return valuePtr(); }
@@ -773,8 +773,6 @@ namespace proxy {
      * Both levels of containers are random access, so that the set of `Right`
      * objects associated to a `Left` can be accessed by index, and the `Right`
      * objects within can be accessed with `Right` index in the `Left`.
-     * 
-     * @todo Metadata for `proxy::details::AssociatedData` is not supported yet.
      */
     template <
       typename Main, typename Aux, typename Metadata /* = void */,

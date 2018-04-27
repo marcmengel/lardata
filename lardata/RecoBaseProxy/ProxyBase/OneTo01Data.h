@@ -121,7 +121,7 @@ namespace proxy {
         private:
       aux_coll_t auxData; ///< Data associated to the main collection.
       
-    }; // class /*OneTo01Data*/<>
+    }; // class OneTo01Data<>
     
   } // namespace details
   

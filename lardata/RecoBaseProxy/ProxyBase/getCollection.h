@@ -18,14 +18,9 @@
 #include <utility> // std::forward()
 
 
-/// Encloses LArSoft data product proxy objects and utilities.
-/// @addtogroup LArSoftProxies
 namespace proxy {
   
-  // --- BEGIN Collection proxy infrastructure ---------------------------------
-  /// @addtogroup LArSoftProxyCollections
-  /// @{
-  
+  // ---------------------------------------------------------------------------
   /**
    * @brief Creates a proxy to a data product collection.
    * @tparam CollProxy type of target main collection proxy
@@ -34,6 +29,8 @@ namespace proxy {
    * @param event event to read data from
    * @param optionalArgs optional arguments for construction of the proxy
    * @return a collection proxy object
+   * @ingroup LArSoftProxyBase
+   * @see @ref LArSoftProxyBase "ways to merge more data into a proxy"
    * 
    * This function delivers a collection proxy related to `CollProxy`.
    * 
@@ -48,7 +45,11 @@ namespace proxy {
    * collection, and then `withAssociated<recob::Hits>()`. The meaning of both
    * is decided depending on the collection proxy being created, but it's common
    * to have the first argument be the input tag to the main collection, as in
-   * the example.
+   * this example.
+   * `withAssociated()` is one of the ways for a proxy to have
+   * @ref LArSoftProxyDefinitionAuxiliaryData "auxiliary data" "merged" into.
+   * The options to @ref LArSoftProxyDefinitionMerging "merge" this data are
+   * collected in the @ref LArSoftProxyBase "proxy interface documentation".
    * 
    * The collection proxy name is arbitrary, but it's custom to have it live in
    * `proxy` namespace and have the same name as the base object, made plural:
@@ -56,10 +57,18 @@ namespace proxy {
    * called `proxy::Tracks`.
    * 
    * Note that a proxy need to be explicitly supported in order to be available.
+   * Nevertheless, a generic implementation is supported to create a proxy of a
+   * data product which is a C++ vector, so that:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto tracks = proxy::getCollection<std::vector<recob::Track>>
+   *   (event, tag, withAssociated<recob::Hits>());
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * will have an outcome similar to the previous example. In this case, though,
+   * all the specific track interface that went into `proxy::Tracks` proxy will
+   * not be available.
    * 
-   * In practice, this function does very little apart from invoking the proper
-   * `CollectionProxyMaker` class. Each proxy has its own, and there is where
-   * the meaning of the optional arguments is assigned.
+   * The implementation of this feature is documented in
+   * @ref LArSoftProxyCollections "its own doxygen module".
    * 
    * 
    * Customization
@@ -77,8 +86,7 @@ namespace proxy {
     }
   
   
-  /// @}
-  // --- END Collection proxy infrastructure -----------------------------------
+  // ---------------------------------------------------------------------------
   
   
 } // namespace proxy

@@ -38,13 +38,33 @@ namespace proxy {
 
   } // namespace details
   
-  
-  // --- BEGIN Collection proxy infrastructure ---------------------------------
-  /// @addtogroup LArSoftProxyCollections
-  /// @{
+  // --- BEGIN One-to-one (optional) associations ------------------------------
+  /**
+   * @name One-to-one (optional) associations
+   * 
+   * These functions allow to merge into a data collection proxy some auxiliary
+   * data via an _art_ association fulfilling the
+   * @ref LArSoftProxyDefinitionOneToZeroOrOneSeqAssn "one-to-(zero-or-one) sequential association requirement".
+   * 
+   * One category of functions is currently available:
+   *  * `proxy::withZeroOrOne()` reads the relevant association from an event
+   * 
+   * Variants of `proxy::withZeroOrOne()` called `proxy::withZeroOrOneMeta()`
+   * will allow merging the metadata of an association too. This feature is not
+   * supported yet, though.
+   * 
+   * Also, variants are available to customize the tag class.
+   * 
+   * The implementation of this feature is documented in
+   * @ref LArSoftProxiesAssociatedData "its own doxygen module".
+   * 
+   * @{
+   */
   
   //----------------------------------------------------------------------------
   /// The same as `withZeroOrOneMeta()`, but it also specified a tag.
+  /// @ingroup LArSoftProxyBase
+  /// @todo Metadata is not supported yet.
   template <typename Aux, typename Metadata, typename AuxTag, typename... Args>
   auto withZeroOrOneMetaAs(Args&&... args) {
     using ArgTuple_t = std::tuple<Args&&...>;
@@ -56,6 +76,7 @@ namespace proxy {
   
   
   /// The same as `withZeroOrOne()`, but it also specified a tag for the data.
+  /// @ingroup LArSoftProxyBase
   template <typename Aux, typename AuxTag, typename... Args>
   auto withZeroOrOneAs(Args&&... args)
     {
@@ -70,6 +91,7 @@ namespace proxy {
    * @tparam Args types of constructor arguments for associated data collection
    * @param args constructor arguments for the associated data collection
    * @return a temporary object that `getCollection()` knows to handle
+   * @ingroup LArSoftProxyBase
    * @see withZeroOrOneMetaAs(), withZeroOrOne()
    * 
    * This function is meant to convey to `getCollection()` function the request
@@ -122,6 +144,8 @@ namespace proxy {
    * 
    * See the technical details about `withAssociated()`, which hold for this
    * function and related classes too.
+   * 
+   * @todo Metadata is not supported yet (the interface is apparently there though).
    */
   template <typename Aux, typename Metadata, typename... Args>
   auto withZeroOrOneMeta(Args&&... args)
@@ -131,13 +155,14 @@ namespace proxy {
     }
   
   /// Works like `withZeroOrOneMeta()`, but for associations with no metadata.
+  /// @ingroup LArSoftProxyBase
   /// @see withZeroOrOneAs(), withZeroOrOneMeta()
   template <typename Aux, typename... Args>
   auto withZeroOrOne(Args&&... args)
     { return withZeroOrOneMeta<Aux, void>(std::forward<Args>(args)...); }
   
   /// @}
-  // --- END Collection proxy infrastructure -----------------------------------
+  // --- END One-to-one (optional) associations --------------------------------
   
 } // namespace proxy
 

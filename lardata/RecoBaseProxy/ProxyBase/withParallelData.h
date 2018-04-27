@@ -50,12 +50,48 @@ namespace proxy {
   } // namespace details
   
   
-  // --- BEGIN Collection proxy infrastructure ---------------------------------
-  /// @addtogroup LArSoftProxyCollections
-  /// @{
+  // --- BEGIN Parallel data collections ---------------------------------------
+  /**
+   * @name Parallel data collections
+   * 
+   * These functions allow to merge into a data collection proxy some auxiliary
+   * data from other collections fulfilling the
+   * @ref LArSoftProxyDefinitionParallelData "parallel data product requirement".
+   * 
+   * Two categories of functions are available depending on the data source:
+   *  * `proxy::withParallelData()` reads the relevant data product from an
+   *      event
+   *  * `proxy::wrapParallelData()` uses an existing collection
+   * 
+   * Also, variants are available to customize the tag class.
+   * 
+   * The implementation of this feature is documented in
+   * @ref LArSoftProxiesParallelData "its own doxygen module".
+   * 
+   * @{
+   */
   
   //----------------------------------------------------------------------------
-  /// The same as `withParallelData()`, but it also specified a tag.
+  /**
+   * @brief Helper function to merge an auxiliary data product into the proxy.
+   * @tparam Aux type of parallel data product requested
+   * @tparam AuxTag the tag type to refer this auxiliary data as
+   * @tparam Args types of constructor arguments for parallel data proxy
+   * @param args constructor arguments for the parallel data collection proxy
+   * @return a temporary object that `getCollection()` knows to handle
+   * @ingroup LArSoftProxyBase
+   * @see `proxy::withParallelData()`
+   * 
+   * This function is meant to convey to `getCollection()` function the request
+   * for merging a auxiliary data structured as a
+   * @ref LArSoftProxyDefinitionParallelData "collection parallel" into the
+   * collection proxy.
+   * 
+   * It is functionally equivalent to `withParallelData()`, with the difference
+   * that here the auxiliary data tag must be specified. `withParallelData()`
+   * documentation also contains examples on how to use this function and the
+   * proxy resulting from that.
+   */
   template <typename Aux, typename AuxTag, typename... Args>
   auto withParallelDataAs(Args&&... args) {
     using ArgTuple_t = std::tuple<Args&&...>;
@@ -71,12 +107,12 @@ namespace proxy {
    * @tparam Args types of constructor arguments for parallel data proxy
    * @param args constructor arguments for the parallel data collection proxy
    * @return a temporary object that `getCollection()` knows to handle
+   * @ingroup LArSoftProxyBase
    * 
    * This function is meant to convey to `getCollection()` function the request
-   * for merging a collection proxy to carry auxiliary data structured as a
-   * collection parallel to the main collection.
-   * The function also bridges the information required to create a proxy to
-   * that auxiliary data.
+   * to merge auxiliary data structured as a
+   * @ref LArSoftProxyDefinitionParallelData "collection parallel" into the
+   * collection proxy.
    * 
    * This data will be tagged with the type `Aux`. To use a different type as
    * tag, use `withParallelDataAs()` instead, specifying the tag as second
@@ -148,7 +184,51 @@ namespace proxy {
   
   
   //----------------------------------------------------------------------------
-  /// Like `withParallelDataAs()`, but directly using the specified collection.
+  /**
+   * @brief Uses a collection as auxiliary data for a collection proxy.
+   * @tparam AuxTag the tag type to refer this auxiliary data as
+   * @tparam AuxColl type of the auxiliary data collection
+   * @param auxColl the data collection to be used as auxiliary data
+   * @return an object making `getCollection()` add such auxiliary data
+   * @ingroup LArSoftProxyBase
+   * @see `withParallelDataAs()`, `wrapParallelData()`
+   * 
+   * The specified collection is used directly as auxiliary data in a collection
+   * proxy. It is required to fulfil the
+   * @ref LArSoftProxyDefinitionParallelData "parallel data product"
+   * requirements, but it does not have to actually be a data product (that is,
+   * it does not have to be a collection read from _art_).
+   * 
+   * The usage of the resulting proxy is the same as the ones created using
+   * `proxy::withParallelDataAs()`, but the object `auxColl` must remain valid
+   * as long as that proxy is being used.
+   * Example of usage:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * struct MCS {};
+   * 
+   * void checkMomenta(
+   *   std::vector<recob::TrackMomentum> const& mom,
+   *   std::vector<recob::TrackMomentum> const& MCSmom
+   * ) {
+   *   auto tracks = proxy::getCollection<proxy::Tracks>(event, trackTag,
+   *     wrapParallelData<recob::TrackMomentum>(defaultMomTag),
+   *     wrapParallelDataAs<recob::TrackMomentum, MCS>(MCSmomTag)
+   *     );
+   *   for (auto const& track: tracks) {
+   *     auto const& trackMom = track.get<recob::TrackMomentum>();
+   *     auto const& trackMCSmom = track.get<MCS>();
+   *     
+   *     // ...
+   *     
+   *   } // for tracks
+   *   
+   * } // checkMomenta()
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * The first momentum (`mom`) will be accessed by using the type
+   * `recob::TrackMomentum` as tag, while the second one (`MCSmom`) will be
+   * accessed by the `MCS` tag (which is better not be defined in a local
+   * scope).
+   */
   template <typename AuxTag, typename AuxColl>
   auto wrapParallelDataAs(AuxColl const& auxColl) {
     std::tuple<AuxColl const&> args = { auxColl };
@@ -156,21 +236,34 @@ namespace proxy {
       <util::collection_value_t<AuxColl>, decltype(args), AuxColl, AuxTag>
       (std::move(args));
   } // wrapParallelDataAs()
-  /*
-  /// Like `withParallelData()`, but directly using the specified collection.
-  template <typename AuxTag, typename AuxColl>
-  auto wrapParallelData(AuxColl const& auxColl)
-    { return wrapParallelDataAs<AuxTag>(auxColl); }
-  */
-  /// Like `withParallelData()`, but directly using the specified collection.
+  
+  
+  /**
+   * @brief Uses a collection as auxiliary data for a collection proxy.
+   * @tparam AuxColl type of the auxiliary data collection
+   * @param auxColl the data collection to be used as auxiliary data
+   * @return an object making `getCollection()` add such auxiliary data
+   * @ingroup LArSoftProxyBase
+   * @see `proxy::withParallelData()`, `proxy::wrapParallelDataAs()`
+   * 
+   * This function is meant to convey to `getCollection()` function the request
+   * for merging an existing auxiliary data collection structured as a
+   * @ref LArSoftProxyDefinitionParallelData "collection parallel" into the
+   * collection proxy.
+   * 
+   * It is functionally equivalent to `wrapParallelDataAs()`, with the
+   * difference that here the auxiliary data tag is automatically defined after
+   * the type of the data in the container. `withParallelDataAs()`
+   * documentation also contains examples on how to use this function and the
+   * proxy resulting from that.
+   */
   template <typename AuxColl>
   auto wrapParallelData(AuxColl const& auxColl)
     { return wrapParallelDataAs<util::collection_value_t<AuxColl>>(auxColl); }
   
   
   /// @}
-  // --- END Collection proxy infrastructure -----------------------------------
-  
+  // --- END Parallel data collections -----------------------------------------
   
 } // namespace proxy
 

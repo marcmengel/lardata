@@ -11,14 +11,12 @@
  * More complex proxy implementations are provided for some LArSoft data
  * products.
  * New proxies can be created as well.
- * 
- * 
- * @{
  */
 
 /**
  * @namespace proxy
  * @brief Encloses LArSoft data product proxy objects and utilities.
+ * @ingroup LArSoftProxies
  * 
  * See @ref LArSoftProxiesIntro "this doxygen module" for an introduction to
  * data proxies in LArSoft.
@@ -26,10 +24,53 @@
 
 /**
  * @page LArSoftProxiesIntro Introduction to LArSoft data product proxy objects.
+ * @ingroup LArSoftProxies
+ * 
+ * 
+ * @section LArSoftProxyPlug What's next
+ * 
+ * * check out the @ref LArSoftProxyReco "proxies provided by LArSoft"
+ * * if you need to interact with other data, you can tailor a proxy on your
+ *     data: check out the @ref LArSoftProxyBase "LArSoft data proxy interfaces"
+ *     section
+ * * if you need to make a new proxy available to other users, take inspiration
+ *     from one of the @ref LArSoftProxyReco "proxies provided by LArSoft" 
+ * 
+ * Below, some definitions are laid out that are referenced throughout the
+ * documentation and that might be useful.
  * 
  * 
  * @section LArSoftProxyDefinitions Definitions
  * 
+ * * *data collection proxy* (or just _proxy_):
+ *   @anchor LArSoftProxyDefinitionProxy
+ *   an object that wrap one or more related data, and exposes an interface to
+ *   navigate that data honoring its relations. The most evident effect is that
+ *   associated data products are presented as a single object.
+ * * *main data collection*:
+ *   @anchor LArSoftProxyDefinitionMainDataColl
+ *   a data collection proxy is... well, a proxy to a data collection; it has an
+ *   interface like a collection, and the number and order of elements of the
+ *   proxy is the same as the collection the proxy is based on, which is called
+ *   the _main data collection_.
+ * * *auxiliary data*:
+ *   @anchor LArSoftProxyDefinitionAuxiliaryData
+ *   auxiliary data is additional data which is related to the 
+ *   @ref LArSoftProxyDefinitionMainDataColl "main collection" of the proxy;
+ *   the auxiliary data is exposed as a collection which has the same number of
+ *   elements as the main one, and where the _i_-th auxiliary data element is
+ *   related to the _i_-th element of the main collection. Different sources
+ *   qualify to be merged as auxiliary data, including some _art_ associations
+ *   and other data collections.
+ * * *merging* of auxiliary data into a proxy:
+ *   @anchor LArSoftProxyDefinitionMerging
+ *   jargon to express that some 
+ *   @ref LArSoftProxyDefinitionAuxiliaryData "auxiliary data" is made
+ *   available through the interface of that data collection proxy.
+ * * *auxiliary data tag*:
+ *   @anchor LArSoftProxyDefinitionTag
+ *   the identified with which some auxiliary data is accessed in the code. It
+ *   is a C++ type (empty `struct` work well: e.g., `struct MyHits {};`).
  * * *one-to-many sequential association*:
  *   @anchor LArSoftProxyDefinitionOneToManySeqAssn
  *   an association between `L` and `R` types where:
@@ -62,20 +103,51 @@
  *   This does require associations to be one-to-one, bit it does _not_ require
  *   that all `L` be associated to at least one `R`.
  * 
- * @section LArSoftProxyPlug What's next
+ */
+
+/**
+ * @defgroup LArSoftProxyBase LArSoft data proxy interfaces
+ * @ingroup LArSoftProxies
+ * @brief Interfaces to create instances of LArSoft data proxies
  * 
- * * check out the @ref LArSoftProxyReco "proxies provided by LArSoft"
- * * if you need to interact with other data, you can tailor a proxy on your
- *     data: check out the @ref LArSoftProxyCustom "data proxy infrastructure"
- *     section
- * * if you need to make a new proxy available to other users, take inspiration
- *     from one of the @ref LArSoftProxyReco "proxies provided by LArSoft" 
+ * This section contains documentation about the main tools to instantiate a
+ * data collection proxy in LArSoft. Some prepackaged data proxies are provided
+ * by LArSoft and documented in the
+ * @ref LArSoftProxyReco "recostructed object data proxy" section.
  * 
+ * The starting point is the documentation of `proxy::getCollection()`.
+ * That function is the way to create a proxy object in your code.
+ * @ref LArSoftProxyDefinitionAuxiliaryData "Auxiliary data" can me merged to
+ * that proxy on creation, and only then. Different functions help with merging
+ * different auxiliary data:
+ * 
+ * * data from one-to-many associations stored following the 
+ *     @ref LArSoftProxyDefinitionOneToManySeqAssn "one-to-many sequential association requirement"
+ *     can be fetched and merged with the `proxy::withAssociated()` class of
+ *     functions, or just merged, is already fetched, with
+ *     `proxy::wrapAssociated()` functions
+ * * data from a one-to-one optional associations (according to
+ *     @ref LArSoftProxyDefinitionOneToZeroOrOneSeqAssn "this requirement")
+ *     can be merged with the `proxy::withZeroOrOne()` class of functions
+ * * data from another collection with a one-to-one implicit relation (according
+ *     to @ref LArSoftProxyDefinitionParallelData "this requirement")
+ *     can be read and merged with the `proxy::withParallelData()` class of
+ *     functions, or directly used with `proxy::wrapParallelData()` functions
+ * 
+ * Each auxiliary data is identified by a "tag", which is for example used when
+ * asking for that auxiliary data with `get<Tag>()` member of the proxy.
+ * Most of the `withXxx()` functions have a variant, usually `withXxxAs()`, that
+ * allows that tag to be explicitly chosen.
+ * 
+ * For the supported associated data, a variant `withXxxMeta()`
+ * (and `withXxxMetaAs()`) is offered which allows to access also the metadata
+ * of the association.
  * 
  */
+
 /**
  * @defgroup LArSoftProxyCustom LArSoft data proxy infrastructure
- * @ingroup LArSoftProxies
+ * @ingroup LArSoftProxyBase
  * @brief Classes for implementation and customization of LArsoft proxies.
  * 
  * This documentation section contains hints for the creation or customization
@@ -114,6 +186,10 @@
  * makes a proxy object called `tracks` which accesses a `recob::Track`
  * collection data product and its associated hits, assuming that tracks and
  * their association with hits be created by the same module (`trackTag`).
+ * 
+ * @note Only associations falling under some restricted assumptions can be used
+ *       in a proxy.
+ * 
  * From this, it is possible to access tracks and their hits:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
  * for (auto trackInfo: tracks) {
@@ -204,7 +280,7 @@
  * Here, `track` is a constant reference to type `Track`, which is a template
  * type, so that when we ask for `track.get<recob::Hit>()` the compiler does not
  * know that the object `track` of type `Track` has a method `get()` which is a
- * template method, and it gets confused (in fact, it thinks the expression
+ * template method, and it gets confused (in fact, it may think the expression
  * might be a comparison, `track.get < recob::Hit`, and hilarity ensues).
  * This is not true when the type of the object is immediately known:
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
@@ -347,7 +423,4 @@
  * 
  * Each proxy is documented in its own "module" (see the list above).
  * 
- */
-/**
- * @}
  */
