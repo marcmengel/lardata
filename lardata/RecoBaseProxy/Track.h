@@ -927,39 +927,81 @@ namespace proxy {
   
   
   
-  //----------------------------------------------------------------------------
+  // --- BEGIN Auxiliary data --------------------------------------------------
+  /**
+   * @name Auxiliary data
+   * 
+   * These functions may be used as arguments to
+   * `proxy::getCollection<proxy::Tracks>()` call to
+   * @ref LArSoftProxyDefinitionMerging "merge" of some data associated to the
+   * tracks.
+   * 
+   * @{
+   */
+  
   /**
    * @brief Adds `recob::TrackTrajectory` information to the proxy.
    * @param inputTag the data product label to read the data from
    * @return an object driving `getCollection()` to use `recob::TrackTrajectory`
    * @ingroup LArSoftProxyTracks
-   * @see TrackCollectionProxyElement::hasOriginalTrajectory(),
-   *      TrackCollectionProxyElement::originalTrajectory(),
-   *      TrackCollectionProxyElement::originalTrajectoryPtr()
+   * @see `proxy::withOriginalTrajectory()`,
+   *      `proxy::Tracks`, `proxy::getCollection()`
    * 
-   * The `recob::TrackTrajectory` information is required to be from a _art_
-   * association with `recob::Track`. The association must fulfil the
-   * @ref LArSoftProxyDefinitionOneToZeroOrOneSeqAssn "one-to-(zero-or-one) sequential association"
-   * requirements.
-   * 
-   * The data is available through the regular interface via tag
-   * `recob::TrackTrajectory`, or via custom interface, e.g.:
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
-   * recob::TrackTrajectory const* trajectory
-   *   = trackProxy.hasOriginalTrajectory()
-   *   ? &(trackProxy.originalTrajectory()): nullptr;
-   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * 
+   * The behaviour of this function is like `withOriginalTrajectory()`, but
+   * reading the original trajectories from the association with the specified
+   * label rather than the label of the tracks in the proxy.
    */
-  inline auto withOriginalTrajectory(art::InputTag inputTag)
+  inline auto withOriginalTrajectory(art::InputTag const& inputTag)
     {
       return proxy::withZeroOrOneAs
         <recob::TrackTrajectory, Tracks::TrackTrajectoryTag>(inputTag);
     }
   
-  /// Like `withOriginalTrajectory(art::InputTag)`, using the same label as for
-  /// tracks.
-  /// @ingroup LArSoftProxyTracks
+  /**
+   * @brief Adds `recob::TrackTrajectory` information to the proxy.
+   * @return an object driving `getCollection()` to use `recob::TrackTrajectory`
+   * @ingroup LArSoftProxyTracks
+   * @see `proxy::withOriginalTrajectory(art::InputTag const&)`,
+   *      `proxy::Tracks`,
+   *      `proxy::TrackCollectionProxyElement::hasOriginalTrajectory()`,
+   *      `proxy::TrackCollectionProxyElement::originalTrajectory()`,
+   *      `proxy::TrackCollectionProxyElement::originalTrajectoryPtr()`
+   * 
+   * The information from the associated trajectories is merged in the proxy.
+   * That association data product must have the same input tag as the track
+   * collection data product. To specify a different one, use
+   * `withOriginalTrajectory(art::InputTag const&)`.
+   * 
+   * The data is available through the regular interface via tag
+   * `recob::TrackTrajectory`, or via custom interface, e.g.:
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto tracks = proxy::getCollection<proxy::Tracks>
+   *   (event, tracksTag, proxy::withOriginalTrajectory());
+   * 
+   * for (auto const& trackProxy: tracks) {
+   *   
+   *   if (!trackProxy.hasOriginalTrajectory()) continue;
+   *   
+   *   const auto& track = *trackProxy;
+   *   recob::TrackTrajectory const& original = trackProxy.originalTrajectory();
+   *   recob::TrackTrajectory const& fitted = track.Trajectory();
+   *   
+   *   // ...
+   *   
+   * } // for tracks
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * Note the subtle difference between the two inner lines: `trackProxy` is a
+   * track proxy, and the first line is accessing its interface. The second line
+   * is talking to the track object (`recob::Track`, actually) directly. The
+   * same effect is obtained using directly the proxy, but with the indirection
+   * operator (`->`) instead of the member operator (`.`):
+   * `trackProxy->Trajectory()`.
+   * 
+   * The `recob::TrackTrajectory` information is required to be from a _art_
+   * association with `recob::Track`. The association must fulfil the
+   * @ref LArSoftProxyDefinitionOneToZeroOrOneSeqAssn "one-to-(zero-or-one) sequential association"
+   * requirements.
+   */
   inline auto withOriginalTrajectory()
     {
       return proxy::withZeroOrOneAs
@@ -972,34 +1014,78 @@ namespace proxy {
    * @param inputTag the data product label to read the data from
    * @return an object driving `getCollection()` to use `recob::TrackFitHitInfo`
    * @ingroup LArSoftProxyTracks
+   * @see `proxy::Tracks`, `proxy::getCollection()`, `proxy::withFitHitInfo()`
    * 
-   * The collection of `recob::TrackFitHitInfo` is required to be a
-   * `std::vector<std::vector<recob::TrackFitHitInfo>>`, where the first index
-   * addresses which track the information is about, and the second index which
-   * point within that track.
-   * 
-   * The data is available through the regular interface via tag
-   * `recob::TrackFitHitInfo`.
-   * 
-   * The data must satisfy the
-   * @ref LArSoftProxyDefinitionParallelData "parallel data product"
-   * requirement.
-   * 
+   * This function behaves like `withFitHitInfo()`, but allows to use `inputTag`
+   * as input tag, instead of the same label as for the track collection.
+   * See `proxy::withFitHitInfo()` for explanations and examples.
    */
-  inline auto withFitHitInfo(art::InputTag inputTag)
+  inline auto withFitHitInfo(art::InputTag const& inputTag)
     {
       return proxy::withParallelDataAs
         <std::vector<recob::TrackFitHitInfo>, Tracks::TrackFitHitInfoTag>
         (inputTag);
     }
   
-  /// Like `withFitHitInfo(art::InputTag)`, using the same label as for tracks.
-  /// @ingroup LArSoftProxyTracks
+  /**
+   * @brief Adds `recob::TrackFitHitInfo` information to the proxy.
+   * @return an object driving `getCollection()` to use `recob::TrackFitHitInfo`
+   * @ingroup LArSoftProxyTracks
+   * @see `proxy::withFitHitInfo(art::InputTag const&)`,
+   *      `proxy::Tracks`, `proxy::getCollection()`
+   * 
+   * A `recob::TrackFitHitInfo`data product is read from the event and merged
+   * into the proxy being created by `proxy::getCollection()`.
+   * The data product has the same input tag as the track data product; if a
+   * different one is needed, use `proxy::withFitHitInfo(art::InputTag const&)`
+   * instead.
+   * 
+   * Example of usage (more can be found in `TrackProxyTest::testTracks()`):
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+   * auto tracks = proxy::getCollection<proxy::Tracks>
+   *   (event, tracksTag, proxy::withFitHitInfo());
+   * 
+   * for (auto const& trackInfo: tracks) {
+   *   
+   *   for (auto const& point: track.points()) {
+   *     
+   *     auto const& pos = point.position();
+   *     auto const* hit = point.hit();
+   *     auto const* fitInfo = point.fitInfoPtr();
+   *     
+   *     // ...
+   *     
+   *   } // for point
+   *   
+   * } // for tracks
+   * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   * The proxy helps associating the right set of `recob::TrackFitHitInfo` for
+   * each `track` in the outer loop (not shown in the example: it might have
+   * looked like `auto const& fitInfo = tracks.get<recob::TrackFitHitInfo>()`).
+   * It also helps to pick the fit information of the current `point` in the
+   * inner loop of the example (`fitInfo` will never be `nullptr` here, since
+   * we _did_ merge the fit information).
+   * 
+   * The collection of `recob::TrackFitHitInfo` is required to be a
+   * `std::vector<std::vector<recob::TrackFitHitInfo>>`, where the first index
+   * addresses which track the information is about, and the second index which
+   * point within that track.
+   * 
+   * The data is also available through the regular interface via tag
+   * `recob::TrackFitHitInfo`.
+   * 
+   * The data must satisfy the
+   * @ref LArSoftProxyDefinitionParallelData "parallel data product"
+   * requirement.
+   */
   inline auto withFitHitInfo()
     {
       return proxy::withParallelDataAs
         <std::vector<recob::TrackFitHitInfo>, Tracks::TrackFitHitInfoTag>();
     }
+  
+  /// @}
+  // --- END Auxiliary data ----------------------------------------------------
   
   //----------------------------------------------------------------------------
   /// Define the traits of `proxy::Tracks` proxy.
