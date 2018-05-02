@@ -20,7 +20,7 @@
 // Framework includes
 #include "art/Framework/Principal/Run.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 //-----------------------------------------------
 util::LArPropertiesServiceArgoNeuT::LArPropertiesServiceArgoNeuT(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
   : DBsettings() // reads information from DatabaseUtil service
