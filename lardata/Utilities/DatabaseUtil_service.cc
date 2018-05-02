@@ -13,7 +13,7 @@
 // LArSoft includes
 #include "lardata/Utilities/DatabaseUtil.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 
 //-----------------------------------------------
 util::DatabaseUtil::DatabaseUtil(fhicl::ParameterSet const& pset, art::ActivityRegistry & /* reg */)
@@ -53,7 +53,9 @@ int util::DatabaseUtil::Connect(int conn_wait)
       throw cet::exception("DataBaseUtil") << " DB connection failed\n";
    
   } else {
-    LOG_DEBUG("DatabaseUtil")<<"Connected OK\n";
+// workaround for #19851
+//    LOG_DEBUG("DatabaseUtil")<<"Connected OK\n";
+    mf::LogDebug("DatabaseUtil")<<"Connected OK\n";
     return 1;
   }
   return -1;
@@ -65,7 +67,9 @@ int util::DatabaseUtil::DisConnect()
   if(!fShouldConnect)
     return -1;
   //close connection
-  LOG_DEBUG("DatabaseUtil")<<"Closing Connection \n";
+// workaround for #19851
+//  LOG_DEBUG("DatabaseUtil")<<"Closing Connection \n";
+  mf::LogDebug("DatabaseUtil")<<"Closing Connection \n";
   PQfinish(conn);
   return 1;
 }
@@ -134,7 +138,9 @@ int util::DatabaseUtil::SelectSingleFieldByQuery(std::vector<std::string> &value
   } 
   else if(PQresultStatus(result)!=PGRES_TUPLES_OK) {
     if(PQresultStatus(result)==PGRES_COMMAND_OK) 
-      LOG_DEBUG("DatabaseUtil")<<"Command executed OK, "<< PQcmdTuples(result) <<" rows affected\n";
+// workaround for #19851
+//      LOG_DEBUG("DatabaseUtil")<<"Command executed OK, "<< PQcmdTuples(result) <<" rows affected\n";
+      mf::LogDebug("DatabaseUtil")<<"Command executed OK, "<< PQcmdTuples(result) <<" rows affected\n";
     else
       mf::LogWarning("DatabaseUtil")<<"Command failed with code "
 				    <<PQresStatus(PQresultStatus(result)) <<", error message "
@@ -154,7 +160,9 @@ int util::DatabaseUtil::SelectSingleFieldByQuery(std::vector<std::string> &value
 	{
 	  string_val=PQgetvalue(result,i,0);
 	  value.push_back(string_val);
-	  LOG_DEBUG("DatabaseUtil")<<" extracted value: "<<value[i] << "\n";
+// workaround for #19851
+//	  LOG_DEBUG("DatabaseUtil")<<" extracted value: "<<value[i] << "\n";
+	  mf::LogDebug("DatabaseUtil")<<" extracted value: "<<value[i] << "\n";
 	}
       PQclear(result);
       this->DisConnect();

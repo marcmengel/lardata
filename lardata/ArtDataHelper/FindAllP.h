@@ -260,7 +260,9 @@ namespace lar {
         std::vector<art::Handle<Assns_t>> assns_list;
         event.getManyByType(assns_list);
         
-        LOG_DEBUG("FindAllP") << "Read(): read " << assns_list.size()
+// workaround for #19851
+//        LOG_DEBUG("FindAllP") << "Read(): read " << assns_list.size()
+        mf::LogDebug("FindAllP") << "Read(): read " << assns_list.size()
           << " association sets";
         
         unsigned int count = 0;
@@ -268,7 +270,9 @@ namespace lar {
         for (art::Handle<Assns_t> handle: assns_list)
           count += Merge(handle);
         
-        LOG_DEBUG("FindAllP") << "Read " << count << " associations for "
+// workaround for #19851
+//        LOG_DEBUG("FindAllP") << "Read " << count << " associations for "
+        mf::LogDebug("FindAllP") << "Read " << count << " associations for "
           << cache.NProductIDs() << " product IDs";
         
         return count;
@@ -312,7 +316,9 @@ namespace lar {
         
         unsigned int count = 0;
       
-        LOG_DEBUG("FindAllP") << "Merge(): importing " << handle->size()
+// workaround for #19851
+//        LOG_DEBUG("FindAllP") << "Merge(): importing " << handle->size()
+        mf::LogDebug("FindAllP") << "Merge(): importing " << handle->size()
           << " associations from " << handle.provenance();
       
         for (auto const& assn: *handle) {
