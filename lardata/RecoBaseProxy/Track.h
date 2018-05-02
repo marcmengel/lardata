@@ -1195,21 +1195,73 @@ namespace proxy {
   template <typename TrackProxy>
   class TrackPointIterator {
     
+    /*
+     * So, let's go through the list of iterator traits from cppreference.com:
+     * [x] Iterator
+     *   [x] CopyConstructible
+     *   [x] CopyAssignable
+     *   [x] Destructible
+     *   [x] lvalues are Swappable
+     *   [x] value_type
+     *   [x] difference_type
+     *   [x] reference
+     *   [x] pointer
+     *   [x] iterator_category
+     *   [x] operator*()
+     *   [x] operator++()
+     * [ ] InputIterator
+     *   [x] Iterator (above)
+     *   [x] EqualityComparable (operator== (A, B))
+     *   [x] operator!= ()
+     *   [ ] reference operator*() (convertible to value_type)
+     *   [ ] operator->()
+     *   [x] It& operator++()
+     *   [x] operator++(int)
+     *   [x] *i++ equivalent to { auto v = *i; ++i; return v; }
+     * [ ] Forward Iterator
+     *   [ ] InputIterator (above)
+     *   [x] DefaultConstructible
+     *   [x] multipass guarantee: a == b => ++a == ++b
+     *   [ ] reference = value_type const&
+     *   [x] It operator++(int)
+     *   [ ] *i++ returns reference
+     * That's it! :-|
+     */
+    
     using track_proxy_t = TrackProxy;
     
     track_proxy_t const* track = nullptr;
     std::size_t index = std::numeric_limits<std::size_t>::max();
     
       public:
+    
+    /// @name Iterator traits
+    /// @{
+    using difference_type = std::ptrdiff_t;
+    using value_type = TrackPoint;
+    using pointer = TrackPoint const*;
+    using reference = TrackPoint; // booo!
+    // not quite an input iterator (see above)
+    using iterator_category = std::input_iterator_tag;
+    /// @}
+    
     TrackPointIterator() = default;
+    
     TrackPointIterator(track_proxy_t const& track, std::size_t index)
       : track(&track), index(index)
       {}
     
     TrackPointIterator& operator++() { ++index; return *this; }
     
-    auto operator*() const -> decltype(auto)
-      { return TrackPoint(makeTrackPointData(*track, index)); }
+    TrackPointIterator operator++(int)
+      { auto it = *this; this->operator++(); return it; }
+    
+    // we make sure the return value is a temporary
+    value_type operator*() const
+      { return static_cast<value_type>(makeTrackPointData(*track, index)); }
+    
+    bool operator==(TrackPointIterator const& other) const
+      { return (index == other.index) && (track == other.track); }
     
     bool operator!=(TrackPointIterator const& other) const
       { return (index != other.index) || (track != other.track); }
