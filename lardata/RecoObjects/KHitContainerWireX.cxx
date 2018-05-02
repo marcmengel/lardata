@@ -12,7 +12,7 @@
 
 #include "lardata/RecoObjects/KHitContainerWireX.h"
 
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 
 #include "lardata/RecoObjects/KHitWireX.h"
 #include "larcore/Geometry/Geometry.h"

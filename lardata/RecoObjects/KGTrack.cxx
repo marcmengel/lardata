@@ -16,7 +16,7 @@
 #include "lardata/RecoObjects/SurfXYZPlane.h"
 #include "lardata/RecoObjects/PropXYZPlane.h"
 #include "larcore/Geometry/Geometry.h"
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 
 namespace trkf {
 
