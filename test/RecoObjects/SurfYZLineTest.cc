@@ -12,7 +12,7 @@
 #include <cmath>
 #include "lardata/RecoObjects/SurfYZLine.h"
 #include "lardata/RecoObjects/KalmanLinearAlgebra.h"
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 
 struct SurfYZLineTestFixture
 {
