@@ -232,6 +232,7 @@
 
 // LArSoft libraries
 #include "lardata/RecoBaseProxy/ProxyBase.h" // proxy namespace
+#include "lardata/Utilities/filterRangeFor.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/TrackTrajectory.h"
 #include "lardataobj/RecoBase/Hit.h"
@@ -240,6 +241,8 @@
 // framework libraries
 #include "canvas/Persistency/Common/Ptr.h"
 
+// range library
+#include "range/v3/view/filter.hpp" // range::view::filter()
 
 namespace proxy {
   
@@ -905,6 +908,78 @@ namespace proxy {
     auto points() const
       { return details::TrackPointIteratorBox<CollProxy>(*this); }
     
+    /**
+     * @brief Returns an iterable range with only points matching the `mask`.
+     * @tparam Pred type of predicate to test on points
+     * @param pred predicate to be fulfilled by the points
+     * @return an object that can be forward-iterated
+     * @see `points()`, `pointsWithFlags()`
+     * 
+     * This methods is used in a way similar to `points()`, with the addition of
+     * specifying a criterium (predicate) defining the selected points.
+     * The iteration will happen only through the points which fulfil the
+     * predicate.
+     * 
+     * The interface of the elements is documented in `TrackPointWrapper`.
+     * Example:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * auto farPoints = [](auto const& pointInfo)
+     *   { return pointInfo.isPointValid() && pointInfo.position().Z() > 50.; };
+     * for (auto const& pointInfo: track.selectPoints(farPoints)) {
+     *   
+     *   auto const& pos = pointInfo.position();
+     *   
+     *   // ...
+     *   
+     * } // for point
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * will iterate through all points which are valid and whose position is
+     * at _z_ absolute coordinate larger than 50 centimeters (whatever it
+     * means).
+     * 
+     * 
+     * Requirements
+     * -------------
+     * 
+     * * `Pred` is a unary function object which can accept a `TrackPoint`
+     *     object as its sole argument and which returns a value convertible to
+     *     `bool`
+     * 
+     */
+    template <typename Pred>
+    auto selectPoints(Pred&& pred) const;
+    
+    /**
+     * @brief Returns an iterable range with only points matching the `mask`.
+     * @param mask point flag mask to be matched
+     * @return an object that can be forward-iterated
+     * @see `points()`, `util::flags::BitMask::match()`
+     * 
+     * This methods is used in a way similar to `points()`, with the addition of
+     * specifying a `mask` of flags. The iteration will happen only through the
+     * points which match the mask. that is for which
+     * `pointInfo.flags().match(mask)` is `true`.
+     * 
+     * The interface of the elements is documented in `TrackPointWrapper`.
+     * Example:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * for (auto const& pointInfo
+     *   : track.pointsWithFlags(-recob::TrajectoryPointFlags::flag::NoPoint)
+     *   )
+     * {
+     *   
+     *   auto const& pos = pointInfo.position();
+     *   
+     *   // ...
+     *   
+     * } // for point
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * will iterate through only the points which _do not_ have the `NoPoint`
+     * flag set (which have in fact a valid position).
+     */
+    auto pointsWithFlags
+      (recob::TrackTrajectory::PointFlags_t::Mask_t mask) const;
+    
     /// Returns the number of trajectory points in the track.
     std::size_t nPoints() const { return track().NPoints(); }
     
@@ -1312,6 +1387,23 @@ namespace proxy {
   
   //----------------------------------------------------------------------------
   template <typename CollProxy>
+  recob::TrackTrajectory const*
+  TrackCollectionProxyElement<CollProxy>::operator()
+    (proxy::Tracks::TrackType_t type) const noexcept
+  {
+     switch (type) {
+       case proxy::Tracks::Fitted:
+         return &(track().Trajectory());
+       case proxy::Tracks::Unfitted:
+         return originalTrajectoryCPtr();
+       default:
+         return nullptr;
+     } // switch
+  } // TrackCollectionProxyElement<>::operator()
+  
+  
+  //----------------------------------------------------------------------------
+  template <typename CollProxy>
   recob::TrackFitHitInfo const*
   TrackCollectionProxyElement<CollProxy>::fitInfoAtPoint
     (std::size_t index) const
@@ -1328,20 +1420,19 @@ namespace proxy {
   
   //----------------------------------------------------------------------------
   template <typename CollProxy>
-  recob::TrackTrajectory const*
-  TrackCollectionProxyElement<CollProxy>::operator()
-    (proxy::Tracks::TrackType_t type) const noexcept
-  {
-     switch (type) {
-       case proxy::Tracks::Fitted:
-         return &(track().Trajectory());
-       case proxy::Tracks::Unfitted:
-         return originalTrajectoryCPtr();
-       default:
-         return nullptr;
-     } // switch
-  } // TrackCollectionProxyElement<>::operator()
+  template <typename Pred>
+  auto TrackCollectionProxyElement<CollProxy>::selectPoints(Pred&& pred) const
+    { return util::filterRangeFor(points(), std::forward<Pred>(pred)); }
   
+  
+  //----------------------------------------------------------------------------
+  template <typename CollProxy>
+  auto TrackCollectionProxyElement<CollProxy>::pointsWithFlags
+    (recob::TrackTrajectory::PointFlags_t::Mask_t mask) const
+  {
+    return
+      selectPoints([mask](auto&& point) { return point.flags().match(mask); });
+  } // TrackCollectionProxyElement<>::pointsWithFlags()
   
   
   //----------------------------------------------------------------------------

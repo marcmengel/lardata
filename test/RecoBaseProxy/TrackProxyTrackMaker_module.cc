@@ -12,6 +12,7 @@
 #include "lardataobj/RecoBase/TrackFitHitInfo.h"
 #include "lardataobj/RecoBase/Track.h"
 #include "lardataobj/RecoBase/TrackTrajectory.h"
+#include "lardataobj/RecoBase/TrajectoryPointFlags.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/TrackHitMeta.h"
 
@@ -147,9 +148,30 @@ void lar::test::TrackProxyTrackMaker::produce(art::Event& event) {
       //
       // fill base track information
       //
+      using Mask_t = recob::TrajectoryPointFlags::flag::Mask_t;
+      Mask_t pointFlags {
+        - recob::TrajectoryPointFlags::flag::NoPoint
+        - recob::TrajectoryPointFlags::flag::HitIgnored
+        - recob::TrajectoryPointFlags::flag::Suspicious
+        - recob::TrajectoryPointFlags::flag::DetectorIssue
+        };
+      
+      // one point out of seven has no valid position at all
+      if (iPoint % 7 == 2) // make sure there are at least two valid points
+        pointFlags.set(recob::TrajectoryPointFlags::flag::NoPoint);
+      // one point out of five was made ignoring the hit
+      if (iPoint % 5)
+        pointFlags.set(recob::TrajectoryPointFlags::flag::HitIgnored);
+      // one point out of three is suspicious
+      if (iPoint % 3)
+        pointFlags.set(recob::TrajectoryPointFlags::flag::Suspicious);
+      // every other point has issues
+      if (iPoint % 2)
+        pointFlags.set(recob::TrajectoryPointFlags::flag::DetectorIssue);
+      
       pos.emplace_back(iPoint, iPoint, iPoint);
       mom.emplace_back(2.0, 1.0, 0.0);
-      flags.emplace_back(usedHits++);
+      flags.emplace_back(usedHits++, pointFlags);
       //
       // fill optional information
       //
