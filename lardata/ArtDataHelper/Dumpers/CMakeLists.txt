@@ -40,7 +40,7 @@ art_make(
     art_Framework_Principal
     canvas
     ${MF_MESSAGELOGGER}
-    ${MF_UTILITIES}
+    
     cetlib cetlib_except
     ${ROOT_BASIC_LIB_LIST}
   )
@@ -52,7 +52,7 @@ foreach(Dumper IN LISTS RawDataDumpers)
       art_Framework_Principal
       canvas
       ${MF_MESSAGELOGGER}
-      ${MF_UTILITIES}
+      
       cetlib cetlib_except
       ${ROOT_BASIC_LIB_LIST}
     )
@@ -67,7 +67,7 @@ foreach(Dumper IN LISTS RecoBaseDumpers)
       art_Framework_Principal
       canvas
       ${MF_MESSAGELOGGER}
-      ${MF_UTILITIES}
+      
       cetlib cetlib_except
       ${ROOT_BASIC_LIB_LIST}
     )
@@ -80,7 +80,7 @@ foreach(Dumper IN LISTS SimulationDumpers)
       art_Framework_Principal
       canvas
       ${MF_MESSAGELOGGER}
-      ${MF_UTILITIES}
+      
       cetlib cetlib_except
       ${ROOT_BASIC_LIB_LIST}
     )
@@ -93,7 +93,7 @@ foreach(Dumper IN LISTS MCDumpers)
       art_Framework_Principal
       canvas
       ${MF_MESSAGELOGGER}
-      ${MF_UTILITIES}
+      
       cetlib cetlib_except
       ${ROOT_BASIC_LIB_LIST}
     )

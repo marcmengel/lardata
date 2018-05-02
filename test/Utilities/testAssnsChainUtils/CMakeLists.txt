@@ -4,7 +4,7 @@ simple_plugin(
     art_Framework_Core
     art_Framework_Principal
     ${MF_MESSAGELOGGER}
-    ${MF_UTILITIES}
+    
     ${FHICLCPP}
     cetlib_except
   NO_INSTALL
@@ -15,7 +15,7 @@ simple_plugin(
     art_Framework_Core
     art_Framework_Principal
     ${MF_MESSAGELOGGER}
-    ${MF_UTILITIES}
+    
     ${FHICLCPP}
     cetlib_except
   NO_INSTALL
@@ -26,7 +26,7 @@ simple_plugin(
     art_Framework_Core
     art_Framework_Principal
     ${MF_MESSAGELOGGER}
-    ${MF_UTILITIES}
+    
     ${FHICLCPP}
     cetlib_except
   NO_INSTALL
@@ -37,7 +37,7 @@ simple_plugin(
     art_Framework_Core
     art_Framework_Principal
     ${MF_MESSAGELOGGER}
-    ${MF_UTILITIES}
+    
     ${FHICLCPP}
     cetlib_except
     ${ROOT_BASIC_LIB_LIST}
@@ -49,7 +49,7 @@ simple_plugin(
     art_Framework_Core
     art_Framework_Principal
     ${MF_MESSAGELOGGER}
-    ${MF_UTILITIES}
+    
     ${FHICLCPP}
     cetlib_except
   )

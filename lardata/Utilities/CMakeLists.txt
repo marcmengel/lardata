@@ -11,7 +11,7 @@ art_make( NO_PLUGINS
                         art_Utilities
                         canvas
                         ${MF_MESSAGELOGGER}
-                        ${MF_UTILITIES}
+                        
                         cetlib cetlib_except
                         ${ROOT_GEOM}
                         ${ROOT_BASIC_LIB_LIST}
@@ -19,7 +19,7 @@ art_make( NO_PLUGINS
 
 simple_plugin(DatabaseUtil "service"
 	      ${MF_MESSAGELOGGER}
-	      ${MF_UTILITIES}
+	      
 	      ${FHICLCPP}
 	      cetlib cetlib_except
 	      ${PQ}
@@ -42,7 +42,7 @@ simple_plugin(FileCatalogMetadataExtras "service"
 	      canvas
 	      ${SQLITE3}
 	      ${MF_MESSAGELOGGER}
-	      ${MF_UTILITIES}
+	      
 	      cetlib cetlib_except
 	      ${ROOT_BASIC_LIB_LIST}
 )
@@ -52,7 +52,7 @@ simple_plugin(LArPropertiesServiceArgoNeuT "service"
               art_Utilities
 	      canvas
               ${MF_MESSAGELOGGER}
-              ${MF_UTILITIES}
+              
               cetlib cetlib_except
 	      ${ROOT_CORE}
 )
@@ -65,7 +65,7 @@ simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
               ${ART_FRAMEWORK_IO_ROOT_ROOTDB}
               ${SQLITE3}
               ${MF_MESSAGELOGGER}
-              ${MF_UTILITIES}
+              
               cetlib cetlib_except
               ${ROOT_BASIC_LIB_LIST}
 )
@@ -74,7 +74,7 @@ simple_plugin(LArFFT "service"
 	      art_Utilities
 	      canvas
 	      ${MF_MESSAGELOGGER}
-	      ${MF_UTILITIES}
+	      
 	      ${FHICLCPP}
 	      cetlib cetlib_except
 	      ${ROOT_FFTW}
@@ -84,7 +84,7 @@ simple_plugin(LArFFT "service"
 simple_plugin(ComputePi "module"
               ${ART_FRAMEWORK_CORE}
               ${MF_MESSAGELOGGER}
-              ${MF_UTILITIES}
+              
               ${FHICLCPP}
               cetlib cetlib_except
 	      ${ROOT_CORE}
