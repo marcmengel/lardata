@@ -749,8 +749,8 @@ namespace proxy {
     recob::TrackTrajectory const* operator()
       (proxy::Tracks::TrackType_t type) const noexcept;
     
+    // --- BEGIN Direct hit interface ------------------------------------------
     /**
-     * @{
      * @name Direct hit interface.
      * 
      * The track prescription requires one hit per trajectory point.
@@ -775,6 +775,7 @@ namespace proxy {
      * art::Ptr<recob::Hit> lastHit = track.hitAtPoint(track.nHits() - 1U);
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      */
+    /// @{
     
     /**
      * @brief Returns a collection-like range of hits of this track, at point
@@ -795,12 +796,15 @@ namespace proxy {
     std::size_t nHits() const { return hits().size(); }
     
     /// @}
+    // --- END Direct hit interface --------------------------------------------
+    
     
     /// Returns fit info for the specified point (`nullptr` if not available).
     recob::TrackFitHitInfo const* fitInfoAtPoint(std::size_t index) const;
     
+    
+    // --- BEGIN Direct track trajectory interface -----------------------------
     /**
-     * @{
      * @name Direct track trajectory interface
      * @see `proxy::TrackPoint` 
      * 
@@ -824,6 +828,7 @@ namespace proxy {
      *       has not been merged into the proxy (typically via
      *       `proxy::withOriginalTrajectory()`).
      */
+    /// @{
     
     /// Returns whether this track is associated to a trajectory.
     bool hasOriginalTrajectory() const
@@ -847,10 +852,11 @@ namespace proxy {
       { return *originalTrajectoryPtr(); }
     
     /// @}
+    // --- END Direct track trajectory interface -------------------------------
     
     
+    // --- BEGIN Point-by-point iteration interface ----------------------------
     /**
-     * @{
      * @name Point-by-point iteration interface
      * 
      * The points on track can be accessed individually with a special,
@@ -874,10 +880,28 @@ namespace proxy {
      * }
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      */
+    /// @{
     
-    /// Returns an iterable range with point-by-point information
-    /// (`TrackPointWrapper`).
-    /// @see `proxy::TrackPoint`, `proxy::TrackPointWrapper`
+    /**
+     * @brief Returns an iterable range with point-by-point information.
+     * @see `proxy::TrackPoint`, `proxy::TrackPointWrapper`
+     * 
+     * The interface of the elements is documented in `TrackPointWrapper`.
+     * Example:
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+     * for (auto const& pointInfo: track.points()) {
+     *   
+     *   if (!pointInfo.flags().isPointValid()) continue;
+     *   
+     *   auto const& pos = pointInfo.position();
+     *   
+     *   // ...
+     *   
+     * } // for point
+     * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     * will iterate through all points (including the invalid ones, hence the
+     * check).
+     */
     auto points() const
       { return details::TrackPointIteratorBox<CollProxy>(*this); }
     
@@ -899,6 +923,16 @@ namespace proxy {
       { return point(index); }
     
     /// @}
+    // --- END Point-by-point iteration interface ------------------------------
+    
+    
+    // --- BEGIN Additional utilities ------------------------------------------
+    /// @name Additional utilities
+    /// @{
+    
+    
+    /// @}
+    // --- END Additional utilities --------------------------------------------
     
       private:
     recob::TrackTrajectory const* originalTrajectoryCPtr() const noexcept

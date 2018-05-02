@@ -6,7 +6,7 @@
  * 
  * This library is header-only.
  *
- * @note It is likely that a skillful use of Nibbler's range library will
+ * @note It is likely that a skilful use of Nibbler's range library will
  *       provide the same functionality (and loads more).
  *
  *
