@@ -8,7 +8,7 @@ fcldir product_dir job
 product         version
 lardataobj	v1_31_00
 larcore		v06_19_01
-nutools		v2_21_02
+nutools		v2_21_03
 range		v3_0_3_0
 
 cetbuildtools	v7_03_02	-	only_for_build
