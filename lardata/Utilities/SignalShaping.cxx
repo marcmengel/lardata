@@ -242,6 +242,8 @@ void util::SignalShaping::CalculateDeconvKernel() const
     TComplex convMaxComplex = *std::max_element(fConvKernel.begin(),fConvKernel.end(),[](const auto& a, const auto& b){return a.Rho() < b.Rho();});
     double   convMax        = convMaxComplex.Rho();
     
+    if (convComplex.Rho() < fMinConvKernelFrac * convMax) convComplex = fMinConvKernelFrac * convMaxComplex;
+    
     // Now form the deconvolution kernel which will be the ratio of the filter function and
     // the convolution kernel but where we suppress those regions where the convolution kernel
     // is below our cutoff
