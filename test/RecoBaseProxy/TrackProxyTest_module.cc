@@ -244,7 +244,9 @@ void TrackProxyTest::testTracks(art::Event const& event) {
   BOOST_CHECK_EQUAL(fitHitInfoSize, expectedTrackFitHitInfo.size());
   
   std::size_t iExpectedTrack = 0;
-  for (auto trackProxy: tracks) {
+  for (auto const& trackProxy: tracks) {
+    BOOST_TEST_CHECKPOINT("Track #" << trackProxy.index());
+    
     auto const& expectedTrack = expectedTracks[iExpectedTrack];
     auto const& expectedHits = hitsPerTrack.at(iExpectedTrack);
     auto const& expectedFitHitInfo = expectedTrackFitHitInfo[iExpectedTrack];
@@ -294,8 +296,13 @@ void TrackProxyTest::testTracks(art::Event const& event) {
     // direct interface to recob::Track
     BOOST_CHECK_EQUAL(trackProxy->NPoints(), expectedTrack.NPoints());
     
+    
+    std::array<unsigned int, recob::TrajectoryPointFlagTraits::maxFlags()>
+      flagCounts;
+    flagCounts.fill(0U);
     std::size_t iPoint = 0;
-    for (auto pointInfo: trackProxy.points()) {
+    for (auto const& pointInfo: trackProxy.points()) {
+      BOOST_TEST_CHECKPOINT("  point #" << pointInfo.index());
       
       decltype(auto) expectedPointFlags = expectedTrack.FlagsAtPoint(iPoint);
       
@@ -315,6 +322,18 @@ void TrackProxyTest::testTracks(art::Event const& event) {
         BOOST_CHECK(!pointInfo.hitPtr());
       }
       
+      // collect the count of each flag type
+      for (auto flag: {
+        recob::TrajectoryPointFlags::flag::NoPoint,
+        recob::TrajectoryPointFlags::flag::HitIgnored,
+        recob::TrajectoryPointFlags::flag::Suspicious,
+        recob::TrajectoryPointFlags::flag::DetectorIssue
+        })
+      {
+        if (!expectedPointFlags.isDefined(flag)) continue;
+        if (expectedPointFlags.isSet(flag)) ++flagCounts[flag.index()];
+      }
+      
       BOOST_CHECK_EQUAL
         (fitHitInfo[iPoint].WireId(), expectedFitHitInfo[iPoint].WireId());
       BOOST_CHECK_EQUAL
@@ -327,6 +346,27 @@ void TrackProxyTest::testTracks(art::Event const& event) {
       ++iPoint;
     } // for
     BOOST_CHECK_EQUAL(iPoint, expectedTrack.NPoints());
+    
+    // testing pointsWithFlags() with some single flags
+    for (auto flag: {
+      recob::TrajectoryPointFlags::flag::NoPoint,
+      recob::TrajectoryPointFlags::flag::HitIgnored,
+      recob::TrajectoryPointFlags::flag::Suspicious,
+      recob::TrajectoryPointFlags::flag::DetectorIssue
+      })
+    {
+      BOOST_TEST_CHECKPOINT("  flag: " << flag);
+      unsigned int flagCount = 0U;
+      for (auto const& pointInfo: trackProxy.pointsWithFlags(flag)) {
+        
+        BOOST_TEST_CHECKPOINT("    point #" << pointInfo.index());
+        BOOST_CHECK(pointInfo.flags().isDefined(flag));
+        BOOST_CHECK(pointInfo.flags().isSet(flag));
+        
+        ++flagCount;
+      } // for pointInfo
+      BOOST_CHECK_EQUAL(flagCount, flagCounts[flag.index()]);
+    } // for flag
     
     ++iExpectedTrack;
   } // for

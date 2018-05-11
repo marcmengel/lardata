@@ -1,11 +1,13 @@
 /**
- * @file    RangeForWrapper.h
+ * @file    lardata/Utilities/RangeForWrapper.h
  * @brief   Utility function to enable range-for on different type iterators
  * @author  Gianluca Petrillo (petrillo@fnal.gov)
  * @date    December 12, 2016
  *
  * The functionality provided here is implemented in C++ language 2017.
  * Better than here, of course.
+ * When C++17 is adopted in LArSoft, this header should be declared obsolete,
+ * deprecated and then removed.
  */
 
 #ifndef LARDATA_UTILITIES_RANGEFORWRAPPER_H

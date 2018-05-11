@@ -1,0 +1,426 @@
+/**
+ * @defgroup LArSoftProxies LArSoft data proxies
+ * @brief Helper classes for easier access to connected data.
+ * 
+ * Proxies are objects that expose multiple connected data products with a
+ * single interface, implicitly browsing the interconnections.
+ * The connections may be explicit (via some type of data product association,
+ * like `art::Assns`, or element indices) or implicit, following an agreed rule
+ * (like in @ref LArSoftProxyDefinitionParallelData "parallel data products").
+ * 
+ * More complex proxy implementations are provided for some LArSoft data
+ * products.
+ * New proxies can be created as well.
+ */
+
+/**
+ * @namespace proxy
+ * @brief Encloses LArSoft data product proxy objects and utilities.
+ * @ingroup LArSoftProxies
+ * 
+ * See @ref LArSoftProxiesIntro "this doxygen module" for an introduction to
+ * data proxies in LArSoft.
+ */
+
+/**
+ * @page LArSoftProxiesIntro Introduction to LArSoft data product proxy objects.
+ * @ingroup LArSoftProxies
+ * 
+ * 
+ * @section LArSoftProxyPlug What's next
+ * 
+ * * check out the @ref LArSoftProxyReco "proxies provided by LArSoft"
+ * * if you need to interact with other data, you can tailor a proxy on your
+ *     data: check out the @ref LArSoftProxyBase "LArSoft data proxy interfaces"
+ *     section
+ * * if you need to make a new proxy available to other users, take inspiration
+ *     from one of the @ref LArSoftProxyReco "proxies provided by LArSoft" 
+ * 
+ * Below, some definitions are laid out that are referenced throughout the
+ * documentation and that might be useful.
+ * 
+ * 
+ * @section LArSoftProxyDefinitions Definitions
+ * 
+ * * *data collection proxy* (or just _proxy_):
+ *   @anchor LArSoftProxyDefinitionProxy
+ *   an object that wrap one or more related data, and exposes an interface to
+ *   navigate that data honoring its relations. The most evident effect is that
+ *   associated data products are presented as a single object.
+ * * *main data collection*:
+ *   @anchor LArSoftProxyDefinitionMainDataColl
+ *   a data collection proxy is... well, a proxy to a data collection; it has an
+ *   interface like a collection, and the number and order of elements of the
+ *   proxy is the same as the collection the proxy is based on, which is called
+ *   the _main data collection_.
+ * * *auxiliary data*:
+ *   @anchor LArSoftProxyDefinitionAuxiliaryData
+ *   auxiliary data is additional data which is related to the 
+ *   @ref LArSoftProxyDefinitionMainDataColl "main collection" of the proxy;
+ *   the auxiliary data is exposed as a collection which has the same number of
+ *   elements as the main one, and where the _i_-th auxiliary data element is
+ *   related to the _i_-th element of the main collection. Different sources
+ *   qualify to be merged as auxiliary data, including some _art_ associations
+ *   and other data collections.
+ * * *merging* of auxiliary data into a proxy:
+ *   @anchor LArSoftProxyDefinitionMerging
+ *   jargon to express that some 
+ *   @ref LArSoftProxyDefinitionAuxiliaryData "auxiliary data" is made
+ *   available through the interface of that data collection proxy.
+ * * *auxiliary data tag*:
+ *   @anchor LArSoftProxyDefinitionTag
+ *   the identified with which some auxiliary data is accessed in the code. It
+ *   is a C++ type (empty `struct` work well: e.g., `struct MyHits {};`).
+ * * *one-to-many sequential association*:
+ *   @anchor LArSoftProxyDefinitionOneToManySeqAssn
+ *   an association between `L` and `R` types where:
+ *     * `L` objects come from a single data product
+ *     * the sequence of associations is such that if `L1` is before `L2` in the
+ *       original data product, all `L1`-`Rx` associations of `L1` are listed
+ *       before any of the `L2`-`Rx` associations of `L2`; in other words, the
+ *       association list follows the original order of the `L` data product;
+ *       note that this preclude actual many-to-many associations.
+ *   This does _not_ require associations to be one-to-one (it allows one `L` to
+ *   many `R`), nor that all `L` be associated to at least one `R`.
+ * * *parallel data product*:
+ *   @anchor LArSoftProxyDefinitionParallelData
+ *   a data product collection of elements extending
+ *   the information from another data product collection ("main"), where
+ *     * the two data products have the same number of elements
+ *     * there is an implicit one-to-one association between the elements of the
+ *       two data products, so that an element at position _i_ of the parallel
+ *       data product pertains to the element at position _i_ of the main
+ *       data product
+ * * *one-to-(zero-or-one) sequential association*:
+ *   @anchor LArSoftProxyDefinitionOneToZeroOrOneSeqAssn
+ *   an association between `L` and `R` types where:
+ *     * `L` objects come from a single data product
+ *     * there is at most one `R` associated to each single `L`
+ *     * the sequence of associations is such that if `L1` is before `L2` in the
+ *       original data product, `L1`-`R1` association is listed before the
+ *       `L2`-`R2` association; in other words, the association list follows the
+ *       original order of the `L` data product.
+ *   This does require associations to be one-to-one, bit it does _not_ require
+ *   that all `L` be associated to at least one `R`.
+ * 
+ */
+
+/**
+ * @defgroup LArSoftProxyBase LArSoft data proxy interfaces
+ * @ingroup LArSoftProxies
+ * @brief Interfaces to create instances of LArSoft data proxies
+ * 
+ * This section contains documentation about the main tools to instantiate a
+ * data collection proxy in LArSoft. Some prepackaged data proxies are provided
+ * by LArSoft and documented in the
+ * @ref LArSoftProxyReco "recostructed object data proxy" section.
+ * 
+ * The starting point is the documentation of `proxy::getCollection()`.
+ * That function is the way to create a proxy object in your code.
+ * @ref LArSoftProxyDefinitionAuxiliaryData "Auxiliary data" can me merged to
+ * that proxy on creation, and only then. Different functions help with merging
+ * different auxiliary data:
+ * 
+ * * data from one-to-many associations stored following the 
+ *     @ref LArSoftProxyDefinitionOneToManySeqAssn "one-to-many sequential association requirement"
+ *     can be fetched and merged with the `proxy::withAssociated()` class of
+ *     functions, or just merged, is already fetched, with
+ *     `proxy::wrapAssociated()` functions
+ * * data from a one-to-one optional associations (according to
+ *     @ref LArSoftProxyDefinitionOneToZeroOrOneSeqAssn "this requirement")
+ *     can be merged with the `proxy::withZeroOrOne()` class of functions
+ * * data from another collection with a one-to-one implicit relation (according
+ *     to @ref LArSoftProxyDefinitionParallelData "this requirement")
+ *     can be read and merged with the `proxy::withParallelData()` class of
+ *     functions, or directly used with `proxy::wrapParallelData()` functions
+ * 
+ * Each auxiliary data is identified by a "tag", which is for example used when
+ * asking for that auxiliary data with `get<Tag>()` member of the proxy.
+ * Most of the `withXxx()` functions have a variant, usually `withXxxAs()`, that
+ * allows that tag to be explicitly chosen.
+ * 
+ * For the supported associated data, a variant `withXxxMeta()`
+ * (and `withXxxMetaAs()`) is offered which allows to access also the metadata
+ * of the association.
+ * 
+ */
+
+/**
+ * @defgroup LArSoftProxyCustom LArSoft data proxy infrastructure
+ * @ingroup LArSoftProxyBase
+ * @brief Classes for implementation and customization of LArsoft proxies.
+ * 
+ * This documentation section contains hints for the creation or customization
+ * of data product proxies.
+ * These are two slightly different use cases:
+ * * if you need a way to facilitate the association between data products,
+ *     a simple proxy may be your solution: you want to
+ *     @ref LArSoftProxySimple "create a proxy object", which is fairly easy
+ * * if your needs are more complex, including for example an extended interface
+ *     to give friendly names to the associated data or to create a new data
+ *     concept to be published for general use, then you want to create a new
+ *     _class_ describing the proxy, and you are looking for
+ *     @ref LArSoftProxyCustomization "customizing a proxy". This customization
+ *     is not necessarily hard, but it is nevertheless not straightforward, and
+ *     following the example of already implemented proxies may be the best
+ *     starting point.
+ * 
+ * Some implementation choices are also explained here.
+ * 
+ * @bug The current design is flawed in the support of (sub)proxies as direct
+ *      elements of a proxy. The merged elements are implemented as base classes
+ *      of the proxies, to allow their potentially customized interface to
+ *      percolate to the proxy. Since an indirect base class can't appear also
+ *      as direct base class, trying to merge a proxy causes all sorts of
+ *      conflicts between base classes. The stub code `withCollectionProxyAs()`
+ *      and related is showing that problem on some (all?) usages.
+ *      [the author hasn't tried to create a working combination for it]
+ * 
+ * @section LArSoftProxySimple The simplest new proxy
+ * 
+ * In its simplest form, a proxy may be created with no customization at all:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * auto tracks = proxy::getCollection<std::vector<recob::Track>>
+ *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * makes a proxy object called `tracks` which accesses a `recob::Track`
+ * collection data product and its associated hits, assuming that tracks and
+ * their association with hits be created by the same module (`trackTag`).
+ * 
+ * @note Only associations falling under some restricted assumptions can be used
+ *       in a proxy.
+ * 
+ * From this, it is possible to access tracks and their hits:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * for (auto trackInfo: tracks) {
+ *   
+ *   recob::Track const& track = *trackInfo; // access to the track
+ *   double const startTheta = track.Theta();
+ *   
+ *   double const length = trackInfo->Length(); // access to track members
+ * 
+ *   // access to associated data (returns random-access collection-like object)
+ *   auto const& hits = trackInfo.get<recob::Hit>();
+ *   
+ *   double charge = 0.0;
+ *   for (auto const& hitPtr: hits) {
+ *     charge += hitPtr->Integral();
+ *   } // for hits
+ *   
+ *   mf::LogVerbatim("Info")
+ *     << "[#" << trackInfo.index() << "] track ID=" << track.ID()
+ *     << " (" << length << " cm, starting with theta=" << startTheta
+ *     << " rad) deposited charge=" << charge
+ *     << " with " << hits.size() << " hits";
+ *   
+ * } // for tracks
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * If instead of using `trackInfo.get<recob::Hit>()` you want to use something
+ * more friendly, like `trackInfo.Hits()`, then you need to
+ * @ref LArSoftProxyCustomization "create and customize a new proxy class".
+ * 
+ * 
+ * @subsection LArSoftProxyQuirks Quirks of proxy usage (a.k.a. "C++ is not python")
+ * 
+ * There are a number of things one should remember when using proxies.
+ * 
+ * First, the type of the proxy collection, and the type of the proxy collection
+ * element, are not trivial. That is the reason why we use
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * auto tracks = proxy::getCollection<std::vector<recob::Track>>
+ *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * instead of
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * proxy::CollectionProxyBase<
+ *     proxy::CollectionProxyElement,
+ *     std::vector<recob::Track>,
+ *     proxy::details::AssociatedData<recob::Track, recob::Hit, void, recob::Hit>
+ *   >
+ *   tracks = proxy::getCollection<std::vector<recob::Track>>
+ *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * and even more so
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * for (auto trackInfo: tracks)
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * instead of the full class name
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * for (proxy::CollectionProxyElement<
+ *   proxy::CollectionProxyBase<
+ *     proxy::CollectionProxyElement,
+ *     std::vector<recob::Track>,
+ *     proxy::details::AssociatedData<recob::Track, recob::Hit, void, recob::Hit> >
+ *   > trackInfo: tracks)
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * More important, the type depends on which elements we merged into the
+ * collection proxy (in the example, `proxy::details::AssociatedData` reveals
+ * that we merged an associated data). This means that a C++ function in general
+ * can't reliably take a proxy argument by specifying its type, and it needs to
+ * use templated arguments instead:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * template <typename Track>
+ * unsigned int nHitsOnView(Track const& track, geo::View view);
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Also remember that template class methods are allowed but they can't be
+ * virtual.
+ * 
+ * Second quirk, which yields a confused compilation message (at least with GCC
+ * 6), is that template class methods of objects of a template type need the
+ * `template` keyword for C++ to understand what's going on:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * template <typename Track>
+ * unsigned int nHitsOnView(Track const& track, geo::View view) {
+ *   unsigned int count = 0U;
+ *   for (art::Ptr<recob::Hit> const& hitPtr: track.template get<recob::Hit>())
+ *     if (hitPtr->View() == view) ++count;
+ *   return count;
+ * } // nHitsOnView()
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Here, `track` is a constant reference to type `Track`, which is a template
+ * type, so that when we ask for `track.get<recob::Hit>()` the compiler does not
+ * know that the object `track` of type `Track` has a method `get()` which is a
+ * template method, and it gets confused (in fact, it may think the expression
+ * might be a comparison, `track.get < recob::Hit`, and hilarity ensues).
+ * This is not true when the type of the object is immediately known:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * auto tracks = proxy::getCollection<std::vector<recob::Track>>
+ *   (event, tracksTag, proxy::withAssociated<recob::Hit>());
+ * 
+ * for (auto track: tracks) {
+ *   unsigned int count = 0U;
+ *   for (art::Ptr<recob::Hit> const& hitPtr: track.get<recob::Hit>())
+ *     if (hitPtr->View() == view) ++count;
+ *   mf::LogVerbatim("") << "Track ID=" << track->ID() << ": " << count
+ *     << " hits on view " << view;
+ * } // for
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * where `tracks` is a well-known (to the compiler) type, and `track` as well.
+ * 
+ * 
+ * @section LArSoftProxyCustomization Customization of collection proxies
+ * 
+ * The "customization" of a collection proxy consists of writing classes and
+ * functions specific for a use case, to be used as components of a collection
+ * proxy in place of the standard ones.
+ * 
+ * The options of customization are numerous, and it is recommended that
+ * customization start from the code of an existing customized proxy
+ * implementing functionalities similar to the desired ones.
+ * In the same spirit, customization hints are not provided here, but rather
+ * in the
+ * @ref LArSoftProxyTracksCustom "documentation of the proxy::Tracks collection proxy".
+ * 
+ * 
+ * 
+ * @section LArSoftProxyImplementation Technical details
+ * 
+ * @subsection LArSoftProxyOverhead Overhead
+ * 
+ * The proxies have been developed with an eye on minimising the replication of
+ * information. The proxies are therefore light-weight objects relying on
+ * pointers to the original data. One exception is that an additional structure
+ * is created for each one-to-many association (i.e., to hits), which includes
+ * a number of entries proportional to the number of tracks.
+ * 
+ * In general, anyway, copy of any proxies is not recommended, as it is usually
+ * better just to pass around a reference to them.
+ * 
+ * Since this interface (and implementation) is still in development, there
+ * might be flaws that make it non-performant. Please report any suspicious
+ * behaviour.
+ * 
+ * 
+ * @subsection LArSoftProxyInterfaceSubstitition Interface substitution
+ * 
+ * A technique that is used in this implementation is to replace (or extend) the
+ * interface of an existing object.
+ * The @ref LArSoftProxyInterfaceSubstitition "documentation of file CollectionView.h"
+ * includes a more in-depth description of it.
+ * 
+ * 
+ * @subsection IteratorWrappers Iterator wrappers and "static polymorphism"
+ * 
+ * A widely used interface change is the substitution of the dereference
+ * operator of an iterator:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * struct address_iterator: public iterator { // DON'T DO THIS (won't work)
+ *   auto operator*() -> decltype(auto)
+ *     { return std::addressof(iterator::operator*()); }
+ * }; // my_iterator
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * There are two important pitfalls to be aware of in this specific case, well
+ * illustrated in this example.
+ * 
+ * If the caller tries to use e.g. `ait->name()` on a `address_iterator ait`
+ * (or other members, like `ait[0]`), they will be picked from the base class,
+ * and the overloaded `operator*()` is ignored. This can be avoided with private
+ * inheritance, forcing the explicit implementation of everything we want to
+ * use, which will be at very least an increment operator and a comparison one.
+ * 
+ * The second pitfall is that the base class methods return base class
+ * references. For example, `*ait++` will call the inherited increment operator,
+ * which returns an object of type `iterator`, and the following dereference
+ * will be called on it, again bypassing the overridden dereference method.
+ * This means that to implement the increment operator is not enough to import
+ * the inherited one (`using iterator::operator++;`).
+ * 
+ * This task of wrapping a `base_iterator` involves a lot of "boilerplate" code:
+ * the prefix increment operator will always be
+ * `auto& operator++() { base_iterator::operator++(); return *this; }`, the
+ * indexing operator will always be
+ * `auto operator[](std::size_t i) -> decltype(auto) { return std::addressof(base_iterator::operator[](i)); }`
+ * etc. The usual solution is to derive the iterator class from one that
+ * implements the boilerplate. Unfortunately part of the boilerplate is from
+ * the derived class and so it can't appear in the base class. With run-time
+ * polymorphism, the base iterator might define an abstract value transformation
+ * method (`transform()`) and use it in its other methods; the linker will take
+ * care later on of plugging the right `transform()` method from the derived
+ * class. To obtain the same effect at compile time, the base class needs to
+ * know in advance the `transform()` function. Plugging it as a templated
+ * literal argument (a function pointer) requires quite some gymnastic in
+ * predicting the right data type, especially the return type.
+ * A weird alternative is to have this base class inherit from the derived
+ * class, specified as template argument. The derived iterator looks like:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * struct address_iterator: public iterator_base<address_iterator, iterator> {
+ *   using iterator_base_t = iterator_base<address_iterator>;
+ *   using iterator_base_t::iterator_base_t;
+ *   static auto transform(iterator const& it) { return std::addressof(*it); }
+ * };
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * and the weirdness is concentrated in the `iterator_base`:
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
+ * template <typename FinalIter, typename WrappedIter>
+ * class iterator_base: private WrappedIter {
+ *   WrappedIter& asWrapped() const
+ *     { return static_const<WrappedIter&>(*this); }
+ *   FinalIter& asFinal() { return static_const<FinalIter&>(*this); }
+ *     public:
+ *   iterator_base() = default;
+ *   iterator_base(WrappedIter const& from): WrapperIter(from) {}
+ *   FinalIter& operator++() { WrappedIter::operator++(); return asFinal(); }
+ *   auto operator*() const -> decltype(auto)
+ *     { return asFinal().transform(*asWrapped()); }
+ *   bool operator!= (iterator_base const& other) const
+ *     { return asWrapped() != other.asWrapped(); }
+ * }; // class iterator_base
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * With this class, it's possible to transform an `iterator` into an
+ * `address_iterator`, in a similar way to how described in the "Interface
+ * substitution" section (there are some workaround needed because of private
+ * inheritance and to ensure that the iterator traits are correct).
+ * 
+ * @note I learned afterward about the existence of `boost::iterator_adapter`,
+ *       which might provide similar functionality and also be dealing correctly
+ *       with non-constant iterators. Worth considering.
+ * 
+ */
+/**
+ * @defgroup LArSoftProxyReco Reconstructed object data proxy
+ * @ingroup LArSoftProxies
+ * @brief Data proxies for LArSoft reconstruction data products.
+ * 
+ * Each proxy is documented in its own "module" (see the list above).
+ * 
+ */
