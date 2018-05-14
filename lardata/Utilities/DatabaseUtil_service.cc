@@ -13,7 +13,7 @@
 // LArSoft includes
 #include "lardata/Utilities/DatabaseUtil.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 
 //-----------------------------------------------
 util::DatabaseUtil::DatabaseUtil(fhicl::ParameterSet const& pset, art::ActivityRegistry & /* reg */)

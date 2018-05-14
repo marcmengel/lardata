@@ -10,7 +10,7 @@
 
 #include "lardata/RecoObjects/KHitContainer.h"
 
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 
 namespace trkf {
 

@@ -13,7 +13,7 @@
 #include "lardata/RecoObjects/SurfPlane.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 
 namespace trkf {
 

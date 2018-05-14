@@ -10,7 +10,7 @@
 
 #include <cmath>
 #include "lardata/RecoObjects/SurfYZLine.h"
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 #include "TVector2.h"
 #include "TMath.h"
 

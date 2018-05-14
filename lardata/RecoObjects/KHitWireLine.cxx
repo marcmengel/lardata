@@ -13,7 +13,7 @@
 #include "lardata/RecoObjects/SurfWireLine.h"
 #include "larcore/Geometry/Geometry.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 
 namespace trkf {
 
