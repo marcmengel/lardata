@@ -3,7 +3,7 @@ art_make(
     larcorealg_Geometry
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
     ${MF_MESSAGELOGGER}
-    ${MF_UTILITIES}
+    
     ${FHICLCPP}
     cetlib cetlib_except
 )
