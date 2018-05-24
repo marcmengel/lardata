@@ -23,7 +23,7 @@
 #define LARDATA_DETECTORINFO_DETECTORCLOCKSSTANDARDTRIGGERLOADER_H
 
 // LArSoft libraries
-#include "lardata/DetectorInfo/DetectorClocksStandard.h"
+#include "lardataalg/DetectorInfo/DetectorClocksStandard.h"
 #include "lardataobj/RawData/TriggerData.h" // raw::Trigger
 
 // framework libraries

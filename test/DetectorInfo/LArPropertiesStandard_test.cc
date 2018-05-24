@@ -7,8 +7,8 @@
 
 // LArSoft libraries
 #include "larcorealg/TestUtils/unit_test_base.h"
-#include "lardata/DetectorInfo/LArPropertiesStandard.h"
-#include "lardata/DetectorInfo/LArPropertiesStandardTestHelpers.h"
+#include "lardataalg/DetectorInfo/LArPropertiesStandard.h"
+#include "lardataalg/DetectorInfo/LArPropertiesStandardTestHelpers.h"
 
 
 //------------------------------------------------------------------------------

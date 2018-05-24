@@ -18,7 +18,7 @@
 #define LARDATA_DETECTORINFO_LARPROPERTIESSTANDARDTESTHELPERS_H 1
 
 // LArSoft libraries
-#include "lardata/DetectorInfo/LArPropertiesStandard.h"
+#include "lardataalg/DetectorInfo/LArPropertiesStandard.h"
 #include "larcorealg/TestUtils/ProviderTestHelpers.h"
 
 // framework and utility libraries

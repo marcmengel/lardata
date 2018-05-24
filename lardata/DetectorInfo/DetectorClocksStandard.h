@@ -15,7 +15,7 @@
 
 #include "fhiclcpp/ParameterSet.h"
 
-#include "lardata/DetectorInfo/DetectorClocks.h"
+#include "lardataalg/DetectorInfo/DetectorClocks.h"
 
 namespace detinfo{
 

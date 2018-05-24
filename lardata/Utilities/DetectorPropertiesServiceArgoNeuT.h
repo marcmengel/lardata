@@ -17,9 +17,9 @@
 #ifndef UTIL_DETECTORPROPERTIESSERVICEARGONEUT_H
 #define UTIL_DETECTORPROPERTIESSERVICEARGONEUT_H
 
-#include "lardata/DetectorInfo/DetectorProperties.h"
+#include "lardataalg/DetectorInfo/DetectorProperties.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "lardata/DetectorInfo/ElecClock.h"
+#include "lardataalg/DetectorInfo/ElecClock.h"
 #include "lardata/Utilities/LArPropertiesServiceArgoNeuT.h"
 
 #include "fhiclcpp/ParameterSet.h"

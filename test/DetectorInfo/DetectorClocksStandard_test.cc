@@ -7,8 +7,8 @@
 
 // LArSoft libraries
 #include "larcorealg/TestUtils/unit_test_base.h"
-#include "lardata/DetectorInfo/DetectorClocksStandard.h"
-#include "lardata/DetectorInfo/DetectorClocksStandardTestHelpers.h"
+#include "lardataalg/DetectorInfo/DetectorClocksStandard.h"
+#include "lardataalg/DetectorInfo/DetectorClocksStandardTestHelpers.h"
 
 
 //------------------------------------------------------------------------------

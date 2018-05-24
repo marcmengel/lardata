@@ -1,6 +1,6 @@
 
 simple_plugin(DetectorClocksServiceStandard "service"
-              lardata_DetectorInfo
+              lardataalg_DetectorInfo
 	      lardataobj_RawData
 	      art_Utilities
               ${ART_FRAMEWORK_CORE}
@@ -20,7 +20,7 @@ simple_plugin(DetectorClocksServiceStandard "service"
 )
 
 simple_plugin(DetectorPropertiesServiceStandard "service"
-              lardata_DetectorInfo
+              lardataalg_DetectorInfo
               larcore_Geometry_Geometry_service
               larcorealg_Geometry
 	      ${ART_FRAMEWORK_IO_ROOT_ROOTDB}
@@ -36,7 +36,7 @@ simple_plugin(DetectorPropertiesServiceStandard "service"
 )
 
 simple_plugin(LArPropertiesServiceStandard "service"
-	      lardata_DetectorInfo
+	      lardataalg_DetectorInfo
 	      art_Utilities
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
 	      canvas

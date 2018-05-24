@@ -18,7 +18,7 @@
 #define LARDATA_DETECTORINFO_DETECTORCLOCKSSTANDARDTESTHELPERS_H 1
 
 // LArSoft libraries
-#include "lardata/DetectorInfo/DetectorClocksStandard.h"
+#include "lardataalg/DetectorInfo/DetectorClocksStandard.h"
 #include "larcorealg/TestUtils/ProviderTestHelpers.h"
 
 // framework and utility libraries

@@ -14,7 +14,7 @@
 #include <map>
 
 #include "fhiclcpp/ParameterSet.h"
-#include "lardata/DetectorInfo/RunHistory.h"
+#include "lardataalg/DetectorInfo/RunHistory.h"
 
 ///General LArSoft Utilities
 namespace detinfo {

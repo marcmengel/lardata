@@ -10,7 +10,7 @@
 #include <iostream>
 
 // LArSoft includes
-#include "lardata/DetectorInfo/LArPropertiesStandard.h"
+#include "lardataalg/DetectorInfo/LArPropertiesStandard.h"
 #include "larcorealg/CoreUtils/ProviderUtil.h" // lar::IgnorableProviderConfigKeys()
 #include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h"
 

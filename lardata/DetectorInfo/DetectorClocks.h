@@ -9,7 +9,7 @@
 #ifndef LARDATA_DETECTORINFO_DETECTORCLOCKS_H
 #define LARDATA_DETECTORINFO_DETECTORCLOCKS_H
 
-#include "lardata/DetectorInfo/ElecClock.h"
+#include "lardataalg/DetectorInfo/ElecClock.h"
 
 namespace detinfo{
 

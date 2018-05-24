@@ -6,10 +6,10 @@
  */
 
 // LArSoft libraries
-#include "lardata/DetectorInfo/LArPropertiesStandardTestHelpers.h"
-#include "lardata/DetectorInfo/DetectorClocksStandardTestHelpers.h"
-#include "lardata/DetectorInfo/DetectorPropertiesStandard.h"
-#include "lardata/DetectorInfo/DetectorPropertiesStandardTestHelpers.h"
+#include "lardataalg/DetectorInfo/LArPropertiesStandardTestHelpers.h"
+#include "lardataalg/DetectorInfo/DetectorClocksStandardTestHelpers.h"
+#include "lardataalg/DetectorInfo/DetectorPropertiesStandard.h"
+#include "lardataalg/DetectorInfo/DetectorPropertiesStandardTestHelpers.h"
 #include "larcorealg/Geometry/ChannelMapStandardAlg.h"
 #include "larcorealg/Geometry/GeometryCore.h"
 #include "larcorealg/CoreUtils/RealComparisons.h"
