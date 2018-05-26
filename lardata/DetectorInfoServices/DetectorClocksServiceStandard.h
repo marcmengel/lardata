@@ -16,7 +16,7 @@
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/Event.h"
 
-#include "lardata/DetectorInfo/DetectorClocksStandard.h"
+#include "lardataalg/DetectorInfo/DetectorClocksStandard.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
 ///General LArSoft Utilities

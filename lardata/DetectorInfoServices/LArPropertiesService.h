@@ -11,7 +11,7 @@
 
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-#include "lardata/DetectorInfo/LArProperties.h"
+#include "lardataalg/DetectorInfo/LArProperties.h"
 #include "larcore/CoreUtils/ServiceUtil.h"
 
 ///General LArSoft Utilities

@@ -11,9 +11,9 @@
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/ServicePack.h" // lar::providerFrom<>()
-#include "lardata/DetectorInfo/LArProperties.h"
-#include "lardata/DetectorInfo/DetectorProperties.h"
-#include "lardata/DetectorInfo/DetectorClocks.h"
+#include "lardataalg/DetectorInfo/LArProperties.h"
+#include "lardataalg/DetectorInfo/DetectorProperties.h"
+#include "lardataalg/DetectorInfo/DetectorClocks.h"
 #include "larcore/Geometry/Geometry.h"
 #include "larcorealg/Geometry/GeometryCore.h"
 #include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()

@@ -14,8 +14,8 @@
 
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "lardata/DetectorInfo/LArProperties.h"
-#include "lardata/DetectorInfo/DetectorProperties.h"
+#include "lardataalg/DetectorInfo/LArProperties.h"
+#include "lardataalg/DetectorInfo/DetectorProperties.h"
 #include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom<>()
 
 namespace util
