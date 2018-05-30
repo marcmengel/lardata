@@ -54,7 +54,7 @@ namespace util{
       vertangle[ip]=geom->Plane(ip).Wire(0).ThetaZ(false)-TMath::Pi()/2.; // wire angle 
       //vertangle[ip]=geom->WireAngleToVertical(geom->PlaneToView(ip)) - TMath::Pi()/2; // wire angle
         
-    fWirePitch = geom->WirePitch(0,1,0);
+    fWirePitch = geom->WirePitch();
     fTimeTick=detp->SamplingRate()/1000.; 
     fDriftVelocity=detp->DriftVelocity(detp->Efield(),detp->Temperature());
     
@@ -343,7 +343,7 @@ namespace util{
      
       for(UInt_t i = 0; i < geom->Nplanes(); ++i) {
 	if(i == iplane){
-	  Double_t wirePitch = geom->WirePitch(0,1,i);
+	  Double_t wirePitch = geom->WirePitch(i);
 	  Double_t angleToVert =0.5*TMath::Pi() - geom->WireAngleToVertical(geom->Plane(i).View());
 	  
 	      // 	//    //std::cout <<" %%%%%%%%%%  " << i << " angle " 
@@ -395,7 +395,7 @@ namespace util{
      
       for(UInt_t i = 0; i < geom->Nplanes(); ++i){
 	if(i == iplane){
-	  Double_t wirePitch = geom->WirePitch(0,1,i);
+	  Double_t wirePitch = geom->WirePitch(i);
 	  Double_t angleToVert =0.5*TMath::Pi() - geom->WireAngleToVertical(geom->Plane(i).View());
 	  
 	  // 	    //std::cout <<" %%%%%%%%%%  " << i << " angle " 
@@ -1021,7 +1021,7 @@ namespace util{
     Double_t wirePitch   = 0.;
     Double_t angleToVert = 0.;
    
-    wirePitch = geom->WirePitch(0,1,plane);
+    wirePitch = geom->WirePitch(plane);
     angleToVert = geom->WireAngleToVertical(geom->Plane(plane).View()) - 0.5*TMath::Pi();
          
     //(sin(angleToVert),std::cos(angleToVert)) is the direction perpendicular to wire
