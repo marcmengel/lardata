@@ -10,7 +10,7 @@
 
 #include <cmath>
 #include "lardata/RecoObjects/SurfYZPlane.h"
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 #include "TVector2.h"
 
 namespace trkf {

@@ -11,7 +11,7 @@
 #include <cmath>
 #include <cstdlib>
 #include "lardata/RecoObjects/KTrack.h"
-#include "cetlib/exception.h"
+#include "cetlib_except/exception.h"
 
 // Define some particle masses here.
 
