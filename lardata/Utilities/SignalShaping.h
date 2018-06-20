@@ -132,7 +132,7 @@ public:
   private:
 
     // Attributes.
-    double fMinConvKernelFrac;  ///< minimum value of convKernel/peak for deconvolution
+    // unused double fMinConvKernelFrac;  ///< minimum value of convKernel/peak for deconvolution
 
     // Lock flags.
     mutable bool fResponseLocked;
