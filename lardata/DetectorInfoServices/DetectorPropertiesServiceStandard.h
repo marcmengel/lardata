@@ -15,6 +15,7 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "art/Framework/Principal/Run.h"
+#include "art/Persistency/Provenance/ScheduleContext.h"
 #include "lardataalg/DetectorInfo/DetectorPropertiesStandard.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 
@@ -80,7 +81,7 @@ namespace detinfo{
 				art::ActivityRegistry& reg);
 
       virtual void   reconfigure(fhicl::ParameterSet const& pset) override;
-      void   preProcessEvent(const art::Event& evt);
+      void   preProcessEvent(const art::Event& evt, art::ScheduleContext);
       void   postOpenFile(const std::string& filename);
       
       virtual const provider_type* provider() const override { return fProp.get();}

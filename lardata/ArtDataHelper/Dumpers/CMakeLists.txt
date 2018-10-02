@@ -38,6 +38,7 @@ art_make(
     lardataobj_RecoBase
     lardata_ArtDataHelper_Dumpers
     art_Framework_Principal
+    art_Persistency_Provenance
     canvas
     ${MF_MESSAGELOGGER}
     
@@ -50,6 +51,7 @@ foreach(Dumper IN LISTS RawDataDumpers)
   simple_plugin(${Dumper} "module"
       lardataobj_RawData
       art_Framework_Principal
+      art_Persistency_Provenance
       canvas
       ${MF_MESSAGELOGGER}
       
@@ -65,6 +67,7 @@ foreach(Dumper IN LISTS RecoBaseDumpers)
       lardata_ArtDataHelper_Dumpers
       lardata_RecoBaseProxy
       art_Framework_Principal
+      art_Persistency_Provenance
       canvas
       ${MF_MESSAGELOGGER}
       
@@ -78,6 +81,7 @@ foreach(Dumper IN LISTS SimulationDumpers)
   simple_plugin(${Dumper} "module"
       lardataobj_Simulation
       art_Framework_Principal
+      art_Persistency_Provenance
       canvas
       ${MF_MESSAGELOGGER}
       

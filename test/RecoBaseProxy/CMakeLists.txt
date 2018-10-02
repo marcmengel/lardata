@@ -6,6 +6,7 @@ add_subdirectory(ProxyBase)
 simple_plugin(ProxyBaseTest "module"
   lardata_RecoBaseProxy
   lardataobj_RecoBase
+  art_Persistency_Provenance
   ${MF_MESSAGELOGGER}
   
   ${ROOT_GENVECTOR}
@@ -27,6 +28,7 @@ cet_test(ProxyBase_test
 simple_plugin(TrackProxyTest "module"
   lardata_RecoBaseProxy
   lardataobj_RecoBase
+  art_Persistency_Provenance
   ${MF_MESSAGELOGGER}
   
   ${ROOT_GENVECTOR}
@@ -35,12 +37,14 @@ simple_plugin(TrackProxyTest "module"
 
 simple_plugin(TrackProxyHitMaker "module"
   lardataobj_RecoBase
+  art_Persistency_Provenance
   ${MF_MESSAGELOGGER}
   
   )
 
 simple_plugin(TrackProxyTrackMaker "module"
   lardataobj_RecoBase
+  art_Persistency_Provenance
   ${MF_MESSAGELOGGER}
   
   )
@@ -59,6 +63,7 @@ cet_test(TrackProxy_test
 simple_plugin(ChargedSpacePointProxyTest "module"
   lardata_RecoBaseProxy
   lardataobj_RecoBase
+  art_Persistency_Provenance
   ${MF_MESSAGELOGGER}
   
   ${ROOT_GENVECTOR}
@@ -82,4 +87,3 @@ cet_test(ChargedSpacePointProxy_test
   )
 
 ###############################################################################
-

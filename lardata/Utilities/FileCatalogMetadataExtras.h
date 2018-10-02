@@ -92,6 +92,7 @@
 #include "art/Framework/Principal/RunPrincipal.h"
 #include "art/Framework/Principal/SubRunPrincipal.h"
 #include "art/Framework/Principal/Event.h"
+#include "art/Persistency/Provenance/ScheduleContext.h"
 
 namespace util{
 
@@ -136,8 +137,8 @@ namespace util{
     void postEndJob();
     void postOpenFile(std::string const& fn);
     void postCloseFile();
-    void preEvent(art::Event const& ev);
-    void postEvent(art::Event const& ev);
+    void preEvent(art::Event const& ev, art::ScheduleContext);
+    void postEvent(art::Event const& ev, art::ScheduleContext);
 
     // Pseudo-callbacks.  These are not called via the art
     // ActivityRegistry.  We generate fake callbacks ourselves by

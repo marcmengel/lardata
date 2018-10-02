@@ -171,7 +171,7 @@ recob::ChargedSpacePointCollectionCreator::chargePtr
 
 //------------------------------------------------------------------------------
 void recob::ChargedSpacePointCollectionCreator::produces
-  (art::ProducerBase& producer, std::string const& instanceName)
+  (art::detail::Producer& producer, std::string const& instanceName)
 {
   
   producer.produces<std::vector<recob::SpacePoint>>(instanceName);
