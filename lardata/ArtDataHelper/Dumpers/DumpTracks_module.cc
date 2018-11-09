@@ -468,7 +468,7 @@ namespace recob {
       unsigned int skip = std::max(nPoints / fPrintWayPoints, 1U);
       unsigned int iPoint = 0;
       while ((iPoint += skip) < nPoints) {
-        const TVector3& point = track.LocationAtPoint(iPoint);
+        const auto& point = track.LocationAtPoint(iPoint);
         log << "\n    [#" << iPoint << "] ("
           << point.X() << ", " << point.Y() << ", " << point.Z()
           << ")";
