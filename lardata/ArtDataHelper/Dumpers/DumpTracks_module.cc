@@ -305,22 +305,6 @@ namespace recob {
 
 
 //------------------------------------------------------------------------------
-namespace {
-  
-  template <typename STREAM>
-  bool PrintdQdXinView(
-    STREAM& log,
-    const recob::Track& track, geo::View_t view, std::string ViewName
-  ) {
-    auto nData = 0;
-    try { nData = track.NumberdQdx(view); }
-    catch (std::out_of_range) { return false; }
-    log << " " << ViewName << ": " << nData;
-    return true;
-  } // PrintdQdXinView()
-  
-} // local namespace
-
 
 namespace recob {
 
@@ -449,18 +433,7 @@ namespace recob {
         << " ; " << track.EndDirection().Z()
         << " )"
       << "\n  with "
-        << nPoints << " trajectory points, "
-        << track.NumberCovariance() << " covariance matrices";
-    unsigned int nViews = 0;
-    std::ostringstream sstr;
-    if (PrintdQdXinView(sstr, track, geo::kU, "U")) ++nViews;
-    if (PrintdQdXinView(sstr, track, geo::kV, "V")) ++nViews;
-    if (PrintdQdXinView(sstr, track, geo::kZ, "Z")) ++nViews;
-    if (PrintdQdXinView(sstr, track, geo::k3D, "3D")) ++nViews;
-    if (nViews)
-      log << ", dQ/dx in " << nViews << " views: " << sstr.str();
-    else
-      log << ", no dQ/dx";
+        << nPoints << " trajectory points";
     
     if (fPrintWayPoints > 0) {
       // print up to 10 (actually, 8 or 9) way points
