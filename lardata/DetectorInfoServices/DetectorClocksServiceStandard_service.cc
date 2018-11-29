@@ -29,6 +29,7 @@ void detinfo::DetectorClocksServiceStandard::preProcessEvent(const art::Event& e
 //------------------------------------------------------------
 {
   detinfo::setDetectorClocksStandardTrigger(*fClocks, evt);
+  detinfo::setDetectorClocksStandardG4RefTimeCorrection(*fClocks, evt);
 }
 
 //------------------------------------------------------
