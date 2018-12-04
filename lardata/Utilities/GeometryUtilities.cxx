@@ -820,10 +820,9 @@ namespace util{
     if(! geom->ChannelsIntersect(chan1,chan2,y,z) )
       return -1;
  
- 
+    pos[0]=x;
     pos[1]=y;
     pos[2]=z;
-    pos[0]=x;
     
     pN=Get2DPointProjection(pos, pN.plane);
        
@@ -943,11 +942,7 @@ namespace util{
   
     PxPoint pN(0,0,0);
     
-    Double_t pos[3];
-        
-      
-    pos[1]=xyz[1];
-    pos[2]=xyz[2];
+    Double_t pos[3]{0., xyz[1], xyz[2]};
 
     ///\todo: this should use the cryostat and tpc as well in the NearestWire method
     
@@ -964,11 +959,7 @@ namespace util{
   
     PxPoint pN(0,0,0);
     
-    Double_t pos[3];
-        
-      
-    pos[1]=xyz[1];
-    pos[2]=xyz[2];
+    Double_t pos[3]{0., xyz[1], xyz[2]};
 
     ///\todo: this should use the cryostat and tpc as well in the NearestWire method
     
@@ -1492,4 +1483,3 @@ namespace util{
   
   
 } // namespace
-

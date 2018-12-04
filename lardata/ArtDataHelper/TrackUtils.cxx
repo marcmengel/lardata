@@ -50,15 +50,15 @@ double lar::util::TrackProjectedLength(recob::Track const& track, geo::View_t vi
    // to the desired view
 
    for(size_t p = 1; p < track.NumberTrajectoryPoints(); ++p){
-      const TVector3& pos_cur = track.LocationAtPoint(p);
-      const TVector3& pos_prev = track.LocationAtPoint(p - 1);
+      const auto& pos_cur = track.LocationAtPoint(p);
+      const auto& pos_prev = track.LocationAtPoint(p - 1);
       double dist = std::sqrt( std::pow(pos_cur.x() - pos_prev.x(), 2) +
          std::pow(pos_cur.y() - pos_prev.y(), 2) +
          std::pow(pos_cur.z() - pos_prev.z(), 2) );
       
       // (sin(angleToVert),cos(angleToVert)) is the direction perpendicular to wire
       // fDir[p-1] is the direction between the two relevant points
-      const TVector3& dir_prev = track.DirectionAtPoint(p - 1);
+      const auto& dir_prev = track.DirectionAtPoint(p - 1);
       double cosgamma = std::abs(std::sin(angleToVert)*dir_prev.Y() +
          std::cos(angleToVert)*dir_prev.Z() );
       
@@ -87,7 +87,7 @@ double lar::util::TrackPitchInView
    }
    
    auto const* geom = lar::providerFrom<geo::Geometry>();
-   const TVector3& pos = track.LocationAtPoint(trajectory_point);
+   const auto& pos = track.LocationAtPoint(trajectory_point);
    const double Position[3] = { pos.X(), pos.Y(), pos.Z() };
    geo::TPCID tpcid = geom->FindTPCAtPosition ( Position );
    if (!tpcid.isValid) {
@@ -97,7 +97,7 @@ double lar::util::TrackPitchInView
    double wirePitch   = geom->WirePitch(view, tpcid.TPC, tpcid.Cryostat);
    double angleToVert = geom->WireAngleToVertical(view, tpcid.TPC, tpcid.Cryostat) - 0.5*::util::pi<>();
                                    
-   const TVector3& dir = track.DirectionAtPoint(trajectory_point);
+   const auto& dir = track.DirectionAtPoint(trajectory_point);
    //(sin(angleToVert),cos(angleToVert)) is the direction perpendicular to wire
    double cosgamma = std::abs(std::sin(angleToVert)*dir.Y() +
      std::cos(angleToVert)*dir.Z());
