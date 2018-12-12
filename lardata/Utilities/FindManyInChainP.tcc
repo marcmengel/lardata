@@ -15,9 +15,9 @@
 
 // framework
 #include "art/Framework/Principal/Handle.h"
-#include "art/Persistency/Provenance/ProductMetaData.h"
 #include "canvas/Persistency/Common/FindManyP.h"
 #include "canvas/Persistency/Common/Assns.h"
+#include "canvas/Persistency/Provenance/BranchDescription.h"
 #include "canvas/Utilities/Exception.h"
 
 // C/C++ standard library
@@ -123,22 +123,14 @@ namespace lar {
     /// Returns the input tag of the product identified by `id`.
     template <typename Data, typename Event>
     art::InputTag tagFromProductID
-      (art::ProductID const& id, Event const& /* event */)
+      (art::ProductID const& id, Event const& event)
     {
-      //
-      // This implementation will need to be revisited with art 3.0 and in
-      // general with multithreading (note the singleton product list).
-      // 
-      // Also note that this is not efficient for repeated queries, in which
-      // case the product list should be resorted into some map with product ID
-      // as key.
-      //
-      auto const& products = art::ProductMetaData::instance().productList();
-      for (auto const& productInfoPair: products) {
-        auto const& bd = productInfoPair.second; // branch description here
-        if (bd.productID() != id) continue;
-        return { bd.moduleLabel(), bd.productInstanceName(), bd.processName() };
-      } // for
+      // This is not efficient for repeated queries--perhaps a map can
+      // be created that maps ProductID to input tag.
+      auto pd = event.getProductDescription(id);
+      if (pd != nullptr) {
+        return pd->inputTag();
+      }
       throw art::Exception(art::errors::ProductNotFound)
         << "Couldn't find data product with product ID " << id << "\n";
     } // tagFromProductID()

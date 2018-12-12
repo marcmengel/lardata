@@ -15,6 +15,7 @@
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Principal/Event.h"
+#include "art/Persistency/Provenance/ScheduleContext.h"
 
 #include "lardataalg/DetectorInfo/DetectorClocksStandard.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
@@ -88,7 +89,7 @@ namespace detinfo{
     
     virtual void   reconfigure(fhicl::ParameterSet const& pset) override;
     void   preBeginRun(const art::Run& run);
-    void   preProcessEvent(const art::Event& evt);
+    void   preProcessEvent(const art::Event& evt, art::ScheduleContext);
     void   postOpenFile(const std::string& filename);
     
     virtual const provider_type* provider() const override { return fClocks.get();}

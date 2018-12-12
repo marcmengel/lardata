@@ -128,7 +128,7 @@ void lar::test::AssnsChainClusterMaker::produce(art::Event& event) {
   unsigned int nClusters = hits.size() / nHitsPerCluster;
   if (nClusters * nHitsPerCluster < hits.size()) ++nClusters;
   
-  art::PtrMaker<recob::Cluster> ptrMaker(event, *this);
+  art::PtrMaker<recob::Cluster> ptrMaker(event);
   
   for (unsigned int i = 0; i < nClusters; ++i) {
     

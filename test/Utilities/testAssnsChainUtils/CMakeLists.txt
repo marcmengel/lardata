@@ -3,8 +3,8 @@ simple_plugin(
     lardataobj_RecoBase
     art_Framework_Core
     art_Framework_Principal
+    art_Persistency_Provenance
     ${MF_MESSAGELOGGER}
-    
     ${FHICLCPP}
     cetlib_except
   NO_INSTALL
@@ -14,8 +14,8 @@ simple_plugin(
     lardataobj_RecoBase
     art_Framework_Core
     art_Framework_Principal
+    art_Persistency_Provenance
     ${MF_MESSAGELOGGER}
-    
     ${FHICLCPP}
     cetlib_except
   NO_INSTALL
@@ -25,8 +25,8 @@ simple_plugin(
     lardataobj_RecoBase
     art_Framework_Core
     art_Framework_Principal
+    art_Persistency_Provenance
     ${MF_MESSAGELOGGER}
-    
     ${FHICLCPP}
     cetlib_except
   NO_INSTALL
@@ -36,8 +36,8 @@ simple_plugin(
     lardataobj_RecoBase
     art_Framework_Core
     art_Framework_Principal
+    art_Persistency_Provenance
     ${MF_MESSAGELOGGER}
-    
     ${FHICLCPP}
     cetlib_except
     ${ROOT_BASIC_LIB_LIST}
@@ -48,8 +48,8 @@ simple_plugin(
     lardataobj_RecoBase
     art_Framework_Core
     art_Framework_Principal
+    art_Persistency_Provenance
     ${MF_MESSAGELOGGER}
-    
     ${FHICLCPP}
     cetlib_except
   )
@@ -59,8 +59,3 @@ cet_test(AssnsChainUtil_test HANDBUILT
   TEST_ARGS --rethrow-all --config assnschainutils_test.fcl
   DATAFILES assnschainutils_test.fcl
   )
-
-
-# install_headers()
-# install_fhicl()
-# install_source()

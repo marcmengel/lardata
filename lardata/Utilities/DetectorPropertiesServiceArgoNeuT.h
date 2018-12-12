@@ -122,7 +122,7 @@ namespace util{
       // Callbacks.
       void         checkDBstatus() const;
 
-      void         preProcessEvent(const art::Event& evt);
+      void         preProcessEvent(const art::Event& evt, art::ScheduleContext);
 
       void         postOpenFile(std::string const& filename);
 
@@ -161,4 +161,3 @@ namespace util{
 } //namespace util
 DECLARE_ART_SERVICE_INTERFACE_IMPL(util::DetectorPropertiesServiceArgoNeuT, detinfo::DetectorPropertiesService, LEGACY)
 #endif // UTIL_DETECTORPROPERTIESSERVICEARGONEUT_H
-

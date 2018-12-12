@@ -6,10 +6,10 @@ defaultqual	e17
 fcldir product_dir job
 #
 product         version
-lardataalg	v07_02_07
-lardataobj	v07_06_00
-larcore		v07_00_05
-nutools		v2_24_08
+lardataalg	v08_00_00_rc2
+lardataobj	v08_00_00_rc2
+larcore		v08_00_00_rc2
+nutools		v2_26_01
 range		v3_0_3_0
 
 cetbuildtools	v7_04_00	-	only_for_build

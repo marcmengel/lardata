@@ -1095,7 +1095,7 @@ namespace recob {
 //---
 template <typename ModuleType>
 recob::HitAndAssociationsWriterBase::HitAndAssociationsWriterBase(
-  ModuleType& producer, art::Event& event,
+  ModuleType&, art::Event& event,
   std::string instance_name, bool doWireAssns, bool doRawDigitAssns
   )
   : prod_instance(instance_name)
@@ -1105,7 +1105,7 @@ recob::HitAndAssociationsWriterBase::HitAndAssociationsWriterBase(
   , RawDigitAssns
     (doRawDigitAssns? new art::Assns<raw::RawDigit, recob::Hit>: nullptr)
   , event(&event)
-  , hitPtrMaker(*(this->event), producer, prod_instance)
+  , hitPtrMaker(*(this->event), prod_instance)
 {
   // this must be run in the producer constructor...
 //  declare_products(producer, doWireAssns, doRawDigitAssns);

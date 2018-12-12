@@ -1,7 +1,7 @@
-simple_plugin(IntVectorProducer          "module"  NO_INSTALL cetlib_except )
-simple_plugin(PtrMakerProducer           "module"  NO_INSTALL cetlib_except )
-simple_plugin(PtrMakerProducer2          "module"  NO_INSTALL cetlib_except )
-simple_plugin(PtrMakerAnalyzer           "module"  NO_INSTALL cetlib_except )
+simple_plugin(IntVectorProducer          "module"  NO_INSTALL cetlib_except art_Persistency_Provenance)
+simple_plugin(PtrMakerProducer           "module"  NO_INSTALL cetlib_except art_Persistency_Provenance)
+simple_plugin(PtrMakerProducer2          "module"  NO_INSTALL cetlib_except art_Persistency_Provenance)
+simple_plugin(PtrMakerAnalyzer           "module"  NO_INSTALL cetlib_except art_Persistency_Provenance)
 
 cet_test(test_ptrmaker HANDBUILT
   TEST_EXEC lar 
