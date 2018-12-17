@@ -108,7 +108,7 @@ void lar::test::AssnsChainShowerMaker::produce(art::Event& event) {
   //
   unsigned int nShowers = particles.size();
   
-  art::PtrMaker<recob::Shower> ptrMaker(event, *this);
+  art::PtrMaker<recob::Shower> ptrMaker(event);
   
   for (unsigned int i = 0; i < nShowers; ++i) {
     

@@ -1,6 +1,6 @@
-simple_plugin( AssnProducer1          "module"  NO_INSTALL cetlib_except )
-simple_plugin( AssnProducer2          "module"  NO_INSTALL cetlib_except )
-simple_plugin( AssnAnalyzer           "module"  NO_INSTALL cetlib_except )
+simple_plugin( AssnProducer1          "module"  NO_INSTALL cetlib_except art_Persistency_Provenance)
+simple_plugin( AssnProducer2          "module"  NO_INSTALL cetlib_except art_Persistency_Provenance)
+simple_plugin( AssnAnalyzer           "module"  NO_INSTALL cetlib_except art_Persistency_Provenance)
 
 cet_test(associated_groups_test USE_BOOST_UNIT
   LIBRARIES

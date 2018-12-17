@@ -25,7 +25,7 @@ void detinfo::DetectorClocksServiceStandard::reconfigure(fhicl::ParameterSet con
 }
 
 //------------------------------------------------------------
-void detinfo::DetectorClocksServiceStandard::preProcessEvent(const art::Event& evt)
+void detinfo::DetectorClocksServiceStandard::preProcessEvent(const art::Event& evt, art::ScheduleContext)
 //------------------------------------------------------------
 {
   detinfo::setDetectorClocksStandardTrigger(*fClocks, evt);
@@ -133,4 +133,3 @@ void detinfo::DetectorClocksServiceStandard::postOpenFile(const std::string& fil
 }
 
 DEFINE_ART_SERVICE_INTERFACE_IMPL(detinfo::DetectorClocksServiceStandard, detinfo::DetectorClocksService)
-

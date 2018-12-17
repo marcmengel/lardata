@@ -18,7 +18,7 @@
 #include "lardataobj/RecoBase/PointCharge.h"
 
 // framework libraries
-#include "art/Framework/Core/ProducerBase.h"
+#include "art/Framework/Core/detail/Producer.h"
 #include "art/Framework/Principal/Event.h"
 #include "art/Persistency/Common/PtrMaker.h"
 #include "canvas/Persistency/Common/Ptr.h"
@@ -429,7 +429,7 @@ namespace recob {
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      */
     static void produces
-      (art::ProducerBase& producer, std::string const& instanceName = {});
+      (art::detail::Producer& producer, std::string const& instanceName = {});
     
     /// @}
     //--- END Static constructor interface -------------------------------------
@@ -488,7 +488,7 @@ namespace recob {
 template <typename Producer>
 recob::ChargedSpacePointCollectionCreator::ChargedSpacePointCollectionCreator(
   art::Event& event,
-  Producer const& producer,
+  Producer const&,
   std::string const& instanceName /* = {} */,
   std::enable_if_t<details::is_art_module_v<Producer>>* /* = nullptr */
 )
@@ -496,9 +496,9 @@ recob::ChargedSpacePointCollectionCreator::ChargedSpacePointCollectionCreator(
 {
   
   fSpacePointPtrMaker = std::make_unique<art::PtrMaker<recob::SpacePoint>>
-    (fEvent, producer, fInstanceName);
+    (fEvent, fInstanceName);
   fChargePtrMaker = std::make_unique<art::PtrMaker<recob::PointCharge>>
-    (fEvent, producer, fInstanceName);
+    (fEvent, fInstanceName);
   
 } // ChargedSpacePointCollectionCreator(Producer)
 

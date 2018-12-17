@@ -58,7 +58,7 @@ void PtrMakerProducer2::produce(art::Event & e)
   int value_ = e.id().event();
   std::unique_ptr<intvector_t> intvector(new intvector_t);
   auto intptrs = std::make_unique<intPtrvector_t>();
-  art::PtrMaker<int> make_intptr(e, *this);
+  art::PtrMaker<int> make_intptr(e);
 
   for( int i = 0; i != nvalues; ++i ) {
     intvector->push_back(value_ * i);

@@ -1,4 +1,3 @@
-
 simple_plugin(DetectorClocksServiceStandard "service"
               lardataalg_DetectorInfo
 	      lardataobj_RawData
@@ -37,6 +36,7 @@ simple_plugin(DetectorPropertiesServiceStandard "service"
 
 simple_plugin(LArPropertiesServiceStandard "service"
 	      lardataalg_DetectorInfo
+              art_Framework_Principal
 	      art_Utilities
 	      ${ART_FRAMEWORK_SERVICES_REGISTRY}
 	      canvas
@@ -49,4 +49,3 @@ simple_plugin(LArPropertiesServiceStandard "service"
 install_headers()
 install_fhicl()
 install_source()
-

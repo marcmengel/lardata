@@ -14,9 +14,16 @@
 
 #include "messageservice.fcl"
 
+BEGIN_PROLOG
+inline_paths: {
+  hitmakers:        [ hitmakerone, hitmakertwo, hitmakerthree, hitmakerfour, hitmakerfive ]
+  clustermakers:    [ clustermakerone, clustermakertwo, clustermakerthree, clustermakerfour ]
+  pfparticlemakers: [ pfparticlemakerone, pfparticlemakertwo, pfparticlemakerthree ]
+  showermakers:     [ showermakerone, showermakertwo ]
+}
+END_PROLOG
 
 process_name: AssnsChainTest
-
 
 services: {
   message: @local::standard_info
@@ -138,22 +145,10 @@ physics: {
     
   } # analyzers
   
-  hitmakers:        [ hitmakerone, hitmakertwo, hitmakerthree, hitmakerfour, hitmakerfive ]
-  clustermakers:    [ clustermakerone, clustermakertwo, clustermakerthree, clustermakerfour ]
-  pfparticlemakers: [ pfparticlemakerone, pfparticlemakertwo, pfparticlemakerthree ]
-  showermakers:     [ showermakerone, showermakertwo ]
-  
-  makers: [] # redefined later
+  makers: [ @sequence::inline_paths.hitmakers,
+            @sequence::inline_paths.clustermakers,
+            @sequence::inline_paths.pfparticlemakers,
+            @sequence::inline_paths.showermakers ]
   test: [ checkone, checktwo ]
   
-  trigger_paths: [ makers ]
-  end_paths: [ test ]
-  
 } # physics
-
-physics.makers: [
-  @sequence::physics.hitmakers,
-  @sequence::physics.clustermakers,
-  @sequence::physics.pfparticlemakers,
-  @sequence::physics.showermakers
-  ]

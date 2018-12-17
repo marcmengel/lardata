@@ -118,7 +118,7 @@ void lar::test::AssnsChainPFParticleMaker::produce(art::Event& event) {
   unsigned int nPFOs = clusters.size() / nClustersPerPFO;
   if (nPFOs * nClustersPerPFO < clusters.size()) ++nPFOs;
   
-  art::PtrMaker<recob::PFParticle> ptrMaker(event, *this);
+  art::PtrMaker<recob::PFParticle> ptrMaker(event);
   
   unsigned int nDaughtersPerParticle = 2;
   unsigned int nParticlesInTier = 1;

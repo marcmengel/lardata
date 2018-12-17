@@ -93,7 +93,7 @@ namespace util{
   }
 
   //-------------------------------------------------------------
-  void DetectorPropertiesServiceArgoNeuT::preProcessEvent(const art::Event& evt)
+  void DetectorPropertiesServiceArgoNeuT::preProcessEvent(const art::Event& evt, art::ScheduleContext)
   {
     // Make sure TPC Clock is updated with DetectorClocksService (though in principle it shouldn't change)
     fTPCClock = lar::providerFrom<detinfo::DetectorClocksService>()->TPCClock();
