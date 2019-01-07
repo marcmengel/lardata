@@ -11,34 +11,44 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-// Framework includes
-
 extern "C" {
 #include <sys/types.h>
 #include <sys/stat.h>
 }
+
 #include "lardata/Utilities/LArFFT.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h" 
 
 //-----------------------------------------------
-util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& /* reg */) 
+util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg)
   : fSize    (pset.get< int        > ("FFTSize", 0))    
   , fOption  (pset.get< std::string >("FFTOption"))
   , fFitBins (pset.get< int         >("FitBins"))
 {
-
   // Default to the readout window size if the user didn't input
   // a specific size
-  if(fSize <= 0) 
-    fSize = art::ServiceHandle<detinfo::DetectorPropertiesService>()->provider()->ReadOutWindowSize();
-
+  if (fSize <= 0) {
+    // Creating a service handle to DetectorPropertiesService not only
+    // creates the service if it doesn't exist, it also guarantees
+    // that its callbacks are invoked before any of LArFFT's callbacks
+    // are invoked.
+    fSize = art::ServiceHandle<detinfo::DetectorPropertiesService>{}->provider()->ReadOutWindowSize();
+    reg.sPreBeginRun.watch(this, &util::LArFFT::resetSizePerRun);
+}
   InitializeFFT();
 }
 
 //-----------------------------------------------
-void util::LArFFT::InitializeFFT(){
+void util::LArFFT::resetSizePerRun(art::Run const&)
+{
+  fSize = art::ServiceHandle<detinfo::DetectorPropertiesService>{}->provider()->ReadOutWindowSize();
+  ReinitializeFFT(fSize, fOption, fFitBins);
+}
 
+//-----------------------------------------------
+void util::LArFFT::InitializeFFT()
+{
   int i;
   for(i = 1; i < fSize; i *= 2){ }   
   // mf::LogInfo("LArFFt") << "Requested size: " << fSize << " FFT size: " << i ;
@@ -72,8 +82,8 @@ util::LArFFT::~LArFFT()
 }
 
 //------------------------------------------------
-void util::LArFFT::ReinitializeFFT(int size, std::string option, int fitbins){
-
+void util::LArFFT::ReinitializeFFT(int size, std::string option, int fitbins)
+{
   //delete these, which will be remade
   delete fFFT;
   delete fInverseFFT;

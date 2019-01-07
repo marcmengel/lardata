@@ -87,6 +87,7 @@ namespace util{
       TFFTComplexReal       *fInverseFFT; ///< object to do Inverse FF   
 
       void InitializeFFT();
+      void resetSizePerRun(art::Run const&);
       
     }; // class LArFFT
 
