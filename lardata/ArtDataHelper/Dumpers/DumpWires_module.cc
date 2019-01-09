@@ -7,7 +7,7 @@
 
 // LArSoft includes
 #include "larcorealg/Geometry/PlaneGeo.h"
-#include "lardata/Utilities/StatCollector.h" // lar::util::MinMaxCollector<>
+#include "lardataalg/Utilities/StatCollector.h" // lar::util::MinMaxCollector<>
 #include "lardataobj/RecoBase/Wire.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 

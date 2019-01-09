@@ -6,7 +6,7 @@
  */
 
 // LArSoft includes
-#include "lardata/Utilities/StatCollector.h" // lar::util::MinMaxCollector
+#include "lardataalg/Utilities/StatCollector.h" // lar::util::MinMaxCollector
 #include "lardataobj/RawData/OpDetWaveform.h"
 
 // art libraries

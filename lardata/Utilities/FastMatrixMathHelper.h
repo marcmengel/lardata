@@ -22,7 +22,7 @@
 #include <stdexcept> // std::range_error
 
 
-#include "StatCollector.h" // lar::util::identity
+#include "lardataalg/Utilities/StatCollector.h" // lar::util::identity
 
 namespace lar {
   namespace util {
