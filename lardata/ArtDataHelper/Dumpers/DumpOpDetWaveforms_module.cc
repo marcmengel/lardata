@@ -6,7 +6,7 @@
  */
 
 // LArSoft includes
-#include "lardataalg/Utilities/StatCollector.h" // lar::util::MinMaxCollector
+#include "lardataalg/Dumpers/RawData/OpDetWaveform.h"
 #include "lardataobj/RawData/OpDetWaveform.h"
 
 // art libraries
@@ -24,10 +24,7 @@
 
 // C//C++ standard libraries
 #include <string>
-#include <algorithm> // std::min()
-#include <ios> // std::fixed
-#include <iomanip> // std::setprecision(), std::setw()
-#include <utility> // std::forward(), std::swap()
+#include <vector>
 
 
 namespace detsim {
@@ -95,20 +92,6 @@ namespace detsim {
     void analyze (const art::Event& evt);
     
     
-    /// Dumps the content of a single waveform into the specified output stream.
-    template <typename Stream>
-    void DumpWaveform(
-      Stream&& out, raw::OpDetWaveform const& waveform,
-      std::string indent, std::string indentFirst
-      ) const;
-    
-    template <typename Stream>
-    void DumpWaveform(
-      Stream&& out, raw::OpDetWaveform const& waveform, std::string indent = ""
-      ) const
-      { DumpWaveform(std::forward<Stream>(out), waveform, indent, indent); }
-    
-    
       private:
     
     art::InputTag fOpDetWaveformsTag; ///< Input tag of data product to dump.
@@ -140,6 +123,9 @@ namespace detsim {
     auto Waveforms =
       event.getValidHandle<std::vector<raw::OpDetWaveform>>(fOpDetWaveformsTag);
     
+    dump::raw::OpDetWaveformDumper dump(fPedestal, fDigitsPerLine);
+    dump.setIndent("  ");
+    
     mf::LogVerbatim(fOutputCategory)
       << "The event " << event.id() << " contains data for "
       << Waveforms->size() << " optical detector channels";
@@ -148,90 +134,10 @@ namespace detsim {
         << " counts will be subtracted from all ADC readings.";
     } // if pedestal
     
-    for (raw::OpDetWaveform const& waveform: *Waveforms) {
-      
-      DumpWaveform(mf::LogVerbatim(fOutputCategory), waveform, "  ");
-      
-    } // for waveforms
+    for (raw::OpDetWaveform const& waveform: *Waveforms)
+      dump(mf::LogVerbatim(fOutputCategory), waveform);
     
   } // DumpOpDetWaveforms::analyze()
-  
-  
-  //----------------------------------------------------------------------------
-  template <typename Stream>
-  void DumpOpDetWaveforms::DumpWaveform(
-    Stream&& out, raw::OpDetWaveform const& waveform,
-    std::string indent, std::string indentFirst
-    ) const
-  {
-    auto const& data = waveform;
-    using Count_t = raw::ADC_Count_t;
-    
-    // print a header for the raw digits
-    out << indentFirst
-      << "on channel #" << waveform.ChannelNumber() << " (time stamp: "
-      << waveform.TimeStamp() << "): " << data.size() << " time ticks";
-    
-    // print the content of the channel
-    if (fDigitsPerLine == 0) return;
-    
-    std::vector<Count_t> DigitBuffer(fDigitsPerLine), LastBuffer;
-    
-    unsigned int repeat_count = 0; // additional lines like the last one
-    unsigned int index = 0;
-    
-    lar::util::MinMaxCollector<Count_t> Extrema;
-    out << "\n" << indent
-      << "  content of the channel (" << fDigitsPerLine << " ticks per line):";
-    auto iTick = data.cbegin(), tend = data.cend(); // const iterators
-    while (iTick != tend) {
-      // the next line will show at most fDigitsPerLine ticks
-      unsigned int line_size
-        = std::min(fDigitsPerLine, (unsigned int) data.size() - index);
-      if (line_size == 0) break; // no more ticks
-      
-      // fill the new buffer (iTick will move forward)
-      DigitBuffer.resize(line_size);
-      auto iBuf = DigitBuffer.begin(), bend = DigitBuffer.end();
-      while ((iBuf != bend) && (iTick != tend))
-        Extrema.add(*(iBuf++) = *(iTick++) - fPedestal);
-      index += line_size;
-      
-      // if the new buffer is the same as the old one, just mark it
-      if (DigitBuffer == LastBuffer) {
-        repeat_count += 1;
-        continue;
-      }
-      
-      // if there are previous repeats, write that on screen
-      // before the new, different line
-      if (repeat_count > 0) {
-        out << "\n" << indent
-          << "  [ ... repeated " << repeat_count << " more times ]";
-        repeat_count = 0;
-      }
-      
-      // dump the new line of ticks
-      out << "\n" << indent << " ";
-      for (auto digit: DigitBuffer)
-        out << " " << std::setw(4) << digit;
-      
-      // quick way to assign DigitBuffer to LastBuffer
-      // (we don't care we lose the former)
-      std::swap(LastBuffer, DigitBuffer);
-      
-    } // while
-    if (repeat_count > 0) {
-      out << "\n" << indent
-        << "  [ ... repeated " << repeat_count << " more times to the end]";
-    }
-    if (Extrema.min() != Extrema.max()) {
-      out << "\n" << indent
-        << "  range of " << data.size()
-        << " samples: [" << Extrema.min() << ";" << Extrema.max() << "]";
-    }
-  
-  } // DumpOpDetWaveforms::DumpWaveform()
   
   
   //----------------------------------------------------------------------------
