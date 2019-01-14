@@ -6,7 +6,7 @@
  */
 
 // LArSoft includes
-#include "lardata/Utilities/StatCollector.h" // lar::util::MinMaxCollector<>
+#include "lardataalg/Utilities/StatCollector.h" // lar::util::MinMaxCollector<>
 #include "lardataobj/RawData/RawDigit.h"
 #include "lardataobj/RawData/raw.h" // raw::Uncompress()
 #include "larcoreobj/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t

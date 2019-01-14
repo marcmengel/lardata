@@ -24,7 +24,7 @@
 #include <ostream> // std::endl
 
 
-#include "lardata/Utilities/StatCollector.h" // lar::util::identity
+#include "lardataalg/Utilities/StatCollector.h" // lar::util::identity
 #include "lardata/Utilities/FastMatrixMathHelper.h" // lar::util::details::FastMatrixOperations
 
 namespace lar {

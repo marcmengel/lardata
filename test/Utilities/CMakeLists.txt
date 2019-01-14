@@ -10,7 +10,6 @@ add_subdirectory( testAssnsChainUtils )
 
 cet_test(NestedIterator_test USE_BOOST_UNIT)
 cet_test(CountersMap_test USE_BOOST_UNIT)
-cet_test(StatCollector_test USE_BOOST_UNIT)
 cet_test(FastMatrixMath_test USE_BOOST_UNIT)
 cet_test(SimpleFits_test USE_BOOST_UNIT)
 cet_test(ChiSquareAccumulator_test USE_BOOST_UNIT)
