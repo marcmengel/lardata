@@ -260,7 +260,7 @@ namespace lar {
         std::vector<art::Handle<Assns_t>> assns_list;
         event.getManyByType(assns_list);
         
-        LOG_DEBUG("FindAllP") << "Read(): read " << assns_list.size()
+        MF_LOG_DEBUG("FindAllP") << "Read(): read " << assns_list.size()
           << " association sets";
         
         unsigned int count = 0;
@@ -268,7 +268,7 @@ namespace lar {
         for (art::Handle<Assns_t> handle: assns_list)
           count += Merge(handle);
         
-        LOG_DEBUG("FindAllP") << "Read " << count << " associations for "
+        MF_LOG_DEBUG("FindAllP") << "Read " << count << " associations for "
           << cache.NProductIDs() << " product IDs";
         
         return count;
@@ -312,7 +312,7 @@ namespace lar {
         
         unsigned int count = 0;
       
-        LOG_DEBUG("FindAllP") << "Merge(): importing " << handle->size()
+        MF_LOG_DEBUG("FindAllP") << "Merge(): importing " << handle->size()
           << " associations from " << handle.provenance();
       
         for (auto const& assn: *handle) {
@@ -320,7 +320,7 @@ namespace lar {
           art::Ptr<Source_t> const& src = assn.first;
           
           if (src.isNull()) {
-            LOG_ERROR("FindAllP") << "Empty pointer found in association "
+            MF_LOG_ERROR("FindAllP") << "Empty pointer found in association "
               << handle.provenance();
             continue; // this should not happen
           }
@@ -359,7 +359,7 @@ namespace lar {
           ++count;
         } // for all associations in a list
         
-        LOG_DEBUG("FindAllP")
+        MF_LOG_DEBUG("FindAllP")
           << "Merged " << count << " associations from " << handle.provenance();
         return count;
       } // FindAllP::Merge()
