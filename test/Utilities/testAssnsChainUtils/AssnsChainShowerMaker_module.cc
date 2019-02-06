@@ -61,10 +61,10 @@ namespace lar {
         
       }; // struct Config
       
-      using Parameters_t = art::EDProducer::Table<Config>;
+      using Parameters = art::EDProducer::Table<Config>;
       
-      explicit AssnsChainShowerMaker(Parameters_t const& config)
-        : particleTags(config().particles())
+      explicit AssnsChainShowerMaker(Parameters const& config)
+        : EDProducer{config}, particleTags(config().particles())
         {
           produces<std::vector<recob::Shower>>();
           produces<art::Assns<recob::PFParticle, recob::Shower>>();

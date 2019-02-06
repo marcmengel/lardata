@@ -64,7 +64,7 @@ namespace lar {
       using Parameters = art::EDProducer::Table<Config>;
       
       explicit TrackProxyHitMaker(Parameters const& config)
-        : nHits(config().nHits())
+        : EDProducer{config}, nHits(config().nHits())
         {
           produces<std::vector<recob::Hit>>();
         }

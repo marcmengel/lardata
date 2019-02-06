@@ -68,10 +68,11 @@ namespace lar {
         
       }; // struct Config
       
-      using Parameters_t = art::EDProducer::Table<Config>;
+      using Parameters = art::EDProducer::Table<Config>;
       
-      explicit AssnsChainPFParticleMaker(Parameters_t const& config)
-        : clusterTags(config().clusters())
+      explicit AssnsChainPFParticleMaker(Parameters const& config)
+        : EDProducer{config}
+        , clusterTags(config().clusters())
         , nClustersPerPFO(config().clustersPerPFO())
         {
           produces<std::vector<recob::PFParticle>>();

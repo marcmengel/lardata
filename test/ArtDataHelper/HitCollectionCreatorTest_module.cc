@@ -99,7 +99,7 @@ namespace recob {
 //----------------------------------------------------------------------------
 recob::test::HitCollectionCreatorTest::HitCollectionCreatorTest
   (Parameters const& config)
-  : art::EDProducer()
+  : art::EDProducer(config)
   , hitCollManager(
       *this, config().instanceName(),
       false /* doWireAssns */, false /* doRawDigitAssns */

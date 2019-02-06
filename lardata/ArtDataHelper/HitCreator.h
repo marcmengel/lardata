@@ -985,7 +985,8 @@ namespace recob {
    *     public:
    *   
    *   MyHitProducer(fhicl::ParameterSet const& pset)
-   *     : hitCollCreator(*this, pset.get<std::string>("instanceName", ""))
+   *     : EDProducer{pset}
+   *     , hitCollCreator(*this, pset.get<std::string>("instanceName", ""))
    *     {}
    *   
    *   void produce(art::Event& event)

@@ -70,10 +70,10 @@ namespace lar {
         
       }; // struct Config
       
-      using Parameters_t = art::EDProducer::Table<Config>;
+      using Parameters = art::EDProducer::Table<Config>;
       
-      explicit AssnsChainClusterMaker(Parameters_t const& config)
-        : hitTags(config().hits())
+      explicit AssnsChainClusterMaker(Parameters const& config)
+        : EDProducer{config}, hitTags(config().hits())
         , nHitsPerCluster(config().hitsPerCluster())
         {
           produces<std::vector<recob::Cluster>>();

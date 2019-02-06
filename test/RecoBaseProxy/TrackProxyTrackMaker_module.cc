@@ -81,7 +81,8 @@ namespace lar {
       using Parameters = art::EDProducer::Table<Config>;
       
       explicit TrackProxyTrackMaker(Parameters const& config)
-        : hitsTag(config().hitsTag())
+        : EDProducer{config}
+        , hitsTag(config().hitsTag())
         , hitsPerTrack(config().hitsPerTrack())
         {
           produces<std::vector<recob::TrackTrajectory>>();

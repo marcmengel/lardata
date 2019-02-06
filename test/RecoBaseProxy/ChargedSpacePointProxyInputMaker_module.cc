@@ -83,7 +83,8 @@ namespace lar {
 // -----------------------------------------------------------------------------
 lar::test::ChargedSpacePointProxyInputMaker::ChargedSpacePointProxyInputMaker
   (Parameters const& config)
-  : nPoints(config().nPoints())
+  : EDProducer{config}
+  , nPoints(config().nPoints())
 {
   
   // declare production of recob::SpacePoint and recob::PointCharge collections:

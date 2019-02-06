@@ -47,10 +47,9 @@ std::string fInputLabel;
 
 
 AssnProducer2::AssnProducer2(fhicl::ParameterSet const & p)
- :  fInputLabel(p.get<std::string>("input_label"))
-// Initialize member data here.
+  : EDProducer{p}
+  , fInputLabel(p.get<std::string>("input_label"))
 {
-  // Call appropriate produces<>() functions here.
    produces<art::Assns<int, std::string>>();
 }
 

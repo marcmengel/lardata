@@ -46,7 +46,7 @@ private:
 
 
 PtrMakerProducer2::PtrMakerProducer2(fhicl::ParameterSet const & p)
-: nvalues( p.get<int>("nvalues") )
+  : EDProducer{p}, nvalues( p.get<int>("nvalues") )
   {
     produces<intvector_t>();
     produces<intPtrvector_t>();

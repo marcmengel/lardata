@@ -28,7 +28,7 @@ public:
   typedef  std::vector<int>  intvector_t;
 
   explicit IntVectorProducer( fhicl::ParameterSet const & p )
-  : nvalues_( p.get<int>("nvalues") )
+    : EDProducer{p}, nvalues_( p.get<int>("nvalues") )
   {
     produces<intvector_t>();
   }

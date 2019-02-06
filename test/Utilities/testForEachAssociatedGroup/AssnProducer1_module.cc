@@ -50,6 +50,7 @@ private:
 
 
 AssnProducer1::AssnProducer1(fhicl::ParameterSet const & p)
+  : EDProducer{p}
 {
    produces<intvec_t>();
    produces<strvec_t>();
