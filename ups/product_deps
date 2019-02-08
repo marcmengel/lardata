@@ -8,7 +8,7 @@ fcldir product_dir job
 product         version
 lardataalg	v08_03_03
 lardataobj	v08_01_03
-larcore		v08_02_00
+larcore		v08_01_03
 nutools		v2_26_07
 range		v3_0_3_0
 
