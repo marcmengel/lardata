@@ -10,13 +10,8 @@
 
 // LArSoft includes
 #include "lardata/DetectorInfoServices/LArPropertiesServiceStandard.h"
-//#include "SimpleTypesAndConstants/PhysicalConstants.h"
-
-// ROOT includes
-#include "TMath.h"
 
 // Framework includes
-#include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib_except/exception.h"
 //-----------------------------------------------
 detinfo::LArPropertiesServiceStandard::LArPropertiesServiceStandard(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
@@ -39,7 +34,7 @@ void detinfo::LArPropertiesServiceStandard::preBeginRun(const art::Run& run)
 /// \todo these values should eventually come from a database
 void detinfo::LArPropertiesServiceStandard::reconfigure(fhicl::ParameterSet const& pset)
 {
-  fProp->Configure(pset);  
+  fProp->Configure(pset);
   return;
 }
 

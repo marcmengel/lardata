@@ -1,27 +1,13 @@
-
-art_make( 
-          LIB_LIBRARIES lardataobj_AnalysisBase
-                        lardataobj_RecoBase
-                        larcore_Geometry_Geometry_service
-                        larcorealg_Geometry
-                        ${ART_FRAMEWORK_CORE}
-			${ART_FRAMEWORK_PRINCIPAL}
-			${ART_FRAMEWORK_SERVICES_REGISTRY}
-			art_Persistency_Common
-			art_Persistency_Provenance
-			art_Utilities
-			canvas
-			${MF_MESSAGELOGGER}
-			
-	                ${FHICLCPP}
-			cetlib cetlib_except
-			${ROOT_BASIC_LIB_LIST}
-                        ${Boost_SYSTEM_LIBRARY}
-        )
-
+art_make(LIB_LIBRARIES lardataobj_AnalysisBase
+                       lardataobj_RecoBase
+                       larcore_Geometry_Geometry_service
+                       larcorealg_Geometry
+                       ${ART_FRAMEWORK_CORE}
+                       ${ART_FRAMEWORK_SERVICES_REGISTRY}
+                       canvas
+                       ${FHICLCPP}
+                       cetlib_except)
 
 install_headers()
 install_fhicl()
 install_source()
-
-
