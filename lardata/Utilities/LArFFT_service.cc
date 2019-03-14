@@ -11,11 +11,6 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-extern "C" {
-#include <sys/types.h>
-#include <sys/stat.h>
-}
-
 #include "lardata/Utilities/LArFFT.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h" 
