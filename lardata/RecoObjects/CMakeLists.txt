@@ -8,7 +8,8 @@ art_make(LIB_LIBRARIES lardataobj_AnalysisBase
                        ${FHICLCPP}
                        cetlib_except
                        ${ROOT_CORE}
-                       ${ROOT_PHYSICS})
+                       ${ROOT_PHYSICS}
+                       ${Boost_SYSTEM_LIBRARY})
 
 install_headers()
 install_fhicl()
