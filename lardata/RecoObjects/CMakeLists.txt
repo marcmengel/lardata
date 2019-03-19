@@ -6,7 +6,9 @@ art_make(LIB_LIBRARIES lardataobj_AnalysisBase
                        ${ART_FRAMEWORK_SERVICES_REGISTRY}
                        canvas
                        ${FHICLCPP}
-                       cetlib_except)
+                       cetlib_except
+                       ${ROOT_CORE}
+                       ${ROOT_PHYSICS})
 
 install_headers()
 install_fhicl()

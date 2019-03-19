@@ -11,7 +11,7 @@ art_make(LIB_LIBRARIES lardataobj_RawData
                        art_Utilities
                        canvas
                        cetlib_except
-                       )
+                       ${ROOT_CORE})
 
 add_subdirectory(Dumpers)
 

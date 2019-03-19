@@ -34,7 +34,9 @@ simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
               larcorealg_Geometry
               ${ART_FRAMEWORK_IO_ROOT_ROOTDB}
               ${SQLITE3}
-              ${MF_MESSAGELOGGER})
+              ${MF_MESSAGELOGGER}
+              ${ROOT_CORE}
+              ${ROOT_RIO})
 
 simple_plugin(LArFFT "service"
               ${MF_MESSAGELOGGER}
