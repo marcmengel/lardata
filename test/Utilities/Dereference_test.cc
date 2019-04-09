@@ -180,7 +180,7 @@ void test() {
   T value = T(17);
   T* cptr = &value;
   MyPtr<T> my_ptr(&value);
-  std::unique_ptr<T> uptr(new T(value));
+  auto uptr = std::make_unique<T>(value);
   
   T* ptr;
   ptr = lar::util::make_pointer(uptr);
