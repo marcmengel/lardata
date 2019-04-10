@@ -16,18 +16,12 @@
 #include "cetlib_except/exception.h"
 
 //-----------------------------------------------
-util::DatabaseUtil::DatabaseUtil(fhicl::ParameterSet const& pset, art::ActivityRegistry & /* reg */)
+util::DatabaseUtil::DatabaseUtil(fhicl::ParameterSet const& pset)
 {
   conn = NULL;
   this->reconfigure(pset);
   fChannelMap.clear();
   fChannelReverseMap.clear();
-}
-
-//------------------------------------------------
-util::DatabaseUtil::~DatabaseUtil() 
-{
-
 }
 
 //----------------------------------------------
@@ -415,5 +409,3 @@ namespace util{
   DEFINE_ART_SERVICE(DatabaseUtil)
 
 } // namespace util
- 
-  

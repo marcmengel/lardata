@@ -51,8 +51,7 @@ namespace util{
 
   class DatabaseUtil {
   public:
-    DatabaseUtil(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
-    ~DatabaseUtil();
+    DatabaseUtil(fhicl::ParameterSet const& pset);
 
     void   reconfigure(fhicl::ParameterSet const& pset);
       
