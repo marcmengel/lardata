@@ -588,7 +588,7 @@ std::map<double, double> util::LArPropertiesServiceArgoNeuT::TpbEm() const
 //---------------------------------------------------------------------------------
 
 util::LArPropertiesServiceArgoNeuT::DBsettingsClass::DBsettingsClass() {
-  auto const& DButil = *art::ServiceHandle<util::DatabaseUtil>();
+  auto const& DButil = *art::ServiceHandle<util::DatabaseUtil const>();
   ToughErrorTreatment= DButil.ToughErrorTreatment();
   ShouldConnect = DButil.ShouldConnect();
 } // util::LArPropertiesServiceArgoNeuT::DBsettingsClass::DBsettingsClass()

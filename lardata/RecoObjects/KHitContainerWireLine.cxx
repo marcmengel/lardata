@@ -42,7 +42,7 @@ namespace trkf {
   {
     // Get services.
 
-    art::ServiceHandle<geo::Geometry> geom;
+    art::ServiceHandle<geo::Geometry const> geom;
 
     // Loop over hits.
 

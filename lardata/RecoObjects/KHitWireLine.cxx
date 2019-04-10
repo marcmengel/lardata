@@ -34,7 +34,7 @@ namespace trkf {
     fHit(hit)
   {
     // Get services.
-    const detinfo::DetectorProperties* detprop = art::ServiceHandle<detinfo::DetectorPropertiesService>()->provider();
+    const detinfo::DetectorProperties* detprop = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->provider();
 
     // Extract wire id.
     geo::WireID wireid = hit->WireID();
@@ -99,7 +99,7 @@ namespace trkf {
   {
     // Get services.
 
-    art::ServiceHandle<geo::Geometry> geom;
+    art::ServiceHandle<geo::Geometry const> geom;
 
     // Get plane number.
 
@@ -144,7 +144,7 @@ namespace trkf {
 
     // Update prediction error to include contribution from track slope.
 
-    art::ServiceHandle<geo::Geometry> geom;
+    art::ServiceHandle<geo::Geometry const> geom;
     double pitch = geom->WirePitch();
     double phi = tre.getVector()(2);
     double cosphi = std::cos(phi);

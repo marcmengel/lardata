@@ -28,7 +28,7 @@ util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg
     // creates the service if it doesn't exist, it also guarantees
     // that its callbacks are invoked before any of LArFFT's callbacks
     // are invoked.
-    fSize = art::ServiceHandle<detinfo::DetectorPropertiesService>{}->provider()->ReadOutWindowSize();
+    fSize = art::ServiceHandle<detinfo::DetectorPropertiesService const>{}->provider()->ReadOutWindowSize();
     reg.sPreBeginRun.watch(this, &util::LArFFT::resetSizePerRun);
 }
   InitializeFFT();
@@ -37,7 +37,7 @@ util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg
 //-----------------------------------------------
 void util::LArFFT::resetSizePerRun(art::Run const&)
 {
-  fSize = art::ServiceHandle<detinfo::DetectorPropertiesService>{}->provider()->ReadOutWindowSize();
+  fSize = art::ServiceHandle<detinfo::DetectorPropertiesService const>{}->provider()->ReadOutWindowSize();
   ReinitializeFFT(fSize, fOption, fFitBins);
 }
 

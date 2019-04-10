@@ -102,8 +102,8 @@ namespace util{
 //---------------------------------------------------------------------------------
 void DetectorPropertiesServiceArgoNeuT::checkDBstatus() const
 {
-  bool fToughErrorTreatment= art::ServiceHandle<util::DatabaseUtil>()->ToughErrorTreatment();
-  bool fShouldConnect =  art::ServiceHandle<util::DatabaseUtil>()->ShouldConnect();
+  bool fToughErrorTreatment= art::ServiceHandle<util::DatabaseUtil const>()->ToughErrorTreatment();
+  bool fShouldConnect =  art::ServiceHandle<util::DatabaseUtil const>()->ShouldConnect();
   //Have not read from DB, should read and requested tough treatment
     if(!fAlreadyReadFromDB && fToughErrorTreatment && fShouldConnect )
       throw cet::exception("DetectorPropertiesServiceArgoNeuT") << " Extracting values from DetectorPropertiesServiceArgoNeuT before they "
@@ -169,7 +169,7 @@ int  DetectorPropertiesServiceArgoNeuT::TriggerOffset()     const
 
   void DetectorPropertiesServiceArgoNeuT::CalculateXTicksParams() const
   {
-    art::ServiceHandle<geo::Geometry>            geo;
+    art::ServiceHandle<geo::Geometry const>            geo;
 
     double samplingRate   = SamplingRate();
     double efield         = Efield();

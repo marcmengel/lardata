@@ -16,7 +16,7 @@ namespace trkf {
     fWrongDirDistTolerance(wrongDirDistTolerance),
     fPropPinvErr(propPinvErr)
   {
-    detprop = art::ServiceHandle<detinfo::DetectorPropertiesService>()->provider();
+    detprop = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->provider();
     larprop = lar::providerFrom<detinfo::LArPropertiesService>();
   }
 

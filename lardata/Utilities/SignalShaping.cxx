@@ -174,7 +174,7 @@ void util::SignalShaping::AddFilterFunction(const std::vector<TComplex>& filt)
 
   // Get FFT service.
 
-  art::ServiceHandle<util::LArFFT> fft;
+  art::ServiceHandle<util::LArFFT const> fft;
 
   // If this is the first filter function, just copy the filter function.
   // Otherwise, update the overall filter function.
@@ -219,7 +219,7 @@ void util::SignalShaping::LockResponse() const
 
     // Get FFT service.
 
-    art::ServiceHandle<util::LArFFT> fft;
+    art::ServiceHandle<util::LArFFT const> fft;
 
     // Make sure response has been configured.
 

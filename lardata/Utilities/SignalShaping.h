@@ -173,7 +173,7 @@ template <class T> inline void util::SignalShaping::Convolute(std::vector<T>& fu
 
   // Get FFT service.
 
-  art::ServiceHandle<util::LArFFT> fft;
+  art::ServiceHandle<util::LArFFT const> fft;
 
   // Make sure that time series has the correct size.
 
@@ -197,7 +197,7 @@ template <class T> inline void util::SignalShaping::Deconvolute(std::vector<T>& 
 
   // Get FFT service.
 
-  art::ServiceHandle<util::LArFFT> fft;
+  art::ServiceHandle<util::LArFFT const> fft;
 
   // Make sure that time series has the correct size.
 

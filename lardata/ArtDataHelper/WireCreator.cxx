@@ -31,7 +31,7 @@ namespace recob {
     wire(
       sigROIlist,
       rawdigit.Channel(),
-      art::ServiceHandle<geo::Geometry>()->View(rawdigit.Channel())
+      art::ServiceHandle<geo::Geometry const>()->View(rawdigit.Channel())
     )
   {
     // resize fSignalROI again:
@@ -45,7 +45,7 @@ namespace recob {
     wire(
       std::move(sigROIlist),
       rawdigit.Channel(),
-      art::ServiceHandle<geo::Geometry>()->View(rawdigit.Channel())
+      art::ServiceHandle<geo::Geometry const>()->View(rawdigit.Channel())
     )
   {
     // resize fSignalROI again:

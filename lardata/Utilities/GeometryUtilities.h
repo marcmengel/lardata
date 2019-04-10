@@ -284,8 +284,8 @@ namespace util{
     const geo::GeometryCore* geom;
     const detinfo::DetectorProperties* detp;
     /*
-    art::ServiceHandle<detinfo::DetectorPropertiesService> detp;
-    art::ServiceHandle<detinfo::LArPropertiesService> larp;
+    art::ServiceHandle<detinfo::DetectorPropertiesService const> detp;
+    art::ServiceHandle<detinfo::LArPropertiesService const> larp;
     */
     
     std::vector< Double_t > vertangle;  //angle wrt to vertical

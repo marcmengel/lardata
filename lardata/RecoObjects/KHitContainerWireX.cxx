@@ -44,7 +44,7 @@ namespace trkf {
   {
     // Get services.
 
-    art::ServiceHandle<geo::Geometry> geom;
+    art::ServiceHandle<geo::Geometry const> geom;
 
     // Make a temporary map from channel number to KHitGroup objects.
     // The KHitGroup pointers are borrowed references to KHitGroup

@@ -29,7 +29,7 @@ namespace detinfo{
    * It delivers the provider via the standard interface:
    *     
    *     detinfo::DetectorProperties const* detprop
-   *       = art::ServiceHandle<detinfo::DetectorPropertiesStandard>()
+   *       = art::ServiceHandle<detinfo::DetectorPropertiesStandard const>()
    *       ->provider();
    *     
    * or, using the standard interface in "CoreUtils/ServiceUtil.h":

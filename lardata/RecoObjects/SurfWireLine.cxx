@@ -26,7 +26,7 @@ namespace trkf {
   {
     // Get geometry service.
 
-    art::ServiceHandle<geo::Geometry> geom;
+    art::ServiceHandle<geo::Geometry const> geom;
 
     // Get wire geometry.
 
