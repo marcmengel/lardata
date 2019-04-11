@@ -22,7 +22,6 @@
 
 // C/C++ standard libraries
 #include <string>
-#include <vector>
 #include <iomanip> // std::setw()
 #include <algorithm> // std::accumulate()
 #include <utility> // std::forward()

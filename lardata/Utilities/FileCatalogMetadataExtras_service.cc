@@ -7,7 +7,6 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
-#include <vector>
 #include <string>
 #include <algorithm>
 #include "lardata/Utilities/FileCatalogMetadataExtras.h"

@@ -7,7 +7,6 @@
 
 // C++ language includes
 #include <cmath>
-#include <iostream>
 
 // LArSoft includes
 #include "lardata/Utilities/LArPropertiesServiceArgoNeuT.h"

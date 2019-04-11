@@ -25,7 +25,6 @@
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // C/C++ standard libraries
-#include <vector>
 #include <memory> // std::make_unique()
 
 

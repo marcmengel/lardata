@@ -29,7 +29,6 @@
 
 // C/C++ standard libraries
 #include <algorithm> // std::accumulate()
-#include <vector>
 #include <utility> // std::move()
 #include <memory> // std::make_unique()
 #include <cmath> // std::sqrt()

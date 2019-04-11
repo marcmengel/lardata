@@ -218,7 +218,6 @@ namespace recob {
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // C//C++ standard libraries
-#include <vector>
 #include <fstream>
 #include <utility> // std::swap()
 #include <algorithm> // std::count(), std::find()

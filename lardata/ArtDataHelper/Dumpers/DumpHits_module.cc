@@ -100,7 +100,6 @@ namespace hit {
 //---  module implementation
 //---
 // C//C++ standard libraries
-#include <vector>
 #include <memory> // std::unique_ptr<>
 
 // support libraries

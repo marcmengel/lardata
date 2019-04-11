@@ -17,7 +17,6 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Event.h"
 
-#include "canvas/Persistency/Common/Ptr.h"
 #include "canvas/Persistency/Common/Assns.h"
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -26,7 +25,6 @@
 #include "fhiclcpp/types/Comment.h"
 
 // C/C++ standard libraries
-#include <vector>
 #include <utility> // std::move()
 #include <memory> // std::make_unique()
 

@@ -38,7 +38,6 @@
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // C/C++ libraries
-#include <vector>
 #include <algorithm> // std::for_each(), std::find()
 #include <initializer_list>
 #include <memory> // std::unique_ptr<>

@@ -17,7 +17,6 @@
 
 // C/C++ standard libraries
 #include <cmath>
-#include <vector>
 #include <tuple>
 #include <array>
 #include <stdexcept> // std::range_error

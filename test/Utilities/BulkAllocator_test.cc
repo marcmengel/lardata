@@ -12,7 +12,6 @@
  */
 
 // C/C++ standard libraries
-#include <vector>
 #include <map>
 #include <random>
 

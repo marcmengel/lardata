@@ -6,7 +6,6 @@
 // Framework includes
 
 // C++ language includes
-#include <iostream>
 
 // LArSoft includes
 #include "lardata/DetectorInfoServices/LArPropertiesServiceStandard.h"

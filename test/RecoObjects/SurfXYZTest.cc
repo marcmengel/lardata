@@ -8,7 +8,6 @@
 // Purpose: Unit test for SurfXYZPlane.
 //
 
-#include <iostream>
 #include <cmath>
 #include "lardata/RecoObjects/SurfXYZPlane.h"
 #include "lardata/RecoObjects/KalmanLinearAlgebra.h"

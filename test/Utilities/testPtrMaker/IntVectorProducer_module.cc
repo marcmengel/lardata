@@ -11,7 +11,6 @@
 
 #include <iostream>
 #include <memory>
-#include <vector>
 
 namespace arttest {
   class IntVectorProducer;

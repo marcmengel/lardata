@@ -20,7 +20,6 @@
 // C/C++ standard libraries
 #include <algorithm> // std::count_if()
 #include <numeric> // std::iota()
-#include <vector>
 
 
 //-----------------------------------------------------------------------------

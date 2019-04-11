@@ -21,7 +21,6 @@
 
 // C/C++ standard libraries
 #include <array>
-#include <vector>
 #include <iostream>
 
 

@@ -16,7 +16,6 @@
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // C/C++ standard libraries
-#include <vector>
 #include <deque>
 #include <list>
 #include <forward_list>

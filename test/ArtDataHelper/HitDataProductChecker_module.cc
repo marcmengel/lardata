@@ -22,7 +22,6 @@
 
 // C/C++ standard libraries
 #include <string>
-#include <vector>
 #include <iterator> // std::back_inserter()
 
 

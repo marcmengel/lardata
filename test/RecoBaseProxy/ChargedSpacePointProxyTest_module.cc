@@ -30,7 +30,6 @@
 #include <boost/test/test_tools.hpp> // BOOST_CHECK()
 
 // C/C++ libraries
-#include <vector>
 #include <memory> // std::addressof()
 #include <type_traits>
 #include <cassert>

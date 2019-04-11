@@ -23,7 +23,6 @@
 
 #include <iostream>
 #include <memory>
-#include <vector>
 
 namespace lartest {
   class PtrMakerProducer;

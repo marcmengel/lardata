@@ -27,7 +27,6 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // C/C++ standard libraries
-#include <vector>
 #include <utility> // std::move()
 #include <memory> // std::make_unique()
 

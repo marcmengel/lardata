@@ -33,7 +33,6 @@
 #include "fhiclcpp/types/Comment.h"
 
 // C/C++ standard libraries
-#include <vector>
 #include <set>
 #include <cassert>
 

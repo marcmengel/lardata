@@ -107,7 +107,6 @@ namespace recob {
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // C//C++ standard libraries
-#include <vector>
 #include <array>
 
 

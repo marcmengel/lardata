@@ -21,7 +21,6 @@
 #include <iterator>
 #include <numeric> // std::accumulate()
 #include <limits> // std::numeric_limits<>
-#include <vector>
 #include <type_traits> // std::is_same<>, std::is_lvalue_reference<>, ...
 #include <initializer_list>
 

@@ -35,7 +35,6 @@
 #include "Math/SMatrix.h" // ROOT::Math::SMatrixIdentity
 
 // C/C++ standard libraries
-#include <vector>
 #include <utility> // std::move()
 #include <memory> // std::make_unique()
 
