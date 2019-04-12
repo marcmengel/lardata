@@ -8,7 +8,6 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "lardata/ArtDataHelper/MVAReader.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
 
 namespace anab {
 

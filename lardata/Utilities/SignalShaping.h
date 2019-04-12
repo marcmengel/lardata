@@ -167,21 +167,14 @@ public:
 template <class T> inline void util::SignalShaping::Convolute(std::vector<T>& func) const
 {
   // Make sure response configuration is locked.
-
   if(!fResponseLocked)
     LockResponse();
 
-  // Get FFT service.
-
-  art::ServiceHandle<util::LArFFT const> fft;
+  art::ServiceHandle<util::LArFFT> fft;
 
   // Make sure that time series has the correct size.
-
-  int n = func.size();
-  if(n != fft->FFTSize())
+  if(int const n = func.size(); n != fft->FFTSize())
     throw cet::exception("SignalShaping") << "Bad time series size = " << n << "\n";
-
-  // Do convolution.
 
   fft->Convolute(func, const_cast<std::vector<TComplex>&>(fConvKernel));
 }
@@ -191,26 +184,16 @@ template <class T> inline void util::SignalShaping::Convolute(std::vector<T>& fu
 template <class T> inline void util::SignalShaping::Deconvolute(std::vector<T>& func) const
 {
   // Make sure deconvolution kernel is configured.
-
   if(!fFilterLocked)
     CalculateDeconvKernel();
 
-  // Get FFT service.
-
-  art::ServiceHandle<util::LArFFT const> fft;
+  art::ServiceHandle<util::LArFFT> fft;
 
   // Make sure that time series has the correct size.
-
-  int n = func.size();
-  if(n != fft->FFTSize())
+  if(int const n = func.size(); n != fft->FFTSize())
     throw cet::exception("SignalShaping") << "Bad time series size = " << n << "\n";
-
-  // Do convolution.
 
   fft->Convolute(func, fDeconvKernel);
 }
-
-
-
 
 #endif

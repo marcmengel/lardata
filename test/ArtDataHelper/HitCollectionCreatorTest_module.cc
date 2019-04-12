@@ -16,7 +16,6 @@
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Principal/Event.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "fhiclcpp/types/Atom.h"
 #include "fhiclcpp/types/Name.h"

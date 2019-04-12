@@ -11,7 +11,6 @@
 // framework libraries
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDAnalyzer.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "fhiclcpp/types/Atom.h"
 #include "fhiclcpp/types/Sequence.h"
