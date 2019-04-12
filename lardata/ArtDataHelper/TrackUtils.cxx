@@ -21,7 +21,6 @@
 #include "cetlib_except/exception.h"
 
 // ROOT libraries
-#include "TVector3.h"
 
 // C/C++ standard libraries
 #include <cmath>
