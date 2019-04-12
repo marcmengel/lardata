@@ -59,10 +59,10 @@ void AssnProducer2::produce(art::Event & e)
    e.getByLabel(fInputLabel, ih);
    art::Handle<std::vector<std::string>> sh;
    e.getByLabel(fInputLabel, sh);
-   
+
    art::PtrMaker<int> make_intptr(e, ih.id());
    art::PtrMaker<std::string> make_strptr(e, sh.id());
-   
+
    auto assns = std::make_unique<art::Assns<int, std::string>>();
    for (size_t i=0; i < 3; ++i) {
       auto p1 = make_intptr(i);

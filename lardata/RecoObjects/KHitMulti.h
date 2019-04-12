@@ -4,7 +4,7 @@
 ///
 /// \brief  Compound Kalman Filter measurement.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class allows a collection of Kalman Filter measurements to
 /// function as a single measurement.  This class inherits from

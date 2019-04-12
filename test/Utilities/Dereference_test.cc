@@ -37,9 +37,9 @@ template <typename T>
 struct MyPtr {
 	using element_type = T;
 	MyPtr(T* p = nullptr): ptr(p) {}
-	
+
 	T& operator* () { return *ptr; }
-	
+
 	T* ptr;
 }; // struct MyPtr<>
 
@@ -73,7 +73,7 @@ static_assert(std::is_same<
 static_assert(std::is_same<
     typename lar::util::details::dereferenced_type<int*, true>::type,
     int&
-  >::value, 
+  >::value,
   "details::dereferenced_type<int*> is not working"
   );
 static_assert(std::is_same<
@@ -176,12 +176,12 @@ static_assert(std::is_same<
 //***  still mostly a compilation test
 template <typename T>
 void test() {
-  
+
   T value = T(17);
   T* cptr = &value;
   MyPtr<T> my_ptr(&value);
   auto uptr = std::make_unique<T>(value);
-  
+
   T* ptr;
   ptr = lar::util::make_pointer(uptr);
   BOOST_CHECK_EQUAL(*ptr, value);
@@ -191,12 +191,12 @@ void test() {
   BOOST_CHECK_EQUAL(*ptr, value);
   ptr = lar::util::make_pointer(value);
   BOOST_CHECK_EQUAL(*ptr, value);
-  
+
   BOOST_CHECK_EQUAL(lar::util::dereference(uptr), value);
   BOOST_CHECK_EQUAL(lar::util::dereference(my_ptr), value);
   BOOST_CHECK_EQUAL(lar::util::dereference(cptr), value);
   BOOST_CHECK_EQUAL(lar::util::dereference(value), value);
-  
+
 } // test<>()
 
 

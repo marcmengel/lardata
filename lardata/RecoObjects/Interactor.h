@@ -4,7 +4,7 @@
 ///
 /// \brief  Base class for Kalman filter track interactor.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class defined the general interface for calculating
 /// propagation noise.

@@ -35,7 +35,7 @@ namespace trkf {
   /// Arguments:
   ///
   /// hit - Measurement to add.
-  /// 
+  ///
   void KHitGroup::addHit(const std::shared_ptr<const KHitBase>& hit)
   {
     // Make sure that the measurement pointer is not null (throw exception if null).
@@ -51,7 +51,7 @@ namespace trkf {
 
     if(hit->getMeasPlane() < 0)
       throw cet::exception("KHitGroup") << __func__ << ": invalid hit plane " << hit->getMeasPlane() << "\n";
-    
+
     if(fSurf.get() == 0) {
       fSurf = hit->getMeasSurface();
       fPlane = hit->getMeasPlane();

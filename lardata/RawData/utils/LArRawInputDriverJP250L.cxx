@@ -41,7 +41,7 @@ namespace lris {
   // ======================================================================
   void LArRawInputDriverJP250L::closeCurrentFile()
   {
-    delete [] m_data;    
+    delete [] m_data;
   }
 
   // ======================================================================
@@ -54,7 +54,7 @@ namespace lris {
     m_eventTree    = dynamic_cast<TTree*>(m_f.Get("eventTree"));
     m_eventTree->SetDirectory(0);
     m_nEvent = m_eventTree->GetEntries();
-    
+
     // run information
     runTree->SetBranchAddress("runID",&m_runID);
     runTree->SetBranchAddress("unixtime",&m_unixtime);
@@ -69,12 +69,12 @@ namespace lris {
     const int nLength=(m_nSamples+4)*m_nChannels;
     m_data = new unsigned short[nLength];
     m_eventTree->SetBranchAddress("data",m_data);
-    
+
     // Fill and return a new Fileblock.
     // The string tells you what the version of the LArRawInputDriver is
     fb = new art::FileBlock(art::FileFormatVersion(1, "LArRawInputJP250L 2013_01"),
                             name);
-    
+
 
     return;
   }
@@ -87,10 +87,10 @@ namespace lris {
 					 art::EventPrincipal* &outE)
   {
 
-    if(m_current > m_nEvent) return false; 
+    if(m_current > m_nEvent) return false;
 
     m_eventTree->GetEntry(m_current);
-    
+
     raw::DAQHeader daqHeader;
     daqHeader.SetRun(m_runID);
     daqHeader.SetTimeStamp(m_unixtime);
@@ -107,7 +107,7 @@ namespace lris {
     //daqHeader.SetSpareWord(h1.spare);
 
     // make unique_ptrs for the data products to store in the event
-    std::unique_ptr<raw::DAQHeader>              daqcol( new raw::DAQHeader(daqHeader)  );    
+    std::unique_ptr<raw::DAQHeader>              daqcol( new raw::DAQHeader(daqHeader)  );
     std::unique_ptr<std::vector<raw::RawDigit> >  rdcol( new std::vector<raw::RawDigit> );
 
     // loop over the signals and break them into
@@ -120,14 +120,14 @@ namespace lris {
       }
       rdcol->push_back(raw::RawDigit(n,m_nSamples,adcVec));
     }
-    
-    art::RunNumber_t    rn     = daqHeader.GetRun();  
-    art::SubRunNumber_t sn     = 1;			  
+
+    art::RunNumber_t    rn     = daqHeader.GetRun();
+    art::SubRunNumber_t sn     = 1;
     art::EventNumber_t  en     = daqHeader.GetEvent();
     art::Timestamp      tstamp = daqHeader.GetTimeStamp();
 
     // Make the Run and SubRun principals
-    // this step is done once per run.  
+    // this step is done once per run.
     if (m_current < 1){
       std::unique_ptr<sumdata::RunData> rundata(new sumdata::RunData("jpl250l") );
       outR = principalMaker_.makeRunPrincipal(rn, tstamp);
@@ -147,7 +147,7 @@ namespace lris {
     // Put products in the event.
     // first argument places the desired data product in the file
     // second argument is event record to associate it to
-    // third argument is the label of the module storing the 
+    // third argument is the label of the module storing the
     // information.  "daq" is standard in LArSoft
     art::put_product_in_principal(std::move(rdcol),
                                   *outE,

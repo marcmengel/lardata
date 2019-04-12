@@ -7,7 +7,7 @@
  * @see     SimpleFits.h
  *
  * See http://www.boost.org/libs/test for the Boost test library home page.
- * 
+ *
  * Timing:
  * not given yet
  */
@@ -56,7 +56,7 @@ void PrintMatrix
   (std::ostream& out, Array const& m, std::string name = "Matrix")
 {
   const size_t Dim = size_t(std::sqrt(m.size()));
-  
+
   out << name << " " << Dim << "x" << Dim << ":";
   for (size_t r = 0; r < Dim; ++r) {
     out << "\n |";
@@ -74,7 +74,7 @@ void PrintVector
 {
   using Data_t = typename Array::value_type;
   const size_t Dim = v.size();
-  
+
   out << name << " [" << Dim << "]: { ";
   std::copy(v.begin(), v.end(), std::ostream_iterator<Data_t>(std::cout, " "));
   out << "}" << std::endl;
@@ -87,7 +87,7 @@ void PrintFitterInfo(Fitter const& fitter) {
   typename Fitter::FitParameters_t params;
   typename Fitter::FitMatrix_t Xmat, Smat;
   typename Fitter::Data_t det;
-  
+
   bool res = fitter.FillResults(params, Xmat, det, Smat);
   fitter.PrintStats(std::cout);
   PrintMatrix(std::cout, Xmat, "X matrix");
@@ -113,7 +113,7 @@ void CheckLinearFit(
   T chisq,
   int NDF
 ) {
-  
+
   BOOST_CHECK_EQUAL(fitter.N(), n);
   if (n == 0) {
     BOOST_CHECK(!fitter.isValid());
@@ -127,9 +127,9 @@ void CheckLinearFit(
   }
   else {
     BOOST_CHECK(fitter.isValid());
-    
+
     PrintFitterInfo(fitter);
-    
+
     BOOST_CHECK_CLOSE(double(fitter.Intercept()), double(intercept), 0.1);
     BOOST_CHECK_CLOSE(double(fitter.Slope()), double(slope), 0.1);
     BOOST_CHECK_CLOSE
@@ -143,7 +143,7 @@ void CheckLinearFit(
       BOOST_CHECK_CLOSE(double(fitter.ChiSquare()), double(chisq), 0.1);
     BOOST_CHECK_EQUAL(fitter.NDF(), NDF);
   }
-  
+
 } // CheckLinearFit<>()
 
 
@@ -156,7 +156,7 @@ void CheckQuadraticFit(
   T chisq,
   int NDF
 ) {
-  
+
   BOOST_CHECK_EQUAL(fitter.N(), n);
   if (n == 0) {
     BOOST_CHECK(!fitter.isValid());
@@ -171,9 +171,9 @@ void CheckQuadraticFit(
   }
   else {
     BOOST_CHECK(fitter.isValid());
-    
+
     PrintFitterInfo(fitter);
-    
+
     // tolerance: 0.1%
     BOOST_CHECK_CLOSE(double(fitter.FitParameter(0)), double(solution[0]), 0.1);
     BOOST_CHECK_CLOSE(double(fitter.FitParameter(1)), double(solution[1]), 0.1);
@@ -190,7 +190,7 @@ void CheckQuadraticFit(
       BOOST_CHECK_CLOSE(double(fitter.ChiSquare()), double(chisq), 0.1);
     BOOST_CHECK_EQUAL(fitter.NDF(), NDF);
   }
-  
+
 } // CheckQuadraticFit<>()
 
 
@@ -203,7 +203,7 @@ void CheckGaussianFit(
   T chisq,
   int NDF
 ) {
-  
+
   BOOST_CHECK_EQUAL(fitter.N(), n);
   if (n == 0) {
     BOOST_CHECK(!fitter.isValid());
@@ -214,17 +214,17 @@ void CheckGaussianFit(
   }
   else {
     BOOST_CHECK(fitter.isValid());
-    
+
     using FitParameters_t = typename lar::util::GaussianFit<T>::FitParameters_t;
-    
+
     // I am disabling the check on the parameter errors since I have no
     // cross check available
-    
+
     PrintFitterInfo(fitter.Fitter());
     PrintFitterInfo(fitter);
     FitParameters_t  params = fitter.FitParameters();
     /* FitParameters_t perrors = */ fitter.FitParameterErrors();
-    
+
     // tolerance: 0.1%
     BOOST_CHECK_CLOSE(double(params[0]), double(solution[0]), 0.1);
     BOOST_CHECK_CLOSE(double(params[1]), double(solution[1]), 0.1);
@@ -238,7 +238,7 @@ void CheckGaussianFit(
       BOOST_CHECK_CLOSE(double(fitter.ChiSquare()), double(chisq), 0.1);
     BOOST_CHECK_EQUAL(fitter.NDF(), NDF);
   }
-  
+
 } // CheckGaussianFit<>()
 
 
@@ -248,22 +248,22 @@ void CheckGaussianFit(
  */
 template <typename T>
 void LinearFitTest() {
-  
+
   using Data_t = T;
-  
+
   using PerfectItem_t = std::pair<Data_t, Data_t>;
   using UncertainItem_t = std::tuple<Data_t, Data_t, Data_t>;
-  
+
   using PerfectData_t = std::vector<PerfectItem_t>;
   using UncertainData_t = std::vector<UncertainItem_t>;
-  
+
   // prepare input data
   PerfectData_t perfect_data{
     { Data_t(-4),  Data_t( 8) },
     { Data_t( 0),  Data_t( 0) },
     { Data_t( 4),  Data_t(-8) }
     };
-  
+
   const int      n          =         3;
   const Data_t   intercept  = Data_t( 0);
   const Data_t   slope      = Data_t(-2);
@@ -272,27 +272,27 @@ void LinearFitTest() {
   const Data_t   perf_slope_error         = std::sqrt(Data_t( 3)/Data_t(96));
   const Data_t   perf_intercept_slope_cov = - Data_t(0)/Data_t(96);
   const int      perf_DoF   =         1;
-  
+
   UncertainData_t uncertain_data({
     UncertainItem_t{ Data_t(-4), Data_t( 8), Data_t(1) },
     UncertainItem_t{ Data_t( 0), Data_t( 0), Data_t(2) },
     UncertainItem_t{ Data_t( 4), Data_t(-8), Data_t(2) }
     });
-  
+
   const Data_t   unc_chisq               = Data_t( 0);
   const Data_t   unc_intercept_error     = std::sqrt(Data_t(20)/Data_t(21));
   const Data_t   unc_slope_error         = std::sqrt(Data_t(1.5)/Data_t(21));
   const Data_t   unc_intercept_slope_cov = - Data_t(-3)/Data_t(21);
   const int      unc_DoF                 =         1;
-  
+
   //
   // part I: construction
   //
   lar::util::LinearFit<Data_t> fitter;
-  
+
   // check that everything is 0 or NaN-like
   CheckLinearFit<Data_t>(fitter, 0, 0., 0., 0., 0., 0., 0., 0);
-  
+
   //
   // part II: add elements one by one
   //
@@ -305,23 +305,23 @@ void LinearFitTest() {
     else
       fitter.add(std::get<0>(data), std::get<1>(data), std::get<2>(data));
   } // for
-  
+
   // by construction of the input, the statistics for X and Y are the same
   CheckLinearFit<Data_t>(fitter, n,
     intercept, slope,
     unc_intercept_error, unc_slope_error, unc_intercept_slope_cov,
     unc_chisq, unc_DoF
     );
-  
-  
+
+
   //
   // part III: add elements without uncertainty by bulk
   //
-  
+
   // - III.1: clear the fitter
   fitter.clear();
   CheckLinearFit<Data_t>(fitter, 0, 0., 0., 0., 0., 0., 0., 0);
-    
+
   // - III.2: fill by iterators
   fitter.add_without_uncertainty
     (std::begin(perfect_data), std::end(perfect_data));
@@ -330,7 +330,7 @@ void LinearFitTest() {
     perf_intercept_error, perf_slope_error, perf_intercept_slope_cov,
     perf_chisq, perf_DoF
     );
-  
+
   // - III.3: fill by container
   fitter.clear();
   fitter.add_without_uncertainty(perfect_data);
@@ -339,7 +339,7 @@ void LinearFitTest() {
     perf_intercept_error, perf_slope_error, perf_intercept_slope_cov,
     perf_chisq, perf_DoF
     );
-  
+
   // - III.4: fill by iterators and extractor
   fitter.clear();
   fitter.add_without_uncertainty(
@@ -352,7 +352,7 @@ void LinearFitTest() {
     perf_intercept_error, perf_slope_error, perf_intercept_slope_cov,
     perf_chisq, perf_DoF
     );
-  
+
   // - III.5: fill by container and extractor
   fitter.clear();
   fitter.add_without_uncertainty(uncertain_data,
@@ -364,12 +364,12 @@ void LinearFitTest() {
     perf_intercept_error, perf_slope_error, perf_intercept_slope_cov,
     perf_chisq, perf_DoF
     );
-  
-  
+
+
   //
   // part IV: add elements with uncertainty by bulk
   //
-  
+
   // - IV.1: fill by iterators
   fitter.clear();
   fitter.add_with_uncertainty(uncertain_data.begin(), uncertain_data.end());
@@ -378,7 +378,7 @@ void LinearFitTest() {
     unc_intercept_error, unc_slope_error, unc_intercept_slope_cov,
     unc_chisq, unc_DoF
     );
-  
+
   // - IV.2: fill by container
   fitter.clear();
   fitter.add_with_uncertainty(uncertain_data);
@@ -387,7 +387,7 @@ void LinearFitTest() {
     unc_intercept_error, unc_slope_error, unc_intercept_slope_cov,
     unc_chisq, unc_DoF
     );
-  
+
 } // LinearFitTest()
 
 
@@ -396,15 +396,15 @@ void LinearFitTest() {
  */
 template <typename T>
 void QuadraticFitTest() {
-  
+
   using Data_t = T;
-  
+
   using PerfectItem_t = std::pair<Data_t, Data_t>;
   using UncertainItem_t = std::tuple<Data_t, Data_t, Data_t>;
-  
+
   using PerfectData_t = std::vector<PerfectItem_t>;
   using UncertainData_t = std::vector<UncertainItem_t>;
-  
+
   // prepare input data
   PerfectData_t perfect_data{
     { Data_t(-4),  Data_t( 9) },
@@ -412,7 +412,7 @@ void QuadraticFitTest() {
     { Data_t( 4),  Data_t( 5) },
     { Data_t( 6),  Data_t(14) }
     };
-  
+
   const int                   n            =         4;
   // BUG the double brace syntax is required to work around clang bug 21629
   // (https://bugs.llvm.org/show_bug.cgi?id=21629)
@@ -420,31 +420,31 @@ void QuadraticFitTest() {
   const std::array<Data_t, 3> perf_errors2 = {{ 149./199., 163./6368., 59./25472. }};
   const Data_t                perf_chisq   = Data_t( 0);
   const int                   perf_DoF     =         1;
-  
+
   UncertainData_t uncertain_data({
     UncertainItem_t{ Data_t(-4), Data_t( 9), Data_t(2) },
     UncertainItem_t{ Data_t( 0), Data_t(-1), Data_t(1) },
     UncertainItem_t{ Data_t( 4), Data_t( 5), Data_t(1) },
     UncertainItem_t{ Data_t( 6), Data_t(14), Data_t(2) }
     });
-  
+
   const Data_t                unc_chisq  = Data_t( 0);
   // BUG the double brace syntax is required to work around clang bug 21629
   // (https://bugs.llvm.org/show_bug.cgi?id=21629)
   const std::array<Data_t, 3> unc_errors2 = {{ 517./617., 769./9872., 209./39488. }};
   const int                   unc_DoF    =         1;
-  
+
   //
   // part I: construction
   //
   lar::util::QuadraticFit<Data_t> fitter;
-  
+
   std::array<Data_t, 3> empty_params;
   empty_params.fill(0);
-  
+
   // check that everything is 0 or NaN-like
   CheckQuadraticFit<Data_t>(fitter, 0, empty_params, empty_params, 0., 0);
-  
+
   //
   // part II: add elements one by one
   //
@@ -457,32 +457,32 @@ void QuadraticFitTest() {
     else
       fitter.add(std::get<0>(data), std::get<1>(data), std::get<2>(data));
   } // for
-  
+
   // by construction of the input, the statistics for X and Y are the same
   CheckQuadraticFit<Data_t>
     (fitter, n, solution, unc_errors2, unc_chisq, unc_DoF);
-  
-  
+
+
   //
   // part III: add elements without uncertainty by bulk
   //
-  
+
   // - III.1: clear the fitter
   fitter.clear();
   CheckQuadraticFit<Data_t>(fitter, 0, empty_params, empty_params, 0., 0);
-    
+
   // - III.2: fill by iterators
   fitter.add_without_uncertainty
     (std::begin(perfect_data), std::end(perfect_data));
   CheckQuadraticFit<Data_t>
     (fitter, n, solution, perf_errors2, perf_chisq, perf_DoF);
-  
+
   // - III.3: fill by container
   fitter.clear();
   fitter.add_without_uncertainty(perfect_data);
   CheckQuadraticFit<Data_t>
     (fitter, n, solution, perf_errors2, perf_chisq, perf_DoF);
-  
+
   // - III.4: fill by iterators and extractor
   fitter.clear();
   fitter.add_without_uncertainty(
@@ -492,7 +492,7 @@ void QuadraticFitTest() {
     );
   CheckQuadraticFit<Data_t>
     (fitter, n, solution, perf_errors2, perf_chisq, perf_DoF);
-  
+
   // - III.5: fill by container and extractor
   fitter.clear();
   fitter.add_without_uncertainty(uncertain_data,
@@ -501,24 +501,24 @@ void QuadraticFitTest() {
     );
   CheckQuadraticFit<Data_t>
     (fitter, n, solution, perf_errors2, perf_chisq, perf_DoF);
-  
-  
+
+
   //
   // part IV: add elements with uncertainty by bulk
   //
-  
+
   // - IV.1: fill by iterators
   fitter.clear();
   fitter.add_with_uncertainty(uncertain_data.begin(), uncertain_data.end());
   CheckQuadraticFit<Data_t>
     (fitter, n, solution, unc_errors2, unc_chisq, unc_DoF);
-  
+
   // - IV.2: fill by container
   fitter.clear();
   fitter.add_with_uncertainty(uncertain_data);
   CheckQuadraticFit<Data_t>
     (fitter, n, solution, unc_errors2, unc_chisq, unc_DoF);
-  
+
 } // QuadraticFitTest()
 
 
@@ -535,19 +535,19 @@ T gaus(T x, T amplitude, T mean, T sigma) {
 
 template <typename T>
 void GaussianFitTest() {
-  
+
   using Data_t = T;
-  
+
   using PerfectItem_t = std::pair<Data_t, Data_t>;
   using UncertainItem_t = std::tuple<Data_t, Data_t, Data_t>;
-  
+
   using PerfectData_t = std::vector<PerfectItem_t>;
   using UncertainData_t = std::vector<UncertainItem_t>;
-  
+
   // BUG the double brace syntax is required to work around clang bug 21629
   // (https://bugs.llvm.org/show_bug.cgi?id=21629)
   const std::array<Data_t, 3> solution = {{ 5.0, 1.0, 2.0 }};
-  
+
   // prepare input data
   PerfectData_t perfect_data{
     { Data_t(-1), gaus(Data_t(-1), solution[0], solution[1], solution[2]) },
@@ -555,38 +555,38 @@ void GaussianFitTest() {
     { Data_t(+1), gaus(Data_t(+1), solution[0], solution[1], solution[2]) },
     { Data_t(+3), gaus(Data_t(+3), solution[0], solution[1], solution[2]) }
     };
-  
+
   const int                   n            =         4;
   // BUG the double brace syntax is required to work around clang bug 21629
   // (https://bugs.llvm.org/show_bug.cgi?id=21629)
   const std::array<Data_t, 3> perf_errors2 = {{ 0., 0., 0. }};
   const Data_t                perf_chisq   = Data_t( 0);
   const int                   perf_DoF     =         1;
-  
+
   UncertainData_t uncertain_data({
     UncertainItem_t{ Data_t(-1), gaus(Data_t(-1), solution[0], solution[1], solution[2]), Data_t(2)  },
     UncertainItem_t{ Data_t( 0), gaus(Data_t( 0), solution[0], solution[1], solution[2]), Data_t(1)  },
     UncertainItem_t{ Data_t(+1), gaus(Data_t(+1), solution[0], solution[1], solution[2]), Data_t(1)  },
     UncertainItem_t{ Data_t(+3), gaus(Data_t(+3), solution[0], solution[1], solution[2]), Data_t(2)  }
     });
-  
+
   const Data_t                unc_chisq  = Data_t( 0);
   // BUG the double brace syntax is required to work around clang bug 21629
   // (https://bugs.llvm.org/show_bug.cgi?id=21629)
   const std::array<Data_t, 3> unc_errors2 = {{ 0., 0., 0. }};
   const int                   unc_DoF    =         1;
-  
+
   //
   // part I: construction
   //
   lar::util::GaussianFit<Data_t> fitter;
-  
+
   std::array<Data_t, 3> empty_params;
   empty_params.fill(0);
-  
+
   // check that everything is 0 or NaN-like
   CheckGaussianFit<Data_t>(fitter, 0, empty_params, empty_params, 0., 0);
-  
+
   //
   // part II: add elements one by one
   //
@@ -599,32 +599,32 @@ void GaussianFitTest() {
     else
       fitter.add(std::get<0>(data), std::get<1>(data), std::get<2>(data));
   } // for
-  
+
   // by construction of the input, the statistics for X and Y are the same
   CheckGaussianFit<Data_t>
     (fitter, n, solution, unc_errors2, unc_chisq, unc_DoF);
-  
-  
+
+
   //
   // part III: add elements without uncertainty by bulk
   //
-  
+
   // - III.1: clear the fitter
   fitter.clear();
   CheckGaussianFit<Data_t>(fitter, 0, empty_params, empty_params, 0., 0);
-    
+
   // - III.2: fill by iterators
   fitter.add_without_uncertainty
     (std::begin(perfect_data), std::end(perfect_data));
   CheckGaussianFit<Data_t>
     (fitter, n, solution, perf_errors2, perf_chisq, perf_DoF);
-  
+
   // - III.3: fill by container
   fitter.clear();
   fitter.add_without_uncertainty(perfect_data);
   CheckGaussianFit<Data_t>
     (fitter, n, solution, perf_errors2, perf_chisq, perf_DoF);
-  
+
   // - III.4: fill by iterators and extractor
   fitter.clear();
   fitter.add_without_uncertainty(
@@ -634,7 +634,7 @@ void GaussianFitTest() {
     );
   CheckGaussianFit<Data_t>
     (fitter, n, solution, perf_errors2, perf_chisq, perf_DoF);
-  
+
   // - III.5: fill by container and extractor
   fitter.clear();
   fitter.add_without_uncertainty(uncertain_data,
@@ -643,24 +643,24 @@ void GaussianFitTest() {
     );
   CheckGaussianFit<Data_t>
     (fitter, n, solution, perf_errors2, perf_chisq, perf_DoF);
-  
-  
+
+
   //
   // part IV: add elements with uncertainty by bulk
   //
-  
+
   // - IV.1: fill by iterators
   fitter.clear();
   fitter.add_with_uncertainty(uncertain_data.begin(), uncertain_data.end());
   CheckGaussianFit<Data_t>
     (fitter, n, solution, unc_errors2, unc_chisq, unc_DoF);
-  
+
   // - IV.2: fill by container
   fitter.clear();
   fitter.add_with_uncertainty(uncertain_data);
   CheckGaussianFit<Data_t>
     (fitter, n, solution, unc_errors2, unc_chisq, unc_DoF);
-  
+
 } // QuadraticFitTest()
 
 

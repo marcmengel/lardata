@@ -15,7 +15,7 @@
 
 struct SurfYZLineTestFixture
 {
-  SurfYZLineTestFixture() : 
+  SurfYZLineTestFixture() :
     surf1(),
     surf2(0., 0., 0., 0.),
     surf3(1., 1., 1., 0.),
@@ -23,7 +23,7 @@ struct SurfYZLineTestFixture
   trkf::SurfYZLine surf1;  // Default constructed.
   trkf::SurfYZLine surf2;  // Same as surf1.
   trkf::SurfYZLine surf3;  // Different origin, parallel to surf1 and surf2.
-  trkf::SurfYZLine surf4;  // Not parallel.  
+  trkf::SurfYZLine surf4;  // Not parallel.
 };
 
 BOOST_FIXTURE_TEST_SUITE(SurfYZLineTest, SurfYZLineTestFixture)
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(Transformation) {
   surf4.toLocal(xyz1, uvw);
   surf4.toGlobal(uvw, xyz2);
   for(int i=0; i<3; ++i)
-    BOOST_CHECK_CLOSE(xyz1[i], xyz2[i], 1.e-6);  
+    BOOST_CHECK_CLOSE(xyz1[i], xyz2[i], 1.e-6);
 }
 
 // Test separation.

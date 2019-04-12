@@ -100,7 +100,7 @@ namespace trkf {
 
     // Finally, sort the sorted list in order of path distance.
 
-    fSorted.sort();	
+    fSorted.sort();
   }
 
   /// Return the plane with the most KHitGroups in the unsorted list.

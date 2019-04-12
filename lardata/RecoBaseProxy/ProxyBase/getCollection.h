@@ -4,7 +4,7 @@
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   July 27, 2017
  * @see    lardata/RecoBaseProxy/ProxyBase.h
- * 
+ *
  * This library is header-only.
  */
 
@@ -14,12 +14,12 @@
 // LArSoft libraries
 #include "lardata/RecoBaseProxy/ProxyBase/CollectionProxyMaker.h"
 
-// C/C++ standard 
+// C/C++ standard
 #include <utility> // std::forward()
 
 
 namespace proxy {
-  
+
   // ---------------------------------------------------------------------------
   /**
    * @brief Creates a proxy to a data product collection.
@@ -31,9 +31,9 @@ namespace proxy {
    * @return a collection proxy object
    * @ingroup LArSoftProxyBase
    * @see @ref LArSoftProxyBase "ways to merge more data into a proxy"
-   * 
+   *
    * This function delivers a collection proxy related to `CollProxy`.
-   * 
+   *
    * The @ref LArSoftProxyQuirks "type of proxy delivered is arbitrary"
    * and usually not `CollProxy`.
    * The type of the collection proxy must be explicitly specified, e.g.:
@@ -50,12 +50,12 @@ namespace proxy {
    * @ref LArSoftProxyDefinitionAuxiliaryData "auxiliary data" "merged" into.
    * The options to @ref LArSoftProxyDefinitionMerging "merge" this data are
    * collected in the @ref LArSoftProxyBase "proxy interface documentation".
-   * 
+   *
    * The collection proxy name is arbitrary, but it's custom to have it live in
    * `proxy` namespace and have the same name as the base object, made plural:
    * a proxy to a `recob::Track` collection data product will have a proxy
    * called `proxy::Tracks`.
-   * 
+   *
    * Note that a proxy need to be explicitly supported in order to be available.
    * Nevertheless, a generic implementation is supported to create a proxy of a
    * data product which is a C++ vector, so that:
@@ -66,17 +66,17 @@ namespace proxy {
    * will have an outcome similar to the previous example. In this case, though,
    * all the specific track interface that went into `proxy::Tracks` proxy will
    * not be available.
-   * 
+   *
    * The implementation of this feature is documented in
    * @ref LArSoftProxyCollections "its own doxygen module".
-   * 
-   * 
+   *
+   *
    * Customization
    * ==============
-   * 
+   *
    * To control which type of collection proxy is produced for the type
    * `CollProxy`, the class `CollectionProxyMaker` may be specialised.
-   * 
+   *
    */
   template <typename CollProxy, typename Event, typename... OptionalArgs>
   auto getCollection(Event const& event, OptionalArgs&&... optionalArgs)
@@ -84,11 +84,11 @@ namespace proxy {
       return CollectionProxyMaker<CollProxy>::make
         (event, std::forward<OptionalArgs>(optionalArgs)...);
     }
-  
-  
+
+
   // ---------------------------------------------------------------------------
-  
-  
+
+
 } // namespace proxy
 
 

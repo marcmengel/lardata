@@ -30,7 +30,7 @@
 ///
 /// Times and frequencies are measured in units of ticks and cycles/tick.
 ///
-/// Time series are represented as vector<double> of length N, representing 
+/// Time series are represented as vector<double> of length N, representing
 /// sampled times on interval [0,N) ticks.   (N = LArFFT::FFTSize().)
 ///
 /// Frequency series are represented as vector<TComplex> of length (N/2+1),
@@ -40,11 +40,11 @@
 ///
 /// Update notes
 /// -------------
-/// 
+///
 /// * Yun-Tse Tsai (yuntse@slac.stanford.edu), July 17th, 2014<br/>
 ///     Modify
 ///     `void AddResponseFunction(const std::vector<double>& resp);`
-///     to 
+///     to
 ///     `void AddResponseFunction(const std::vector<double>& resp, bool ResetResponse = false );`
 ///     If you want to reset your response, `fResponse` in this object, you can
 ///     do
@@ -52,7 +52,7 @@
 ///     The other part involving `AddResponseFunction` shouldn't be affected.
 /// * X. Qian 2015/01/06 <br/>
 ///     Add the time offset variable<br/>
-///     Need to add the set and extraction code 
+///     Need to add the set and extraction code
 ////////////////////////////////////////////////////////////////////////
 
 #ifndef SIGNALSHAPING_H
@@ -124,7 +124,7 @@ public:
     // Does not lock filter configuration.
     void LockResponse() const;
 
-    // Calculate deconvolution kernel using current convolution kernel 
+    // Calculate deconvolution kernel using current convolution kernel
     // and filter function.
     // Fully locks configuration.
     void CalculateDeconvKernel() const;
@@ -157,7 +157,7 @@ public:
     int fDeconvKernelPolarity;
 
     // Xin added */
-    bool fNorm; 
+    bool fNorm;
 };
 
 }

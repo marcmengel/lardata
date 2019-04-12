@@ -23,10 +23,10 @@ namespace detinfo{
 
     public:
       virtual ~DetectorClocksService() = default;
-      
+
       virtual void   reconfigure(fhicl::ParameterSet const& pset) = 0;
       virtual const  detinfo::DetectorClocks* provider() const = 0;
-            
+
     }; // class DetectorClocksService
 } //namespace detinfo
 DECLARE_ART_SERVICE_INTERFACE(detinfo::DetectorClocksService, LEGACY)

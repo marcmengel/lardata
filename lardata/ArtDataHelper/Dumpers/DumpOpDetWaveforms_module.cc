@@ -33,10 +33,10 @@ namespace detsim {
    *
    * This analyser prints the content of all the raw digits into the
    * LogInfo/LogVerbatim stream.
-   * 
+   *
    * Configuration parameters
    * -------------------------
-   * 
+   *
    * - *OpDetWaveformsTag* (string, default: `daq`): input tag of the
    *   raw::OpDetWaveform collection to be dumped
    * - *OutputCategory* (string, default: `DumpOpDetWaveforms`): the category
@@ -49,57 +49,57 @@ namespace detsim {
    */
   class DumpOpDetWaveforms: public art::EDAnalyzer {
       public:
-    
+
     struct Config {
-      
+
       using Name = fhicl::Name;
       using Comment = fhicl::Comment;
-      
+
       fhicl::Atom<art::InputTag> OpDetWaveformsTag {
         Name("OpDetWaveformsTag"),
         Comment("input tag of the raw::OpDetWaveform collection to be dumped")
         };
-      
+
       fhicl::Atom<std::string> OutputCategory {
         Name("OutputCategory"),
         Comment("name of the category used for the output"),
         "DumpOpDetWaveforms"
         };
-      
+
       fhicl::Atom<unsigned int> DigitsPerLine {
         Name("DigitsPerLine"),
         Comment
           ("the dump of ADC readings will put this many of them for each line"),
         20U
         };
-      
+
       fhicl::Atom<raw::ADC_Count_t> Pedestal {
         Name("Pedestal"),
         Comment("ADC readings are written relative to this number"),
         0
         };
-      
+
     }; // struct Config
-    
+
     using Parameters = art::EDAnalyzer::Table<Config>;
-    
-    
+
+
     explicit DumpOpDetWaveforms(Parameters const& config);
-    
-    
+
+
     /// Does the printing.
     void analyze (const art::Event& evt);
-    
-    
+
+
       private:
-    
+
     art::InputTag fOpDetWaveformsTag; ///< Input tag of data product to dump.
     std::string fOutputCategory; ///< Category for `mf::LogInfo` output.
     unsigned int fDigitsPerLine; ///< ADC readings per line in the output.
     raw::ADC_Count_t fPedestal; ///< ADC pedestal (subtracted from readings).
-    
+
   }; // class DumpOpDetWaveforms
-  
+
 } // namespace detsim
 
 
@@ -117,14 +117,14 @@ namespace detsim {
 
   //-------------------------------------------------
   void DumpOpDetWaveforms::analyze(const art::Event& event) {
-    
+
     // fetch the data to be dumped on screen
     auto Waveforms =
       event.getValidHandle<std::vector<raw::OpDetWaveform>>(fOpDetWaveformsTag);
-    
+
     dump::raw::OpDetWaveformDumper dump(fPedestal, fDigitsPerLine);
     dump.setIndent("  ");
-    
+
     mf::LogVerbatim(fOutputCategory)
       << "The event " << event.id() << " contains data for "
       << Waveforms->size() << " optical detector channels";
@@ -132,16 +132,16 @@ namespace detsim {
       mf::LogVerbatim(fOutputCategory) << "A pedestal of " << fPedestal
         << " counts will be subtracted from all ADC readings.";
     } // if pedestal
-    
+
     for (raw::OpDetWaveform const& waveform: *Waveforms)
       dump(mf::LogVerbatim(fOutputCategory), waveform);
-    
+
   } // DumpOpDetWaveforms::analyze()
-  
-  
+
+
   //----------------------------------------------------------------------------
   DEFINE_ART_MODULE(DumpOpDetWaveforms)
 
   //----------------------------------------------------------------------------
-  
+
 } // namespace detsim

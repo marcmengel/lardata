@@ -4,7 +4,7 @@
 ///
 /// \brief  Base class for Kalman filter surface.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// Surfaces may have the following distinct uses in the context
 /// of the Kalman filter.
@@ -16,12 +16,12 @@
 ///
 /// Larsoft global coordinates are (x,y,z).
 ///
-/// Surface local coordinates are called (u,v,w), where w=0 is the 
+/// Surface local coordinates are called (u,v,w), where w=0 is the
 /// surface, and (u,v) are the local coordinates within the surface.
 ///
 /// Notes about track and surface directions:
 ///
-/// 1.  Surfaces are in general orientable, which means that a track 
+/// 1.  Surfaces are in general orientable, which means that a track
 ///     that is located at a surface can be propagating in the forward
 ///     direction with respect to the surface (dw/ds > 0) or in the
 ///     backward direction (dw/ds < 0).
@@ -86,7 +86,7 @@ namespace trkf {
 					TrackDirection dir=UNKNOWN) const {return dir;}
 
     /// Get momentum vector of track.
-    virtual void getMomentum(const TrackVector& vec, double mom[3], 
+    virtual void getMomentum(const TrackVector& vec, double mom[3],
 			     TrackDirection dir=UNKNOWN) const = 0;
 
     /// Get pointing error of track.

@@ -26,7 +26,7 @@ namespace trkf {
   /// doDedx - dE/dx enable flag.
   ///
   PropYZPlane::PropYZPlane(double tcut, bool doDedx) :
-    Propagator(tcut, doDedx, (tcut >= 0. ? 
+    Propagator(tcut, doDedx, (tcut >= 0. ?
 			      std::shared_ptr<const Interactor>(new InteractPlane(tcut)) :
 			      std::shared_ptr<const Interactor>()))
   {}
@@ -51,7 +51,7 @@ namespace trkf {
   ///
   boost::optional<double>
   PropYZPlane::short_vec_prop(KTrack& trk,
-			      const std::shared_ptr<const Surface>& psurf, 
+			      const std::shared_ptr<const Surface>& psurf,
 			      Propagator::PropDirection dir,
 			      bool doDedx,
 			      TrackMatrix* prop_matrix,
@@ -96,7 +96,7 @@ namespace trkf {
 
     const TrackVector& vec = trk.getVector();
     if(vec.size() != 5)
-      throw cet::exception("PropYZPlane") 
+      throw cet::exception("PropYZPlane")
 	<< "Track state vector has wrong size" << vec.size() << "\n";
     double u1 = vec(0);
     double v1 = vec(1);
@@ -168,7 +168,7 @@ namespace trkf {
 
     // Update default result to success and store propagation distance.
 
-    result = boost::optional<double>(true, s);		
+    result = boost::optional<double>(true, s);
 
     // Update propagation matrix (if requested).
 
@@ -261,7 +261,7 @@ namespace trkf {
   ///
   /// Propagation distance is always zero after successful propagation.
   ///
-  boost::optional<double> 
+  boost::optional<double>
   PropYZPlane::origin_vec_prop(KTrack& trk,
 			       const std::shared_ptr<const Surface>& porient,
 			       TrackMatrix* prop_matrix) const
@@ -279,7 +279,7 @@ namespace trkf {
 
     TrackVector vec = trk.getVector();    // Modifiable copy.
     if(vec.size() != 5)
-      throw cet::exception("PropYZPlane") 
+      throw cet::exception("PropYZPlane")
 	<< "Track state vector has wrong size" << vec.size() << "\n";
     Surface::TrackDirection dir = trk.getDirection();
 
@@ -462,7 +462,7 @@ namespace trkf {
       double du2dphi1 = du1dphi1;
       double dv2dphi1 = rvw*dw1dphi1;
       double dw2dphi1 = rww*dw1dphi1;
-      
+
       double ddu2dphi1 = ddu1dphi1;
       double ddv2dphi1 = rvw*ddw1dphi1;
       double ddw2dphi1 = rww*ddw1dphi1;
@@ -720,7 +720,7 @@ namespace trkf {
         dir = (dw2dw1 > 0.)? Surface::BACKWARD: Surface::FORWARD;
         break;
       default:
-        throw cet::exception("PropXYZPlane") 
+        throw cet::exception("PropXYZPlane")
           << __func__ << ": unexpected direction #" << ((int) dir) << "\n";
     } // switch
 

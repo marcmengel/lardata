@@ -143,7 +143,7 @@ namespace trkf {
       if(!ok)
 	break;
 
-      // 
+      //
 
       // Update objects that are concatenations of underlying measurements.
 

@@ -241,7 +241,7 @@ namespace trkf {
   ///
   /// Throw an exception if the other surface is not parallel.
   ///
-  /// Assuming the other surface is parallel, the distance is 
+  /// Assuming the other surface is parallel, the distance is
   /// simply the w-coordinate of the other surface, and is signed.
   ///
   /// Arguments:

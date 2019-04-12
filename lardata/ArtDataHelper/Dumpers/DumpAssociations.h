@@ -18,7 +18,7 @@
 
 
 namespace util {
-  
+
   /**
    * @brief Dumps a short introduction about specified association
    * @tparam Stream type of output stream
@@ -45,9 +45,9 @@ namespace util {
       out << " is empty";
     }
   } // DumpAssociationsIntro<Data>()
-  
-  
-  
+
+
+
 } // namespace util
 
 #endif // UTIL_DUMPASSOCIATIONS_H

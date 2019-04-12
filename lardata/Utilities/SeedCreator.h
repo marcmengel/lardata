@@ -15,7 +15,7 @@
 
 #include "TRandom3.h"
 
-namespace SeedCreator{ 
+namespace SeedCreator{
 
   inline unsigned int CreateRandomNumberSeed()
   {
@@ -28,7 +28,7 @@ namespace SeedCreator{
     TRandom3 rand(0);
     return rand.Integer(900000000);
   }
-  
+
 }
 
 #endif// SEEDCREATOR_H

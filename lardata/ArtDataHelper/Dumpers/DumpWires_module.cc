@@ -31,7 +31,7 @@
 
 
 namespace {
-  
+
   // Copied from geo::PlaneGeo, local so far
   std::string ViewName(geo::View_t view) {
     switch (view) {
@@ -46,7 +46,7 @@ namespace {
         return "<UNSUPPORTED (" + std::to_string((int) view) + ")>";
     } // switch
   } // ViewName()
-  
+
 } // local namespace
 
 
@@ -58,10 +58,10 @@ namespace caldata {
    *
    * This analyser prints the content of all the wires into the
    * `LogVerbatim` stream.
-   * 
+   *
    * Configuration parameters
    * =========================
-   * 
+   *
    * - *CalWireModuleLabel* (string, default: `"caldata"`): label of the
    *   producer used to create the `recob::Wire` collection to be dumped
    * - *OutputCategory* (string, default: `"DumpWires"`): the category used
@@ -71,53 +71,53 @@ namespace caldata {
    */
   class DumpWires : public art::EDAnalyzer {
       public:
-    
+
     struct Config {
       using Name = fhicl::Name;
       using Comment = fhicl::Comment;
-      
+
       fhicl::Atom<art::InputTag> CalWireModuleLabel{
         Name("CalWireModuleLabel"),
         Comment("tag of producer used to create the recob::Wire collection"),
         "caldata" /* default */
         };
-      
+
       fhicl::Atom<std::string> OutputCategory{
         Name("OutputCategory"),
         Comment("the messagefacility category used for the output"),
         "DumpWires" /* default */
         };
-      
+
       fhicl::Atom<unsigned int> DigitsPerLine {
         Name("DigitsPerLine"),
         Comment("number of digits printed per line (0: don't print digits)"),
         20 /* default */
         };
-      
+
     }; // Config
-    
+
     using Parameters = art::EDAnalyzer::Table<Config>;
-    
-    
+
+
     /// Constructor.
     explicit DumpWires(Parameters const& config);
-    
+
     /// Does the printing.
     virtual void analyze (art::Event const& evt) override;
-    
+
       private:
-    
+
     art::InputTag fCalWireModuleLabel; ///< Input tag for wires.
     std::string fOutputCategory; ///< Category for `LogVerbatim` output.
     unsigned int fDigitsPerLine; ///< Ticks/digits per line in the output.
-    
+
     /// Dumps a single `recob:Wire` to the specified output stream.
     template <typename Stream>
     void PrintWire(
       Stream&& out, recob::Wire const& wire,
       std::string indent = "  ", std::string firstIndent = "  "
       ) const;
-    
+
   }; // class DumpWires
 
 } // namespace caldata
@@ -139,17 +139,17 @@ void caldata::DumpWires::analyze(art::Event const& evt) {
 
   auto const& Wires
     = *(evt.getValidHandle<std::vector<recob::Wire>>(fCalWireModuleLabel));
-  
+
   mf::LogVerbatim(fOutputCategory) << "Event " << evt.id()
     << " contains " << Wires.size() << " '" << fCalWireModuleLabel.encode()
     << "' wires";
-  
+
   for (recob::Wire const& wire: Wires) {
-    
+
     PrintWire(mf::LogVerbatim(fOutputCategory), wire);
-    
+
   } // for wire
-  
+
 } // caldata::DumpWires::analyze()
 
 
@@ -159,11 +159,11 @@ void caldata::DumpWires::PrintWire(
   Stream&& out, recob::Wire const& wire,
   std::string indent /* = "  " */, std::string firstIndent /* = "  " */
 ) const {
-  
+
   using RegionsOfInterest_t = recob::Wire::RegionsOfInterest_t;
-  
+
   RegionsOfInterest_t const & RoIs = wire.SignalROI();
-  
+
   //
   // print a header for the wire
   //
@@ -184,15 +184,15 @@ void caldata::DumpWires::PrintWire(
     out << "\n" << indent
       << "  from " << RoI.offset << " for " << RoI.size() << " ticks";
   } // for
-  
+
   //
   // print the content of the wire
   //
   if (fDigitsPerLine > 0) {
-    
+
     std::vector<RegionsOfInterest_t::value_type> DigitBuffer(fDigitsPerLine),
       LastBuffer;
-    
+
     unsigned int repeat_count = 0; // additional lines like the last one
     unsigned int index = 0;
     lar::util::MinMaxCollector<RegionsOfInterest_t::value_type> Extrema;
@@ -204,20 +204,20 @@ void caldata::DumpWires::PrintWire(
       unsigned int line_size
         = std::min(fDigitsPerLine, (unsigned int) RoIs.size() - index);
       if (line_size == 0) break; // no more ticks
-      
+
       // fill the new buffer (iTick will move forward)
       DigitBuffer.resize(line_size);
       auto iBuf = DigitBuffer.begin(), bend = DigitBuffer.end();
       while ((iBuf != bend) && (iTick != tend))
         Extrema.add(*(iBuf++) = *(iTick++));
       index += line_size;
-      
+
       // if the new buffer is the same as the old one, just mark it
       if (DigitBuffer == LastBuffer) {
         repeat_count += 1;
         continue;
       }
-      
+
       // if there are previous repeats, write that on screen
       // before the new, different line
       if (repeat_count > 0) {
@@ -226,16 +226,16 @@ void caldata::DumpWires::PrintWire(
           << (repeat_count * LastBuffer.size()) << " ticks ]";
         repeat_count = 0;
       }
-      
+
       // dump the new line of ticks
       out << "\n" << indent
         << " " << std::fixed << std::setprecision(3);
       for (auto digit: DigitBuffer) out << std::setw(8) << digit;
-      
+
       // quick way to assign DigitBuffer to LastBuffer
       // (we don't care we lose the former)
       std::swap(LastBuffer, DigitBuffer);
-      
+
     } // while
     if (repeat_count > 0) {
       out << "\n" << indent
@@ -247,7 +247,7 @@ void caldata::DumpWires::PrintWire(
         << " samples: [" << Extrema.min() << ";" << Extrema.max() << "]";
     }
   } // if dumping the ticks
-  
+
 } // caldata::DumpWires::PrintWire()
 
 //------------------------------------------------------------------------------

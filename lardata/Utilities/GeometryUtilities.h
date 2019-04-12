@@ -22,7 +22,7 @@
 #include "lardataobj/RecoBase/Hit.h"
 #include "larcorealg/Geometry/GeometryCore.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
-#include "canvas/Persistency/Common/Ptr.h" 
+#include "canvas/Persistency/Common/Ptr.h"
 
 #include <climits>
 #include <iostream>
@@ -33,7 +33,7 @@
 namespace util{
 
   const double kINVALID_DOUBLE = std::numeric_limits<Double_t>::max();
-  
+
   //class GeometryUtilities : public larlight::larlight_base {
   class GeometryUtilities {
 
@@ -49,7 +49,7 @@ namespace util{
 
     /// Default destructor
     ~GeometryUtilities();
-    
+
   private:
 
     static GeometryUtilities* _me;
@@ -63,84 +63,84 @@ namespace util{
     */
 
   public:
-   
+
     void Reconfigure();
-    
+
     Int_t Get3DaxisN(Int_t iplane0,
 		     Int_t iplane1,
-		     Double_t omega0, 
+		     Double_t omega0,
 		     Double_t omega1,
 		     Double_t &phi,
 		     Double_t &theta) const;
-    
+
     Double_t CalculatePitch(UInt_t iplane0,
 			    Double_t phi,
 			    Double_t theta) const;
-    
+
     Double_t CalculatePitchPolar(UInt_t iplane0,
 				 Double_t phi,
 				 Double_t theta) const;
-    
+
     Double_t Get3DSpecialCaseTheta(Int_t iplane0,
 				   Int_t iplane1,
-				   Double_t dw0, 
+				   Double_t dw0,
 				   Double_t dw1) const;
-        
-    
+
+
     Double_t Get2Dangle(Double_t deltawire,
 			Double_t deltatime) const;
 
-		      
-		      
+
+
     Double_t Get2Dangle(Double_t wireend,
 			Double_t wirestart,
 			Double_t timeend,
 			Double_t timestart) const;
-    
-						
+
+
     double Get2Dangle(const util::PxPoint *endpoint,
 		      const util::PxPoint *startpoint) const;
-    
+
     double Get2DangleFrom3D(unsigned int plane,double phi, double theta) const;
-		      
+
     double Get2DangleFrom3D(unsigned int plane,TVector3 dir_vector) const;
-		      
-		      
+
+
     Double_t Get2Dslope(Double_t deltawire,
 			Double_t deltatime) const;
-    
+
     Double_t Get2Dslope(Double_t wireend,
 			Double_t wirestart,
 			Double_t timeend,
 			Double_t timestart) const;
-    
+
     double Get2Dslope(const util::PxPoint *endpoint,
 		      const util::PxPoint *startpoint) const;
-		      
+
     Double_t Get2DDistance(Double_t wire1,
 			   Double_t time1,
 			   Double_t wire2,
 			   Double_t time2) const;
-    
+
     double Get2DDistance(const util::PxPoint *point1,
-			 const util::PxPoint *point2) const;			 
-			 
-			 
+			 const util::PxPoint *point2) const;
+
+
     Double_t Get2DPitchDistance(Double_t angle,
 				Double_t inwire,
 				Double_t wire) const;
-    
+
     Double_t Get2DPitchDistanceWSlope(Double_t slope,
 				      Double_t inwire,
 				      Double_t wire) const;
-    
+
     Int_t GetPointOnLine(Double_t slope,
 			 Double_t intercept,
 			 Double_t wire1,
 			 Double_t time1,
 			 Double_t &wireout,
 			 Double_t &timeout) const;
-    
+
     Int_t GetPointOnLine(Double_t slope,
 			 Double_t wirestart,
 			 Double_t timestart,
@@ -148,118 +148,118 @@ namespace util{
 			 Double_t time1,
 			 Double_t &wireout,
 			 Double_t &timeout) const;
-    
+
     int GetPointOnLine(Double_t slope,
 		       const util::PxPoint *startpoint,
 		       const util::PxPoint *point1,
 		       util::PxPoint &pointout) const;
-    
+
     int GetPointOnLine(double slope,
 	               double intercept,
 		       const util::PxPoint *point1,
 		       util::PxPoint &pointout) const;
-		       
+
     Int_t GetPointOnLineWSlopes(Double_t slope,
 				Double_t intercept,
 				Double_t ort_intercept,
 				Double_t &wireout,
 				Double_t &timeout) const;
-    
+
     Int_t GetPointOnLineWSlopes(double slope,
 				double intercept,
 				double ort_intercept,
 				util::PxPoint &pointonline) const;
-    
-    PxPoint Get2DPointProjection(Double_t *xyz,Int_t plane) const;			       
+
+    PxPoint Get2DPointProjection(Double_t *xyz,Int_t plane) const;
 
     PxPoint Get2DPointProjectionCM(std::vector< double > xyz, int plane) const;
 
     PxPoint Get2DPointProjectionCM(double *xyz, int plane) const;
-    
+
     PxPoint Get2DPointProjectionCM(TLorentzVector *xyz, int plane) const;
-    
+
     Double_t GetTimeTicks(Double_t x, Int_t plane) const;
-    
+
     Int_t GetProjectedPoint(const PxPoint *p0,
 			    const PxPoint *p1,
 			    PxPoint &pN) const;
-    
+
   /*  art::Ptr< recob::Hit > FindClosestHitPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
                                                  unsigned int wirein,
-                                                 double timein) const;			    
+                                                 double timein) const;
 
-						 
+
     recob::Hit * FindClosestHit(std::vector<art::Ptr< recob::Hit > > hitlist,
                                                  unsigned int wirein,
-                                                 double timein) const;             */                                 
-	
+                                                 double timein) const;             */
+
     util::PxHit  FindClosestHit(std::vector<util::PxHit >  hitlist,
                                                  unsigned int wirein,
-                                                 double timein) const;		
-	
+                                                 double timein) const;
+
     unsigned int FindClosestHitIndex(std::vector<util::PxHit >  hitlist,
                                                  unsigned int wirein,
-                                                 double timein) const;						 
-						 
-						 
-//     void SelectLocalHitlist(std::vector< art::Ptr < recob::Hit> > hitlist, 
-//                                              std::vector < art::Ptr<recob::Hit> > &hitlistlocal, 
+                                                 double timein) const;
+
+
+//     void SelectLocalHitlist(std::vector< art::Ptr < recob::Hit> > hitlist,
+//                                              std::vector < art::Ptr<recob::Hit> > &hitlistlocal,
 //                                              double  wire_start,
-//                                              double time_start, 
-//                                              double linearlimit,   
-//                                              double ortlimit, 
+//                                              double time_start,
+//                                              double linearlimit,
+//                                              double ortlimit,
 //                                              double lineslopetest);
-					 
-/*    void SelectLocalHitlist(std::vector< util::PxHit > hitlist, 
-                                             std::vector < util::PxHit > &hitlistlocal, 
+
+/*    void SelectLocalHitlist(std::vector< util::PxHit > hitlist,
+                                             std::vector < util::PxHit > &hitlistlocal,
                                              double  wire_start,
-                                             double time_start, 
-                                             double linearlimit,   
-                                             double ortlimit, 
-                                             double lineslopetest);	*/					 
-						 
-			    
+                                             double time_start,
+                                             double linearlimit,
+                                             double ortlimit,
+                                             double lineslopetest);	*/
+
+
     Int_t GetYZ(const PxPoint *p0,
-		const PxPoint *p1, 
+		const PxPoint *p1,
 		Double_t* yz) const;
-    
+
 
     Int_t GetXYZ(const PxPoint *p0,
-		const PxPoint *p1, 
-		Double_t* xyz) const;		
-		
+		const PxPoint *p1,
+		Double_t* xyz) const;
+
     Double_t PitchInView(UInt_t plane,
 			 Double_t phi,
 			 Double_t theta) const;
-    
+
     void GetDirectionCosines(Double_t phi,
 			     Double_t theta,
 			     Double_t *dirs) const;
-    
-   //interface without average Hit			     
-    void SelectLocalHitlist(const std::vector<util::PxHit> &hitlist, 
+
+   //interface without average Hit
+    void SelectLocalHitlist(const std::vector<util::PxHit> &hitlist,
 			    std::vector <const util::PxHit*> &hitlistlocal,
 			    util::PxPoint &startHit,
-			    Double_t& linearlimit,   
-			    Double_t& ortlimit, 
-			    Double_t& lineslopetest);			     
-			     
-    void SelectLocalHitlist(const std::vector<util::PxHit> &hitlist, 
+			    Double_t& linearlimit,
+			    Double_t& ortlimit,
+			    Double_t& lineslopetest);
+
+    void SelectLocalHitlist(const std::vector<util::PxHit> &hitlist,
 			    std::vector <const util::PxHit*> &hitlistlocal,
 			    util::PxPoint &startHit,
-			    Double_t& linearlimit,   
-			    Double_t& ortlimit, 
+			    Double_t& linearlimit,
+			    Double_t& ortlimit,
 			    Double_t& lineslopetest,
 			    util::PxHit &averageHit);
 
-   void SelectLocalHitlistIndex(const std::vector<util::PxHit> &hitlist, 
+   void SelectLocalHitlistIndex(const std::vector<util::PxHit> &hitlist,
 			    std::vector <unsigned int> &hitlistlocal_index,
 			    util::PxPoint &startHit,
-			    Double_t& linearlimit,   
-			    Double_t& ortlimit, 
+			    Double_t& linearlimit,
+			    Double_t& ortlimit,
 			    Double_t& lineslopetest);
-    
-    
+
+
     void SelectPolygonHitList(const std::vector<util::PxHit> &hitlist,
 			      std::vector <const util::PxHit*> &hitlistlocal);
 
@@ -287,7 +287,7 @@ namespace util{
     art::ServiceHandle<detinfo::DetectorPropertiesService const> detp;
     art::ServiceHandle<detinfo::LArPropertiesService const> larp;
     */
-    
+
     std::vector< Double_t > vertangle;  //angle wrt to vertical
     Double_t fWirePitch;
     Double_t fTimeTick;
@@ -296,7 +296,7 @@ namespace util{
     Double_t fWiretoCm;
     Double_t fTimetoCm;
     Double_t fWireTimetoCmCm;
-    
+
     }; // class GeometryUtilities
 
 } //namespace util

@@ -35,35 +35,35 @@ namespace detinfo{
 /*
     // obtain the required dependency service providers and create our own
     const geo::GeometryCore* geo = lar::providerFrom<geo::Geometry>();
-    
+
     const detinfo::LArProperties* lp = lar::providerFrom<detinfo::LArPropertiesService>();
-    
+
     const detinfo::DetectorClocks* clks = lar::providerFrom<detinfo::DetectorClocksService>();
-    
+
     fProp = std::make_unique<detinfo::DetectorPropertiesStandard>(pset,geo,lp,clks);
     */
     fProp = std::make_unique<detinfo::DetectorPropertiesStandard>(pset,
       lar::extractProviders<
-        geo::Geometry, 
+        geo::Geometry,
         detinfo::LArPropertiesService,
         detinfo::DetectorClocksService
         >(),
         std::set<std::string>({ "InheritNumberTimeSamples" })
       );
-    
+
     // at this point we need and expect the provider to be fully configured
     fProp->CheckIfConfigured();
-    
+
     // Save the parameter set.
     fPS = pset;
-    
+
   }
 
   //--------------------------------------------------------------------
   void DetectorPropertiesServiceStandard::reconfigure(fhicl::ParameterSet const& p)
   {
     fProp->ValidateAndConfigure(p, { "InheritNumberTimeSamples" });
-    
+
     // Save the parameter set.
     fPS = p;
 
@@ -139,9 +139,9 @@ namespace detinfo{
 
 	    //	    if(fInheritNumberTimeSamples) {
 	    unsigned int newNumberTimeSamples = ps.get<unsigned int>("NumberTimeSamples");
-	    
+
 	    // Ignore parameter values that match the current configuration.
-	    
+
 	    if(newNumberTimeSamples != fPS.get<unsigned int>("NumberTimeSamples")) {
 	      if(nNumberTimeSamples == 0)
 		iNumberTimeSamples = newNumberTimeSamples;
@@ -159,8 +159,8 @@ namespace detinfo{
 	// Done looping over parameter sets.
 	// Now decide which parameters we will actually override.
 
-	if(// fInheritNumberTimeSamples && 
-	   nNumberTimeSamples != 0 && 
+	if(// fInheritNumberTimeSamples &&
+	   nNumberTimeSamples != 0 &&
 	   iNumberTimeSamples != fProp->NumberTimeSamples()) {
 	  mf::LogInfo("DetectorPropertiesServiceStandard")
 	    << "Overriding configuration parameter NumberTimeSamples using historical value.\n"
@@ -177,20 +177,20 @@ namespace detinfo{
 	delete file;
       }
     }
-    
+
   }
 
   //--------------------------------------------------------------------
   //  Determine whether a parameter set is a DetectorPropertiesService configuration.
-  
+
   bool DetectorPropertiesServiceStandard::isDetectorPropertiesServiceStandard
     (const fhicl::ParameterSet& ps) const
   {
     // This method uses heuristics to determine whether the parameter
     // set passed as argument is a DetectorPropertiesService configuration
     // parameter set.
-    
-    return 
+
+    return
          (ps.get<std::string>("service_type", "") == "DetectorPropertiesService")
       && (ps.get<std::string>("service_provider", "") == "DetectorPropertiesServiceStandard")
       ;
@@ -200,7 +200,7 @@ namespace detinfo{
     double d;
     int i;
     unsigned int u;
-    
+
     bool result = !ps.get_if_present("module_label", s);
     result = result && ps.get_if_present("TriggerOffset", i);
     result = result && ps.get_if_present("SamplingRate", d);

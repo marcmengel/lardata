@@ -4,7 +4,7 @@
 ///
 /// \brief  Base class for Kalman filter track propagator.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class provides the general interface for propagating a track
 /// (KTrack or KETrack) from its current surface to some destionation
@@ -41,7 +41,7 @@
 /// provided the propagation is successful.  The error and noise
 /// propagation methods additionally update the track error matrix.
 ///
-/// In case of propagation failure, all propagation methods promise 
+/// In case of propagation failure, all propagation methods promise
 /// to leave the original track unmodified.
 ///
 /// Use case three (propagate with error, but without noise) updates the
@@ -110,7 +110,7 @@ namespace trkf {
 
     /// Propagate without error (short distance).
     virtual boost::optional<double> short_vec_prop(KTrack& trk,
-						   const std::shared_ptr<const Surface>& psurf, 
+						   const std::shared_ptr<const Surface>& psurf,
 						   PropDirection dir,
 						   bool doDedx,
 						   TrackMatrix* prop_matrix = 0,
@@ -123,7 +123,7 @@ namespace trkf {
 
     /// Propagate without error (long distance).
     boost::optional<double> vec_prop(KTrack& trk,
-				     const std::shared_ptr<const Surface>& psurf, 
+				     const std::shared_ptr<const Surface>& psurf,
 				     PropDirection dir,
 				     bool doDedx,
 				     TrackMatrix* prop_matrix = 0,
@@ -131,7 +131,7 @@ namespace trkf {
 
     /// Linearized propagate without error.
     boost::optional<double> lin_prop(KTrack& trk,
-				     const std::shared_ptr<const Surface>& psurf, 
+				     const std::shared_ptr<const Surface>& psurf,
 				     PropDirection dir,
 				     bool doDedx,
 				     KTrack* ref = 0,
@@ -139,7 +139,7 @@ namespace trkf {
 				     TrackError* noise_matrix = 0) const;
     /// Propagate with error, but without noise.
     boost::optional<double> err_prop(KETrack& tre,
-				     const std::shared_ptr<const Surface>& psurf, 
+				     const std::shared_ptr<const Surface>& psurf,
 				     PropDirection dir,
 				     bool doDedx,
 				     KTrack* ref = 0,
@@ -147,7 +147,7 @@ namespace trkf {
 
     /// Propagate with error and noise.
     boost::optional<double> noise_prop(KETrack& tre,
-				       const std::shared_ptr<const Surface>& psurf, 
+				       const std::shared_ptr<const Surface>& psurf,
 				       PropDirection dir,
 				       bool doDedx,
 				       KTrack* ref = 0) const;

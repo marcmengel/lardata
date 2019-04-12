@@ -24,8 +24,8 @@
 namespace util{
 
   //--------------------------------------------------------------------
-  DetectorPropertiesServiceArgoNeuT::DetectorPropertiesServiceArgoNeuT(fhicl::ParameterSet const& pset, 
-					 art::ActivityRegistry &reg) 
+  DetectorPropertiesServiceArgoNeuT::DetectorPropertiesServiceArgoNeuT(fhicl::ParameterSet const& pset,
+					 art::ActivityRegistry &reg)
     : fNumberTimeSamples(pset.get< unsigned int >("NumberTimeSamples"))
   {
     fLP = dynamic_cast<util::LArPropertiesServiceArgoNeuT const*>
@@ -37,7 +37,7 @@ namespace util{
         << "DetectorPropertiesServiceArgoNeuT service requires"
         " LArPropertiesServiceArgoNeuT";
     }
-    
+
     this->reconfigure(pset);
 
     // Register for callbacks.
@@ -51,7 +51,7 @@ namespace util{
   {
     return lar::providerFrom<detinfo::DetectorClocksService>()->TPCTDC2Tick(tdc);
   }
-  
+
   //--------------------------------------------------------------
   double DetectorPropertiesServiceArgoNeuT::ConvertTicksToTDC(double ticks) const
   {
@@ -79,7 +79,7 @@ namespace util{
     fTimeOffsetV       	      = p.get< double 	     >("TimeOffsetV"      );
     fTimeOffsetZ       	      = p.get< double 	     >("TimeOffsetZ"      );
     fInheritNumberTimeSamples = p.get<bool           >("InheritNumberTimeSamples", false);
-    
+
     fSimpleBoundary           = p.get<bool           >("SimpleBoundaryProcess", true);
 
     fXTicksParamsLoaded = false;
@@ -125,18 +125,18 @@ void DetectorPropertiesServiceArgoNeuT::checkDBstatus() const
 }
 
 //------------------------------------------------------------------------------------//
-int  DetectorPropertiesServiceArgoNeuT::TriggerOffset()     const 
+int  DetectorPropertiesServiceArgoNeuT::TriggerOffset()     const
 {
   return fTPCClock.Ticks(lar::providerFrom<detinfo::DetectorClocksService>()->TriggerOffsetTPC() * -1.);
 }
 
 
   //--------------------------------------------------------------------
-  //  x<--> ticks conversion methods 
+  //  x<--> ticks conversion methods
   //
-  //  Ben Jones April 2012, 
+  //  Ben Jones April 2012,
   //  based on code by Herb Greenlee in SpacePointService
-  //  
+  //
 
 
 
@@ -144,7 +144,7 @@ int  DetectorPropertiesServiceArgoNeuT::TriggerOffset()     const
   //--------------------------------------------------------------------
   // Take an X coordinate, and convert to a number of ticks, the
   // charge deposit occured at t=0
- 
+
   double DetectorPropertiesServiceArgoNeuT::ConvertXToTicks(double X, int p, int t, int c) const
   {
     if(!fXTicksParamsLoaded) CalculateXTicksParams();
@@ -156,11 +156,11 @@ int  DetectorPropertiesServiceArgoNeuT::TriggerOffset()     const
   //-------------------------------------------------------------------
   // Take a cooridnate in ticks, and convert to an x position
   // assuming event deposit occured at t=0
- 
+
   double  DetectorPropertiesServiceArgoNeuT::ConvertTicksToX(double ticks, int p, int t, int c) const
   {
     if(!fXTicksParamsLoaded) CalculateXTicksParams();
-    return (ticks - fXTicksOffsets.at(c).at(t).at(p)) * fXTicksCoefficient * fDriftDirection.at(c).at(t);  
+    return (ticks - fXTicksOffsets.at(c).at(t).at(p)) * fXTicksCoefficient * fDriftDirection.at(c).at(t);
   }
 
 
@@ -175,7 +175,7 @@ int  DetectorPropertiesServiceArgoNeuT::TriggerOffset()     const
     double efield         = Efield();
     double temperature    = fLP->Temperature();
     double driftVelocity  = DriftVelocity(efield, temperature);
-    
+
     fXTicksCoefficient    = 0.001 * driftVelocity * samplingRate;
 
     double triggerOffset  = TriggerOffset();
@@ -200,8 +200,8 @@ int  DetectorPropertiesServiceArgoNeuT::TriggerOffset()     const
 	fXTicksOffsets[cstat][tpc].resize(nplane, 0.);
 	for(int plane = 0; plane < nplane; ++plane) {
 	  const geo::PlaneGeo& pgeom = tpcgeom.Plane(plane);
-	  
-	  
+
+
 	  // Get field in gap between planes
 	  double efieldgap[3];
 	  double driftVelocitygap[3];
@@ -211,11 +211,11 @@ int  DetectorPropertiesServiceArgoNeuT::TriggerOffset()     const
 	    driftVelocitygap[igap] = DriftVelocity(efieldgap[igap], temperature);
 	    fXTicksCoefficientgap[igap] = 0.001 * driftVelocitygap[igap] * samplingRate;
 	  }
-	  
+
 	  // Calculate geometric time offset.
 	  // only works if xyz[0]<=0
 	  const double* xyz = tpcgeom.PlaneLocation(0);
-	  
+
 	  fXTicksOffsets[cstat][tpc][plane] = -xyz[0]/(dir * fXTicksCoefficient) + triggerOffset;
 
 	  if (nplane==3){
@@ -232,7 +232,7 @@ int  DetectorPropertiesServiceArgoNeuT::TriggerOffset()     const
 	    for (int ip = 0; ip < plane; ++ip){
 	      fXTicksOffsets[cstat][tpc][plane] += tpcgeom.PlanePitch(ip,ip+1)/fXTicksCoefficientgap[ip+1];
 	    }
-	  }	  
+	  }
 	  else if (nplane==2){ ///< special case for ArgoNeuT
 	    /*
 	 |    ---------- plane = 1 (collection)
@@ -249,7 +249,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 	    }
 	    fXTicksOffsets[cstat][tpc][plane] -= tpcgeom.PlanePitch()*(1/fXTicksCoefficient-1/fXTicksCoefficientgap[1]);
 	  }
-	  
+
 	  // Add view dependent offset
 	  geo::View_t view = pgeom.View();
 	  if(view == geo::kU)
@@ -261,7 +261,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 	  else
 	    throw cet::exception("DetectorPropertiesServiceArgoNeuT") << "Bad view = "
 						       << view << "\n" ;
-	}	
+	}
       }
     }
 
@@ -292,7 +292,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
   double DetectorPropertiesServiceArgoNeuT::GetXTicksOffset(int p, int t, int c) const
   {
     if(!fXTicksParamsLoaded) CalculateXTicksParams();
-    return fXTicksOffsets.at(c).at(t).at(p);	
+    return fXTicksOffsets.at(c).at(t).at(p);
   }
 
   //--------------------------------------------------------------------
@@ -378,8 +378,8 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 	// Done looping over parameter sets.
 	// Now decide which parameters we will actually override.
 
-	if(fInheritNumberTimeSamples && 
-	   nNumberTimeSamples != 0 && 
+	if(fInheritNumberTimeSamples &&
+	   nNumberTimeSamples != 0 &&
 	   iNumberTimeSamples != fNumberTimeSamples) {
 	  mf::LogInfo("DetectorPropertiesServiceArgoNeuT")
 	    << "Overriding configuration parameter NumberTimeSamples using historical value.\n"
@@ -411,7 +411,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
     double d;
     int i;
     unsigned int u;
-    
+
     bool result = !ps.get_if_present("module_label", s);
     result = result && ps.get_if_present("TriggerOffset", i);
     result = result && ps.get_if_present("SamplingRate", d);
@@ -424,7 +424,7 @@ For plane = 0, t offset is pitch/Coeff[1] - (pitch+xyz[0])/Coeff[0]
 } // namespace
 
 namespace util{
- 
+
   DEFINE_ART_SERVICE_INTERFACE_IMPL(DetectorPropertiesServiceArgoNeuT, detinfo::DetectorPropertiesService)
 
 } // namespace util

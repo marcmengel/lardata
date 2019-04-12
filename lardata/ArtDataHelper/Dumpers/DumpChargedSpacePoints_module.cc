@@ -27,19 +27,19 @@
 
 
 namespace recob {
-  
+
   /**
    * @brief Prints the content of all the space points and charge on screen.
    *
    * This analyser prints the content of all the space points into the
    * LogInfo/LogVerbatim stream.
-   * 
+   *
    * The space point and charge data products must fulfil the requirements of
    * the `proxy::ChargedSpacePoints` proxy.
-   * 
+   *
    * Configuration parameters
    * =========================
-   * 
+   *
    * - *SpacePointLabel* (`art::InputTag`, mandatory): label of the
    *   producer used to create the `recob::SpacePoint` _and_
    *   `recob::PointCharge` collections to be dumped
@@ -49,12 +49,12 @@ namespace recob {
    */
   class DumpChargedSpacePoints: public art::EDAnalyzer {
       public:
-    
+
     /// Configuration parameters
     struct Config {
       using Name = fhicl::Name;
       using Comment = fhicl::Comment;
-      
+
       fhicl::Atom<art::InputTag> SpacePointTag {
         Name   ("SpacePointLabel"),
         Comment(
@@ -67,15 +67,15 @@ namespace recob {
         Comment("the category used for the output (useful for filtering)"),
         "DumpChargedSpacePoints" /* default value */
         };
-      
+
     }; // struct Config
-    
+
     using Parameters = art::EDAnalyzer::Table<Config>;
-    
-    
+
+
     /// Constructor.
-    explicit DumpChargedSpacePoints(Parameters const& config); 
-    
+    explicit DumpChargedSpacePoints(Parameters const& config);
+
     /// Does the printing.
     virtual void analyze (art::Event const& event) override;
 
@@ -83,9 +83,9 @@ namespace recob {
 
     art::InputTag fInputTag; ///< Input tag of the SpacePoint product.
     std::string fOutputCategory; ///< Category for LogInfo output.
-    
+
   }; // class DumpChargedSpacePoints
-  
+
 } // namespace recob
 
 
@@ -104,29 +104,29 @@ recob::DumpChargedSpacePoints::DumpChargedSpacePoints
 
 //----------------------------------------------------------------------------
 void recob::DumpChargedSpacePoints::analyze(art::Event const& event) {
-  
+
   //
   // collect all the available information
   //
   // fetch the data to be dumped on screen
   auto const& points = proxy::getChargedSpacePoints(event, fInputTag);
-  
+
   size_t const nPoints = points.size();
   mf::LogVerbatim log(fOutputCategory);
   log
     << "The event " << event.id()
     << " contains " << nPoints
     << " space points from '" << fInputTag.encode() << "'";
-  
+
   for (auto const& point: points) {
-    
+
     log << "\n [#" << point.index() << "] "
       << point.point() << " " << point.charge();
-    
+
   } // for
-  
+
   log << "\n"; // two empty lines
-  
+
 } // DumpChargedSpacePoints::analyze()
 
 

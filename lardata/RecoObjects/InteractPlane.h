@@ -4,7 +4,7 @@
 ///
 /// \brief  Interactor for planar surfaces.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class calculates propagation noise for tracks on planar
 /// surfaces.  In particular, this class works for any surface that

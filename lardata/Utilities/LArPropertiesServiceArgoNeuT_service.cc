@@ -123,14 +123,14 @@ void util::LArPropertiesServiceArgoNeuT::reconfigure(fhicl::ParameterSet const& 
 
   if(fExtraMatProperties){
     // Used data to be found e.g. in:  JINST 7 P05008 (reflectances estimated from measurements at Cracow University of Technology (thanks to dr. J. Jaglarz and dr. N. Nosidlak) + http://refractiveindex.info and refs. therein), G.M. Seidel, et al.,Nucl. Instr. and Meth. A 489 (2002)189; arXiv:1108.5584 [physics.ins-det]; Journal of Luminescence 81 (1999) 285}291;  arXiv:1304.6117v3 [physics.ins-det]; „Optical characterization and GEANT4 simulation of the light collection system for the WArP 100 liters detector: analysis of the event reconstruction capability”, F. Di Pompeo PhD thesis; //http://gentitfx.fr/litrani/AllModules/FitMacros/RIndexRev_vm2000.C.html for vm2000 (VM2000 (TM)) and refs. Therein - list will be updated for referece
-    
+
     fTpbTimeConstant = pset.get<double>("TpbTimeConstant" );
 
     fTpbEmmisionEnergies    = pset.get<std::vector<double> >("TpbEmmisionEnergies"  );
     fTpbEmmisionSpectrum    = pset.get<std::vector<double> >("TpbEmmisionSpectrum"  );
     fTpbAbsorptionEnergies  = pset.get<std::vector<double> >("TpbAbsorptionEnergies");
     fTpbAbsorptionSpectrum  = pset.get<std::vector<double> >("TpbAbsorptionSpectrum");
-    
+
   }
 
 
@@ -253,10 +253,10 @@ double util::LArPropertiesServiceArgoNeuT::DriftVelocity(double efield, double t
   double   T0W =  90.371;  // K
 
 // From Craig Thorne . . . currently not documented
-// smooth transition from linear at small fields to 
+// smooth transition from linear at small fields to
 //     icarus fit at most fields to Walkowiak at very high fields
    if (efield < xFit) vd=efield*uFit;
-   else if (efield<0.619) { 
+   else if (efield<0.619) {
      vd = ((P1*(temperature-T0)+1)
 	       *(P3*efield*std::log(1+P4/efield) + P5*std::pow(efield,P6))
 	       +P2*(temperature-T0));
@@ -272,7 +272,7 @@ double util::LArPropertiesServiceArgoNeuT::DriftVelocity(double efield, double t
    else {
      vd = ((P1W*(temperature-T0W)+1)
 	       *(P3W*efield*std::log(1+P4W/efield) + P5W*std::pow(efield,P6W))
-	       +P2W*(temperature-T0W));     
+	       +P2W*(temperature-T0W));
    }
 
   vd /= 10.;
@@ -303,7 +303,7 @@ double util::LArPropertiesServiceArgoNeuT::BirksCorrection(double dQdx) const
   return dEdx;
 }
 
-// Modified Box model correction 
+// Modified Box model correction
 double util::LArPropertiesServiceArgoNeuT::ModBoxCorrection(double dQdx) const
 {
   // Modified Box model correction has better behavior than the Birks
@@ -314,7 +314,7 @@ double util::LArPropertiesServiceArgoNeuT::ModBoxCorrection(double dQdx) const
   double Beta    = util::kModBoxB / (rho * Efield);
   double Alpha   = util::kModBoxA;
   double dEdx = (exp(Beta * Wion * dQdx ) - Alpha) / Beta;
-  
+
   return dEdx;
 
 }
@@ -416,13 +416,13 @@ double util::LArPropertiesServiceArgoNeuT::ElossVar(double mom, double mass) con
 //---------------------------------------------------------------------------------
 void util::LArPropertiesServiceArgoNeuT::checkDBstatus() const
 {
-  
+
   // if we don't have any business with DBs, we have already wasted enough time
   if (!DBsettings.ShouldConnect) return;
-    
+
     // have we already done our duty?
   if (fAlreadyReadFromDB) return;
-  
+
   if(DBsettings.ToughErrorTreatment) {
     // Have not read from DB: should read and requested tough treatment
     throw cet::exception("LArProperties") << " Extracting values from LArProperties before they "
@@ -576,11 +576,11 @@ std::map<std::string, std::map<double,double> > util::LArPropertiesServiceArgoNe
 
   return ToReturn;
 }
-//---------------------------------------------------------------------------------  
+//---------------------------------------------------------------------------------
 std::map<double, double> util::LArPropertiesServiceArgoNeuT::TpbAbs() const
 { throw cet::exception("LArPropertiesServiceArgoNeuT") << __func__ << "() not implemented here !\n"; }
 
-//--------------------------------------------------------------------------------- 
+//---------------------------------------------------------------------------------
 std::map<double, double> util::LArPropertiesServiceArgoNeuT::TpbEm() const
 { throw cet::exception("LArPropertiesServiceArgoNeuT") << __func__ << "() not implemented here !\n"; }
 
@@ -597,7 +597,7 @@ util::LArPropertiesServiceArgoNeuT::DBsettingsClass::DBsettingsClass() {
 
 
 namespace util{
- 
+
   DEFINE_ART_SERVICE_INTERFACE_IMPL(LArPropertiesServiceArgoNeuT, detinfo::LArPropertiesService)
 
 } // namespace util

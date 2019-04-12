@@ -4,7 +4,7 @@
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   July 27, 2017
  * @see    Track.h
- * 
+ *
  */
 
 // LArSoft libraries
@@ -23,9 +23,9 @@ proxy::TrackPointIterator proxy::details::TrackPointIteratorBox::end() const
 //---  proxy::Tracks implementation
 //------------------------------------------------------------------------------
 proxy::Track proxy::Tracks::getProxyAt(std::size_t index) const {
-  
+
   return { Base_t::getMainAt(index), hitsPerTrack[index] };
-  
+
 } // proxy::Tracks::getProxyAt()
 
 

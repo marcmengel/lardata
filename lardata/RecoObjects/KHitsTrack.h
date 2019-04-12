@@ -4,7 +4,7 @@
 ///
 /// \brief  Basic Kalman filter track class, with measurements.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class inherits the following attributes from KFitTrack.
 ///

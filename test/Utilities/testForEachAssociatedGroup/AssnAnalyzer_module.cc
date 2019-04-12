@@ -33,7 +33,7 @@ public:
   typedef  std::vector<int>             intvec_t;
   typedef  std::vector<std::string>     strvec_t;
   typedef  art::Assns<std::string, int> strintAssns_t;
-   
+
   explicit AssnAnalyzer(fhicl::ParameterSet const & p);
   // The compiler-generated destructor is fine for non-base
   // classes without bare pointers or other resource use.
@@ -49,21 +49,21 @@ public:
 
 private:
    art::InputTag fInputLabel;
-   
+
    std::set<std::string> fEnabledTests;
-   
+
    void for_each_associated_group_test(art::Event const & e) const;
    void associated_groups_test(art::Event const & e) const;
    void associated_groups_with_left_test(art::Event const & e) const;
-   
+
 };
 
 
 namespace {
-   
+
    bool starts_with(std::string const& s, std::string const& key)
      { return s.substr(0, key.length()) == key; }
-   
+
 } // local namespace
 
 
@@ -100,7 +100,7 @@ void AssnAnalyzer::for_each_associated_group_test(art::Event const & e) const
    typedef typename art::Assns<int, std::string> istr_assns;
    auto const & int_to_str_assns = *e.getValidHandle<istr_assns> (fInputLabel);
    auto vs = strvec_t {"one", "one-a", "two", "two-a", "three", "three-a"};
-   
+
    strvec_t strvec;
    auto strings = [&strvec](auto strs) {
       for(auto s=begin(strs); s!=end(strs); ++s) {
@@ -108,9 +108,9 @@ void AssnAnalyzer::for_each_associated_group_test(art::Event const & e) const
          strvec.push_back(**s);
       }
    };
-   
+
    art::for_each_group(int_to_str_assns, strings);
-   
+
    //strings should be same as vs
    for(auto k=0; k<6;++k) {
       if (strvec[k] != vs[k]) {
@@ -119,7 +119,7 @@ void AssnAnalyzer::for_each_associated_group_test(art::Event const & e) const
           << "', got '" << strvec[k] << "' instead!\n";
       }
    }
-   
+
 } // for_each_associated_group_test()
 
 
@@ -127,11 +127,11 @@ void AssnAnalyzer::associated_groups_test(art::Event const & e) const
 {
    // this is the exact same test as for_each_associated_group_test(),
    // but written with an explicit loop
-   
+
    typedef typename art::Assns<int, std::string> istr_assns;
    auto const & int_to_str_assns = *e.getValidHandle<istr_assns> (fInputLabel);
    auto vs = strvec_t {"one", "one-a", "two", "two-a", "three", "three-a"};
-   
+
    strvec_t strvec;
    for (auto strs: util::associated_groups(int_to_str_assns)) {
       for(art::Ptr<std::string> const& s: strs) {
@@ -139,7 +139,7 @@ void AssnAnalyzer::associated_groups_test(art::Event const & e) const
          strvec.push_back(*s);
       }
    } // for associated groups
-   
+
    //strings should be same as vs
    for(auto k=0; k<6;++k) {
       if (strvec[k] != vs[k]) {
@@ -148,7 +148,7 @@ void AssnAnalyzer::associated_groups_test(art::Event const & e) const
           << "', got '" << strvec[k] << "' instead!\n";
       }
    }
-   
+
 } // associated_groups_test()
 
 
@@ -156,7 +156,7 @@ void AssnAnalyzer::associated_groups_with_left_test(art::Event const & e) const
 {
    // this is the exact same test as associated_groups_test(),
    // but passing around also the key
-   
+
    typedef typename art::Assns<int, std::string> istr_assns;
    auto const & int_to_str_assns = *e.getValidHandle<istr_assns> (fInputLabel);
    std::vector<std::pair<int, std::string>> vs = {
@@ -167,21 +167,21 @@ void AssnAnalyzer::associated_groups_with_left_test(art::Event const & e) const
      { 3, "three"   },
      { 3, "three-a" }
    };
-   
+
    std::vector<std::pair<int, std::string>> strvec;
    for (auto const& group: util::associated_groups_with_left(int_to_str_assns))
    {
-      // user code here: 
+      // user code here:
       auto const& key = std::get<0>(group);  // group.first also ok
       auto const& strs = std::get<1>(group); // group.second also ok
-      
+
       std::cout << "#" << (*key) << " (" << key << ")" << std::endl;
       for(art::Ptr<std::string> const& s: strs) {
          std::cout << " - " << s << " \"" << *s << "\"" << std::endl;
          strvec.emplace_back(*key, *s);
       }
    } // for associated groups
-   
+
    //strings should be same as vs
    for(auto k=0; k<6;++k) {
       std::string const& s = strvec[k].second;
@@ -189,21 +189,21 @@ void AssnAnalyzer::associated_groups_with_left_test(art::Event const & e) const
       if      (starts_with(s, "one"  )) key = 1;
       else if (starts_with(s, "two"  )) key = 2;
       else if (starts_with(s, "three")) key = 3;
-      
+
       if (key != vs[k].first) {
         throw art::Exception(art::errors::LogicError)
           << "String #" << k << " expected to have key '" << vs[k].first
           << "', got '" << key << "' instead!\n";
       }
-      
+
       if (s != vs[k].second) {
         throw art::Exception(art::errors::LogicError)
           << "String #" << k << " expected to be '" << vs[k].second
           << "', got '" << s << "' instead!\n";
       }
-      
+
    }
-   
+
 } // associated_groups_test()
 
 

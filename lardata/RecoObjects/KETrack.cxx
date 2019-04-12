@@ -40,7 +40,7 @@ namespace trkf {
   ///
   KETrack::KETrack(const std::shared_ptr<const Surface>& psurf,
 		   const TrackVector& vec,
-		   const TrackError& err, 
+		   const TrackError& err,
 		   Surface::TrackDirection dir,
 		   int pdg) :
     KTrack(psurf, vec, dir, pdg),

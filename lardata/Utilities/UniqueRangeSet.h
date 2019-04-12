@@ -28,7 +28,7 @@ namespace util {
      modification of element. I assume what we're interested in is "find if the range already \n
      exists, and merge if it exists". The insert function does that by recursively looking up \n
      overlapping elements w.r.t. input argument of insert function.                           \n
-     
+
      One important function worth noting is util::UniqueRangeSet::Exclusive which takes two   \n
      input arguments, "start" and "end", and returns util::UniqueRangeSet of all exclusive    \n
      regions between "start" and "end". By definition, merging this return with the original  \n
@@ -48,14 +48,14 @@ namespace util {
 
     /// Very first "start" of all contained range
     const T& Start() const
-    { 
+    {
       if(!(this->size())) throw std::runtime_error("Nothing in the set!");
       return (*(this->begin()))._window.first;
     }
 
     /// Very last "end" of all contained range
     const T& End() const
-    { 
+    {
       if(!(this->size())) throw std::runtime_error("Nothing in the set!");
       return (*(this->rbegin()))._window.second;
     }
@@ -71,7 +71,7 @@ namespace util {
 
       auto start_iter = std::lower_bound(this->begin(),this->end(),start);
       auto end_iter   = std::lower_bound(this->begin(),this->end(),end);
-      
+
       // Anything to add to the head?
       if(start < (*start_iter)._window.first) res.emplace(start,(*start_iter)._window.first);
 
@@ -86,18 +86,18 @@ namespace util {
       }
 
       // Anything to add to the tail?
-      if(tmp_end < end) 
+      if(tmp_end < end)
 	res.emplace(tmp_end,end);
 
       return res;
     }
-    
+
     /// Modified emplace that merges overlapping range. Return = # merged range.
     size_t emplace(const T& start,const T& end) {
 
       auto res = std::set<util::Range<T> >::emplace(start,end);
       if(res.second) return 0;
-      
+
       auto& iter = res.first;
       auto tmp_a = Range<T>(start,end);
       size_t ctr=0;
@@ -114,7 +114,7 @@ namespace util {
     /// Modified insert that merges overlapping range. Return = # merged range.
     size_t insert(const Range<T>& a)
     {return emplace(a._window.first,a._window.second);}
-    
+
   };
 }
 

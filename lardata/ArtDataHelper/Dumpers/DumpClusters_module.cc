@@ -39,10 +39,10 @@ namespace recob {
    *
    * This analyser prints the content of all the clusters into the
    * LogInfo/LogVerbatim stream.
-   * 
+   *
    * Configuration parameters
    * -------------------------
-   * 
+   *
    * - *ClusterModuleLabel* (string, _required_): input tag from the
    *   producer used to create the recob::Cluster collection to be dumped
    * - *OutputCategory* (string, default: `"DumpClusters"`): the category
@@ -53,12 +53,12 @@ namespace recob {
    */
   class DumpClusters : public art::EDAnalyzer {
       public:
-    
+
     /// Configuration object
     struct Config {
       using Comment = fhicl::Comment;
       using Name = fhicl::Name;
-      
+
       fhicl::Atom<art::InputTag> ClusterModuleLabel{
         Name("ClusterModuleLabel"),
         Comment("input tag for the clusters to be dumped")
@@ -73,14 +73,14 @@ namespace recob {
         Comment("number of hits per line (0 suppresses hit dumping)"),
         20U
         };
-      
+
     }; // Config
-    
+
     using Parameters = art::EDAnalyzer::Table<Config>;
-    
+
     /// Default constructor
-    explicit DumpClusters(Parameters const& config); 
-    
+    explicit DumpClusters(Parameters const& config);
+
     /// Does the printing
     void analyze (const art::Event& evt);
 
@@ -97,7 +97,7 @@ namespace recob {
 
 //------------------------------------------------------------------------------
 namespace {
-  
+
   /// Returns the length of the string representation of the specified object
   template <typename T>
   size_t StringLength(const T& value) {
@@ -105,14 +105,14 @@ namespace {
     sstr << value;
     return sstr.str().length();
   } // StringLength()
-  
+
 } // local namespace
 
 namespace recob {
 
   //-------------------------------------------------
   DumpClusters::DumpClusters(Parameters const& config)
-    : EDAnalyzer         (config) 
+    : EDAnalyzer         (config)
     , fClusterModuleLabel(config().ClusterModuleLabel())
     , fOutputCategory    (config().OutputCategory())
     , fHitsPerLine       (config().HitsPerLine())
@@ -121,49 +121,49 @@ namespace recob {
 
   //-------------------------------------------------
   void DumpClusters::analyze(const art::Event& evt) {
-    
+
     // fetch the data to be dumped on screen
     art::InputTag ClusterInputTag(fClusterModuleLabel);
-    
+
     auto Clusters
       = evt.getValidHandle<std::vector<recob::Cluster>>(ClusterInputTag);
-    
+
     // get cluster-hit associations
     art::FindManyP<recob::Hit> HitAssn(Clusters, evt, ClusterInputTag);
-    
+
     mf::LogInfo(fOutputCategory)
       << "The event contains " << Clusters->size() << " '"
       << ClusterInputTag.encode() << "' clusters";
-    
+
     unsigned int iCluster = 0;
     std::vector<size_t> HitBuffer(fHitsPerLine), LastBuffer;
     for (const recob::Cluster& cluster: *Clusters) {
       decltype(auto) ClusterHits = HitAssn.at(iCluster);
-      
+
       // print a header for the cluster
       mf::LogVerbatim(fOutputCategory)
         << "Cluster #" << (iCluster++) << " from " << ClusterHits.size()
         << " hits: " << cluster;
-      
-      
+
+
       // print the hits of the cluster
       if ((fHitsPerLine > 0) && !ClusterHits.empty()) {
         std::vector<size_t> HitIndices;
         for (art::Ptr<recob::Hit> pHit: ClusterHits)
           HitIndices.push_back(pHit.key());
         std::sort(HitIndices.begin(), HitIndices.end());
-        
+
         unsigned int Padding = ::StringLength(HitIndices.back());
-        
+
         mf::LogVerbatim(fOutputCategory) << "  hit indices:";
-        
+
         std::vector<size_t>::const_iterator iHit = HitIndices.begin(),
           hend = HitIndices.end();
         size_t RangeStart = *iHit, RangeStop = RangeStart;
         std::ostringstream output_line;
         size_t nItemsInLine = 0;
         while (++iHit != hend) {
-          
+
           if (*iHit == RangeStop + 1) {
             ++RangeStop;
           }
@@ -185,16 +185,16 @@ namespace recob {
             // - start a new one
             RangeStart = RangeStop = *iHit;
           } // if ... else
-          
+
           // if we have enough stuff in the buffer, let's print it
           if (nItemsInLine >= fHitsPerLine) {
             nItemsInLine = 0;
             mf::LogVerbatim(fOutputCategory) << " " << output_line.str();
             output_line.str("");
           }
-          
+
         } // while
-        
+
         mf::LogVerbatim line_out(fOutputCategory);
         line_out << " " << output_line.str();
         if (RangeStart == RangeStop)
@@ -206,9 +206,9 @@ namespace recob {
             << std::setw(Padding) << std::setfill(fill) << RangeStop;
         }
       } // if dumping the hits
-    
+
     } // for clusters
-    
+
   } // DumpClusters::analyze()
 
   DEFINE_ART_MODULE(DumpClusters)

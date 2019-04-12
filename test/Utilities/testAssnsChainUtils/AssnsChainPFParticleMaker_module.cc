@@ -33,42 +33,42 @@
 
 namespace lar {
   namespace test {
-    
+
     // -------------------------------------------------------------------------
     /**
     * @brief Creates some dummy PFParticles and associations to clusters.
-    * 
+    *
     * Configuration parameters
     * =========================
-    * 
+    *
     * * *clusters* (list of input tags): collections of the clusters to be
     *     used if PFParticles
     * * *clustersPerPFO* (unsigned integer, default: 3): number of clusters
     *   combined into each PFParticle
-    * 
+    *
     */
     class AssnsChainPFParticleMaker: public art::EDProducer {
         public:
-      
+
       struct Config {
         using Name = fhicl::Name;
         using Comment = fhicl::Comment;
-        
+
         fhicl::Sequence<art::InputTag> clusters{
           Name("clusters"),
           Comment("collections of clusters to be combined")
           };
-        
+
         fhicl::Atom<unsigned int> clustersPerPFO{
           Name("clustersPerPFO"),
           Comment("number of clusters combined into each PFParticle"),
           3
           };
-        
+
       }; // struct Config
-      
+
       using Parameters = art::EDProducer::Table<Config>;
-      
+
       explicit AssnsChainPFParticleMaker(Parameters const& config)
         : EDProducer{config}
         , clusterTags(config().clusters())
@@ -79,47 +79,47 @@ namespace lar {
         }
 
       virtual void produce(art::Event& event) override;
-      
+
         private:
       std::vector<art::InputTag> clusterTags; ///< List of cluster tags.
       unsigned int nClustersPerPFO; ///< Maximum number of clusters per PFO.
-      
+
       /// Returns a list of clusters to be combined.
       std::vector<art::Ptr<recob::Cluster>> collectClusters
         (art::Event const& event) const;
-      
+
     };  // AssnsChainPFParticleMaker
 
     // -------------------------------------------------------------------------
-    
-    
+
+
   } // namespace test
 } // namespace lar
 
 
 // -----------------------------------------------------------------------------
 void lar::test::AssnsChainPFParticleMaker::produce(art::Event& event) {
-  
+
   //
   // prepare input: merge all hits in a single collection
   //
   std::vector<art::Ptr<recob::Cluster>> clusters = collectClusters(event);
-  
+
   //
   // prepare output
   //
   auto PFOs = std::make_unique<std::vector<recob::PFParticle>>();
   auto clusterPFOassns
     = std::make_unique<art::Assns<recob::Cluster, recob::PFParticle>>();
-  
+
   //
   // create the PFParticles
   //
   unsigned int nPFOs = clusters.size() / nClustersPerPFO;
   if (nPFOs * nClustersPerPFO < clusters.size()) ++nPFOs;
-  
+
   art::PtrMaker<recob::PFParticle> ptrMaker(event);
-  
+
   unsigned int nDaughtersPerParticle = 2;
   unsigned int nParticlesInTier = 1;
   std::size_t firstPFOinThisTier = 0;
@@ -128,16 +128,16 @@ void lar::test::AssnsChainPFParticleMaker::produce(art::Event& event) {
   std::vector<std::size_t> parents
     (nPFOs, std::size_t(recob::PFParticle::kPFParticlePrimary));
   for (unsigned int i = 0; i < nPFOs; ++i) {
-    
+
     // prepare for the next tier, if needed
     if (i >= firstPFOinNextTier) {
       firstPFOinThisTier = firstPFOinNextTier;
-      
+
       nParticlesInTier *= nDaughtersPerParticle;
       nDaughtersPerParticle += 1;
       firstPFOinNextTier += nParticlesInTier;
     } // if
-    
+
     //
     // assign clusters to PFO
     //
@@ -147,7 +147,7 @@ void lar::test::AssnsChainPFParticleMaker::produce(art::Event& event) {
       PFOclusters.push_back(clusters[iCluster]);
       iCluster += nPFOs;
     } // while
-    
+
     //
     // generate the PFParticle
     //
@@ -160,14 +160,14 @@ void lar::test::AssnsChainPFParticleMaker::produce(art::Event& event) {
       daughters.push_back(nextDaughter);
       ++nextDaughter;
     } // while
-    
+
     PFOs->emplace_back(
       11,                  // pdgCode (11 = shower-like)
       i,                   // self
       parents[i],          // parent
       std::move(daughters)
       );
-    
+
     //
     // generate associations
     //
@@ -177,18 +177,18 @@ void lar::test::AssnsChainPFParticleMaker::produce(art::Event& event) {
         << "Associating cluster " << cluster << " with PFO " << PFOptr;
       clusterPFOassns->addSingle(cluster, PFOptr);
     }
-    
+
   } // for
-  
+
   mf::LogInfo("AssnsChainPFParticleMaker")
     << "Created " << PFOs->size() << " particle flow objects with about "
     << nClustersPerPFO << " clusters each from " << clusters.size()
     << " clusters and " << clusterPFOassns->size() << " associations from "
     << clusterTags.size() << " collections";
-  
+
   event.put(std::move(PFOs));
   event.put(std::move(clusterPFOassns));
-  
+
 } // lar::test::AssnsChainClusterMaker::produce()
 
 
@@ -197,18 +197,18 @@ std::vector<art::Ptr<recob::Cluster>>
 lar::test::AssnsChainPFParticleMaker::collectClusters
   (art::Event const& event) const
 {
-  
+
   std::vector<art::Ptr<recob::Cluster>> allClusters;
-  
+
   for (auto const& tag: clusterTags) {
     auto clusters = event.getValidHandle<std::vector<recob::Cluster>>(tag);
-    
+
     std::size_t const nClusters = clusters->size();
     for (std::size_t i = 0; i < nClusters; ++i)
       allClusters.emplace_back(clusters, i);
-    
+
   } // for
-  
+
   return allClusters;
 } // lar::test::AssnsChainPFParticleMaker::collectClusters()
 

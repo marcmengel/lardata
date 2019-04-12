@@ -29,22 +29,22 @@ class lartest::AssnProducer1 : public art::EDProducer {
 public:
    typedef  std::vector<int>             intvec_t;
    typedef  std::vector<std::string>     strvec_t;
-   
+
    explicit AssnProducer1(fhicl::ParameterSet const & p);
    // The compiler-generated destructor is fine for non-base
    // classes without bare pointers or other resource use.
-   
+
    // Plugins should not be copied or assigned.
    AssnProducer1(AssnProducer1 const &) = delete;
    AssnProducer1(AssnProducer1 &&) = delete;
    AssnProducer1 & operator = (AssnProducer1 const &) = delete;
    AssnProducer1 & operator = (AssnProducer1 &&) = delete;
-   
+
    // Required functions.
    void produce(art::Event & e) override;
-   
+
 private:
-  
+
 };
 
 
@@ -59,7 +59,7 @@ void AssnProducer1::produce(art::Event & e)
 {
    auto vs = std::make_unique<strvec_t>(strvec_t {"one", "one-a", "two", "two-a", "three", "three-a"});
    auto vi = std::make_unique<intvec_t>(intvec_t {1, 2, 3});
-  
+
    e.put(std::move(vs));
    e.put(std::move(vi));
 }

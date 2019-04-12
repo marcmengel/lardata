@@ -129,7 +129,7 @@ namespace trkf {
 
     if(!getMeasSurface()->isEqual(*tre.getSurface()))
       throw cet::exception("KHitWireX") << "Track surface not the same as measurement surface.\n";
- 
+
     // Prediction is just u track perameter and error.
 
     int size = tre.getVector().size();

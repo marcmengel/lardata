@@ -51,5 +51,5 @@ class lris::LArRawInputDriver {
   stringvec_t                    inputfiles_;
   stringvec_t::const_iterator    nextfile_;
   stringvec_t::const_iterator    filesdone_;
-  art::SubRunID                  currentSubRunID_; 
+  art::SubRunID                  currentSubRunID_;
 };  // LArRawInputDriver

@@ -125,7 +125,7 @@ namespace trkf {
   ///
   /// track - Track to fill.
   ///
-  void KGTrack::fillTrack(recob::Track& track, 
+  void KGTrack::fillTrack(recob::Track& track,
 			  int id) const
   {
 
@@ -279,15 +279,15 @@ namespace trkf {
       const KHitBase& hit = *(trh.getHit());
       int plane = hit.getMeasPlane();
       std::ios_base::fmtflags f = out.flags();
-      out << "State " << std::setw(4) << n 
-	  << ", path=" << std::setw(8) << std::fixed << std::setprecision(2) << s 
-	  << ", length=" << std::setw(8) << len 
-	  << ", x=" << std::setw(8) << xyz[0] 
-	  << ", y=" << std::setw(8) << xyz[1] 
+      out << "State " << std::setw(4) << n
+	  << ", path=" << std::setw(8) << std::fixed << std::setprecision(2) << s
+	  << ", length=" << std::setw(8) << len
+	  << ", x=" << std::setw(8) << xyz[0]
+	  << ", y=" << std::setw(8) << xyz[1]
 	  << ", z=" << std::setw(8) << xyz[2]
-	  << ", dx=" << std::setw(8) << mom[0] 
-	  << ", dy=" << std::setw(8) << mom[1] 
-	  << ", dz=" << std::setw(8) << mom[2] 
+	  << ", dx=" << std::setw(8) << mom[0]
+	  << ", dy=" << std::setw(8) << mom[1]
+	  << ", dz=" << std::setw(8) << mom[2]
 	  << ", plane=" << std::setw(1) << plane
 	  << "\n";
       out.flags(f);
@@ -295,7 +295,7 @@ namespace trkf {
       oldxyz[0] = xyz[0];
       oldxyz[1] = xyz[1];
       oldxyz[2] = xyz[2];
-      
+
       ++n;
       first = false;
     }

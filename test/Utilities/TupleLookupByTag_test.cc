@@ -3,7 +3,7 @@
  * @brief  Unit tests on `TupleLookupByTag.h` utilities.
  * @author Gianluca Petrillo
  * @date   August 17, 2018
- * 
+ *
  * Most of the tests are static and their failure will trigger compilation
  * errors.
  */
@@ -273,71 +273,71 @@ static_assert(util::count_types<TestTaggedC,   TestTaggedTuple_t>() == 0, "Bug :
 
 
 namespace my {
-  
+
   // A class supporting tuple-type operations.
   template <typename... Data>
   class MyTuple {
     using tuple_t = std::tuple<Data...>;
     tuple_t data;
-    
-    
+
+
       public:
     template <std::size_t I>
     using element_type = std::tuple_element_t<I, tuple_t>;
-    
+
     MyTuple(Data&&... data): data(std::forward<Data>(data)...) {}
     MyTuple(tuple_t&& data): data(std::move(data)) {}
-    
+
     template <std::size_t I>
     auto get() -> decltype(auto) { return std::get<I>(data); }
-    
+
     template <std::size_t I>
     auto get() const -> decltype(auto) { return std::get<I>(data); }
-    
+
     template <typename T>
     auto get() -> decltype(auto) { return std::get<T>(data); }
-    
+
     template <typename T>
     auto get() const -> decltype(auto) { return std::get<T>(data); }
-    
-    
+
+
     static constexpr std::size_t tuple_size()
       { return std::tuple_size<tuple_t>(); }
-    
+
   }; // MyTuple
-  
-  
+
+
   template <typename... Data>
   auto make_my_tuple(Data&&... data)
     { return MyTuple<Data...>{ std::forward<Data>(data)... }; }
-  
-  
+
+
   template <std::size_t I, typename... T>
   auto get(MyTuple<T...> const& t) -> decltype(auto)
     { return t.template get<I>(); }
-  
+
   template <typename Target, typename... T>
   auto get(MyTuple<T...> const& t) -> decltype(auto)
     { return t.template get<Target>(); }
-  
-  
+
+
 } // namespace my
 
 
 namespace std {
   // specialization of tuple-like operations for the new type
-  
+
   template <std::size_t I, typename... T>
   class tuple_element<I, my::MyTuple<T...>> {
       public:
     using type = typename my::MyTuple<T...>::template element_type<I>;
   }; // class tuple_element<MyTuple>
-  
+
   template <typename... T>
   class tuple_size<my::MyTuple<T...>>
     : public std::integral_constant<std::size_t, my::MyTuple<T...>::tuple_size()>
     {};
-  
+
 } // namespace std
 
 
@@ -347,7 +347,7 @@ namespace std {
 template <typename Tag, typename Payload = void>
 struct TaggedType: public TaggedType<Tag> {
   Payload data;
-  
+
   TaggedType(Payload data): data(data) {}
 }; // TaggedType
 
@@ -362,34 +362,34 @@ using TagC = util::TagN<2>;
 
 
 void testMakeTagged() {
-  
+
   struct MyData {
     int content = 5;
   };
-  
+
   struct MyStonedData: public MyData, public lar::UncopiableAndUnmovableClass {};
-  
+
   MyData lightData;        // moveable, copiable
   MyStonedData heavyStone; // unmoveable, uncopiable
-  
+
   decltype(auto) lightDataTagged     = util::makeTagged<TagA>(lightData        );
   decltype(auto) heavyStoneTagged    = util::makeTagged<TagA>(heavyStone       );
   decltype(auto) lightDataCopyTagged = util::makeTagged<TagA>(MyData(lightData));
-  
+
   static_assert( std::is_lvalue_reference<decltype(util::makeTagged<TagA>(lightData)        )>(), "makeTagged(moveable lvalue)   does not produce a reference");
   static_assert( std::is_lvalue_reference<decltype(util::makeTagged<TagA>(heavyStone)       )>(), "makeTagged(unmoveable lvalue) does not produce a reference");
   static_assert(!std::is_lvalue_reference<decltype(util::makeTagged<TagA>(MyData(lightData)))>(), "makeTagged(rvalue) produces a (lvalue) reference"          );
   static_assert(!std::is_rvalue_reference<decltype(util::makeTagged<TagA>(MyData(lightData)))>(), "makeTagged(rvalue) produces a (rvalue) reference"          );
-  
+
   assert(std::addressof(lightDataTagged    ) == std::addressof(lightData ));
   assert(std::addressof(heavyStoneTagged   ) == std::addressof(heavyStone));
   assert(std::addressof(lightDataCopyTagged) != std::addressof(lightData ));
-  
+
 } // testMakeTagged()
 
 
 int main() {
-  
+
   //
   // test data
   //
@@ -405,14 +405,14 @@ int main() {
 //  assert((util::getByExtractedType<TestExtractTag, TestTagA>(testTuple).value == 1));
   assert((util::getByExtractedType<TestExtractTag, TestTagB>(testTuple).value == 2));
 //  assert((util::getByExtractedType<TestExtractTag, TestTagC>(testTuple).value == 3));
-  
+
   using DataA = TaggedType<TagA, int>;
   using DataB = TaggedType<TagB, int>;
   using DataC = TaggedType<TagC, char>;
-  
+
   auto data         = my::make_my_tuple<DataA, DataC, DataB>(64, 'b', 66);
   auto dataWithDupl = my::make_my_tuple<DataA, DataC, DataA>(64, 'b', 66);
-  
+
   //
   // traditional std::get()
   //
@@ -423,7 +423,7 @@ int main() {
   static_assert(std::is_same<std::decay_t<decltype(get<0U>(dataWithDupl))>, DataA>(), "Unexpected type 1 (dupl)");
   static_assert(std::is_same<std::decay_t<decltype(get<1U>(dataWithDupl))>, DataC>(), "Unexpected type 2 (dupl)");
   static_assert(std::is_same<std::decay_t<decltype(get<2U>(dataWithDupl))>, DataA>(), "Unexpected type 3 (dupl)");
-  
+
   //
   // traditional std::get() (by type)
   //
@@ -434,7 +434,7 @@ int main() {
 //  static_assert(std::is_same<std::decay_t<decltype(get<DataA>(dataWithDupl))>, DataA>(), "Unexpected type 1 (dupl)"); // does not compile: duplicate types!
   static_assert(std::is_same<std::decay_t<decltype(get<DataC>(dataWithDupl))>, DataC>(), "Unexpected type 2 (dupl)");
 //  static_assert(std::is_same<std::decay_t<decltype(get<DataA>(dataWithDupl))>, DataA>(), "Unexpected type 3 (dupl)"); // does not compile: duplicate types!
-  
+
   //
   // traditional std::tuple_element()
   //
@@ -445,14 +445,14 @@ int main() {
   static_assert(std::is_same<std::tuple_element_t<0U, decltype(dataWithDupl)>, DataA>(), "Unexpected type 1 (dupl)");
   static_assert(std::is_same<std::tuple_element_t<1U, decltype(dataWithDupl)>, DataC>(), "Unexpected type 2 (dupl)");
   static_assert(std::is_same<std::tuple_element_t<2U, decltype(dataWithDupl)>, DataA>(), "Unexpected type 3 (dupl)");
-  
+
   //
   // traditional std::tuple_size
   //
   static_assert(std::tuple_size<decltype(data        )>() == 3U, "Unexpected tuple size");
   static_assert(std::tuple_size<decltype(dataWithDupl)>() == 3U, "Unexpected tuple size (dupl)");
-  
-  
+
+
   //
   // util::index_of_type()
   //
@@ -462,7 +462,7 @@ int main() {
 //  static_assert(util::index_of_type<DataA, decltype(dataWithDupl)>() == 0U, "Unexpected type 1 (dupl)");
     static_assert(util::index_of_type<DataC, decltype(dataWithDupl)>() == 1U, "Unexpected type 2 (dupl)");
 //  static_assert(util::index_of_type<DataA, decltype(dataWithDupl)>() == 2U, "Unexpected type 3 (dupl)");
-  
+
   //
   // util::index_of_tag()
   //
@@ -472,7 +472,7 @@ int main() {
 //  static_assert(util::index_of_tag<TagA, decltype(dataWithDupl)>() == 0U, "Unexpected tagged type 1 (dupl)");
     static_assert(util::index_of_tag<TagC, decltype(dataWithDupl)>() == 1U, "Unexpected tagged type 2 (dupl)");
 //  static_assert(util::index_of_tag<TagA, decltype(dataWithDupl)>() == 2U, "Unexpected tagged type 3 (dupl)");
-  
+
   //
   // util::type_with_tag()
   //
@@ -482,7 +482,7 @@ int main() {
 //  static_assert(std::is_same<util::type_with_tag_t<TagA, decltype(dataWithDupl)>, DataA>(), "Unexpected tagged type 1 (dupl)");
     static_assert(std::is_same<util::type_with_tag_t<TagC, decltype(dataWithDupl)>, DataC>(), "Unexpected tagged type 2 (dupl)");
 //  static_assert(std::is_same<util::type_with_tag_t<TagA, decltype(dataWithDupl)>, DataA>(), "Unexpected tagged type 3 (dupl)");
-  
+
   //
   // util::has_type()
   //
@@ -492,7 +492,7 @@ int main() {
   static_assert( util::has_type<DataA, decltype(dataWithDupl)>(), "Unexpected type 1 (dupl)");
   static_assert( util::has_type<DataC, decltype(dataWithDupl)>(), "Unexpected type 2 (dupl)");
   static_assert(!util::has_type<DataB, decltype(dataWithDupl)>(), "Unexpected type 3 (dupl)");
-  
+
   //
   // util::has_tag()
   //
@@ -502,7 +502,7 @@ int main() {
   static_assert( util::has_tag<TagA, decltype(dataWithDupl)>(), "Unexpected tagged type 1 (dupl)");
   static_assert( util::has_tag<TagC, decltype(dataWithDupl)>(), "Unexpected tagged type 2 (dupl)");
   static_assert(!util::has_tag<TagB, decltype(dataWithDupl)>(), "Unexpected tagged type 3 (dupl)");
-  
+
   //
   // util::count_types()
   //
@@ -512,7 +512,7 @@ int main() {
   static_assert(util::count_types<DataA, decltype(dataWithDupl)>() == 2, "Unexpected type 1 (dupl)");
   static_assert(util::count_types<DataC, decltype(dataWithDupl)>() == 1, "Unexpected type 2 (dupl)");
   static_assert(util::count_types<DataB, decltype(dataWithDupl)>() == 0, "Unexpected type 3 (dupl)");
-  
+
   //
   // util::count_tags()
   //
@@ -522,7 +522,7 @@ int main() {
   static_assert(util::count_tags<TagA, decltype(dataWithDupl)>() == 2, "Unexpected type 1 (dupl)");
   static_assert(util::count_tags<TagC, decltype(dataWithDupl)>() == 1, "Unexpected type 2 (dupl)");
   static_assert(util::count_tags<TagB, decltype(dataWithDupl)>() == 0, "Unexpected type 3 (dupl)");
-  
+
   //
   // util::has_duplicate_types()
   //
@@ -544,18 +544,18 @@ int main() {
 //  static_assert(std::is_same<std::decay_t<decltype(util::getByTag<TagA>(dataWithDupl).data)>, int >(), "Unexpected type 1 (dupl)"); // does not compile: duplicate types!
     static_assert(std::is_same<std::decay_t<decltype(util::getByTag<TagC>(dataWithDupl).data)>, char>(), "Unexpected type 2 (dupl)");
 //  static_assert(std::is_same<std::decay_t<decltype(util::getByTag<TagA>(dataWithDupl).data)>, int >(), "Unexpected type 3 (dupl)"); // does not compile: duplicate types!
-  
+
     assert((util::getByTag<TagA>(data)        ).data ==  64);
     assert((util::getByTag<TagC>(data)        ).data == 'b');
     assert((util::getByTag<TagB>(data)        ).data ==  66);
 //  assert((util::getByTag<TagA>(dataWithDupl)).data ==  64); // does not compile: duplicate types!
     assert((util::getByTag<TagC>(dataWithDupl)).data == 'b');
 //  assert((util::getByTag<TagA>(dataWithDupl)).data ==  66); // does not compile: duplicate types!
-  
-  // 
+
+  //
   // makeTagged()
   //
   testMakeTagged();
-  
+
   return 0;
 } // main()

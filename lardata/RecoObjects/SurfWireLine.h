@@ -4,7 +4,7 @@
 ///
 /// \brief  Linear surface defined by wire id and x coordinate.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class derives from SurfYZLine.  This class does not add any
 /// new members, but has a constructor that allows construction from

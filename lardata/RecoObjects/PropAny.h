@@ -4,7 +4,7 @@
 ///
 /// \brief  Propagate between any two surfaces.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// Class for propagating between any two surfaces.  This propagator
 /// tests the type of the destination surface, and calls the
@@ -39,8 +39,8 @@ namespace trkf {
 
     /// Propagate without error.
     boost::optional<double> short_vec_prop(KTrack& trk,
-					   const std::shared_ptr<const Surface>& surf, 
-					   Propagator::PropDirection dir, 
+					   const std::shared_ptr<const Surface>& surf,
+					   Propagator::PropDirection dir,
 					   bool doDedx,
 					   TrackMatrix* prop_matrix = 0,
 					   TrackError* noise_matrix = 0) const;

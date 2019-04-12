@@ -130,7 +130,7 @@ namespace trkf {
 
     if(!getMeasSurface()->isEqual(*tre.getSurface()))
       throw cet::exception("KHitWireLine") << "Track surface not the same as measurement surface.\n";
- 
+
     // Prediction is the signed impact parameter (parameter 0).
 
     int size = tre.getVector().size();

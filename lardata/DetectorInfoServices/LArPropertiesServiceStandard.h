@@ -21,10 +21,10 @@
 namespace detinfo{
   class LArPropertiesServiceStandard : public LArPropertiesService {
     public:
-      
+
       // this enables art to print the configuration help:
       using Parameters = art::ServiceTable<detinfo::LArPropertiesStandard::ConfigurationParameters_t>;
-      
+
       LArPropertiesServiceStandard(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
 
       virtual void   reconfigure(fhicl::ParameterSet const& pset) override;

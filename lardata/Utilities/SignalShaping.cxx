@@ -4,7 +4,7 @@
 ///
 /// \brief  Generic signal shaping class.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 ////////////////////////////////////////////////////////////////////////
 
@@ -16,7 +16,7 @@
 //----------------------------------------------------------------------
 // Constructor.
 //
-util::SignalShaping::SignalShaping() 
+util::SignalShaping::SignalShaping()
   : fResponseLocked(false)
   , fFilterLocked  (false)
   , fNorm (true)
@@ -278,17 +278,17 @@ void util::SignalShaping::CalculateDeconvKernel() const
     throw cet::exception("SignalShaping") << __func__ << ": inconsistent size, "
       << fFilter.size() << " vs. " << fConvKernel.size() << "\n";
   }
-  
-  // Calculate deconvolution kernel as the ratio of the 
+
+  // Calculate deconvolution kernel as the ratio of the
   // filter function and the convolution kernel.
 
   fDeconvKernel = fFilter;
   for(unsigned int i=0; i<fDeconvKernel.size(); ++i) {
     if(std::abs(fConvKernel[i].Re()) <= 0.0001 && std::abs(fConvKernel[i].Im()) <= 0.0001) {
-      fDeconvKernel[i] = 0.; 
+      fDeconvKernel[i] = 0.;
     }
     else {
-      fDeconvKernel[i] /= fConvKernel[i]; 
+      fDeconvKernel[i] /= fConvKernel[i];
     }
   }
 
@@ -308,7 +308,7 @@ void util::SignalShaping::CalculateDeconvKernel() const
     if ( fDeconvKernelPolarity == -1 )
       peak_response = 4096;
     for(unsigned int i = 0; i < fResponse.size(); ++i) {
-      if( (fResponse[i] > peak_response) 
+      if( (fResponse[i] > peak_response)
 	  and (fDeconvKernelPolarity == 1))
 	peak_response = fResponse[i];
       else if ( (fResponse[i] < peak_response)
@@ -321,10 +321,10 @@ void util::SignalShaping::CalculateDeconvKernel() const
       throw cet::exception("SignalShaping") << __func__
 					    << ": peak should always be positive (got " << peak_response << ")\n";
     }
-    
+
     // Find the peak value of the deconvoluted response
     // Should normally be at zero, but don't assume that.
-    
+
     double peak_deconv = 0.;
     for(unsigned int i = 0; i < deconv.size(); ++i) {
       if(deconv[i] > peak_deconv)
@@ -334,10 +334,10 @@ void util::SignalShaping::CalculateDeconvKernel() const
       throw cet::exception("SignalShaping") << __func__
 					    << ": deconvolution peak should always be positive (got " << peak_deconv << ")\n";
     }
-    
+
     // Multiply the deconvolution kernel by a factor such that
     // (Peak of response) = (Peak of deconvoluted response).
-    
+
     double ratio = peak_response / peak_deconv;
     for(unsigned int i = 0; i < fDeconvKernel.size(); ++i)
       fDeconvKernel[i] *= ratio;

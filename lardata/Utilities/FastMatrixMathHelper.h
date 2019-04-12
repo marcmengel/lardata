@@ -7,7 +7,7 @@
  * Currently includes:
  *  - determinant (2x2, 3x3, 4x4)
  *  - inversion (2x2, 3x3, 4x4)
- * 
+ *
  */
 
 #ifndef FASTMATRIXMATHHELPER_H
@@ -26,59 +26,59 @@
 
 namespace lar {
   namespace util {
-    
+
     namespace details {
-      
+
       /// Base class with common definitions for "fast" matrix operations.
       template <typename T, unsigned int DIM>
       struct FastMatrixOperationsBase {
         using Data_t = T;
-        
+
         static constexpr unsigned int Dim = DIM; ///< matrix dimensions
-        
+
         using Matrix_t = std::array<Data_t, Dim*Dim>;
         using Vector_t = std::array<Data_t, Dim>;
-        
+
         /// Returns the product of a square matrix times a column vector
         static Vector_t MatrixVectorProduct
           (Matrix_t const& mat, Vector_t const& vec);
-        
-        
+
+
         static constexpr Data_t sqr(Data_t v) { return v*v; }
       }; // struct FastMatrixOperationsBase<>
-      
-      
+
+
       /**
        * @brief Provides "fast" matrix operations.
        * @tparam T data type for the elements of the matrix
        * @tparam DIM the dimension of the (square) matrix
-       * 
+       *
        * Actually this class does nothing: specialize it!
-       * 
+       *
        * Once the specialization is in place, this class offers:
-       *     
+       *
        *     constexpr unsigned int Dim = 2;
        *     std::array<float, Dim*Dim> matrix;
-       *     
+       *
        *     float det = FastMatrixOperations<float, Dim>::Determinant();
-       *     
+       *
        *     std::array<float, Dim*Dim> inverse;
-       *     
+       *
        *     // generic inversion
        *     inverse = FastMatrixOperations<float, Dim>::InvertMatrix(matrix);
-       *     
+       *
        *     // faster inversion if we already have the determinant
        *     inverse = FastMatrixOperations<float, Dim>::InvertMatrix
        *       (matrix, det);
-       *     
+       *
        *     // faster inversion if we know the matrix is symmetric
        *     inverse = FastMatrixOperations<float, Dim>::InvertSymmetricMatrix
        *       (matrix);
-       *     
+       *
        *     // even faster inversion if we also know the determinant already
        *     inverse = FastMatrixOperations<float, Dim>::InvertSymmetricMatrix
        *       (matrix, det);
-       *     
+       *
        * Note that the inversion functions do not have a defined policy for
        * non-invertible matrices. If you need to check (and you usually do),
        * compute the determinant first, and invert only if `std::isnormal(det)`.
@@ -88,27 +88,27 @@ namespace lar {
         using Base_t = FastMatrixOperationsBase<T, DIM>;
         using Data_t = typename Base_t::Data_t;
         using Matrix_t = typename Base_t::Matrix_t;
-        
+
         /// Computes the determinant of a matrix
         static Data_t Determinant(Matrix_t const& mat);
-        
+
         /// Computes the determinant of a matrix, using the provided determinant
         static Matrix_t InvertMatrix(Matrix_t const& mat, Data_t det);
-        
+
         /// Computes the determinant of a symmatric matrix,
         /// using the provided determinant
         static Matrix_t InvertSymmetricMatrix(Matrix_t const& mat, Data_t det);
-        
+
         /// Computes the determinant of a matrix
         static Matrix_t InvertMatrix(Matrix_t const& mat)
           { return InvertMatrix(mat, Determinant(mat)); }
-        
+
         /// Computes the determinant of a matrix
         static Matrix_t InvertSymmetricMatrix(Matrix_t const& mat)
           { return InvertSymmetricMatrix(mat, Determinant(mat)); }
-        
+
       }; // struct FastMatrixOperations<>
-      
+
     } // namespace details
   } // namespace util
 } // namespace lar
@@ -120,29 +120,29 @@ namespace lar {
 //***
 namespace lar {
   namespace util {
-    
+
     namespace details {
-      
+
       template <unsigned int NCols>
       constexpr size_t MatrixIndex(unsigned int row, unsigned int col)
         { return row * NCols + col; }
-      
+
       template <unsigned int N>
       struct DeterminantHelperBase {
         static constexpr size_t index(unsigned int row, unsigned int col)
           { return MatrixIndex<N>(row, col); }
       }; // struct DeterminantHelperBase<>
-      
+
       template <typename T, unsigned int N,
         unsigned int... RnC // all row indices, then all column indices
         >
       struct DeterminantHelper: public DeterminantHelperBase<N> {
         using DeterminantHelperBase<N>::index;
-        
+
         static T compute(T const* data);
       }; // struct DeterminantHelper<>
-      
-      
+
+
       /// Determinant of a 1x1 submatrix
       template <typename T, unsigned int N,
         unsigned int R, unsigned int C
@@ -151,11 +151,11 @@ namespace lar {
         using DeterminantHelperBase<N>::index;
         static_assert(R < N, "invalid row index specified");
         static_assert(C < N, "invalid column index specified");
-        
+
         static T compute(T const* data) { return data[index(R, C)]; }
       }; // struct DeterminantHelper<>
-      
-      
+
+
       /// Determinant of a 2x2 submatrix
       template <typename T, unsigned int N,
         unsigned int R1, unsigned int R2,
@@ -169,9 +169,9 @@ namespace lar {
         static_assert(R2 < N, "invalid row index specified");
         static_assert(C1 < N, "invalid column index specified");
         static_assert(C2 < N, "invalid column index specified");
-        
+
         static constexpr T sqr(T v) { return v*v; }
-        
+
         static T compute(T const* data)
           {
             return data[index(R1, C1)] * data[index(R2, C2)]
@@ -182,8 +182,8 @@ namespace lar {
              */
           }
       }; // struct DeterminantHelper<>
-      
-      
+
+
       /// Determinant of a 3x3 submatrix
       template <typename T, unsigned int N,
         unsigned int R1, unsigned int R2, unsigned int R3,
@@ -213,8 +213,8 @@ namespace lar {
               ;
           }
       }; // struct DeterminantHelper<>
-      
-      
+
+
       /// Determinant of a 4x4 submatrix
       template <typename T, unsigned int N,
         unsigned int R1, unsigned int R2, unsigned int R3, unsigned int R4,
@@ -247,8 +247,8 @@ namespace lar {
               ;
           }
       }; // struct DeterminantHelper<>
-      
-      
+
+
       /// Routines for 2x2 matrices
       template <typename T>
       struct FastMatrixOperations<T, 2>:
@@ -258,29 +258,29 @@ namespace lar {
         static constexpr unsigned int Dim = Base_t::Dim;
         using Data_t = typename Base_t::Data_t;
         using Matrix_t = typename Base_t::Matrix_t;
-        
+
         /// Computes the determinant of a matrix
         static Data_t Determinant(Matrix_t const& mat)
           { return DeterminantHelper<T, Dim, 0, 1, 0, 1>::compute(mat.data()); }
-        
+
         /// Computes the determinant of a matrix, using the provided determinant
         static Matrix_t InvertMatrix(Matrix_t const& mat, Data_t det);
-        
+
         /// Computes the determinant of a symmatric matrix,
         /// using the provided determinant
         static Matrix_t InvertSymmetricMatrix(Matrix_t const& mat, Data_t det);
-        
+
         /// Computes the determinant of a matrix
         static Matrix_t InvertMatrix(Matrix_t const& mat)
           { return InvertMatrix(mat, Determinant(mat)); }
-        
+
         /// Computes the determinant of a matrix
         static Matrix_t InvertSymmetricMatrix(Matrix_t const& mat)
           { return InvertSymmetricMatrix(mat, Determinant(mat)); }
-        
+
       }; // struct FastMatrixOperations<T, 2>
-      
-      
+
+
       /// Routines for 3x3 matrices
       template <typename T>
       struct FastMatrixOperations<T, 3>:
@@ -290,32 +290,32 @@ namespace lar {
         static constexpr unsigned int Dim = Base_t::Dim;
         using Data_t = typename Base_t::Data_t;
         using Matrix_t = typename Base_t::Matrix_t;
-        
+
         /// Computes the determinant of a matrix
         static Data_t Determinant(Matrix_t const& mat)
           {
             return
               DeterminantHelper<T, Dim, 0, 1, 2, 0, 1, 2>::compute(mat.data());
           }
-        
+
         /// Computes the determinant of a matrix, using the provided determinant
         static Matrix_t InvertMatrix(Matrix_t const& mat, Data_t det);
-        
+
         /// Computes the determinant of a symmatric matrix,
         /// using the provided determinant
         static Matrix_t InvertSymmetricMatrix(Matrix_t const& mat, Data_t det);
-        
+
         /// Computes the determinant of a matrix
         static Matrix_t InvertMatrix(Matrix_t const& mat)
           { return InvertMatrix(mat, Determinant(mat)); }
-        
+
         /// Computes the determinant of a matrix
         static Matrix_t InvertSymmetricMatrix(Matrix_t const& mat)
           { return InvertSymmetricMatrix(mat, Determinant(mat)); }
-        
+
       }; // struct FastMatrixOperations<T, 3>
-      
-      
+
+
       /// Routines for 4x4 matrices
       template <typename T>
       struct FastMatrixOperations<T, 4>:
@@ -325,33 +325,33 @@ namespace lar {
         static constexpr unsigned int Dim = Base_t::Dim;
         using Data_t = typename Base_t::Data_t;
         using Matrix_t = typename Base_t::Matrix_t;
-        
+
         /// Computes the determinant of a matrix
         static Data_t Determinant(Matrix_t const& mat)
           {
             return DeterminantHelper<T, Dim, 0, 1, 2, 3, 0, 1, 2, 3>::compute
               (mat.data());
           }
-        
+
         /// Computes the determinant of a matrix, using the provided determinant
         static Matrix_t InvertMatrix(Matrix_t const& mat, Data_t det);
-        
+
         /// Computes the determinant of a symmatric matrix,
         /// using the provided determinant
         static Matrix_t InvertSymmetricMatrix(Matrix_t const& mat, Data_t det);
-        
+
         /// Computes the determinant of a matrix
         static Matrix_t InvertMatrix(Matrix_t const& mat)
           { return InvertMatrix(mat, Determinant(mat)); }
-        
+
         /// Computes the determinant of a matrix
         static Matrix_t InvertSymmetricMatrix(Matrix_t const& mat)
           { return InvertSymmetricMatrix(mat, Determinant(mat)); }
-        
+
       }; // struct FastMatrixOperations<T, 3>
-      
-      
-      
+
+
+
     } // namespace details
   } // namespace util
 } // namespace lar

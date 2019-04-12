@@ -36,41 +36,41 @@
 
 namespace lar {
   namespace test {
-    
+
     // -------------------------------------------------------------------------
     /**
     * @brief Creates some dummy clusters and associations to hits.
-    * 
+    *
     * Configuration parameters
     * =========================
-    * 
+    *
     * * *hits* (list of input tags): collections of the hits to be clustered
-    * * *hitsPerCluster* (unsigned integer, default: 100): number of hits 
+    * * *hitsPerCluster* (unsigned integer, default: 100): number of hits
     *   associated with each cluster
-    * 
+    *
     */
     class AssnsChainClusterMaker: public art::EDProducer {
         public:
-      
+
       struct Config {
         using Name = fhicl::Name;
         using Comment = fhicl::Comment;
-        
+
         fhicl::Sequence<art::InputTag> hits{
           Name("hits"),
           Comment("collections of hits to be clustered")
           };
-        
+
         fhicl::Atom<unsigned int> hitsPerCluster{
           Name("hitsPerCluster"),
           Comment("number of hits associated with each cluster"),
           100
           };
-        
+
       }; // struct Config
-      
+
       using Parameters = art::EDProducer::Table<Config>;
-      
+
       explicit AssnsChainClusterMaker(Parameters const& config)
         : EDProducer{config}, hitTags(config().hits())
         , nHitsPerCluster(config().hitsPerCluster())
@@ -80,57 +80,57 @@ namespace lar {
         }
 
       virtual void produce(art::Event& event) override;
-      
+
         private:
       std::vector<art::InputTag> hitTags; ///< List of hit tags for clustering.
       unsigned int nHitsPerCluster; ///< Maximum number of hits per cluster.
-      
+
       /// Returns a list of hits to be clustered.
       std::vector<art::Ptr<recob::Hit>> collectHits
         (art::Event const& event) const;
-      
+
     };  // AssnsChainClusterMaker
 
     // -------------------------------------------------------------------------
-    
-    
+
+
   } // namespace test
 } // namespace lar
 
 
 // -----------------------------------------------------------------------------
 namespace {
-  
+
   template <typename T>
   inline T sqr(T v) { return v*v; }
-  
+
 } // local namespace
 
 // -----------------------------------------------------------------------------
 void lar::test::AssnsChainClusterMaker::produce(art::Event& event) {
-  
+
   //
   // prepare input: merge all hits in a single collection
   //
   std::vector<art::Ptr<recob::Hit>> hits = collectHits(event);
-  
+
   //
   // prepare output
   //
   auto clusters = std::make_unique<std::vector<recob::Cluster>>();
   auto hitClusterAssns
     = std::make_unique<art::Assns<recob::Hit, recob::Cluster>>();
-  
+
   //
   // create the clusters
   //
   unsigned int nClusters = hits.size() / nHitsPerCluster;
   if (nClusters * nHitsPerCluster < hits.size()) ++nClusters;
-  
+
   art::PtrMaker<recob::Cluster> ptrMaker(event);
-  
+
   for (unsigned int i = 0; i < nClusters; ++i) {
-    
+
     //
     // assign hits to cluster
     //
@@ -140,7 +140,7 @@ void lar::test::AssnsChainClusterMaker::produce(art::Event& event) {
       clusterHits.push_back(hits[iHit]);
       iHit += nClusters;
     } // while
-    
+
     //
     // generate the cluster
     //
@@ -183,25 +183,25 @@ void lar::test::AssnsChainClusterMaker::produce(art::Event& event) {
       clusterHits.front()->WireID().asPlaneID(), // plane
       recob::Cluster::Sentry
       );
-    
+
     //
     // generate associations
     //
     auto const clusterPtr = ptrMaker(i); // art pointer to the new cluster
     for (art::Ptr<recob::Hit> const& hit: clusterHits)
       hitClusterAssns->addSingle(hit, clusterPtr);
-    
+
   } // for
-  
+
   mf::LogInfo("AssnsChainClusterMaker")
     << "Created " << clusters->size() << " clusters with about "
     << nHitsPerCluster << " hits each from " << hits.size() << " hits and "
     << hitClusterAssns->size() << " associations from "
     << hitTags.size() << " collections";
-  
+
   event.put(std::move(clusters));
   event.put(std::move(hitClusterAssns));
-  
+
 } // lar::test::AssnsChainClusterMaker::produce()
 
 
@@ -209,18 +209,18 @@ void lar::test::AssnsChainClusterMaker::produce(art::Event& event) {
 std::vector<art::Ptr<recob::Hit>> lar::test::AssnsChainClusterMaker::collectHits
   (art::Event const& event) const
 {
-  
+
   std::vector<art::Ptr<recob::Hit>> allHits;
-  
+
   for (auto const& tag: hitTags) {
     auto hits = event.getValidHandle<std::vector<recob::Hit>>(tag);
-    
+
     std::size_t const nHits = hits->size();
     for (std::size_t i = 0; i < nHits; ++i)
       allHits.emplace_back(hits, i);
-    
+
   } // for
-  
+
   return allHits;
 } // lar::test::AssnsChainClusterMaker::collectHits()
 

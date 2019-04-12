@@ -4,9 +4,9 @@
 ///
 /// \brief  Line surface perpendicular to x-axis.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
-/// This class represents a line surface perpendicular to the global 
+/// This class represents a line surface perpendicular to the global
 /// x-axis, or equivalently, parallel to the yz-plane.
 ///
 /// The surface parameters and local coordinate system of this
@@ -38,7 +38,7 @@
 /// 5. 1/p (nonmagnetic) or q/p (magnetic)
 ///
 /// r = Signed impoact parameter.  Absolute value of r is the perpendicular
-///     distance of the track to the v-axis at the point of closest 
+///     distance of the track to the v-axis at the point of closest
 ///     approach to v-axis.  Sign of r matches sign of L_v (v projection
 ///     of angular momentum).
 /// v = V-coordinate of track at point of closest approach to v-axis.

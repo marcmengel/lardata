@@ -4,7 +4,7 @@
 ///
 /// \brief  Base class for Kalman filter measurement.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class represents a general measurement on a surface.
 ///

@@ -76,7 +76,7 @@ namespace trkf {
     // v =  (y-y0)*cos(phi) + (z-z0)*sin(phi)
     uvw[1] = (xyz[1] - fY0) * cosphi + (xyz[2] - fZ0) * sinphi;
 
-    // w = -(y-y0)*sin(phi) + (z-z0)*cos(phi) 
+    // w = -(y-y0)*sin(phi) + (z-z0)*cos(phi)
     uvw[2] = -(xyz[1] - fY0) * sinphi + (xyz[2] - fZ0) * cosphi;
   }
 
@@ -206,7 +206,7 @@ namespace trkf {
   ///
   /// Throw an exception if the other surface is not parallel.
   ///
-  /// Assuming the other surface is parallel, the distance is 
+  /// Assuming the other surface is parallel, the distance is
   /// simply the w-coordinate of the other surface, and is signed.
   ///
   /// Arguments:
@@ -239,7 +239,7 @@ namespace trkf {
 
   /// Test two surfaces for equality, within tolerance.
   /// Here equal is defined as having all surface parameters the same,
-  /// not just having the surfaces coincide spatially, so that the 
+  /// not just having the surfaces coincide spatially, so that the
   /// local coordinate systems are the same between the two surfaces.
   ///
   /// Arguments:
@@ -263,7 +263,7 @@ namespace trkf {
       double dx = fX0 - psurf->x0();
       double dy = fY0 - psurf->y0();
       double dz = fZ0 - psurf->z0();
-      if(std::abs(delta_phi) <= fPhiTolerance && 
+      if(std::abs(delta_phi) <= fPhiTolerance &&
 	 std::abs(dx) <= fSepTolerance &&
 	 std::abs(dy) <= fSepTolerance &&
 	 std::abs(dz) <= fSepTolerance)

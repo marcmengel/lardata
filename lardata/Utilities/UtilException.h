@@ -2,7 +2,7 @@
  * \file UtilException.h
  *
  * \ingroup Utilities
- * 
+ *
  * \brief Class def header for exception classes used in GeometryUtilities
  *
  * @author kazuhiro
@@ -34,7 +34,7 @@ namespace util {
     }
 
     virtual ~UtilException() throw(){};
-    virtual const char* what() const throw() 
+    virtual const char* what() const throw()
     { return _msg.c_str(); }
 
   private:
@@ -44,5 +44,5 @@ namespace util {
 
 }
 #endif
-/** @} */ // end of doxygen group 
+/** @} */ // end of doxygen group
 

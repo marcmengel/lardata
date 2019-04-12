@@ -185,7 +185,7 @@ int main()
   for(unsigned int i = 0; i < m8.size1(); ++i) {
     for(unsigned int j = 0; j < m8.size2(); ++j)
       m8(i,j) = i + 2*j + (i==j ? 1. : 0.);
-    
+
   }
   trkf::KMatrix<3,3>::type minv8(m8);
   ok = trkf::invert(minv8);
@@ -207,7 +207,7 @@ int main()
   for(unsigned int i = 0; i < m9.size1(); ++i) {
     for(unsigned int j = 0; j < m9.size2(); ++j)
       m9(i,j) = i + 2*j + (i==j ? 1. : 0.);
-    
+
   }
   trkf::KMatrix<4,4>::type minv9(m9);
   ok = trkf::invert(minv9);
@@ -229,7 +229,7 @@ int main()
   for(unsigned int i = 0; i < m10.size1(); ++i) {
     for(unsigned int j = 0; j < m10.size2(); ++j)
       m10(i,j) = i + 2*j + (i==j ? 1. : 0.);
-    
+
   }
   trkf::TrackMatrix minv10(m10);
   ok = trkf::invert(minv10);

@@ -51,7 +51,7 @@ namespace trkf {
 
       // Extract the wireid from the Hit.
       geo::WireID hitWireID = hit.WireID();
-		
+
       uint32_t channel = hit.Channel();
 
       // Choose plane.

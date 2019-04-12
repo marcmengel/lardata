@@ -4,7 +4,7 @@
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   March 8th, 2016
  * @see    TrackUtils.h
- * 
+ *
  */
 
 // our header
@@ -29,13 +29,13 @@
 
 //------------------------------------------------------------------------------
 double lar::util::TrackProjectedLength(recob::Track const& track, geo::View_t view) {
-                  
+
    if(view == geo::kUnknown) {
       throw cet::exception("TrackProjectedLength") << "cannot provide projected length for "
         << "unknown view\n";
    }
    double length = 0.;
-   
+
    auto const* geom = lar::providerFrom<geo::Geometry>();
    double angleToVert = 0.;
    for(unsigned int i = 0; i < geom->Nplanes(); ++i){
@@ -54,17 +54,17 @@ double lar::util::TrackProjectedLength(recob::Track const& track, geo::View_t vi
       double dist = std::sqrt( std::pow(pos_cur.x() - pos_prev.x(), 2) +
          std::pow(pos_cur.y() - pos_prev.y(), 2) +
          std::pow(pos_cur.z() - pos_prev.z(), 2) );
-      
+
       // (sin(angleToVert),cos(angleToVert)) is the direction perpendicular to wire
       // fDir[p-1] is the direction between the two relevant points
       const auto& dir_prev = track.DirectionAtPoint(p - 1);
       double cosgamma = std::abs(std::sin(angleToVert)*dir_prev.Y() +
          std::cos(angleToVert)*dir_prev.Z() );
-      
+
       /// @todo is this right, or should it be dist*cosgamma???
       length += dist/cosgamma;
    } // end loop over distances between trajectory points
-   
+
    return length;
 } // lar::util::TrackProjectedLength()
 
@@ -74,17 +74,17 @@ double lar::util::TrackProjectedLength(recob::Track const& track, geo::View_t vi
 double lar::util::TrackPitchInView
   (recob::Track const& track, geo::View_t view, size_t trajectory_point /* = 0 */)
 {
-   
+
    if(view == geo::kUnknown) {
       throw cet::exception("TrackPitchInView") << "Warning cannot obtain pitch for unknown view\n";
    }
-   
+
    if(trajectory_point >= track.NumberTrajectoryPoints()) {
-      cet::exception("TrackPitchInView") << "ERROR: Asking for trajectory point #" 
+      cet::exception("TrackPitchInView") << "ERROR: Asking for trajectory point #"
          << trajectory_point << " when trajectory vector size is of size "
          << track.NumberTrajectoryPoints() << ".\n";
    }
-   
+
    auto const* geom = lar::providerFrom<geo::Geometry>();
    const auto& pos = track.LocationAtPoint(trajectory_point);
    const double Position[3] = { pos.X(), pos.Y(), pos.Z() };
@@ -95,16 +95,16 @@ double lar::util::TrackPitchInView
    }
    double wirePitch   = geom->WirePitch(view, tpcid.TPC, tpcid.Cryostat);
    double angleToVert = geom->WireAngleToVertical(view, tpcid.TPC, tpcid.Cryostat) - 0.5*::util::pi<>();
-                                   
+
    const auto& dir = track.DirectionAtPoint(trajectory_point);
    //(sin(angleToVert),cos(angleToVert)) is the direction perpendicular to wire
    double cosgamma = std::abs(std::sin(angleToVert)*dir.Y() +
      std::cos(angleToVert)*dir.Z());
-   
+
    if(cosgamma < 1.e-5)
       throw cet::exception("Track") << "cosgamma is basically 0, that can't be right\n";
    return wirePitch/cosgamma;
-                                                                                                  
+
 } // lar::util::TrackPitchInView()
-   
+
 //------------------------------------------------------------------------------

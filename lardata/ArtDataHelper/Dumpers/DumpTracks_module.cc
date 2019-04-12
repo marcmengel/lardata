@@ -37,7 +37,7 @@
 
 
 namespace {
-  
+
   /// Returns the length of the string representation of the specified object
   template <typename T>
   size_t StringLength(const T& value) {
@@ -45,7 +45,7 @@ namespace {
     sstr << value;
     return sstr.str().length();
   } // StringLength()
-  
+
   /**
    * @brief Prints a table with compact integers
    * @param log stream to send the output to
@@ -60,14 +60,14 @@ namespace {
     std::string IndentStr = "")
   {
     unsigned int Padding = StringLength(Indices.back());
-    
+
     typename CONT::const_iterator iIndex = Indices.begin(),
       iend = Indices.end();
     size_t RangeStart = *iIndex, RangeStop = RangeStart;
     std::ostringstream output_line;
     size_t nItemsInLine = 0;
     while (++iIndex != iend) {
-      
+
       if (*iIndex == RangeStop + 1) {
         ++RangeStop;
       }
@@ -90,16 +90,16 @@ namespace {
         // - start a new one
         RangeStart = RangeStop = *iIndex;
       } // if ... else
-      
+
       // if we have enough stuff in the buffer, let's print it
       if (nItemsInLine >= IndicesPerLine) {
         nItemsInLine = 0;
         log << IndentStr << output_line.str() << "\n";
         output_line.str("");
       }
-      
+
     } // while
-    
+
     // print what we have accumulated so far of the last line
     log << IndentStr << output_line.str();
     // print the last range (or single element)
@@ -115,9 +115,9 @@ namespace {
     }
     log << std::endl;
   } // PrintCompactIndexTable()
-  
-  
-  
+
+
+
   /**
    * @brief Prints a table with keys from a container of objects
    * @param log stream to send the output to
@@ -135,16 +135,16 @@ namespace {
     GETINDEX IndexExtractor, std::string IndentStr)
   {
     if ((IndicesPerLine == 0) || Objects.empty()) return;
-    
+
     std::vector<size_t> Indices;
     Indices.reserve(Objects.size());
     std::transform(Objects.begin(), Objects.end(), std::back_inserter(Indices),
       IndexExtractor);
     std::sort(Indices.begin(), Indices.end());
     PrintCompactIndexTable(log, Indices, IndicesPerLine, IndentStr);
-    
+
   } // PrintCompactIndexTable()
-  
+
   /**
    * @brief Prints a table with indices from a container of objects
    * @param log stream to send the output to
@@ -166,8 +166,8 @@ namespace {
       IndentStr
       );
   } // PrintAssociatedIndexTable()
-  
-  
+
+
   /**
    * @brief Prints a table with indices from a container of objects
    * @param log stream to send the output to
@@ -190,7 +190,7 @@ namespace {
       IndentStr
       );
   } // PrintAssociatedIDTable()
-  
+
 } // local namespace
 
 
@@ -203,10 +203,10 @@ namespace recob {
    * LogInfo/LogVerbatim stream.
    * The associated objects are printed only if they were produced with the
    * same input tag as the tracks.
-   * 
+   *
    * Configuration parameters
    * -------------------------
-   * 
+   *
    * - *TrackModuleLabel* (string, _required_): label of the
    *   producer used to create the recob::Track collection to be dumped
    * - *OutputCategory* (string, default: `"DumpTracks"`): the category
@@ -232,7 +232,7 @@ namespace recob {
     struct Config {
       using Comment = fhicl::Comment;
       using Name = fhicl::Name;
-      
+
       fhicl::Atom<art::InputTag> TrackModuleLabel{
         Name("TrackModuleLabel"),
         Comment("input tag for the tracks to be dumped")
@@ -272,14 +272,14 @@ namespace recob {
         Comment("prints the number of PF particles associated to the track"),
         true
         };
-      
+
     }; // Config
-    
+
     using Parameters = art::EDAnalyzer::Table<Config>;
-    
+
     /// Default constructor
-    explicit DumpTracks(Parameters const& config); 
-    
+    explicit DumpTracks(Parameters const& config);
+
     /// Does the printing
     void analyze (const art::Event& evt);
 
@@ -288,7 +288,7 @@ namespace recob {
     art::InputTag fTrackModuleLabel; ///< name of module that produced the tracks
     std::string fOutputCategory; ///< category for LogInfo output
     unsigned int fPrintWayPoints; ///< number of printed way points
-    
+
     bool fPrintNHits; ///< prints the number of associated hits
     bool fPrintNSpacePoints; ///< prints the number of associated space points
     bool fPrintNParticles; ///< prints the number of associated PFParticles
@@ -298,7 +298,7 @@ namespace recob {
 
     /// Dumps information about the specified track
     void DumpTrack(unsigned int iTrack, recob::Track const& track) const;
-    
+
   }; // class DumpTracks
 
 } // namespace recob
@@ -309,8 +309,8 @@ namespace recob {
 namespace recob {
 
   //-------------------------------------------------
-  DumpTracks::DumpTracks(Parameters const& config) 
-    : EDAnalyzer        (config) 
+  DumpTracks::DumpTracks(Parameters const& config)
+    : EDAnalyzer        (config)
     , fTrackModuleLabel (config().TrackModuleLabel())
     , fOutputCategory   (config().OutputCategory())
     , fPrintWayPoints   (config().WayPoints())
@@ -321,18 +321,18 @@ namespace recob {
     , fPrintSpacePoints (config().PrintSpacePoints())
     , fPrintParticles   (config().ParticleAssociations())
     {}
-  
+
   //-------------------------------------------------
   void DumpTracks::analyze(const art::Event& evt) {
-    
+
     // fetch the data to be dumped on screen
     auto Tracks
       = evt.getValidHandle<std::vector<recob::Track>>(fTrackModuleLabel);
-    
+
     mf::LogInfo(fOutputCategory)
       << "The event contains " << Tracks->size() << " '"
       << fTrackModuleLabel.encode() << "'tracks";
-    
+
     std::unique_ptr<art::FindManyP<recob::Hit>> pHits(
       fPrintNHits?
       new art::FindManyP<recob::Hit>(Tracks, evt, fTrackModuleLabel):
@@ -343,7 +343,7 @@ namespace recob {
         << "No hit associated with '" << fTrackModuleLabel.encode()
         << "' tracks.\n";
     }
-    
+
     std::unique_ptr<art::FindManyP<recob::SpacePoint>> pSpacePoints(
       fPrintNSpacePoints?
       new art::FindManyP<recob::SpacePoint>(Tracks, evt, fTrackModuleLabel):
@@ -354,7 +354,7 @@ namespace recob {
         << "No space point associated with '" << fTrackModuleLabel.encode()
         << "' tracks.\n";
     }
-    
+
     std::unique_ptr<art::FindManyP<recob::PFParticle>> pPFParticles(
       fPrintNParticles?
       new art::FindManyP<recob::PFParticle>(Tracks, evt, fTrackModuleLabel):
@@ -365,13 +365,13 @@ namespace recob {
         << "No particle-flow particle associated with '"
         << fTrackModuleLabel.encode() << "' tracks.\n";
     }
-    
+
     for (unsigned int iTrack = 0; iTrack < Tracks->size(); ++iTrack) {
       const recob::Track& track = Tracks->at(iTrack);
-      
+
       // print track information
       DumpTrack(iTrack, track);
-      
+
       mf::LogVerbatim log(fOutputCategory);
       if (pHits || pSpacePoints || pPFParticles) {
         log << "\n  associated with:";
@@ -382,20 +382,20 @@ namespace recob {
         if (pPFParticles)
           log << " " << pPFParticles->at(iTrack).size() << " PF particles;";
       } // if we have any association
-      
+
       if (pHits && fPrintHits) {
         const auto& Hits = pHits->at(iTrack);
         log << "\n  hit indices (" << Hits.size() << "):\n";
         PrintAssociatedIndexTable(log, Hits, 10 /* 10 hits per line */, "    ");
       } // if print individual hits
-      
+
       if (pSpacePoints && fPrintSpacePoints) {
         const auto& SpacePoints = pSpacePoints->at(iTrack);
         log << "\n  space point IDs (" << SpacePoints.size() << "):\n";
         PrintAssociatedIDTable
           (log, SpacePoints, 10 /* 10 hits per line */, "    ");
       } // if print individual space points
-      
+
       if (pPFParticles && fPrintParticles) {
         const auto& PFParticles = pPFParticles->at(iTrack);
         log << "\n  particle indices (" << PFParticles.size() << "):\n";
@@ -405,8 +405,8 @@ namespace recob {
       } // if print individual particles
     } // for tracks
   } // DumpTracks::analyze()
-  
-  
+
+
   //---------------------------------------------------------------------------
   void DumpTracks::DumpTrack
     (unsigned int iTrack, recob::Track const& track) const
@@ -434,7 +434,7 @@ namespace recob {
         << " )"
       << "\n  with "
         << nPoints << " trajectory points";
-    
+
     if (fPrintWayPoints > 0) {
       // print up to 10 (actually, 8 or 9) way points
       log << "\n  passes through:";
@@ -448,8 +448,8 @@ namespace recob {
       } // while (iPoint)
     } // if print way points
   } // DumpTracks::DumpTrack()
-  
-  
+
+
   //---------------------------------------------------------------------------
   DEFINE_ART_MODULE(DumpTracks)
 

@@ -23,10 +23,10 @@ namespace detinfo{
 
     public:
       virtual ~DetectorPropertiesService() = default;
-      
+
       virtual void   reconfigure(fhicl::ParameterSet const& pset) = 0;
       virtual const  detinfo::DetectorProperties* provider() const = 0;
-            
+
     }; // class DetectorPropertiesService
 } //namespace detinfo
 DECLARE_ART_SERVICE_INTERFACE(detinfo::DetectorPropertiesService, LEGACY)

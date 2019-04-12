@@ -4,9 +4,9 @@
 ///
 /// \brief  Planar surface parallel to x-axis.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
-/// This class represents a planar surface parallel to the global 
+/// This class represents a planar surface parallel to the global
 /// x-axis, or equivalently, the normal vector is in the yz-plane.
 ///
 /// This surface is defined by four parameters, which are,

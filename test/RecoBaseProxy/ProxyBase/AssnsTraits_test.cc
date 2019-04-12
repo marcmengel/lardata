@@ -3,7 +3,7 @@
  * @brief  Unit tests on _art_ association trait utilities.
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   April 17, 2018
- * 
+ *
  * The relevant components of this test are static.
  */
 

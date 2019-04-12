@@ -23,16 +23,16 @@
 // ... plus see below ...
 
 namespace hit {
-  
+
   /**
    * @brief Prints the content of all the hits on screen
    *
    * This analyser prints the content of all the hits into the
    * LogInfo/LogVerbatim stream.
-   * 
+   *
    * Configuration parameters
    * =========================
-   * 
+   *
    * - *HitModuleLabel* (string): label of the producer used to create the
    *   recob::Hit collection
    * - *OutputCategory* (string, default: "DumpHits"): the category
@@ -45,54 +45,54 @@ namespace hit {
    */
   class DumpHits: public art::EDAnalyzer {
       public:
-    
+
     struct Config {
       using Name = fhicl::Name;
       using Comment = fhicl::Comment;
-      
+
       fhicl::Atom<art::InputTag> HitModuleLabel{
         Name("HitModuleLabel"),
         Comment("tag of the producer used to create the recob::Hit collection")
         };
-      
+
       fhicl::Atom<std::string> OutputCategory{
         Name("OutputCategory"),
         Comment("the messagefacility category used for the output"),
         "DumpHits"
         };
-      
+
       fhicl::Atom<bool> CheckRawDigitAssociation{
         Name("CheckRawDigitAssociation"),
         Comment("verify the associated raw digits are on the same channel as the hit"),
         false
         }; // CheckRawDigitAssociation
-      
+
       fhicl::Atom<bool>CheckWireAssociation{
         Name("CheckWireAssociation"),
         Comment("verify the associated wire is on the same channel as the hit"),
         false
         }; // CheckWireAssociation
-      
+
     }; // Config
-    
+
     using Parameters = art::EDAnalyzer::Table<Config>;
-    
-    
+
+
     /// Default constructor
-    explicit DumpHits(Parameters const& config); 
-    
+    explicit DumpHits(Parameters const& config);
+
     /// Does the printing
     void analyze (const art::Event& evt);
-    
+
       private:
-    
+
     art::InputTag fHitsModuleLabel; ///< name of module that produced the hits
     std::string fOutputCategory;    ///< category for LogInfo output
     bool bCheckRawDigits;           ///< check associations with raw digits
     bool bCheckWires;               ///< check associations with wires
-    
+
   }; // class DumpHits
-  
+
 } // namespace hit
 
 
@@ -116,27 +116,27 @@ namespace hit {
 
 
 namespace hit {
-  
+
   //-------------------------------------------------
-  DumpHits::DumpHits(Parameters const& config) 
-    : EDAnalyzer         (config) 
+  DumpHits::DumpHits(Parameters const& config)
+    : EDAnalyzer         (config)
     , fHitsModuleLabel   (config().HitModuleLabel())
     , fOutputCategory    (config().OutputCategory())
     , bCheckRawDigits    (config().CheckRawDigitAssociation())
     , bCheckWires        (config().CheckWireAssociation())
     {}
-  
-  
+
+
   //-------------------------------------------------
   void DumpHits::analyze(const art::Event& evt) {
-    
+
     // fetch the data to be dumped on screen
     auto Hits = evt.getValidHandle<std::vector<recob::Hit>>(fHitsModuleLabel);
-    
+
     mf::LogInfo(fOutputCategory)
       << "The event contains " << Hits->size() << " '"
       << fHitsModuleLabel.encode() << "' hits";
-    
+
     std::unique_ptr<art::FindOne<raw::RawDigit>> HitToRawDigit;
     if (bCheckRawDigits) {
       HitToRawDigit.reset
@@ -147,7 +147,7 @@ namespace hit {
           << fHitsModuleLabel << "'";
       }
     } // if check raw digits
-    
+
     std::unique_ptr<art::FindOne<recob::Wire>> HitToWire;
     if (bCheckWires) {
       HitToWire.reset(new art::FindOne<recob::Wire>(Hits, evt, fHitsModuleLabel));
@@ -157,14 +157,14 @@ namespace hit {
           << fHitsModuleLabel << "'";
       }
     } // if check wires
-    
+
     unsigned int iHit = 0;
     for (const recob::Hit& hit: *Hits) {
-      
+
       // print a header for the cluster
       mf::LogVerbatim(fOutputCategory)
         << "Hit #" << iHit << ": " << hit;
-      
+
       if (HitToRawDigit) {
         raw::ChannelID_t assChannelID = HitToRawDigit->at(iHit).ref().Channel();
         if (assChannelID != hit.Channel()) {
@@ -174,7 +174,7 @@ namespace hit {
             << "!!";
         } // mismatch
       } // raw digit check
-      
+
       if (HitToWire) {
         raw::ChannelID_t assChannelID = HitToWire->at(iHit).ref().Channel();
         if (assChannelID != hit.Channel()) {
@@ -184,12 +184,12 @@ namespace hit {
             << "!!";
         } // mismatch
       } // wire check
-      
+
       ++iHit;
     } // for hits
-    
+
   } // DumpHits::analyze()
-  
+
   DEFINE_ART_MODULE(DumpHits)
-  
+
 } // namespace hit

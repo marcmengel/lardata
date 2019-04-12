@@ -6,7 +6,7 @@
  * @version 1.0
  *
  * See http://www.boost.org/libs/test for the Boost test library home page.
- * 
+ *
  * Timing:
  * version 1.0 takes negligible time on a 3 GHz machine
  */
@@ -47,20 +47,20 @@ constexpr unsigned int RandomSeed = 12345;
  *
  * The test consists in filling a sequence of integers in a two-level structure,
  * and then iterating to recover the sequence.
- * 
+ *
  * The test fails if the extracted sequence is not correct.
  */
 void RunVectorVectorTest() {
-  
+
   // fill the double tier structure
   using DoubleVectorI_t = std::vector<std::vector<int>>;
   DoubleVectorI_t data(1); // get the first vector started
   constexpr size_t NElements = 10000;
   constexpr float SwitchProbability = 0.1; // expect about 1000 containers
-  
+
   static std::default_random_engine random_engine(RandomSeed);
   std::uniform_real_distribution<float> uniform(0., 1.);
-  
+
   unsigned int nEmpty = 0;
   for (size_t i = 0; i < NElements; ++i) {
     // add a new vector (some times)
@@ -73,9 +73,9 @@ void RunVectorVectorTest() {
   } // for
   std::cout << "Working with " << NElements << " elements in " << data.size()
     << " vectors (" << nEmpty << " empty) in a vector" << std::endl;
-  
+
   unsigned int nMismatches = 0;
-  
+
   int expected = 0;
   lar::double_fwd_const_iterator<DoubleVectorI_t::const_iterator>
     iElem(data, lar::double_fwd_const_iterator<DoubleVectorI_t::const_iterator>::begin),
@@ -86,7 +86,7 @@ void RunVectorVectorTest() {
     ++expected;
     ++iElem;
   } // while
-  
+
   BOOST_CHECK_EQUAL((unsigned int) expected, NElements);
   BOOST_CHECK_EQUAL(nMismatches, 0U);
 } // RunVectorVectorTest()
@@ -97,11 +97,11 @@ void RunVectorVectorTest() {
  *
  * The test consists in filling a sequence of integers in a two-level structure,
  * and then iterating to recover the sequence.
- * 
+ *
  * The test fails if the extracted sequence is not correct.
  */
 void RunVectorMapTest() {
-  
+
   // fill the double tier structure
   using VectorMapI_t = std::map<int, std::vector<int>>;
   VectorMapI_t data; // get the first vector started
@@ -109,10 +109,10 @@ void RunVectorMapTest() {
   data[0] = {};
   constexpr size_t NElements = 10000;
   constexpr float SwitchProbability = 0.1; // expect about 1000 containers
-  
+
   static std::default_random_engine random_engine(RandomSeed);
   std::uniform_real_distribution<float> uniform(0., 1.);
-  
+
   unsigned int nEmpty = 0;
   for (size_t i = 0; i < NElements; ++i) {
     // add a new map (some times)
@@ -125,9 +125,9 @@ void RunVectorMapTest() {
   } // for
   std::cout << "Working with " << NElements << " elements in " << data.size()
     << " vectors (" << nEmpty << " empty) in a map" << std::endl;
-  
+
   unsigned int nMismatches = 0;
-  
+
   int expected = 0;
   using ConstIterator_t = lar::double_fwd_const_iterator
     <VectorMapI_t::const_iterator, lar::PairSecond<VectorMapI_t::value_type>>;
@@ -139,7 +139,7 @@ void RunVectorMapTest() {
     ++expected;
     ++iElem;
   } // while
-  
+
   BOOST_CHECK_EQUAL((unsigned int) expected, NElements);
   BOOST_CHECK_EQUAL(nMismatches, 0U);
 } // RunVectorMapTest()

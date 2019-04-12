@@ -136,7 +136,7 @@ namespace trkf {
 			       (fStat == FORWARD_PREDICTED ? "FORWARD_PREDICTED" :
 				(fStat == BACKWARD ? "BACKWARD" :
 				 (fStat == BACKWARD_PREDICTED ? "BACKWARD_PREDICTED" :
-				  (fStat == OPTIMAL ? "OPTIMAL" : 
+				  (fStat == OPTIMAL ? "OPTIMAL" :
 				   "OPTIMAL_PREDICTED"))))))) << "\n";
 
     // Print base class.

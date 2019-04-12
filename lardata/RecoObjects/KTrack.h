@@ -4,7 +4,7 @@
 ///
 /// \brief  Basic Kalman filter track class, without error.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class include the following attributes.
 ///

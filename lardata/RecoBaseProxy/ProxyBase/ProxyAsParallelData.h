@@ -4,7 +4,7 @@
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   July 27, 2017
  * @see    lardata/RecoBaseProxy/ProxyBase/withCollectionProxy.h
- * 
+ *
  * This library is header-only.
  */
 
@@ -16,24 +16,24 @@
 #include "lardata/RecoBaseProxy/ProxyBase/ParallelData.h"
 #include "larcorealg/CoreUtils/ContainerMeta.h" // util::collection_value_t, ...
 
-// C/C++ standard 
+// C/C++ standard
 #include <utility> // std::move()
 
 
 namespace proxy {
-  
+
   namespace details {
-    
+
     template <
       typename AuxProxyColl,
       typename Aux = util::collection_value_t<AuxProxyColl>,
       typename Tag = Aux
       >
     struct ProxyAsParallelData;
-    
+
   } // namespace details
-  
-  
+
+
   // --- BEGIN Infrastructure for proxies as auxiliary data --------------------
   /**
    * @defgroup LArSoftProxiesAuxProxy Infrastructure for proxies as auxiliary
@@ -42,10 +42,10 @@ namespace proxy {
    * @brief Infrastructure to use a collection proxy as auxiliary data for
    *        another proxy.
    * @bug Broken in many ways. Do not use.
-   * 
+   *
    * @{
    */
-  
+
   template <
     typename Tag /* = Aux */,
     typename Aux /* = util::collection_value_t<AuxProxyColl>*/,
@@ -56,15 +56,15 @@ namespace proxy {
       return details::ProxyAsParallelData<AuxProxyColl, Aux, Tag>
         (std::move(auxProxy));
     } // makeProxyAsParallelData()
-  
-  
+
+
   /// @}
   /// --- END Infrastructure for proxies as auxiliary data ---------------------
-  
-  
+
+
   //----------------------------------------------------------------------------
   namespace details {
-    
+
     //--------------------------------------------------------------------------
     /**
      * @brief Object presenting a proxy as parallel data for another one.
@@ -72,7 +72,7 @@ namespace proxy {
      * @tparam Aux type of the associated object
      * @tparam Tag tag this data is labeled with
      * @ingroup LArSoftProxiesAuxProxy
-     * 
+     *
      * This object inherits its interface from `proxy::ParallelData`.
      * In addition, it owns the proxy it wraps.
      */
@@ -91,17 +91,17 @@ namespace proxy {
         , ParallelData<AuxProxyColl, Aux, Tag>
           (static_cast<AuxProxyColl const*>(this))
         {}
-      
+
       // explicitly select the tag from the parallel data (same as Tag)
       using typename ParallelData<AuxProxyColl, Aux, Tag>::tag;
-      
+
     }; // class ProxyAsParallelData<>
-    
-    
+
+
     //--------------------------------------------------------------------------
-    
+
   } // namespace details
-  
+
 } // namespace proxy
 
 

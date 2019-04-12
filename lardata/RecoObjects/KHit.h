@@ -4,7 +4,7 @@
 ///
 /// \brief  Kalman filter measurement class template.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// Class KHit represents a general measurement on a surface.  It is
 /// specialized compared to base class KHitBase by specifying the
@@ -256,7 +256,7 @@ namespace trkf {
 	refprop = *ref;
 	prefprop = &refprop;
       }
-      
+
 
       // Make a no-noise, no-dE/dx propagation to the measurement
       // surface.  But do calculate the propagation matrix, which we
@@ -265,7 +265,7 @@ namespace trkf {
 
       TrackMatrix prop_matrix;
       boost::optional<double> dist = prop->err_prop(treprop, getMeasSurface(),
-						    Propagator::UNKNOWN, false, 
+						    Propagator::UNKNOWN, false,
 						    prefprop, &prop_matrix);
       ok = !!dist;
       if(ok) {

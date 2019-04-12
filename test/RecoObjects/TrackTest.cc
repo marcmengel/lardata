@@ -1,7 +1,7 @@
 //
 // File: TrackTest.cxx
 //
-// Purpose: Single source executable with tests for track classes 
+// Purpose: Single source executable with tests for track classes
 //
 
 #include <iostream>

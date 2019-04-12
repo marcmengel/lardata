@@ -142,30 +142,30 @@ namespace {
     // exit or exception throw.
     EventFileSentry efs(dir+"/"+filename);
     std::ifstream &infile = efs.infile;
-    
+
     if( !infile.is_open() ) {
       throw art::Exception( art::errors::FileReadError )
         << "failed to open input file " << filename << std::endl;
     }
-    
+
     ///\todo Total number of channels=144 in Long Bo is hardcoded in LArRawInputDriver_LongBo.cxx
     unsigned int wiresPerPlane = 48;
     unsigned int planes = 3;
     int nwires = wiresPerPlane*planes;
-    
+
     header h1;
     channel c1;
     //    footer f1;
-    
+
     //read in header section of file
     infile.read((char *) &h1, sizeof h1);
-    
+
     time_t mytime = h1.time;
     mytime = mytime << 32;//Nov. 2, 2010 - "time_t" is a 64-bit word on many 64-bit machines
     //so we had to change types in header struct to read in the correct
     //number of bits.  Once we have the 32-bit timestamp from the binary
     //data, shift it up to the upper half of the 64-bit timestamp.  - Mitch
-    
+
     // std::cout << "Fixed Value (0x0000D480): " << std::hex << h1.fixed << std::endl;
     // std::cout << "Output Format: " << std::hex << h1.format << std::endl;
     // std::cout << "Software Version: " << std::hex << h1.software << std::dec << std::endl;
@@ -173,7 +173,7 @@ namespace {
     //     << "Event " << std::setw(8) << std::left << h1.event
     //           << "h1.time " << std::setw(8) << std::left << h1.time;
     // std::cout << " #Channels = " << h1.nchan << std::endl;
-    
+
     daqHeader.SetStatus(1);
     daqHeader.SetFixedWord(h1.fixed);
     daqHeader.SetFileFormat(h1.format);
@@ -183,15 +183,15 @@ namespace {
     daqHeader.SetTimeStamp(mytime);
     daqHeader.SetSpareWord(h1.spare);
     daqHeader.SetNChannels(h1.nchan);
-    
+
     //one digit for every wire on each plane
     digitList.clear();
     digitList.resize(wiresPerPlane*planes);
-    
+
     //16 external trigger inputs
     extTrig.clear();
     extTrig.resize(16);
-    
+
     for( int i = 0; i != nwires; ++i ) {
       infile.read((char *) &c1, sizeof c1);
       //Create vector for ADC data, with correct number of samples for this event
@@ -200,7 +200,7 @@ namespace {
       //      std::cout << "Channel = " << c1.ch ;
       // std::cout << " #Samples = " << c1.samples ;
       // std::cout << " ADC[0] = " << adclist[0] << " ADC[2047] = " << adclist[2047] << std::endl;
-      
+
       // set signal to be 400 if it is 0 (bad pedestal)
       for (int ijk=0;ijk<c1.samples;++ijk) {
 	if (std::abs(adclist[ijk])<1e-5)
@@ -214,7 +214,7 @@ namespace {
 	  adclist[ijk]=400-mysig;
 	}
       }
-      
+
       if (i<96){
 	//      digitList[i] = raw::RawDigit((c1.ch-1), c1.samples, adclist);//subtract one from ch. number...
 	digitList[i] = raw::RawDigit(i, c1.samples, adclist);//subtract one from ch. number...
@@ -232,17 +232,17 @@ namespace {
     //  MStancari, TYang - Apr 4 2013
     //
     //  Add trigger information to the record
-    
+
     unsigned int ichan;
     for( int i = 0; i < 16; ++i ) {
-      unsigned int utrigtime = 0;      
+      unsigned int utrigtime = 0;
       infile.read((char *) &c1, sizeof c1);
       //Create vector for ADC data, with correct number of samples for this event
       std::vector<short> adclist(c1.samples);
       infile.read((char*)&adclist[0],sizeof(short)*c1.samples);
-      
+
       int j=0;
-      while (j<c1.samples){      
+      while (j<c1.samples){
 	float test = 400.0-adclist[j];
 	if (test>10 && j>0) {
 	  utrigtime=j;
@@ -253,7 +253,7 @@ namespace {
       ichan=i+144;
       extTrig[i] = raw::ExternalTrigger(ichan,utrigtime);
     }
-    
+
 
 
     // infile will be closed automatically as EventFileSentry goes out of scope.

@@ -4,7 +4,7 @@
 ///
 /// \brief  General planar surface.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class represents an (almost) general planar surface.  It is
 /// intended to represent the measurement surface defined by a wire

@@ -4,7 +4,7 @@
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   July 27, 2017
  * @see    lardata/RecoBaseProxy/ProxyBase.h
- * 
+ *
  * This library is header-only.
  */
 
@@ -17,18 +17,18 @@
 // framework libraries
 #include "canvas/Utilities/InputTag.h"
 
-// C/C++ standard 
+// C/C++ standard
 #include <tuple> // also std::tuple_element_t<>
 #include <utility> // std::forward(), std::move()
 #include <type_traits> // std::is_convertible<>, std::decay_t<>, ...
 
 
 namespace proxy {
-  
+
   // --- BEGIN Collection proxy infrastructure ---------------------------------
   /// @addtogroup LArSoftProxyCollections
   /// @{
-  
+
   //----------------------------------------------------------------------------
   /// The same as `withCollectionProxy()`, but it also specified a tag.
   /// @bug Broken in many ways. Do not use.
@@ -45,7 +45,7 @@ namespace proxy {
       return details::WithProxyAsAuxStructBase<AuxProxy, ArgTuple_t, AuxTag>
         (std::move(argsTuple));
     } // withCollectionProxyAs()
-  
+
   //----------------------------------------------------------------------------
   /**
    * @brief Helper function to merge an auxiliary proxy into the proxy.
@@ -54,21 +54,21 @@ namespace proxy {
    * @param args constructor arguments for the parallel data collection proxy
    * @return a temporary object that `getCollection()` knows to handle
    * @bug Broken in many ways. Do not use.
-   * 
+   *
    * This function is meant to convey to `getCollection()` function the request
    * for merging a collection proxy to carry auxiliary data structured as
    * another collection proxy, parallel to the main collection.
    * The function also bridges the information required to create a proxy to
    * that auxiliary data.
-   * 
+   *
    * This data will be tagged with the type `AuxProxy`. To use a different type
    * as tag, use `withCollectionProxyAs()` instead, specifying the tag as second
    * template argument.
-   * 
-   * 
+   *
+   *
    * Customization of the auxiliary collection proxy
    * ================================================
-   * 
+   *
    * The customization of auxiliary collection proxy happens in a fashion
    * similar to the customization presented in `withParallelData()`.
    * The customization point here is `ProxyAsAuxProxyMaker`.
@@ -79,11 +79,11 @@ namespace proxy {
       return
         withCollectionProxyAs<AuxProxy, AuxProxy>(std::forward<Args>(args)...);
     }
-  
-  
+
+
   /// @}
   // --- END Collection proxy infrastructure -----------------------------------
-  
+
 } // namespace proxy
 
 

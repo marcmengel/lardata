@@ -15,7 +15,7 @@
 // DatabaseUtil service and the ability to read information from a database
 // with direct DB connection.
 // For new experiments, an indirect connection should be used instead.
-// 
+//
 // PLEASE DO NOT take this as a model to develop a service:
 // this is just a backward-compatible hack.
 //
@@ -40,7 +40,7 @@ namespace util{
      * @brief Properties related to liquid argon environment in the detector
      *
      * This class can access databases via DatabaseUtil service.
-     * 
+     *
      * @note Some of the database connection properties are established before
      * the beginning of the job and if they change this service will not be
      * aware of it. These properties petrain, so far, only the connection mode
@@ -51,45 +51,45 @@ namespace util{
       , public detinfo::LArPropertiesService // implements service interface
     {
     public:
-      
+
       //------------------------------------------------------------------------
       LArPropertiesServiceArgoNeuT(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
-      
+
       //------------------------------------------------------------------------
       //--- service interface
       /// Type of service provider
       using provider_type = LArPropertiesServiceArgoNeuT;
-      
+
       virtual ~LArPropertiesServiceArgoNeuT() = default;
-      
+
       virtual void   reconfigure(fhicl::ParameterSet const& pset) override;
       virtual const  detinfo::LArProperties* provider() const override { return this; }
-      
+
       //------------------------------------------------------------------------
       //--- service provider interface
-      
+
       /// Ar atomic number
       virtual double AtomicNumber() const override { return fZ; }
       /// Ar atomic mass (g/mol)
       virtual double AtomicMass() const override { return fA; }
       /// Ar mean excitation energy (eV)
       virtual double ExcitationEnergy() const override { return fI; }
-      
+
       virtual double RadiationLength()              const override { return fRadiationLength; } ///< g/cm^2
       virtual double Argon39DecayRate()             const override { return fArgon39DecayRate; } ///< decays per cm^3 per second
-      
-      
+
+
       virtual double ScintResolutionScale() const override { return fScintResolutionScale; }
-      virtual double ScintFastTimeConst()   const override { return fScintFastTimeConst;   } 
+      virtual double ScintFastTimeConst()   const override { return fScintFastTimeConst;   }
       virtual double ScintSlowTimeConst()   const override { return fScintSlowTimeConst;   }
       virtual double ScintBirksConstant()   const override { return fScintBirksConstant;   }
-      
+
       virtual bool ScintByParticleType()    const override { return fScintByParticleType;  }
-      
+
       virtual double ScintYield(bool prescale = false)         const override { return fScintYield * ScintPreScale(prescale);}
       virtual double ScintPreScale(bool prescale = true)       const override { return (prescale ? fScintPreScale : 1);      }
       virtual double ScintYieldRatio()                         const override { return fScintYieldRatio;                     }
-      
+
       virtual double ProtonScintYield(bool prescale = false)   const override { return fProtonScintYield * ScintPreScale(prescale);  }
       virtual double ProtonScintYieldRatio()                   const override { return fProtonScintYieldRatio;                       }
       virtual double MuonScintYield(bool prescale = false)     const override { return fMuonScintYield * ScintPreScale(prescale);    }
@@ -102,19 +102,19 @@ namespace util{
       virtual double ElectronScintYieldRatio()                 const override { return fElectronScintYieldRatio;                     }
       virtual double AlphaScintYield(bool prescale = false)    const override { return fAlphaScintYield * ScintPreScale(prescale);   }
       virtual double AlphaScintYieldRatio()                    const override { return fAlphaScintYieldRatio;                        }
-      
+
       virtual bool CerenkovLightEnabled()   const override { return fEnableCerenkovLight;  }
-      
+
       virtual std::map<double, double>  SlowScintSpectrum() const override;
       virtual std::map<double, double>  FastScintSpectrum() const override;
       virtual std::map<double, double>  RIndexSpectrum()    const override;
       virtual std::map<double, double>  AbsLengthSpectrum() const override;
       virtual std::map<double, double>  RayleighSpectrum()  const override;
-      
+
       virtual std::map<std::string, std::map<double, double> > SurfaceReflectances()                const override;
       virtual std::map<std::string, std::map<double, double> > SurfaceReflectanceDiffuseFractions() const override;
-      
-      
+
+
       //------------------------------------------------------------------------
 
       // this stuff is moved to DetectorProperties
@@ -123,25 +123,25 @@ namespace util{
       double ElectronLifetime() 	     const; 				///< microseconds
       double Density(double temperature=0.) const;     ///< g/cm^3
       double Temperature()                  const;     ///< kelvin
-      
+
       /// Restricted mean dE/dx energy loss (MeV/cm).
       double Eloss(double mom, double mass, double tcut) const;
 
       /// Energy loss fluctuation (sigma_E^2 / length in MeV^2/cm).
       double ElossVar(double mom, double mass) const;
-      
+
       /// dQ/dX in electrons/cm, returns dE/dX in MeV/cm.
       double BirksCorrection(double dQdX) const;
       double ModBoxCorrection(double dQdX) const;
       virtual bool ExtraMatProperties() const override { return fExtraMatProperties; }
-      virtual double TpbTimeConstant()  const override { return fTpbTimeConstant; }      
-      
+      virtual double TpbTimeConstant()  const override { return fTpbTimeConstant; }
+
     private:
 
       void preBeginRun(art::Run const& run);
       void checkDBstatus() 	const;
-      
-      
+
+
       std::vector< double >          fEfield;           ///< kV/cm
       double                         fTemperature;      ///< kelvin
       double                         fElectronlifetime; ///< microseconds
@@ -152,7 +152,7 @@ namespace util{
       double                         fArgon39DecayRate; ///<  decays per cm^3 per second
 
       bool			     fAlreadyReadFromDB; ///< tests whether the values have alread been picked up from the Database
-      
+
       // Following parameters are for use in Bethe-Bloch formula for dE/dx.
 
       double fZ;                ///< Ar atomic number
@@ -187,17 +187,17 @@ namespace util{
       bool fScintByParticleType;
 
       double fProtonScintYield;
-      double fProtonScintYieldRatio; 
+      double fProtonScintYieldRatio;
       double fMuonScintYield;
-      double fMuonScintYieldRatio; 
+      double fMuonScintYieldRatio;
       double fPionScintYield;
-      double fPionScintYieldRatio; 
+      double fPionScintYieldRatio;
       double fKaonScintYield;
-      double fKaonScintYieldRatio; 
+      double fKaonScintYieldRatio;
       double fElectronScintYield;
-      double fElectronScintYieldRatio; 
+      double fElectronScintYieldRatio;
       double fAlphaScintYield;
-      double fAlphaScintYieldRatio; 
+      double fAlphaScintYieldRatio;
 
       double fScintYield;
       double fScintPreScale;
@@ -213,7 +213,7 @@ namespace util{
       std::vector<double>               fReflectiveSurfaceEnergies;
       std::vector<std::vector<double> > fReflectiveSurfaceReflectances;
       std::vector<std::vector<double> > fReflectiveSurfaceDiffuseFractions;
-      
+
       std::vector<double>               fTpbEmmisionEnergies;
       std::vector<double>               fTpbEmmisionSpectrum;
       std::vector<double>               fTpbAbsorptionEnergies;
@@ -222,18 +222,18 @@ namespace util{
 
       struct DBsettingsClass {
         DBsettingsClass();
-        
+
         bool ToughErrorTreatment; ///< equivalent parameter in DatabaseUtil
         bool ShouldConnect; ///< equivalent parameter in DatabaseUtil
       }; // DBsettingsClass
-      
+
       DBsettingsClass DBsettings; ///< settings read from DB access
-      
+
     }; // class LArPropertiesServiceArgoNeuT
-    
+
     /// type of provider name following LArSoft name convention
     using LArPropertiesArgoNeuT = LArPropertiesServiceArgoNeuT;
-    
+
 } //namespace util
 DECLARE_ART_SERVICE_INTERFACE_IMPL(util::LArPropertiesServiceArgoNeuT, detinfo::LArPropertiesService, LEGACY)
 #endif // LARPROPERTIESSERVICEARGONEUT_H

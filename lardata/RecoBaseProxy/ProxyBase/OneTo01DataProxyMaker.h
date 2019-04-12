@@ -4,7 +4,7 @@
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   July 27, 2017
  * @see    lardata/RecoBaseProxy/ProxyBase/withZeroOrOne.h
- * 
+ *
  * This library is header-only.
  */
 
@@ -24,11 +24,11 @@
 
 
 namespace proxy {
-  
+
   // --- BEGIN LArSoftProxiesAssociatedData ------------------------------------
   /// @addtogroup LArSoftProxiesAssociatedData
   /// @{
-  
+
   //----------------------------------------------------------------------------
   //--- one-to-(zero/one) associations
   //----------------------------------------------------------------------------
@@ -38,10 +38,10 @@ namespace proxy {
    * @tparam Aux type of datum (element) to associate to ("right")
    * @tparam Metadata type of metadata coming with the association
    * @tparam AuxTag tag labelling this association
-   * 
+   *
    * Usually, `AuxTag` is also the type of datum (element) to associate to
    * ("right").
-   * 
+   *
    * This class works as a base class for `OneTo01DataProxyMaker` so that
    * the specializations of the latter can still inherit from this one if they
    * its facilities.
@@ -51,26 +51,26 @@ namespace proxy {
     typename AuxTag = Aux
     >
   struct OneTo01DataProxyMakerBase {
-    
+
     /// Tag labelling the associated data we are going to produce.
     using data_tag = AuxTag;
-    
+
     /// Type of the main datum ("left").
     using main_element_t = Main;
-    
+
     /// Type of the auxiliary associated datum ("right").
     using aux_element_t = Aux;
-    
+
     /// Type of associated metadata.
     using metadata_t = Metadata;
-    
+
     /// Type of associated data proxy being created.
     using aux_collection_proxy_t = details::OneTo01Data
        <main_element_t, aux_element_t, metadata_t, data_tag>;
-    
+
     /// Type of _art_ association being used as input.
     using assns_t = typename aux_collection_proxy_t::assns_t;
-    
+
     /**
      * @brief Create a association proxy collection using main collection tag.
      * @tparam Event type of the event to read associations from
@@ -80,11 +80,11 @@ namespace proxy {
      * @param mainHandle handle to the main collection data product
      * @param mainArgs an object describing the main data product
      * @return an auxiliary data proxy object
-     * 
+     *
      * The returned object exposes a random access container interface, with
      * data indexed by the index of the corresponding object in the main
      * collection.
-     * 
+     *
      * The `mainArgs` object is of an arbitrary type that must be convertible
      * by explicit type cast into a `art::InputTag`; that input tag will be
      * used to fetch the association.
@@ -96,7 +96,7 @@ namespace proxy {
         return createFromTag
           (event, std::forward<Handle>(mainHandle), art::InputTag(mainArgs));
       }
-    
+
     /**
      * @brief Create a association proxy collection using the specified tag.
      * @tparam Event type of the event to read associations from
@@ -106,7 +106,7 @@ namespace proxy {
      * @param mainHandle handle to the main collection data product
      * @param auxInputTag the tag of the association to be read
      * @return a auxiliary data proxy object
-     * 
+     *
      * The returned object exposes a random access container interface, with
      * data indexed by the index of the corresponding object in the main
      * collection.
@@ -120,7 +120,7 @@ namespace proxy {
         return
           createFromTag(event, std::forward<Handle>(mainHandle), auxInputTag);
       }
-    
+
     /**
      * @brief Create a association proxy collection using the specified tag.
      * @tparam Event type of the event to read associations from (unused)
@@ -129,7 +129,7 @@ namespace proxy {
      * @param handle handle to the main data collection
      * @param assns the associations to be wrapped
      * @return a auxiliary data proxy object
-     * 
+     *
      * The returned object exposes a random access container interface, with
      * data indexed by the index of the corresponding object in the main
      * collection.
@@ -144,8 +144,8 @@ namespace proxy {
           );
         return makeOneTo01dataFrom<data_tag>(assns, handle->size());
       }
-    
-    
+
+
       private:
     template<typename Event, typename Handle>
     static auto createFromTag(
@@ -156,10 +156,10 @@ namespace proxy {
           <main_element_t, aux_element_t, metadata_t, data_tag>
           (event, auxInputTag, mainHandle->size());
       }
-    
+
   }; // struct OneTo01DataProxyMakerBase<>
-  
-  
+
+
   //--------------------------------------------------------------------------
   /**
    * @brief Creates an one-to-(zero-or-one) wrapper for the specified types.
@@ -183,14 +183,14 @@ namespace proxy {
    *   template <typename Event, typename Handle, typename MainArg, typename... Args>
    *   auto make(Event const&, Handle&&, MainArg const&, Args&&...);
    *   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   * 
+   *
    * This class can be specialized (see `withAssociated()` for an example
    * of the general procedure).
    * The default implementation just wraps a one-to-(zero-or-one)
    * `art::Assns<Main, Aux>` data product fulfilling
    * @ref LArSoftProxyDefinitionOneToZeroOrOneSeqAssn "one-to-(zero or one) sequential association"
    * requirement.
-   * 
+   *
    * The last template argument is designed for specialization of associations
    * in the context of a specific proxy type.
    */
@@ -207,24 +207,24 @@ namespace proxy {
     // OneTo01DataProxyMakerBase. It's just mirroring the base class.
     //
     using base_t = OneTo01DataProxyMakerBase<Main, Aux, Metadata, Tag>;
-    
+
       public:
-    
+
     /// Type of the main datum ("left").
     using typename base_t::main_element_t;
-    
+
     /// Type of the auxiliary associated datum ("right").
     using typename base_t::aux_element_t;
-    
+
     /// Type of metadata in the association.
     using typename base_t::metadata_t;
-    
+
     /// Type of associated data proxy being created.
     using typename base_t::aux_collection_proxy_t;
-    
+
     /// Type of _art_ association being used as input.
     using typename base_t::assns_t;
-    
+
     /**
      * @brief Create a association proxy collection using main collection tag.
      * @tparam Event type of the event to read associations from
@@ -236,11 +236,11 @@ namespace proxy {
      * @param margs an object describing the main data product
      * @param args input tag for associated data, if different from main
      * @return an auxiliary data proxy object
-     * 
+     *
      * The returned object exposes a random access container interface, with
      * data indexed by the index of the corresponding object in the main
      * collection.
-     * 
+     *
      * This implementation requires `margs` object to be convertible
      * by explicit type cast into a `art::InputTag`; that input tag will be
      * used to fetch the association.
@@ -259,16 +259,16 @@ namespace proxy {
           std::forward<Args>(args)...
           );
       }
-    
+
   }; // struct OneTo01DataProxyMaker<>
-  
-  
+
+
   /// @}
   // --- END LArSoftProxiesAssociatedData --------------------------------------
-  
-  
+
+
   namespace details {
-    
+
     //--------------------------------------------------------------------------
     //---  Stuff for one-to-(zero or one) associated data
     //--------------------------------------------------------------------------
@@ -281,10 +281,10 @@ namespace proxy {
       using maker_t = OneTo01DataProxyMaker
         <typename CollProxy::main_element_t, Aux, Metadata, CollProxy, AuxTag>;
     };
-    
+
   } // namespace details
-  
-  
+
+
 } // namespace proxy
 
 

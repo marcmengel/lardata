@@ -4,7 +4,7 @@
 ///
 /// \brief  Basic Kalman filter track class, with error.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class inherits the following attributes from KTrack.
 ///
@@ -39,7 +39,7 @@ namespace trkf {
     /// Constructor - surface + track parameters + error matrix.
     KETrack(const std::shared_ptr<const Surface>& psurf,
 	    const TrackVector& vec,
-	    const TrackError& err, 
+	    const TrackError& err,
 	    Surface::TrackDirection dir = Surface::UNKNOWN,
 	    int pdg = 0);
 

@@ -4,7 +4,7 @@
 ///
 /// \brief  A KHitContainer for KHitWireX type measurements.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class derives from KHitContainer.  It does not add any
 /// attributes of its own, nor does it override any base class

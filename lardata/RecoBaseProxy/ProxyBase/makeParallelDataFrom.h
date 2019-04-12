@@ -4,7 +4,7 @@
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   July 27, 2017
  * @see    lardata/RecoBaseProxy/ProxyBase/withParallelData.h
- * 
+ *
  * This library is header-only.
  */
 
@@ -21,12 +21,12 @@
 
 
 namespace proxy {
-  
-  
+
+
   // -- BEGIN Parallel data infrastructure -------------------------------------
   /// @addtogroup LArSoftProxiesParallelData
   /// @{
-  
+
   /**
    * @brief Wraps a collection into a parallel data collection object.
    * @tparam AuxColl type of parallel data data product container
@@ -35,11 +35,11 @@ namespace proxy {
    * @tparam Tag the tag labelling this associated data (if omitted: as `Aux`)
    * @param data data collection to be wrapped
    * @return a new `ParallelData` wrapping the information in `data`
-   * 
+   *
    * The data collection must be non-temporary and it is treated as fulfilling
    * @ref LArSoftProxyDefinitionParallelData "parallel data product"
    * requirements.
-   * 
+   *
    * Example:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * std::vector<recob::TrackFitHitInfo> trackData;
@@ -57,8 +57,8 @@ namespace proxy {
     >
   auto makeParallelDataFrom(AuxColl const& data)
     { return proxy::makeParallelData<AuxColl, Aux, Tag>(data); }
-  
-  
+
+
   /**
    * @brief Creates and returns a parallel data collection object.
    * @tparam AuxColl type of parallel data data product container
@@ -69,10 +69,10 @@ namespace proxy {
    * @param event event to read the data product from
    * @param tag input tag of the parallel data product
    * @return a new `ParallelData` filled with data from `tag`
-   * 
+   *
    * The data product being retrieved must fulfill the requirements of
    * @ref LArSoftProxyDefinitionParallelData "parallel data product".
-   * 
+   *
    * At least one template type must be explicitly specified, e.g.
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * auto auxData
@@ -83,11 +83,11 @@ namespace proxy {
    */
   template <typename AuxColl, typename Aux, typename Tag, typename Event>
   auto makeParallelDataFrom(Event const& event, art::InputTag const& tag);
-  
+
   template <typename AuxColl, typename Aux, typename Event>
   auto makeParallelDataFrom(Event const& event, art::InputTag const& tag)
     { return makeParallelDataFrom<AuxColl, Aux, Aux, Event>(event, tag); }
-  
+
   template <typename AuxColl, typename Event>
   auto makeParallelDataFrom(Event const& event, art::InputTag const& tag)
     {
@@ -95,12 +95,12 @@ namespace proxy {
         makeParallelDataFrom<AuxColl, util::collection_value_t<AuxColl>, Event>
         (event, tag);
     }
-  
-  
+
+
   /// @}
   // -- END Parallel data infrastructure ---------------------------------------
-  
-  
+
+
 } // namespace proxy
 
 
@@ -108,7 +108,7 @@ namespace proxy {
 //--- template implementation
 //------------------------------------------------------------------------------
 namespace proxy {
-  
+
   //----------------------------------------------------------------------------
   //--- makeParallelDataFrom() implementations
   //----------------------------------------------------------------------------
@@ -117,7 +117,7 @@ namespace proxy {
     return makeParallelDataFrom<AuxColl, Aux, Tag>
       (*(event.template getValidHandle<AuxColl>(tag)));
   } // makeParallelDataFrom()
-  
+
 } // namespace proxy
 
 

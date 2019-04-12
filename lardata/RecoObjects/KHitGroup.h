@@ -4,7 +4,7 @@
 ///
 /// \brief  A collection of measurements on the same surface.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class represents a collection of measurements on a common
 /// surface.  The measurements are polymorphic, stored as pointers

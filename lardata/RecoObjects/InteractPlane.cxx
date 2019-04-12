@@ -78,7 +78,7 @@ namespace trkf {
 
     const SurfPlane* psurf = dynamic_cast<const SurfPlane*>(&*trk.getSurface());
     if(psurf == 0)
-      throw cet::exception("InteractPlane") 
+      throw cet::exception("InteractPlane")
 	<< "InteractPlane called for non-planar surface.\n";
 
     // Clear noise matrix.

@@ -4,7 +4,7 @@
 ///
 /// \brief  Kalman filter wire-time measurement on a SurfWireLine surface.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class is a type of one-dimensional Kalman filter measurement
 /// reprsenting a single wire-time hit on a line surface parallel to the

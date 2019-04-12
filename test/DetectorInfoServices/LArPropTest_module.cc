@@ -9,7 +9,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "art/Framework/Core/ModuleMacros.h" 
+#include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDAnalyzer.h"
 
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
@@ -88,7 +88,7 @@ namespace util
       else if(i == 2)
 	e = 0.8;
       double v = detprop->DriftVelocity(e);
-      std::cout << std::setprecision(3) << std::setw(15) << e 
+      std::cout << std::setprecision(3) << std::setw(15) << e
 		<< std::setprecision(4) << std::setw(15) << v << std::endl;
     }
 
@@ -124,9 +124,9 @@ namespace util
 
 	double dedxr = detprop->Eloss(p, mass, 0.05) / detprop->Density();  // Restricted.
 	double dedx = detprop->Eloss(p, mass, 0.) / detprop->Density();     // Unrestricted.
-	std::cout << std::setw(10) << t 
-		  << std::setw(10) << 1000.*p 
-		  << std::setw(10) << dedx 
+	std::cout << std::setw(10) << t
+		  << std::setw(10) << 1000.*p
+		  << std::setw(10) << dedx
 		  << std::setw(10) << dedxr << std::endl;
       }
     }

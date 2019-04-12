@@ -238,7 +238,7 @@ namespace trkf {
       dir[2] /= p;
     }
     out << "  Surface direction = " << (fDir == Surface::FORWARD ?
-					"FORWARD" : 
+					"FORWARD" :
 					( fDir == Surface::BACKWARD ?
 					  "BACKWARD" : "UNKNOWN" )) << "\n"
 	<< "  Pdg = " << fPdgCode << "\n"

@@ -49,15 +49,15 @@ namespace util {
 
     /// Default dtor
     ~Range(){}
-    
+
     /// "start" accessor
     const T& Start() const { return _window.first;  }
     /// "end" accessor
     const T& End()   const { return _window.second; }
     /// Setter
     void Set(const T& s, const T& e)
-    { 
-      if(s>=e) throw std::runtime_error("Inserted invalid range: end before start."); 
+    {
+      if(s>=e) throw std::runtime_error("Inserted invalid range: end before start.");
       _window.first  = s;
       _window.second = e;
     }
@@ -73,7 +73,7 @@ namespace util {
     {return ( _window.first == rhs.Start() && _window.second == rhs.End() ); }
     inline bool operator!=(const Range& rhs) const
     {return !( (*this) == rhs ); }
-    
+
     //
     // Ordering w/ T
     //

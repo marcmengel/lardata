@@ -34,7 +34,7 @@ namespace trkf {
   /// slope track paramers and errors (parameters 2 and 3).
   ///
   double SurfLine::PointingError(const TrackVector& vec, const TrackError& err) const
-  { 
+  {
     // Get slope parameters and error matrix.
 
     double phi = vec(2);

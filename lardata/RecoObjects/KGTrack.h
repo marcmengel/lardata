@@ -4,7 +4,7 @@
 ///
 /// \brief  A collection of KHitTracks.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class is a colleciton of KHitTracks.  In other words, it has
 /// full information every measurement, and every fit on every
@@ -12,7 +12,7 @@
 /// that it is possible to have.
 ///
 /// KHitTrack collection is stored as a map, indexed by path distance.
-/// This organization makes it easy to find the one or two nearest 
+/// This organization makes it easy to find the one or two nearest
 /// KHitTrack objects to any path distance.
 ///
 /// Note that by combining information from forward and backward fit

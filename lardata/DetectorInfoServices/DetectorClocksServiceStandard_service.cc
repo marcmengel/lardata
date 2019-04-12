@@ -9,11 +9,11 @@ detinfo::DetectorClocksServiceStandard::DetectorClocksServiceStandard
   (fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
   : fClocks(std::make_unique<detinfo::DetectorClocksStandard>(pset))
 {
-  
+
   reg.sPreProcessEvent.watch (this, &DetectorClocksServiceStandard::preProcessEvent);
   reg.sPostOpenFile.watch    (this, &DetectorClocksServiceStandard::postOpenFile);
   reg.sPreBeginRun.watch     (this, &DetectorClocksServiceStandard::preBeginRun);
-  
+
 }
 
 //------------------------------------------------------------------
@@ -48,24 +48,24 @@ void detinfo::DetectorClocksServiceStandard::postOpenFile(const std::string& fil
 {
 
   // Method inheriting from DetectorProperties
-  
+
   if(!fClocks->InheritClockConfig()) return;
 
   // The only way to access art service metadata from the input file
   // is to open it as a separate TFile object.  Do that now.
-  
+
   if(!filename.empty()) {
-    
+
     TFile* file = TFile::Open(filename.c_str(), "READ");
     if(file != 0 && !file->IsZombie() && file->IsOpen()) {
 
       std::vector<std::string> cfgName = fClocks->ConfigNames();
       std::vector<double> cfgValue = fClocks->ConfigValues();
-      
+
       // Open the sqlite datatabase.
-      
+
       art::SQLite3Wrapper sqliteDB(file, "RootFileDB");
-      
+
       // Loop over all stored ParameterSets.
 
       std::vector<size_t> config_count(detinfo::kInheritConfigTypeMax,0);
@@ -84,7 +84,7 @@ void detinfo::DetectorClocksServiceStandard::postOpenFile(const std::string& fil
 	for(size_t i=0; i<detinfo::kInheritConfigTypeMax; ++i) {
 
 	  double value_from_file = ps.get<double>(cfgName.at(i).c_str());
-	  
+
 	  if(!(config_count.at(i)))
 
 	    config_value.at(i) = value_from_file;
@@ -99,10 +99,10 @@ void detinfo::DetectorClocksServiceStandard::postOpenFile(const std::string& fil
 	  config_count.at(i) +=1;
 
 	}
-	
+
       }
 
-      // Override parameters 
+      // Override parameters
 
       for(size_t i=0; i<detinfo::kInheritConfigTypeMax; ++i)
 
@@ -113,12 +113,12 @@ void detinfo::DetectorClocksServiceStandard::postOpenFile(const std::string& fil
 			     cfgValue.at(i),
 			     config_value.at(i))
 		     << std::endl;
-	  
+
 	  fClocks->SetConfigValue(i,config_value.at(i));
-	  
+
 	}
     }
-    
+
     // Close file.
     if(file != 0) {
       if(file->IsOpen())

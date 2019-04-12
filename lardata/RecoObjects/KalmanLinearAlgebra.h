@@ -4,7 +4,7 @@
 ///
 /// \brief  Kalman filter linear algebra typedefs.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// There are various linear algebra typedefs defined in this header:
 ///
@@ -27,7 +27,7 @@
 /// 1.  Matrices are stored in row major order (normal c/c++ convention).
 /// 2.  Symmetric matrices are stored in lower triangular format.
 /// 3.  Amount of preallocated stack memory is specified at compilation
-///     time (the actual size of objects must still be specified at run 
+///     time (the actual size of objects must still be specified at run
 ///     time).
 ///
 /// Surprisingly, the ublas linear algebra package does not have any
@@ -100,7 +100,7 @@ namespace trkf {
   /// The method used is Cholesky decomposition.
   /// This method is efficient and stable for positive-definite matrices.
   /// In case the matrix is not positive-definite, this method will usually
-  /// work, but there can be some numerical pathologies, including "false 
+  /// work, but there can be some numerical pathologies, including "false
   /// singular" failures, and numerical instability.
   /// In the Kalman filter, we expect that this method will be used
   /// exclusively for positive-definite matrices.
@@ -150,7 +150,7 @@ namespace trkf {
 	value_type ele = m(i,j);
 
 	// Diagonal elements.
-	
+
 	if(i == j)
 	  m(i,i) = 1./ele;
 

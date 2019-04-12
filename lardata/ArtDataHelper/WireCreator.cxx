@@ -4,7 +4,7 @@
  * @date   December 11, 2014
  * @author petrillo@fnal.gov
  * @see    Wire.h WireCreator.h
- * 
+ *
  * ****************************************************************************/
 
 // declaration header

@@ -50,14 +50,14 @@ namespace trkf {
   /// maximum size.
   ///
   boost::optional<double> Propagator::vec_prop(KTrack& trk,
-					       const std::shared_ptr<const Surface>& psurf, 
+					       const std::shared_ptr<const Surface>& psurf,
 					       PropDirection dir,
 					       bool doDedx,
 					       TrackMatrix* prop_matrix,
 					       TrackError* noise_matrix) const
   {
     // Default result.
-    
+
     auto result = boost::make_optional<double>(false, 0.);
 
     // Get the inverse momentum (assumed to be track parameter four).
@@ -110,7 +110,7 @@ namespace trkf {
       // Cumulative propagation distance.
 
       double s = 0.;
-	
+
       // Begin stepping loop.
       // We put a maximum iteration count to prevent infinite loops caused by
       // floating point pathologies.  The iteration count is large enough to reach
@@ -198,7 +198,7 @@ namespace trkf {
 
 	// Do the actual step propagation.
 
-	dist = short_vec_prop(trk, pstep, dir, doDedx, 
+	dist = short_vec_prop(trk, pstep, dir, doDedx,
 			      plocal_prop_matrix, plocal_noise_matrix);
 
 	// If the step propagation failed, return failure.
@@ -256,7 +256,7 @@ namespace trkf {
   /// If the reference track is null, this method simply calls vec_prop.
   ///
   boost::optional<double> Propagator::lin_prop(KTrack& trk,
-					       const std::shared_ptr<const Surface>& psurf, 
+					       const std::shared_ptr<const Surface>& psurf,
 					       PropDirection dir,
 					       bool doDedx,
 					       KTrack* ref,
@@ -277,7 +277,7 @@ namespace trkf {
       // the track to be propagted are not on the same surface.
 
       if(!trk.getSurface()->isEqual(*(ref->getSurface())))
-	throw cet::exception("Propagator") << 
+	throw cet::exception("Propagator") <<
 	  "Input track and reference track not on same surface.\n";
 
       // Remember the starting track and reference track.
@@ -324,7 +324,7 @@ namespace trkf {
       else {
 
 	// Propagation failed.
-	// Restore the reference track to its starting value, so that we ensure 
+	// Restore the reference track to its starting value, so that we ensure
 	// the reference track and the actual track remain on the same surface.
 
 	trk = trk0;
@@ -352,7 +352,7 @@ namespace trkf {
   /// Returned value: propagation distance + success flag.
   ///
   boost::optional<double> Propagator::err_prop(KETrack& tre,
-					       const std::shared_ptr<const Surface>& psurf, 
+					       const std::shared_ptr<const Surface>& psurf,
 					       PropDirection dir,
 					       bool doDedx,
 					       KTrack* ref,
@@ -392,7 +392,7 @@ namespace trkf {
   /// Returned value: propagation distance + success flag.
   ///
   boost::optional<double> Propagator::noise_prop(KETrack& tre,
-						 const std::shared_ptr<const Surface>& psurf, 
+						 const std::shared_ptr<const Surface>& psurf,
 						 PropDirection dir,
 						 bool doDedx,
 						 KTrack* ref) const
@@ -454,7 +454,7 @@ namespace trkf {
   /// The derivative is calculated assuming E2 = E1 + constant, giving
   ///
   /// d(pinv2)/d(pinv1) = pinv2^3 E2 / (pinv1^3 E1).
-  /// 
+  ///
   ///
   boost::optional<double> Propagator::dedx_prop(double pinv, double mass,
 						double s, double* deriv) const

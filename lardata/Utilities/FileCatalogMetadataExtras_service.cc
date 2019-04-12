@@ -22,7 +22,7 @@
 
 //--------------------------------------------------------------------
 // Constructor.
-util::FileCatalogMetadataExtras::FileCatalogMetadataExtras(fhicl::ParameterSet const& pset, 
+util::FileCatalogMetadataExtras::FileCatalogMetadataExtras(fhicl::ParameterSet const& pset,
 							   art::ActivityRegistry &reg) :
   fGeneratePerFileMetadata(false),
   fRenameOverwrite(false),
@@ -44,7 +44,7 @@ util::FileCatalogMetadataExtras::FileCatalogMetadataExtras(fhicl::ParameterSet c
 
 //--------------------------------------------------------------------
 // Destructor.
-util::FileCatalogMetadataExtras::~FileCatalogMetadataExtras() 
+util::FileCatalogMetadataExtras::~FileCatalogMetadataExtras()
 {
   // Shouldn't really be necessary to call checkOutputFiles, as we can
   // catch final closed files via postEndJob callback.  But do it just
@@ -52,7 +52,7 @@ util::FileCatalogMetadataExtras::~FileCatalogMetadataExtras()
 
   checkOutputFiles();
 }
-  
+
 //--------------------------------------------------------------------
 // Set service parameters.
 void util::FileCatalogMetadataExtras::reconfigure(fhicl::ParameterSet const& pset)
@@ -272,7 +272,7 @@ void util::FileCatalogMetadataExtras::postCloseOutputFile(art::OutputFileInfo co
 
 //--------------------------------------------------------------------
 // Check whether the specified file is a readable art file.
-// Do this by opening the file and checking whether it contains 
+// Do this by opening the file and checking whether it contains
 // a RootFileDB object.
 bool util::FileCatalogMetadataExtras::isArtFile(std::string const& fn)
 {
@@ -359,7 +359,7 @@ void util::FileCatalogMetadataExtras::checkOutputFiles()
 
   for(auto const& of : opened_files)
     postOpenOutputFile(of);
-  
+
   // Update list of open output files.
 
   fOutputFiles.swap(output_files);
@@ -404,7 +404,7 @@ void util::FileCatalogMetadataExtras::addPerFileMetadata(std::string const& fn)
   }
   if(map_fn != fn) {
     mf::LogInfo info("FileCatalogMetadataExtras");
-    info << "No metadata for file " << fn 
+    info << "No metadata for file " << fn
 	 << "\nUsing renamed file " << map_fn << " metadata instead.";
   }
 
@@ -417,7 +417,7 @@ void util::FileCatalogMetadataExtras::addPerFileMetadata(std::string const& fn)
 
   md.fEndTime = time(0);
 
-  // Update sam metadata in root file.  
+  // Update sam metadata in root file.
   // Open exsiting root file for update.
 
   TFile* file = TFile::Open(fn.c_str(), "UPDATE");
@@ -514,7 +514,7 @@ void util::FileCatalogMetadataExtras::addPerFileMetadata(std::string const& fn)
     delete file;
   }
 
-  // Delete the metadata we used from the metadata map, so we don't 
+  // Delete the metadata we used from the metadata map, so we don't
   // accidentally use it again.
 
   fPerFileMetadataMap.erase(map_fn);
@@ -679,7 +679,7 @@ std::string util::FileCatalogMetadataExtras::expandTemplate() const
 	<< "Output file name template: " << filename
 	<< " has mismatched braces.\n";
 
-    // Split current filename into three pieces: head, argument of current 
+    // Split current filename into three pieces: head, argument of current
     // ${...}, and tail.
 
     std::string head = filename.substr(0, f);
@@ -826,7 +826,7 @@ std::string util::FileCatalogMetadataExtras::expandTemplate() const
 	// Environment variable not defined.
 
 	mf::LogWarning("FileCatalogMetadataExtras")
-	  << "Unknown keyword " << keyword 
+	  << "Unknown keyword " << keyword
 	  << " in output file name template " << filename << ".\n";
 	expanded = subarg;
       }
@@ -854,7 +854,7 @@ std::string util::FileCatalogMetadataExtras::expandTemplate() const
 }
 
 namespace util{
- 
+
   DEFINE_ART_SERVICE(FileCatalogMetadataExtras)
 
 } // namespace util

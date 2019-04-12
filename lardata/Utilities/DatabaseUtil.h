@@ -21,10 +21,10 @@ namespace util{
   class UBDaqID {
   public:
   UBDaqID() : crate(-1), card(-1), channel(-1) {};
-  UBDaqID( int _crate, int _card, int _channel ) :    
+  UBDaqID( int _crate, int _card, int _channel ) :
     crate(_crate), card(_card), channel(_channel) {};
     ~UBDaqID() {};
-    
+
     int crate;
     int card;
     int channel;
@@ -39,10 +39,10 @@ namespace util{
       else if (this->crate < rhs.crate) is_less=true;
       return is_less;
     }
-    
+
   };
 
-  
+
   typedef int UBLArSoftCh_t;
 
   typedef std::map< UBDaqID, UBLArSoftCh_t > UBChannelMap_t;
@@ -54,7 +54,7 @@ namespace util{
     DatabaseUtil(fhicl::ParameterSet const& pset);
 
     void   reconfigure(fhicl::ParameterSet const& pset);
-      
+
     int GetLifetimeFromDB(int run,double &lftime_real);
     int GetTriggerOffsetFromDB(int run,double &T0_real);
     int GetTemperatureFromDB(int run,double &temp_real);
@@ -68,14 +68,14 @@ namespace util{
 
     bool ToughErrorTreatment() const { return fToughErrorTreatment; }
     bool ShouldConnect() const { return fShouldConnect; }
-      
+
   private:
-      
+
     int SelectSingleFieldByQuery(std::vector<std::string> &value,const char * query);
     int Connect(int conn_wait=0);
     int DisConnect();
     char connection_str[200];
-      
+
     PGconn *conn;       // database connection handle
     std::string fDBHostName;
     std::string fDBName;
@@ -89,7 +89,7 @@ namespace util{
     UBChannelMap_t        fChannelMap;
     UBChannelReverseMap_t fChannelReverseMap;
     void LoadUBChannelMap(int data_taking_timestamp = -1 , int  swizzling_timestamp = -1 );
-    
+
   }; // class DatabaseUtil
 } //namespace util
 

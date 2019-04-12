@@ -4,7 +4,7 @@
 ///
 /// \brief  A collection of KHitGroups.
 ///
-/// \author H. Greenlee 
+/// \author H. Greenlee
 ///
 /// This class internally maintains three STL lists of KHitGroup objects.
 ///
@@ -31,7 +31,7 @@
 ///     are visited in order from the sorted list.
 /// 4.  If necessary, candidate measurements can be resorted during the
 ///     progress of the Kalman filter using the updated track.
-/// 5.  After candidate measurements are disposed of (added to track or 
+/// 5.  After candidate measurements are disposed of (added to track or
 ///     rejected), they are moved to the unused list.
 /// 6.  The Kalman filter can be repeated using a new seed track by
 ///     moving all objects to the unsorted list.

@@ -6,7 +6,7 @@
  * @version 1.0
  *
  * See http://www.boost.org/libs/test for the Boost test library home page.
- * 
+ *
  * Timing:
  * version 1.0 takes less than 3" on a 3 GHz machine FIXME
  */
@@ -51,23 +51,23 @@ constexpr unsigned int RandomSeed = 12345;
  * The test fails if the two images do not match.
  */
 void RunHoughTransformTreeTest() {
-  
+
   // the structure we are testing is a 2D "image" of integers;
   // image is mostly empty (zero), but each abscissa has roughly the same
   // number of non-empty pixels (NPoints), and at least one of them.
-  
+
   constexpr unsigned int NPoints =  1000;
   constexpr unsigned int NAngles = 10800;
   constexpr unsigned int NDist   =  2500; // half distance
-  
+
   typedef std::map<int, int> BaseMap_t;
-  
+
   // STL allocator
   std::vector<std::map<
     int, int, BaseMap_t::key_compare,
     std::allocator<BaseMap_t::value_type>
     >> stl_image(NAngles);
-  
+
   // BulkAllocator
   // Normally, I would declare an allocator like
   // lar::BulkAllocator<BaseMap_t::value_type> MyAllocator(500000);
@@ -90,10 +90,10 @@ void RunHoughTransformTreeTest() {
   // Here the non-standard part is the name of the node type, std::_Rb_tree_node
   lar::BulkAllocator<std::_Rb_tree_node<BaseMap_t::value_type>>
     ::SetChunkSize(500000);
-  
+
   static std::default_random_engine random_engine(RandomSeed);
   std::uniform_real_distribution<float> uniform(-1., 1.);
-  
+
   for (unsigned int iPoint = 0; iPoint != NPoints; ++iPoint) {
     // we add here some simple image, not to strain the test;
     // this is a straight line
@@ -110,7 +110,7 @@ void RunHoughTransformTreeTest() {
       while (d < 0) d += 2*NDist;
     } // for iAngle
   } // for iPoint
-  
+
   // we have to provide a comparison between two "different" structures
   // (having different allocators is enough to make them unrelated)
   bool bSame = true;
@@ -122,9 +122,9 @@ void RunHoughTransformTreeTest() {
     bSame = false;
     break;
   } // for
-  
+
   BOOST_CHECK(bSame);
-  
+
 } // RunHoughTransformTreeTest()
 
 

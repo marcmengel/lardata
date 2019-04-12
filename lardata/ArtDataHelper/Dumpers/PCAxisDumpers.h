@@ -25,7 +25,7 @@
 
 namespace recob {
   namespace dumper {
-    
+
     /// Dumps the content of the specified PCA axis (indentation info in nl)
     /// @tparam Stream the type of the output stream
     /// @tparam NewLineRef NewLine reference type (to get a universal reference)
@@ -34,7 +34,7 @@ namespace recob {
       <std::is_same<recob::dumper::NewLine<std::decay_t<Stream>>, std::decay_t<NewLineRef>>::value>
     DumpPCAxis
       (Stream&& out, recob::PCAxis const& pca, NewLineRef&& nl);
-    
+
     /** ************************************************************************
      * @brief Dumps the content of the specified PCA axis into a stream
      * @tparam Stream the type of output stream
@@ -42,9 +42,9 @@ namespace recob {
      * @param pca the principal component axis to be dumped
      * @param indent indentation string (none by default)
      * @param indentFirst whether to indent the first line (yes by default)
-     * 
+     *
      * Insertion operators are required that insert into Stream basic types.
-     * 
+     *
      * This function does not insert a end-of-line after its output.
      */
     template <typename Stream>
@@ -57,8 +57,8 @@ namespace recob {
           std::forward<Stream>(out), pca, makeNewLine(out, indent, !indentFirst)
           );
       }
-    
-    
+
+
   } // namespace dumper
 } // namespace lar
 
@@ -75,7 +75,7 @@ std::enable_if_t
 recob::dumper::DumpPCAxis
   (Stream&& out, recob::PCAxis const& pca, NewLineRef&& nl)
 {
-  
+
   if (!pca.getSvdOK()) {
     nl() << "<not valid>";
     return;
@@ -109,7 +109,7 @@ recob::dumper::DumpPCAxis
     << std::setw(7) << std::setprecision(4) << pca.getEigenVectors()[2][0]
     << ", " << pca.getEigenVectors()[2][1]
     << ", " << pca.getEigenVectors()[2][2];
-  
+
 } // recob::dumper::DumpPCAxis()
 
 //------------------------------------------------------------------------------

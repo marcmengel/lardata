@@ -16,16 +16,16 @@
 
 namespace lar {
   /*
-  namespace details { 
-    
+  namespace details {
+
   } // namespace details
   */
-  
+
   /// Type of provider pack with providers from all specified Services
   template <typename... Services>
   using ProviderPackFromServices
     = lar::ProviderPack<typename Services::provider_type...>;
-  
+
   /**
    * @brief Returns a provider pack with providers from specified services
    * @tparam Services the services to extract the providers from
@@ -35,18 +35,18 @@ namespace lar {
    * from a list of services.
    * This is convenient if an algorithm or service accepts a provider pack
    * for setup:
-   *     
+   *
    *     algo->Setup(extractProviders<
    *       detinfo::DetectorPropertiesService, detinfo::LArPropertiesService
    *       >());
-   *     
+   *
    * Also note that the provider packs can rearrange their elements, so the call
    * above should work just the same as:
-   *     
+   *
    *     algo->Setup(extractProviders<
    *       detinfo::LArPropertiesService, detinfo::DetectorPropertiesService
    *       >());
-   *     
+   *
    * If a provider is needed in the setup argument that is not provided by any
    * of the specified services, a compilation error will occur.
    */
@@ -63,7 +63,7 @@ namespace lar {
 namespace lar {
   namespace details {
     //--------------------------------------------------------------------------
- 
+
     //--------------------------------------------------------------------------
   } // namespace details
 } // namespace lar

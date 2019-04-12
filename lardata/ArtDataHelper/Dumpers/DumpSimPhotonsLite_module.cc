@@ -34,26 +34,26 @@ namespace sim {
 
 namespace {
   using namespace fhicl;
-  
+
   /// Collection of configuration parameters for the module
   struct Config {
     using Name = fhicl::Name;
     using Comment = fhicl::Comment;
-    
+
     fhicl::Atom<art::InputTag> InputPhotons {
       Name("InputPhotons"),
       Comment("data product with the SimPhotonsLite to be dumped")
       };
-    
+
     fhicl::Atom<std::string> OutputCategory {
       Name("OutputCategory"),
       Comment("name of the output stream (managed by the message facility)"),
       "DumpSimPhotonsLite" /* default value */
       };
-    
+
   }; // struct Config
-  
-  
+
+
 } // local namespace
 
 
@@ -61,21 +61,21 @@ class sim::DumpSimPhotonsLite: public art::EDAnalyzer {
     public:
   // type to enable module parameters description by art
   using Parameters = art::EDAnalyzer::Table<Config>;
-  
+
   /// Configuration-checking constructor
   explicit DumpSimPhotonsLite(Parameters const& config);
-  
+
   // Plugins should not be copied or assigned.
   DumpSimPhotonsLite(DumpSimPhotonsLite const&) = delete;
   DumpSimPhotonsLite(DumpSimPhotonsLite &&) = delete;
   DumpSimPhotonsLite& operator = (DumpSimPhotonsLite const&) = delete;
   DumpSimPhotonsLite& operator = (DumpSimPhotonsLite &&) = delete;
-  
-  
+
+
   // Operates on the event
   void analyze(art::Event const& event) override;
-  
-  
+
+
   /**
    * @brief Dumps the content of specified SimPhotonsLite in the output stream.
    * @tparam Stream the type of output stream
@@ -83,10 +83,10 @@ class sim::DumpSimPhotonsLite: public art::EDAnalyzer {
    * @param photons the SimPhotonsLite to be dumped
    * @param indent base indentation string _(default: none)_
    * @param firstIndent if first output line should be indented _(default: yes)_
-   * 
+   *
    * The indent string is prepended to every line of output, with the possible
    * exception of the first one, in case bIndentFirst is true.
-   * 
+   *
    * The output starts on the current line, and the last line is *not* broken.
    */
   template <typename Stream>
@@ -94,19 +94,19 @@ class sim::DumpSimPhotonsLite: public art::EDAnalyzer {
     Stream&& out, sim::SimPhotonsLite const& photons,
     std::string indent, std::string firstIndent
     ) const;
-  
+
   template <typename Stream>
   void DumpPhoton
     (Stream&& out, sim::SimPhotonsLite const& photons, std::string indent = "")
     const
     { DumpPhoton(std::forward<Stream>(out), photons, indent, indent); }
-  
-  
+
+
     private:
-  
+
   art::InputTag fInputPhotons; ///< name of SimPhotons's data product
   std::string fOutputCategory; ///< name of the stream for output
-  
+
 }; // class sim::DumpSimPhotonsLite
 
 
@@ -126,12 +126,12 @@ void sim::DumpSimPhotonsLite::DumpPhoton(
   Stream&& out, sim::SimPhotonsLite const& photons,
   std::string indent, std::string firstIndent
 ) const {
-  
+
   unsigned int const nPhotons = std::accumulate(
     photons.DetectedPhotons.begin(), photons.DetectedPhotons.end(),
     0U, [](auto sum, auto const& entry){ return sum + entry.second; }
     );
-  
+
   out << firstIndent
     << "channel=" << photons.OpChannel << " has ";
   if (nPhotons) {
@@ -149,32 +149,32 @@ void sim::DumpSimPhotonsLite::DumpPhoton(
   else {
     out << "no photons";
   }
-  
+
 } // sim::DumpSimPhotonsLite::DumpPhoton()
 
 
 //------------------------------------------------------------------------------
 void sim::DumpSimPhotonsLite::analyze(art::Event const& event) {
-  
+
   // get the particles from the event
   auto const& Photons
     = *(event.getValidHandle<std::vector<sim::SimPhotonsLite>>(fInputPhotons));
-  
+
   mf::LogVerbatim(fOutputCategory) << "Event " << event.id()
     << " : data product '" << fInputPhotons.encode() << "' contains "
     << Photons.size() << " SimPhotonsLite";
-  
+
   unsigned int iChannel = 0;
   for (sim::SimPhotonsLite const& photons: Photons) {
-    
+
     mf::LogVerbatim log(fOutputCategory);
     // a bit of a header
     log << "[#" << (iChannel++) << "] ";
     DumpPhoton(log, photons, "  ");
-    
+
   } // for
   mf::LogVerbatim(fOutputCategory) << "\n"; // just an empty line
-  
+
 } // sim::DumpSimPhotonsLite::analyze()
 
 

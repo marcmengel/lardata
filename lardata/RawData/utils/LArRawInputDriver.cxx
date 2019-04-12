@@ -273,19 +273,19 @@ namespace lris {
 						  currentSubRunID_.subRun(),
 						  tstamp);
       art::put_product_in_principal(std::move(rundata), *outR, "daq");
-    } 
+    }
     else if (rn != currentSubRunID_.run()){
       throw cet::exception("InconsistentEventStream")
 	<< "Encountered run #" << rn
 	<< " while processing events from run #" << currentSubRunID_.run()
 	<< "\n";
     }
-    
+
     outE = principalMaker_.makeEventPrincipal(currentSubRunID_.run(),
                                               currentSubRunID_.subRun(),
                                               daqHeader.GetEvent(),
                                               tstamp);
-    
+
     // Put products in the event.
     art::put_product_in_principal(std::move(rdcol),
                                   *outE,

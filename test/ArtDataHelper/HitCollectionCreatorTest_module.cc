@@ -13,7 +13,7 @@
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::kMysteryType, ...
 
 // framework libraries
-#include "art/Framework/Core/ModuleMacros.h" 
+#include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Principal/Event.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -28,71 +28,71 @@
 
 namespace recob {
   namespace test {
-  
+
     /**
      * @brief Test module for `recob::HitCollector`.
-     * 
+     *
      * Currently exercises:
      * @todo
-     * 
+     *
      * Throws an exception on failure.
-     * 
+     *
      * Service requirements
      * =====================
-     * 
+     *
      * This module requires no service.
-     * 
+     *
      * Configuration parameters
      * =========================
-     * 
+     *
      * * *instanceName* (string, default: empty): name of the data product
      *     instance to produce
-     * 
+     *
      */
     class HitCollectionCreatorTest: public art::EDProducer {
-      
+
         public:
-      
+
       struct Config {
-        
+
         using Name = fhicl::Name;
         using Comment = fhicl::Comment;
-        
+
         fhicl::Atom<std::string> instanceName {
           Name("instanceName"),
           Comment("name of the data product instance to produce"),
           "" /* default: empty */
           };
-        
+
       }; // Config
-      
+
       using Parameters = art::EDProducer::Table<Config>;
-      
+
       explicit HitCollectionCreatorTest(Parameters const& config);
-      
+
       virtual void produce(art::Event& event) override;
-      
-      
-      
+
+
+
         private:
-      
+
       recob::HitCollectionCreatorManager<> hitCollManager;
-      
+
       std::string fInstanceName; ///< Instance name to be used for products.
-      
-      
-      
+
+
+
       /// Produces a collection of hits and stores it into the event.
       void produceHits(art::Event& event, std::string instanceName);
-      
+
     }; // HitCollectionCreatorTest
-    
+
     DEFINE_ART_MODULE(HitCollectionCreatorTest)
-    
+
   } // namespace test
 } // namespace recob
-  
-  
+
+
 //------------------------------------------------------------------------------
 //--- implementation
 //---
@@ -117,12 +117,12 @@ void recob::test::HitCollectionCreatorTest::produce(art::Event& event) {
 void recob::test::HitCollectionCreatorTest::produceHits
   (art::Event& event, std::string instanceName)
 {
-  
+
   // this object will contain al the hits until they are moved into the event;
   // while it's useful to test the creation of the associations, that is too
   // onerous for this test
   auto Hits = hitCollManager.collectionWriter(event);
-  
+
   // create hits, one by one
   for (double time: { 0.0, 200.0, 400.0 }) {
     Hits.emplace_back(
@@ -148,9 +148,9 @@ void recob::test::HitCollectionCreatorTest::produceHits
         )
     );
   } // for hits
-  
+
   Hits.put_into(event);
-  
+
 } // recob::test::HitCollectionCreatorTest::produceHits()
 
 
