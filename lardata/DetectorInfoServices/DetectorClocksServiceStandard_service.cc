@@ -1,7 +1,7 @@
 #include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h"
 #include "lardataalg/DetectorInfo/DetectorClocksStandardTriggerLoader.h"
 #include "TFile.h"
-#include "art/Framework/IO/Root/RootDB/SQLite3Wrapper.h"
+#include "art_root_io/RootDB/SQLite3Wrapper.h"
 #include "fhiclcpp/make_ParameterSet.h"
 
 //-----------------------------------------------------------------------------------------

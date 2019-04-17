@@ -34,7 +34,6 @@ cet_cmake_env()
 cet_set_compiler_flags(DIAGS CAUTIOUS
   WERROR
   NO_UNDEFINED
-  ALLOW_DEPRECATIONS
   EXTRA_FLAGS -pedantic
 )
 
@@ -48,6 +47,7 @@ find_ups_product( lardataalg )
 find_ups_product( larcore  )
 find_ups_product( nutools  )
 find_ups_product( art  )
+find_ups_product(art_root_io)
 find_ups_product( postgresql  )
 find_ups_product( range )
 find_ups_product( cetbuildtools )
