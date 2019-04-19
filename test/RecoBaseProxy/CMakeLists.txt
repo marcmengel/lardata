@@ -46,7 +46,7 @@ simple_plugin(TrackProxyTrackMaker "module"
   lardataobj_RecoBase
   art_Persistency_Provenance
   ${MF_MESSAGELOGGER}
-  
+  ${ROOT_CORE}
   )
 
 cet_test(TrackProxy_test

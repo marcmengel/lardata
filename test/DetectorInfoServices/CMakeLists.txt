@@ -3,9 +3,9 @@ art_make(
     larcorealg_Geometry
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
     ${MF_MESSAGELOGGER}
-    
     ${FHICLCPP}
     cetlib cetlib_except
+    ${ROOT_CORE}
 )
 
 cet_test(LarProp HANDBUILT

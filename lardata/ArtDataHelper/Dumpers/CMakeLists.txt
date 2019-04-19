@@ -53,7 +53,8 @@ foreach(Dumper IN LISTS SimulationDumpers)
   simple_plugin(${Dumper} "module"
       lardataobj_Simulation
       art_Persistency_Provenance
-      ${MF_MESSAGELOGGER})
+      ${MF_MESSAGELOGGER}
+      ${ROOT_CORE})
 endforeach(Dumper IN LISTS SimulationDumpers)
 
 
