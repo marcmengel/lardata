@@ -1408,13 +1408,11 @@ namespace proxy {
   TrackCollectionProxyElement<CollProxy>::fitInfoAtPoint
     (std::size_t index) const
   {
-    if (!base_t::template has<Tracks::TrackFitHitInfoTag>())
-      return nullptr;
-    auto&& fitInfo = base_t::template getIf<
-      Tracks::TrackFitHitInfoTag,
-      std::vector<recob::TrackFitHitInfo> const&
-      >();
-    return &(fitInfo[index]);
+    if constexpr (base_t::template has<Tracks::TrackFitHitInfoTag>()) {
+      auto const& fitInfo = base_t::template get<Tracks::TrackFitHitInfoTag>();
+      return &(fitInfo[index]);
+    }
+    else return nullptr;
   } // TrackCollectionProxyElement<>::fitInfoAtPoint()
 
 

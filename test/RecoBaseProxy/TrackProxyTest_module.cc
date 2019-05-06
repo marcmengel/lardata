@@ -218,7 +218,6 @@ void TrackProxyTest::testTracks(art::Event const& event) {
   //
   static_assert(!tracks.has<recob::SpacePoint>(),
     "Track proxy does NOT have space points available!!!");
-  BOOST_CHECK_THROW(tracks.getIf<recob::SpacePoint>(), std::logic_error);
 
   static_assert(
     tracks.has<recob::TrackFitHitInfo>(),

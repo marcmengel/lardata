@@ -201,6 +201,9 @@ namespace proxy {
      * @throw std::logic_error if the tag is not available.
      * @see get(), has()
      *
+     * @deprecated C++17 `if constexpr` should be used instead
+     *             (see the example below)
+     *             
      * This method is a `get()` which forgives when the requested type is not
      * available (because this proxy was configured not to hold it).
      *
@@ -241,9 +244,10 @@ namespace proxy {
      * @warning This functionality is not trivial to use!
      *          It's mostly meant for implementation of higher level wrappers.
      *
-     * @todo Use C++17 constexpr if when available.
+     * @deprecated Use C++17 constexpr if instead.
      */
     template <typename Tag, typename T = std::vector<Tag> const&>
+    [[deprecated("Use C++17 constexpr if instead and get() instead")]]
     auto getIf() const -> decltype(auto);
 
 
@@ -269,9 +273,9 @@ namespace proxy {
 
 
     template <typename Tag, typename>
-    auto getIfHas(util::bool_constant<true>) const -> decltype(auto);
+    auto getIfHas(std::bool_constant<true>) const -> decltype(auto);
     template <typename Tag, typename T>
-    [[noreturn]] auto getIfHas(util::bool_constant<false>) const -> T;
+    [[noreturn]] auto getIfHas(std::bool_constant<false>) const -> T;
 
     /// Returns an iterator pointing to the specified index of this collection.
     const_iterator makeIterator(std::size_t i) const { return { *this, i }; }
@@ -408,7 +412,7 @@ namespace proxy {
   template <typename Tag, typename T>
   auto CollectionProxyBase<Element, MainColl, AuxColls...>::getIf() const
     -> decltype(auto)
-    { return getIfHas<Tag, T>(util::bool_constant<has<Tag>()>{}); }
+    { return getIfHas<Tag, T>(std::bool_constant<has<Tag>()>{}); }
 
 
   template <
@@ -418,7 +422,7 @@ namespace proxy {
     >
   template <typename Tag, typename>
   auto CollectionProxyBase<Element, MainColl, AuxColls...>::getIfHas
-    (util::bool_constant<true>) const -> decltype(auto)
+    (std::bool_constant<true>) const -> decltype(auto)
     { return get<Tag>(); }
 
   template <
@@ -428,7 +432,7 @@ namespace proxy {
     >
   template <typename Tag, typename T>
   auto CollectionProxyBase<Element, MainColl, AuxColls...>::getIfHas
-    (util::bool_constant<false>) const -> T
+    (std::bool_constant<false>) const -> T
     {
       throw std::logic_error
         ("Tag '" + lar::debug::demangle<Tag>() + "' not available.");

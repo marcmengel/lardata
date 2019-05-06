@@ -198,7 +198,10 @@ namespace proxy {
      * @return the auxiliary data specified by type (`Tag`).
      * @throw std::logic_error if the tag is not available.
      * @see get(), has()
-     *
+     * 
+     * @deprecated C++17 `if constexpr` should be used instead
+     *             (see the example below)
+     *             
      * This method is a `get()` which forgives when the requested type is not
      * available (because this proxy was configured not to hold it).
      *
@@ -259,6 +262,7 @@ namespace proxy {
      *
      */
     template <typename Tag, typename T = Tag const&>
+    [[deprecated("Use C++17 constexpr if instead and get() instead")]]
     auto getIf() const -> decltype(auto);
 
 
@@ -276,10 +280,10 @@ namespace proxy {
     aux_elements_t fAuxData; ///< Data associated to the main object.
 
     template <typename Tag, typename>
-    auto getIfHas(util::bool_constant<true>) const -> decltype(auto);
+    auto getIfHas(std::bool_constant<true>) const -> decltype(auto);
 
     template <typename Tag, typename T>
-    [[noreturn]] auto getIfHas(util::bool_constant<false>) const -> T;
+    [[noreturn]] auto getIfHas(std::bool_constant<false>) const -> T;
 
   }; // CollectionProxyElement<>
 
@@ -357,20 +361,20 @@ namespace proxy {
   template <typename CollProxy>
   template <typename Tag, typename T>
   auto CollectionProxyElement<CollProxy>::getIf() const -> decltype(auto)
-    { return getIfHas<Tag, T>(util::bool_constant<has<Tag>()>{}); }
+    { return getIfHas<Tag, T>(std::bool_constant<has<Tag>()>{}); }
 
 
   //----------------------------------------------------------------------------
   template <typename CollProxy>
   template <typename Tag, typename>
   auto CollectionProxyElement<CollProxy>::getIfHas
-    (util::bool_constant<true>) const -> decltype(auto)
+    (std::bool_constant<true>) const -> decltype(auto)
     { return get<Tag>(); }
 
   template <typename CollProxy>
   template <typename Tag, typename T>
   auto CollectionProxyElement<CollProxy>::getIfHas
-    (util::bool_constant<false>) const -> T
+    (std::bool_constant<false>) const -> T
     {
       throw std::logic_error
         ("Tag '" + lar::debug::demangle<Tag>() + "' not available.");
