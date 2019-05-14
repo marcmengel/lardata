@@ -129,8 +129,6 @@ namespace detsim {
     }; // struct TimestampLabelMaker
     
     
-    detinfo::DetectorClocks const* fDetClocks = nullptr;
-    
     art::InputTag fOpDetWaveformsTag; ///< Input tag of data product to dump.
     std::string fOutputCategory; ///< Category for `mf::LogInfo` output.
     unsigned int fDigitsPerLine; ///< ADC readings per line in the output.
@@ -195,8 +193,10 @@ namespace detsim {
         << " counts will be subtracted from all ADC readings.";
     } // if pedestal
 
-    for (raw::OpDetWaveform const& waveform: *Waveforms)
-      dump(mf::LogVerbatim(fOutputCategory), waveform);
+    for (raw::OpDetWaveform const& waveform: *Waveforms) {
+      mf::LogVerbatim log(fOutputCategory);
+      dump(log, waveform);
+    }
 
   } // DumpOpDetWaveforms::analyze()
 
