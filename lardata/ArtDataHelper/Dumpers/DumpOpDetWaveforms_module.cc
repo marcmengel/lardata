@@ -6,6 +6,8 @@
  */
 
 // LArSoft includes
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "lardataalg/DetectorInfo/DetectorClocks.h"
 #include "lardataalg/Dumpers/RawData/OpDetWaveform.h"
 #include "lardataobj/RawData/OpDetWaveform.h"
 
@@ -45,6 +47,11 @@ namespace detsim {
    *   will put this many of them for each line
    * - *Pedestal* (integer, default: `0`): ADC readings are written relative
    *   to this number
+   * - *TickLabel* (string, default: `"tick"`): a preamble to each line of the
+   *   dumped waveform digits, chosen among:
+   *     - `"tick"`: the tick number of the waveform is printed (starts at `0`)
+   *     - `"time"`: timestamp (&micro;s) of the first tick in the row
+   *     - `"none"`: no preamble written at all
    *
    */
   class DumpOpDetWaveforms: public art::EDAnalyzer {
@@ -79,6 +86,17 @@ namespace detsim {
         0
         };
 
+      fhicl::Atom<std::string> TickLabel {
+        Name("TickLabel"),
+        Comment(
+          "write an index in front of each digit dump line; choose between:"
+          " \"tick\" (waveform tick number)"
+          ", \"timestamp\" (electronics clock time in microseconds)"
+          ", \"none\" (no tick label)"
+          ),
+        "tick"
+        };
+
     }; // struct Config
 
     using Parameters = art::EDAnalyzer::Table<Config>;
@@ -92,12 +110,33 @@ namespace detsim {
 
 
       private:
-
+    
+    /// Base functor for printing time according to tick number.
+    struct TimestampLabelMaker
+      : public dump::raw::OpDetWaveformDumper::TimeLabelMaker
+    {
+      double tickDuration; // should this me `util::quantities::microsecond`?
+      
+      /// Constructor: specify the duration of optical clock tick [&micro;s].
+      TimestampLabelMaker(double tickDuration)
+        : tickDuration(tickDuration) {}
+        
+      /// Returns the electronics time of the specified waveform tick.
+      virtual std::string label
+        (raw::OpDetWaveform const& waveform, unsigned int tick) const override
+        { return std::to_string(waveform.TimeStamp() + tick * tickDuration); }
+      
+    }; // struct TimestampLabelMaker
+    
+    
     art::InputTag fOpDetWaveformsTag; ///< Input tag of data product to dump.
     std::string fOutputCategory; ///< Category for `mf::LogInfo` output.
     unsigned int fDigitsPerLine; ///< ADC readings per line in the output.
     raw::ADC_Count_t fPedestal; ///< ADC pedestal (subtracted from readings).
-
+    
+    /// The object used to print tick labels.
+    std::unique_ptr<dump::raw::OpDetWaveformDumper::TimeLabelMaker> fTimeLabel;
+    
   }; // class DumpOpDetWaveforms
 
 } // namespace detsim
@@ -112,7 +151,27 @@ namespace detsim {
     , fOutputCategory    (config().OutputCategory())
     , fDigitsPerLine     (config().DigitsPerLine())
     , fPedestal          (config().Pedestal())
-    {}
+  {
+    std::string const tickLabelStr = config().TickLabel();
+    if (tickLabelStr == "none") {
+      fTimeLabel.reset(); // not very useful, but let's be explicit
+    }
+    else if (tickLabelStr == "tick") {
+      fTimeLabel
+        = std::make_unique<dump::raw::OpDetWaveformDumper::TickLabelMaker>();
+    }
+    else if (tickLabelStr == "time") {
+      auto const* detClocks
+        = lar::providerFrom<detinfo::DetectorClocksService>();
+      fTimeLabel = std::make_unique<TimestampLabelMaker>
+        (detClocks->OpticalClock().TickPeriod());
+    }
+    else {
+      throw art::Exception(art::errors::Configuration)
+        << "Invalid choice '" << tickLabelStr << "' for time label.\n";
+    }
+    
+  } // DumpOpDetWaveforms::DumpOpDetWaveforms()
 
 
   //-------------------------------------------------
@@ -124,6 +183,7 @@ namespace detsim {
 
     dump::raw::OpDetWaveformDumper dump(fPedestal, fDigitsPerLine);
     dump.setIndent("  ");
+    dump.setTimeLabelMaker(fTimeLabel.get());
 
     mf::LogVerbatim(fOutputCategory)
       << "The event " << event.id() << " contains data for "
@@ -133,8 +193,10 @@ namespace detsim {
         << " counts will be subtracted from all ADC readings.";
     } // if pedestal
 
-    for (raw::OpDetWaveform const& waveform: *Waveforms)
-      dump(mf::LogVerbatim(fOutputCategory), waveform);
+    for (raw::OpDetWaveform const& waveform: *Waveforms) {
+      mf::LogVerbatim log(fOutputCategory);
+      dump(log, waveform);
+    }
 
   } // DumpOpDetWaveforms::analyze()
 
