@@ -14,15 +14,6 @@ simple_plugin(DatabaseUtil "service"
               ${ART_ROOT_IO_ROOTDB}
               art_Persistency_Provenance)
 
-simple_plugin(FileCatalogMetadataExtras "service"
-              ${ART_ROOT_IO_ROOTDB}
-              ${ART_FRAMEWORK_CORE}
-              ${ART_FRAMEWORK_PRINCIPAL}
-              ${ART_FRAMEWORK_SERVICES_SYSTEM_FILECATALOGMETADATA_SERVICE}
-              ${SQLITE3}
-              ${MF_MESSAGELOGGER}
-              ${ROOT_BASIC_LIB_LIST})
-
 simple_plugin(LArPropertiesServiceArgoNeuT "service"
               lardata_Utilities_DatabaseUtil_service
               ${MF_MESSAGELOGGER})
