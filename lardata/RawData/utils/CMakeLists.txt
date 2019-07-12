@@ -13,7 +13,6 @@ art_make(NO_PLUGINS
                        ${PQ}
                        ${Boost_SERIALIZATION_LIBRARY}
                        ${Boost_DATE_TIME_LIBRARY}
-                       ${Boost_SYSTEM_LIBRARY}
                        ${ROOT_CORE}
                        ${ROOT_RIO}
                        ${ROOT_TREE}

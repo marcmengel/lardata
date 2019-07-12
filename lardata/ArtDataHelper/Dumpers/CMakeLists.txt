@@ -4,8 +4,7 @@
 #
 set(RawDataDumpers
   "DumpRawDigits"
-  "DumpOpDetWaveforms"
-  )
+  "DumpOpDetWaveforms")
 set(RecoBaseDumpers
   "DumpWires"
   "DumpHits"
@@ -16,13 +15,10 @@ set(RecoBaseDumpers
   "DumpSpacePoints"
   "DumpChargedSpacePoints"
   "DumpTracks"
-  "DumpVertices"
-  )
+  "DumpVertices")
 set(SimulationDumpers
-  "DumpSimPhotonsLite"
-  )
-set(MCDumpers
-  )
+   "DumpSimPhotonsLite")
+set(MCDumper)
 
 
 art_make(NO_PLUGINS LIB_LIBRARIES lardataobj_RecoBase)
@@ -31,10 +27,8 @@ foreach(Dumper IN LISTS RawDataDumpers)
   simple_plugin(${Dumper} "module"
       lardataobj_RawData
       ${ART_FRAMEWORK_SERVICES_REGISTRY}
-      ${ART_PERSISTENCY_PROVENANCE}
-      ${MF_MESSAGELOGGER}
-      )
-endforeach(Dumper IN LISTS RawDataDumpers)
+      ${MF_MESSAGELOGGER})
+endforeach()
 
 
 foreach(Dumper IN LISTS RecoBaseDumpers)
@@ -42,28 +36,21 @@ foreach(Dumper IN LISTS RecoBaseDumpers)
       lardataobj_RecoBase
       lardata_ArtDataHelper_Dumpers
       lardata_RecoBaseProxy
-      ${ART_PERSISTENCY_PROVENANCE}
-      ${MF_MESSAGELOGGER}
-      )
-endforeach(Dumper IN LISTS RecoBaseDumpers)
+      ${MF_MESSAGELOGGER})
+endforeach()
 
 
 foreach(Dumper IN LISTS SimulationDumpers)
   simple_plugin(${Dumper} "module"
       lardataobj_Simulation
-      ${ART_PERSISTENCY_PROVENANCE}
       ${MF_MESSAGELOGGER}
-      ${ROOT_CORE}
-      )
+      ${ROOT_CORE})
 endforeach(Dumper IN LISTS SimulationDumpers)
 
 
 foreach(Dumper IN LISTS MCDumpers)
-  simple_plugin(${Dumper} "module"
-      lardataobj_MCBase
-      ${ART_PERSISTENCY_PROVENANCE}
-      )
-endforeach(Dumper IN LISTS MCDumpers)
+  simple_plugin(${Dumper} "module" lardataobj_MCBase)
+endforeach()
 
 
 

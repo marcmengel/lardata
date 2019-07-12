@@ -31,8 +31,11 @@ simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
 
 simple_plugin(LArFFT "service"
               ${MF_MESSAGELOGGER}
+              ${ROOT_CORE}
               ${ROOT_FFTW}
-              ${ROOT_BASIC_LIB_LIST})
+              ${ROOT_HIST}
+              ${ROOT_MATHCORE}
+              ${ROOT_PHYSICS})
 
 simple_plugin(ComputePi "module"
               ${MF_MESSAGELOGGER})
