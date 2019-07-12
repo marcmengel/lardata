@@ -5,16 +5,18 @@
 /// \author  brebel@fnal.gov, soderber@fnal.gov
 ////////////////////////////////////////////////////////////////////////
 
-#include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Core/ProductRegistryHelper.h"
-#include "art/Framework/IO/Sources/SourceHelper.h"
-#include "art/Framework/Core/FileBlock.h"
-#include "art/Framework/Principal/RunPrincipal.h"
-#include "art/Framework/Principal/SubRunPrincipal.h"
-#include "art/Framework/Principal/EventPrincipal.h"
+namespace art {
+  class EventPrincipal;
+  class FileBlock;
+  class ProductRegistryHelper;
+  class RunPrincipal;
+  class SourceHelper;
+  class SubRunPrincipal;
+}
+namespace fhicl { class ParameterSet; }
+
 #include "canvas/Persistency/Provenance/SubRunID.h"
 
-#include <fstream>
 #include <string>
 #include <vector>
 

@@ -10,7 +10,6 @@
 #include "lardataobj/RawData/RawDigit.h"
 #include "lardataobj/RawData/raw.h" // raw::Uncompress()
 #include "larcoreobj/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
-#include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::View_t
 
 // art libraries
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -28,7 +27,6 @@
 // C//C++ standard libraries
 #include <string>
 #include <algorithm> // std::min(), std::copy_n()
-#include <ios> // std::fixed
 #include <iomanip> // std::setprecision(), std::setw()
 
 

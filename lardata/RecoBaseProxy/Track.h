@@ -241,8 +241,9 @@
 // framework libraries
 #include "canvas/Persistency/Common/Ptr.h"
 
-// range library
-#include "range/v3/view/filter.hpp" // range::view::filter()
+#include <limits>
+#include <tuple>
+#include <vector>
 
 namespace proxy {
 

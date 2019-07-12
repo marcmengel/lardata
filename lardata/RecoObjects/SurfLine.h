@@ -50,7 +50,7 @@
 #ifndef SURFLINE_H
 #define SURFLINE_H
 
-#include <ostream>
+#include "lardata/RecoObjects/KalmanLinearAlgebra.h"
 #include "lardata/RecoObjects/Surface.h"
 
 namespace trkf {

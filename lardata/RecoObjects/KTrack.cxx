@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <ostream>
 #include "lardata/RecoObjects/KTrack.h"
 #include "cetlib_except/exception.h"
 

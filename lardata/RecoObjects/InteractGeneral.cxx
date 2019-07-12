@@ -11,7 +11,6 @@
 #include <cmath>
 #include "lardata/RecoObjects/InteractGeneral.h"
 #include "lardata/RecoObjects/SurfXYZPlane.h"
-#include "cetlib_except/exception.h"
 
 namespace trkf {
 

@@ -10,12 +10,16 @@
 
 #include <cmath>
 #include <iomanip>
+
 #include "lardata/RecoObjects/KGTrack.h"
 #include "lardata/RecoObjects/KHitWireX.h"
 #include "lardata/RecoObjects/KHitWireLine.h"
 #include "lardata/RecoObjects/SurfXYZPlane.h"
 #include "lardata/RecoObjects/PropXYZPlane.h"
-#include "larcore/Geometry/Geometry.h"
+#include "lardataobj/RecoBase/Track.h"
+#include "lardataobj/RecoBase/TrackingTypes.h"
+#include "lardataobj/RecoBase/TrajectoryPointFlags.h"
+
 #include "cetlib_except/exception.h"
 
 namespace trkf {

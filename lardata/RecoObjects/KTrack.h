@@ -22,7 +22,7 @@
 #ifndef KTRACK_H
 #define KTRACK_H
 
-#include <ostream>
+#include <iosfwd>
 #include <memory>
 #include "lardata/RecoObjects/KalmanLinearAlgebra.h"
 #include "lardata/RecoObjects/Surface.h"

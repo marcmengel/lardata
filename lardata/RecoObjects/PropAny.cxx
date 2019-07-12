@@ -8,7 +8,6 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include <cmath>
 #include "lardata/RecoObjects/PropAny.h"
 #include "lardata/RecoObjects/SurfYZLine.h"
 #include "lardata/RecoObjects/SurfYZPlane.h"

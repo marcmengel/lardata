@@ -15,9 +15,9 @@
 #define LARDATA_RECOBASEART_TRACKUTILS_H 1
 
 // LArSoft libraries
-#include "lardataobj/RecoBase/Track.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::View_t
 
+namespace recob { class Track; }
 
 namespace lar {
    namespace util {

@@ -10,8 +10,6 @@
 // LArSoft includes
 #include "lardata/DetectorInfoServices/LArPropertiesServiceStandard.h"
 
-// Framework includes
-#include "cetlib_except/exception.h"
 //-----------------------------------------------
 detinfo::LArPropertiesServiceStandard::LArPropertiesServiceStandard(fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
 {

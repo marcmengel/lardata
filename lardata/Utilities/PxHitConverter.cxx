@@ -7,14 +7,12 @@
 //
 //
 ////////////////////////////////////////////////////////////////////////
+
+#include "TString.h"
 #include "PxHitConverter.h"
 
-
-// C/C++ standard libraries
-#include <algorithm> // std::transform(), std::iota()
-#include <iterator> // std::back_inserter()
-#include <functional> // std::mem_fun()
-
+#include "lardata/Utilities/GeometryUtilities.h"
+#include "lardata/Utilities/UtilException.h"
 
 namespace util {
 

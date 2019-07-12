@@ -1,12 +1,13 @@
 #ifndef TRACKSTATEPROPAGATOR_H
 #define TRACKSTATEPROPAGATOR_H
 
-#include <memory>
-
+#include "lardataobj/RecoBase/TrackingPlane.h"
+#include "lardataobj/RecoBase/TrackingTypes.h"
 #include "lardata/RecoObjects/TrackState.h"
-#include "fhiclcpp/ParameterSet.h"
 #include "fhiclcpp/types/Atom.h"
 #include "fhiclcpp/types/Table.h"
+
+#include <utility>
 
 namespace detinfo {
   class DetectorProperties;

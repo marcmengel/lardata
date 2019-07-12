@@ -11,6 +11,8 @@
 #include "lardata/ArtDataHelper/ChargedSpacePointCreator.h"
 
 // framework libraries
+#include "art/Framework/Core/detail/Producer.h"
+#include "art/Framework/Principal/Event.h"
 #include "cetlib_except/exception.h"
 
 // C/C++ standard libraries

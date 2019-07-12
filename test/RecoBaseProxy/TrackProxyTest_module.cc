@@ -15,9 +15,6 @@
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/TrackFitHitInfo.h"
 
-#include "larcorealg/CoreUtils/DebugUtils.h" // lar::debug::demangle()
-#include "larcorealg/CoreUtils/UncopiableAndUnmovableClass.h"
-
 // framework libraries
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"

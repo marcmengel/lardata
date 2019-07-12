@@ -65,6 +65,7 @@
 #define KHIT_H
 
 #include "lardata/RecoObjects/KHitBase.h"
+#include "lardata/RecoObjects/Propagator.h"
 #include "cetlib_except/exception.h"
 
 namespace trkf {

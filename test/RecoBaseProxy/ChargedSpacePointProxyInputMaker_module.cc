@@ -128,45 +128,4 @@ void lar::test::ChargedSpacePointProxyInputMaker::produce(art::Event& event) {
 
 } // lar::test::ChargedSpacePointProxyInputMaker::produce()
 
-#if 0
-// -----------------------------------------------------------------------------
-void lar::test::ChargedSpacePointProxyInputMaker::produce(art::Event& event) {
-
-  auto points = std::make_unique<std::vector<recob::SpacePoint>>();
-  auto charges = std::make_unique<std::vector<recob::PointCharge>>();
-
-  const double err[6U] = { 1.0, 0.0, 1.0, 0.0, 0.0, 1.0 };
-
-  for (unsigned int iPoint = 0; iPoint < nPoints; ++iPoint) {
-
-    //
-    // point
-    //
-    double const pos[3U]
-      = { double(iPoint), double(2.0 * iPoint), double(4.0 * iPoint) };
-    points->emplace_back(pos, err, 1.0 /* chisq */, int(iPoint) /* id */);
-
-    //
-    // charge
-    //
-    charges->emplace_back(recob::PointCharge::Charge_t(iPoint));
-
-    mf::LogVerbatim("ChargedSpacePointProxyInputMaker")
-      << "[#" << iPoint << "] point: " << points->back()
-      << "; charge: " << charges->back();
-
-  } // for (iPoint)
-
-  mf::LogInfo("ChargedSpacePointProxyInputMaker")
-    << "Produced " << points->size() << " points and charges.";
-
-  event.put(std::move(points));
-  event.put(std::move(charges));
-
-} // lar::test::ChargedSpacePointProxyInputMaker::produce()
-#endif // 0
-
-// -----------------------------------------------------------------------------
 DEFINE_ART_MODULE(lar::test::ChargedSpacePointProxyInputMaker)
-
-// -----------------------------------------------------------------------------

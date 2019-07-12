@@ -7,7 +7,6 @@
 /// \author H. Greenlee
 ///
 ////////////////////////////////////////////////////////////////////////
-#include <stdint.h>
 
 #include "lardata/RecoObjects/KHitWireLine.h"
 #include "lardata/RecoObjects/SurfWireLine.h"

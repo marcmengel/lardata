@@ -9,25 +9,18 @@
 #ifndef UTIL_GEOMETRYUTILITIES_H
 #define UTIL_GEOMETRYUTILITIES_H
 
-#include <TMath.h>
-#include <TLorentzVector.h>
+#include "RtypesCore.h"
+#include "TVector3.h"
 
 #include "PxUtils.h"
-#include "larcore/Geometry/Geometry.h"
-#include "lardata/DetectorInfoServices/LArPropertiesService.h"
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "lardata/Utilities/UtilException.h"
-#include "time.h"
 
-#include "lardataobj/RecoBase/Hit.h"
-#include "larcorealg/Geometry/GeometryCore.h"
-#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
-#include "canvas/Persistency/Common/Ptr.h"
-
-#include <climits>
-#include <iostream>
+#include <limits>
 #include <vector>
 
+class TLorentzVector;
+
+namespace detinfo { class DetectorProperties; }
+namespace geo { class GeometryCore; }
 
 ///General LArSoft Utilities
 namespace util{

@@ -31,10 +31,6 @@ namespace util {
     /// @see RangeForWrapperBox
     template <typename BeginIter, typename EndIter>
     class RangeForWrapperIterator {
-      struct Dereferencer;
-      struct Incrementer;
-      struct Comparer;
-      struct Dumper;
 
       using traits_t = std::iterator_traits<BeginIter>;
 

@@ -11,7 +11,6 @@
 
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Principal/Event.h"
-#include "art/Framework/Principal/Handle.h"
 #include "canvas/Utilities/InputTag.h"
 
 #include "lardata/ArtDataHelper/MVAWrapperBase.h"
@@ -353,4 +352,3 @@ void anab::FVectorWriter<N>::saveOutputs(art::Event & evt)
 //----------------------------------------------------------------------------
 
 #endif //ANAB_MVAREADER
-

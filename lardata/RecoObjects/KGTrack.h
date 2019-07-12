@@ -25,14 +25,18 @@
 #ifndef KGTRACK_H
 #define KGTRACK_H
 
+#include <iosfwd>
 #include <map>
+#include <vector>
 
-#include "canvas/Persistency/Common/Ptr.h"
 #include "canvas/Persistency/Common/PtrVector.h"
 
 #include "lardata/RecoObjects/KHitTrack.h"
-#include "lardataobj/RecoBase/Track.h"
-#include "lardataobj/RecoBase/Hit.h"
+
+namespace recob {
+  class Hit;
+  class Track;
+}
 
 namespace trkf {
 

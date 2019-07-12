@@ -20,7 +20,7 @@
 #ifndef SURFPLANE_H
 #define SURFPLANE_H
 
-#include <ostream>
+#include "lardata/RecoObjects/KalmanLinearAlgebra.h"
 #include "lardata/RecoObjects/Surface.h"
 
 namespace trkf {

@@ -10,14 +10,26 @@
 #include "lardataobj/RawData/RawDigit.h"
 #include "lardataobj/RawData/ExternalTrigger.h"
 #include "lardataobj/RawData/DAQHeader.h"
-#include "larcore/Geometry/Geometry.h"
 #include "larcoreobj/SummaryData/RunData.h"
 
 #include "art/Framework/IO/Sources/put_product_in_principal.h"
+#include "art/Framework/Core/FileBlock.h"
+#include "art/Framework/Core/ProductRegistryHelper.h"
+#include "art/Framework/IO/Sources/SourceHelper.h"
+#include "art/Framework/Principal/EventPrincipal.h"
+#include "art/Framework/Principal/RunPrincipal.h"
+#include "canvas/Persistency/Provenance/FileFormatVersion.h"
+#include "canvas/Persistency/Provenance/Timestamp.h"
 #include "canvas/Utilities/Exception.h"
+#include "cetlib_except/coded_exception.h"
+#include "cetlib_except/exception.h"
+
+#include <algorithm>
+#include <fstream>
+#include <stdlib.h>
+#include <time.h>
 
 extern "C" {
-#include <sys/types.h>
 #include <dirent.h>
 }
 

@@ -18,8 +18,6 @@
 #include "lardataobj/RecoBase/PointCharge.h"
 
 // framework libraries
-#include "art/Framework/Core/detail/Producer.h"
-#include "art/Framework/Principal/Event.h"
 #include "art/Persistency/Common/PtrMaker.h"
 #include "canvas/Persistency/Common/Ptr.h"
 
@@ -29,6 +27,8 @@
 #include <type_traits> // std::enable_if_t, ...
 #include <cstdlib> // std::size_t
 
+namespace art { class Event; }
+namespace art::detail { class Producer; }
 
 namespace recob {
 

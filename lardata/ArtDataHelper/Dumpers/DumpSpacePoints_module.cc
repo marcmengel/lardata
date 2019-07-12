@@ -8,7 +8,6 @@
 // LArSoft includes
 #include "lardata/ArtDataHelper/Dumpers/NewLine.h" // recob::dumper::makeNewLine()
 #include "lardata/ArtDataHelper/Dumpers/SpacePointDumpers.h"
-#include "lardata/ArtDataHelper/Dumpers/hexfloat.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
 
 // art libraries
@@ -17,7 +16,6 @@
 #include "art/Framework/Principal/Event.h"
 
 // support libraries
-#include "fhiclcpp/ParameterSet.h"
 #include "fhiclcpp/types/Atom.h" // also pulls in fhicl::Name and fhicl::Comment
 
 // C//C++ standard libraries

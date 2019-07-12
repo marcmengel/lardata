@@ -13,10 +13,9 @@
 #ifndef RANGE_H
 #define RANGE_H
 
-#include <vector>
-#include <iostream>
-#include <exception>
-#include <stdexcept>
+#include <algorithm>
+#include <functional>
+#include <utility>
 
 namespace util {
 

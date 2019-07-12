@@ -10,6 +10,8 @@
 
 #include "lardata/RecoObjects/KHitBase.h"
 
+#include <ostream>
+
 namespace trkf {
 
   /// Default Constructor.

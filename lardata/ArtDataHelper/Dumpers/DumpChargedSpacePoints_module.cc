@@ -6,10 +6,8 @@
  */
 
 // LArSoft includes
-#include "lardata/ArtDataHelper/Dumpers/SpacePointDumpers.h"
 #include "lardata/RecoBaseProxy/ChargedSpacePoints.h"
 #include "lardataobj/RecoBase/SpacePoint.h"
-#include "lardataobj/RecoBase/PointCharge.h"
 
 // art libraries
 #include "canvas/Utilities/InputTag.h"
@@ -19,7 +17,6 @@
 
 // support libraries
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "fhiclcpp/ParameterSet.h"
 #include "fhiclcpp/types/Atom.h" // also pulls in fhicl::Name and fhicl::Comment
 
 // C//C++ standard libraries

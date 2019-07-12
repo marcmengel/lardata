@@ -12,7 +12,6 @@
 
 // framework libraries
 #include "canvas/Persistency/Common/Assns.h"
-#include "canvas/Persistency/Common/Ptr.h"
 
 // C/C++ standard libraries
 #include <utility> // std::declval()

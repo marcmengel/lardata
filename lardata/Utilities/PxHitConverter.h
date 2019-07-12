@@ -10,26 +10,14 @@
 #ifndef UTIL_PXHITCONVERTER_H
 #define UTIL_PXHITCONVERTER_H
 
-//#include <TMath.h>
-//#include <TLorentzVector.h>
-
 #include "PxUtils.h"
-#include "larcore/Geometry/Geometry.h"
-#include "lardata/Utilities/GeometryUtilities.h"
-#include "lardata/Utilities/UtilException.h"
 #include "lardata/Utilities/Dereference.h"
-//#include "time.h"
-
 #include "lardataobj/RecoBase/Hit.h"
-//#include "Geometry/CryostatGeo.h"
-//#include "Geometry/PlaneGeo.h"
-//#include "Geometry/WireGeo.h"
-//#include "Geometry/TPCGeo.h"
-//#include "SimpleTypesAndConstants/geo_types.h"
+
 #include "canvas/Persistency/Common/Ptr.h"
 
-//#include <climits>
-#include <iostream>
+#include <algorithm>
+#include <type_traits>
 #include <vector>
 
 

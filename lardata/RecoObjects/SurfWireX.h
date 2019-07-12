@@ -15,8 +15,9 @@
 #ifndef SURFWIREX_H
 #define SURFWIREX_H
 
-#include "larcoreobj/SimpleTypesAndConstants/geo_types.h"
 #include "lardata/RecoObjects/SurfYZPlane.h"
+
+namespace geo { struct WireID; }
 
 namespace trkf {
 

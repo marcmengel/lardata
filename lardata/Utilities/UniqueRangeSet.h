@@ -15,8 +15,6 @@
 #define UNIQUERANGESET_H
 
 #include <set>
-#include <iostream>
-#include <exception>
 #include "Range.h"
 
 namespace util {

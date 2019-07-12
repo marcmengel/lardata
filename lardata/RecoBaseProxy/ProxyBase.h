@@ -20,6 +20,4 @@
 #include "lardata/RecoBaseProxy/ProxyBase/withZeroOrOne.h"
 #include "lardata/RecoBaseProxy/ProxyBase/getCollection.h"
 
-
-
 #endif // LARDATA_RECOBASEPROXY_PROXYBASE_H

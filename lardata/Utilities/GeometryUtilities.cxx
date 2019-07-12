@@ -8,14 +8,17 @@
 ////////////////////////////////////////////////////////////////////////
 
 
+#include "larcore/CoreUtils/ServiceUtil.h"
+#include "larcore/Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/Utilities/GeometryUtilities.h"
-#include "larcorealg/Geometry/CryostatGeo.h"
+#include "lardata/Utilities/UtilException.h"
+#include "larcorealg/Geometry/GeometryCore.h"
 #include "larcorealg/Geometry/PlaneGeo.h"
 #include "larcorealg/Geometry/WireGeo.h"
-#include "larcorealg/Geometry/TPCGeo.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-//#include "PxHitConverter.h"
 
+#include "TLorentzVector.h"
 
 namespace {
   template <typename T>

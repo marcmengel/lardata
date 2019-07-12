@@ -7,11 +7,7 @@
 
 // LArSoft includes
 #include "lardata/DetectorInfoServices/DetectorPropertiesServiceStandard.h"
-#include "lardataalg/DetectorInfo/LArProperties.h"
 #include "larcore/Geometry/Geometry.h"
-#include "larcorealg/Geometry/CryostatGeo.h"
-#include "larcorealg/Geometry/TPCGeo.h"
-#include "larcorealg/Geometry/PlaneGeo.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "lardata/DetectorInfoServices/ServicePack.h" // lar::extractProviders()
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"

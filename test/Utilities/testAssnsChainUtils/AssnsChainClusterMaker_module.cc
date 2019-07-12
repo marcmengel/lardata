@@ -10,17 +10,14 @@
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardataobj/RecoBase/Cluster.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo namespace
-#include "larcoreobj/SimpleTypesAndConstants/RawTypes.h" // raw namespace
 
 // framework libraries
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Event.h"
-
 #include "canvas/Persistency/Common/Ptr.h"
 #include "canvas/Persistency/Common/Assns.h"
 #include "canvas/Utilities/InputTag.h"
-
 #include "fhiclcpp/types/Atom.h"
 #include "fhiclcpp/types/Sequence.h"
 #include "fhiclcpp/types/Name.h"
@@ -28,7 +25,6 @@
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 // C/C++ standard libraries
-#include <algorithm> // std::accumulate()
 #include <utility> // std::move()
 #include <memory> // std::make_unique()
 #include <cmath> // std::sqrt()

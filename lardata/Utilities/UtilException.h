@@ -14,7 +14,7 @@
 #ifndef UTILEXCEPTION_HH
 #define UTILEXCEPTION_HH
 
-#include <iostream>
+#include <string>
 #include <exception>
 
 namespace util {
@@ -45,4 +45,3 @@ namespace util {
 }
 #endif
 /** @} */ // end of doxygen group
-

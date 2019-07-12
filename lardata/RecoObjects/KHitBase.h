@@ -49,12 +49,15 @@
 #ifndef KHITBASE_H
 #define KHITBASE_H
 
-#include <ostream>
+#include <iosfwd>
+#include <memory>
+
 #include "lardata/RecoObjects/Surface.h"
 #include "lardata/RecoObjects/KETrack.h"
-#include "lardata/RecoObjects/Propagator.h"
 
 namespace trkf {
+
+  class Propagator;
 
   class KHitBase
   {

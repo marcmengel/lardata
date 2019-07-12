@@ -14,13 +14,10 @@
 #include "art/Framework/Core/EDProducer.h"
 #include "art/Framework/Core/ModuleMacros.h"
 #include "art/Framework/Principal/Event.h"
-
-#include "canvas/Persistency/Common/Assns.h"
-
-#include "messagefacility/MessageLogger/MessageLogger.h"
 #include "fhiclcpp/types/Atom.h"
 #include "fhiclcpp/types/Name.h"
 #include "fhiclcpp/types/Comment.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
 
 // C/C++ standard libraries
 #include <utility> // std::move()

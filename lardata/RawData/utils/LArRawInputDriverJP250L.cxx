@@ -6,19 +6,25 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "lardata/RawData/utils/LArRawInputDriverJP250L.h"
-
 #include "lardataobj/RawData/DAQHeader.h"
 #include "lardataobj/RawData/RawDigit.h"
-#include "larcore/Geometry/Geometry.h"
 #include "larcoreobj/SummaryData/RunData.h"
 
+#include "art/Framework/Core/FileBlock.h"
+#include "art/Framework/Core/ProductRegistryHelper.h"
+#include "art/Framework/IO/Sources/SourceHelper.h"
 #include "art/Framework/IO/Sources/put_product_in_principal.h"
-#include "canvas/Utilities/Exception.h"
+#include "art/Framework/Principal/EventPrincipal.h"
+#include "art/Framework/Principal/RunPrincipal.h"
+#include "canvas/Persistency/Provenance/FileFormatVersion.h"
+#include "canvas/Persistency/Provenance/Timestamp.h"
 
-extern "C" {
-#include <sys/types.h>
-#include <dirent.h>
-}
+#include "TFile.h"
+#include "TObject.h"
+#include "TTree.h"
+
+#include <memory>
+#include <vector>
 
 // ======================================================================
 // JP250L conversion of raw DAQ file to ART format

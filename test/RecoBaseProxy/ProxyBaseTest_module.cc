@@ -16,8 +16,8 @@
 #include "lardataobj/RecoBase/TrackFitHitInfo.h"
 #include "lardataobj/RecoBase/TrackHitMeta.h"
 
-#include "larcorealg/CoreUtils/DebugUtils.h" // lar::debug::demangle()
-#include "larcorealg/CoreUtils/UncopiableAndUnmovableClass.h"
+// #include "larcorealg/CoreUtils/DebugUtils.h" // lar::debug::demangle()
+// #include "larcorealg/CoreUtils/UncopiableAndUnmovableClass.h"
 
 // framework libraries
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -39,7 +39,7 @@
 
 // C/C++ libraries
 #include <algorithm> // std::for_each(), std::find()
-#include <initializer_list>
+// #include <initializer_list>
 #include <memory> // std::unique_ptr<>
 #include <cstring> // std::strlen(), std::strcpy()
 #include <type_traits> // std::is_rvalue_reference<>

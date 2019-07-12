@@ -13,7 +13,6 @@
 
 #include "lardata/Utilities/LArFFT.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
 
 //-----------------------------------------------
 util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg)
@@ -46,8 +45,6 @@ void util::LArFFT::InitializeFFT()
 {
   int i;
   for(i = 1; i < fSize; i *= 2){ }
-  // mf::LogInfo("LArFFt") << "Requested size: " << fSize << " FFT size: " << i ;
-
   fSize=i;
   fFreqSize = fSize/2+1;
 

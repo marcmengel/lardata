@@ -374,4 +374,3 @@ std::array<float, N> anab::MVAWrapperBase::pAccumulate(
 //----------------------------------------------------------------------------
 
 #endif //ANAB_MVAWRAPPERBASE
-

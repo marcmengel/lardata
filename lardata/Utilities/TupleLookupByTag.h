@@ -1130,9 +1130,6 @@ namespace util {
 
 
     // Part of implementation of `has_duplicate_types`.
-    template <typename Tuple>
-    struct has_duplicate_types_unwrapper;
-
     template <typename... T>
     struct has_duplicate_types_unwrapper<std::tuple<T...>>
       : public has_duplicate_types_impl<std::tuple<T...>, T...>
@@ -1279,4 +1276,3 @@ namespace util {
 
 
 #endif // LARDATA_UTILITIES_TUPLELOOKUPBYTAG_H
-

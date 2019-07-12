@@ -14,7 +14,6 @@
 #include "lardataobj/RecoBase/SpacePoint.h"
 
 // C/C++ standard libraries
-#include <string>
 #include <utility> // std::forward<>()
 #include <type_traits> // std::decay<>
 
@@ -113,4 +112,3 @@ auto recob::dumper::DumpSpacePoint(
 //------------------------------------------------------------------------------
 
 #endif // LARDATA_RECOBASE_DUMPERS_SPACEPOINTDUMPERS_H
-

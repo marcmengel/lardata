@@ -25,7 +25,7 @@
 #ifndef KHITSTRACK_H
 #define KHITSTRACK_H
 
-#include <vector>
+#include <memory>
 #include "lardata/RecoObjects/KFitTrack.h"
 #include "lardata/RecoObjects/KHitBase.h"
 

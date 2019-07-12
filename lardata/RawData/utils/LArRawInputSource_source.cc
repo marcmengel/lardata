@@ -1,6 +1,6 @@
 // ======================================================================
 //
-// LArRawInputSource_plugin.cc
+// LArRawInputSource_source.cc
 //
 // ======================================================================
 
@@ -8,8 +8,4 @@
 #include "art/Framework/IO/Sources/Source.h"
 #include "lardata/RawData/utils/LArRawInputDriver.h"
 
-namespace lris {
-  typedef art::Source<LArRawInputDriver> LArRawInputSource;
-}
-
-DEFINE_ART_INPUT_SOURCE(lris::LArRawInputSource)
+DEFINE_ART_INPUT_SOURCE(art::Source<lris::LArRawInputDriver>)

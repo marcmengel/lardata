@@ -27,14 +27,12 @@
 #include <vector>
 #include <string>
 
-
-// declaration of some heavy art stuff
+namespace geo { struct WireID; }
+namespace raw { class RawDigit; }
 namespace art {
-	class Event;
 	class EDProducer;
-	class EDProductGetter;
-} // namespace art
-
+  class Event;
+}
 
 /// Reconstruction base classes
 namespace recob {

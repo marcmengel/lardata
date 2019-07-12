@@ -22,7 +22,6 @@
 #include "lardata/Utilities/TensorIndices.h"
 
 // C/C++ standard libraries
-#include <stdexcept> // std::out_of_range
 #include <array>
 #include <chrono>
 #include <sstream>

@@ -1,8 +1,6 @@
 #include "lardata/RecoObjects/TrackStatePropagator.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
-#include "cetlib_except/exception.h"
-#include "boost/optional.hpp"
 
 using namespace recob::tracking;
 

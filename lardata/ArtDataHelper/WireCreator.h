@@ -17,8 +17,8 @@
 #include "larcoreobj/SimpleTypesAndConstants/RawTypes.h" // raw::ChannelID_t
 #include "larcoreobj/SimpleTypesAndConstants/geo_types.h" // geo::View_t
 #include "lardataobj/RecoBase/Wire.h"
-#include "lardataobj/RawData/RawDigit.h"
 
+namespace raw { class RawDigit; }
 
 /// Reconstruction base classes
 namespace recob {

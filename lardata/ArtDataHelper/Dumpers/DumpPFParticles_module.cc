@@ -17,7 +17,6 @@
 #include "art/Framework/Principal/Event.h"
 
 // support libraries
-#include "fhiclcpp/ParameterSet.h"
 #include "fhiclcpp/types/Atom.h"
 #include "fhiclcpp/types/OptionalAtom.h"
 
