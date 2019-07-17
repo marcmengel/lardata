@@ -1,4 +1,5 @@
 simple_plugin(DetectorClocksServiceStandard "service"
+              art_root_io_detail
               lardataalg_DetectorInfo
               lardataobj_RawData
               ${ART_FRAMEWORK_CORE}
