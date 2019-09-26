@@ -45,11 +45,13 @@ find_ups_product( larcorealg )
 find_ups_product( lardataobj )
 find_ups_product( lardataalg )
 find_ups_product( larcore  )
+find_ups_product( larreco  )
 find_ups_product( art  )
 find_ups_product(art_root_io)
 find_ups_product( postgresql  )
 find_ups_product( range )
 find_ups_product( cetbuildtools )
+find_ups_product( fftw )
 
 #  Find all the libraries needed by our dependent CMakeList.txt files
 cet_find_library( NUSIMDATA_SIMULATIONBASE NAMES nusimdata_SimulationBase PATHS ENV NUSIMDATA_LIB NO_DEFAULT_PATH )

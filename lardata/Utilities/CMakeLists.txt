@@ -1,10 +1,16 @@
+include_directories(${FFTW_INCLUDE_DIR})
+cet_find_library(FFTW_LIBRARY NAMES fftw3 fftw3-3 PATHS $ENV{FFTW_DIR}/$ENV{FFTW_FQ}/lib )
+set(FFTW_LIBRARIES ${FFTW_LIBRARY})
+
 art_make(NO_PLUGINS
          LIB_LIBRARIES lardata_Utilities_LArFFT_service
                        lardataobj_RecoBase
                        larcorealg_Geometry
+                       larreco_HitFinder
                        canvas
                        ${MF_MESSAGELOGGER}
-                       cetlib_except)
+                       cetlib_except
+                       ${FFTW_LIBRARIES})
 
 simple_plugin(DatabaseUtil "service"
               ${MF_MESSAGELOGGER}
