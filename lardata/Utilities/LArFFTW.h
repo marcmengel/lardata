@@ -11,7 +11,7 @@
 
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "cetlib_except/coded_exception.h"
-#include "larreco/HitFinder/HitFinderTools/MarqFitAlg.h"
+#include "lardata/Utilities/MarqFitAlg.h"
 
 namespace util {
 
