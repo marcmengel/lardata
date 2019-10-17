@@ -1,5 +1,6 @@
 #include "lardata/Utilities/MarqFitAlg.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
+#include <limits>
 
 namespace gshf{
 
@@ -272,6 +273,13 @@ namespace gshf{
 
   int MarqFitAlg::mrqdtfit(float &lambda, float p[], float y[], const int nParam, const int nData, float &chiSqr, float &dchiSqr)
   {
+    std::vector<float> plimmin(nParam,std::numeric_limits<float>::lowest());
+    std::vector<float> plimmax(nParam,std::numeric_limits<float>::max());
+    return mrqdtfit(lambda, p, &plimmin[0], &plimmax[0], y, nParam, nData, chiSqr, dchiSqr);
+  }
+
+  int MarqFitAlg::mrqdtfit(float &lambda, float p[], float plimmin[], float plimmax[], float y[], const int nParam, const int nData, float &chiSqr, float &dchiSqr)
+  {
     int j;
     float nu,rho,lzmlh,amax,chiSq0;
 
@@ -283,6 +291,13 @@ namespace gshf{
     std::vector<float> dydp(nData*nParam);
     std::vector<float> alpha(nParam*nParam);
 
+    bool haslimits = false;
+    for(j=0;j<nParam;j++){
+      if (plimmin[j]>std::numeric_limits<float>::lowest() || plimmax[j]<std::numeric_limits<float>::max()) {
+        haslimits = true;
+        break;
+      }
+    }
 
     fgauss(y, p, nParam, nData, res);
     chiSq0=cal_xi2(res, nData);
@@ -311,6 +326,11 @@ namespace gshf{
       }
       fgauss(y, p, nParam, nData, res);
       chiSqr = cal_xi2(res, nData);
+      if (haslimits) {
+        for(j=0;j<nParam;j++){
+          if (p[j]<=plimmin[j] || p[j]>=plimmax[j]) chiSqr*=10000;//penalty for going out of limits!
+        }
+      }
 
       lzmlh=0.;
       for(j=0;j<nParam;j++){
