@@ -27,21 +27,9 @@
 #include <type_traits> // std::enable_if_t, ...
 #include <cstdlib> // std::size_t
 
-namespace art { class Event; }
-namespace art::detail { class Producer; }
+namespace art { class Event; class ProducesCollector; }
 
 namespace recob {
-
-  namespace details {
-
-    template <typename T, typename = void>
-    struct is_art_module;
-
-    template <typename T>
-    constexpr bool is_art_module_v = is_art_module<T>();
-
-  } // namespace details
-
 
   /**
    * @brief Creates a collection of space points with associated charge.
@@ -86,7 +74,7 @@ namespace recob {
    * In the same fashion as data products must be declared to _art_ with a
    * `produces()` call, the collection creator will have to perform an
    * `equivalent step. This is achieved by calling the static `produces()`
-   * method (see its documentation for an example).
+   * method from your module's constructor (see its documentation for an example).
    *
    *
    * Construction of a collection creator object
@@ -110,9 +98,7 @@ namespace recob {
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * void MyProducer::produce(art::Event& event) {
    *
-   *   recob::ChargedSpacePointCollectionCreator spacePoints(event, *this);
-   *
-   *   produces<art::Assns<recob::SpacePoint, recob::Hit>>();
+   *   recob::ChargedSpacePointCollectionCreator spacePoints(event, producesCollector());
    *
    *   // ...
    *
@@ -261,18 +247,15 @@ namespace recob {
      * @brief Constructor binding this object to a specific _art_ event.
      * @tparam Producer the type of producer required
      * @param event the _art_ event to bind to
-     * @param producer pointer to the producer
+     * @param producesCollector Reference to the module's producesCollector
      * @param instanceName _(default: empty)_ instance name for all data
      *                     products
      *
      * This constructor enables the creation of _art_ pointers.
      */
-    template <typename Producer>
     ChargedSpacePointCollectionCreator(
-      art::Event& event, Producer const& producer,
-      std::string const& instanceName = {},
-      std::enable_if_t<details::is_art_module_v<Producer>>* = nullptr
-      );
+      art::Event& event, art::ProducesCollector const& producesCollector,
+      std::string const& instanceName = {});
 
     /// @}
     //--- END Constructors ---------------------------------------------------
@@ -423,13 +406,13 @@ namespace recob {
      * MyProducer::MyProducer(Parameters const& config) {
      *
      *   recob::ChargedSpacePointCollectionCreator::produces
-     *     (*this, config().instanceName());
+     *     (producesCollector(), config().instanceName());
      *
      * } // MyProducer::MyProducer()
      * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      */
     static void produces
-      (art::detail::Producer& producer, std::string const& instanceName = {});
+      (art::ProducesCollector& producesCollector, std::string const& instanceName = {});
 
     /// @}
     //--- END Static constructor interface -------------------------------------
@@ -455,52 +438,6 @@ namespace recob {
   }; // class ChargedSpacePointCollectionCreator
 
 } // namespace recob
-
-
-//------------------------------------------------------------------------------
-//--- template implementation
-//------------------------------------------------------------------------------
-namespace recob {
-
-  namespace details {
-
-    //--------------------------------------------------------------------------
-    template <typename T>
-    constexpr bool always_true_v = true;
-
-    template <typename T, typename /* = void */>
-    struct is_art_module: public std::false_type {};
-
-    template <typename T>
-    struct is_art_module
-      <T, std::enable_if_t<always_true_v<typename T::ModuleType>>>
-      : public std::true_type
-      {};
-
-    //--------------------------------------------------------------------------
-
-  } // namespace details
-
-} // namespace recob
-
-
-//------------------------------------------------------------------------------
-template <typename Producer>
-recob::ChargedSpacePointCollectionCreator::ChargedSpacePointCollectionCreator(
-  art::Event& event,
-  Producer const&,
-  std::string const& instanceName /* = {} */,
-  std::enable_if_t<details::is_art_module_v<Producer>>* /* = nullptr */
-)
-  : ChargedSpacePointCollectionCreator(event, instanceName)
-{
-
-  fSpacePointPtrMaker = std::make_unique<art::PtrMaker<recob::SpacePoint>>
-    (fEvent, fInstanceName);
-  fChargePtrMaker = std::make_unique<art::PtrMaker<recob::PointCharge>>
-    (fEvent, fInstanceName);
-
-} // ChargedSpacePointCollectionCreator(Producer)
 
 
 //------------------------------------------------------------------------------

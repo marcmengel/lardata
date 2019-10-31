@@ -11,7 +11,7 @@
 #include "lardata/ArtDataHelper/ChargedSpacePointCreator.h"
 
 // framework libraries
-#include "art/Framework/Core/detail/Producer.h"
+#include "art/Framework/Core/ProducesCollector.h"
 #include "art/Framework/Principal/Event.h"
 #include "cetlib_except/exception.h"
 
@@ -29,6 +29,20 @@ recob::ChargedSpacePointCollectionCreator::ChargedSpacePointCollectionCreator
   , fSpacePoints(std::make_unique<std::vector<recob::SpacePoint>>())
   , fCharges(std::make_unique<std::vector<recob::PointCharge>>())
   {}
+
+
+//------------------------------------------------------------------------------
+recob::ChargedSpacePointCollectionCreator::ChargedSpacePointCollectionCreator
+(art::Event& event,
+ art::ProducesCollector const&,
+ std::string const& instanceName /* = {} */)
+  : ChargedSpacePointCollectionCreator(event, instanceName)
+{
+  fSpacePointPtrMaker = std::make_unique<art::PtrMaker<recob::SpacePoint>>
+    (fEvent, fInstanceName);
+  fChargePtrMaker = std::make_unique<art::PtrMaker<recob::PointCharge>>
+    (fEvent, fInstanceName);
+} // ChargedSpacePointCollectionCreator(ProducesCollector)
 
 
 //------------------------------------------------------------------------------
@@ -173,11 +187,11 @@ recob::ChargedSpacePointCollectionCreator::chargePtr
 
 //------------------------------------------------------------------------------
 void recob::ChargedSpacePointCollectionCreator::produces
-  (art::detail::Producer& producer, std::string const& instanceName)
+  (art::ProducesCollector& producesCollector, std::string const& instanceName)
 {
 
-  producer.produces<std::vector<recob::SpacePoint>>(instanceName);
-  producer.produces<std::vector<recob::PointCharge>>(instanceName);
+  producesCollector.produces<std::vector<recob::SpacePoint>>(instanceName);
+  producesCollector.produces<std::vector<recob::PointCharge>>(instanceName);
 
 } // recob::ChargedSpacePointCollectionCreator::produces()
 
