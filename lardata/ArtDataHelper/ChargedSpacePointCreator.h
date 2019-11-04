@@ -94,11 +94,11 @@ namespace recob {
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    *
    * If _art_ pointers to the data products are needed (e.g. to create
-   * associations), then the producer must be specified in the constructor:
+   * associations), then the named-constructor idiom should be followed:
    * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.cpp}
    * void MyProducer::produce(art::Event& event) {
    *
-   *   recob::ChargedSpacePointCollectionCreator spacePoints(event, producesCollector());
+   *   auto spacePoints = recob::ChargedSpacePointCollectionCreator::forPtrs(event);
    *
    *   // ...
    *
@@ -190,8 +190,8 @@ namespace recob {
    *             should be set in as default-constructed (which unfortunately
    *             in the case of space points _might_ be, albeit unlikely, a
    *             legal outcome)
-   * * if at construction time a producer is specified, _art_ pointers can be
-   *   created with `lastSpacePointPtr()`, `lastChargePtr()`, `spacePointPtr()`
+   * * if art::Ptr-creation has been enabled (by calling the static 'forPtrs(...)' function), _art_
+   *   pointers can be created with `lastSpacePointPtr()`, `lastChargePtr()`, `spacePointPtr()`
    *   and `chargePtr()` to the elements of the future data products
    *
    *
@@ -224,7 +224,7 @@ namespace recob {
    */
   class ChargedSpacePointCollectionCreator {
 
-      public:
+  public:
 
     //--- BEGIN Constructors ---------------------------------------------------
     /// @{
@@ -244,18 +244,16 @@ namespace recob {
       (art::Event& event, std::string const& instanceName = {});
 
     /**
-     * @brief Constructor binding this object to a specific _art_ event.
-     * @tparam Producer the type of producer required
+     * @brief Static function binding a new object to a specific _art_ event.
      * @param event the _art_ event to bind to
-     * @param producesCollector Reference to the module's producesCollector
      * @param instanceName _(default: empty)_ instance name for all data
      *                     products
      *
-     * This constructor enables the creation of _art_ pointers.
+     * This static function follows the named-constructor idiom,
+     * enabling the creation of _art_ pointers.
      */
-    ChargedSpacePointCollectionCreator(
-      art::Event& event, art::ProducesCollector const& producesCollector,
-      std::string const& instanceName = {});
+    static ChargedSpacePointCollectionCreator forPtrs(art::Event& event,
+                                                      std::string const& instanceName = {});
 
     /// @}
     //--- END Constructors ---------------------------------------------------
@@ -418,7 +416,7 @@ namespace recob {
     //--- END Static constructor interface -------------------------------------
 
 
-      private:
+  private:
     art::Event& fEvent; ///< The event this object is bound to.
 
     std::string fInstanceName; ///< Instance name of all the data products.

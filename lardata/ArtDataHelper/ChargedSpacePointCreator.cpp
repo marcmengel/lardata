@@ -32,16 +32,17 @@ recob::ChargedSpacePointCollectionCreator::ChargedSpacePointCollectionCreator
 
 
 //------------------------------------------------------------------------------
-recob::ChargedSpacePointCollectionCreator::ChargedSpacePointCollectionCreator
+recob::ChargedSpacePointCollectionCreator
+recob::ChargedSpacePointCollectionCreator::forPtrs
 (art::Event& event,
- art::ProducesCollector const&,
  std::string const& instanceName /* = {} */)
-  : ChargedSpacePointCollectionCreator(event, instanceName)
 {
-  fSpacePointPtrMaker = std::make_unique<art::PtrMaker<recob::SpacePoint>>
-    (fEvent, fInstanceName);
-  fChargePtrMaker = std::make_unique<art::PtrMaker<recob::PointCharge>>
-    (fEvent, fInstanceName);
+  ChargedSpacePointCollectionCreator creator(event, instanceName);
+  creator.fSpacePointPtrMaker = std::make_unique<art::PtrMaker<recob::SpacePoint>>
+    (event, instanceName);
+  creator.fChargePtrMaker = std::make_unique<art::PtrMaker<recob::PointCharge>>
+    (event, instanceName);
+  return creator;
 } // ChargedSpacePointCollectionCreator(ProducesCollector)
 
 

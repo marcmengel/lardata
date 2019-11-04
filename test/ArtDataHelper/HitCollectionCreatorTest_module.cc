@@ -75,7 +75,7 @@ namespace recob {
 
         private:
 
-      recob::HitCollectionCreatorManager<> hitCollManager;
+      recob::HitCollectionCreatorManager hitCollManager;
 
       std::string fInstanceName; ///< Instance name to be used for products.
 
@@ -89,7 +89,7 @@ namespace recob {
     DEFINE_ART_MODULE(HitCollectionCreatorTest)
 
   } // namespace test
-} // namespace recob
+} // namespace recob::
 
 
 //------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ recob::test::HitCollectionCreatorTest::HitCollectionCreatorTest
   (Parameters const& config)
   : art::EDProducer(config)
   , hitCollManager(
-      *this, config().instanceName(),
+      producesCollector(), config().instanceName(),
       false /* doWireAssns */, false /* doRawDigitAssns */
     ) // produces<>() hit collections
   {}
