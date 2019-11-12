@@ -9,33 +9,33 @@
  * This library provides a number of util::CreateAssn() functions;
  * for convenience, the ones supported as of January 2015 are listed here:
  *
- * -# `CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, std::string, size_t)`
+ * -# `CreateAssn(art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, std::string, size_t)`
  *   one-to-one association, between a element of a vector (future data product)
  *   and a art-pointed object; allows for a instance name for the vector
- * -# `CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, size_t)`
+ * -# `CreateAssn(art::Event&, std::vector<T> const&, art::Ptr<U> const&b, art::Assns<U,T> &, size_t)`
  *   one-to-one association, between a element of a vector (future data product)
  *   and a art-pointed object
- * -# `CreateAssn(PRODUCER const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T>&)`
+ * -# `CreateAssn(art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T>&)`
  *   one-to-one association, between two art-pointed objects
- * -# `CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, art::PtrVector<U> const&, art::Assns<T,U>&, size_t)`
+ * -# `CreateAssn(art::Event&, std::vector<T> const&, art::PtrVector<U> const&, art::Assns<T,U>&, size_t)`
  *   one-to-many association, between a element of a vector (future data
  *   product) and a list of art-pointed objects in a art::PtrVector list
- * -# `CreateAssn(PRODUCER const&, art::Event&, art::Ptr<T> const&, std::vector<art::Ptr<U>> const&, art::Assns<T,U>&)`
+ * -# `CreateAssn(art::Event&, art::Ptr<T> const&, std::vector<art::Ptr<U>> const&, art::Assns<T,U>&)`
  *   one-to-many association, between an art-pointed object and all the elements
  *   in a std::vector of art-pointed objects
- * -# `CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, std::vector<art::Ptr<U>>&, art::Assns<T,U>&, size_t)`
+ * -# `CreateAssn(art::Event&, std::vector<T> const&, std::vector<art::Ptr<U>>&, art::Assns<T,U>&, size_t)`
  *   one-to-many association, between an element of a vector (future data
  *   product) and all the elements in a std::vector of art-pointed objects
- * -# `CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, std::vector<U> const&, art::Assns<T,U>&, size_t, size_t, size_t)`
+ * -# `CreateAssn(art::Event&, std::vector<T> const&, std::vector<U> const&, art::Assns<T,U>&, size_t, size_t, size_t)`
  *   one-to-many association, between an element of a vector (future data
  *   product) and the elements in a subrange of a std::vector (also future data
  *   product)
- * -# `CreateAssn(PRODUCER const&, art::Event&, art::Assns<T,U>&, size_t, Iter, Iter)`
+ * -# `CreateAssn(art::Event&, art::Assns<T,U>&, size_t, Iter, Iter)`
  *   one-to-many association, between an element of a collection and the
  *   elements of another collection, whose indices are specified by the values
  *   in a subrange of a third collection (of indices)
- * -# @code CreateAssnD(PRODUCER const&, art::Event&, art::Assns<T,U>&, size_t, size_t, typename art::Assns<T,U,D>::data_t const&) @endcode,
- *   @code CreateAssnD(PRODUCER const&, art::Event&, art::Assns<T,U>&, size_t, size_t, typename art::Assns<T,U,D>::data_t&&) @endcode
+ * -# @code CreateAssnD(art::Event&, art::Assns<T,U>&, size_t, size_t, typename art::Assns<T,U,D>::data_t const&) @endcode,
+ *   @code CreateAssnD(art::Event&, art::Assns<T,U>&, size_t, size_t, typename art::Assns<T,U,D>::data_t&&) @endcode
  *   one-to-one association, between an element of a collection and the element
  *   of another collection, both specified by index, with additional data
  *
@@ -49,11 +49,11 @@
  *
  * the one (T)            | the other one (U) | special notes               | function
  * :--------------------: | :---------------: | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------
- * element of std::vector | art pointer       | allows instance name for T  | CreateAssn(PRODUCER const &, art::Event &, std::vector< T > const &, art::Ptr< U > const &, art::Assns< U, T > &, std::string, size_t)
- * element of std::vector | art pointer       |                             | CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, art::Ptr<U> const&, art::Assns<U,T> &, size_t)
- * art pointer            | art pointer       |                             | CreateAssn(PRODUCER const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T>&)
- * element by index       | element by index  | associates data too         | CreateAssnD(PRODUCER const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T,D>&, size_t, size_t, typename art::Assns<T,U,D>::data_t const&)
- * element by index       | element by index  | associates data too (moved) | CreateAssnD(PRODUCER const&, art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T,D>&, size_t, size_t, typename art::Assns<T,U,D>::data_t&&)
+ * element of std::vector | art pointer       | allows instance name for T  | CreateAssn(art::Event &, std::vector< T > const &, art::Ptr< U > const &, art::Assns< U, T > &, std::string, size_t)
+ * element of std::vector | art pointer       |                             | CreateAssn(art::Event&, std::vector<T> const&, art::Ptr<U> const&, art::Assns<U,T> &, size_t)
+ * art pointer            | art pointer       |                             | CreateAssn(art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T>&)
+ * element by index       | element by index  | associates data too         | CreateAssnD(art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T,D>&, size_t, size_t, typename art::Assns<T,U,D>::data_t const&)
+ * element by index       | element by index  | associates data too (moved) | CreateAssnD(art::Event&, art::Ptr<T> const&, art::Ptr<U> const&, art::Assns<U,T,D>&, size_t, size_t, typename art::Assns<T,U,D>::data_t&&)
  *
  *
  * One-to-many associations
@@ -61,11 +61,11 @@
  *
  * the one (T)            | the many (U)             | special notes              | function
  * :--------------------: | :----------------------: | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------
- * element of std::vector | art::PtrVector           |                            | CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, art::PtrVector<U> const&, art::Assns<T,U>&, size_t)
- * art pointer            | std::vector<art::Ptr<U>> |                            | CreateAssn(PRODUCER const&, art::Event&, art::Ptr<T> const&, std::vector<art::Ptr<U>> const&, art::Assns<T,U>&)
- * element of std::vector | std::vector<art::Ptr<U>> |                            | CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, std::vector<art::Ptr<U>>&, art::Assns<T,U>&, size_t)
- * element of std::vector | std::vector<U>           |                            | CreateAssn(PRODUCER const&, art::Event&, std::vector<T> const&, std::vector<U> const&, art::Assns<T,U>&, size_t, size_t, size_t)
- * element by index       | range of indices         | does not need object lists | CreateAssn(PRODUCER const&, art::Event&, art::Assns<T,U>&, size_t, Iter, Iter)
+ * element of std::vector | art::PtrVector           |                            | CreateAssn(art::Event&, std::vector<T> const&, art::PtrVector<U> const&, art::Assns<T,U>&, size_t)
+ * art pointer            | std::vector<art::Ptr<U>> |                            | CreateAssn(art::Event&, art::Ptr<T> const&, std::vector<art::Ptr<U>> const&, art::Assns<T,U>&)
+ * element of std::vector | std::vector<art::Ptr<U>> |                            | CreateAssn(art::Event&, std::vector<T> const&, std::vector<art::Ptr<U>>&, art::Assns<T,U>&, size_t)
+ * element of std::vector | std::vector<U>           |                            | CreateAssn(art::Event&, std::vector<T> const&, std::vector<U> const&, art::Assns<T,U>&, size_t, size_t, size_t)
+ * element by index       | range of indices         | does not need object lists | CreateAssn(art::Event&, art::Assns<T,U>&, size_t, Iter, Iter)
  *
  */
 
@@ -79,7 +79,6 @@
 
 // framework libraries
 #include "art/Framework/Principal/Event.h"
-#include "art/Framework/Core/EDProducer.h"
 #include "art/Persistency/Common/PtrMaker.h"
 #include "canvas/Persistency/Common/Assns.h"
 #include "canvas/Persistency/Common/FindMany.h"
@@ -99,7 +98,6 @@ namespace util {
    * @brief Creates a single one-to-one association
    * @tparam T type of the new object to associate
    * @tparam U type of the object already in the data product or art::Ptr
-   * @param prod reference to the producer that will write the vector a
    * @param evt reference to the current event
    * @param a vector of data products that are in, or will be put into, evt
    * @param b art::Ptr to the (new) object to be associated to the one in a
@@ -151,9 +149,8 @@ namespace util {
    *
    */
   // MARK CreateAssn_01
-  template<class PRODUCER, class T, class U>
-  bool CreateAssn(PRODUCER const&        prod,
-                  art::Event            &evt,
+  template<class T, class U>
+  bool CreateAssn(art::Event            &evt,
                   std::vector<T>   const&a,
                   art::Ptr<U>      const&b,
                   art::Assns<U,T>       &assn,
@@ -165,7 +162,6 @@ namespace util {
    * @brief Creates a single one-to-one association
    * @tparam T type of the new object to associate
    * @tparam U type of the object already in the data product or art::Ptr
-   * @param prod reference to the producer that will write the vector a
    * @param evt reference to the current event
    * @param a vector of data products that are in, or will be put into, evt
    * @param b art::Ptr to the (new) object to be associated to the one in a
@@ -209,21 +205,19 @@ namespace util {
    *
    */
   // MARK CreateAssn_02
-  template<class PRODUCER, class T, class U>
-  inline bool CreateAssn(PRODUCER const&        prod,
-                         art::Event            &evt,
+  template<class T, class U>
+  inline bool CreateAssn(art::Event            &evt,
                          std::vector<T>   const&a,
                          art::Ptr<U>      const&b,
                          art::Assns<U,T>       &assn,
                          size_t                index=UINT_MAX)
-    { return CreateAssn(prod, evt, a, b, assn, std::string(), index); }
+    { return CreateAssn(evt, a, b, assn, std::string(), index); }
 
 
   /**
    * @brief Creates a single one-to-one association
    * @tparam T type of one object to associate
    * @tparam U type of the other object to associate
-   * @param prod reference to the producer that will write the vector a
    * @param evt reference to the current event
    * @param a art::Ptr to the first object in the association
    * @param b art::Ptr to the object to be associated to the one in a
@@ -234,9 +228,8 @@ namespace util {
    * Neither the event not the producer references are used.
    */
   // MARK CreateAssn_03
-  template<class PRODUCER, class T, class U>
+  template<class T, class U>
   bool CreateAssn(
-    PRODUCER        const& prod,
     art::Event           & evt,
     art::Ptr<T>     const& a,
     art::Ptr<U>     const& b,
@@ -247,7 +240,6 @@ namespace util {
    * @brief Creates a single one-to-many association
    * @tparam T type of the new object to associate
    * @tparam U type of the many objects already in the data product or art::Ptr
-   * @param prod reference to the producer that will write the vector a
    * @param evt reference to the current event
    * @param a vector of data products that are in, or will be put into, evt
    * @param b art::PtrVector to the (new) objects to be associated to the one in a
@@ -262,9 +254,8 @@ namespace util {
    * parameter that we pretent not to exist).
    */
   // MARK CreateAssn_04
-  template<class PRODUCER, class T, class U>
+  template<class T, class U>
   bool CreateAssn(
-    PRODUCER          const& prod,
     art::Event             & evt,
     std::vector<T>    const& a,
     art::PtrVector<U> const& b,
@@ -276,7 +267,6 @@ namespace util {
    * @brief Creates a single one-to-many association
    * @tparam T type of the new object to associate
    * @tparam U type of the many objects already in the data product or art::Ptr
-   * @param prod reference to the producer that will write the vector a
    * @param evt reference to the current event
    * @param a art::Ptr to the item to be associated with many
    * @param b vector to art::Ptr to the (new) objects to be associated to a
@@ -292,9 +282,8 @@ namespace util {
   // index is the location in the input std::vector<T> of the object you wish to
   // associate with the art::PtrVector<U>
   // MARK CreateAssn_05
-  template<class PRODUCER, class T, class U>
+  template<class T, class U>
   bool CreateAssn(
-    PRODUCER                 const& prod,
     art::Event                    & evt,
     art::Ptr<T>              const& a,
     std::vector<art::Ptr<U>> const& b,
@@ -305,7 +294,6 @@ namespace util {
    * @brief Creates a single one-to-many association
    * @tparam T type of the new object to associate
    * @tparam U type of the many objects already in the data product or art::Ptr
-   * @param prod reference to the producer that will write the vector a
    * @param evt reference to the current event
    * @param a vector of data products that are in, or will be put into, evt
    * @param b vector to art::Ptr to the (new) objects to be associated to the one in a
@@ -320,9 +308,8 @@ namespace util {
    * parameter that we pretent not to exist).
    */
   // MARK CreateAssn_06
-  template<class PRODUCER, class T, class U>
+  template<class T, class U>
   bool CreateAssn(
-    PRODUCER                 const& prod,
     art::Event                    & evt,
     std::vector<T>           const& a,
     std::vector<art::Ptr<U>> const& b,
@@ -334,7 +321,6 @@ namespace util {
    * @brief Creates a single one-to-many association
    * @tparam T type of the new object to associate
    * @tparam U type of the many objects already in the data product or art::Ptr
-   * @param prod reference to the producer that will write the vector a
    * @param evt reference to the current event
    * @param a vector of data products that are in, or will be put into, evt
    * @param b vector of the (new) objects to be associated to the one in a
@@ -358,9 +344,8 @@ namespace util {
    * parameter that we pretent not to exist).
    */
   // MARK CreateAssn_07
-  template<class PRODUCER, class T, class U>
+  template<class T, class U>
   bool CreateAssn(
-    PRODUCER        const& prod,
     art::Event           & evt,
     std::vector<T>  const& a,
     std::vector<U>  const& b,
@@ -374,7 +359,6 @@ namespace util {
    * @brief Creates a single one-to-many association
    * @tparam T type of the new object to associate
    * @tparam U type of the many objects already in the data product or art::Ptr
-   * @param prod reference to the producer that will write the vector a
    * @param evt reference to the current event
    * @param a vector of data products that are in, or will be put into, evt
    * @param b vector of the (new) objects to be associated to the one in a
@@ -397,9 +381,8 @@ namespace util {
    * parameter that we pretent not to exist).
    */
   // MARK CreateAssn_07a
-  template<class PRODUCER, class T, class U>
+  template<class T, class U>
   bool CreateAssn(
-    PRODUCER        const& prod,
     art::Event           & evt,
     std::vector<T>  const& a,
     std::vector<U>  const& b,
@@ -413,7 +396,6 @@ namespace util {
    * @tparam T type of the new object to associate
    * @tparam U type of the many objects already in the data product or art::Ptr
    * @tparam Iter iterator to size_t-compatible elements
-   * @param prod reference to the producer that will write the vector a
    * @param evt reference to the current event
    * @param assn reference to association object where the new one will be put
    * @param first_index index of the object of type T to be associated to all
@@ -447,9 +429,8 @@ namespace util {
    * and that the producer is prod for both of them.
    */
   // MARK CreateAssn_08
-  template <typename PRODUCER, typename T, typename U, typename Iter>
+  template <typename T, typename U, typename Iter>
   bool CreateAssn(
-    PRODUCER        const& prod,
     art::Event           & evt,
     art::Assns<T,U>      & assn,
     size_t                 first_index,
@@ -463,7 +444,6 @@ namespace util {
    * @tparam T type of the new object to associate
    * @tparam U type of the many objects already in the data product or art::Ptr
    * @tparam D type of the "metadata" coupled to this pair association
-   * @param prod reference to the producer that will write the vector a
    * @param evt reference to the current event
    * @param assn reference to association object where the new one will be put
    * @param first_index index of the object of type T to be associated
@@ -514,9 +494,8 @@ namespace util {
    */
   // MARK CreateAssnD_01
   // MARK CreateAssnD_01a
-  template <typename PRODUCER, typename T, typename U, typename D>
+  template <typename T, typename U, typename D>
   bool CreateAssnD(
-    PRODUCER                      const& prod,
     art::Event                         & evt,
     art::Assns<T,U,D>                  & assn,
     size_t                               first_index,
@@ -524,9 +503,8 @@ namespace util {
     typename art::Assns<T,U,D>::data_t&& data
     );
   // MARK CreateAssnD_01b
-  template <typename PRODUCER, typename T, typename U, typename D>
+  template <typename T, typename U, typename D>
   bool CreateAssnD(
-    PRODUCER                           const& prod,
     art::Event                              & evt,
     art::Assns<T,U,D>                       & assn,
     size_t                                    first_index,
@@ -599,9 +577,8 @@ namespace util {
 
 //----------------------------------------------------------------------
 // MARK CreateAssn_01
-template<class PRODUCER, class T, class U>
+template<class T, class U>
 bool util::CreateAssn(
-  PRODUCER        const&,
   art::Event           & evt,
   std::vector<T>  const& a,
   art::Ptr<U>     const& b,
@@ -627,9 +604,8 @@ bool util::CreateAssn(
 
 //----------------------------------------------------------------------
 // MARK CreateAssn_03
-template<class PRODUCER, class T, class U>
+template<class T, class U>
 bool util::CreateAssn(
-  PRODUCER        const&,
   art::Event           &,
   art::Ptr<T>     const& a,
   art::Ptr<U>     const& b,
@@ -651,9 +627,8 @@ bool util::CreateAssn(
 
 //----------------------------------------------------------------------
 // MARK CreateAssn_04
-template<class PRODUCER, class T, class U>
+template<class T, class U>
 bool util::CreateAssn(
-  PRODUCER          const&,
   art::Event             & evt,
   std::vector<T>    const& a,
   art::PtrVector<U> const& b,
@@ -677,9 +652,8 @@ bool util::CreateAssn(
 
 //----------------------------------------------------------------------
 // MARK CreateAssn_05
-template<class PRODUCER, class T, class U>
+template<class T, class U>
 bool util::CreateAssn(
-  PRODUCER                 const&,
   art::Event                    &,
   art::Ptr<T>              const& a,
   std::vector<art::Ptr<U>> const& b,
@@ -700,9 +674,8 @@ bool util::CreateAssn(
 
 //----------------------------------------------------------------------
 // MARK CreateAssn_06
-template<class PRODUCER, class T, class U>
+template<class T, class U>
 bool util::CreateAssn(
-  PRODUCER                 const&,
   art::Event                    & evt,
   std::vector<T>           const& a,
   std::vector<art::Ptr<U>> const& b,
@@ -727,9 +700,8 @@ bool util::CreateAssn(
 
 //----------------------------------------------------------------------
 // MARK CreateAssn_07
-template<class PRODUCER, class T, class U>
+template<class T, class U>
 bool util::CreateAssn(
-  PRODUCER        const&,
   art::Event           & evt,
   std::vector<T>  const& a,
   std::vector<U>  const& /* b */,
@@ -759,9 +731,8 @@ bool util::CreateAssn(
 
 //----------------------------------------------------------------------
 // MARK CreateAssn_07a
-template<class PRODUCER, class T, class U>
+template<class T, class U>
 bool util::CreateAssn(
-  PRODUCER        const&,
   art::Event           & evt,
   std::vector<T>  const& a,
   std::vector<U>  const& /* b */,
@@ -790,9 +761,8 @@ bool util::CreateAssn(
 
 //----------------------------------------------------------------------
 // MARK CreateAssn_08
-template <typename PRODUCER, typename T, typename U, typename Iter>
+template <typename T, typename U, typename Iter>
 bool util::CreateAssn(
-  PRODUCER        const&,
   art::Event           & evt,
   art::Assns<T,U>      & assn,
   size_t                 first_index,
@@ -825,9 +795,8 @@ bool util::CreateAssn(
 
 //----------------------------------------------------------------------
 // MARK CreateAssnD_01a
-template <typename PRODUCER, typename T, typename U, typename D>
+template <typename T, typename U, typename D>
 bool util::CreateAssnD(
-  PRODUCER                      const&,
   art::Event                         & evt,
   art::Assns<T,U,D>                  & assn,
   size_t                               first_index,
@@ -855,9 +824,8 @@ bool util::CreateAssnD(
   return true;
 } // util::CreateAssnD() [01a]
 
-template <typename PRODUCER, typename T, typename U, typename D>
+template <typename T, typename U, typename D>
 bool util::CreateAssnD(
-  PRODUCER                           const&,
   art::Event                              & evt,
   art::Assns<T,U,D>                       & assn,
   size_t                                    first_index,
@@ -884,7 +852,6 @@ bool util::CreateAssnD(
 
   return true;
 } // util::CreateAssnD() [01b]
-
 
 //----------------------------------------------------------------------
 template<class T, class U>
@@ -983,5 +950,30 @@ util::GetAssociatedVectorManyP(art::Handle< art::Assns<T,U> > h,
   return associated_pointers;
 }
 
+//--------------------------------------------------------------------
+// Functions to support unnecessary leading producer argument
+//
+//   These are legacy function signatures that accept a reference to a
+//   producer module.  Although the signatures are still supported,
+//   they should not be encouraged.  They, along with the other
+//   CreateAssn(D) functions above, will be marked as [[deprecated]]
+//   once art supports Assns::addMany (expected in art 3.04).
+//--------------------------------------------------------------------
+
+#include "art/Framework/Core/EDProducer.h"
+
+namespace util {
+  template <typename Producer, typename... Args>
+  std::enable_if_t<std::is_base_of_v<art::EDProducer, Producer>, bool>
+  CreateAssn(Producer const&, Args&&... args) {
+    return CreateAssn(std::forward<Args>(args)...);
+  }
+
+  template <typename Producer, typename... Args>
+  std::enable_if_t<std::is_base_of_v<art::EDProducer, Producer>, bool>
+  CreateAssnD(Producer const&, Args&&... args) {
+    return CreateAssnD(std::forward<Args>(args)...);
+  }
+}
 
 #endif  //ASSOCIATIONUTIL_H

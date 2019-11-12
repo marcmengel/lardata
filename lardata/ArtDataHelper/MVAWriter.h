@@ -9,7 +9,7 @@
 #ifndef ANAB_MVAWRITER_H
 #define ANAB_MVAWRITER_H
 
-#include "art/Framework/Core/EDProducer.h"
+#include "art/Framework/Core/ProducesCollector.h"
 #include "art/Framework/Principal/Event.h"
 #include "canvas/Utilities/InputTag.h"
 
@@ -29,8 +29,8 @@ public:
     /// and FeatureVector<N> (for which it is combined with the processed data product names).
     /// The name is used as an instance name for the FVecDescription data product
     /// which lets you to save multiple vector collections from a single art module.
-    FVectorWriter(art::EDProducer* module, const char* name = "") :
-        fProducer(module), fInstanceName(name),
+    FVectorWriter(art::ProducesCollector& collector, const char* name = "") :
+        fCollector(collector), fInstanceName(name),
         fIsDescriptionRegistered(false),
         fDescriptions(nullptr)
     { }
@@ -132,7 +132,7 @@ protected:
 
 private:
     // Data initialized for the module life:
-    art::EDProducer* fProducer;
+    art::ProducesCollector& fCollector;
     std::string fInstanceName;
 
     std::vector< std::string > fRegisteredDataTypes;
@@ -168,8 +168,8 @@ public:
     /// (like eg. "emtrack" for outputs from a model distinguishing EM from track-like hits
     /// and clusters). The name is used as an instance name for the MVADescription data product
     /// which lets you to save multiple MVA results from a single art module.
-    MVAWriter(art::EDProducer* module, const char* name = "") :
-        FVectorWriter<N>(module, name)
+    MVAWriter(art::ProducesCollector& collector, const char* name = "") :
+        FVectorWriter<N>(collector, name)
     { }
 
     void setOutput(FVector_ID id, size_t key, std::array<float, N> const & values) { FVectorWriter<N>::setVector(id, key, values); }
@@ -264,11 +264,11 @@ void anab::FVectorWriter<N>::produces_using()
 
     if (!fIsDescriptionRegistered)
     {
-        fProducer->produces< std::vector< anab::FVecDescription<N> > >(fInstanceName);
+        fCollector.produces< std::vector< anab::FVecDescription<N> > >(fInstanceName);
         fIsDescriptionRegistered = true;
     }
 
-    fProducer->produces< std::vector< anab::FeatureVector<N> > >(fInstanceName + dataName);
+    fCollector.produces< std::vector< anab::FeatureVector<N> > >(fInstanceName + dataName);
     fRegisteredDataTypes.push_back(dataName);
 }
 //----------------------------------------------------------------------------

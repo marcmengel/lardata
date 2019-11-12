@@ -87,14 +87,14 @@ lar::test::ChargedSpacePointProxyInputMaker::ChargedSpacePointProxyInputMaker
 {
 
   // declare production of recob::SpacePoint and recob::PointCharge collections:
-  recob::ChargedSpacePointCollectionCreator::produces(*this);
+  recob::ChargedSpacePointCollectionCreator::produces(producesCollector());
 
 } // ChargedSpacePointProxyInputMaker::ChargedSpacePointProxyInputMaker()
 
 // -----------------------------------------------------------------------------
 void lar::test::ChargedSpacePointProxyInputMaker::produce(art::Event& event) {
 
-  recob::ChargedSpacePointCollectionCreator spacePoints(event, *this);
+  auto spacePoints = recob::ChargedSpacePointCollectionCreator::forPtrs(event);
 
   BOOST_CHECK(spacePoints.empty());
 

@@ -24,7 +24,6 @@
 
 // LArSoft libraries
 #include "larcore/Geometry/Geometry.h"
-// #include "RawData/RawDigit.h"
 #include "lardataobj/RecoBase/Wire.h"
 #include "lardataobj/RecoBase/Hit.h"
 #include "lardata/Utilities/MakeIndex.h"
@@ -231,6 +230,40 @@ namespace recob {
   //****************************************************************************
   //***  HitAndAssociationsWriterBase
   //----------------------------------------------------------------------
+  HitAndAssociationsWriterBase::HitAndAssociationsWriterBase(
+    art::Event& event,
+    std::string instance_name, bool doWireAssns, bool doRawDigitAssns
+    )
+    : prod_instance(instance_name)
+    , hits()
+    , WireAssns
+      (doWireAssns? new art::Assns<recob::Wire, recob::Hit>: nullptr)
+    , RawDigitAssns
+      (doRawDigitAssns? new art::Assns<raw::RawDigit, recob::Hit>: nullptr)
+    , event(&event)
+    , hitPtrMaker(*(this->event), prod_instance)
+  {} // HitAndAssociationsWriterBase::HitAndAssociationsWriterBase()
+
+  //------------------------------------------------------------------------------
+  void HitAndAssociationsWriterBase::declare_products(
+    art::ProducesCollector& collector,
+    std::string instance_name /* = "" */,
+    bool doWireAssns /* = true */, bool doRawDigitAssns /* = true */
+  ) {
+    collector.produces<std::vector<recob::Hit>>(instance_name);
+
+    // declare the other products we are creating (if any)
+    if (doWireAssns) {
+      collector.produces<art::Assns<recob::Wire, recob::Hit>>
+        (instance_name);
+    }
+    if (doRawDigitAssns) {
+      collector.produces<art::Assns<raw::RawDigit, recob::Hit>>
+        (instance_name);
+    }
+  } // HitAndAssociationsWriterBase::declare_products()
+
+  //------------------------------------------------------------------------------
   void HitAndAssociationsWriterBase::put_into() {
     assert(event);
     if (hits) event->put(std::move(hits), prod_instance);
@@ -241,6 +274,18 @@ namespace recob {
 
   //****************************************************************************
   //***  HitCollectionCreator
+  //----------------------------------------------------------------------
+  HitCollectionCreator::HitCollectionCreator(
+    art::Event& event,
+    std::string instance_name /* = "" */,
+    bool doWireAssns /* = true */, bool doRawDigitAssns /* = true */
+    )
+    : HitAndAssociationsWriterBase
+      (event, instance_name, doWireAssns, doRawDigitAssns)
+  {
+    hits.reset(new std::vector<recob::Hit>);
+  } // HitCollectionCreator::HitCollectionCreator()
+
   //----------------------------------------------------------------------
   void HitCollectionCreator::emplace_back(
     recob::Hit&& hit,
@@ -301,6 +346,45 @@ namespace recob {
 
   //****************************************************************************
   //***  HitCollectionAssociator
+  //----------------------------------------------------------------------
+  HitCollectionAssociator::HitCollectionAssociator(
+    art::Event& event,
+    std::string instance_name,
+    art::InputTag const& WireModuleLabel,
+    art::InputTag const& RawDigitModuleLabel
+  )
+    : HitAndAssociationsWriterBase(
+        event, instance_name,
+        WireModuleLabel != "", RawDigitModuleLabel != ""
+        )
+    , wires_label(WireModuleLabel)
+    , digits_label(RawDigitModuleLabel)
+  {
+    hits.reset(new std::vector<recob::Hit>);
+  } // HitCollectionAssociator::HitCollectionAssociator()
+
+  //----------------------------------------------------------------------
+  recob::HitCollectionAssociator::HitCollectionAssociator(
+    art::Event& event,
+    std::string instance_name,
+    art::InputTag const& WireModuleLabel,
+    bool doRawDigitAssns /* = false */
+  )
+    : HitAndAssociationsWriterBase(
+        event, instance_name,
+        WireModuleLabel != "", doRawDigitAssns
+        )
+    , wires_label(WireModuleLabel)
+    , digits_label()
+  {
+    if (RawDigitAssns && !WireAssns) {
+      throw art::Exception(art::errors::LogicError)
+        << "HitCollectionAssociator can't create hit <--> raw digit"
+        " associations through wires, without wires!\n";
+    }
+    hits.reset(new std::vector<recob::Hit>);
+  } // HitCollectionAssociator::HitCollectionAssociator()
+
   //----------------------------------------------------------------------
   void HitCollectionAssociator::use_hits
     (std::unique_ptr<std::vector<recob::Hit>>&& srchits)
@@ -423,9 +507,22 @@ namespace recob {
 
   } // HitCollectionAssociator::put_into()
 
-
   //****************************************************************************
   //***  HitRefinerAssociator
+  //----------------------------------------------------------------------
+  HitRefinerAssociator::HitRefinerAssociator(
+    art::Event& event,
+    art::InputTag const& HitModuleLabel,
+    std::string instance_name /* = "" */,
+    bool doWireAssns /* = true */, bool doRawDigitAssns /* = true */
+  )
+    : HitAndAssociationsWriterBase
+        (event, instance_name, doWireAssns, doRawDigitAssns)
+    , hits_label(HitModuleLabel)
+  {
+    hits.reset(new std::vector<recob::Hit>);
+  } // HitRefinerAssociator::HitRefinerAssociator()
+
   //----------------------------------------------------------------------
   void HitRefinerAssociator::use_hits
     (std::unique_ptr<std::vector<recob::Hit>>&& srchits)
@@ -533,5 +630,4 @@ namespace recob {
   } // HitRefinerAssociator::put_into()
 
 
-  //----------------------------------------------------------------------
 } // namespace recob
