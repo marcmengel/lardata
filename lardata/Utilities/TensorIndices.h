@@ -21,7 +21,7 @@
 #include <stdexcept> // std::out_of_range
 #include <string> // std::to_string()
 #include <type_traits> // std::enable_if
-
+#undef minor
 
 namespace util {
 
