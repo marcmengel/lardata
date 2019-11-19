@@ -21,7 +21,6 @@
 #include <stdexcept> // std::out_of_range
 #include <string> // std::to_string()
 #include <type_traits> // std::enable_if
-#undef minor
 
 namespace util {
 
@@ -264,7 +263,7 @@ namespace util {
      */
     template <typename... OTHERINDICES>
     LinIndex_t operator() (Index_t first, OTHERINDICES... others) const
-      { return first * minor().size() + minor()(others...); }
+      { return first * minorTensr().size() + minorTensr()(others...); }
 
 
     /**
@@ -291,8 +290,8 @@ namespace util {
       <std::is_convertible<decltype(*(ITER())), DimSize_t>::value, LinIndex_t>
     operator() (ITER indexIter) const
       {
-        auto const baseSize = (*indexIter) * minor().size();
-        return baseSize + minor()(++indexIter);
+        auto const baseSize = (*indexIter) * minorTensr().size();
+        return baseSize + minorTensr()(++indexIter);
       }
 
 
@@ -321,8 +320,8 @@ namespace util {
     template <typename... OTHERINDICES>
     LinIndex_t at(Index_t first, OTHERINDICES... others) const
       {
-        return Base_t::checkOuterIndex(first) * minor().size()
-          + minor().at(others...);
+        return Base_t::checkOuterIndex(first) * minorTensr().size()
+          + minorTensr().at(others...);
       }
 
     /**
@@ -352,8 +351,8 @@ namespace util {
     at(ITER indexIter) const
       {
         auto const baseSize
-          = Base_t::checkOuterIndex(*indexIter) * minor().size();
-        return baseSize + minor()(++indexIter);
+          = Base_t::checkOuterIndex(*indexIter) * minorTensr().size();
+        return baseSize + minorTensr()(++indexIter);
       }
 
 
@@ -383,7 +382,7 @@ namespace util {
      */
     template <typename... OTHERINDICES>
     bool has(Index_t first, OTHERINDICES... others) const
-      { return Base_t::has(first) && minor().has(others...); }
+      { return Base_t::has(first) && minorTensr().has(others...); }
 
     /**
      * @brief Returns whether the specified set of indices is valid
@@ -411,7 +410,7 @@ namespace util {
     std::enable_if_t
       <std::is_convertible<decltype(*(ITER())), DimSize_t>::value, bool>
     has(ITER indexIter) const
-      { return Base_t::has(*indexIter)? minor().has(++indexIter): false; }
+      { return Base_t::has(*indexIter)? minorTensr().has(++indexIter): false; }
 
 
     /**
@@ -481,15 +480,15 @@ namespace util {
 
 
     /// Returns the tensor of rank `Rank-1` from stripping the first dimension
-    MinorTensor_t const& minor() const { return m; }
+    MinorTensor_t const& minorTensr() const { return m; }
 
     /// Returns whether all sizes of the tensor t are the same as this one
     bool operator== (TensorIndices<RANK> const& t) const
-      { return Base_t::operator==(t) && (minor() == t.minor()); }
+      { return Base_t::operator==(t) && (minorTensr() == t.minorTensr()); }
 
     /// Returns whether any size of the tensor t is different from this one
     bool operator!= (TensorIndices<RANK> const& t) const
-      { return Base_t::operator!=(t) || (minor() != t.minor()); }
+      { return Base_t::operator!=(t) || (minorTensr() != t.minorTensr()); }
 
 
 
@@ -580,11 +579,11 @@ namespace util {
       static_assert(RANK > DIM, "Invalid dimension requested");
       static TensorIndicesBasicTypes::DimSize_t dim
         (TensorIndices<RANK> const& t)
-        { return ExtractTensorDimension<RANK-1U, DIM-1U>::dim(t.minor()); }
+        { return ExtractTensorDimension<RANK-1U, DIM-1U>::dim(t.minorTensr()); }
 
       static TensorIndicesBasicTypes::DimSize_t size
         (TensorIndices<RANK> const& t)
-        { return ExtractTensorDimension<RANK-1U, DIM-1U>::size(t.minor()); }
+        { return ExtractTensorDimension<RANK-1U, DIM-1U>::size(t.minorTensr()); }
 
     }; // ExtractTensorDimension<>()
 
