@@ -138,8 +138,8 @@ void MatrixTest() {
 
   BOOST_CHECK_EQUAL(indices.size(), 4U * 3U);
 
-  BOOST_CHECK_EQUAL(indices.minorTensr().rank(), 1U);
-  BOOST_CHECK_EQUAL(indices.minorTensr().size(), 3U);
+  BOOST_CHECK_EQUAL(indices.minorTensor().rank(), 1U);
+  BOOST_CHECK_EQUAL(indices.minorTensor().size(), 3U);
 
   //
   // indexing
@@ -229,8 +229,8 @@ void TensorRank3Test() {
 
   BOOST_CHECK_EQUAL(indices.size(), 2U * 3U * 4U);
 
-  BOOST_CHECK_EQUAL(indices.minorTensr().rank(), 2U);
-  BOOST_CHECK_EQUAL(indices.minorTensr().size(), 3U * 4U);
+  BOOST_CHECK_EQUAL(indices.minorTensor().rank(), 2U);
+  BOOST_CHECK_EQUAL(indices.minorTensor().size(), 3U * 4U);
 
   //
   // indexing
