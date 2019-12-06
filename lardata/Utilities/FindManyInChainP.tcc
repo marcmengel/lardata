@@ -93,7 +93,7 @@ namespace lar {
     template <unsigned int NCopies>
     struct TupleAppender {
       template <typename Tuple, typename T>
-      static auto append(Tuple&& t, T const& value)
+      static decltype(auto) append(Tuple&& t, T const& value)
         {
           return TupleAppender<(NCopies - 1)>::append(
             std::tuple_cat(std::forward<Tuple>(t), std::make_tuple(value)),
@@ -105,12 +105,12 @@ namespace lar {
     template <>
     struct TupleAppender<0> {
       template <typename Tuple, typename T>
-      static auto append(Tuple&& t, T const&) { return t; }
+      static decltype(auto) append(Tuple&& t, T const&) { return std::forward<Tuple>(t); }
     }; // TupleAppender<0>
     
     
     template <unsigned int NCopies, typename T, typename Tuple>
-    auto appendToTuple(Tuple&& t, T value)
+    decltype(auto) appendToTuple(Tuple&& t, T value)
       { return TupleAppender<NCopies>::append(std::forward<Tuple>(t), value); }
     
     
@@ -1085,3 +1085,7 @@ lar::FindManyInChainP<Target, Intermediate...>::at(std::size_t i) const
 
 
 #endif // LARDATA_UTILITIES_FINDMANYINCHAINP_TCC
+
+// Local variables:
+// mode: c+
+// End:
