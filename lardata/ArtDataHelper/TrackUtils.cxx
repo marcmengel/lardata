@@ -102,8 +102,8 @@ double lar::util::TrackPitchInView
 #if 0 // this can be enabled after `geo::PlaneGeo::InterWireProjectedDistance()` becomes available in larcorealg
    double const d = plane.InterWireProjectedDistance(point.direction());
    
-   // do we prefer to just return 0 and let the caller check it?
-   if (d == 0.0) { // this is a special value, it is /exactly/ zero
+   // do we prefer to just return the value and let the caller check it?
+   if (d > 50.0 * plane.WirePitch()) { // after many pitches track would scatter
       throw cet::exception("Track")
         << "track at point #" << trajectory_point
         << " is almost parallel to the wires in view "
