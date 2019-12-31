@@ -81,17 +81,10 @@ double lar::util::TrackPitchInView
     * The plan:
     * 1. find the wire plane we are talking about
     *    (in the right TPC and with the right view)
-    * 2. project the direction of the track on that plane
-    * 3. scale that projection so that it covers a wire pitch worth in the wire
-    *    coordinate direction
+    * 2. ask the plane the answer
     * 
     */
   
-   auto const& geom = *(lar::providerFrom<geo::Geometry>());
-   
-   //
-   // 1. find the wire plane we are talking about
-   //
    
    if(trajectory_point >= track.NumberTrajectoryPoints()) {
       cet::exception("TrackPitchInView") << "ERROR: Asking for trajectory point #"
@@ -103,9 +96,25 @@ double lar::util::TrackPitchInView
    
    // this throws if the position is not in any TPC,
    // or if there is no view with specified plane
+   auto const& geom = *(lar::providerFrom<geo::Geometry>());
    geo::PlaneGeo const& plane = geom.PositionToTPC(point.position).Plane(view);
    
+#if 0 // this can be enabled after `geo::PlaneGeo::InterWireProjectedDistance()` becomes available in larcorealg
+   double const d = plane.InterWireProjectedDistance(point.direction());
    
+   // do we prefer to just return 0 and let the caller check it?
+   if (d == 0.0) { // this is a special value, it is /exactly/ zero
+      throw cet::exception("Track")
+        << "track at point #" << trajectory_point
+        << " is almost parallel to the wires in view "
+        << geo::PlaneGeo::ViewName(view) << " (wire direction is "
+        << plane.GetWireDirection<geo::Vector_t>() << "; track direction is "
+        << point.direction()
+        << ").\n";
+   }
+   return d;
+   
+#else // !0
    //
    // 2. project the direction of the track on that plane
    //
@@ -132,7 +141,8 @@ double lar::util::TrackPitchInView
    //    WirePitch() is what gives this vector a physical size [cm]
    //
    return proj.R() / std::abs(proj.Y()) * plane.WirePitch();
-   
+#endif // ?0
+
 } // lar::util::TrackPitchInView()
 
 //------------------------------------------------------------------------------
