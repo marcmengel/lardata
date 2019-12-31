@@ -17,7 +17,7 @@
 #include "larcorealg/Geometry/PlaneGeo.h"
 #include "larcorealg/CoreUtils/RealComparisons.h"
 #include "lardataobj/RecoBase/Track.h"
-#include "larcoreobj/SimpleTypesAndConstants/geo_vectors.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_vectors.h" // geo::Vector_t
 #include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h" // util::pi()
 
 // framework libraries
@@ -110,10 +110,12 @@ double lar::util::TrackPitchInView
    // 2. project the direction of the track on that plane
    //
    // this is the projection of the direction of the track on the wire plane;
-   // it is 2D and its second component ("Y()") is on wire coordinate direction
+   // it is 2D and its second component ("Y()") is on wire coordinate direction;
+   // remember that the projection modulus is smaller than 1 because it is
+   // the 3D direction versor, deprived of its drift direction component
    auto const& proj = plane.Projection(point.direction());
    
-   if (lar::util::RealComparisons<double>(1e-4).zero(proj.Y())) {
+   if (lar::util::RealComparisons(1e-4).zero(proj.Y())) {
       throw cet::exception("Track")
         << "track at point #" << trajectory_point
         << " is almost parallel to the wires in view "
@@ -127,8 +129,6 @@ double lar::util::TrackPitchInView
    //
    // 3. scale that projection so that it covers a wire pitch worth in the wire
    //    coordinate direction;
-   //    remember that the projection modulus is smaller than 1 because it is
-   //    the 3D direction versor, deprived of its drift direction component;
    //    WirePitch() is what gives this vector a physical size [cm]
    //
    return proj.R() / std::abs(proj.Y()) * plane.WirePitch();
