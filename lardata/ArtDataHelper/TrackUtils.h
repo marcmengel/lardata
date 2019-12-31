@@ -37,19 +37,33 @@ namespace lar {
 
 
       /**
-       * @brief Provides projected wire pitch for the view
+       * @brief Returns the projected length of track on a wire pitch step [cm]
        * @param track the track to be projected on a view
        * @param view the view for track projection
-       * @param trajectory_point at which point of the track to look for the pitch (default: 0)
-       * @return wire pitch along the track direction at its specified point, in centimetres
-       *
-       * The point of the trajectory with the specified index (by default, the
-       * first point of the trajectory) is projected into the
-       * specified view, and the effective distance between two wires along the
-       * direction the track is pointing to at that point is computed and returned.
+       * @param trajectory_point at which point of the track to look for the pitch (default: `0`)
+       * @return wire pitch along the track direction at its specified point [cm]
+       * @throw cet::exception (category `"TrackPitchInView"`) if the
+       *                       `trajectory_point` index is not valid in `track`
+       * @throw cet::exception (category `"Geometry"`) if the point is in no TPC
+       * @throw cet::exception (category `"TPCGeo"`) if the `view` is
+       *                       unknown, not available or otherwise invalid
+       * @throw cet::exception (category `"Track"`) if the track projection on
+       *                       the wire plane is parallel to the wires (< 0.01%)
+       * 
+       * This function returns the distance covered by the track between two
+       * wires, projected on the wire plane.
+       * The direction of the track is the one at the specified trajectory point
+       * (the first one by default). That direction is projected on the wire
+       * plane with the specified `view` within the TPC that contains that
+       * point.
+       * 
+       * The returned value is the distance, in centimeters, between two
+       * consecutive wires on that projected direction. This is always a
+       * positive number, regardless the direction of the track, and never
+       * smaller than the wire pitch on the projection wire plane.
        */
       double TrackPitchInView
-        (recob::Track const& track, geo::View_t view, size_t trajectory_point = 0);
+        (recob::Track const& track, geo::View_t view, size_t trajectory_point = 0U);
 
 
    } // namespace util

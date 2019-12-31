@@ -11,11 +11,13 @@
 #include "lardata/ArtDataHelper/TrackUtils.h"
 
 // LArSoft libraries
-#include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h" // util::pi()
 #include "larcore/Geometry/Geometry.h"
+#include "larcorealg/Geometry/GeometryCore.h"
+#include "larcorealg/Geometry/TPCGeo.h"
 #include "larcorealg/Geometry/PlaneGeo.h"
-#include "larcorealg/Geometry/WireGeo.h"
+#include "larcorealg/CoreUtils/RealComparisons.h"
 #include "lardataobj/RecoBase/Track.h"
+#include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h" // util::pi()
 
 // framework libraries
 #include "cetlib_except/exception.h"
@@ -74,37 +76,62 @@ double lar::util::TrackProjectedLength(recob::Track const& track, geo::View_t vi
 double lar::util::TrackPitchInView
   (recob::Track const& track, geo::View_t view, size_t trajectory_point /* = 0 */)
 {
-
-   if(view == geo::kUnknown) {
-      throw cet::exception("TrackPitchInView") << "Warning cannot obtain pitch for unknown view\n";
-   }
-
+   /*
+    * The plan:
+    * 1. find the wire plane we are talking about
+    *    (in the right TPC and with the right view)
+    * 2. project the direction of the track on that plane
+    * 3. scale that projection so that it covers a wire pitch worth in the wire
+    *    coordinate direction
+    * 
+    */
+  
+   auto const& geom = *(lar::providerFrom<geo::Geometry>());
+   
+   //
+   // 1. find the wire plane we are talking about
+   //
+   
    if(trajectory_point >= track.NumberTrajectoryPoints()) {
       cet::exception("TrackPitchInView") << "ERROR: Asking for trajectory point #"
          << trajectory_point << " when trajectory vector size is of size "
          << track.NumberTrajectoryPoints() << ".\n";
    }
-
-   auto const* geom = lar::providerFrom<geo::Geometry>();
-   const auto& pos = track.LocationAtPoint(trajectory_point);
-   const double Position[3] = { pos.X(), pos.Y(), pos.Z() };
-   geo::TPCID tpcid = geom->FindTPCAtPosition ( Position );
-   if (!tpcid.isValid) {
-      cet::exception("TrackPitchInView") << "ERROR: invalid TPC " << std::string(tpcid)
-         << " for trajectory point #" << trajectory_point  << ".\n";
+   recob::Track::TrajectoryPoint_t const& point
+     = track.TrajectoryPoint(trajectory_point);
+   
+   // this throws if the position is not in any TPC,
+   // or if there is no view with specified plane
+   geo::PlaneGeo const& plane = geom.PositionToTPC(point.position).Plane(view);
+   
+   
+   //
+   // 2. project the direction of the track on that plane
+   //
+   // this is the projection of the direction of the track on the wire plane;
+   // it is 2D and its second component ("Y()") is on wire coordinate direction
+   auto const& proj = plane.Projection(point.direction());
+   
+   if (lar::util::RealComparisons<double>(1e-4).zero(proj.Y())) {
+      throw cet::exception("Track")
+        << "track at point #" << trajectory_point
+        << " is almost parallel to the wires in view "
+        << geo::PlaneGeo::ViewName(view) << " (wire direction is "
+        << plane.GetWireDirection<geo::Vector_t>() << "; track direction is "
+        << point.direction()
+        << ", its projection on plane " << plane.ID() << " is " << proj
+        << ").\n";
    }
-   double wirePitch   = geom->WirePitch(view, tpcid.TPC, tpcid.Cryostat);
-   double angleToVert = geom->WireAngleToVertical(view, tpcid.TPC, tpcid.Cryostat) - 0.5*::util::pi<>();
-
-   const auto& dir = track.DirectionAtPoint(trajectory_point);
-   //(sin(angleToVert),cos(angleToVert)) is the direction perpendicular to wire
-   double cosgamma = std::abs(std::sin(angleToVert)*dir.Y() +
-     std::cos(angleToVert)*dir.Z());
-
-   if(cosgamma < 1.e-5)
-      throw cet::exception("Track") << "cosgamma is basically 0, that can't be right\n";
-   return wirePitch/cosgamma;
-
+   
+   //
+   // 3. scale that projection so that it covers a wire pitch worth in the wire
+   //    coordinate direction;
+   //    remember that the projection modulus is smaller than 1 because it is
+   //    the 3D direction versor, deprived of its drift direction component;
+   //    WirePitch() is what gives this vector a physical size [cm]
+   //
+   return proj.R() / std::abs(proj.Y()) * plane.WirePitch();
+   
 } // lar::util::TrackPitchInView()
 
 //------------------------------------------------------------------------------
