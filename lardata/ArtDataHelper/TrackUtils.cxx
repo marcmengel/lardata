@@ -1,9 +1,9 @@
 /**
- * @file   TrackUtils.cxx
- * @brief  Utility functions to extract information from recob::Track - implementation
+ * @file   lardata/ArtDataHelper/TrackUtils.cxx
+ * @brief  Utility functions to extract information from `recob::Track` - implementation
  * @author Gianluca Petrillo (petrillo@fnal.gov)
  * @date   March 8th, 2016
- * @see    TrackUtils.h
+ * @see    lardata/ArtDataHelper/TrackUtils.h
  *
  */
 
@@ -17,6 +17,7 @@
 #include "larcorealg/Geometry/PlaneGeo.h"
 #include "larcorealg/CoreUtils/RealComparisons.h"
 #include "lardataobj/RecoBase/Track.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_vectors.h"
 #include "larcoreobj/SimpleTypesAndConstants/PhysicalConstants.h" // util::pi()
 
 // framework libraries
