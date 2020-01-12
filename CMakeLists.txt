@@ -40,6 +40,7 @@ cet_set_compiler_flags(DIAGS CAUTIOUS
 cet_report_compiler_flags()
 
 # these are minimum required versions, not the actual product versions
+find_ups_product( nusimdata )
 find_ups_product( larcoreobj )
 find_ups_product( larcorealg )
 find_ups_product( lardataobj )
@@ -53,7 +54,7 @@ find_ups_product( cetbuildtools )
 find_ups_product( fftw )
 
 #  Find all the libraries needed by our dependent CMakeList.txt files
-cet_find_library( NUSIMDATA_SIMULATIONBASE NAMES nusimdata_SimulationBase PATHS ENV NUSIMDATA_LIB NO_DEFAULT_PATH )
+# cet_find_library( NUSIMDATA_SIMULATIONBASE NAMES nusimdata_SimulationBase PATHS ENV NUSIMDATA_LIB NO_DEFAULT_PATH )
 cet_find_library( PQ                  NAMES pq                  PATHS ENV POSTGRESQL_LIBRARIES NO_DEFAULT_PATH )
 
 # macros for artdaq_dictionary and simple_plugin

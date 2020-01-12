@@ -17,7 +17,9 @@ set(RecoBaseDumpers
   "DumpTracks"
   "DumpVertices")
 set(SimulationDumpers
-   "DumpSimPhotonsLite")
+  "DumpSimPhotonsLite"
+  "DumpSimEnergyDeposits"
+  )
 set(MCDumper)
 
 
@@ -42,8 +44,10 @@ endforeach()
 
 foreach(Dumper IN LISTS SimulationDumpers)
   simple_plugin(${Dumper} "module"
+      lardataalg_MCDumpers
       lardataobj_Simulation
       ${MF_MESSAGELOGGER}
+      ${ROOT_GENVECTOR}
       ${ROOT_CORE})
 endforeach(Dumper IN LISTS SimulationDumpers)
 

@@ -1,0 +1,187 @@
+/**
+ * @file   DumpSimEnergyDeposits_module.cc
+ * @brief  Dumps on screen the content of the `sim::SimEnergyDeposit` objects.
+ * @author Gianluca Petrillo (petrillo@slac.stanford.edu)
+ * @date   January 11, 2020
+ */
+
+// LArSoft libraries
+#include "lardataalg/MCDumpers/MCDumperUtils.h" // sim::ParticleName()
+#include "larcorealg/CoreUtils/enumerate.h"
+#include "lardataobj/Simulation/SimEnergyDeposit.h"
+#include "larcoreobj/SimpleTypesAndConstants/geo_vectors.h"
+
+// art libraries
+#include "art/Framework/Core/EDAnalyzer.h"
+#include "art/Framework/Core/ModuleMacros.h"
+#include "art/Framework/Principal/Event.h"
+#include "art/Framework/Principal/Handle.h"
+#include "canvas/Utilities/InputTag.h"
+
+// support libraries
+#include "messagefacility/MessageLogger/MessageLogger.h"
+#include "fhiclcpp/types/Atom.h"
+#include "fhiclcpp/types/Name.h"
+#include "fhiclcpp/types/Comment.h"
+
+// C//C++ standard libraries
+#include <string>
+#include <memory> // std::unique_ptr<>
+
+
+
+// -----------------------------------------------------------------------------
+namespace sim { class DumpSimEnergyDeposits; }
+/**
+ * @brief Prints the content of all the deposited energies on screen.
+ *
+ * This analyzer prints the content of all the hits into the
+ * LogInfo/LogVerbatim stream.
+ *
+ * Configuration parameters
+ * =========================
+ *
+ * - *EnergyDepositTag* (input tag, default: `"largeant:TPCActive"`):
+ *   tag of data product containing the deposits to dump (memento: format is
+ *   `"moduleLabel:instanceName"`;
+ * - *OutputCategory* (string, default: "DumpSimEnergyDeposits"): the category
+ *   used for the output (useful for filtering)
+ *
+ */
+class sim::DumpSimEnergyDeposits: public art::EDAnalyzer {
+    public:
+
+  struct Config {
+    using Name = fhicl::Name;
+    using Comment = fhicl::Comment;
+
+    fhicl::Atom<art::InputTag> EnergyDepositTag {
+      Name("EnergyDepositTag"),
+      Comment
+        ("tag of data product containing the `sim::SimEnergyDeposit` to dump"),
+      art::InputTag{ "largeant", "TPCActive" }
+      };
+
+    fhicl::Atom<bool> ShowLocation {
+      Name("ShowLocation"),
+      Comment("whether to show where the deposition took place"),
+      true
+      };
+
+    fhicl::Atom<bool> ShowStep {
+      Name("ShowStep"),
+      Comment("whether to show start and end position of the particle step"),
+      false
+      };
+
+    fhicl::Atom<bool> ShowEmission {
+      Name("ShowEmission"),
+      Comment("whether to show the number of photons and electrons generated"),
+      true
+      };
+
+    fhicl::Atom<bool> SplitPhotons {
+      Name("SplitPhotons"),
+      Comment("whether to list fast- and slow-emitted photons separately"),
+      [this](){ return ShowEmission(); },
+      true
+      };
+  
+    fhicl::Atom<std::string> OutputCategory{
+      Name("OutputCategory"),
+      Comment("the messagefacility category used for the output"),
+      "DumpSimEnergyDeposits"
+      };
+
+  }; // struct Config
+
+  using Parameters = art::EDAnalyzer::Table<Config>;
+
+
+  /// Constructor: reads the configuration.
+  explicit DumpSimEnergyDeposits(Parameters const& config);
+
+  /// Does the printing.
+  void analyze(art::Event const& evt);
+
+    private:
+
+  art::InputTag fEnergyDepositTag; ///< Tag for input data product.
+  std::string fOutputCategory;    ///< Category for LogInfo output.
+  
+  bool bShowLocation = true; ///< Print the center of the deposition.
+  bool bShowStep     = true; ///< Print the step ends.
+  bool bShowEmission = true; ///< Print the photons and electrons emitted.
+  bool bSplitPhotons = true; ///< Print photons by emission speed.
+  
+  template <typename Stream>
+  void dumpEnergyDeposit(Stream& out, sim::SimEnergyDeposit const& dep) const;
+  
+}; // class sim::DumpSimEnergyDeposits
+
+
+//------------------------------------------------------------------------------
+//---  module implementation
+//------------------------------------------------------------------------------
+sim::DumpSimEnergyDeposits::DumpSimEnergyDeposits(Parameters const& config)
+  : EDAnalyzer       (config)
+  , fEnergyDepositTag(config().EnergyDepositTag())
+  , fOutputCategory  (config().OutputCategory())
+  , bShowLocation(config().ShowLocation())
+  , bShowStep    (config().ShowStep())
+  , bShowEmission(config().ShowEmission())
+  , bSplitPhotons(config().SplitPhotons())
+  {}
+
+
+//------------------------------------------------------------------------------
+void sim::DumpSimEnergyDeposits::analyze(art::Event const& event) {
+
+  // fetch the data to be dumped on screen
+  auto const& Deps = *(
+    event.getValidHandle<std::vector<sim::SimEnergyDeposit>>(fEnergyDepositTag)
+    );
+
+  mf::LogVerbatim(fOutputCategory)
+    << "Event " << event.id() << " contains " << Deps.size() << " '"
+    << fEnergyDepositTag.encode() << "' energy deposits";
+
+  for (auto const& [ iDep, dep ]: util::enumerate(Deps)) {
+
+    // print a header for the cluster
+    mf::LogVerbatim log(fOutputCategory);
+    log << "[#" << iDep << "]  ";
+    dumpEnergyDeposit(log, dep);
+
+  } // for depositions
+
+} // sim::DumpSimEnergyDeposits::analyze()
+
+
+// -----------------------------------------------------------------------------
+template <typename Stream>
+void sim::DumpSimEnergyDeposits::dumpEnergyDeposit
+  (Stream& out, sim::SimEnergyDeposit const& dep) const
+{
+  out << "TrkID=" << dep.TrackID()
+    << " (" << sim::ParticleName(dep.PdgCode()) << "): "
+    << (1000.0 * dep.Energy()) << " MeV on " << dep.Time() << " ns";
+  if (bShowLocation) out << " at " << dep.MidPoint();
+  if (bShowStep) out << " from " << dep.Start() << " to " << dep.End();
+  out << " (step: " << dep.StepLength() << " cm)";
+  if (bShowEmission) {
+    out << "; electrons: " << dep.NumElectrons();
+    if (bSplitPhotons) {
+      out << "; photons: " << dep.NumFPhotons() << " (fast), "
+        << dep.NumSPhotons() << " (slow)";
+    }
+    else out << "; photons: " << dep.NumPhotons();
+  }
+  
+} // sim::DumpSimEnergyDeposits::dumpEnergyDeposit()
+
+
+// -----------------------------------------------------------------------------
+DEFINE_ART_MODULE(sim::DumpSimEnergyDeposits)
+
+// -----------------------------------------------------------------------------

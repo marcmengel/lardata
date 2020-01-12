@@ -1,0 +1,112 @@
+#
+# File:     dump_simenergydeposits.fcl
+# Purpose:  Dump on screen the simulated energy depositions.
+# Author:   Gianluca Petrillo (petrillo@slac.stanford.edu)
+# Date:     January 11, 2020
+# Version:  1.0
+#
+# Configuration: by default, "largeant:TPCActive" and "largeant:Other"
+# energy deposition data products are dumped.
+#
+# Service dependencies:
+# - message facility
+#
+
+process_name: DumpEDep
+
+services: {
+  
+  message: {
+  #   debugModules: [ "*" ]
+    destinations: {
+      
+      # grab all the "DumpEnergyDeposit" messages and put them in DumpEnergyDeposit.log
+      DumpEnergyDepositLog: {
+        append: false
+        categories: {
+          DumpSimEnergyDeposits: { limit: -1 }
+          default:               { limit: 0 }
+        }
+        filename: "DumpEnergyDeposit.log"
+        threshold: "INFO"
+        type: "file"
+      } # DumpHits
+      
+      LogStandardOut: {
+        categories: {
+          DumpSimEnergyDeposits: { limit: 0 }
+          default:               {}
+        }
+        threshold: "WARNING"
+        type: "cout"
+      } # LogStandardOut
+      
+    } # destinations
+  } # message
+} # services
+
+
+physics: {
+
+  analyzers: {
+  
+    dumpedepactive: {
+    
+      module_type:  DumpSimEnergyDeposits
+      
+      # specify the tag of the `sim::SimEnergyDeposit` producer
+      EnergyDepositTag: "largeant:TPCActive"
+      
+      # whether to show where the deposition took place
+      ShowLocation: true
+
+      # whether to show start and end position of the particle step
+      ShowStep: false
+      
+      
+      # whether to show the number of photons and electrons generated
+      ShowEmission: true
+      
+      # whether to list fast- and slow-emitted photons separately
+      SplitPhotons: true
+      
+      # output category ("DumpSimEnergyDeposits" by default), useful for filtering (see above)
+      OutputCategory: "DumpSimEnergyDeposits"
+      
+    } # dumpedepactive
+    
+    
+    dumpedepother: {
+    
+      module_type:  DumpSimEnergyDeposits
+      
+      # specify the tag of the `sim::SimEnergyDeposit` producer
+      EnergyDepositTag: "largeant:Other"
+      
+      # whether to show where the deposition took place
+      ShowLocation: true
+
+      # whether to show start and end position of the particle step
+      ShowStep: false
+      
+      # whether to show the number of photons and electrons generated
+      ShowEmission: true
+      
+      # whether to list fast- and slow-emitted photons separately
+      SplitPhotons: true
+      
+      # output category ("DumpSimEnergyDeposits" by default), useful for filtering (see above)
+      OutputCategory: "DumpSimEnergyDeposits"
+      
+    } # dumpedepother
+    
+    
+  } # analyzers
+  
+  dumpers:  [ dumpedepactive, dumpedepother ]
+  
+  trigger_paths: []
+  
+  end_paths:     [ dumpers ]
+  
+} # physics
