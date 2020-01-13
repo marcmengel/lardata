@@ -7,6 +7,8 @@
 
 // LArSoft libraries
 #include "lardataalg/MCDumpers/MCDumperUtils.h" // sim::ParticleName()
+#include "lardataalg/Utilities/quantities/energy.h" // GeV
+#include "lardataalg/Utilities/quantities/spacetime.h" // cm
 #include "larcorealg/CoreUtils/enumerate.h"
 #include "lardataobj/Simulation/SimEnergyDeposit.h"
 #include "larcoreobj/SimpleTypesAndConstants/geo_vectors.h"
@@ -27,7 +29,6 @@
 // C//C++ standard libraries
 #include <string>
 #include <memory> // std::unique_ptr<>
-
 
 
 // -----------------------------------------------------------------------------
@@ -137,6 +138,11 @@ sim::DumpSimEnergyDeposits::DumpSimEnergyDeposits(Parameters const& config)
 //------------------------------------------------------------------------------
 void sim::DumpSimEnergyDeposits::analyze(art::Event const& event) {
 
+  using namespace util::quantities::energy_literals;
+  using namespace util::quantities::space_literals;
+  using util::quantities::gigaelectronvolt;
+  using util::quantities::centimeter;
+
   // fetch the data to be dumped on screen
   auto const& Deps = *(
     event.getValidHandle<std::vector<sim::SimEnergyDeposit>>(fEnergyDepositTag)
@@ -146,6 +152,11 @@ void sim::DumpSimEnergyDeposits::analyze(art::Event const& event) {
     << "Event " << event.id() << " contains " << Deps.size() << " '"
     << fEnergyDepositTag.encode() << "' energy deposits";
 
+  gigaelectronvolt TotalE = 0_GeV;
+  centimeter TotalLength { 0.0 };
+  unsigned int TotalElectrons = 0U, TotalPhotons = 0U,
+    TotalPhotonsFast = 0U, TotalPhotonsSlow = 0U;
+
   for (auto const& [ iDep, dep ]: util::enumerate(Deps)) {
 
     // print a header for the cluster
@@ -153,7 +164,24 @@ void sim::DumpSimEnergyDeposits::analyze(art::Event const& event) {
     log << "[#" << iDep << "]  ";
     dumpEnergyDeposit(log, dep);
 
+    // collect statistics
+    TotalE += gigaelectronvolt{ dep.Energy() };
+    TotalLength += centimeter{ dep.StepLength() };
+    TotalElectrons += dep.NumElectrons();
+    TotalPhotons += dep.NumPhotons();
+    TotalPhotonsSlow += dep.NumSPhotons();
+    TotalPhotonsFast += dep.NumFPhotons();
+
   } // for depositions
+
+  mf::LogVerbatim(fOutputCategory)
+    << "Event " << event.id() << " energy deposits '"
+    << fEnergyDepositTag.encode() << "' include "
+    << TotalE << " worth of energy, " << TotalElectrons
+    << " electrons and " << TotalPhotons << " photons ("
+    << TotalPhotonsFast << " fast and " << TotalPhotonsSlow
+    << " slow); tracked particles crossed " << TotalLength << " of space."
+    ;
 
 } // sim::DumpSimEnergyDeposits::analyze()
 
@@ -163,12 +191,20 @@ template <typename Stream>
 void sim::DumpSimEnergyDeposits::dumpEnergyDeposit
   (Stream& out, sim::SimEnergyDeposit const& dep) const
 {
+  using util::quantities::megaelectronvolt, util::quantities::gigaelectronvolt;
+  using util::quantities::centimeter;
+  using util::quantities::nanosecond;
+
+  auto const time { nanosecond(dep.Time()) };
+  megaelectronvolt const energy { gigaelectronvolt(dep.Energy()) }; // convert
+  auto const length { centimeter(dep.StepLength()) };
+
   out << "TrkID=" << dep.TrackID()
     << " (" << sim::ParticleName(dep.PdgCode()) << "): "
-    << (1000.0 * dep.Energy()) << " MeV on " << dep.Time() << " ns";
+    << energy << " on " << time;
   if (bShowLocation) out << " at " << dep.MidPoint();
   if (bShowStep) out << " from " << dep.Start() << " to " << dep.End();
-  out << " (step: " << dep.StepLength() << " cm)";
+  out << " (step: " << length << ")";
   if (bShowEmission) {
     out << "; electrons: " << dep.NumElectrons();
     if (bSplitPhotons) {
