@@ -7,7 +7,7 @@
 
 // LArSoft libraries
 #include "lardataalg/MCDumpers/MCDumperUtils.h" // sim::ParticleName()
-#include "lardataalg/Utilities/quantities/energy.h" // GeV
+#include "lardataalg/Utilities/quantities/energy.h" // MeV
 #include "lardataalg/Utilities/quantities/spacetime.h" // cm
 #include "larcorealg/CoreUtils/enumerate.h"
 #include "lardataobj/Simulation/SimEnergyDeposit.h"
@@ -140,7 +140,7 @@ void sim::DumpSimEnergyDeposits::analyze(art::Event const& event) {
 
   using namespace util::quantities::energy_literals;
   using namespace util::quantities::space_literals;
-  using util::quantities::gigaelectronvolt;
+  using util::quantities::megaelectronvolt;
   using util::quantities::centimeter;
 
   // fetch the data to be dumped on screen
@@ -152,7 +152,7 @@ void sim::DumpSimEnergyDeposits::analyze(art::Event const& event) {
     << "Event " << event.id() << " contains " << Deps.size() << " '"
     << fEnergyDepositTag.encode() << "' energy deposits";
 
-  gigaelectronvolt TotalE = 0_GeV;
+  megaelectronvolt TotalE = 0_MeV;
   centimeter TotalLength { 0.0 };
   unsigned int TotalElectrons = 0U, TotalPhotons = 0U,
     TotalPhotonsFast = 0U, TotalPhotonsSlow = 0U;
@@ -165,7 +165,7 @@ void sim::DumpSimEnergyDeposits::analyze(art::Event const& event) {
     dumpEnergyDeposit(log, dep);
 
     // collect statistics
-    TotalE += gigaelectronvolt{ dep.Energy() };
+    TotalE += megaelectronvolt{ dep.Energy() };
     TotalLength += centimeter{ dep.StepLength() };
     TotalElectrons += dep.NumElectrons();
     TotalPhotons += dep.NumPhotons();
@@ -196,7 +196,7 @@ void sim::DumpSimEnergyDeposits::dumpEnergyDeposit
   using util::quantities::nanosecond;
 
   auto const time { nanosecond(dep.Time()) };
-  megaelectronvolt const energy { gigaelectronvolt(dep.Energy()) }; // convert
+  auto const energy { megaelectronvolt(dep.Energy()) };
   auto const length { centimeter(dep.StepLength()) };
 
   out << "TrkID=" << dep.TrackID()
