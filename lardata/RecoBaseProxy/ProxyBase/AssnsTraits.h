@@ -178,7 +178,7 @@ namespace lar {
 
     template <typename L, typename R>
     struct assns_iterator_type<art::Assns<L, R, void>> {
-      using type = typename art::Assns<L, R, void>::assn_iterator;
+      using type = typename art::Assns<L, R, void>::const_iterator;
     };
 
 
