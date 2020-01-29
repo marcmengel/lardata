@@ -48,14 +48,14 @@ namespace lar::util {
    *                       unknown, not available or otherwise invalid
    * @throw cet::exception (category `"Track"`) if the track projection on
    *                       the wire plane is parallel to the wires (< 0.01%)
-   * 
+   *
    * This function returns the distance covered by the track between two
    * wires, projected on the wire plane.
    * The direction of the track is the one at the specified trajectory point
    * (the first one by default). That direction is projected on the wire
    * plane with the specified `view` within the TPC that contains that
    * point.
-   * 
+   *
    * The returned value is the distance, in centimeters, between two
    * consecutive wires on that projected direction. This is always a
    * positive number, regardless the direction of the track, and never

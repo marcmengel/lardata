@@ -82,10 +82,10 @@ double lar::util::TrackPitchInView
     * 1. find the wire plane we are talking about
     *    (in the right TPC and with the right view)
     * 2. ask the plane the answer
-    * 
+    *
     */
-  
-   
+
+
    if(trajectory_point >= track.NumberTrajectoryPoints()) {
       cet::exception("TrackPitchInView") << "ERROR: Asking for trajectory point #"
          << trajectory_point << " when trajectory vector size is of size "
@@ -93,15 +93,15 @@ double lar::util::TrackPitchInView
    }
    recob::Track::TrajectoryPoint_t const& point
      = track.TrajectoryPoint(trajectory_point);
-   
+
    // this throws if the position is not in any TPC,
    // or if there is no view with specified plane
    auto const& geom = *(lar::providerFrom<geo::Geometry>());
    geo::PlaneGeo const& plane = geom.PositionToTPC(point.position).Plane(view);
-   
+
 #if 0 // this can be enabled after `geo::PlaneGeo::InterWireProjectedDistance()` becomes available in larcorealg
    double const d = plane.InterWireProjectedDistance(point.direction());
-   
+
    // do we prefer to just return the value and let the caller check it?
    if (d > 50.0 * plane.WirePitch()) { // after many pitches track would scatter
       throw cet::exception("Track")
@@ -113,7 +113,7 @@ double lar::util::TrackPitchInView
         << ").\n";
    }
    return d;
-   
+
 #else // !0
    //
    // 2. project the direction of the track on that plane
@@ -123,7 +123,7 @@ double lar::util::TrackPitchInView
    // remember that the projection modulus is smaller than 1 because it is
    // the 3D direction versor, deprived of its drift direction component
    auto const& proj = plane.Projection(point.direction());
-   
+
    if (lar::util::RealComparisons(1e-4).zero(proj.Y())) {
       throw cet::exception("Track")
         << "track at point #" << trajectory_point
@@ -134,7 +134,7 @@ double lar::util::TrackPitchInView
         << ", its projection on plane " << plane.ID() << " is " << proj
         << ").\n";
    }
-   
+
    //
    // 3. scale that projection so that it covers a wire pitch worth in the wire
    //    coordinate direction;
