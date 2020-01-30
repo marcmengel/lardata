@@ -12,6 +12,7 @@ art_make(LIB_LIBRARIES lardataobj_RawData
                        canvas
                        cetlib_except
                        ${ROOT_CORE}
+		       ${ROOT_GENVECTOR}
                        ${Boost_SYSTEM_LIBRARY})
 
 add_subdirectory(Dumpers)
