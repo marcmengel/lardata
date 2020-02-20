@@ -7,8 +7,8 @@ simple_plugin(DetectorClocksServiceStandard "service"
               ${ART_ROOT_IO_ROOTDB}
               art_Persistency_Provenance
               ${SQLITE3}
-              ${ROOT_CORE}
-              ${ROOT_RIO})
+              ROOT::Core
+              ROOT::RIO)
 
 simple_plugin(DetectorPropertiesServiceStandard "service"
               lardataalg_DetectorInfo
@@ -17,8 +17,8 @@ simple_plugin(DetectorPropertiesServiceStandard "service"
               ${ART_ROOT_IO_ROOTDB}
               ${SQLITE3}
               ${MF_MESSAGELOGGER}
-              ${ROOT_CORE}
-              ${ROOT_RIO})
+              ROOT::Core
+              ROOT::RIO)
 
 simple_plugin(LArPropertiesServiceStandard "service"
               lardataalg_DetectorInfo

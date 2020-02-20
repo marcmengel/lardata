@@ -13,9 +13,9 @@ art_make(NO_PLUGINS
                        ${PQ}
                        ${Boost_SERIALIZATION_LIBRARY}
                        ${Boost_DATE_TIME_LIBRARY}
-                       ${ROOT_CORE}
-                       ${ROOT_RIO}
-                       ${ROOT_TREE}
+                       ROOT::Core
+                       ROOT::RIO
+                       ROOT::Tree
         )
 
 simple_plugin(LArRawInputSource "source"
