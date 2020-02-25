@@ -5,7 +5,7 @@ art_make(
     ${MF_MESSAGELOGGER}
     ${FHICLCPP}
     cetlib cetlib_except
-    ${ROOT_CORE}
+    ROOT::Core
 )
 
 cet_test(LarProp HANDBUILT

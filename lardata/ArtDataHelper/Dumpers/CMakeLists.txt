@@ -47,8 +47,8 @@ foreach(Dumper IN LISTS SimulationDumpers)
       lardataalg_MCDumpers
       lardataobj_Simulation
       ${MF_MESSAGELOGGER}
-      ${ROOT_GENVECTOR}
-      ${ROOT_CORE})
+      ROOT::GenVector
+      ROOT::Core)
 endforeach(Dumper IN LISTS SimulationDumpers)
 
 

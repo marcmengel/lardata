@@ -52,7 +52,7 @@ simple_plugin(
     ${MF_MESSAGELOGGER}
     ${FHICLCPP}
     cetlib_except
-    ${ROOT_CORE}
+    ROOT::Core
   )
 
 cet_test(AssnsChainUtil_test HANDBUILT
