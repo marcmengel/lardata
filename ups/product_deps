@@ -9,7 +9,7 @@ product         version
 lardataalg	v08_03_00_02a
 lardataobj	v08_01_00_02a
 larcore		v08_01_00_02
-nutools		v2_27_06
+nutools		v2_27_07
 range		v3_0_3_0
 
 cetbuildtools	v7_06_04	-	only_for_build
