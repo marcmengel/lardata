@@ -9,18 +9,18 @@
 #ifndef DETECTORPROPERTIESSERVICESTANDARD_H
 #define DETECTORPROPERTIESSERVICESTANDARD_H
 
-#include "fhiclcpp/ParameterSet.h"
-#include "fhiclcpp/types/Atom.h"
+#include "art/Framework/Principal/Run.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-#include "art/Framework/Principal/Run.h"
 #include "art/Persistency/Provenance/ScheduleContext.h"
-#include "lardataalg/DetectorInfo/DetectorPropertiesStandard.h"
+#include "fhiclcpp/ParameterSet.h"
+#include "fhiclcpp/types/Atom.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardataalg/DetectorInfo/DetectorPropertiesStandard.h"
 
 ///General LArSoft Utilities
-namespace detinfo{
+namespace detinfo {
 
   /**
    * @brief "Standard" implementation of DetectorProperties service
@@ -55,47 +55,49 @@ namespace detinfo{
 
   class DetectorPropertiesServiceStandard : public DetectorPropertiesService {
 
-    public:
+  public:
+    // the following is currently not used for validation,
+    // but only for documentation
+    struct ServiceConfiguration_t {
 
-      // the following is currently not used for validation,
-      // but only for documentation
-      struct ServiceConfiguration_t {
+      // service-specific configuration
+      fhicl::Atom<bool> InheritNumberTimeSamples{
+        fhicl::Name("InheritNumberTimeSamples"),
+        fhicl::Comment(""),
+        false /* default value */
+      };
 
-        // service-specific configuration
-        fhicl::Atom<bool> InheritNumberTimeSamples {
-          fhicl::Name("InheritNumberTimeSamples"),
-          fhicl::Comment(""),
-          false /* default value */
-        };
+      // provider configuration
+      detinfo::DetectorPropertiesStandard::Configuration_t ProviderConfiguration;
 
-        // provider configuration
-        detinfo::DetectorPropertiesStandard::Configuration_t ProviderConfiguration;
+    }; // ServiceConfiguration_t
 
-      }; // ServiceConfiguration_t
+    // this enables art to print the configuration help:
+    using Parameters = art::ServiceTable<ServiceConfiguration_t>;
 
+    DetectorPropertiesServiceStandard(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
 
-      // this enables art to print the configuration help:
-      using Parameters = art::ServiceTable<ServiceConfiguration_t>;
+    virtual void reconfigure(fhicl::ParameterSet const& pset) override;
+    void preProcessEvent(const art::Event& evt, art::ScheduleContext);
+    void postOpenFile(const std::string& filename);
 
-      DetectorPropertiesServiceStandard(fhicl::ParameterSet const& pset,
-				art::ActivityRegistry& reg);
+    virtual const provider_type*
+    provider() const override
+    {
+      return fProp.get();
+    }
 
-      virtual void   reconfigure(fhicl::ParameterSet const& pset) override;
-      void   preProcessEvent(const art::Event& evt, art::ScheduleContext);
-      void   postOpenFile(const std::string& filename);
+  private:
+    std::unique_ptr<detinfo::DetectorPropertiesStandard> fProp;
+    fhicl::ParameterSet fPS; ///< Original parameter set.
 
-      virtual const provider_type* provider() const override { return fProp.get();}
+    bool fInheritNumberTimeSamples; ///< Flag saying whether to inherit NumberTimeSamples
 
-    private:
+    bool isDetectorPropertiesServiceStandard(const fhicl::ParameterSet& ps) const;
 
-      std::unique_ptr<detinfo::DetectorPropertiesStandard> fProp;
-      fhicl::ParameterSet   fPS;       ///< Original parameter set.
-
-      bool fInheritNumberTimeSamples; ///< Flag saying whether to inherit NumberTimeSamples
-
-      bool isDetectorPropertiesServiceStandard(const fhicl::ParameterSet& ps) const;
-
-    }; // class DetectorPropertiesService
+  }; // class DetectorPropertiesService
 } //namespace detinfo
-DECLARE_ART_SERVICE_INTERFACE_IMPL(detinfo::DetectorPropertiesServiceStandard, detinfo::DetectorPropertiesService, LEGACY)
+DECLARE_ART_SERVICE_INTERFACE_IMPL(detinfo::DetectorPropertiesServiceStandard,
+                                   detinfo::DetectorPropertiesService,
+                                   LEGACY)
 #endif // DETECTORPROPERTIESSERVICESTANDARD_H

@@ -9,9 +9,9 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "lardata/RecoObjects/Propagator.h"
-#include "lardata/RecoObjects/SurfXYZPlane.h"
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "cetlib_except/exception.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/RecoObjects/SurfXYZPlane.h"
 
 namespace trkf {
 
@@ -22,16 +22,14 @@ namespace trkf {
   /// tcut   - Maximum delta ray energy.
   /// doDedx - dE/dx enable flag.
   ///
-  Propagator::Propagator(double tcut, bool doDedx,
-			 const std::shared_ptr<const Interactor>& interactor) :
-    fTcut(tcut),
-    fDoDedx(doDedx),
-    fInteractor(interactor)
+  Propagator::Propagator(double tcut,
+                         bool doDedx,
+                         const std::shared_ptr<const Interactor>& interactor)
+    : fTcut(tcut), fDoDedx(doDedx), fInteractor(interactor)
   {}
 
   /// Destructor.
-  Propagator::~Propagator()
-  {}
+  Propagator::~Propagator() {}
 
   /// Propagate without error (long distance).
   ///
@@ -49,12 +47,13 @@ namespace trkf {
   /// This method calls virtual method short_vec_prop in steps of some
   /// maximum size.
   ///
-  boost::optional<double> Propagator::vec_prop(KTrack& trk,
-					       const std::shared_ptr<const Surface>& psurf,
-					       PropDirection dir,
-					       bool doDedx,
-					       TrackMatrix* prop_matrix,
-					       TrackError* noise_matrix) const
+  boost::optional<double>
+  Propagator::vec_prop(KTrack& trk,
+                       const std::shared_ptr<const Surface>& psurf,
+                       PropDirection dir,
+                       bool doDedx,
+                       TrackMatrix* prop_matrix,
+                       TrackError* noise_matrix) const
   {
     // Default result.
 
@@ -69,7 +68,7 @@ namespace trkf {
     // the call to short_vec_prop with unlimited distance.
 
     bool dedx = getDoDedx() && doDedx;
-    if(!dedx || pinv == 0.)
+    if (!dedx || pinv == 0.)
       result = short_vec_prop(trk, psurf, dir, dedx, prop_matrix, noise_matrix);
 
     else {
@@ -80,19 +79,18 @@ namespace trkf {
 
       // Get LAr service.
 
-      auto const * detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
+      auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
       // Initialize propagation matrix to unit matrix (if specified).
 
       int nvec = trk.getVector().size();
-      if(prop_matrix)
-	*prop_matrix = ublas::identity_matrix<TrackVector::value_type>(nvec);
+      if (prop_matrix) *prop_matrix = ublas::identity_matrix<TrackVector::value_type>(nvec);
 
       // Initialize noise matrix to zero matrix (if specified).
 
-      if(noise_matrix) {
-	noise_matrix->resize(nvec, nvec, false);
-	noise_matrix->clear();
+      if (noise_matrix) {
+        noise_matrix->resize(nvec, nvec, false);
+        noise_matrix->clear();
       }
 
       // Remember the starting track.
@@ -103,9 +101,9 @@ namespace trkf {
       // propagation and noise matrices, or null if not specified.
 
       TrackMatrix local_prop_matrix;
-      TrackMatrix* plocal_prop_matrix = (prop_matrix==0 ? 0 : &local_prop_matrix);
+      TrackMatrix* plocal_prop_matrix = (prop_matrix == 0 ? 0 : &local_prop_matrix);
       TrackError local_noise_matrix;
-      TrackError* plocal_noise_matrix = (noise_matrix==0 ? 0 : &local_noise_matrix);
+      TrackError* plocal_noise_matrix = (noise_matrix == 0 ? 0 : &local_noise_matrix);
 
       // Cumulative propagation distance.
 
@@ -117,116 +115,114 @@ namespace trkf {
       // any point in the tpc using the minimum step size (for a reasonable tpc).
 
       bool done = false;
-      int nitmax = 10000;  // Maximum number of iterations.
-      int nit = 0;         // Iteration count.
-      while(!done) {
+      int nitmax = 10000; // Maximum number of iterations.
+      int nit = 0;        // Iteration count.
+      while (!done) {
 
-	// If the iteration count exceeds the maximum, return failure.
+        // If the iteration count exceeds the maximum, return failure.
 
-	++nit;
-	if(nit > nitmax) {
-	  trk = trk0;
-	  result = boost::optional<double>(false, 0.);
-	  return result;
-	}
+        ++nit;
+        if (nit > nitmax) {
+          trk = trk0;
+          result = boost::optional<double>(false, 0.);
+          return result;
+        }
 
-	// Estimate maximum step distance according to the above
-	// stated principle.
+        // Estimate maximum step distance according to the above
+        // stated principle.
 
-	pinv = trk.getVector()(4);
-	double mass = trk.Mass();
-	double p = 1./std::abs(pinv);
-	double e = std::hypot(p, mass);
-	double t = p*p / (e + mass);
-	double dedx = 0.001 * detprop->Eloss(p, mass, fTcut);
-	double smax = 0.1 * t / dedx;
-	if (smax <= 0.)
-	  throw cet::exception("Propagator") << __func__ << ": maximum step " << smax << "\n";
+        pinv = trk.getVector()(4);
+        double mass = trk.Mass();
+        double p = 1. / std::abs(pinv);
+        double e = std::hypot(p, mass);
+        double t = p * p / (e + mass);
+        double dedx = 0.001 * detprop->Eloss(p, mass, fTcut);
+        double smax = 0.1 * t / dedx;
+        if (smax <= 0.)
+          throw cet::exception("Propagator") << __func__ << ": maximum step " << smax << "\n";
 
-	// Always allow a step of at least 0.3 cm (about one wire spacing).
+        // Always allow a step of at least 0.3 cm (about one wire spacing).
 
-	if(smax < 0.3)
-	  smax = 0.3;
+        if (smax < 0.3) smax = 0.3;
 
-	// First do a test propagation (without dE/dx and errors) to
-	// find the distance to the destination surface.
+        // First do a test propagation (without dE/dx and errors) to
+        // find the distance to the destination surface.
 
-	KTrack trktest(trk);
-	boost::optional<double> dist = short_vec_prop(trktest, psurf, dir, false, 0, 0);
+        KTrack trktest(trk);
+        boost::optional<double> dist = short_vec_prop(trktest, psurf, dir, false, 0, 0);
 
-	// If the test propagation failed, return failure.
+        // If the test propagation failed, return failure.
 
-	if(!dist) {
-	  trk = trk0;
-	  return dist;
-	}
+        if (!dist) {
+          trk = trk0;
+          return dist;
+        }
 
-	// Generate destionation surface for this step (either final
-	// destination, or some intermediate surface).
+        // Generate destionation surface for this step (either final
+        // destination, or some intermediate surface).
 
-	std::shared_ptr<const Surface> pstep;
-	if(std::abs(*dist) <= smax) {
-	  done = true;
-	  pstep = psurf;
-	}
-	else {
+        std::shared_ptr<const Surface> pstep;
+        if (std::abs(*dist) <= smax) {
+          done = true;
+          pstep = psurf;
+        }
+        else {
 
-	  // Generate intermediate surface.
-	  // First get point where track will intersect intermediate surface.
+          // Generate intermediate surface.
+          // First get point where track will intersect intermediate surface.
 
-	  double xyz0[3];                                // Starting point.
-	  trk.getPosition(xyz0);
-	  double xyz1[3];                                // Destination point.
-	  trktest.getPosition(xyz1);
-	  double frac = smax / std::abs(*dist);
-	  double xyz[3];                                 // Intermediate point.
-	  xyz[0] = xyz0[0] + frac * (xyz1[0] - xyz0[0]);
-	  xyz[1] = xyz0[1] + frac * (xyz1[1] - xyz0[1]);
-	  xyz[2] = xyz0[2] + frac * (xyz1[2] - xyz0[2]);
+          double xyz0[3]; // Starting point.
+          trk.getPosition(xyz0);
+          double xyz1[3]; // Destination point.
+          trktest.getPosition(xyz1);
+          double frac = smax / std::abs(*dist);
+          double xyz[3]; // Intermediate point.
+          xyz[0] = xyz0[0] + frac * (xyz1[0] - xyz0[0]);
+          xyz[1] = xyz0[1] + frac * (xyz1[1] - xyz0[1]);
+          xyz[2] = xyz0[2] + frac * (xyz1[2] - xyz0[2]);
 
-	  // Choose orientation of intermediate surface perpendicular
-	  // to track.
+          // Choose orientation of intermediate surface perpendicular
+          // to track.
 
-	  double mom[3];
-	  trk.getMomentum(mom);
+          double mom[3];
+          trk.getMomentum(mom);
 
-	  // Make intermediate surface object.
+          // Make intermediate surface object.
 
-	  pstep = std::shared_ptr<const Surface>(new SurfXYZPlane(xyz[0], xyz[1], xyz[2],
-								  mom[0], mom[1], mom[2]));
-	}
+          pstep = std::shared_ptr<const Surface>(
+            new SurfXYZPlane(xyz[0], xyz[1], xyz[2], mom[0], mom[1], mom[2]));
+        }
 
-	// Do the actual step propagation.
+        // Do the actual step propagation.
 
-	dist = short_vec_prop(trk, pstep, dir, doDedx,
-			      plocal_prop_matrix, plocal_noise_matrix);
+        dist = short_vec_prop(trk, pstep, dir, doDedx, plocal_prop_matrix, plocal_noise_matrix);
 
-	// If the step propagation failed, return failure.
+        // If the step propagation failed, return failure.
 
-	if(!dist) {
-	  trk = trk0;
-	  return dist;
-	}
+        if (!dist) {
+          trk = trk0;
+          return dist;
+        }
 
-	// Update cumulative propagation distance.
+        // Update cumulative propagation distance.
 
-	s += *dist;
+        s += *dist;
 
-	// Update cumulative propagation matrix (left-multiply).
+        // Update cumulative propagation matrix (left-multiply).
 
-	if(prop_matrix != 0) {
-	  TrackMatrix temp = prod(*plocal_prop_matrix, *prop_matrix);
-	  *prop_matrix = temp;
-	}
+        if (prop_matrix != 0) {
+          TrackMatrix temp = prod(*plocal_prop_matrix, *prop_matrix);
+          *prop_matrix = temp;
+        }
 
-	// Update cumulative noise matrix.
+        // Update cumulative noise matrix.
 
-	if(noise_matrix != 0) {
-	  TrackMatrix temp = prod(*noise_matrix, trans(*plocal_prop_matrix));
-	  TrackMatrix temp2 = prod(*plocal_prop_matrix, temp);
-	  *noise_matrix = ublas::symmetric_adaptor<TrackMatrix>(temp2);
-	  *noise_matrix += *plocal_noise_matrix;
-	}
+        if (noise_matrix != 0) {
+          TrackMatrix temp = prod(*noise_matrix, trans(*plocal_prop_matrix));
+          TrackMatrix temp2 = prod(*plocal_prop_matrix, temp);
+          *noise_matrix = ublas::symmetric_adaptor<TrackMatrix>(temp2);
+          *noise_matrix += *plocal_noise_matrix;
+        }
       }
 
       // Set the final result (distance + success).
@@ -255,19 +251,20 @@ namespace trkf {
   ///
   /// If the reference track is null, this method simply calls vec_prop.
   ///
-  boost::optional<double> Propagator::lin_prop(KTrack& trk,
-					       const std::shared_ptr<const Surface>& psurf,
-					       PropDirection dir,
-					       bool doDedx,
-					       KTrack* ref,
-					       TrackMatrix* prop_matrix,
-					       TrackError* noise_matrix) const
+  boost::optional<double>
+  Propagator::lin_prop(KTrack& trk,
+                       const std::shared_ptr<const Surface>& psurf,
+                       PropDirection dir,
+                       bool doDedx,
+                       KTrack* ref,
+                       TrackMatrix* prop_matrix,
+                       TrackError* noise_matrix) const
   {
     // Default result.
 
     boost::optional<double> result;
 
-    if(ref == 0)
+    if (ref == 0)
       result = vec_prop(trk, psurf, dir, doDedx, prop_matrix, noise_matrix);
     else {
 
@@ -276,9 +273,9 @@ namespace trkf {
       // It is an error (throw exception) if the reference track and
       // the track to be propagted are not on the same surface.
 
-      if(!trk.getSurface()->isEqual(*(ref->getSurface())))
-	throw cet::exception("Propagator") <<
-	  "Input track and reference track not on same surface.\n";
+      if (!trk.getSurface()->isEqual(*(ref->getSurface())))
+        throw cet::exception("Propagator")
+          << "Input track and reference track not on same surface.\n";
 
       // Remember the starting track and reference track.
 
@@ -289,46 +286,45 @@ namespace trkf {
       // propagation matrix.
 
       TrackMatrix prop_temp;
-      if(prop_matrix == 0)
-	prop_matrix = &prop_temp;
+      if (prop_matrix == 0) prop_matrix = &prop_temp;
 
       // Do the propgation.  The returned result will be the result of
       // this propagatrion.
 
       result = vec_prop(*ref, psurf, dir, doDedx, prop_matrix, noise_matrix);
-      if(!!result) {
+      if (!!result) {
 
-	// Propagation of reference track succeeded.  Update the track
-	// state vector and surface of the track to be propagated.
+        // Propagation of reference track succeeded.  Update the track
+        // state vector and surface of the track to be propagated.
 
-	TrackVector diff = trk.getSurface()->getDiff(trk.getVector(), ref0.getVector());
-	TrackVector newvec = ref->getVector() + prod(*prop_matrix, diff);
+        TrackVector diff = trk.getSurface()->getDiff(trk.getVector(), ref0.getVector());
+        TrackVector newvec = ref->getVector() + prod(*prop_matrix, diff);
 
-	// Store updated state vector and surface.
+        // Store updated state vector and surface.
 
-	trk.setVector(newvec);
-	trk.setSurface(psurf);
-	trk.setDirection(ref->getDirection());
-	if (!trk.getSurface()->isEqual(*(ref->getSurface())))
-	  throw cet::exception("Propagator") << __func__ << ": surface mismatch";
+        trk.setVector(newvec);
+        trk.setSurface(psurf);
+        trk.setDirection(ref->getDirection());
+        if (!trk.getSurface()->isEqual(*(ref->getSurface())))
+          throw cet::exception("Propagator") << __func__ << ": surface mismatch";
 
-	// Final validity check.  In case of failure, restore the track
-	// and reference track to their starting values.
+        // Final validity check.  In case of failure, restore the track
+        // and reference track to their starting values.
 
-	if(!trk.isValid()) {
-	  result = boost::optional<double>(false, 0.);
-	  trk = trk0;
-	  *ref = ref0;
-	}
+        if (!trk.isValid()) {
+          result = boost::optional<double>(false, 0.);
+          trk = trk0;
+          *ref = ref0;
+        }
       }
       else {
 
-	// Propagation failed.
-	// Restore the reference track to its starting value, so that we ensure
-	// the reference track and the actual track remain on the same surface.
+        // Propagation failed.
+        // Restore the reference track to its starting value, so that we ensure
+        // the reference track and the actual track remain on the same surface.
 
-	trk = trk0;
-	*ref = ref0;
+        trk = trk0;
+        *ref = ref0;
       }
     }
 
@@ -336,7 +332,6 @@ namespace trkf {
 
     return result;
   }
-
 
   /// Propagate with error, but without noise (i.e. reversibly).
   ///
@@ -351,23 +346,23 @@ namespace trkf {
   ///
   /// Returned value: propagation distance + success flag.
   ///
-  boost::optional<double> Propagator::err_prop(KETrack& tre,
-					       const std::shared_ptr<const Surface>& psurf,
-					       PropDirection dir,
-					       bool doDedx,
-					       KTrack* ref,
-					       TrackMatrix* prop_matrix) const
+  boost::optional<double>
+  Propagator::err_prop(KETrack& tre,
+                       const std::shared_ptr<const Surface>& psurf,
+                       PropDirection dir,
+                       bool doDedx,
+                       KTrack* ref,
+                       TrackMatrix* prop_matrix) const
   {
     // Propagate without error, get propagation matrix.
 
     TrackMatrix prop_temp;
-    if(prop_matrix == 0)
-      prop_matrix = &prop_temp;
+    if (prop_matrix == 0) prop_matrix = &prop_temp;
     boost::optional<double> result = lin_prop(tre, psurf, dir, doDedx, ref, prop_matrix, 0);
 
     // If propagation succeeded, update track error matrix.
 
-    if(!!result) {
+    if (!!result) {
       TrackMatrix temp = prod(tre.getError(), trans(*prop_matrix));
       TrackMatrix temp2 = prod(*prop_matrix, temp);
       TrackError newerr = ublas::symmetric_adaptor<TrackMatrix>(temp2);
@@ -391,22 +386,23 @@ namespace trkf {
   ///
   /// Returned value: propagation distance + success flag.
   ///
-  boost::optional<double> Propagator::noise_prop(KETrack& tre,
-						 const std::shared_ptr<const Surface>& psurf,
-						 PropDirection dir,
-						 bool doDedx,
-						 KTrack* ref) const
+  boost::optional<double>
+  Propagator::noise_prop(KETrack& tre,
+                         const std::shared_ptr<const Surface>& psurf,
+                         PropDirection dir,
+                         bool doDedx,
+                         KTrack* ref) const
   {
     // Propagate without error, get propagation matrix and noise matrix.
 
     TrackMatrix prop_matrix;
     TrackError noise_matrix;
-    boost::optional<double> result = lin_prop(tre, psurf, dir, doDedx, ref,
-					      &prop_matrix, &noise_matrix);
+    boost::optional<double> result =
+      lin_prop(tre, psurf, dir, doDedx, ref, &prop_matrix, &noise_matrix);
 
     // If propagation succeeded, update track error matrix.
 
-    if(!!result) {
+    if (!!result) {
       TrackMatrix temp = prod(tre.getError(), trans(prop_matrix));
       TrackMatrix temp2 = prod(prop_matrix, temp);
       TrackError newerr = ublas::symmetric_adaptor<TrackMatrix>(temp2);
@@ -456,14 +452,13 @@ namespace trkf {
   /// d(pinv2)/d(pinv1) = pinv2^3 E2 / (pinv1^3 E1).
   ///
   ///
-  boost::optional<double> Propagator::dedx_prop(double pinv, double mass,
-						double s, double* deriv) const
+  boost::optional<double>
+  Propagator::dedx_prop(double pinv, double mass, double s, double* deriv) const
   {
     // For infinite initial momentum, return with success status,
     // still infinite momentum.
 
-    if(pinv == 0.)
-      return boost::optional<double>(true, 0.);
+    if (pinv == 0.) return boost::optional<double>(true, 0.);
 
     // Set the default return value to be uninitialized with value 0.
 
@@ -471,31 +466,29 @@ namespace trkf {
 
     // Get LAr service.
 
-    auto const * detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
+    auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     // Calculate final energy.
 
-    double p1 = 1./std::abs(pinv);
+    double p1 = 1. / std::abs(pinv);
     double e1 = std::hypot(p1, mass);
     double de = -0.001 * s * detprop->Eloss(p1, mass, fTcut);
     double emid = e1 + 0.5 * de;
-    if(emid > mass) {
-      double pmid = std::sqrt(emid*emid - mass*mass);
+    if (emid > mass) {
+      double pmid = std::sqrt(emid * emid - mass * mass);
       double e2 = e1 - 0.001 * s * detprop->Eloss(pmid, mass, fTcut);
-      if(e2 > mass) {
-	double p2 = std::sqrt(e2*e2 - mass*mass);
-	double pinv2 = 1./p2;
-	if(pinv < 0.)
-	  pinv2 = -pinv2;
+      if (e2 > mass) {
+        double p2 = std::sqrt(e2 * e2 - mass * mass);
+        double pinv2 = 1. / p2;
+        if (pinv < 0.) pinv2 = -pinv2;
 
-	// Calculation was successful, update result.
+        // Calculation was successful, update result.
 
-	result = boost::optional<double>(true, pinv2);
+        result = boost::optional<double>(true, pinv2);
 
-	// Also calculate derivative, if requested.
+        // Also calculate derivative, if requested.
 
-	if(deriv != 0)
-	  *deriv = pinv2*pinv2*pinv2 * e2 / (pinv*pinv*pinv * e1);
+        if (deriv != 0) *deriv = pinv2 * pinv2 * pinv2 * e2 / (pinv * pinv * pinv * e1);
       }
     }
 

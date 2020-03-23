@@ -6,29 +6,30 @@
 // Framework includes
 
 // LArSoft includes
-#include "lardata/DetectorInfoServices/DetectorPropertiesServiceStandard.h"
 #include "larcore/Geometry/Geometry.h"
-#include "messagefacility/MessageLogger/MessageLogger.h"
-#include "lardata/DetectorInfoServices/ServicePack.h" // lar::extractProviders()
-#include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesServiceStandard.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
+#include "lardata/DetectorInfoServices/ServicePack.h" // lar::extractProviders()
+#include "messagefacility/MessageLogger/MessageLogger.h"
 
 // Art includes
 #include "art_root_io/RootDB/SQLite3Wrapper.h"
 #include "fhiclcpp/make_ParameterSet.h"
 
-namespace detinfo{
+namespace detinfo {
 
   //--------------------------------------------------------------------
-  DetectorPropertiesServiceStandard::DetectorPropertiesServiceStandard
-    (fhicl::ParameterSet const& pset, art::ActivityRegistry &reg)
+  DetectorPropertiesServiceStandard::DetectorPropertiesServiceStandard(
+    fhicl::ParameterSet const& pset,
+    art::ActivityRegistry& reg)
     : fInheritNumberTimeSamples(pset.get<bool>("InheritNumberTimeSamples", false))
   {
     // Register for callbacks.
 
-    reg.sPostOpenFile.watch    (this, &DetectorPropertiesServiceStandard::postOpenFile);
-    reg.sPreProcessEvent.watch (this, &DetectorPropertiesServiceStandard::preProcessEvent);
-/*
+    reg.sPostOpenFile.watch(this, &DetectorPropertiesServiceStandard::postOpenFile);
+    reg.sPreProcessEvent.watch(this, &DetectorPropertiesServiceStandard::preProcessEvent);
+    /*
     // obtain the required dependency service providers and create our own
     const geo::GeometryCore* geo = lar::providerFrom<geo::Geometry>();
 
@@ -38,27 +39,25 @@ namespace detinfo{
 
     fProp = std::make_unique<detinfo::DetectorPropertiesStandard>(pset,geo,lp,clks);
     */
-    fProp = std::make_unique<detinfo::DetectorPropertiesStandard>(pset,
-      lar::extractProviders<
-        geo::Geometry,
-        detinfo::LArPropertiesService,
-        detinfo::DetectorClocksService
-        >(),
-        std::set<std::string>({ "InheritNumberTimeSamples" })
-      );
+    fProp = std::make_unique<detinfo::DetectorPropertiesStandard>(
+      pset,
+      lar::extractProviders<geo::Geometry,
+                            detinfo::LArPropertiesService,
+                            detinfo::DetectorClocksService>(),
+      std::set<std::string>({"InheritNumberTimeSamples"}));
 
     // at this point we need and expect the provider to be fully configured
     fProp->CheckIfConfigured();
 
     // Save the parameter set.
     fPS = pset;
-
   }
 
   //--------------------------------------------------------------------
-  void DetectorPropertiesServiceStandard::reconfigure(fhicl::ParameterSet const& p)
+  void
+  DetectorPropertiesServiceStandard::reconfigure(fhicl::ParameterSet const& p)
   {
-    fProp->ValidateAndConfigure(p, { "InheritNumberTimeSamples" });
+    fProp->ValidateAndConfigure(p, {"InheritNumberTimeSamples"});
 
     // Save the parameter set.
     fPS = p;
@@ -67,7 +66,8 @@ namespace detinfo{
   }
 
   //-------------------------------------------------------------
-  void DetectorPropertiesServiceStandard::preProcessEvent(const art::Event& evt, art::ScheduleContext)
+  void
+  DetectorPropertiesServiceStandard::preProcessEvent(const art::Event& evt, art::ScheduleContext)
   {
     // Make sure TPC Clock is updated with TimeService (though in principle it shouldn't change
     fProp->UpdateClocks(lar::providerFrom<detinfo::DetectorClocksService>());
@@ -76,7 +76,8 @@ namespace detinfo{
   //--------------------------------------------------------------------
   //  Callback called after input file is opened.
 
-  void DetectorPropertiesServiceStandard::postOpenFile(const std::string& filename)
+  void
+  DetectorPropertiesServiceStandard::postOpenFile(const std::string& filename)
   {
     // Use this method to figure out whether to inherit configuration
     // parameters from previous jobs.
@@ -102,94 +103,90 @@ namespace detinfo{
 
     // Don't do anything if no parameters are supposed to be inherited.
 
-    if(!fInheritNumberTimeSamples) return;
+    if (!fInheritNumberTimeSamples) return;
 
     // The only way to access art service metadata from the input file
     // is to open it as a separate TFile object.  Do that now.
 
-    if(filename.size() != 0) {
+    if (filename.size() != 0) {
 
       TFile* file = TFile::Open(filename.c_str(), "READ");
-      if(file != 0 && !file->IsZombie() && file->IsOpen()) {
+      if (file != 0 && !file->IsZombie() && file->IsOpen()) {
 
-	// Open the sqlite datatabase.
+        // Open the sqlite datatabase.
 
-	art::SQLite3Wrapper sqliteDB(file, "RootFileDB");
+        art::SQLite3Wrapper sqliteDB(file, "RootFileDB");
 
-	// Loop over all stored ParameterSets.
+        // Loop over all stored ParameterSets.
 
-	unsigned int iNumberTimeSamples = 0;  // Combined value of NumberTimeSamples.
-	unsigned int nNumberTimeSamples = 0;  // Number of NumberTimeSamples parameters seen.
+        unsigned int iNumberTimeSamples = 0; // Combined value of NumberTimeSamples.
+        unsigned int nNumberTimeSamples = 0; // Number of NumberTimeSamples parameters seen.
 
-	sqlite3_stmt * stmt = 0;
-	sqlite3_prepare_v2(sqliteDB, "SELECT PSetBlob from ParameterSets;", -1, &stmt, NULL);
-	while (sqlite3_step(stmt) == SQLITE_ROW) {
-	  fhicl::ParameterSet ps;
-	  fhicl::make_ParameterSet(reinterpret_cast<char const *>(sqlite3_column_text(stmt, 0)), ps);
-	  // Is this a DetectorPropertiesService parameter set?
+        sqlite3_stmt* stmt = 0;
+        sqlite3_prepare_v2(sqliteDB, "SELECT PSetBlob from ParameterSets;", -1, &stmt, NULL);
+        while (sqlite3_step(stmt) == SQLITE_ROW) {
+          fhicl::ParameterSet ps;
+          fhicl::make_ParameterSet(reinterpret_cast<char const*>(sqlite3_column_text(stmt, 0)), ps);
+          // Is this a DetectorPropertiesService parameter set?
 
-	  bool psok = isDetectorPropertiesServiceStandard(ps);
-	  if(psok) {
+          bool psok = isDetectorPropertiesServiceStandard(ps);
+          if (psok) {
 
-	    // Check NumberTimeSamples
+            // Check NumberTimeSamples
 
-	    //	    if(fInheritNumberTimeSamples) {
-	    unsigned int newNumberTimeSamples = ps.get<unsigned int>("NumberTimeSamples");
+            //	    if(fInheritNumberTimeSamples) {
+            unsigned int newNumberTimeSamples = ps.get<unsigned int>("NumberTimeSamples");
 
-	    // Ignore parameter values that match the current configuration.
+            // Ignore parameter values that match the current configuration.
 
-	    if(newNumberTimeSamples != fPS.get<unsigned int>("NumberTimeSamples")) {
-	      if(nNumberTimeSamples == 0)
-		iNumberTimeSamples = newNumberTimeSamples;
-	      else if(newNumberTimeSamples != iNumberTimeSamples) {
-		throw cet::exception(__FUNCTION__)
-		  << "Historical values of NumberTimeSamples do not agree: "
-		  << iNumberTimeSamples << " " << newNumberTimeSamples << "\n" ;
-	      }
-	      ++nNumberTimeSamples;
-	      //	    }
-	    }
-	  }
-	}
+            if (newNumberTimeSamples != fPS.get<unsigned int>("NumberTimeSamples")) {
+              if (nNumberTimeSamples == 0)
+                iNumberTimeSamples = newNumberTimeSamples;
+              else if (newNumberTimeSamples != iNumberTimeSamples) {
+                throw cet::exception(__FUNCTION__)
+                  << "Historical values of NumberTimeSamples do not agree: " << iNumberTimeSamples
+                  << " " << newNumberTimeSamples << "\n";
+              }
+              ++nNumberTimeSamples;
+              //	    }
+            }
+          }
+        }
 
-	// Done looping over parameter sets.
-	// Now decide which parameters we will actually override.
+        // Done looping over parameter sets.
+        // Now decide which parameters we will actually override.
 
-	if(// fInheritNumberTimeSamples &&
-	   nNumberTimeSamples != 0 &&
-	   iNumberTimeSamples != fProp->NumberTimeSamples()) {
-	  mf::LogInfo("DetectorPropertiesServiceStandard")
-	    << "Overriding configuration parameter NumberTimeSamples using historical value.\n"
-	    << "  Configured value:        " << fProp->NumberTimeSamples() << "\n"
-	    << "  Historical (used) value: " << iNumberTimeSamples << "\n";
-	  fProp->SetNumberTimeSamples(iNumberTimeSamples);
-	}
+        if ( // fInheritNumberTimeSamples &&
+          nNumberTimeSamples != 0 && iNumberTimeSamples != fProp->NumberTimeSamples()) {
+          mf::LogInfo("DetectorPropertiesServiceStandard")
+            << "Overriding configuration parameter NumberTimeSamples using historical value.\n"
+            << "  Configured value:        " << fProp->NumberTimeSamples() << "\n"
+            << "  Historical (used) value: " << iNumberTimeSamples << "\n";
+          fProp->SetNumberTimeSamples(iNumberTimeSamples);
+        }
       }
 
       // Close file.
-      if(file != 0) {
-	if(file->IsOpen())
-	  file->Close();
-	delete file;
+      if (file != 0) {
+        if (file->IsOpen()) file->Close();
+        delete file;
       }
     }
-
   }
 
   //--------------------------------------------------------------------
   //  Determine whether a parameter set is a DetectorPropertiesService configuration.
 
-  bool DetectorPropertiesServiceStandard::isDetectorPropertiesServiceStandard
-    (const fhicl::ParameterSet& ps) const
+  bool
+  DetectorPropertiesServiceStandard::isDetectorPropertiesServiceStandard(
+    const fhicl::ParameterSet& ps) const
   {
     // This method uses heuristics to determine whether the parameter
     // set passed as argument is a DetectorPropertiesService configuration
     // parameter set.
 
-    return
-         (ps.get<std::string>("service_type", "") == "DetectorPropertiesService")
-      && (ps.get<std::string>("service_provider", "") == "DetectorPropertiesServiceStandard")
-      ;
+    return (ps.get<std::string>("service_type", "") == "DetectorPropertiesService") &&
+           (ps.get<std::string>("service_provider", "") == "DetectorPropertiesServiceStandard");
 #if 0
     // old heuristics here:
     std::string s;
@@ -209,4 +206,5 @@ namespace detinfo{
 
 } // namespace detinfo
 
-DEFINE_ART_SERVICE_INTERFACE_IMPL(detinfo::DetectorPropertiesServiceStandard, detinfo::DetectorPropertiesService)
+DEFINE_ART_SERVICE_INTERFACE_IMPL(detinfo::DetectorPropertiesServiceStandard,
+                                  detinfo::DetectorPropertiesService)

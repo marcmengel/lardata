@@ -19,16 +19,15 @@
 #include "canvas/Utilities/InputTag.h"
 
 // support libraries
-#include "messagefacility/MessageLogger/MessageLogger.h"
 #include "fhiclcpp/types/Atom.h"
-#include "fhiclcpp/types/Name.h"
 #include "fhiclcpp/types/Comment.h"
+#include "fhiclcpp/types/Name.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
 
 // C//C++ standard libraries
-#include <vector>
-#include <string>
 #include <algorithm> // std::sort()
-
+#include <string>
+#include <vector>
 
 namespace detsim {
 
@@ -56,220 +55,197 @@ namespace detsim {
    *     - `"none"`: no preamble written at all
    *
    */
-  class DumpOpDetWaveforms: public art::EDAnalyzer {
-      public:
-
+  class DumpOpDetWaveforms : public art::EDAnalyzer {
+  public:
     struct Config {
 
       using Name = fhicl::Name;
       using Comment = fhicl::Comment;
 
-      fhicl::Atom<art::InputTag> OpDetWaveformsTag {
+      fhicl::Atom<art::InputTag> OpDetWaveformsTag{
         Name("OpDetWaveformsTag"),
-        Comment("input tag of the raw::OpDetWaveform collection to be dumped")
-        };
+        Comment("input tag of the raw::OpDetWaveform collection to be dumped")};
 
-      fhicl::Atom<std::string> OutputCategory {
-        Name("OutputCategory"),
-        Comment("name of the category used for the output"),
-        "DumpOpDetWaveforms"
-        };
+      fhicl::Atom<std::string> OutputCategory{Name("OutputCategory"),
+                                              Comment("name of the category used for the output"),
+                                              "DumpOpDetWaveforms"};
 
-      fhicl::Atom<unsigned int> DigitsPerLine {
+      fhicl::Atom<unsigned int> DigitsPerLine{
         Name("DigitsPerLine"),
-        Comment
-          ("the dump of ADC readings will put this many of them for each line"),
-        20U
-        };
+        Comment("the dump of ADC readings will put this many of them for each line"),
+        20U};
 
-      fhicl::Atom<raw::ADC_Count_t> Pedestal {
+      fhicl::Atom<raw::ADC_Count_t> Pedestal{
         Name("Pedestal"),
         Comment("ADC readings are written relative to this number"),
-        0
-        };
+        0};
 
-      fhicl::Atom<std::string> TickLabel {
+      fhicl::Atom<std::string> TickLabel{
         Name("TickLabel"),
-        Comment(
-          "write an index in front of each digit dump line; choose between:"
-          " \"tick\" (waveform tick number)"
-          ", \"timestamp\" (electronics clock time in microseconds)"
-          ", \"none\" (no tick label)"
-          ),
-        "tick"
-        };
+        Comment("write an index in front of each digit dump line; choose between:"
+                " \"tick\" (waveform tick number)"
+                ", \"timestamp\" (electronics clock time in microseconds)"
+                ", \"none\" (no tick label)"),
+        "tick"};
 
     }; // struct Config
 
     using Parameters = art::EDAnalyzer::Table<Config>;
 
-
     explicit DumpOpDetWaveforms(Parameters const& config);
 
-
     /// Does the printing.
-    void analyze (const art::Event& evt);
+    void analyze(const art::Event& evt);
 
-
-      private:
-    
+  private:
     /// Base functor for printing time according to tick number.
-    struct TimestampLabelMaker
-      : public dump::raw::OpDetWaveformDumper::TimeLabelMaker
-    {
+    struct TimestampLabelMaker : public dump::raw::OpDetWaveformDumper::TimeLabelMaker {
       double tickDuration; // should this me `util::quantities::microsecond`?
-      
+
       /// Constructor: specify the duration of optical clock tick [&micro;s].
-      TimestampLabelMaker(double tickDuration)
-        : tickDuration(tickDuration) {}
-        
+      TimestampLabelMaker(double tickDuration) : tickDuration(tickDuration) {}
+
       /// Returns the electronics time of the specified waveform tick.
-      virtual std::string label
-        (raw::OpDetWaveform const& waveform, unsigned int tick) const override
-        { return std::to_string(waveform.TimeStamp() + tick * tickDuration); }
-      
+      virtual std::string
+      label(raw::OpDetWaveform const& waveform, unsigned int tick) const override
+      {
+        return std::to_string(waveform.TimeStamp() + tick * tickDuration);
+      }
+
     }; // struct TimestampLabelMaker
-    
-    
+
     art::InputTag fOpDetWaveformsTag; ///< Input tag of data product to dump.
-    std::string fOutputCategory; ///< Category for `mf::LogInfo` output.
-    unsigned int fDigitsPerLine; ///< ADC readings per line in the output.
-    raw::ADC_Count_t fPedestal; ///< ADC pedestal (subtracted from readings).
-    
+    std::string fOutputCategory;      ///< Category for `mf::LogInfo` output.
+    unsigned int fDigitsPerLine;      ///< ADC readings per line in the output.
+    raw::ADC_Count_t fPedestal;       ///< ADC pedestal (subtracted from readings).
+
     /// The object used to print tick labels.
     std::unique_ptr<dump::raw::OpDetWaveformDumper::TimeLabelMaker> fTimeLabel;
-    
+
     /// Returns pointers to all waveforms in a vector with channel as index.
-    static std::vector<std::vector<raw::OpDetWaveform const*>>
-    groupByChannel(std::vector<raw::OpDetWaveform> const& waveforms);
-    
+    static std::vector<std::vector<raw::OpDetWaveform const*>> groupByChannel(
+      std::vector<raw::OpDetWaveform> const& waveforms);
+
     /// Sorts all the waveforms in the vector by growing timestamp.
-    static void sortByTimestamp
-      (std::vector<raw::OpDetWaveform const*>& waveforms);
-    
+    static void sortByTimestamp(std::vector<raw::OpDetWaveform const*>& waveforms);
+
   }; // class DumpOpDetWaveforms
 
 } // namespace detsim
-
 
 namespace detsim {
 
   //-------------------------------------------------
   DumpOpDetWaveforms::DumpOpDetWaveforms(Parameters const& config)
-    : EDAnalyzer         (config)
-    , fOpDetWaveformsTag (config().OpDetWaveformsTag())
-    , fOutputCategory    (config().OutputCategory())
-    , fDigitsPerLine     (config().DigitsPerLine())
-    , fPedestal          (config().Pedestal())
+    : EDAnalyzer(config)
+    , fOpDetWaveformsTag(config().OpDetWaveformsTag())
+    , fOutputCategory(config().OutputCategory())
+    , fDigitsPerLine(config().DigitsPerLine())
+    , fPedestal(config().Pedestal())
   {
     std::string const tickLabelStr = config().TickLabel();
     if (tickLabelStr == "none") {
       fTimeLabel.reset(); // not very useful, but let's be explicit
     }
     else if (tickLabelStr == "tick") {
-      fTimeLabel
-        = std::make_unique<dump::raw::OpDetWaveformDumper::TickLabelMaker>();
+      fTimeLabel = std::make_unique<dump::raw::OpDetWaveformDumper::TickLabelMaker>();
     }
     else if (tickLabelStr == "time") {
-      auto const* detClocks
-        = lar::providerFrom<detinfo::DetectorClocksService>();
-      fTimeLabel = std::make_unique<TimestampLabelMaker>
-        (detClocks->OpticalClock().TickPeriod());
+      auto const* detClocks = lar::providerFrom<detinfo::DetectorClocksService>();
+      fTimeLabel = std::make_unique<TimestampLabelMaker>(detClocks->OpticalClock().TickPeriod());
     }
     else {
       throw art::Exception(art::errors::Configuration)
         << "Invalid choice '" << tickLabelStr << "' for time label.\n";
     }
-    
+
   } // DumpOpDetWaveforms::DumpOpDetWaveforms()
 
-
   //-------------------------------------------------
-  void DumpOpDetWaveforms::analyze(const art::Event& event) {
+  void
+  DumpOpDetWaveforms::analyze(const art::Event& event)
+  {
 
     // fetch the data to be dumped on screen
-    auto Waveforms =
-      event.getValidHandle<std::vector<raw::OpDetWaveform>>(fOpDetWaveformsTag);
+    auto Waveforms = event.getValidHandle<std::vector<raw::OpDetWaveform>>(fOpDetWaveformsTag);
 
     dump::raw::OpDetWaveformDumper dump(fPedestal, fDigitsPerLine);
     dump.setIndent("    ");
     dump.setTimeLabelMaker(fTimeLabel.get());
 
-    mf::LogVerbatim(fOutputCategory)
-      << "The event " << event.id() << " contains data for "
-      << Waveforms->size() << " optical detector channels";
+    mf::LogVerbatim(fOutputCategory) << "The event " << event.id() << " contains data for "
+                                     << Waveforms->size() << " optical detector channels";
     if (fPedestal != 0) {
-      mf::LogVerbatim(fOutputCategory) << "A pedestal of " << fPedestal
-        << " counts will be subtracted from all ADC readings.";
+      mf::LogVerbatim(fOutputCategory)
+        << "A pedestal of " << fPedestal << " counts will be subtracted from all ADC readings.";
     } // if pedestal
-    
+
     auto groupedWaveforms = groupByChannel(*Waveforms);
-    
-    for (auto& channelWaveforms: groupedWaveforms) {
+
+    for (auto& channelWaveforms : groupedWaveforms) {
       if (channelWaveforms.empty()) continue;
-      
+
       sortByTimestamp(channelWaveforms);
       auto const channel = channelWaveforms.front()->ChannelNumber();
-      
-      mf::LogVerbatim(fOutputCategory)
-        << "  optical detector channel #" << channel << " has "
-        << channelWaveforms.size() << " waveforms:";
-      
-      for (raw::OpDetWaveform const* pWaveform: channelWaveforms) {
+
+      mf::LogVerbatim(fOutputCategory) << "  optical detector channel #" << channel << " has "
+                                       << channelWaveforms.size() << " waveforms:";
+
+      for (raw::OpDetWaveform const* pWaveform : channelWaveforms) {
         mf::LogVerbatim log(fOutputCategory);
         dump(log, *pWaveform);
       } // for waveforms on channel
-      
-    } // for all channels
-    
-  } // DumpOpDetWaveforms::analyze()
 
+    } // for all channels
+
+  } // DumpOpDetWaveforms::analyze()
 
   //----------------------------------------------------------------------------
   std::vector<std::vector<raw::OpDetWaveform const*>>
-  DumpOpDetWaveforms::groupByChannel
-    (std::vector<raw::OpDetWaveform> const& waveforms)
+  DumpOpDetWaveforms::groupByChannel(std::vector<raw::OpDetWaveform> const& waveforms)
   {
     std::vector<std::vector<raw::OpDetWaveform const*>> groups;
-    for (auto const& waveform: waveforms) {
+    for (auto const& waveform : waveforms) {
       auto const channel = waveform.ChannelNumber();
       if (groups.size() <= channel) groups.resize(channel + 1);
       groups[channel].push_back(&waveform);
     } // for
     return groups;
   } // DumpOpDetWaveforms::groupByChannel()
-  
-  
-  
+
   //----------------------------------------------------------------------------
-  void DumpOpDetWaveforms::sortByTimestamp
-    (std::vector<raw::OpDetWaveform const*>& waveforms)
+  void
+  DumpOpDetWaveforms::sortByTimestamp(std::vector<raw::OpDetWaveform const*>& waveforms)
   {
-    
+
     struct ChannelSorter {
-      
-      static bool sort(raw::OpDetWaveform const& a, raw::OpDetWaveform const& b)
-        {
-          if (a.ChannelNumber() < b.ChannelNumber()) return true;
-          if (a.ChannelNumber() > b.ChannelNumber()) return false;
-          
-          return (a.TimeStamp() < b.TimeStamp());
-        }
-      
-      bool operator()
-        (raw::OpDetWaveform const& a, raw::OpDetWaveform const& b) const
-        { return sort(a, b); }
-      
-      bool operator()
-        (raw::OpDetWaveform const* a, raw::OpDetWaveform const* b) const
-        { return sort(*a, *b); }
-      
+
+      static bool
+      sort(raw::OpDetWaveform const& a, raw::OpDetWaveform const& b)
+      {
+        if (a.ChannelNumber() < b.ChannelNumber()) return true;
+        if (a.ChannelNumber() > b.ChannelNumber()) return false;
+
+        return (a.TimeStamp() < b.TimeStamp());
+      }
+
+      bool
+      operator()(raw::OpDetWaveform const& a, raw::OpDetWaveform const& b) const
+      {
+        return sort(a, b);
+      }
+
+      bool
+      operator()(raw::OpDetWaveform const* a, raw::OpDetWaveform const* b) const
+      {
+        return sort(*a, *b);
+      }
+
     }; // struct ChannelSorter
     std::sort(waveforms.begin(), waveforms.end(), ChannelSorter());
-    
+
   } // DumpOpDetWaveforms::sortByTimestamp()
-  
-  
+
   //----------------------------------------------------------------------------
   DEFINE_ART_MODULE(DumpOpDetWaveforms)
 
