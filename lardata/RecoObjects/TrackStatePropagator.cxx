@@ -1,4 +1,6 @@
 #include "lardata/RecoObjects/TrackStatePropagator.h"
+#include "art/Framework/Services/Registry/ServiceHandle.h"
+#include "larcore/CoreUtils/ServiceUtil.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 

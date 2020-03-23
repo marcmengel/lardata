@@ -6,6 +6,7 @@
  */
 
 // LArSoft includes
+#include "larcore/CoreUtils/ServiceUtil.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardataalg/DetectorInfo/DetectorClocks.h"
 #include "lardataalg/Dumpers/RawData/OpDetWaveform.h"

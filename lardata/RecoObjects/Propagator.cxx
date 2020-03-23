@@ -10,6 +10,7 @@
 
 #include "lardata/RecoObjects/Propagator.h"
 #include "cetlib_except/exception.h"
+#include "larcore/CoreUtils/ServiceUtil.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/RecoObjects/SurfXYZPlane.h"
 

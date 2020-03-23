@@ -44,7 +44,7 @@ namespace util {
     /// type of service provider, that is this very same
     using provider_type = DetectorPropertiesServiceArgoNeuT;
 
-    virtual void reconfigure(fhicl::ParameterSet const& pset) override;
+    void reconfigure(fhicl::ParameterSet const& pset);
 
     /// Returns our service provider, that is this very same class
     virtual const detinfo::DetectorProperties*

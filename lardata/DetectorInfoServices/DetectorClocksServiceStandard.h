@@ -20,7 +20,6 @@
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardataalg/DetectorInfo/DetectorClocksStandard.h"
 
-///General LArSoft Utilities
 namespace detinfo {
 
   /**
@@ -87,22 +86,24 @@ namespace detinfo {
   public:
     DetectorClocksServiceStandard(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
 
-    virtual void reconfigure(fhicl::ParameterSet const& pset) override;
-    void preBeginRun(const art::Run& run);
-    void preProcessEvent(const art::Event& evt, art::ScheduleContext);
-    void postOpenFile(const std::string& filename);
+  private:
+    void reconfigure(fhicl::ParameterSet const& pset);
+    void preBeginRun(art::Run const& run);
+    void preProcessEvent(art::Event const& evt, art::ScheduleContext);
+    void postOpenFile(std::string const& filename);
 
-    virtual const provider_type*
+    provider_type const*
     provider() const override
     {
-      return fClocks.get();
+      return &fClocks;
     }
 
-  private:
-    std::unique_ptr<detinfo::DetectorClocksStandard> fClocks;
+    detinfo::DetectorClocksStandard fClocks;
   };
 } //namespace detinfo
+
 DECLARE_ART_SERVICE_INTERFACE_IMPL(detinfo::DetectorClocksServiceStandard,
                                    detinfo::DetectorClocksService,
                                    LEGACY)
+
 #endif // DETECTORCLOCKSSERVICESTANDARD_H

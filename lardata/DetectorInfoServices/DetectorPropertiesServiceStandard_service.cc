@@ -23,46 +23,29 @@ namespace detinfo {
   DetectorPropertiesServiceStandard::DetectorPropertiesServiceStandard(
     fhicl::ParameterSet const& pset,
     art::ActivityRegistry& reg)
-    : fInheritNumberTimeSamples(pset.get<bool>("InheritNumberTimeSamples", false))
+    : fProp{pset,
+            lar::extractProviders<geo::Geometry,
+                                  detinfo::LArPropertiesService,
+                                  detinfo::DetectorClocksService>(),
+            std::set<std::string>({"InheritNumberTimeSamples"})}
+    , fPS{pset}
+    , fInheritNumberTimeSamples{pset.get<bool>("InheritNumberTimeSamples", false)}
   {
-    // Register for callbacks.
-
     reg.sPostOpenFile.watch(this, &DetectorPropertiesServiceStandard::postOpenFile);
     reg.sPreProcessEvent.watch(this, &DetectorPropertiesServiceStandard::preProcessEvent);
-    /*
-    // obtain the required dependency service providers and create our own
-    const geo::GeometryCore* geo = lar::providerFrom<geo::Geometry>();
-
-    const detinfo::LArProperties* lp = lar::providerFrom<detinfo::LArPropertiesService>();
-
-    const detinfo::DetectorClocks* clks = lar::providerFrom<detinfo::DetectorClocksService>();
-
-    fProp = std::make_unique<detinfo::DetectorPropertiesStandard>(pset,geo,lp,clks);
-    */
-    fProp = std::make_unique<detinfo::DetectorPropertiesStandard>(
-      pset,
-      lar::extractProviders<geo::Geometry,
-                            detinfo::LArPropertiesService,
-                            detinfo::DetectorClocksService>(),
-      std::set<std::string>({"InheritNumberTimeSamples"}));
 
     // at this point we need and expect the provider to be fully configured
-    fProp->CheckIfConfigured();
-
-    // Save the parameter set.
-    fPS = pset;
+    fProp.CheckIfConfigured();
   }
 
   //--------------------------------------------------------------------
   void
   DetectorPropertiesServiceStandard::reconfigure(fhicl::ParameterSet const& p)
   {
-    fProp->ValidateAndConfigure(p, {"InheritNumberTimeSamples"});
+    fProp.ValidateAndConfigure(p, {"InheritNumberTimeSamples"});
 
     // Save the parameter set.
     fPS = p;
-
-    return;
   }
 
   //-------------------------------------------------------------
@@ -70,7 +53,7 @@ namespace detinfo {
   DetectorPropertiesServiceStandard::preProcessEvent(const art::Event& evt, art::ScheduleContext)
   {
     // Make sure TPC Clock is updated with TimeService (though in principle it shouldn't change
-    fProp->UpdateClocks(lar::providerFrom<detinfo::DetectorClocksService>());
+    fProp.UpdateClocks(lar::providerFrom<detinfo::DetectorClocksService>());
   }
 
   //--------------------------------------------------------------------
@@ -157,12 +140,12 @@ namespace detinfo {
         // Now decide which parameters we will actually override.
 
         if ( // fInheritNumberTimeSamples &&
-          nNumberTimeSamples != 0 && iNumberTimeSamples != fProp->NumberTimeSamples()) {
+          nNumberTimeSamples != 0 && iNumberTimeSamples != fProp.NumberTimeSamples()) {
           mf::LogInfo("DetectorPropertiesServiceStandard")
             << "Overriding configuration parameter NumberTimeSamples using historical value.\n"
-            << "  Configured value:        " << fProp->NumberTimeSamples() << "\n"
+            << "  Configured value:        " << fProp.NumberTimeSamples() << "\n"
             << "  Historical (used) value: " << iNumberTimeSamples << "\n";
-          fProp->SetNumberTimeSamples(iNumberTimeSamples);
+          fProp.SetNumberTimeSamples(iNumberTimeSamples);
         }
       }
 
@@ -187,21 +170,6 @@ namespace detinfo {
 
     return (ps.get<std::string>("service_type", "") == "DetectorPropertiesService") &&
            (ps.get<std::string>("service_provider", "") == "DetectorPropertiesServiceStandard");
-#if 0
-    // old heuristics here:
-    std::string s;
-    double d;
-    int i;
-    unsigned int u;
-
-    bool result = !ps.get_if_present("module_label", s);
-    result = result && ps.get_if_present("TriggerOffset", i);
-    result = result && ps.get_if_present("SamplingRate", d);
-    result = result && ps.get_if_present("NumberTimeSamples", u);
-    result = result && ps.get_if_present("ReadOutWindowSize", u);
-
-    return result;
-#endif // 0
   }
 
 } // namespace detinfo

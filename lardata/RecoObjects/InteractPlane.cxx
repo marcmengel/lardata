@@ -8,12 +8,14 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include "lardata/RecoObjects/InteractPlane.h"
+#include <cmath>
+
 #include "cetlib_except/exception.h"
+#include "larcore/CoreUtils/ServiceUtil.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
+#include "lardata/RecoObjects/InteractPlane.h"
 #include "lardata/RecoObjects/SurfPlane.h"
-#include <cmath>
 
 namespace trkf {
 

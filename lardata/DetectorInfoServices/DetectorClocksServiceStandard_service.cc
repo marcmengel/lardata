@@ -33,7 +33,7 @@ namespace detinfo {
 
   DetectorClocksServiceStandard::DetectorClocksServiceStandard(fhicl::ParameterSet const& pset,
                                                                art::ActivityRegistry& reg)
-    : fClocks(make_unique<DetectorClocksStandard>(pset))
+    : fClocks{pset}
   {
 
     reg.sPreProcessEvent.watch(this, &DetectorClocksServiceStandard::preProcessEvent);
@@ -44,26 +44,26 @@ namespace detinfo {
   void
   DetectorClocksServiceStandard::reconfigure(fhicl::ParameterSet const& pset)
   {
-    fClocks->Configure(pset);
+    fClocks.Configure(pset);
   }
 
   void
   DetectorClocksServiceStandard::preProcessEvent(const art::Event& evt, art::ScheduleContext)
   {
-    setDetectorClocksStandardTrigger(*fClocks, evt);
-    setDetectorClocksStandardG4RefTimeCorrection(*fClocks, evt);
+    setDetectorClocksStandardTrigger(fClocks, evt);
+    setDetectorClocksStandardG4RefTimeCorrection(fClocks, evt);
   }
 
   void
   DetectorClocksServiceStandard::preBeginRun(art::Run const& run)
   {
-    fClocks->ApplyParams();
+    fClocks.ApplyParams();
   }
 
   void
   DetectorClocksServiceStandard::postOpenFile(const string& filename)
   {
-    if (!fClocks->InheritClockConfig()) { return; }
+    if (!fClocks.InheritClockConfig()) { return; }
     if (filename.empty()) { return; }
     TFile* file = TFile::Open(filename.c_str(), "READ");
     if ((file == nullptr) || file->IsZombie() || !file->IsOpen()) { return; }
@@ -73,8 +73,8 @@ namespace detinfo {
                            "Input file does not contain a metadata tree!");
     }
     auto fileFormatVersion = art::detail::readMetadata<art::FileFormatVersion>(metaDataTree);
-    vector<string> cfgName(fClocks->ConfigNames());
-    vector<double> cfgValue(fClocks->ConfigValues());
+    vector<string> cfgName(fClocks.ConfigNames());
+    vector<double> cfgValue(fClocks.ConfigValues());
     vector<size_t> config_count(kInheritConfigTypeMax, 0);
     vector<double> config_value(kInheritConfigTypeMax, 0);
     if (fileFormatVersion.value_ < 5) {
@@ -86,7 +86,7 @@ namespace detinfo {
       for (auto const& psEntry : psetMap) {
         fhicl::ParameterSet ps;
         fhicl::make_ParameterSet(psEntry.second.pset_, ps);
-        if (!fClocks->IsRightConfig(ps)) { continue; }
+        if (!fClocks.IsRightConfig(ps)) { continue; }
         for (size_t i = 0; i < kInheritConfigTypeMax; ++i) {
           double value_from_file = ps.get<double>(cfgName[i]);
           if (config_count[i] == 0) { config_value[i] = value_from_file; }
@@ -106,7 +106,7 @@ namespace detinfo {
       while (sqlite3_step(stmt) == SQLITE_ROW) {
         fhicl::ParameterSet ps;
         fhicl::make_ParameterSet(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)), ps);
-        if (!fClocks->IsRightConfig(ps)) { continue; }
+        if (!fClocks.IsRightConfig(ps)) { continue; }
         for (size_t i = 0; i < kInheritConfigTypeMax; ++i) {
           double value_from_file = ps.get<double>(cfgName[i]);
           if (config_count[i] == 0) { config_value[i] = value_from_file; }
@@ -123,14 +123,14 @@ namespace detinfo {
       if ((config_count[i] != 0) && (cfgValue[i] != config_value[i])) {
         cout << "Overriding configuration parameter " << cfgName[i] << " ... " << cfgValue[i]
              << " (fcl) => " << config_value[i] << " (data file)" << endl;
-        fClocks->SetConfigValue(i, config_value[i]);
+        fClocks.SetConfigValue(i, config_value[i]);
       }
     }
     if (file != nullptr) {
       if (file->IsOpen()) { file->Close(); }
       delete file;
     }
-    fClocks->ApplyParams();
+    fClocks.ApplyParams();
   }
 
 } // namespace detinfo

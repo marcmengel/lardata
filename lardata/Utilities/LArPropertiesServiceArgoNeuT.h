@@ -60,7 +60,7 @@ namespace util {
 
     virtual ~LArPropertiesServiceArgoNeuT() = default;
 
-    virtual void reconfigure(fhicl::ParameterSet const& pset) override;
+    void reconfigure(fhicl::ParameterSet const& pset);
     virtual const detinfo::LArProperties*
     provider() const override
     {

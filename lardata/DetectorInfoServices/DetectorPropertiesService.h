@@ -10,24 +10,18 @@
 #define DETECTORPROPERTIESSERVICE_H
 
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-#include "fhiclcpp/ParameterSet.h"
-#include "larcore/CoreUtils/ServiceUtil.h"
 #include "lardataalg/DetectorInfo/DetectorProperties.h"
 
-///General LArSoft Utilities
 namespace detinfo {
   class DetectorPropertiesService {
-
   public:
-    typedef detinfo::DetectorProperties provider_type;
+    using provider_type = detinfo::DetectorProperties;
 
-  public:
     virtual ~DetectorPropertiesService() = default;
-
-    virtual void reconfigure(fhicl::ParameterSet const& pset) = 0;
-    virtual const detinfo::DetectorProperties* provider() const = 0;
-
-  }; // class DetectorPropertiesService
+    virtual provider_type const* provider() const = 0;
+  };
 } //namespace detinfo
-DECLARE_ART_SERVICE_INTERFACE(detinfo::DetectorPropertiesService, LEGACY)
+
+DECLARE_ART_SERVICE_INTERFACE(detinfo::DetectorPropertiesService, SHARED)
+
 #endif // DETECTORPROPERTIESSERVICE_H

@@ -1,39 +1,20 @@
-////////////////////////////////////////////////////////////////////////
-//
-//  LArProperties_plugin
-//
-////////////////////////////////////////////////////////////////////////
-// Framework includes
-
-// C++ language includes
-
-// LArSoft includes
 #include "lardata/DetectorInfoServices/LArPropertiesServiceStandard.h"
 
+//------------------------------------------------
+/// \todo these values should eventually come from a database
 //-----------------------------------------------
-detinfo::LArPropertiesServiceStandard::LArPropertiesServiceStandard(fhicl::ParameterSet const& pset,
+detinfo::LArPropertiesServiceStandard::LArPropertiesServiceStandard(Parameters const& config,
                                                                     art::ActivityRegistry& reg)
+  : fProp{config.get_PSet()}
 {
-  fProp.reset(new detinfo::LArPropertiesStandard());
-
-  this->reconfigure(pset);
   reg.sPreBeginRun.watch(this, &LArPropertiesServiceStandard::preBeginRun);
 }
 
 //----------------------------------------------
 void
-detinfo::LArPropertiesServiceStandard::preBeginRun(const art::Run& run)
+detinfo::LArPropertiesServiceStandard::preBeginRun(art::Run const& run)
 {
-  fProp->Update(run.id().run());
-}
-
-//------------------------------------------------
-/// \todo these values should eventually come from a database
-void
-detinfo::LArPropertiesServiceStandard::reconfigure(fhicl::ParameterSet const& pset)
-{
-  fProp->Configure(pset);
-  return;
+  fProp.Update(run.run());
 }
 
 //------------------------------------------------

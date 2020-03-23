@@ -17,30 +17,27 @@
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "lardataalg/DetectorInfo/LArPropertiesStandard.h"
 
-///General LArSoft Utilities
 namespace detinfo {
   class LArPropertiesServiceStandard : public LArPropertiesService {
   public:
-    // this enables art to print the configuration help:
     using Parameters = art::ServiceTable<detinfo::LArPropertiesStandard::ConfigurationParameters_t>;
-
-    LArPropertiesServiceStandard(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
-
-    virtual void reconfigure(fhicl::ParameterSet const& pset) override;
-    void preBeginRun(const art::Run& run);
-
-    virtual const provider_type*
-    provider() const override
-    {
-      return fProp.get();
-    }
+    LArPropertiesServiceStandard(Parameters const& params, art::ActivityRegistry& reg);
 
   private:
-    std::unique_ptr<detinfo::LArPropertiesStandard> fProp;
+    provider_type const*
+    provider() const override
+    {
+      return &fProp;
+    }
 
-  }; // class LArPropertiesServiceStandard
+    void preBeginRun(art::Run const& run);
+
+    detinfo::LArPropertiesStandard fProp;
+  };
 } //namespace detinfo
+
 DECLARE_ART_SERVICE_INTERFACE_IMPL(detinfo::LArPropertiesServiceStandard,
                                    detinfo::LArPropertiesService,
-                                   LEGACY)
+                                   SHARED)
+
 #endif // LARPROPERTIESSERVICESTANDARD_H

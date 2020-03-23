@@ -77,18 +77,18 @@ namespace detinfo {
 
     DetectorPropertiesServiceStandard(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
 
-    virtual void reconfigure(fhicl::ParameterSet const& pset) override;
+  private:
+    void reconfigure(fhicl::ParameterSet const& pset);
     void preProcessEvent(const art::Event& evt, art::ScheduleContext);
     void postOpenFile(const std::string& filename);
 
-    virtual const provider_type*
+    const provider_type*
     provider() const override
     {
-      return fProp.get();
+      return &fProp;
     }
 
-  private:
-    std::unique_ptr<detinfo::DetectorPropertiesStandard> fProp;
+    detinfo::DetectorPropertiesStandard fProp;
     fhicl::ParameterSet fPS; ///< Original parameter set.
 
     bool fInheritNumberTimeSamples; ///< Flag saying whether to inherit NumberTimeSamples
