@@ -1,12 +1,12 @@
 # The parent line must be the first non-comment line in the file
 # This line defines the product name and version
-parent	lardata	v08_14_05
+parent	lardata	v08_15_00
 defaultqual	e19
 #
 fcldir product_dir job
 #
 product         version
-lardataalg	v08_13_05
+lardataalg	v08_13_06
 lardataobj	v08_10_05
 larcore 	v08_11_02
 range		v3_0_4_0
