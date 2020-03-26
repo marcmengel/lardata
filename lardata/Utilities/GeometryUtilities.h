@@ -20,47 +20,23 @@
 class TLorentzVector;
 
 namespace detinfo {
-  class DetectorProperties;
+  class DetectorClocksData;
+  class DetectorPropertiesData;
 }
 namespace geo {
   class GeometryCore;
 }
 
-///General LArSoft Utilities
+/// General LArSoft Utilities
 namespace util {
 
-  const double kINVALID_DOUBLE = std::numeric_limits<Double_t>::max();
+  constexpr double kINVALID_DOUBLE = std::numeric_limits<Double_t>::max();
 
-  //class GeometryUtilities : public larlight::larlight_base {
   class GeometryUtilities {
-
   public:
-    static const GeometryUtilities*
-    GetME()
-    {
-      if (!_me) _me = new GeometryUtilities;
-      return _me;
-    }
-
-    /// Default constructor = private for singleton
-    GeometryUtilities();
-
-    /// Default destructor
-    ~GeometryUtilities();
-
-  private:
-    static GeometryUtilities* _me;
-
-    /*
-    /// Default constructor = private for singleton
-    GeometryUtilities();
-
-    /// Default destructor
-    ~GeometryUtilities();
-    */
-
-  public:
-    void Reconfigure();
+    GeometryUtilities(geo::GeometryCore const& geom,
+                      detinfo::DetectorClocksData const& clockData,
+                      detinfo::DetectorPropertiesData const& propData);
 
     Int_t Get3DaxisN(Int_t iplane0,
                      Int_t iplane1,
@@ -153,38 +129,13 @@ namespace util {
 
     Int_t GetProjectedPoint(const PxPoint* p0, const PxPoint* p1, PxPoint& pN) const;
 
-    /*  art::Ptr< recob::Hit > FindClosestHitPtr(std::vector<art::Ptr< recob::Hit > > hitlist,
-                                                 unsigned int wirein,
-                                                 double timein) const;
-
-
-    recob::Hit * FindClosestHit(std::vector<art::Ptr< recob::Hit > > hitlist,
-                                                 unsigned int wirein,
-                                                 double timein) const;             */
-
-    util::PxHit FindClosestHit(std::vector<util::PxHit> hitlist,
+    util::PxHit FindClosestHit(std::vector<util::PxHit> const& hitlist,
                                unsigned int wirein,
                                double timein) const;
 
-    unsigned int FindClosestHitIndex(std::vector<util::PxHit> hitlist,
+    unsigned int FindClosestHitIndex(std::vector<util::PxHit> const& hitlist,
                                      unsigned int wirein,
                                      double timein) const;
-
-    //     void SelectLocalHitlist(std::vector< art::Ptr < recob::Hit> > hitlist,
-    //                                              std::vector < art::Ptr<recob::Hit> > &hitlistlocal,
-    //                                              double  wire_start,
-    //                                              double time_start,
-    //                                              double linearlimit,
-    //                                              double ortlimit,
-    //                                              double lineslopetest);
-
-    /*    void SelectLocalHitlist(std::vector< util::PxHit > hitlist,
-                                             std::vector < util::PxHit > &hitlistlocal,
-                                             double  wire_start,
-                                             double time_start,
-                                             double linearlimit,
-                                             double ortlimit,
-                                             double lineslopetest);	*/
 
     Int_t GetYZ(const PxPoint* p0, const PxPoint* p1, Double_t* yz) const;
 
@@ -194,13 +145,13 @@ namespace util {
 
     void GetDirectionCosines(Double_t phi, Double_t theta, Double_t* dirs) const;
 
-    //interface without average Hit
+    // interface without average Hit
     void SelectLocalHitlist(const std::vector<util::PxHit>& hitlist,
                             std::vector<const util::PxHit*>& hitlistlocal,
                             util::PxPoint& startHit,
                             Double_t& linearlimit,
                             Double_t& ortlimit,
-                            Double_t& lineslopetest);
+                            Double_t& lineslopetest) const;
 
     void SelectLocalHitlist(const std::vector<util::PxHit>& hitlist,
                             std::vector<const util::PxHit*>& hitlistlocal,
@@ -208,22 +159,22 @@ namespace util {
                             Double_t& linearlimit,
                             Double_t& ortlimit,
                             Double_t& lineslopetest,
-                            util::PxHit& averageHit);
+                            util::PxHit& averageHit) const;
 
     void SelectLocalHitlistIndex(const std::vector<util::PxHit>& hitlist,
                                  std::vector<unsigned int>& hitlistlocal_index,
                                  util::PxPoint& startHit,
                                  Double_t& linearlimit,
                                  Double_t& ortlimit,
-                                 Double_t& lineslopetest);
+                                 Double_t& lineslopetest) const;
 
     void SelectPolygonHitList(const std::vector<util::PxHit>& hitlist,
-                              std::vector<const util::PxHit*>& hitlistlocal);
+                              std::vector<const util::PxHit*>& hitlistlocal) const;
 
     std::vector<size_t> PolyOverlap(std::vector<const util::PxHit*> ordered_hits,
-                                    std::vector<size_t> candidate_polygon);
+                                    std::vector<size_t> candidate_polygon) const;
 
-    bool Clockwise(double Ax, double Ay, double Bx, double By, double Cx, double Cy);
+    bool Clockwise(double Ax, double Ay, double Bx, double By, double Cx, double Cy) const;
 
     Double_t
     TimeToCm() const
@@ -247,19 +198,11 @@ namespace util {
     }
 
   private:
-    /*
-     larutil::Geometry* geom;
-     larutil::DetectorProperties* detp;
-    */
+    geo::GeometryCore const& fGeom;
+    detinfo::DetectorClocksData const& fClocks;
+    detinfo::DetectorPropertiesData const& fDetProp;
 
-    const geo::GeometryCore* geom;
-    const detinfo::DetectorProperties* detp;
-    /*
-    art::ServiceHandle<detinfo::DetectorPropertiesService const> detp;
-    art::ServiceHandle<detinfo::LArPropertiesService const> larp;
-    */
-
-    std::vector<Double_t> vertangle; //angle wrt to vertical
+    std::vector<Double_t> vertangle; // angle wrt to vertical
     Double_t fWirePitch;
     Double_t fTimeTick;
     Double_t fDriftVelocity;
@@ -267,8 +210,7 @@ namespace util {
     Double_t fWiretoCm;
     Double_t fTimetoCm;
     Double_t fWireTimetoCmCm;
-
   }; // class GeometryUtilities
 
-} //namespace util
+} // namespace util
 #endif // UTIL_GEOMETRYUTILITIES_H

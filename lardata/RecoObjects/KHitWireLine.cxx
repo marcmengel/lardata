@@ -11,6 +11,7 @@
 #include "lardata/RecoObjects/KHitWireLine.h"
 #include "cetlib_except/exception.h"
 #include "larcore/Geometry/Geometry.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/RecoObjects/SurfWireLine.h"
 
@@ -27,14 +28,11 @@ namespace trkf {
   /// be specified to allow measurements to whare surfaces to save
   /// memory.
   ///
-  KHitWireLine::KHitWireLine(const art::Ptr<recob::Hit>& hit,
+  KHitWireLine::KHitWireLine(const detinfo::DetectorPropertiesData& detProp,
+                             const art::Ptr<recob::Hit>& hit,
                              const std::shared_ptr<const Surface>& psurf)
     : KHit(psurf), fHit(hit)
   {
-    // Get services.
-    const detinfo::DetectorProperties* detprop =
-      art::ServiceHandle<detinfo::DetectorPropertiesService const>()->provider();
-
     // Extract wire id.
     geo::WireID wireid = hit->WireID();
 
@@ -50,8 +48,8 @@ namespace trkf {
 
     // Calculate position and error.
 
-    double x = detprop->ConvertTicksToX(t, wireid.Plane, wireid.TPC, wireid.Cryostat);
-    double xerr = terr * detprop->GetXTicksCoefficient();
+    double x = detProp.ConvertTicksToX(t, wireid.Plane, wireid.TPC, wireid.Cryostat);
+    double xerr = terr * detProp.GetXTicksCoefficient();
 
     // Check the surface (determined by wire id + drift time).  If the
     // surface pointer is null, make a new SurfWireLine surface and
@@ -114,17 +112,14 @@ namespace trkf {
     setMeasError(merr);
   }
 
-  /// Destructor.
-  KHitWireLine::~KHitWireLine() {}
-
   bool
   KHitWireLine::subpredict(const KETrack& tre,
                            KVector<1>::type& pvec,
                            KSymMatrix<1>::type& perr,
                            KHMatrix<1>::type& hmatrix) const
   {
-    // Make sure that the track surface and the measurement surface are the same.
-    // Throw an exception if they are not.
+    // Make sure that the track surface and the measurement surface are the
+    // same. Throw an exception if they are not.
 
     if (!getMeasSurface()->isEqual(*tre.getSurface()))
       throw cet::exception("KHitWireLine")

@@ -24,18 +24,16 @@ namespace trkf {
   /// tcut   - Delta ray energy cutoff for calculating dE/dx.
   /// doDedx - dE/dx enable flag.
   ///
-  PropAny::PropAny(double tcut, bool doDedx)
-    : Propagator(tcut,
+  PropAny::PropAny(detinfo::DetectorPropertiesData const& detProp, double tcut, bool doDedx)
+    : Propagator(detProp,
+                 tcut,
                  doDedx,
-                 (tcut >= 0 ? std::shared_ptr<const Interactor>(new InteractPlane(tcut)) :
-                              std::shared_ptr<const Interactor>()))
-    , fPropYZLine(tcut, doDedx)
-    , fPropYZPlane(tcut, doDedx)
-    , fPropXYZPlane(tcut, doDedx)
+                 (tcut >= 0 ? std::make_shared<InteractPlane const>(detProp, tcut) :
+                              std::shared_ptr<Interactor const>{}))
+    , fPropYZLine(detProp, tcut, doDedx)
+    , fPropYZPlane(detProp, tcut, doDedx)
+    , fPropXYZPlane(detProp, tcut, doDedx)
   {}
-
-  /// Destructor.
-  PropAny::~PropAny() {}
 
   /// Propagate without error.
   /// Optionally return propagation matrix and noise matrix.
@@ -53,7 +51,7 @@ namespace trkf {
   ///
   /// Returned value: propagation distance + success flag.
   ///
-  boost::optional<double>
+  std::optional<double>
   PropAny::short_vec_prop(KTrack& trk,
                           const std::shared_ptr<const Surface>& psurf,
                           Propagator::PropDirection dir,
@@ -63,7 +61,7 @@ namespace trkf {
   {
     // Default result.
 
-    boost::optional<double> result(false, 0.);
+    std::optional<double> result{std::nullopt};
 
     // Test the type of the destination surface.
 
@@ -94,14 +92,14 @@ namespace trkf {
   ///
   /// Propagation distance is always zero after successful propagation.
   ///
-  boost::optional<double>
+  std::optional<double>
   PropAny::origin_vec_prop(KTrack& trk,
                            const std::shared_ptr<const Surface>& porient,
                            TrackMatrix* prop_matrix) const
   {
     // Default result.
 
-    boost::optional<double> result(false, 0.);
+    std::optional<double> result{std::nullopt};
 
     // Test the type of the destination surface.
 

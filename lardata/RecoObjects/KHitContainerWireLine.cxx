@@ -17,12 +17,6 @@
 
 namespace trkf {
 
-  /// Default Constructor.
-  KHitContainerWireLine::KHitContainerWireLine() {}
-
-  /// Destructor.
-  KHitContainerWireLine::~KHitContainerWireLine() {}
-
   /// Fill container.
   ///
   /// Arguments:
@@ -34,7 +28,9 @@ namespace trkf {
   /// KHitWireLine objects and inserts them into the base class.
   ///
   void
-  KHitContainerWireLine::fill(const art::PtrVector<recob::Hit>& hits, int only_plane)
+  KHitContainerWireLine::fill(const detinfo::DetectorPropertiesData& detProp,
+                              const art::PtrVector<recob::Hit>& hits,
+                              int only_plane)
   {
     // Get services.
 
@@ -63,17 +59,7 @@ namespace trkf {
           << __func__ << ": no group map for channel " << channel << "\n";
       }
 
-      // Get surface from KHitGroup (initially a null pointer).
-
-      const std::shared_ptr<const Surface>& psurf = pgr->getSurface();
-
-      // Construct KHitWireLine object.
-
-      std::shared_ptr<const KHitBase> phit(new KHitWireLine(*ihit, psurf));
-
-      // Insert hit into KHitGroup.
-
-      pgr->addHit(phit);
+      pgr->addHit(std::make_shared<KHitWireLine>(detProp, *ihit, pgr->getSurface()));
     }
   }
 

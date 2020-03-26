@@ -14,12 +14,6 @@
 
 namespace trkf {
 
-  /// Default Constructor.
-  KHitContainer::KHitContainer() {}
-
-  /// Destructor.
-  KHitContainer::~KHitContainer() {}
-
   void
   fill(const art::PtrVector<recob::Hit>& hits, int only_plane)
   {}
@@ -53,13 +47,9 @@ namespace trkf {
   void
   KHitContainer::sort(const KTrack& trk,
                       bool addUnsorted,
-                      const Propagator* prop,
+                      const Propagator& prop,
                       Propagator::PropDirection dir)
   {
-    if (!prop)
-      throw cet::exception("KHitContainer") << __func__ << ": no propagator"
-                                            << "\n";
-
     // Maybe transfer all objects in unsorted list to the sorted list.
 
     if (addUnsorted) fSorted.splice(fSorted.end(), fUnsorted);
@@ -78,7 +68,7 @@ namespace trkf {
       // the destination surface.
 
       KTrack trkp = trk;
-      boost::optional<double> dist = prop->vec_prop(trkp, psurf, dir, false, 0, 0);
+      std::optional<double> dist = prop.vec_prop(trkp, psurf, dir, false, 0, 0);
       if (!dist) {
 
         // If propagation failed, reset the path flag for this surface

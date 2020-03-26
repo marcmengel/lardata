@@ -1,10 +1,9 @@
 art_make(
   MODULE_LIBRARIES
     larcorealg_Geometry
+    lardataalg_DetectorInfo
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
     ${MF_MESSAGELOGGER}
-    ${FHICLCPP}
-    cetlib cetlib_except
     ROOT::Core
 )
 
@@ -74,4 +73,3 @@ cet_test( DetectorPropertiesServiceBo_test
 install_headers()
 install_fhicl()
 install_source()
-

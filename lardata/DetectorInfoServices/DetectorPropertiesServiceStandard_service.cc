@@ -24,36 +24,13 @@ namespace detinfo {
     fhicl::ParameterSet const& pset,
     art::ActivityRegistry& reg)
     : fProp{pset,
-            lar::extractProviders<geo::Geometry,
-                                  detinfo::LArPropertiesService,
-                                  detinfo::DetectorClocksService>(),
+            lar::providerFrom<geo::Geometry>(),
+            lar::providerFrom<detinfo::LArPropertiesService>(),
             std::set<std::string>({"InheritNumberTimeSamples"})}
     , fPS{pset}
     , fInheritNumberTimeSamples{pset.get<bool>("InheritNumberTimeSamples", false)}
   {
     reg.sPostOpenFile.watch(this, &DetectorPropertiesServiceStandard::postOpenFile);
-    reg.sPreProcessEvent.watch(this, &DetectorPropertiesServiceStandard::preProcessEvent);
-
-    // at this point we need and expect the provider to be fully configured
-    fProp.CheckIfConfigured();
-  }
-
-  //--------------------------------------------------------------------
-  void
-  DetectorPropertiesServiceStandard::reconfigure(fhicl::ParameterSet const& p)
-  {
-    fProp.ValidateAndConfigure(p, {"InheritNumberTimeSamples"});
-
-    // Save the parameter set.
-    fPS = p;
-  }
-
-  //-------------------------------------------------------------
-  void
-  DetectorPropertiesServiceStandard::preProcessEvent(const art::Event& evt, art::ScheduleContext)
-  {
-    // Make sure TPC Clock is updated with TimeService (though in principle it shouldn't change
-    fProp.UpdateClocks(lar::providerFrom<detinfo::DetectorClocksService>());
   }
 
   //--------------------------------------------------------------------
@@ -91,69 +68,60 @@ namespace detinfo {
     // The only way to access art service metadata from the input file
     // is to open it as a separate TFile object.  Do that now.
 
-    if (filename.size() != 0) {
+    if (filename.empty()) { return; }
 
-      TFile* file = TFile::Open(filename.c_str(), "READ");
-      if (file != 0 && !file->IsZombie() && file->IsOpen()) {
+    std::unique_ptr<TFile> file{TFile::Open(filename.c_str(), "READ")};
+    if (!file) { return; }
 
-        // Open the sqlite datatabase.
+    if (file->IsZombie() || !file->IsOpen()) { return; }
 
-        art::SQLite3Wrapper sqliteDB(file, "RootFileDB");
+    // Open the sqlite datatabase.
 
-        // Loop over all stored ParameterSets.
+    art::SQLite3Wrapper sqliteDB(file.get(), "RootFileDB");
 
-        unsigned int iNumberTimeSamples = 0; // Combined value of NumberTimeSamples.
-        unsigned int nNumberTimeSamples = 0; // Number of NumberTimeSamples parameters seen.
+    // Loop over all stored ParameterSets.
 
-        sqlite3_stmt* stmt = 0;
-        sqlite3_prepare_v2(sqliteDB, "SELECT PSetBlob from ParameterSets;", -1, &stmt, NULL);
-        while (sqlite3_step(stmt) == SQLITE_ROW) {
-          fhicl::ParameterSet ps;
-          fhicl::make_ParameterSet(reinterpret_cast<char const*>(sqlite3_column_text(stmt, 0)), ps);
-          // Is this a DetectorPropertiesService parameter set?
+    unsigned int iNumberTimeSamples = 0; // Combined value of NumberTimeSamples.
+    unsigned int nNumberTimeSamples = 0; // Number of NumberTimeSamples parameters seen.
 
-          bool psok = isDetectorPropertiesServiceStandard(ps);
-          if (psok) {
+    sqlite3_stmt* stmt = nullptr;
+    sqlite3_prepare_v2(sqliteDB, "SELECT PSetBlob from ParameterSets;", -1, &stmt, nullptr);
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+      fhicl::ParameterSet ps;
+      fhicl::make_ParameterSet(reinterpret_cast<char const*>(sqlite3_column_text(stmt, 0)), ps);
+      // Is this a DetectorPropertiesService parameter set?
 
-            // Check NumberTimeSamples
+      if (isDetectorPropertiesServiceStandard(ps)) {
 
-            //	    if(fInheritNumberTimeSamples) {
-            unsigned int newNumberTimeSamples = ps.get<unsigned int>("NumberTimeSamples");
+        // Check NumberTimeSamples
 
-            // Ignore parameter values that match the current configuration.
+        auto const newNumberTimeSamples = ps.get<unsigned int>("NumberTimeSamples");
 
-            if (newNumberTimeSamples != fPS.get<unsigned int>("NumberTimeSamples")) {
-              if (nNumberTimeSamples == 0)
-                iNumberTimeSamples = newNumberTimeSamples;
-              else if (newNumberTimeSamples != iNumberTimeSamples) {
-                throw cet::exception(__FUNCTION__)
-                  << "Historical values of NumberTimeSamples do not agree: " << iNumberTimeSamples
-                  << " " << newNumberTimeSamples << "\n";
-              }
-              ++nNumberTimeSamples;
-              //	    }
-            }
+        // Ignore parameter values that match the current configuration.
+
+        if (newNumberTimeSamples != fPS.get<unsigned int>("NumberTimeSamples")) {
+          if (nNumberTimeSamples == 0)
+            iNumberTimeSamples = newNumberTimeSamples;
+          else if (newNumberTimeSamples != iNumberTimeSamples) {
+            throw cet::exception(__FUNCTION__)
+              << "Historical values of NumberTimeSamples do not agree: " << iNumberTimeSamples
+              << " " << newNumberTimeSamples << "\n";
           }
-        }
-
-        // Done looping over parameter sets.
-        // Now decide which parameters we will actually override.
-
-        if ( // fInheritNumberTimeSamples &&
-          nNumberTimeSamples != 0 && iNumberTimeSamples != fProp.NumberTimeSamples()) {
-          mf::LogInfo("DetectorPropertiesServiceStandard")
-            << "Overriding configuration parameter NumberTimeSamples using historical value.\n"
-            << "  Configured value:        " << fProp.NumberTimeSamples() << "\n"
-            << "  Historical (used) value: " << iNumberTimeSamples << "\n";
-          fProp.SetNumberTimeSamples(iNumberTimeSamples);
+          ++nNumberTimeSamples;
         }
       }
+    }
 
-      // Close file.
-      if (file != 0) {
-        if (file->IsOpen()) file->Close();
-        delete file;
-      }
+    // Done looping over parameter sets.
+    // Now decide which parameters we will actually override.
+
+    if (nNumberTimeSamples != 0 && iNumberTimeSamples != fProp.NumberTimeSamples()) {
+      mf::LogInfo("DetectorPropertiesServiceStandard")
+        << "Overriding configuration parameter NumberTimeSamples using "
+           "historical value.\n"
+        << "  Configured value:        " << fProp.NumberTimeSamples() << "\n"
+        << "  Historical (used) value: " << iNumberTimeSamples << "\n";
+      fProp.SetNumberTimeSamples(iNumberTimeSamples);
     }
   }
 

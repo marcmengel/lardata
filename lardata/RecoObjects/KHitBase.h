@@ -68,7 +68,7 @@ namespace trkf {
     KHitBase(const std::shared_ptr<const Surface>& psurf, int plane = -1);
 
     /// Destructor.
-    virtual ~KHitBase();
+    virtual ~KHitBase() = default;
 
     // Accessors.
 
@@ -127,7 +127,7 @@ namespace trkf {
 
     /// Prediction method (return false if fail).
     virtual bool predict(const KETrack& tre,
-                         const Propagator* prop = 0,
+                         const Propagator& prop,
                          const KTrack* ref = 0) const = 0;
 
     /// Return incremental chisquare.

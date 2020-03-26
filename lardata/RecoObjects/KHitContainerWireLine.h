@@ -23,15 +23,9 @@
 namespace trkf {
 
   class KHitContainerWireLine : public KHitContainer {
-  public:
-    /// Default constructor.
-    KHitContainerWireLine();
-
-    /// Destructor.
-    virtual ~KHitContainerWireLine();
-
-    /// Fill container.
-    void fill(const art::PtrVector<recob::Hit>& hits, int only_plane) override;
+    void fill(const detinfo::DetectorPropertiesData& detProp,
+              const art::PtrVector<recob::Hit>& hits,
+              int only_plane) override;
   };
 }
 

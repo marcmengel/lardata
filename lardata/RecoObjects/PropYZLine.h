@@ -15,37 +15,34 @@
 
 #include "lardata/RecoObjects/Propagator.h"
 
+namespace detinfo {
+  class DetectorPropertiesData;
+}
+
 namespace trkf {
 
   class PropYZLine : public trkf::Propagator {
   public:
-    /// Constructor.
-    PropYZLine(double tcut, bool doDedx);
+    PropYZLine(detinfo::DetectorPropertiesData const& detProp, double tcut, bool doDedx);
 
-    /// Destructor.
-    virtual ~PropYZLine();
-
-    // Overrides.
-
-    /// Clone method.
     Propagator*
-    clone() const
+    clone() const override
     {
       return new PropYZLine(*this);
     }
 
     /// Propagate without error.
-    boost::optional<double> short_vec_prop(KTrack& trk,
-                                           const std::shared_ptr<const Surface>& surf,
-                                           Propagator::PropDirection dir,
-                                           bool doDedx,
-                                           TrackMatrix* prop_matrix = 0,
-                                           TrackError* noise_matrix = 0) const;
+    std::optional<double> short_vec_prop(KTrack& trk,
+                                         const std::shared_ptr<const Surface>& surf,
+                                         Propagator::PropDirection dir,
+                                         bool doDedx,
+                                         TrackMatrix* prop_matrix = 0,
+                                         TrackError* noise_matrix = 0) const override;
 
     /// Propagate without error to surface whose origin parameters coincide with track position.
-    virtual boost::optional<double> origin_vec_prop(KTrack& trk,
-                                                    const std::shared_ptr<const Surface>& porient,
-                                                    TrackMatrix* prop_matrix = 0) const;
+    std::optional<double> origin_vec_prop(KTrack& trk,
+                                          const std::shared_ptr<const Surface>& porient,
+                                          TrackMatrix* prop_matrix = 0) const override;
 
   private:
     /// The following methods transform the track parameters from

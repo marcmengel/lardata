@@ -27,9 +27,6 @@ namespace trkf {
     : fPredDist(0.), fID(0), fMeasSurf(psurf), fMeasPlane(plane)
   {}
 
-  /// Destructor.
-  KHitBase::~KHitBase() {}
-
   /// Printout
   std::ostream&
   KHitBase::Print(std::ostream& out, bool doTitle) const

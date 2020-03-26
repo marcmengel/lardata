@@ -10,7 +10,7 @@
 #include <utility>
 
 namespace detinfo {
-  class DetectorProperties;
+  class DetectorPropertiesData;
   class LArProperties;
 }
 
@@ -90,11 +90,9 @@ namespace trkf {
                              p().propPinvErr())
     {}
 
-    /// Destructor.
-    virtual ~TrackStatePropagator();
-
     /// Main function for propagation of a TrackState to a Plane
     TrackState propagateToPlane(bool& success,
+                                const detinfo::DetectorPropertiesData& detProp,
                                 const TrackState& origin,
                                 const Plane& target,
                                 bool dodedx,
@@ -102,7 +100,7 @@ namespace trkf {
                                 PropDirection dir = FORWARD) const;
 
     /// Rotation of a TrackState to a Plane (zero distance propagation)
-    inline TrackState
+    TrackState
     rotateToPlane(bool& success, const TrackState& origin, const Plane& target) const
     {
       double dw2dw1 = 0.;
@@ -110,7 +108,7 @@ namespace trkf {
     }
 
     /// Quick accesss to the propagated position given a distance
-    inline Point_t
+    Point_t
     propagatedPosByDistance(const Point_t& origpos, const Vector_t& origdir, double distance) const
     {
       return origpos + distance * origdir;
@@ -122,7 +120,7 @@ namespace trkf {
                            const Point_t& origpos,
                            const Vector_t& origdir,
                            const Plane& target) const;
-    inline double
+    double
     distanceToPlane(bool& success, const TrackState& origin, const Plane& target) const
     {
       return distanceToPlane(success, origin.position(), origin.momentum().Unit(), target);
@@ -132,7 +130,7 @@ namespace trkf {
     //@{
     /// Distance of a TrackState (Point) to a Plane along the direction orthogonal to the Plane
     double perpDistanceToPlane(bool& success, const Point_t& origpos, const Plane& target) const;
-    inline double
+    double
     perpDistanceToPlane(bool& success, const TrackState& origin, const Plane& target) const
     {
       return perpDistanceToPlane(success, origin.position(), target);
@@ -145,7 +143,7 @@ namespace trkf {
                                                   const Point_t& origpos,
                                                   const Vector_t& origdir,
                                                   const Plane& target) const;
-    inline std::pair<double, double>
+    std::pair<double, double>
     distancePairToPlane(bool& success, const TrackState& origin, const Plane& target) const
     {
       return distancePairToPlane(success, origin.position(), origin.momentum().Unit(), target);
@@ -153,11 +151,17 @@ namespace trkf {
     //@}
 
     /// Apply energy loss.
-    void apply_dedx(double& pinv, double dedx, double e1, double mass, double s, double& deriv)
-      const;
+    void apply_dedx(double& pinv,
+                    detinfo::DetectorPropertiesData const& detProp,
+                    double dedx,
+                    double e1,
+                    double mass,
+                    double s,
+                    double& deriv) const;
 
     /// Apply multiple coulomb scattering.
-    bool apply_mcs(double dudw,
+    bool apply_mcs(detinfo::DetectorPropertiesData const& detProp,
+                   double dudw,
                    double dvdw,
                    double pinv,
                    double mass,
@@ -189,7 +193,6 @@ namespace trkf {
     double fWrongDirDistTolerance; ///< Allowed propagation distance in the wrong direction.
     bool
       fPropPinvErr; ///< Propagate error on 1/p or not (in order to avoid infs, it should be set to false when 1/p not updated)
-    const detinfo::DetectorProperties* detprop;
     const detinfo::LArProperties* larprop;
   };
 }

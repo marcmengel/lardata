@@ -1,8 +1,8 @@
 #include "lardata/RecoObjects/TrackStatePropagator.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "larcore/CoreUtils/ServiceUtil.h"
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
+#include "lardataalg/DetectorInfo/DetectorPropertiesData.h"
 
 using namespace recob::tracking;
 
@@ -21,16 +21,14 @@ namespace trkf {
     , fWrongDirDistTolerance(wrongDirDistTolerance)
     , fPropPinvErr(propPinvErr)
   {
-    detprop = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->provider();
     larprop = lar::providerFrom<detinfo::LArPropertiesService>();
   }
-
-  TrackStatePropagator::~TrackStatePropagator() {}
 
   using PropDirection = TrackStatePropagator::PropDirection;
 
   TrackState
   TrackStatePropagator::propagateToPlane(bool& success,
+                                         const detinfo::DetectorPropertiesData& detProp,
                                          const TrackState& origin,
                                          const Plane& target,
                                          bool dodedx,
@@ -39,9 +37,7 @@ namespace trkf {
   {
     //
     // 1- find distance to target plane
-    std::pair<double, double> distpair = distancePairToPlane(success, origin, target);
-    double distance = distpair.first;
-    double sperp = distpair.second;
+    auto [distance, sperp] = distancePairToPlane(success, origin, target);
     //
     if ((distance < -fWrongDirDistTolerance && dir == FORWARD) ||
         (distance > fWrongDirDistTolerance && dir == BACKWARD)) {
@@ -86,7 +82,7 @@ namespace trkf {
       const double p = 1. / par5d[4];
       const double e = std::hypot(p, mass);
       const double t = e - mass;
-      const double dedx = 0.001 * detprop->Eloss(std::abs(p), mass, fTcut);
+      const double dedx = 0.001 * detProp.Eloss(std::abs(p), mass, fTcut);
       const double range = t / dedx;
       const double smax = std::max(fMinStep, fMaxElossFrac * range);
       double s = distance;
@@ -105,14 +101,23 @@ namespace trkf {
         bool flip = false;
         if (origin.isTrackAlongPlaneDir() == true && dw2dw1 < 0.) flip = true;
         if (origin.isTrackAlongPlaneDir() == false && dw2dw1 > 0.) flip = true;
-        bool ok = apply_mcs(
-          par5d[2], par5d[3], par5d[4], origin.mass(), s, range, p, e * e, flip, noise_matrix);
+        bool ok = apply_mcs(detProp,
+                            par5d[2],
+                            par5d[3],
+                            par5d[4],
+                            origin.mass(),
+                            s,
+                            range,
+                            p,
+                            e * e,
+                            flip,
+                            noise_matrix);
         if (!ok) {
           success = false;
           return origin;
         }
       }
-      if (dodedx) { apply_dedx(par5d(4), dedx, e, origin.mass(), s, deriv); }
+      if (dodedx) { apply_dedx(par5d(4), detProp, dedx, e, origin.mass(), s, deriv); }
     }
     if (fPropPinvErr) pm(4, 4) *= deriv;
     //
@@ -262,6 +267,7 @@ namespace trkf {
 
   void
   TrackStatePropagator::apply_dedx(double& pinv,
+                                   detinfo::DetectorPropertiesData const& detProp,
                                    double dedx,
                                    double e1,
                                    double mass,
@@ -274,7 +280,7 @@ namespace trkf {
     const double emid = e1 - 0.5 * s * dedx;
     if (emid > mass) {
       const double pmid = std::sqrt(emid * emid - mass * mass);
-      const double e2 = e1 - 0.001 * s * detprop->Eloss(pmid, mass, fTcut);
+      const double e2 = e1 - 0.001 * s * detProp.Eloss(pmid, mass, fTcut);
       if (e2 > mass) {
         const double p2 = std::sqrt(e2 * e2 - mass * mass);
         double pinv2 = 1. / p2;
@@ -289,7 +295,8 @@ namespace trkf {
   }
 
   bool
-  TrackStatePropagator::apply_mcs(double dudw,
+  TrackStatePropagator::apply_mcs(detinfo::DetectorPropertiesData const& detProp,
+                                  double dudw,
                                   double dvdw,
                                   double pinv,
                                   double mass,
@@ -309,7 +316,7 @@ namespace trkf {
     const double p2 = p * p;
 
     // Calculate the radiation length in cm.
-    const double x0 = larprop->RadiationLength() / detprop->Density();
+    const double x0 = larprop->RadiationLength() / detProp.Density();
 
     // Calculate projected rms scattering angle.
     // Use the estimted range in the logarithm factor.
@@ -330,7 +337,7 @@ namespace trkf {
 
     // Calculate energy loss fluctuations.
 
-    const double evar = 1.e-6 * detprop->ElossVar(p, mass) * std::abs(s); // E variance (GeV^2).
+    const double evar = 1.e-6 * detProp.ElossVar(p, mass) * std::abs(s); // E variance (GeV^2).
     const double pinvvar = evar * e2 / (p2 * p2 * p2); // Inv. p variance (1/GeV^2)
 
     // Update elements of noise matrix.

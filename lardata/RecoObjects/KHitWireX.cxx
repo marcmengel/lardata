@@ -27,13 +27,11 @@ namespace trkf {
   /// be specified to allow measurements to whare surfaces to save
   /// memory.
   ///
-  KHitWireX::KHitWireX(const art::Ptr<recob::Hit>& hit, const std::shared_ptr<const Surface>& psurf)
+  KHitWireX::KHitWireX(const detinfo::DetectorPropertiesData& detProp,
+                       const art::Ptr<recob::Hit>& hit,
+                       const std::shared_ptr<const Surface>& psurf)
     : KHit(psurf), fHit(hit)
   {
-    // Get services.
-    const detinfo::DetectorProperties* detprop =
-      art::ServiceHandle<detinfo::DetectorPropertiesService const>()->provider();
-
     // Extract wire id.
     geo::WireID wireid = hit->WireID();
 
@@ -57,7 +55,7 @@ namespace trkf {
     // Extract time information from hit.
 
     double t = hit->PeakTime();
-    double terr = hit->RMS(); //hit->SigmaPeakTime();
+    double terr = hit->RMS(); // hit->SigmaPeakTime();
 
     // Don't let the time error be less than 1./sqrt(12.) ticks.
     // This should be removed when hit errors are fixed.
@@ -67,8 +65,8 @@ namespace trkf {
     // Calculate position and error.
 
     double x =
-      detprop->ConvertTicksToX(t, hit->WireID().Plane, hit->WireID().TPC, hit->WireID().Cryostat);
-    double xerr = terr * detprop->GetXTicksCoefficient();
+      detProp.ConvertTicksToX(t, hit->WireID().Plane, hit->WireID().TPC, hit->WireID().Cryostat);
+    double xerr = terr * detProp.GetXTicksCoefficient();
 
     // Update measurement vector and error matrix.
 
@@ -113,17 +111,14 @@ namespace trkf {
     setMeasError(merr);
   }
 
-  /// Destructor.
-  KHitWireX::~KHitWireX() {}
-
   bool
   KHitWireX::subpredict(const KETrack& tre,
                         KVector<1>::type& pvec,
                         KSymMatrix<1>::type& perr,
                         KHMatrix<1>::type& hmatrix) const
   {
-    // Make sure that the track surface and the measurement surface are the same.
-    // Throw an exception if they are not.
+    // Make sure that the track surface and the measurement surface are the
+    // same. Throw an exception if they are not.
 
     if (!getMeasSurface()->isEqual(*tre.getSurface()))
       throw cet::exception("KHitWireX") << "Track surface not the same as measurement surface.\n";

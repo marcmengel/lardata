@@ -172,7 +172,7 @@ namespace trkf {
     // Implementation of overrides is found at the bottom of this header.
 
     /// Prediction method (return false if fail).
-    bool predict(const KETrack& tre, const Propagator* prop = 0, const KTrack* ref = 0) const;
+    bool predict(const KETrack& tre, const Propagator& prop, const KTrack* ref = 0) const;
 
     /// Update track method.
     void update(KETrack& tre) const;
@@ -249,7 +249,7 @@ namespace trkf {
   ///
   template <int N>
   bool
-  KHit<N>::predict(const KETrack& tre, const Propagator* prop, const KTrack* ref) const
+  KHit<N>::predict(const KETrack& tre, const Propagator& prop, const KTrack* ref) const
   {
     // Update the prediction surface to be the track surface.
 
@@ -278,10 +278,6 @@ namespace trkf {
       // internal propagation will be required.  Throw an exception if
       // no propagator was provided.
 
-      if (prop == 0)
-        throw cet::exception("KHit")
-          << "Track surface does not match measurement surface and no propagator.\n";
-
       // First make a copy of the original KETrack.
 
       KETrack treprop(tre);
@@ -301,10 +297,9 @@ namespace trkf {
       // class.
 
       TrackMatrix prop_matrix;
-      boost::optional<double> dist = prop->err_prop(
+      std::optional<double> dist = prop.err_prop(
         treprop, getMeasSurface(), Propagator::UNKNOWN, false, prefprop, &prop_matrix);
-      ok = !!dist;
-      if (ok) {
+      if (dist) {
 
         // Update prediction distance.
 

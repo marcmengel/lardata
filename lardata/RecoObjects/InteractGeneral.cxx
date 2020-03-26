@@ -20,12 +20,9 @@ namespace trkf {
   ///
   /// tcut - Maximum delta ray energy.
   ///
-  InteractGeneral::InteractGeneral(double tcut)
-    : Interactor(tcut), fInteract(tcut), fProp(-1., false)
+  InteractGeneral::InteractGeneral(detinfo::DetectorPropertiesData const& detProp, double tcut)
+    : Interactor(tcut), fInteract(detProp, tcut), fProp(detProp, -1., false)
   {}
-
-  /// Destructor.
-  InteractGeneral::~InteractGeneral() {}
 
   /// Calculate noise matrix.
   ///
@@ -66,7 +63,7 @@ namespace trkf {
 
     TrackMatrix prop_matrix;
     KTrack temp_trk = trk;
-    boost::optional<double> result =
+    std::optional<double> result =
       fProp.short_vec_prop(temp_trk, psurf, Propagator::UNKNOWN, false, &prop_matrix);
 
     // Return failure if propagation did not succeed.

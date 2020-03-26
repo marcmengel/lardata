@@ -21,15 +21,11 @@
 namespace util {
   class LArPropTest : public art::EDAnalyzer {
   public:
-    // Constructor, destructor.
-
     explicit LArPropTest(fhicl::ParameterSet const& pset);
-    ~LArPropTest();
 
-    // Overrides.
-
-    void beginJob();
-    void analyze(const art::Event& evt);
+  private:
+    void beginJob() override;
+    void analyze(const art::Event& evt) override;
   };
 
   DEFINE_ART_MODULE(LArPropTest)
@@ -51,27 +47,27 @@ namespace util {
     // Get services.
 
     detinfo::LArProperties const* larprop = lar::providerFrom<detinfo::LArPropertiesService>();
-    detinfo::DetectorProperties const* detprop =
-      lar::providerFrom<detinfo::DetectorPropertiesService>();
+    auto const detprop =
+      art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataForJob();
 
     // Test (default) accessors.
 
-    std::cout << "Density = " << detprop->Density() << " g/cm^3" << std::endl;
-    std::cout << "Drift velocity = " << detprop->DriftVelocity() << " cm/usec" << std::endl;
-    std::cout << "Efield = " << detprop->Efield() << " kV/cm" << std::endl;
-    std::cout << "Temperature = " << detprop->Temperature() << " Kelvin" << std::endl;
-    std::cout << "Electron lifetime = " << detprop->ElectronLifetime() << " usec" << std::endl;
+    std::cout << "Density = " << detprop.Density() << " g/cm^3" << std::endl;
+    std::cout << "Drift velocity = " << detprop.DriftVelocity() << " cm/usec" << std::endl;
+    std::cout << "Efield = " << detprop.Efield() << " kV/cm" << std::endl;
+    std::cout << "Temperature = " << detprop.Temperature() << " Kelvin" << std::endl;
+    std::cout << "Electron lifetime = " << detprop.ElectronLifetime() << " usec" << std::endl;
     std::cout << "Radiation Length = " << larprop->RadiationLength() << " g/cm^2" << std::endl;
-    std::cout << "Radiation Length = " << larprop->RadiationLength() / detprop->Density() << " cm"
+    std::cout << "Radiation Length = " << larprop->RadiationLength() / detprop.Density() << " cm"
               << std::endl;
 
     // Make sure default values are acting correctly.
 
-    assert(detprop->Density() == detprop->Density(detprop->Temperature()));
-    assert(detprop->Density() != detprop->Density(detprop->Temperature() + 0.1));
-    assert(detprop->DriftVelocity() == detprop->DriftVelocity(detprop->Efield()));
-    assert(detprop->DriftVelocity() ==
-           detprop->DriftVelocity(detprop->Efield(), detprop->Temperature()));
+    assert(detprop.Density() == detprop.Density(detprop.Temperature()));
+    assert(detprop.Density() != detprop.Density(detprop.Temperature() + 0.1));
+    assert(detprop.DriftVelocity() == detprop.DriftVelocity(detprop.Efield()));
+    assert(detprop.DriftVelocity() ==
+           detprop.DriftVelocity(detprop.Efield(), detprop.Temperature()));
 
     // Drift velocity vs. electric field.
 
@@ -83,7 +79,7 @@ namespace util {
         e = 0.666667;
       else if (i == 2)
         e = 0.8;
-      double v = detprop->DriftVelocity(e);
+      double v = detprop.DriftVelocity(e);
       std::cout << std::setprecision(3) << std::setw(15) << e << std::setprecision(4)
                 << std::setw(15) << v << std::endl;
     }
@@ -120,16 +116,14 @@ namespace util {
 
         // Calculate restricted and unrestricted dE/dx.
 
-        double dedxr = detprop->Eloss(p, mass, 0.05) / detprop->Density(); // Restricted.
-        double dedx = detprop->Eloss(p, mass, 0.) / detprop->Density();    // Unrestricted.
+        double dedxr = detprop.Eloss(p, mass, 0.05) / detprop.Density(); // Restricted.
+        double dedx = detprop.Eloss(p, mass, 0.) / detprop.Density();    // Unrestricted.
         std::cout << std::setw(10) << t << std::setw(10) << 1000. * p << std::setw(10) << dedx
                   << std::setw(10) << dedxr << std::endl;
       }
     }
     std::cout.flags(flags);
   }
-
-  LArPropTest::~LArPropTest() {}
 
   void
   LArPropTest::analyze(const art::Event& /* evt */)

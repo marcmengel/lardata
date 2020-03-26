@@ -24,6 +24,7 @@
 #include "art_root_io/Inputfwd.h"
 #include "art_root_io/detail/readMetadata.h"
 
+#include <bitset>
 #include <string>
 #include <vector>
 
@@ -33,102 +34,91 @@ namespace detinfo {
 
   DetectorClocksServiceStandard::DetectorClocksServiceStandard(fhicl::ParameterSet const& pset,
                                                                art::ActivityRegistry& reg)
-    : fClocks{pset}
+    : fClocks{pset}, fInheritClockConfig{pset.get<bool>("InheritClockConfig")}
   {
-
-    reg.sPreProcessEvent.watch(this, &DetectorClocksServiceStandard::preProcessEvent);
     reg.sPostOpenFile.watch(this, &DetectorClocksServiceStandard::postOpenFile);
     reg.sPreBeginRun.watch(this, &DetectorClocksServiceStandard::preBeginRun);
   }
 
   void
-  DetectorClocksServiceStandard::reconfigure(fhicl::ParameterSet const& pset)
-  {
-    fClocks.Configure(pset);
-  }
-
-  void
-  DetectorClocksServiceStandard::preProcessEvent(const art::Event& evt, art::ScheduleContext)
-  {
-    setDetectorClocksStandardTrigger(fClocks, evt);
-    setDetectorClocksStandardG4RefTimeCorrection(fClocks, evt);
-  }
-
-  void
   DetectorClocksServiceStandard::preBeginRun(art::Run const& run)
   {
+    // This callback probably is not necessary.
     fClocks.ApplyParams();
   }
 
   void
-  DetectorClocksServiceStandard::postOpenFile(const string& filename)
+  DetectorClocksServiceStandard::postOpenFile(string const& filename)
   {
-    if (!fClocks.InheritClockConfig()) { return; }
+    if (!fInheritClockConfig) { return; }
     if (filename.empty()) { return; }
-    TFile* file = TFile::Open(filename.c_str(), "READ");
-    if ((file == nullptr) || file->IsZombie() || !file->IsOpen()) { return; }
-    auto metaDataTree = static_cast<TTree*>(file->Get(art::rootNames::metaDataTreeName().c_str()));
+    std::unique_ptr<TFile> file{TFile::Open(filename.c_str(), "READ")};
+    if (!file || file->IsZombie() || !file->IsOpen()) { return; }
+    std::unique_ptr<TTree> metaDataTree{
+      file->Get<TTree>(art::rootNames::metaDataTreeName().c_str())};
     if (metaDataTree == nullptr) {
       throw cet::exception("DetectorClocksServiceStandard",
                            "Input file does not contain a metadata tree!");
     }
-    auto fileFormatVersion = art::detail::readMetadata<art::FileFormatVersion>(metaDataTree);
-    vector<string> cfgName(fClocks.ConfigNames());
-    vector<double> cfgValue(fClocks.ConfigValues());
-    vector<size_t> config_count(kInheritConfigTypeMax, 0);
-    vector<double> config_value(kInheritConfigTypeMax, 0);
+    auto const fileFormatVersion =
+      art::detail::readMetadata<art::FileFormatVersion>(metaDataTree.get());
+    fhicl::ParameterSet ps;
+    vector<string> const cfgName(fClocks.ConfigNames());
+    vector<double> const cfgValue(fClocks.ConfigValues());
+    bitset<kConfigTypeMax> config_set;
+    vector<double> config_value(kConfigTypeMax, 0);
+
+    auto count_configuration_changes =
+      [&cfgName, &config_set, &config_value](fhicl::ParameterSet const& ps) {
+        for (size_t i = 0; i < kConfigTypeMax; ++i) {
+          auto const value_from_file = ps.get<double>(cfgName[i]);
+          if (not config_set[i]) {
+            config_value[i] = value_from_file;
+            config_set[i] = true;
+          }
+          else if (config_value[i] != value_from_file) {
+            throw cet::exception("DetectorClocksServiceStandard")
+              << "Found historical value disagreement for " << cfgName[i] << " ... "
+              << config_value[i] << " != " << value_from_file;
+          }
+        }
+      };
+
     if (fileFormatVersion.value_ < 5) {
       art::ParameterSetMap psetMap;
-      if (!art::detail::readMetadata(metaDataTree, psetMap)) {
+      if (!art::detail::readMetadata(metaDataTree.get(), psetMap)) {
         throw cet::exception("DetectorClocksServiceStandard",
                              "Could not read ParameterSetMap from metadata tree!");
       }
+
       for (auto const& psEntry : psetMap) {
         fhicl::ParameterSet ps;
         fhicl::make_ParameterSet(psEntry.second.pset_, ps);
         if (!fClocks.IsRightConfig(ps)) { continue; }
-        for (size_t i = 0; i < kInheritConfigTypeMax; ++i) {
-          double value_from_file = ps.get<double>(cfgName[i]);
-          if (config_count[i] == 0) { config_value[i] = value_from_file; }
-          else if (config_value[i] != value_from_file) {
-            throw cet::exception("DetectorClocksServiceStandard")
-              << "Found historical value disagreement for " << cfgName[i] << " ... "
-              << config_value[i] << " != " << value_from_file;
-          }
-          ++config_count[i];
-        }
+
+        count_configuration_changes(ps);
       }
     }
     else {
-      art::SQLite3Wrapper sqliteDB(file, "RootFileDB");
+      art::SQLite3Wrapper sqliteDB(file.get(), "RootFileDB");
       sqlite3_stmt* stmt{nullptr};
-      sqlite3_prepare_v2(sqliteDB, "SELECT PSetBlob from ParameterSets;", -1, &stmt, NULL);
+      sqlite3_prepare_v2(sqliteDB, "SELECT PSetBlob from ParameterSets;", -1, &stmt, nullptr);
       while (sqlite3_step(stmt) == SQLITE_ROW) {
         fhicl::ParameterSet ps;
         fhicl::make_ParameterSet(reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0)), ps);
         if (!fClocks.IsRightConfig(ps)) { continue; }
-        for (size_t i = 0; i < kInheritConfigTypeMax; ++i) {
-          double value_from_file = ps.get<double>(cfgName[i]);
-          if (config_count[i] == 0) { config_value[i] = value_from_file; }
-          else if (config_value[i] != value_from_file) {
-            throw cet::exception("DetectorClocksServiceStandard")
-              << "Found historical value disagreement for " << cfgName[i] << " ... "
-              << config_value[i] << " != " << value_from_file;
-          }
-          ++config_count[i];
-        }
+
+        count_configuration_changes(ps);
       }
     }
-    for (size_t i = 0; i < kInheritConfigTypeMax; ++i) {
-      if ((config_count[i] != 0) && (cfgValue[i] != config_value[i])) {
-        cout << "Overriding configuration parameter " << cfgName[i] << " ... " << cfgValue[i]
-             << " (fcl) => " << config_value[i] << " (data file)" << endl;
-        fClocks.SetConfigValue(i, config_value[i]);
-      }
-    }
-    if (file != nullptr) {
-      if (file->IsOpen()) { file->Close(); }
-      delete file;
+
+    for (size_t i = 0; i < kConfigTypeMax; ++i) {
+      if (not config_set[i]) continue;
+      if (cfgValue[i] == config_value[i]) continue;
+
+      cout << "Overriding configuration parameter " << cfgName[i] << " ... " << cfgValue[i]
+           << " (fcl) => " << config_value[i] << " (data file)" << endl;
+      fClocks.SetConfigValue(i, config_value[i]);
     }
     fClocks.ApplyParams();
   }

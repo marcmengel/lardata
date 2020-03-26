@@ -92,7 +92,7 @@ namespace trkf {
   /// measurement and updates the combined prediction attributes.
   ///
   bool
-  KHitMulti::predict(const KETrack& tre, const Propagator* prop, const KTrack* ref) const
+  KHitMulti::predict(const KETrack& tre, const Propagator& prop, const KTrack* ref) const
   {
     // Resize and clear all linear algebra objects.
 

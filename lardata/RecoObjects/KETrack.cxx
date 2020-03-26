@@ -85,7 +85,7 @@ namespace trkf {
   /// because the sum of the two error matrices is singular, in which
   /// case the success flag embedded in the return value is false.
   ///
-  boost::optional<double>
+  std::optional<double>
   KETrack::combineTrack(const KETrack& tre)
   {
     // Make sure that the two track surfaces are the same.
@@ -96,7 +96,7 @@ namespace trkf {
 
     // Default result is failure.
 
-    boost::optional<double> result(false, 0.);
+    std::optional<double> result{std::nullopt};
 
     // We will use asymmetric versions of the updating formulas, such
     // that the result is calculated as a perturbation on the
@@ -165,12 +165,12 @@ namespace trkf {
 
       TrackVector dvec1 = prod(derr, dvec);
       double chisq = inner_prod(dvec, dvec1);
-      result = boost::optional<double>(true, chisq);
+      result = std::make_optional(chisq);
     }
 
     // Final validity check.
 
-    if (!isValid()) result = boost::optional<double>(false, 0.);
+    if (!isValid()) result = std::nullopt;
 
     // Done.
 

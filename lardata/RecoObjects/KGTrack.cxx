@@ -24,18 +24,12 @@
 
 namespace trkf {
 
-  /// Default constructor.
   KGTrack::KGTrack(int prefplane) : fPrefPlane(prefplane) {}
-
-  /// Destructor.
-  KGTrack::~KGTrack() {}
 
   /// Track at start point.
   const KHitTrack&
   KGTrack::startTrack() const
   {
-    /// Throw exception if track is not valid.
-
     if (!isValid()) throw cet::exception("KGTrack") << "Starting track is not valid.\n";
 
     // Return track.
@@ -129,12 +123,14 @@ namespace trkf {
   /// track - Track to fill.
   ///
   void
-  KGTrack::fillTrack(recob::Track& track, int id) const
+  KGTrack::fillTrack(detinfo::DetectorPropertiesData const& detProp,
+                     recob::Track& track,
+                     int id) const
   {
 
     // Make propagator for propating to standard track surface.
 
-    PropXYZPlane prop(0., false);
+    PropXYZPlane prop(detProp, 0., false);
 
     // Fill collections of trajectory points and direction vectors.
 
@@ -186,9 +182,8 @@ namespace trkf {
       const std::shared_ptr<const Surface> psurf(
         new SurfXYZPlane(pos[0], pos[1], pos[2], mom[0], mom[1], mom[2]));
       KETrack tre(trh);
-      boost::optional<double> dist = prop.err_prop(tre, psurf, Propagator::UNKNOWN, false);
-      if (!dist.is_initialized())
-        throw cet::exception("KGTrack") << __func__ << ": error propagation failed\n";
+      std::optional<double> dist = prop.err_prop(tre, psurf, Propagator::UNKNOWN, false);
+      if (!dist) throw cet::exception("KGTrack") << __func__ << ": error propagation failed\n";
       for (int i = 0; i < 5; ++i) {
         for (int j = 0; j < 5; ++j)
           covar(i, j) = tre.getError()(i, j);

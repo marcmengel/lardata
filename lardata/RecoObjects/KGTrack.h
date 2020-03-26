@@ -33,6 +33,10 @@
 
 #include "lardata/RecoObjects/KHitTrack.h"
 
+namespace detinfo {
+  class DetectorPropertiesData;
+}
+
 namespace recob {
   class Hit;
   class Track;
@@ -42,13 +46,7 @@ namespace trkf {
 
   class KGTrack {
   public:
-    /// Constructor.
     KGTrack(int prefplane);
-
-    /// Destructor.
-    ~KGTrack();
-
-    // Accessors.
 
     int
     getPrefPlane() const
@@ -114,7 +112,9 @@ namespace trkf {
     // Methods.
 
     /// Fill a recob::Track.
-    void fillTrack(recob::Track& track, int id) const;
+    void fillTrack(detinfo::DetectorPropertiesData const& detProp,
+                   recob::Track& track,
+                   int id) const;
 
     /// Fill a PtrVector of Hits.
     void fillHits(art::PtrVector<recob::Hit>& hits, std::vector<unsigned int>& hittpindex) const;
@@ -129,8 +129,6 @@ namespace trkf {
     std::ostream& Print(std::ostream& out) const;
 
   private:
-    // Attributes.
-
     /// Preferred plane.
     int fPrefPlane;
 

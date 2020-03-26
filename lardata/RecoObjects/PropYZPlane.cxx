@@ -25,15 +25,13 @@ namespace trkf {
   /// tcut   - Delta ray energy cutoff for calculating dE/dx.
   /// doDedx - dE/dx enable flag.
   ///
-  PropYZPlane::PropYZPlane(double tcut, bool doDedx)
-    : Propagator(tcut,
+  PropYZPlane::PropYZPlane(detinfo::DetectorPropertiesData const& detProp, double tcut, bool doDedx)
+    : Propagator{detProp,
+                 tcut,
                  doDedx,
-                 (tcut >= 0. ? std::shared_ptr<const Interactor>(new InteractPlane(tcut)) :
-                               std::shared_ptr<const Interactor>()))
+                 (tcut >= 0. ? std::make_shared<InteractPlane const>(detProp, tcut) :
+                               std::shared_ptr<Interactor const>{})}
   {}
-
-  /// Destructor.
-  PropYZPlane::~PropYZPlane() {}
 
   /// Propagate without error.
   /// Optionally return propagation matrix and noise matrix.
@@ -49,7 +47,7 @@ namespace trkf {
   ///
   /// Returned value: propagation distance + success flag.
   ///
-  boost::optional<double>
+  std::optional<double>
   PropYZPlane::short_vec_prop(KTrack& trk,
                               const std::shared_ptr<const Surface>& psurf,
                               Propagator::PropDirection dir,
@@ -59,7 +57,7 @@ namespace trkf {
   {
     // Set the default return value to be unitialized with value 0.
 
-    boost::optional<double> result(false, 0.);
+    std::optional<double> result{std::nullopt};
 
     // Get destination surface and surface parameters.
     // Return failure if wrong surface type.
@@ -87,7 +85,7 @@ namespace trkf {
 
     TrackMatrix local_prop_matrix;
     TrackMatrix* plocal_prop_matrix = (prop_matrix == 0 ? 0 : &local_prop_matrix);
-    boost::optional<double> result1 = origin_vec_prop(trk, psurf, plocal_prop_matrix);
+    std::optional<double> result1 = origin_vec_prop(trk, psurf, plocal_prop_matrix);
     if (!result1) return result1;
 
     // Get the intermediate track state vector and track parameters.
@@ -149,7 +147,7 @@ namespace trkf {
     // Find final momentum.
 
     double deriv = 1.;
-    boost::optional<double> pinv2(true, pinv);
+    auto pinv2 = std::make_optional(pinv);
     if (getDoDedx() && doDedx && s != 0.) {
       double* pderiv = (prop_matrix != 0 ? &deriv : 0);
       pinv2 = dedx_prop(pinv, trk.Mass(), s, pderiv);
@@ -164,7 +162,7 @@ namespace trkf {
 
     // Update default result to success and store propagation distance.
 
-    result = boost::optional<double>(true, s);
+    result = std::make_optional(s);
 
     // Update propagation matrix (if requested).
 
@@ -218,7 +216,7 @@ namespace trkf {
         bool ok = getInteractor()->noise(trk, s, *noise_matrix);
         if (!ok) {
           trk = trk0;
-          return boost::optional<double>(false, 0.);
+          return std::nullopt;
         }
       }
       else
@@ -257,14 +255,14 @@ namespace trkf {
   ///
   /// Propagation distance is always zero after successful propagation.
   ///
-  boost::optional<double>
+  std::optional<double>
   PropYZPlane::origin_vec_prop(KTrack& trk,
                                const std::shared_ptr<const Surface>& porient,
                                TrackMatrix* prop_matrix) const
   {
     // Set the default return value to be unitialized with value 0.
 
-    boost::optional<double> result(false, 0.);
+    std::optional<double> result{std::nullopt};
 
     // Remember starting track.
 
@@ -307,8 +305,8 @@ namespace trkf {
       // Transform track to origin surface.
 
       bool ok = transformYZLine(phi1, phi2, vec, dir, prop_matrix);
-      result = boost::optional<double>(ok, 0.);
-      if (!ok) return result;
+      result = std::make_optional(0.);
+      if (!ok) return std::nullopt;
     }
     else if (const SurfYZPlane* from = dynamic_cast<const SurfYZPlane*>(&*trk.getSurface())) {
 
@@ -320,8 +318,8 @@ namespace trkf {
       // Transform track to origin surface.
 
       bool ok = transformYZPlane(phi1, phi2, vec, dir, prop_matrix);
-      result = boost::optional<double>(ok, 0.);
-      if (!ok) return result;
+      result = std::make_optional(0.);
+      if (!ok) return std::nullopt;
     }
     else if (const SurfXYZPlane* from = dynamic_cast<const SurfXYZPlane*>(&*trk.getSurface())) {
 
@@ -334,8 +332,8 @@ namespace trkf {
       // Transform track to origin surface.
 
       bool ok = transformXYZPlane(theta1, phi1, phi2, vec, dir, prop_matrix);
-      result = boost::optional<double>(ok, 0.);
-      if (!ok) return result;
+      result = std::make_optional(0.);
+      if (!ok) return std::nullopt;
     }
 
     // Update track.
@@ -348,7 +346,7 @@ namespace trkf {
 
     if (!trk.isValid()) {
       trk = trk0;
-      result = boost::optional<double>(false, 0.);
+      result = std::nullopt;
     }
 
     // Done.

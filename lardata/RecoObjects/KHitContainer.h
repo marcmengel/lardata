@@ -52,34 +52,35 @@
 #include "lardataobj/RecoBase/Hit.h"
 #include <list>
 
+namespace detinfo {
+  class DetectorPropertiesData;
+}
+
 namespace trkf {
 
   class KHitContainer {
   public:
-    /// Default constructor.
-    KHitContainer();
+    virtual ~KHitContainer() = default;
 
-    /// Destructor.
-    virtual ~KHitContainer();
-
-    virtual void fill(const art::PtrVector<recob::Hit>& hits, int only_plane) = 0;
-    // Const Accessors.
+    virtual void fill(detinfo::DetectorPropertiesData const& clock_data,
+                      const art::PtrVector<recob::Hit>& hits,
+                      int only_plane) = 0;
 
     const std::list<KHitGroup>&
     getSorted() const
     {
       return fSorted;
-    } ///< Sorted list.
+    }
     const std::list<KHitGroup>&
     getUnsorted() const
     {
       return fUnsorted;
-    } ///< Unsorted list.
+    }
     const std::list<KHitGroup>&
     getUnused() const
     {
       return fUnused;
-    } ///< Unused list.
+    }
 
     // Non-const Accessors.
 
@@ -108,7 +109,7 @@ namespace trkf {
     /// (Re)sort objects in unsorted and sorted lists.
     void sort(const KTrack& trk,
               bool addUnsorted,
-              const Propagator* prop,
+              const Propagator& prop,
               Propagator::PropDirection dir = Propagator::UNKNOWN);
 
     /// Return the plane with the most KHitGroups in the unsorted list.

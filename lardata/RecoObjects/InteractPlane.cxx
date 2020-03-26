@@ -12,10 +12,10 @@
 
 #include "cetlib_except/exception.h"
 #include "larcore/CoreUtils/ServiceUtil.h"
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "lardata/RecoObjects/InteractPlane.h"
 #include "lardata/RecoObjects/SurfPlane.h"
+#include "lardataalg/DetectorInfo/DetectorPropertiesData.h"
 
 namespace trkf {
 
@@ -25,10 +25,9 @@ namespace trkf {
   ///
   /// tcut - Maximum delta ray energy.
   ///
-  InteractPlane::InteractPlane(double tcut) : Interactor(tcut) {}
-
-  /// Destructor.
-  InteractPlane::~InteractPlane() {}
+  InteractPlane::InteractPlane(detinfo::DetectorPropertiesData const& detProp, double tcut)
+    : Interactor(tcut), fDetProp{detProp}
+  {}
 
   /// Calculate noise matrix.
   ///
@@ -72,12 +71,11 @@ namespace trkf {
     // Get LAr service.
 
     auto const* larprop = lar::providerFrom<detinfo::LArPropertiesService>();
-    auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
     // Make sure we are on a plane surface (throw exception if not).
 
     const SurfPlane* psurf = dynamic_cast<const SurfPlane*>(&*trk.getSurface());
-    if (psurf == 0)
+    if (psurf == nullptr)
       throw cet::exception("InteractPlane") << "InteractPlane called for non-planar surface.\n";
 
     // Clear noise matrix.
@@ -103,13 +101,13 @@ namespace trkf {
     double e2 = p2 + mass * mass;
     double e = std::sqrt(e2);
     double t = e - mass;
-    double dedx = 0.001 * detprop->Eloss(p, mass, getTcut());
+    double dedx = 0.001 * fDetProp.Eloss(p, mass, getTcut());
     double range = t / dedx;
     if (range > 100.) range = 100.;
 
     // Calculate the radiation length in cm.
 
-    double x0 = larprop->RadiationLength() / detprop->Density();
+    double x0 = larprop->RadiationLength() / fDetProp.Density();
 
     // Calculate projected rms scattering angle.
     // Use the estimted range in the logarithm factor.
@@ -132,7 +130,7 @@ namespace trkf {
 
     // Calculate energy loss fluctuations.
 
-    double evar = 1.e-6 * detprop->ElossVar(p, mass) * std::abs(s); // E variance (GeV^2).
+    double evar = 1.e-6 * fDetProp.ElossVar(p, mass) * std::abs(s); // E variance (GeV^2).
     double pinvvar = evar * e2 / (p2 * p2 * p2);                    // Inv. p variance (1/GeV^2)
 
     // Fill elements of noise matrix.

@@ -21,8 +21,8 @@
 #ifndef KETRACK_H
 #define KETRACK_H
 
-#include "boost/optional.hpp"
 #include "lardata/RecoObjects/KTrack.h"
+#include <optional>
 
 namespace trkf {
 
@@ -70,7 +70,7 @@ namespace trkf {
     } ///< Set error matrix.
 
     /// Combine two tracks.
-    boost::optional<double> combineTrack(const KETrack& tre);
+    std::optional<double> combineTrack(const KETrack& tre);
 
     /// Printout
     virtual std::ostream& Print(std::ostream& out, bool doTitle = true) const;

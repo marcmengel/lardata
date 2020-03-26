@@ -20,7 +20,6 @@ namespace trkf {
   ///
   Interactor::Interactor(double tcut) : fTcut(tcut) {}
 
-  /// Destructor.
-  Interactor::~Interactor() {}
+  Interactor::~Interactor() = default;
 
 } // end namespace trkf

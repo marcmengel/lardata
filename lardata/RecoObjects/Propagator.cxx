@@ -11,8 +11,8 @@
 #include "lardata/RecoObjects/Propagator.h"
 #include "cetlib_except/exception.h"
 #include "larcore/CoreUtils/ServiceUtil.h"
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/RecoObjects/SurfXYZPlane.h"
+#include "lardataalg/DetectorInfo/DetectorPropertiesData.h"
 
 namespace trkf {
 
@@ -23,14 +23,15 @@ namespace trkf {
   /// tcut   - Maximum delta ray energy.
   /// doDedx - dE/dx enable flag.
   ///
-  Propagator::Propagator(double tcut,
+  Propagator::Propagator(detinfo::DetectorPropertiesData const& detProp,
+                         double tcut,
                          bool doDedx,
                          const std::shared_ptr<const Interactor>& interactor)
-    : fTcut(tcut), fDoDedx(doDedx), fInteractor(interactor)
+    : fDetProp{detProp}, fTcut(tcut), fDoDedx(doDedx), fInteractor(interactor)
   {}
 
   /// Destructor.
-  Propagator::~Propagator() {}
+  Propagator::~Propagator() = default;
 
   /// Propagate without error (long distance).
   ///
@@ -48,7 +49,7 @@ namespace trkf {
   /// This method calls virtual method short_vec_prop in steps of some
   /// maximum size.
   ///
-  boost::optional<double>
+  std::optional<double>
   Propagator::vec_prop(KTrack& trk,
                        const std::shared_ptr<const Surface>& psurf,
                        PropDirection dir,
@@ -56,9 +57,7 @@ namespace trkf {
                        TrackMatrix* prop_matrix,
                        TrackError* noise_matrix) const
   {
-    // Default result.
-
-    auto result = boost::make_optional<double>(false, 0.);
+    std::optional<double> result{std::nullopt};
 
     // Get the inverse momentum (assumed to be track parameter four).
 
@@ -77,10 +76,6 @@ namespace trkf {
       // dE/dx is requested.  In this case we limit the maximum
       // propagation distance such that the kinetic energy of the
       // particle should not change by more thatn 10%.
-
-      // Get LAr service.
-
-      auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
 
       // Initialize propagation matrix to unit matrix (if specified).
 
@@ -125,7 +120,7 @@ namespace trkf {
         ++nit;
         if (nit > nitmax) {
           trk = trk0;
-          result = boost::optional<double>(false, 0.);
+          result = std::nullopt;
           return result;
         }
 
@@ -137,7 +132,7 @@ namespace trkf {
         double p = 1. / std::abs(pinv);
         double e = std::hypot(p, mass);
         double t = p * p / (e + mass);
-        double dedx = 0.001 * detprop->Eloss(p, mass, fTcut);
+        double dedx = 0.001 * fDetProp.Eloss(p, mass, fTcut);
         double smax = 0.1 * t / dedx;
         if (smax <= 0.)
           throw cet::exception("Propagator") << __func__ << ": maximum step " << smax << "\n";
@@ -150,7 +145,7 @@ namespace trkf {
         // find the distance to the destination surface.
 
         KTrack trktest(trk);
-        boost::optional<double> dist = short_vec_prop(trktest, psurf, dir, false, 0, 0);
+        std::optional<double> dist = short_vec_prop(trktest, psurf, dir, false, 0, 0);
 
         // If the test propagation failed, return failure.
 
@@ -228,7 +223,7 @@ namespace trkf {
 
       // Set the final result (distance + success).
 
-      result = boost::optional<double>(true, s);
+      result = std::make_optional(s);
     }
 
     // Done.
@@ -252,7 +247,7 @@ namespace trkf {
   ///
   /// If the reference track is null, this method simply calls vec_prop.
   ///
-  boost::optional<double>
+  std::optional<double>
   Propagator::lin_prop(KTrack& trk,
                        const std::shared_ptr<const Surface>& psurf,
                        PropDirection dir,
@@ -263,7 +258,7 @@ namespace trkf {
   {
     // Default result.
 
-    boost::optional<double> result;
+    std::optional<double> result;
 
     if (ref == 0)
       result = vec_prop(trk, psurf, dir, doDedx, prop_matrix, noise_matrix);
@@ -313,7 +308,7 @@ namespace trkf {
         // and reference track to their starting values.
 
         if (!trk.isValid()) {
-          result = boost::optional<double>(false, 0.);
+          result = std::nullopt;
           trk = trk0;
           *ref = ref0;
         }
@@ -347,7 +342,7 @@ namespace trkf {
   ///
   /// Returned value: propagation distance + success flag.
   ///
-  boost::optional<double>
+  std::optional<double>
   Propagator::err_prop(KETrack& tre,
                        const std::shared_ptr<const Surface>& psurf,
                        PropDirection dir,
@@ -359,7 +354,7 @@ namespace trkf {
 
     TrackMatrix prop_temp;
     if (prop_matrix == 0) prop_matrix = &prop_temp;
-    boost::optional<double> result = lin_prop(tre, psurf, dir, doDedx, ref, prop_matrix, 0);
+    std::optional<double> result = lin_prop(tre, psurf, dir, doDedx, ref, prop_matrix, 0);
 
     // If propagation succeeded, update track error matrix.
 
@@ -387,7 +382,7 @@ namespace trkf {
   ///
   /// Returned value: propagation distance + success flag.
   ///
-  boost::optional<double>
+  std::optional<double>
   Propagator::noise_prop(KETrack& tre,
                          const std::shared_ptr<const Surface>& psurf,
                          PropDirection dir,
@@ -398,7 +393,7 @@ namespace trkf {
 
     TrackMatrix prop_matrix;
     TrackError noise_matrix;
-    boost::optional<double> result =
+    std::optional<double> result =
       lin_prop(tre, psurf, dir, doDedx, ref, &prop_matrix, &noise_matrix);
 
     // If propagation succeeded, update track error matrix.
@@ -453,31 +448,27 @@ namespace trkf {
   /// d(pinv2)/d(pinv1) = pinv2^3 E2 / (pinv1^3 E1).
   ///
   ///
-  boost::optional<double>
+  std::optional<double>
   Propagator::dedx_prop(double pinv, double mass, double s, double* deriv) const
   {
     // For infinite initial momentum, return with success status,
     // still infinite momentum.
 
-    if (pinv == 0.) return boost::optional<double>(true, 0.);
+    if (pinv == 0.) return std::make_optional(0.);
 
     // Set the default return value to be uninitialized with value 0.
 
-    boost::optional<double> result(false, 0.);
-
-    // Get LAr service.
-
-    auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
+    std::optional<double> result{std::nullopt};
 
     // Calculate final energy.
 
     double p1 = 1. / std::abs(pinv);
     double e1 = std::hypot(p1, mass);
-    double de = -0.001 * s * detprop->Eloss(p1, mass, fTcut);
+    double de = -0.001 * s * fDetProp.Eloss(p1, mass, fTcut);
     double emid = e1 + 0.5 * de;
     if (emid > mass) {
       double pmid = std::sqrt(emid * emid - mass * mass);
-      double e2 = e1 - 0.001 * s * detprop->Eloss(pmid, mass, fTcut);
+      double e2 = e1 - 0.001 * s * fDetProp.Eloss(pmid, mass, fTcut);
       if (e2 > mass) {
         double p2 = std::sqrt(e2 * e2 - mass * mass);
         double pinv2 = 1. / p2;
@@ -485,7 +476,7 @@ namespace trkf {
 
         // Calculation was successful, update result.
 
-        result = boost::optional<double>(true, pinv2);
+        result = std::make_optional(pinv2);
 
         // Also calculate derivative, if requested.
 

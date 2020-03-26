@@ -10,20 +10,13 @@
 
 #include <map>
 
-#include "lardata/RecoObjects/KHitContainerWireX.h"
-
 #include "cetlib_except/exception.h"
 
 #include "larcore/Geometry/Geometry.h"
+#include "lardata/RecoObjects/KHitContainerWireX.h"
 #include "lardata/RecoObjects/KHitWireX.h"
 
 namespace trkf {
-
-  /// Default Constructor.
-  KHitContainerWireX::KHitContainerWireX() {}
-
-  /// Destructor.
-  KHitContainerWireX::~KHitContainerWireX() {}
 
   /// Fill container.
   ///
@@ -38,7 +31,9 @@ namespace trkf {
   /// KHitGroup objects.
   ///
   void
-  KHitContainerWireX::fill(const art::PtrVector<recob::Hit>& hits, int only_plane)
+  KHitContainerWireX::fill(const detinfo::DetectorPropertiesData& detProp,
+                           const art::PtrVector<recob::Hit>& hits,
+                           int only_plane)
   {
     // Get services.
 
@@ -79,17 +74,7 @@ namespace trkf {
           << __func__ << ": no group map for channel " << channel << "\n";
       }
 
-      // Get surface from KHitGroup (might be null pointer).
-
-      const std::shared_ptr<const Surface>& psurf = pgr->getSurface();
-
-      // Construct KHitWireX object.
-
-      std::shared_ptr<const KHitBase> phit(new KHitWireX(*ihit, psurf));
-
-      // Insert hit into KHitGroup.
-
-      pgr->addHit(phit);
+      pgr->addHit(std::make_shared<KHitWireX>(detProp, *ihit, pgr->getSurface()));
     }
   }
 

@@ -25,18 +25,21 @@
 #include "lardata/RecoObjects/KHit.h"
 #include "lardataobj/RecoBase/Hit.h"
 
+namespace detinfo {
+  class DetectorPropertiesData;
+}
+
 namespace trkf {
 
   class KHitWireX : public KHit<1> {
   public:
     /// Constructor from Hit.
-    KHitWireX(const art::Ptr<recob::Hit>& hit, const std::shared_ptr<const Surface>& psurf);
+    KHitWireX(const detinfo::DetectorPropertiesData& detProp,
+              const art::Ptr<recob::Hit>& hit,
+              const std::shared_ptr<const Surface>& psurf);
 
     /// Constructor from wire id (mainly for testing).
     KHitWireX(const geo::WireID& wireid, double x, double xerr);
-
-    /// Destructor.
-    virtual ~KHitWireX();
 
     // Accessors.
 
@@ -47,13 +50,11 @@ namespace trkf {
       return fHit;
     }
 
-    // Overrides.
-
     // Prediction method.
-    virtual bool subpredict(const KETrack& tre,
-                            KVector<1>::type& pvec,
-                            KSymMatrix<1>::type& perr,
-                            KHMatrix<1>::type& hmatrix) const;
+    bool subpredict(const KETrack& tre,
+                    KVector<1>::type& pvec,
+                    KSymMatrix<1>::type& perr,
+                    KHMatrix<1>::type& hmatrix) const override;
 
   private:
     // Attributes.

@@ -27,8 +27,9 @@ util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg
     // creates the service if it doesn't exist, it also guarantees
     // that its callbacks are invoked before any of LArFFT's callbacks
     // are invoked.
-    fSize = art::ServiceHandle<detinfo::DetectorPropertiesService const> {}
-    ->provider()->ReadOutWindowSize();
+    fSize = art::ServiceHandle<detinfo::DetectorPropertiesService const>()
+              ->DataForJob()
+              .ReadOutWindowSize();
     reg.sPreBeginRun.watch(this, &util::LArFFT::resetSizePerRun);
   }
   InitializeFFT();
@@ -38,8 +39,9 @@ util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg
 void
 util::LArFFT::resetSizePerRun(art::Run const&)
 {
-  fSize = art::ServiceHandle<detinfo::DetectorPropertiesService const> {}
-  ->provider()->ReadOutWindowSize();
+  fSize = art::ServiceHandle<detinfo::DetectorPropertiesService const>()
+            ->DataForJob()
+            .ReadOutWindowSize();
   ReinitializeFFT(fSize, fOption, fFitBins);
 }
 
@@ -125,8 +127,4 @@ util::LArFFT::ShiftData(std::vector<TComplex>& input, double shift)
   return;
 }
 
-namespace util {
-
-  DEFINE_ART_SERVICE(LArFFT)
-
-}
+DEFINE_ART_SERVICE(util::LArFFT)

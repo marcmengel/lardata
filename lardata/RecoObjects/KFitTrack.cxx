@@ -94,7 +94,7 @@ namespace trkf {
 
       // Update track parameters and error matrix.
 
-      boost::optional<double> chisq = combineTrack(trf);
+      std::optional<double> chisq = combineTrack(trf);
 
       // Update status and chisquare.
 
