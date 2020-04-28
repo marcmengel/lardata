@@ -9,11 +9,11 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "lardata/RecoObjects/PropAny.h"
+#include "cetlib_except/exception.h"
+#include "lardata/RecoObjects/InteractPlane.h"
+#include "lardata/RecoObjects/SurfXYZPlane.h"
 #include "lardata/RecoObjects/SurfYZLine.h"
 #include "lardata/RecoObjects/SurfYZPlane.h"
-#include "lardata/RecoObjects/SurfXYZPlane.h"
-#include "lardata/RecoObjects/InteractPlane.h"
-#include "cetlib_except/exception.h"
 
 namespace trkf {
 
@@ -24,18 +24,18 @@ namespace trkf {
   /// tcut   - Delta ray energy cutoff for calculating dE/dx.
   /// doDedx - dE/dx enable flag.
   ///
-  PropAny::PropAny(double tcut, bool doDedx) :
-    Propagator(tcut, doDedx, (tcut >= 0 ?
-			      std::shared_ptr<const Interactor>(new InteractPlane(tcut)) :
-			      std::shared_ptr<const Interactor>())),
-    fPropYZLine(tcut, doDedx),
-    fPropYZPlane(tcut, doDedx),
-    fPropXYZPlane(tcut, doDedx)
+  PropAny::PropAny(double tcut, bool doDedx)
+    : Propagator(tcut,
+                 doDedx,
+                 (tcut >= 0 ? std::shared_ptr<const Interactor>(new InteractPlane(tcut)) :
+                              std::shared_ptr<const Interactor>()))
+    , fPropYZLine(tcut, doDedx)
+    , fPropYZPlane(tcut, doDedx)
+    , fPropXYZPlane(tcut, doDedx)
   {}
 
   /// Destructor.
-  PropAny::~PropAny()
-  {}
+  PropAny::~PropAny() {}
 
   /// Propagate without error.
   /// Optionally return propagation matrix and noise matrix.
@@ -55,11 +55,11 @@ namespace trkf {
   ///
   boost::optional<double>
   PropAny::short_vec_prop(KTrack& trk,
-			  const std::shared_ptr<const Surface>& psurf,
-			  Propagator::PropDirection dir,
-			  bool doDedx,
-			  TrackMatrix* prop_matrix,
-			  TrackError* noise_matrix) const
+                          const std::shared_ptr<const Surface>& psurf,
+                          Propagator::PropDirection dir,
+                          bool doDedx,
+                          TrackMatrix* prop_matrix,
+                          TrackError* noise_matrix) const
   {
     // Default result.
 
@@ -67,11 +67,11 @@ namespace trkf {
 
     // Test the type of the destination surface.
 
-    if(dynamic_cast<const SurfYZLine*>(&*psurf))
+    if (dynamic_cast<const SurfYZLine*>(&*psurf))
       result = fPropYZLine.short_vec_prop(trk, psurf, dir, doDedx, prop_matrix, noise_matrix);
-    else if(dynamic_cast<const SurfYZPlane*>(&*psurf))
+    else if (dynamic_cast<const SurfYZPlane*>(&*psurf))
       result = fPropYZPlane.short_vec_prop(trk, psurf, dir, doDedx, prop_matrix, noise_matrix);
-    else if(dynamic_cast<const SurfXYZPlane*>(&*psurf))
+    else if (dynamic_cast<const SurfXYZPlane*>(&*psurf))
       result = fPropXYZPlane.short_vec_prop(trk, psurf, dir, doDedx, prop_matrix, noise_matrix);
     else
       throw cet::exception("PropAny") << "Destination surface has unknown type.\n";
@@ -96,8 +96,8 @@ namespace trkf {
   ///
   boost::optional<double>
   PropAny::origin_vec_prop(KTrack& trk,
-			   const std::shared_ptr<const Surface>& porient,
-			   TrackMatrix* prop_matrix) const
+                           const std::shared_ptr<const Surface>& porient,
+                           TrackMatrix* prop_matrix) const
   {
     // Default result.
 
@@ -105,11 +105,11 @@ namespace trkf {
 
     // Test the type of the destination surface.
 
-    if(dynamic_cast<const SurfYZLine*>(&*porient))
+    if (dynamic_cast<const SurfYZLine*>(&*porient))
       result = fPropYZLine.origin_vec_prop(trk, porient, prop_matrix);
-    else if(dynamic_cast<const SurfYZPlane*>(&*porient))
+    else if (dynamic_cast<const SurfYZPlane*>(&*porient))
       result = fPropYZPlane.origin_vec_prop(trk, porient, prop_matrix);
-    else if(dynamic_cast<const SurfXYZPlane*>(&*porient))
+    else if (dynamic_cast<const SurfXYZPlane*>(&*porient))
       result = fPropXYZPlane.origin_vec_prop(trk, porient, prop_matrix);
     else
       throw cet::exception("PropAny") << "Destination surface has unknown type.\n";

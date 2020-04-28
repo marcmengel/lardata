@@ -9,10 +9,10 @@
 ////////////////////////////////////////////////////////////////////////
 
 #include "lardata/RecoObjects/KHitWireX.h"
-#include "lardata/RecoObjects/SurfWireX.h"
+#include "cetlib_except/exception.h"
 #include "larcore/Geometry/Geometry.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
-#include "cetlib_except/exception.h"
+#include "lardata/RecoObjects/SurfWireX.h"
 
 namespace trkf {
 
@@ -27,13 +27,12 @@ namespace trkf {
   /// be specified to allow measurements to whare surfaces to save
   /// memory.
   ///
-  KHitWireX::KHitWireX(const art::Ptr<recob::Hit>& hit,
-		       const std::shared_ptr<const Surface>& psurf) :
-    KHit(psurf),
-    fHit(hit)
+  KHitWireX::KHitWireX(const art::Ptr<recob::Hit>& hit, const std::shared_ptr<const Surface>& psurf)
+    : KHit(psurf), fHit(hit)
   {
     // Get services.
-    const detinfo::DetectorProperties*  detprop = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->provider();
+    const detinfo::DetectorProperties* detprop =
+      art::ServiceHandle<detinfo::DetectorPropertiesService const>()->provider();
 
     // Extract wire id.
     geo::WireID wireid = hit->WireID();
@@ -43,14 +42,14 @@ namespace trkf {
     // update the base class appropriately.  Otherwise, just check
     // that the specified surface agrees with the wire id.
 
-    if(psurf.get() == 0) {
+    if (psurf.get() == 0) {
       std::shared_ptr<const Surface> new_psurf(new SurfWireX(wireid));
       setMeasSurface(new_psurf);
     }
     else {
       SurfWireX check_surf(wireid);
-      if(!check_surf.isEqual(*psurf))
-	throw cet::exception("KHitWireX") << "Measurement surface doesn't match wire id.\n";
+      if (!check_surf.isEqual(*psurf))
+        throw cet::exception("KHitWireX") << "Measurement surface doesn't match wire id.\n";
     }
 
     setMeasPlane(hit->WireID().Plane);
@@ -63,12 +62,12 @@ namespace trkf {
     // Don't let the time error be less than 1./sqrt(12.) ticks.
     // This should be removed when hit errors are fixed.
 
-    if(terr < 1./std::sqrt(12.))
-      terr = 1./std::sqrt(12.);
+    if (terr < 1. / std::sqrt(12.)) terr = 1. / std::sqrt(12.);
 
     // Calculate position and error.
 
-    double x = detprop->ConvertTicksToX(t, hit->WireID().Plane, hit->WireID().TPC, hit->WireID().Cryostat);
+    double x =
+      detprop->ConvertTicksToX(t, hit->WireID().Plane, hit->WireID().TPC, hit->WireID().Cryostat);
     double xerr = terr * detprop->GetXTicksCoefficient();
 
     // Update measurement vector and error matrix.
@@ -77,7 +76,7 @@ namespace trkf {
     setMeasVector(mvec);
 
     trkf::KSymMatrix<1>::type merr(1);
-    merr(0,0) = xerr * xerr;
+    merr(0, 0) = xerr * xerr;
     setMeasError(merr);
 
     // Set the unique id from a combination of the channel number and the time.
@@ -93,8 +92,8 @@ namespace trkf {
   /// x       - X coordinate.
   /// xerr    - X error.
   ///
-  KHitWireX::KHitWireX(const geo::WireID& wireid, double x, double xerr) :
-    KHit(std::shared_ptr<const Surface>(new SurfWireX(wireid)))
+  KHitWireX::KHitWireX(const geo::WireID& wireid, double x, double xerr)
+    : KHit(std::shared_ptr<const Surface>(new SurfWireX(wireid)))
   {
     // Get services.
 
@@ -110,23 +109,23 @@ namespace trkf {
     setMeasVector(mvec);
 
     trkf::KSymMatrix<1>::type merr(1);
-    merr(0,0) = xerr * xerr;
+    merr(0, 0) = xerr * xerr;
     setMeasError(merr);
   }
 
   /// Destructor.
-  KHitWireX::~KHitWireX()
-  {}
+  KHitWireX::~KHitWireX() {}
 
-  bool KHitWireX::subpredict(const KETrack& tre,
-			     KVector<1>::type& pvec,
-			     KSymMatrix<1>::type& perr,
-			     KHMatrix<1>::type& hmatrix) const
+  bool
+  KHitWireX::subpredict(const KETrack& tre,
+                        KVector<1>::type& pvec,
+                        KSymMatrix<1>::type& perr,
+                        KHMatrix<1>::type& hmatrix) const
   {
     // Make sure that the track surface and the measurement surface are the same.
     // Throw an exception if they are not.
 
-    if(!getMeasSurface()->isEqual(*tre.getSurface()))
+    if (!getMeasSurface()->isEqual(*tre.getSurface()))
       throw cet::exception("KHitWireX") << "Track surface not the same as measurement surface.\n";
 
     // Prediction is just u track perameter and error.
@@ -138,21 +137,21 @@ namespace trkf {
 
     perr.resize(1, /* preserve */ false);
     perr.clear();
-    perr(0,0) = tre.getError()(0,0);
+    perr(0, 0) = tre.getError()(0, 0);
 
     // Update prediction error to include contribution from track slope.
 
     art::ServiceHandle<geo::Geometry const> geom;
     double pitch = geom->WirePitch();
     double slope = tre.getVector()(2);
-    double slopevar = pitch*pitch * slope*slope / 12.;
-    perr(0,0) += slopevar;
+    double slopevar = pitch * pitch * slope * slope / 12.;
+    perr(0, 0) += slopevar;
 
     // Hmatrix - du/du = 1., all others are zero.
 
     hmatrix.resize(1, size, /* preserve */ false);
     hmatrix.clear();
-    hmatrix(0,0) = 1.;
+    hmatrix(0, 0) = 1.;
 
     return true;
   }

@@ -16,16 +16,14 @@
 #ifndef KHITCONTAINERWIRELINE_H
 #define KHITCONTAINERWIRELINE_H
 
+#include "canvas/Persistency/Common/PtrVector.h"
 #include "lardata/RecoObjects/KHitContainer.h"
 #include "lardataobj/RecoBase/Hit.h"
-#include "canvas/Persistency/Common/PtrVector.h"
 
 namespace trkf {
 
-  class KHitContainerWireLine : public KHitContainer
-  {
+  class KHitContainerWireLine : public KHitContainer {
   public:
-
     /// Default constructor.
     KHitContainerWireLine();
 

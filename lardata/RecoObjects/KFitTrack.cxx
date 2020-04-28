@@ -14,11 +14,7 @@
 namespace trkf {
 
   /// Default constructor.
-  KFitTrack::KFitTrack() :
-    fPath(0.),
-    fChisq(0.),
-    fStat(INVALID)
-  {}
+  KFitTrack::KFitTrack() : fPath(0.), fChisq(0.), fStat(INVALID) {}
 
   /// Initializing constructor.
   ///
@@ -29,19 +25,12 @@ namespace trkf {
   /// chisq - Fit chisquare.
   /// stat  - Fit status.
   ///
-  KFitTrack::KFitTrack(const KETrack& tre,
-		       double s,
-		       double chisq,
-		       FitStatus stat) :
-    KETrack(tre),
-    fPath(s),
-    fChisq(chisq),
-    fStat(stat)
+  KFitTrack::KFitTrack(const KETrack& tre, double s, double chisq, FitStatus stat)
+    : KETrack(tre), fPath(s), fChisq(chisq), fStat(stat)
   {}
 
   /// Destructor.
-  KFitTrack::~KFitTrack()
-  {}
+  KFitTrack::~KFitTrack() {}
 
   /// Combine two tracks.
   ///
@@ -73,12 +62,13 @@ namespace trkf {
   /// The two tracks being combined should be on the same surface
   /// (throw exception if not).
   ///
-  bool KFitTrack::combineFit(const KFitTrack& trf)
+  bool
+  KFitTrack::combineFit(const KFitTrack& trf)
   {
     // Make sure that the two track surfaces are the same.
     // Throw an exception if they are not.
 
-    if(!getSurface()->isEqual(*trf.getSurface()))
+    if (!getSurface()->isEqual(*trf.getSurface()))
       throw cet::exception("KFitTrack") << "Track combination surfaces are not the same.\n";
 
     // Default result failure.
@@ -91,16 +81,16 @@ namespace trkf {
     FitStatus stat1 = getStat();
     FitStatus stat2 = trf.getStat();
     FitStatus statu = UNKNOWN;
-    if((stat1 == FORWARD && stat2 == BACKWARD_PREDICTED) ||
-       (stat1 == FORWARD_PREDICTED && stat2 == BACKWARD) ||
-       (stat1 == BACKWARD && stat2 == FORWARD_PREDICTED) ||
-       (stat1 == BACKWARD_PREDICTED && stat2 == FORWARD))
+    if ((stat1 == FORWARD && stat2 == BACKWARD_PREDICTED) ||
+        (stat1 == FORWARD_PREDICTED && stat2 == BACKWARD) ||
+        (stat1 == BACKWARD && stat2 == FORWARD_PREDICTED) ||
+        (stat1 == BACKWARD_PREDICTED && stat2 == FORWARD))
       statu = OPTIMAL;
-    else if(stat1 == FORWARD_PREDICTED && stat2 == BACKWARD_PREDICTED)
+    else if (stat1 == FORWARD_PREDICTED && stat2 == BACKWARD_PREDICTED)
       statu = OPTIMAL_PREDICTED;
     else
       statu = UNKNOWN;
-    if(statu != UNKNOWN) {
+    if (statu != UNKNOWN) {
 
       // Update track parameters and error matrix.
 
@@ -108,10 +98,10 @@ namespace trkf {
 
       // Update status and chisquare.
 
-      if(!!chisq) {
-	result = true;
-	fStat = statu;
-	fChisq = fChisq + trf.getChisq() + *chisq;
+      if (!!chisq) {
+        result = true;
+        fStat = statu;
+        fChisq = fChisq + trf.getChisq() + *chisq;
       }
     }
 
@@ -121,23 +111,30 @@ namespace trkf {
   }
 
   /// Printout
-  std::ostream& KFitTrack::Print(std::ostream& out, bool doTitle) const
+  std::ostream&
+  KFitTrack::Print(std::ostream& out, bool doTitle) const
   {
-    if(doTitle)
-      out << "KFitTrack:\n";
+    if (doTitle) out << "KFitTrack:\n";
 
     // Print information specific to this class.
 
     out << "  Distance = " << fPath << "\n";
     out << "  Chisquare = " << fChisq << "\n";
-    out << "  Status = " << (fStat == INVALID ? "INVALID" :
-			     (fStat == UNKNOWN ? "UNKNOWN" :
-			      (fStat == FORWARD ? "FORWARD" :
-			       (fStat == FORWARD_PREDICTED ? "FORWARD_PREDICTED" :
-				(fStat == BACKWARD ? "BACKWARD" :
-				 (fStat == BACKWARD_PREDICTED ? "BACKWARD_PREDICTED" :
-				  (fStat == OPTIMAL ? "OPTIMAL" :
-				   "OPTIMAL_PREDICTED"))))))) << "\n";
+    out << "  Status = "
+        << (fStat == INVALID ?
+              "INVALID" :
+              (fStat == UNKNOWN ?
+                 "UNKNOWN" :
+                 (fStat == FORWARD ?
+                    "FORWARD" :
+                    (fStat == FORWARD_PREDICTED ?
+                       "FORWARD_PREDICTED" :
+                       (fStat == BACKWARD ?
+                          "BACKWARD" :
+                          (fStat == BACKWARD_PREDICTED ?
+                             "BACKWARD_PREDICTED" :
+                             (fStat == OPTIMAL ? "OPTIMAL" : "OPTIMAL_PREDICTED")))))))
+        << "\n";
 
     // Print base class.
 

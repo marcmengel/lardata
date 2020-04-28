@@ -20,10 +20,8 @@
 
 namespace trkf {
 
-  class InteractPlane : public trkf::Interactor
-  {
+  class InteractPlane : public trkf::Interactor {
   public:
-
     /// Constructor.
     InteractPlane(double tcut);
 
@@ -33,7 +31,11 @@ namespace trkf {
     // Overrides.
 
     /// Clone method.
-    Interactor* clone() const {return new InteractPlane(*this);}
+    Interactor*
+    clone() const
+    {
+      return new InteractPlane(*this);
+    }
 
     /// Calculate noise matrix.
     virtual bool noise(const KTrack& trk, double s, TrackError& noise_matrix) const;

@@ -8,15 +8,14 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include <cmath>
 #include "lardata/RecoObjects/KETrack.h"
 #include "cetlib_except/exception.h"
+#include <cmath>
 
 namespace trkf {
 
   /// Default constructor.
-  KETrack::KETrack()
-  {}
+  KETrack::KETrack() {}
 
   /// Constructor - specify surface only.
   ///
@@ -24,9 +23,7 @@ namespace trkf {
   ///
   /// psurf - Surface pointer.
   ///
-  KETrack::KETrack(const std::shared_ptr<const Surface>& psurf) :
-    KTrack(psurf)
-  {}
+  KETrack::KETrack(const std::shared_ptr<const Surface>& psurf) : KTrack(psurf) {}
 
   /// Constructor - surface + track parameters + error matrix.
   ///
@@ -39,12 +36,11 @@ namespace trkf {
   /// pdg   - Pdg code.
   ///
   KETrack::KETrack(const std::shared_ptr<const Surface>& psurf,
-		   const TrackVector& vec,
-		   const TrackError& err,
-		   Surface::TrackDirection dir,
-		   int pdg) :
-    KTrack(psurf, vec, dir, pdg),
-    fErr(err)
+                   const TrackVector& vec,
+                   const TrackError& err,
+                   Surface::TrackDirection dir,
+                   int pdg)
+    : KTrack(psurf, vec, dir, pdg), fErr(err)
   {}
 
   /// Constructor - KTrack + error matrix.
@@ -54,14 +50,10 @@ namespace trkf {
   /// trk - KTrack.
   /// err - Track error matrix.
   ///
-  KETrack::KETrack(const KTrack& trk, const TrackError& err) :
-    KTrack(trk),
-    fErr(err)
-  {}
+  KETrack::KETrack(const KTrack& trk, const TrackError& err) : KTrack(trk), fErr(err) {}
 
   /// Destructor.
-  KETrack::~KETrack()
-  {}
+  KETrack::~KETrack() {}
 
   /// Calculate track pointing error (sigma, in radians).
   ///
@@ -71,9 +63,10 @@ namespace trkf {
   /// surface class, since this class doesn't know what the track
   /// parameters mean.
   ///
-  double KETrack::PointingError() const
+  double
+  KETrack::PointingError() const
   {
-    if(!isValid())
+    if (!isValid())
       throw cet::exception("KETrack") << "Pointing error requested for invalid track.\n";
     return getSurface()->PointingError(getVector(), fErr);
   }
@@ -92,12 +85,13 @@ namespace trkf {
   /// because the sum of the two error matrices is singular, in which
   /// case the success flag embedded in the return value is false.
   ///
-  boost::optional<double> KETrack::combineTrack(const KETrack& tre)
+  boost::optional<double>
+  KETrack::combineTrack(const KETrack& tre)
   {
     // Make sure that the two track surfaces are the same.
     // Throw an exception if they are not.
 
-    if(!getSurface()->isEqual(*tre.getSurface()))
+    if (!getSurface()->isEqual(*tre.getSurface()))
       throw cet::exception("KETrack") << "Track combination surfaces are not the same.\n";
 
     // Default result is failure.
@@ -119,17 +113,17 @@ namespace trkf {
     // Calculate the traces of the error matrices.
 
     double tr1 = 0;
-    for(unsigned int i=0; i<err1->size1(); ++i)
-      tr1 += (*err1)(i,i);
+    for (unsigned int i = 0; i < err1->size1(); ++i)
+      tr1 += (*err1)(i, i);
 
     double tr2 = 0;
-    for(unsigned int i=0; i<err2->size1(); ++i)
-      tr2 += (*err2)(i,i);
+    for (unsigned int i = 0; i < err2->size1(); ++i)
+      tr2 += (*err2)(i, i);
 
     // Define vec1, err1 as belong to the better measured track.
     // Swap if necessary.
 
-    if(tr1 > tr2) {
+    if (tr1 > tr2) {
       const TrackVector* tvec = vec1;
       vec1 = vec2;
       vec2 = tvec;
@@ -147,7 +141,7 @@ namespace trkf {
     // This is the only place where a detectable failure can occur.
 
     bool ok = syminvert(derr);
-    if(ok) {
+    if (ok) {
 
       // Calculate updated state vector.
       // vec1 = vec1 - err1 * derr * dvec
@@ -176,8 +170,7 @@ namespace trkf {
 
     // Final validity check.
 
-    if(!isValid())
-      result = boost::optional<double>(false, 0.);
+    if (!isValid()) result = boost::optional<double>(false, 0.);
 
     // Done.
 
@@ -185,10 +178,10 @@ namespace trkf {
   }
 
   /// Printout
-  std::ostream& KETrack::Print(std::ostream& out, bool doTitle) const
+  std::ostream&
+  KETrack::Print(std::ostream& out, bool doTitle) const
   {
-    if(doTitle)
-      out << "KETrack:\n";
+    if (doTitle) out << "KETrack:\n";
 
     // Print base class.
 
@@ -197,11 +190,10 @@ namespace trkf {
     // Print diagonal errors.
 
     out << "  Diagonal errors:\n"
-	<< "  [";
-    for(unsigned int i = 0; i < fErr.size1(); ++i) {
-      if(i != 0)
-	out << ", ";
-      double err = fErr(i,i);
+        << "  [";
+    for (unsigned int i = 0; i < fErr.size1(); ++i) {
+      if (i != 0) out << ", ";
+      double err = fErr(i, i);
       err = (err >= 0. ? std::sqrt(err) : -std::sqrt(-err));
       out << err;
     }
@@ -210,25 +202,24 @@ namespace trkf {
     // Print correlations.
 
     out << "  Correlation matrix:";
-    for(unsigned int i = 0; i < fErr.size1(); ++i) {
-      if(i == 0)
-	out << "\n  [";
+    for (unsigned int i = 0; i < fErr.size1(); ++i) {
+      if (i == 0)
+        out << "\n  [";
       else
-	out << "\n   ";
-      for(unsigned int j = 0; j <= i; ++j) {
-	if(j != 0)
-	  out << ", ";
-	if(i == j)
-	  out << 1.;
-	else {
-	  double eiijj = fErr(i,i) * fErr(j,j);
-	  double eij = fErr(i,j);
-	  if(eiijj != 0.)
-	    eij /= std::sqrt(std::abs(eiijj));
-	  else
-	    eij = 0.;
-	  out << eij;
-	}
+        out << "\n   ";
+      for (unsigned int j = 0; j <= i; ++j) {
+        if (j != 0) out << ", ";
+        if (i == j)
+          out << 1.;
+        else {
+          double eiijj = fErr(i, i) * fErr(j, j);
+          double eij = fErr(i, j);
+          if (eiijj != 0.)
+            eij /= std::sqrt(std::abs(eiijj));
+          else
+            eij = 0.;
+          out << eij;
+        }
       }
     }
     out << "]\n";

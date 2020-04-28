@@ -64,17 +64,15 @@
 #ifndef KHIT_H
 #define KHIT_H
 
+#include "cetlib_except/exception.h"
 #include "lardata/RecoObjects/KHitBase.h"
 #include "lardata/RecoObjects/Propagator.h"
-#include "cetlib_except/exception.h"
 
 namespace trkf {
 
   template <int N>
-  class KHit : public KHitBase
-  {
+  class KHit : public KHitBase {
   public:
-
     /// Default constructor.
     KHit();
 
@@ -83,8 +81,8 @@ namespace trkf {
 
     /// Fully Initializing Constructor.
     KHit(const std::shared_ptr<const Surface>& psurf,
-	 const typename KVector<N>::type& mvec,
-	 const typename KSymMatrix<N>::type& merr);
+         const typename KVector<N>::type& mvec,
+         const typename KSymMatrix<N>::type& merr);
 
     /// Destructor.
     virtual ~KHit();
@@ -92,39 +90,83 @@ namespace trkf {
     // Modifiers.
 
     /// Set measurement vector.
-    void setMeasVector(const typename KVector<N>::type& mvec) {fMvec = mvec;}
+    void
+    setMeasVector(const typename KVector<N>::type& mvec)
+    {
+      fMvec = mvec;
+    }
 
     /// Set measurement error.
-    void setMeasError(const typename KSymMatrix<N>::type& merr) {fMerr = merr;}
+    void
+    setMeasError(const typename KSymMatrix<N>::type& merr)
+    {
+      fMerr = merr;
+    }
 
     // Accessors.
 
     /// Measurement vector.
-    const typename KVector<N>::type& getMeasVector() const {return fMvec;}
+    const typename KVector<N>::type&
+    getMeasVector() const
+    {
+      return fMvec;
+    }
 
     /// Measurement error matrix.
-    const typename KSymMatrix<N>::type& getMeasError() const {return fMerr;}
+    const typename KSymMatrix<N>::type&
+    getMeasError() const
+    {
+      return fMerr;
+    }
 
     /// Prediction vector.
-    const typename KVector<N>::type& getPredVector() const {return fPvec;}
+    const typename KVector<N>::type&
+    getPredVector() const
+    {
+      return fPvec;
+    }
 
     /// Prediction matrix.
-    const typename KSymMatrix<N>::type& getPredError() const {return fPerr;}
+    const typename KSymMatrix<N>::type&
+    getPredError() const
+    {
+      return fPerr;
+    }
 
     /// Residual vector.
-    const typename KVector<N>::type& getResVector() const {return fRvec;}
+    const typename KVector<N>::type&
+    getResVector() const
+    {
+      return fRvec;
+    }
 
     /// Residual error matrix.
-    const typename KSymMatrix<N>::type& getResError() const {return fRerr;}
+    const typename KSymMatrix<N>::type&
+    getResError() const
+    {
+      return fRerr;
+    }
 
     /// Residual inv. error matrix.
-    const typename KSymMatrix<N>::type& getResInvError() const {return fRinv;}
+    const typename KSymMatrix<N>::type&
+    getResInvError() const
+    {
+      return fRinv;
+    }
 
     /// Kalman H-matrix.
-    const typename KHMatrix<N>::type& getH() const {return fH;}
+    const typename KHMatrix<N>::type&
+    getH() const
+    {
+      return fH;
+    }
 
     /// Incremental chisquare.
-    double getChisq() const {return fChisq;}
+    double
+    getChisq() const
+    {
+      return fChisq;
+    }
 
     // Overrides.
     // Implementation of overrides is found at the bottom of this header.
@@ -139,34 +181,32 @@ namespace trkf {
 
     /// Calculate prediction function (return via arguments).
     virtual bool subpredict(const KETrack& tre,
-			    typename KVector<N>::type& pvec,
-			    typename KSymMatrix<N>::type& perr,
-			    typename KHMatrix<N>::type& hmatrix) const = 0;
+                            typename KVector<N>::type& pvec,
+                            typename KSymMatrix<N>::type& perr,
+                            typename KHMatrix<N>::type& hmatrix) const = 0;
 
     /// Printout
     virtual std::ostream& Print(std::ostream& out, bool doTitle = true) const;
 
   private:
-
     // Attributes.
 
-    typename KVector<N>::type fMvec;             ///< Measurement vector.
-    typename KSymMatrix<N>::type fMerr;          ///< Measurement error matrix.
-    mutable typename KVector<N>::type fPvec;     ///< Prediction vector.
-    mutable typename KSymMatrix<N>::type fPerr;  ///< Prediction  error matrix.
-    mutable typename KVector<N>::type fRvec;     ///< Residual vector.
-    mutable typename KSymMatrix<N>::type fRerr;  ///< Residual error matrix.
-    mutable typename KSymMatrix<N>::type fRinv;  ///< Residual inverse error matrix.
-    mutable typename KHMatrix<N>::type fH;       ///< Kalman H-matrix.
-    mutable double fChisq;                       ///< Incremental chisquare.
+    typename KVector<N>::type fMvec;            ///< Measurement vector.
+    typename KSymMatrix<N>::type fMerr;         ///< Measurement error matrix.
+    mutable typename KVector<N>::type fPvec;    ///< Prediction vector.
+    mutable typename KSymMatrix<N>::type fPerr; ///< Prediction  error matrix.
+    mutable typename KVector<N>::type fRvec;    ///< Residual vector.
+    mutable typename KSymMatrix<N>::type fRerr; ///< Residual error matrix.
+    mutable typename KSymMatrix<N>::type fRinv; ///< Residual inverse error matrix.
+    mutable typename KHMatrix<N>::type fH;      ///< Kalman H-matrix.
+    mutable double fChisq;                      ///< Incremental chisquare.
   };
 
   // Method implementations.
 
   /// Default constructor.
   template <int N>
-  KHit<N>::KHit() :
-    fChisq(0.)
+  KHit<N>::KHit() : fChisq(0.)
   {}
 
   /// Initializing Constructor -- surface only.
@@ -175,10 +215,8 @@ namespace trkf {
   ///
   /// psurf - Surface pointer.
   ///
-  template<int N>
-  KHit<N>::KHit(const std::shared_ptr<const Surface>& psurf) :
-    KHitBase(psurf),
-    fChisq(0.)
+  template <int N>
+  KHit<N>::KHit(const std::shared_ptr<const Surface>& psurf) : KHitBase(psurf), fChisq(0.)
   {}
 
   /// Fully Initializing Constructor.
@@ -189,14 +227,11 @@ namespace trkf {
   /// mvec  - Measurement vector.
   /// merr  - Measurement error.
   ///
-  template<int N>
+  template <int N>
   KHit<N>::KHit(const std::shared_ptr<const Surface>& psurf,
-		const typename KVector<N>::type& mvec,
-		const typename KSymMatrix<N>::type& merr) :
-    KHitBase(psurf),
-    fMvec(mvec),
-    fMerr(merr),
-    fChisq(0.)
+                const typename KVector<N>::type& mvec,
+                const typename KSymMatrix<N>::type& merr)
+    : KHitBase(psurf), fMvec(mvec), fMerr(merr), fChisq(0.)
   {}
 
   /// Destructor.
@@ -213,7 +248,8 @@ namespace trkf {
   /// ref  - Reference track.
   ///
   template <int N>
-    bool KHit<N>::predict(const KETrack& tre, const Propagator* prop, const KTrack* ref) const
+  bool
+  KHit<N>::predict(const KETrack& tre, const Propagator* prop, const KTrack* ref) const
   {
     // Update the prediction surface to be the track surface.
 
@@ -229,7 +265,7 @@ namespace trkf {
     // First test whether the prediction surface matches the
     // measurement surface.
 
-    if(getMeasSurface()->isEqual(*fPredSurf)) {
+    if (getMeasSurface()->isEqual(*fPredSurf)) {
 
       // Prediction and measurement surfaces agree.
       //Just call subpredict method (don't do propagation).
@@ -242,8 +278,9 @@ namespace trkf {
       // internal propagation will be required.  Throw an exception if
       // no propagator was provided.
 
-      if(prop == 0)
-	throw cet::exception("KHit") << "Track surface does not match measurement surface and no propagator.\n";
+      if (prop == 0)
+        throw cet::exception("KHit")
+          << "Track surface does not match measurement surface and no propagator.\n";
 
       // First make a copy of the original KETrack.
 
@@ -253,11 +290,10 @@ namespace trkf {
 
       KTrack refprop;
       KTrack* prefprop = 0;
-      if(ref != 0) {
-	refprop = *ref;
-	prefprop = &refprop;
+      if (ref != 0) {
+        refprop = *ref;
+        prefprop = &refprop;
       }
-
 
       // Make a no-noise, no-dE/dx propagation to the measurement
       // surface.  But do calculate the propagation matrix, which we
@@ -265,31 +301,30 @@ namespace trkf {
       // class.
 
       TrackMatrix prop_matrix;
-      boost::optional<double> dist = prop->err_prop(treprop, getMeasSurface(),
-						    Propagator::UNKNOWN, false,
-						    prefprop, &prop_matrix);
+      boost::optional<double> dist = prop->err_prop(
+        treprop, getMeasSurface(), Propagator::UNKNOWN, false, prefprop, &prop_matrix);
       ok = !!dist;
-      if(ok) {
+      if (ok) {
 
-	// Update prediction distance.
+        // Update prediction distance.
 
-	fPredDist = *dist;
+        fPredDist = *dist;
 
-	// Now we are ready to calculate the prediction on the
-	// measurement surface.
+        // Now we are ready to calculate the prediction on the
+        // measurement surface.
 
-	typename KHMatrix<N>::type hmatrix;
-	ok = subpredict(treprop, fPvec, fPerr, hmatrix);
-	if(ok) {
+        typename KHMatrix<N>::type hmatrix;
+        ok = subpredict(treprop, fPvec, fPerr, hmatrix);
+        if (ok) {
 
-	  // Use the propagation matrix to transform the H-matrix back
-	  // to the prediction surface.
+          // Use the propagation matrix to transform the H-matrix back
+          // to the prediction surface.
 
-	  fH = prod(hmatrix, prop_matrix);
-	}
+          fH = prod(hmatrix, prop_matrix);
+        }
       }
     }
-    if(ok) {
+    if (ok) {
 
       // Update residual
 
@@ -297,19 +332,19 @@ namespace trkf {
       fRerr = fMerr + fPerr;
       fRinv = fRerr;
       ok = syminvert(fRinv);
-      if(ok) {
+      if (ok) {
 
-	// Calculate incremental chisquare.
+        // Calculate incremental chisquare.
 
-	// (workaround: if we use the copy constructor, gcc emits a spurious warning)
-//	typename KVector<N>::type rtemp = prod(fRinv, fRvec);
-	fChisq = inner_prod(fRvec, prod(fRinv, fRvec));
+        // (workaround: if we use the copy constructor, gcc emits a spurious warning)
+        //	typename KVector<N>::type rtemp = prod(fRinv, fRvec);
+        fChisq = inner_prod(fRvec, prod(fRinv, fRvec));
       }
     }
 
     // If a problem occured at any step, clear the prediction surface pointer.
 
-    if(!ok) {
+    if (!ok) {
       fPredSurf.reset();
       fPredDist = 0.;
     }
@@ -326,12 +361,13 @@ namespace trkf {
   /// tre - Track to be updated.
   ///
   template <int N>
-  void KHit<N>::update(KETrack& tre) const
+  void
+  KHit<N>::update(KETrack& tre) const
   {
     // Make sure that the track surface and the prediction surface are the same.
     // Throw an exception if they are not.
 
-    if(!getPredSurface()->isEqual(*tre.getSurface()))
+    if (!getPredSurface()->isEqual(*tre.getSurface()))
       throw cet::exception("KHit") << "Track surface not the same as prediction surface.\n";
 
     const TrackVector& tvec = tre.getVector();
@@ -369,10 +405,10 @@ namespace trkf {
 
   /// Printout
   template <int N>
-  std::ostream& KHit<N>::Print(std::ostream& out, bool doTitle) const
+  std::ostream&
+  KHit<N>::Print(std::ostream& out, bool doTitle) const
   {
-    if(doTitle)
-      out << "KHit<" << N << ">:\n";
+    if (doTitle) out << "KHit<" << N << ">:\n";
 
     // Print base class.
 
@@ -381,10 +417,9 @@ namespace trkf {
     // Print measurement vector.
 
     out << "  Measurement vector:\n"
-	<< "  [";
-    for(unsigned int i = 0; i < fMvec.size(); ++i) {
-      if(i != 0)
-	out << ", ";
+        << "  [";
+    for (unsigned int i = 0; i < fMvec.size(); ++i) {
+      if (i != 0) out << ", ";
       out << fMvec(i);
     }
     out << "]\n";
@@ -392,11 +427,10 @@ namespace trkf {
     // Print diagonal measurement  errors.
 
     out << "  Diagonal measurement errors:\n"
-	<< "  [";
-    for(unsigned int i = 0; i < fMerr.size1(); ++i) {
-      if(i != 0)
-	out << ", ";
-      double err = fMerr(i,i);
+        << "  [";
+    for (unsigned int i = 0; i < fMerr.size1(); ++i) {
+      if (i != 0) out << ", ";
+      double err = fMerr(i, i);
       err = (err >= 0. ? std::sqrt(err) : -std::sqrt(-err));
       out << err;
     }
@@ -404,28 +438,27 @@ namespace trkf {
 
     // Print measurement correlations.
 
-    if(fMerr.size1() > 1) {
+    if (fMerr.size1() > 1) {
       out << "  Measurement correlation matrix:";
-      for(unsigned int i = 0; i < fMerr.size1(); ++i) {
-	if(i == 0)
-	  out << "\n  [";
-	else
-	  out << "\n   ";
-	for(unsigned int j = 0; j <= i; ++j) {
-	  if(j != 0)
-	    out << ", ";
-	  if(i == j)
-	    out << 1.;
-	  else {
-	    double eiijj = fMerr(i,i) * fMerr(j,j);
-	    double eij = fMerr(i,j);
-	    if(eiijj != 0.)
-	      eij /= std::sqrt(std::abs(eiijj));
-	    else
-	      eij = 0.;
-	    out << eij;
-	  }
-	}
+      for (unsigned int i = 0; i < fMerr.size1(); ++i) {
+        if (i == 0)
+          out << "\n  [";
+        else
+          out << "\n   ";
+        for (unsigned int j = 0; j <= i; ++j) {
+          if (j != 0) out << ", ";
+          if (i == j)
+            out << 1.;
+          else {
+            double eiijj = fMerr(i, i) * fMerr(j, j);
+            double eij = fMerr(i, j);
+            if (eiijj != 0.)
+              eij /= std::sqrt(std::abs(eiijj));
+            else
+              eij = 0.;
+            out << eij;
+          }
+        }
       }
       out << "]\n";
     }
@@ -433,10 +466,9 @@ namespace trkf {
     // Print prediction vector.
 
     out << "  Prediction vector:\n"
-	<< "  [";
-    for(unsigned int i = 0; i < fPvec.size(); ++i) {
-      if(i != 0)
-	out << ", ";
+        << "  [";
+    for (unsigned int i = 0; i < fPvec.size(); ++i) {
+      if (i != 0) out << ", ";
       out << fPvec(i);
     }
     out << "]\n";
@@ -444,11 +476,10 @@ namespace trkf {
     // Print diagonal prediction  errors.
 
     out << "  Diagonal prediction errors:\n"
-	<< "  [";
-    for(unsigned int i = 0; i < fPerr.size1(); ++i) {
-      if(i != 0)
-	out << ", ";
-      double err = fPerr(i,i);
+        << "  [";
+    for (unsigned int i = 0; i < fPerr.size1(); ++i) {
+      if (i != 0) out << ", ";
+      double err = fPerr(i, i);
       err = (err >= 0. ? std::sqrt(err) : -std::sqrt(-err));
       out << err;
     }
@@ -456,28 +487,27 @@ namespace trkf {
 
     // Print prediction correlations.
 
-    if(fPerr.size1() > 1) {
+    if (fPerr.size1() > 1) {
       out << "  Prediction correlation matrix:";
-      for(unsigned int i = 0; i < fPerr.size1(); ++i) {
-	if(i == 0)
-	  out << "\n  [";
-	else
-	  out << "\n   ";
-	for(unsigned int j = 0; j <= i; ++j) {
-	  if(j != 0)
-	    out << ", ";
-	  if(i == j)
-	    out << 1.;
-	  else {
-	    double eiijj = fPerr(i,i) * fPerr(j,j);
-	    double eij = fPerr(i,j);
-	    if(eiijj != 0.)
-	      eij /= std::sqrt(std::abs(eiijj));
-	    else
-	      eij = 0.;
-	    out << eij;
-	  }
-	}
+      for (unsigned int i = 0; i < fPerr.size1(); ++i) {
+        if (i == 0)
+          out << "\n  [";
+        else
+          out << "\n   ";
+        for (unsigned int j = 0; j <= i; ++j) {
+          if (j != 0) out << ", ";
+          if (i == j)
+            out << 1.;
+          else {
+            double eiijj = fPerr(i, i) * fPerr(j, j);
+            double eij = fPerr(i, j);
+            if (eiijj != 0.)
+              eij /= std::sqrt(std::abs(eiijj));
+            else
+              eij = 0.;
+            out << eij;
+          }
+        }
       }
       out << "]\n";
     }
@@ -485,10 +515,9 @@ namespace trkf {
     // Print residual vector.
 
     out << "  Residual vector:\n"
-	<< "  [";
-    for(unsigned int i = 0; i < fRvec.size(); ++i) {
-      if(i != 0)
-	out << ", ";
+        << "  [";
+    for (unsigned int i = 0; i < fRvec.size(); ++i) {
+      if (i != 0) out << ", ";
       out << fRvec(i);
     }
     out << "]\n";
@@ -496,11 +525,10 @@ namespace trkf {
     // Print diagonal residual  errors.
 
     out << "  Diagonal residual errors:\n"
-	<< "  [";
-    for(unsigned int i = 0; i < fRerr.size1(); ++i) {
-      if(i != 0)
-	out << ", ";
-      double err = fRerr(i,i);
+        << "  [";
+    for (unsigned int i = 0; i < fRerr.size1(); ++i) {
+      if (i != 0) out << ", ";
+      double err = fRerr(i, i);
       err = (err >= 0. ? std::sqrt(err) : -std::sqrt(-err));
       out << err;
     }
@@ -508,28 +536,27 @@ namespace trkf {
 
     // Print residual correlations.
 
-    if(fRerr.size1() > 1) {
+    if (fRerr.size1() > 1) {
       out << "  Residual correlation matrix:";
-      for(unsigned int i = 0; i < fRerr.size1(); ++i) {
-	if(i == 0)
-	  out << "\n  [";
-	else
-	  out << "\n   ";
-	for(unsigned int j = 0; j <= i; ++j) {
-	  if(j != 0)
-	    out << ", ";
-	  if(i == j)
-	    out << 1.;
-	  else {
-	    double eiijj = fRerr(i,i) * fRerr(j,j);
-	    double eij = fRerr(i,j);
-	    if(eiijj != 0.)
-	      eij /= std::sqrt(std::abs(eiijj));
-	    else
-	      eij = 0.;
-	    out << eij;
-	  }
-	}
+      for (unsigned int i = 0; i < fRerr.size1(); ++i) {
+        if (i == 0)
+          out << "\n  [";
+        else
+          out << "\n   ";
+        for (unsigned int j = 0; j <= i; ++j) {
+          if (j != 0) out << ", ";
+          if (i == j)
+            out << 1.;
+          else {
+            double eiijj = fRerr(i, i) * fRerr(j, j);
+            double eij = fRerr(i, j);
+            if (eiijj != 0.)
+              eij /= std::sqrt(std::abs(eiijj));
+            else
+              eij = 0.;
+            out << eij;
+          }
+        }
       }
       out << "]\n";
     }

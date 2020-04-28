@@ -8,9 +8,9 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-#include <cmath>
 #include "lardata/RecoObjects/InteractGeneral.h"
 #include "lardata/RecoObjects/SurfXYZPlane.h"
+#include <cmath>
 
 namespace trkf {
 
@@ -20,15 +20,12 @@ namespace trkf {
   ///
   /// tcut - Maximum delta ray energy.
   ///
-  InteractGeneral::InteractGeneral(double tcut) :
-    Interactor(tcut),
-    fInteract(tcut),
-    fProp(-1., false)
+  InteractGeneral::InteractGeneral(double tcut)
+    : Interactor(tcut), fInteract(tcut), fProp(-1., false)
   {}
 
   /// Destructor.
-  InteractGeneral::~InteractGeneral()
-  {}
+  InteractGeneral::~InteractGeneral() {}
 
   /// Calculate noise matrix.
   ///
@@ -49,7 +46,8 @@ namespace trkf {
   /// Then calculate the noise matrix on that surface and
   /// transform back to the original surface.
   ///
-  bool InteractGeneral::noise(const KTrack& trk, double s, TrackError& noise_matrix) const
+  bool
+  InteractGeneral::noise(const KTrack& trk, double s, TrackError& noise_matrix) const
   {
     // Get track position and direction.
 
@@ -61,20 +59,19 @@ namespace trkf {
     // Generate a SurfXYZPlane with origin at current track position, and
     // normal to current track direction.
 
-    std::shared_ptr<Surface> psurf(new SurfXYZPlane(xyz[0], xyz[1], xyz[2],
-						    mom[0], mom[1], mom[2]));
+    std::shared_ptr<Surface> psurf(
+      new SurfXYZPlane(xyz[0], xyz[1], xyz[2], mom[0], mom[1], mom[2]));
 
     // Propagate track to newly created surface (zero-distance propagation).
 
     TrackMatrix prop_matrix;
     KTrack temp_trk = trk;
-    boost::optional<double> result = fProp.short_vec_prop(temp_trk, psurf, Propagator::UNKNOWN,
-							  false, &prop_matrix);
+    boost::optional<double> result =
+      fProp.short_vec_prop(temp_trk, psurf, Propagator::UNKNOWN, false, &prop_matrix);
 
     // Return failure if propagation did not succeed.
 
-    if(!result)
-      return false;
+    if (!result) return false;
 
     // Calculate noise on plane surface.
 

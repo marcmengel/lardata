@@ -15,18 +15,18 @@
 namespace trkf {
 
   /// Default Constructor.
-  KHitContainer::KHitContainer()
-  {}
+  KHitContainer::KHitContainer() {}
 
   /// Destructor.
-  KHitContainer::~KHitContainer()
+  KHitContainer::~KHitContainer() {}
+
+  void
+  fill(const art::PtrVector<recob::Hit>& hits, int only_plane)
   {}
 
- void fill(const art::PtrVector<recob::Hit>& hits, int only_plane)
-    {}
-
   /// Clear all lists.
-  void KHitContainer::clear()
+  void
+  KHitContainer::clear()
   {
     fSorted.clear();
     fUnsorted.clear();
@@ -34,7 +34,8 @@ namespace trkf {
   }
 
   /// Move all objects to unsorted list (from sorted and unused lists).
-  void KHitContainer::reset()
+  void
+  KHitContainer::reset()
   {
     fUnsorted.splice(fUnsorted.end(), fSorted);
     fUnsorted.splice(fUnsorted.end(), fUnused);
@@ -49,22 +50,23 @@ namespace trkf {
   /// prop        - Propagator.
   /// dir         - Propagation direction.
   ///
-  void KHitContainer::sort(const KTrack& trk, bool addUnsorted,
-			   const Propagator* prop,
-			   Propagator::PropDirection dir)
+  void
+  KHitContainer::sort(const KTrack& trk,
+                      bool addUnsorted,
+                      const Propagator* prop,
+                      Propagator::PropDirection dir)
   {
-    if(!prop)
-      throw cet::exception("KHitContainer") << __func__ << ": no propagator" << "\n";
+    if (!prop)
+      throw cet::exception("KHitContainer") << __func__ << ": no propagator"
+                                            << "\n";
 
     // Maybe transfer all objects in unsorted list to the sorted list.
 
-    if(addUnsorted)
-      fSorted.splice(fSorted.end(), fUnsorted);
+    if (addUnsorted) fSorted.splice(fSorted.end(), fUnsorted);
 
     // Loop over objects in sorted list.
 
-    for(std::list<KHitGroup>::iterator igr = fSorted.begin();
-	igr != fSorted.end();) {
+    for (std::list<KHitGroup>::iterator igr = fSorted.begin(); igr != fSorted.end();) {
 
       KHitGroup& gr = *igr;
 
@@ -77,24 +79,24 @@ namespace trkf {
 
       KTrack trkp = trk;
       boost::optional<double> dist = prop->vec_prop(trkp, psurf, dir, false, 0, 0);
-      if(!dist) {
+      if (!dist) {
 
-	// If propagation failed, reset the path flag for this surface
-	// and move the KHitGroup to the unsorted list.  Be careful to
-	// keep the list iterator valid.
+        // If propagation failed, reset the path flag for this surface
+        // and move the KHitGroup to the unsorted list.  Be careful to
+        // keep the list iterator valid.
 
-	gr.setPath(false, 0.);
-	std::list<KHitGroup>::iterator it = igr;
-	++igr;
-	fUnsorted.splice(fUnsorted.end(), fSorted, it);
+        gr.setPath(false, 0.);
+        std::list<KHitGroup>::iterator it = igr;
+        ++igr;
+        fUnsorted.splice(fUnsorted.end(), fSorted, it);
       }
       else {
 
-	// Otherwise (if propagation succeeded), set the path distance
-	// and advance the iterator to the next KHitGroup.
+        // Otherwise (if propagation succeeded), set the path distance
+        // and advance the iterator to the next KHitGroup.
 
-	gr.setPath(true, *dist);
-	++igr;
+        gr.setPath(true, *dist);
+        ++igr;
       }
     }
 
@@ -104,7 +106,8 @@ namespace trkf {
   }
 
   /// Return the plane with the most KHitGroups in the unsorted list.
-  unsigned int KHitContainer::getPreferredPlane() const
+  unsigned int
+  KHitContainer::getPreferredPlane() const
   {
     // Count hits in each plane.
 
@@ -112,8 +115,8 @@ namespace trkf {
 
     // Loop over KHitGroups in the unsorted list.
 
-    for(std::list<KHitGroup>::const_iterator igr = fUnsorted.begin();
-	igr != fUnsorted.end(); ++igr) {
+    for (std::list<KHitGroup>::const_iterator igr = fUnsorted.begin(); igr != fUnsorted.end();
+         ++igr) {
 
       const KHitGroup& gr = *igr;
 
@@ -126,9 +129,8 @@ namespace trkf {
     // Figure out which plane has the most hits.
 
     unsigned int prefplane = 0;
-    for(unsigned int i=0; i<planehits.size(); ++i) {
-      if(planehits[i] >= planehits[prefplane])
-	prefplane = i;
+    for (unsigned int i = 0; i < planehits.size(); ++i) {
+      if (planehits[i] >= planehits[prefplane]) prefplane = i;
     }
     return prefplane;
   }

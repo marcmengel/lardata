@@ -14,18 +14,16 @@
 
 #include "cetlib_except/exception.h"
 
-#include "lardata/RecoObjects/KHitWireX.h"
 #include "larcore/Geometry/Geometry.h"
+#include "lardata/RecoObjects/KHitWireX.h"
 
 namespace trkf {
 
   /// Default Constructor.
-  KHitContainerWireX::KHitContainerWireX()
-  {}
+  KHitContainerWireX::KHitContainerWireX() {}
 
   /// Destructor.
-  KHitContainerWireX::~KHitContainerWireX()
-  {}
+  KHitContainerWireX::~KHitContainerWireX() {}
 
   /// Fill container.
   ///
@@ -39,8 +37,8 @@ namespace trkf {
   /// corresponding to the same readout wire are grouped together as
   /// KHitGroup objects.
   ///
-  void KHitContainerWireX::fill(const art::PtrVector<recob::Hit>& hits,
-				int only_plane)
+  void
+  KHitContainerWireX::fill(const art::PtrVector<recob::Hit>& hits, int only_plane)
   {
     // Get services.
 
@@ -54,8 +52,8 @@ namespace trkf {
 
     // Loop over hits.
 
-    for(art::PtrVector<recob::Hit>::const_iterator ihit = hits.begin();
-	ihit != hits.end(); ++ihit) {
+    for (art::PtrVector<recob::Hit>::const_iterator ihit = hits.begin(); ihit != hits.end();
+         ++ihit) {
       const recob::Hit& hit = **ihit;
 
       // Extract the wire id from the Hit.
@@ -64,16 +62,15 @@ namespace trkf {
       uint32_t channel = hit.Channel();
 
       // Choose plane.
-      if(only_plane >= 0 && hitWireID.Plane != (unsigned int)(only_plane))
-	continue;
+      if (only_plane >= 0 && hitWireID.Plane != (unsigned int)(only_plane)) continue;
 
       // See if we need to make a new KHitGroup.
 
       KHitGroup* pgr = 0;
-      if(group_map.count(channel) == 0) {
-	getUnsorted().push_back(KHitGroup());
-	pgr = &(getUnsorted().back());
-	group_map[channel] = pgr;
+      if (group_map.count(channel) == 0) {
+        getUnsorted().push_back(KHitGroup());
+        pgr = &(getUnsorted().back());
+        group_map[channel] = pgr;
       }
       else
         pgr = group_map[channel];

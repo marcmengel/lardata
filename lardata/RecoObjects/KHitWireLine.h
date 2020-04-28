@@ -21,19 +21,16 @@
 #ifndef KHITWIRELINE_H
 #define KHITWIRELINE_H
 
+#include "canvas/Persistency/Common/Ptr.h"
 #include "lardata/RecoObjects/KHit.h"
 #include "lardataobj/RecoBase/Hit.h"
-#include "canvas/Persistency/Common/Ptr.h"
 
 namespace trkf {
 
-  class KHitWireLine : public KHit<1>
-  {
+  class KHitWireLine : public KHit<1> {
   public:
-
     /// Constructor from Hit.
-    KHitWireLine(const art::Ptr<recob::Hit>& hit,
-		 const std::shared_ptr<const Surface>& psurf);
+    KHitWireLine(const art::Ptr<recob::Hit>& hit, const std::shared_ptr<const Surface>& psurf);
 
     /// Constructor from wire id (mainly for testing).
     KHitWireLine(const geo::WireID& wireid, double x, double xerr);
@@ -44,18 +41,21 @@ namespace trkf {
     // Accessors.
 
     /// Get original hit.
-    const art::Ptr<recob::Hit>& getHit() const {return fHit;}
+    const art::Ptr<recob::Hit>&
+    getHit() const
+    {
+      return fHit;
+    }
 
     // Overrides.
 
     // Prediction method.
     virtual bool subpredict(const KETrack& tre,
-			    KVector<1>::type& pvec,
-			    KSymMatrix<1>::type& perr,
-			    KHMatrix<1>::type& hmatrix) const;
+                            KVector<1>::type& pvec,
+                            KSymMatrix<1>::type& perr,
+                            KHMatrix<1>::type& hmatrix) const;
 
   private:
-
     // Attributes.
 
     art::Ptr<recob::Hit> fHit;

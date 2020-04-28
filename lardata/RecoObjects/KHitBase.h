@@ -52,17 +52,15 @@
 #include <iosfwd>
 #include <memory>
 
-#include "lardata/RecoObjects/Surface.h"
 #include "lardata/RecoObjects/KETrack.h"
+#include "lardata/RecoObjects/Surface.h"
 
 namespace trkf {
 
   class Propagator;
 
-  class KHitBase
-  {
+  class KHitBase {
   public:
-
     /// Default constructor.
     KHitBase();
 
@@ -75,33 +73,62 @@ namespace trkf {
     // Accessors.
 
     /// Predition surface.
-    const std::shared_ptr<const Surface>& getPredSurface() const {return fPredSurf;}
+    const std::shared_ptr<const Surface>&
+    getPredSurface() const
+    {
+      return fPredSurf;
+    }
 
     /// Prediction distance.
-    double getPredDistance() const {return fPredDist;}
+    double
+    getPredDistance() const
+    {
+      return fPredDist;
+    }
 
     /// Measurement surface.
-    const std::shared_ptr<const Surface>& getMeasSurface() const {return fMeasSurf;}
+    const std::shared_ptr<const Surface>&
+    getMeasSurface() const
+    {
+      return fMeasSurf;
+    }
 
     /// Measurement plane index.
-    int getMeasPlane() const {return fMeasPlane;}
+    int
+    getMeasPlane() const
+    {
+      return fMeasPlane;
+    }
 
     /// Unique id.
-    int getID() const {return fID;}
+    int
+    getID() const
+    {
+      return fID;
+    }
 
     // Modifiers.
 
     /// Measurement surface.
-    void setMeasSurface(const std::shared_ptr<const Surface>& psurf) {fMeasSurf = psurf;}
+    void
+    setMeasSurface(const std::shared_ptr<const Surface>& psurf)
+    {
+      fMeasSurf = psurf;
+    }
 
     /// Measurement plane.
-    void setMeasPlane(int plane) {fMeasPlane = plane;}
+    void
+    setMeasPlane(int plane)
+    {
+      fMeasPlane = plane;
+    }
 
     // Pure virtual methods.
 
     /// Prediction method (return false if fail).
-    virtual bool predict(const KETrack& tre, const Propagator* prop = 0,
-			 const KTrack* ref = 0) const = 0;
+    virtual bool predict(const KETrack& tre,
+                         const Propagator* prop = 0,
+                         const KTrack* ref = 0) const = 0;
 
     /// Return incremental chisquare.
     virtual double getChisq() const = 0;
@@ -115,15 +142,13 @@ namespace trkf {
     // Attributes.
 
   protected:
-
-    mutable std::shared_ptr<const Surface> fPredSurf;   ///< Prediction surface.
-    mutable double fPredDist;                           ///< Prediction distance.
-    int fID;                                            ///< Unique id.
+    mutable std::shared_ptr<const Surface> fPredSurf; ///< Prediction surface.
+    mutable double fPredDist;                         ///< Prediction distance.
+    int fID;                                          ///< Unique id.
 
   private:
-
-    std::shared_ptr<const Surface> fMeasSurf;           ///< Measurement surface.
-    int fMeasPlane;                                     ///< Measurement plane index.
+    std::shared_ptr<const Surface> fMeasSurf; ///< Measurement surface.
+    int fMeasPlane;                           ///< Measurement plane index.
   };
 
   /// Output operator.

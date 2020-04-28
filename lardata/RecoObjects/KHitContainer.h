@@ -45,20 +45,17 @@
 #ifndef KHITCONTAINER_H
 #define KHITCONTAINER_H
 
-#include <list>
+#include "canvas/Persistency/Common/PtrVector.h"
 #include "lardata/RecoObjects/KHitGroup.h"
 #include "lardata/RecoObjects/KTrack.h"
 #include "lardata/RecoObjects/Propagator.h"
-#include "canvas/Persistency/Common/PtrVector.h"
 #include "lardataobj/RecoBase/Hit.h"
-
+#include <list>
 
 namespace trkf {
 
-  class KHitContainer
-  {
+  class KHitContainer {
   public:
-
     /// Default constructor.
     KHitContainer();
 
@@ -68,15 +65,39 @@ namespace trkf {
     virtual void fill(const art::PtrVector<recob::Hit>& hits, int only_plane) = 0;
     // Const Accessors.
 
-    const std::list<KHitGroup>& getSorted() const {return fSorted;}       ///< Sorted list.
-    const std::list<KHitGroup>& getUnsorted() const {return fUnsorted;}   ///< Unsorted list.
-    const std::list<KHitGroup>& getUnused() const {return fUnused;}       ///< Unused list.
+    const std::list<KHitGroup>&
+    getSorted() const
+    {
+      return fSorted;
+    } ///< Sorted list.
+    const std::list<KHitGroup>&
+    getUnsorted() const
+    {
+      return fUnsorted;
+    } ///< Unsorted list.
+    const std::list<KHitGroup>&
+    getUnused() const
+    {
+      return fUnused;
+    } ///< Unused list.
 
     // Non-const Accessors.
 
-    std::list<KHitGroup>& getSorted() {return fSorted;}       ///< Sorted list.
-    std::list<KHitGroup>& getUnsorted() {return fUnsorted;}   ///< Unsorted list.
-    std::list<KHitGroup>& getUnused() {return fUnused;}       ///< Unused list.
+    std::list<KHitGroup>&
+    getSorted()
+    {
+      return fSorted;
+    } ///< Sorted list.
+    std::list<KHitGroup>&
+    getUnsorted()
+    {
+      return fUnsorted;
+    } ///< Unsorted list.
+    std::list<KHitGroup>&
+    getUnused()
+    {
+      return fUnused;
+    } ///< Unused list.
 
     /// Clear all lists.
     void clear();
@@ -85,19 +106,20 @@ namespace trkf {
     void reset();
 
     /// (Re)sort objects in unsorted and sorted lists.
-    void sort(const KTrack& trk, bool addUnsorted, const Propagator* prop,
-	      Propagator::PropDirection dir = Propagator::UNKNOWN);
+    void sort(const KTrack& trk,
+              bool addUnsorted,
+              const Propagator* prop,
+              Propagator::PropDirection dir = Propagator::UNKNOWN);
 
     /// Return the plane with the most KHitGroups in the unsorted list.
     unsigned int getPreferredPlane() const;
 
   private:
-
     // Attributes.
 
-    std::list<KHitGroup> fSorted;     ///< Sorted KHitGroup objects.
-    std::list<KHitGroup> fUnsorted;   ///< Unsorted KHitGroup objects.
-    std::list<KHitGroup> fUnused;     ///< Unused KHitGroup objects.
+    std::list<KHitGroup> fSorted;   ///< Sorted KHitGroup objects.
+    std::list<KHitGroup> fUnsorted; ///< Unsorted KHitGroup objects.
+    std::list<KHitGroup> fUnused;   ///< Unused KHitGroup objects.
   };
 }
 

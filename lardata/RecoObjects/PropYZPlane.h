@@ -17,10 +17,8 @@
 
 namespace trkf {
 
-  class PropYZPlane : public trkf::Propagator
-  {
+  class PropYZPlane : public trkf::Propagator {
   public:
-
     /// Constructor.
     PropYZPlane(double tcut, bool doDedx);
 
@@ -30,23 +28,26 @@ namespace trkf {
     // Overrides.
 
     /// Clone method.
-    Propagator* clone() const {return new PropYZPlane(*this);}
+    Propagator*
+    clone() const
+    {
+      return new PropYZPlane(*this);
+    }
 
     /// Propagate without error.
     boost::optional<double> short_vec_prop(KTrack& trk,
-					   const std::shared_ptr<const Surface>& surf,
-					   Propagator::PropDirection dir,
-					   bool doDedx,
-					   TrackMatrix* prop_matrix = 0,
-					   TrackError* noise_matrix = 0) const;
+                                           const std::shared_ptr<const Surface>& surf,
+                                           Propagator::PropDirection dir,
+                                           bool doDedx,
+                                           TrackMatrix* prop_matrix = 0,
+                                           TrackError* noise_matrix = 0) const;
 
     /// Propagate without error to surface whose origin parameters coincide with track position.
     virtual boost::optional<double> origin_vec_prop(KTrack& trk,
-						    const std::shared_ptr<const Surface>& porient,
-						    TrackMatrix* prop_matrix = 0) const;
+                                                    const std::shared_ptr<const Surface>& porient,
+                                                    TrackMatrix* prop_matrix = 0) const;
 
   private:
-
     /// The following methods transform the track parameters from
     /// initial surface to SurfYZPlane origin surface, and generate a
     /// propagation matrix.  The first group of function parameters
@@ -59,25 +60,26 @@ namespace trkf {
     /// Transform yz line -> yz plane.
 
     bool transformYZLine(double phi1,
-			 double phi2,
-			 TrackVector& vec,
-			 Surface::TrackDirection& dir,
-			 TrackMatrix* prop_matrix) const;
+                         double phi2,
+                         TrackVector& vec,
+                         Surface::TrackDirection& dir,
+                         TrackMatrix* prop_matrix) const;
 
     /// Transform yz plane -> yz plane.
 
     bool transformYZPlane(double phi1,
-			  double phi2,
-			  TrackVector& vec,
-			  Surface::TrackDirection& dir,
-			  TrackMatrix* prop_matrix) const;
+                          double phi2,
+                          TrackVector& vec,
+                          Surface::TrackDirection& dir,
+                          TrackMatrix* prop_matrix) const;
     /// Transform xyz plane -> yz plane.
 
-    bool transformXYZPlane(double theta1, double phi1,
-			   double phi2,
-			   TrackVector& vec,
-			   Surface::TrackDirection& dir,
-			   TrackMatrix* prop_matrix) const;
+    bool transformXYZPlane(double theta1,
+                           double phi1,
+                           double phi2,
+                           TrackVector& vec,
+                           Surface::TrackDirection& dir,
+                           TrackMatrix* prop_matrix) const;
   };
 }
 
