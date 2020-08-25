@@ -122,6 +122,6 @@ namespace detinfo {
 
 DECLARE_ART_SERVICE_INTERFACE_IMPL(detinfo::DetectorClocksServiceStandard,
                                    detinfo::DetectorClocksService,
-                                   LEGACY)
+                                   SHARED)
 
 #endif // DETECTORCLOCKSSERVICESTANDARD_H
