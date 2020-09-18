@@ -57,11 +57,21 @@ namespace util {
     {
       return fLP->BirksCorrection(dQdX);
     }
+    double
+    BirksCorrection(double dQdX, double EField) const override
+    {
+      return fLP->BirksCorrection(dQdX, EField);
+    }
 
     double
     ModBoxCorrection(double dQdX) const override
     {
       return fLP->ModBoxCorrection(dQdX);
+    }
+    double
+    ModBoxCorrection(double dQdX, double EField) const override
+    {
+      return fLP->ModBoxCorrection(dQdX, EField);
     }
 
     double
