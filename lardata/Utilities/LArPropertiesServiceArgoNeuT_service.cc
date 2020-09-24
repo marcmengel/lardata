@@ -286,6 +286,10 @@ double util::LArPropertiesServiceArgoNeuT::DriftVelocity(double efield, double t
 // returns dEdX in MeV/cm
 double util::LArPropertiesServiceArgoNeuT::BirksCorrection(double dQdx) const
 {
+  return BirksCorrection(dQdx, Efield());
+}
+double util::LArPropertiesServiceArgoNeuT::BirksCorrection(double dQdx, double Efield) const
+{
   // Correction for charge quenching using parameterization from
   // S.Amoruso et al., NIM A 523 (2004) 275
 
@@ -293,7 +297,6 @@ double util::LArPropertiesServiceArgoNeuT::BirksCorrection(double dQdx) const
   double  K3t    = util::kRecombk;                     // in KV/cm*(g/cm^2)/MeV
   double  rho    = this->Density();                    // LAr density in g/cm^3
   double Wion    = 1000./util::kGeVToElectrons;        // 23.6 eV = 1e, Wion in MeV/e
-  double Efield  = this->Efield();                     // Electric Field in the drift region in KV/cm
   K3t           /= rho;                                // KV/MeV
   double dEdx    = dQdx/(A3t/Wion-K3t/Efield*dQdx);    //MeV/cm
 
@@ -303,11 +306,14 @@ double util::LArPropertiesServiceArgoNeuT::BirksCorrection(double dQdx) const
 // Modified Box model correction
 double util::LArPropertiesServiceArgoNeuT::ModBoxCorrection(double dQdx) const
 {
+  return ModBoxCorrection(dQdx, Efield());
+}
+double util::LArPropertiesServiceArgoNeuT::ModBoxCorrection(double dQdx, double Efield) const
+{
   // Modified Box model correction has better behavior than the Birks
   // correction at high values of dQ/dx.
   double  rho    = this->Density();                    // LAr density in g/cm^3
   double Wion    = 1000./util::kGeVToElectrons;        // 23.6 eV = 1e, Wion in MeV/e
-  double Efield  = this->Efield();                     // Electric Field in the drift region in KV/cm
   double Beta    = util::kModBoxB / (rho * Efield);
   double Alpha   = util::kModBoxA;
   double dEdx = (exp(Beta * Wion * dQdx ) - Alpha) / Beta;
