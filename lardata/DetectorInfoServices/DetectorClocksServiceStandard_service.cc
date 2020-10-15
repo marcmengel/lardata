@@ -16,7 +16,7 @@
 #include "fhiclcpp/make_ParameterSet.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardataalg/DetectorInfo/DetectorClocksStandard.h"
-#include "lardataalg/DetectorInfo/DetectorClocksStandardTriggerLoader.h"
+#include "lardataalg/DetectorInfo/DetectorClocksStandardDataFor.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -121,7 +121,13 @@ namespace detinfo {
       fClocks.SetConfigValue(i, config_value[i]);
     }
     fClocks.ApplyParams();
-  }
+  } // DetectorClocksServiceStandard::postOpenFile()
+  
+  
+  DetectorClocksData DetectorClocksServiceStandard::DataFor
+    (art::Event const& e) const
+    { return detinfo::detectorClocksStandardDataFor(fClocks, e); }
+  
 
 } // namespace detinfo
 
