@@ -30,8 +30,7 @@
 process_name: DetPropStandardTestLArTPC
 
 services: {
-  ExptGeoHelperInterface:    @local::lartpcdetector_geometry_helper
-  Geometry:                  @local::lartpcdetector_geometry
+                             @table::lartpcdetector_geometry_services # from `geometry_lartpcdetector.fcl`
   DetectorPropertiesService: @local::lartpcdetector_detproperties
   LArPropertiesService:      @local::lartpcdetector_properties
   DetectorClocksService:     @local::lartpcdetector_detectorclocks
