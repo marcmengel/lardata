@@ -239,11 +239,11 @@ namespace util {
 
       /// Extractor of the begin iterator from a range.
       static auto extractBegin(RangeRef_t range)
-        { using namespace std; return begin(static_cast<RangeRef_t>(range)); }
+        { using namespace std; return begin(range); }
 
       /// Extracts the end iterator from a range object.
       static auto extractEnd(RangeRef_t range)
-        { using namespace std; return end(static_cast<RangeRef_t>(range)); }
+        { using namespace std; return end(range); }
 
       /// Type of wrapped begin iterator.
       using BeginIter_t = decltype(extractBegin(std::declval<RangeRef_t>()));
