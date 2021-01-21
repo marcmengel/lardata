@@ -4,10 +4,10 @@
 # Author:  Gianluca Petrillo (petrillo@fnal.gov)
 # Date:    October 2nd, 2015
 # Version: 1.0
-# 
+#
 # This is a collection of services that should work for our testing geometry,
 # the "LArTPC detector" geometry.
-# 
+#
 # Changes:
 # 20151002 (petrillo@fnal.gov) [v1.0]
 #   original version

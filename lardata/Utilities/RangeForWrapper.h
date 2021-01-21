@@ -295,10 +295,10 @@ namespace util {
 
       /// Type of difference between element positions.
       using difference_type = typename Traits_t::difference_type;
-      
+
       /// Type of value contained in the wrapped sequence.
       using value_type = typename Traits_t::value_type;
-      
+
 
       /// Constructor: references the specified range (lvalue reference).
       RangeForWrapperBox(Range_t& range)
