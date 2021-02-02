@@ -9,6 +9,13 @@ cet_test(associated_groups_test USE_BOOST_UNIT
     ROOT::Core
   )
 
+cet_test(associated_groups_with_left_test USE_BOOST_UNIT
+  LIBRARIES
+    canvas
+    cetlib cetlib_except
+    ROOT::Core
+  )
+
 cet_test(test_feag HANDBUILT
   TEST_EXEC lar
   TEST_ARGS --rethrow-all --config test_feag.fcl
