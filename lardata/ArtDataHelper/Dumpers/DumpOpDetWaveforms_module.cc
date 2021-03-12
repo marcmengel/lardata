@@ -6,7 +6,6 @@
  */
 
 // LArSoft includes
-#include "larcore/CoreUtils/ServiceUtil.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardataalg/DetectorInfo/DetectorClocks.h"
 #include "lardataalg/Dumpers/RawData/OpDetWaveform.h"
@@ -152,8 +151,9 @@ namespace detsim {
       fTimeLabel = std::make_unique<dump::raw::OpDetWaveformDumper::TickLabelMaker>();
     }
     else if (tickLabelStr == "time") {
-      auto const* detClocks = lar::providerFrom<detinfo::DetectorClocksService>();
-      fTimeLabel = std::make_unique<TimestampLabelMaker>(detClocks->OpticalClock().TickPeriod());
+      auto const clock_data =
+        art::ServiceHandle<detinfo::DetectorClocksService const>()->DataForJob();
+      fTimeLabel = std::make_unique<TimestampLabelMaker>(clock_data.OpticalClock().TickPeriod());
     }
     else {
       throw art::Exception(art::errors::Configuration)

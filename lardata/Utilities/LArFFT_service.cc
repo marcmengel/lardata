@@ -11,14 +11,14 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-#include "lardata/Utilities/LArFFT.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/Utilities/LArFFT.h"
 
 //-----------------------------------------------
 util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg)
-  : fSize    (pset.get< int        > ("FFTSize", 0))
-  , fOption  (pset.get< std::string >("FFTOption"))
-  , fFitBins (pset.get< int         >("FitBins"))
+  : fSize(pset.get<int>("FFTSize", 0))
+  , fOption(pset.get<std::string>("FFTOption"))
+  , fFitBins(pset.get<int>("FitBins"))
 {
   // Default to the readout window size if the user didn't input
   // a specific size
@@ -27,38 +27,48 @@ util::LArFFT::LArFFT(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg
     // creates the service if it doesn't exist, it also guarantees
     // that its callbacks are invoked before any of LArFFT's callbacks
     // are invoked.
-    fSize = art::ServiceHandle<detinfo::DetectorPropertiesService const>{}->provider()->ReadOutWindowSize();
+    fSize = art::ServiceHandle<detinfo::DetectorPropertiesService const>()
+              ->DataForJob()
+              .ReadOutWindowSize();
     reg.sPreBeginRun.watch(this, &util::LArFFT::resetSizePerRun);
-}
+  }
   InitializeFFT();
 }
 
 //-----------------------------------------------
-void util::LArFFT::resetSizePerRun(art::Run const&)
+void
+util::LArFFT::resetSizePerRun(art::Run const&)
 {
-  fSize = art::ServiceHandle<detinfo::DetectorPropertiesService const>{}->provider()->ReadOutWindowSize();
+  fSize = art::ServiceHandle<detinfo::DetectorPropertiesService const>()
+            ->DataForJob()
+            .ReadOutWindowSize();
   ReinitializeFFT(fSize, fOption, fFitBins);
 }
 
 //-----------------------------------------------
-void util::LArFFT::InitializeFFT()
+void
+util::LArFFT::InitializeFFT()
 {
   int i;
-  for(i = 1; i < fSize; i *= 2){ }
-  fSize=i;
-  fFreqSize = fSize/2+1;
+  for (i = 1; i < fSize; i *= 2) {}
+  fSize = i;
+  fFreqSize = fSize / 2 + 1;
 
   // allocate and setup Transform objects
-  fFFT        = new TFFTRealComplex(fSize, false);
+  fFFT = new TFFTRealComplex(fSize, false);
   fInverseFFT = new TFFTComplexReal(fSize, false);
 
   int dummy[1] = {0};
   // appears to be dummy argument from root page
-  fFFT->Init(fOption.c_str(),-1,dummy);
-  fInverseFFT->Init(fOption.c_str(),1,dummy);
+  fFFT->Init(fOption.c_str(), -1, dummy);
+  fInverseFFT->Init(fOption.c_str(), 1, dummy);
 
-  fPeakFit = new TF1("fPeakFit","gaus"); //allocate function used for peak fitting
-  fConvHist = new TH1D("fConvHist","Convolution Peak Data",fFitBins,0,fFitBins);  //allocate histogram for peak fitting
+  fPeakFit = new TF1("fPeakFit", "gaus"); //allocate function used for peak fitting
+  fConvHist = new TH1D("fConvHist",
+                       "Convolution Peak Data",
+                       fFitBins,
+                       0,
+                       fFitBins); //allocate histogram for peak fitting
   //allocate other data vectors
   fCompTemp.resize(fFreqSize);
   fKern.resize(fFreqSize);
@@ -74,7 +84,8 @@ util::LArFFT::~LArFFT()
 }
 
 //------------------------------------------------
-void util::LArFFT::ReinitializeFFT(int size, std::string option, int fitbins)
+void
+util::LArFFT::ReinitializeFFT(int size, std::string option, int fitbins)
 {
   //delete these, which will be remade
   delete fFFT;
@@ -102,23 +113,18 @@ void util::LArFFT::ReinitializeFFT(int size, std::string option, int fitbins)
 // frequency vectors are input_fFreqSize
 // --see the FFTW3 or Root docmentation for details
 
-
 //According to the Fourier transform identity
 //f(x-a) = Inverse Transform(exp(-2*Pi*i*a*w)F(w))
 //--------------------------------------------------
-void util::LArFFT::ShiftData(std::vector<TComplex> & input,
-			     double shift)
+void
+util::LArFFT::ShiftData(std::vector<TComplex>& input, double shift)
 {
-  double factor = -2.0*TMath::Pi()*shift/(double)fSize;
+  double factor = -2.0 * TMath::Pi() * shift / (double)fSize;
 
-  for(int i = 0; i < fFreqSize; i++)
-    input[i] *= TComplex::Exp(TComplex(0,factor*(double)i));
+  for (int i = 0; i < fFreqSize; i++)
+    input[i] *= TComplex::Exp(TComplex(0, factor * (double)i));
 
   return;
 }
 
-namespace util{
-
-  DEFINE_ART_SERVICE(LArFFT)
-
-}
+DEFINE_ART_SERVICE(util::LArFFT)

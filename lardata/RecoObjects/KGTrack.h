@@ -33,6 +33,10 @@
 
 #include "lardata/RecoObjects/KHitTrack.h"
 
+namespace detinfo {
+  class DetectorPropertiesData;
+}
+
 namespace recob {
   class Hit;
   class Track;
@@ -40,25 +44,29 @@ namespace recob {
 
 namespace trkf {
 
-  class KGTrack
-  {
+  class KGTrack {
   public:
-
-    /// Constructor.
     KGTrack(int prefplane);
 
-    /// Destructor.
-    ~KGTrack();
-
-    // Accessors.
-
-    int getPrefPlane() const {return fPrefPlane;}
+    int
+    getPrefPlane() const
+    {
+      return fPrefPlane;
+    }
 
     /// KHitTrack collection, indexed by path distance.
-    const std::multimap<double, KHitTrack>& getTrackMap() const {return fTrackMap;}
+    const std::multimap<double, KHitTrack>&
+    getTrackMap() const
+    {
+      return fTrackMap;
+    }
 
     /// Number of measurements in track.
-    size_t numHits() const {return fTrackMap.size();}
+    size_t
+    numHits() const
+    {
+      return fTrackMap.size();
+    }
 
     /// Track at start point.
     const KHitTrack& startTrack() const;
@@ -67,12 +75,20 @@ namespace trkf {
     const KHitTrack& endTrack() const;
 
     /// Validity flag.
-    bool isValid() const {return fTrackMap.size() > 0;}
+    bool
+    isValid() const
+    {
+      return fTrackMap.size() > 0;
+    }
 
     // Modifiers.
 
     /// Modifiable KHitTrack collection, indexed by path distance.
-    std::multimap<double, KHitTrack>& getTrackMap() {return fTrackMap;}
+    std::multimap<double, KHitTrack>&
+    getTrackMap()
+    {
+      return fTrackMap;
+    }
 
     /// Modifiable track at start point.
     KHitTrack& startTrack();
@@ -87,27 +103,32 @@ namespace trkf {
     void recalibrate();
 
     /// Clear track collection.
-    void clear() {fTrackMap.clear();}
+    void
+    clear()
+    {
+      fTrackMap.clear();
+    }
 
     // Methods.
 
     /// Fill a recob::Track.
-    void fillTrack(recob::Track& track,
-		   int id) const;
+    void fillTrack(detinfo::DetectorPropertiesData const& detProp,
+                   recob::Track& track,
+                   int id) const;
 
     /// Fill a PtrVector of Hits.
-    void fillHits(art::PtrVector<recob::Hit>& hits,
-                  std::vector<unsigned int>& hittpindex) const;
+    void fillHits(art::PtrVector<recob::Hit>& hits, std::vector<unsigned int>& hittpindex) const;
 
-    const std::multimap<double, KHitTrack> TrackMap() const { return fTrackMap; }
+    const std::multimap<double, KHitTrack>
+    TrackMap() const
+    {
+      return fTrackMap;
+    }
 
     /// Printout
     std::ostream& Print(std::ostream& out) const;
 
   private:
-
-    // Attributes.
-
     /// Preferred plane.
     int fPrefPlane;
 

@@ -15,11 +15,7 @@
 namespace trkf {
 
   /// Default Constructor.
-  KHitBase::KHitBase() :
-    fPredDist(0.),
-    fID(0),
-    fMeasPlane(-1)
-  {}
+  KHitBase::KHitBase() : fPredDist(0.), fID(0), fMeasPlane(-1) {}
 
   /// Initializing Constructor.
   ///
@@ -27,25 +23,18 @@ namespace trkf {
   ///
   /// psurf - Measurement surface pointer.
   ///
-  KHitBase::KHitBase(const std::shared_ptr<const Surface>& psurf, int plane) :
-    fPredDist(0.),
-    fID(0),
-    fMeasSurf(psurf),
-    fMeasPlane(plane)
-  {}
-
-  /// Destructor.
-  KHitBase::~KHitBase()
+  KHitBase::KHitBase(const std::shared_ptr<const Surface>& psurf, int plane)
+    : fPredDist(0.), fID(0), fMeasSurf(psurf), fMeasPlane(plane)
   {}
 
   /// Printout
-  std::ostream& KHitBase::Print(std::ostream& out, bool doTitle) const
+  std::ostream&
+  KHitBase::Print(std::ostream& out, bool doTitle) const
   {
-    if(doTitle)
-      out << "KHitBase:\n";
+    if (doTitle) out << "KHitBase:\n";
     out << "  Measurement Surface: " << *fMeasSurf << "\n";
     out << "  Measurement Plane: " << fMeasPlane << "\n";
-    if(fPredSurf.get() != 0) {
+    if (fPredSurf.get() != 0) {
       out << "  Prediction Surface: " << *fPredSurf << "\n";
       out << "  Prediction Distance: " << fPredDist << "\n";
     }
@@ -53,7 +42,8 @@ namespace trkf {
   }
 
   /// Output operator.
-  std::ostream& operator<<(std::ostream& out, const KHitBase& trk)
+  std::ostream&
+  operator<<(std::ostream& out, const KHitBase& trk)
   {
     return trk.Print(out);
   }

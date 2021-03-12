@@ -14,10 +14,7 @@
 namespace trkf {
 
   /// Default Constructor.
-  KHitMulti::KHitMulti() :
-    fMeasDim(0),
-    fChisq(0.)
-  {}
+  KHitMulti::KHitMulti() : fMeasDim(0), fChisq(0.) {}
 
   /// Initializing Constructor.
   ///
@@ -25,15 +22,12 @@ namespace trkf {
   ///
   /// psurf - Measurement surface pointer.
   ///
-  KHitMulti::KHitMulti(const std::shared_ptr<const Surface>& psurf) :
-    KHitBase(psurf),
-    fMeasDim(0),
-    fChisq(0.)
+  KHitMulti::KHitMulti(const std::shared_ptr<const Surface>& psurf)
+    : KHitBase(psurf), fMeasDim(0), fChisq(0.)
   {}
 
   /// Destructor.
-  KHitMulti::~KHitMulti()
-  {}
+  KHitMulti::~KHitMulti() {}
 
   /// Add a measurement.
   ///
@@ -44,21 +38,22 @@ namespace trkf {
   /// This method tries to dynamic cast the measurement to a supported
   /// type.  If the dynamic cast fails, throw an exception.
   ///
-  void KHitMulti::addMeas(const std::shared_ptr<const KHitBase>& pmeas)
+  void
+  KHitMulti::addMeas(const std::shared_ptr<const KHitBase>& pmeas)
   {
     // It is an error to pass in a null pointer.
 
-    if(pmeas.get() == 0)
+    if (pmeas.get() == 0)
       throw cet::exception("KHitMulti") << "Attempt to add null measurement pointer.\n";
 
     // Do the dynamic cast.
 
-    std::shared_ptr<const KHit<1> > pmeas1 =
+    std::shared_ptr<const KHit<1>> pmeas1 =
       std::dynamic_pointer_cast<const KHit<1>, const KHitBase>(pmeas);
 
     // Throw an exception if dynamic cast failed.
 
-    if(pmeas1.get() == 0)
+    if (pmeas1.get() == 0)
       throw cet::exception("KHitMulti") << "Dynamic cast for KHitBase pointer failed.\n";
     addMeas(pmeas1);
   }
@@ -69,11 +64,12 @@ namespace trkf {
   ///
   /// pmeas - Measurement.
   ///
-  void KHitMulti::addMeas(const std::shared_ptr<const KHit<1> >& pmeas)
+  void
+  KHitMulti::addMeas(const std::shared_ptr<const KHit<1>>& pmeas)
   {
     // It is an error to pass in a null pointer.
 
-    if(pmeas.get() == 0)
+    if (pmeas.get() == 0)
       throw cet::exception("KHitMulti") << "Attempt to add null measurement pointer.\n";
 
     // Add the measurement.
@@ -95,7 +91,8 @@ namespace trkf {
   /// This class calls the predict method of each underlying
   /// measurement and updates the combined prediction attributes.
   ///
-  bool KHitMulti::predict(const KETrack& tre, const Propagator* prop, const KTrack* ref) const
+  bool
+  KHitMulti::predict(const KETrack& tre, const Propagator& prop, const KTrack* ref) const
   {
     // Resize and clear all linear algebra objects.
 
@@ -134,29 +131,28 @@ namespace trkf {
 
     // Loop over one-dimensional measurements.
 
-    for(unsigned int im = 0; ok && im < fMeasVec.size(); ++im) {
+    for (unsigned int im = 0; ok && im < fMeasVec.size(); ++im) {
       const KHit<1>& meas = *(fMeasVec[im]);
 
       // Update prediction for this measurement.
 
       ok = meas.predict(tre, prop, ref);
-      if(!ok)
-	break;
+      if (!ok) break;
 
       //
 
       // Update objects that are concatenations of underlying measurements.
 
-      fMvec(im) = meas.getMeasVector()(0);         // Measurement vector.
-      fMerr(im, im) = meas.getMeasError()(0, 0);   // Measurement error matrix.
-      fPvec(im) = meas.getPredVector()(0);         // Prediction vector.
+      fMvec(im) = meas.getMeasVector()(0);       // Measurement vector.
+      fMerr(im, im) = meas.getMeasError()(0, 0); // Measurement error matrix.
+      fPvec(im) = meas.getPredVector()(0);       // Prediction vector.
 
       // H-matrix.
 
-      for(unsigned int j = 0; j < meas.getH().size2(); ++j)
-	fH(im, j) = meas.getH()(0, j);
+      for (unsigned int j = 0; j < meas.getH().size2(); ++j)
+        fH(im, j) = meas.getH()(0, j);
     }
-    if(ok) {
+    if (ok) {
 
       // Calculate prediction error matrix.
       // T = H C H^T.
@@ -165,7 +161,7 @@ namespace trkf {
       ublas::matrix<double> temp2(fMeasDim, fMeasDim);
       temp = prod(tre.getError(), trans(fH));
       temp2 = prod(fH, temp);
-      fPerr = ublas::symmetric_adaptor<ublas::matrix<double> >(temp2);
+      fPerr = ublas::symmetric_adaptor<ublas::matrix<double>>(temp2);
 
       // Update residual
 
@@ -173,18 +169,18 @@ namespace trkf {
       fRerr = fMerr + fPerr;
       fRinv = fRerr;
       ok = syminvert(fRinv);
-      if(ok) {
+      if (ok) {
 
         // Calculate incremental chisquare.
 
-	ublas::vector<double> rtemp = prod(fRinv, fRvec);
+        ublas::vector<double> rtemp = prod(fRinv, fRvec);
         fChisq = inner_prod(fRvec, rtemp);
       }
     }
 
     // If a problem occured at any step, clear the prediction surface pointer.
 
-    if(!ok) {
+    if (!ok) {
       fPredSurf.reset();
       fPredDist = 0.;
     }
@@ -202,12 +198,13 @@ namespace trkf {
   ///
   /// This method is almost an exact copy of the update method in KHit<N>.
   ///
-  void KHitMulti::update(KETrack& tre) const
+  void
+  KHitMulti::update(KETrack& tre) const
   {
     // Make sure that the track surface and the prediction surface are the same.
     // Throw an exception if they are not.
 
-    if(!getPredSurface()->isEqual(*tre.getSurface()))
+    if (!getPredSurface()->isEqual(*tre.getSurface()))
       throw cet::exception("KHitMulti") << "Track surface not the same as prediction surface.\n";
 
     const TrackVector& tvec = tre.getVector();
@@ -244,10 +241,10 @@ namespace trkf {
   }
 
   /// Printout
-  std::ostream& KHitMulti::Print(std::ostream& out, bool doTitle) const
+  std::ostream&
+  KHitMulti::Print(std::ostream& out, bool doTitle) const
   {
-    if(doTitle)
-      out << "KHitMulti:\n";
+    if (doTitle) out << "KHitMulti:\n";
     return out;
   }
 

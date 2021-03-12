@@ -11,7 +11,6 @@
 
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "art/Persistency/Provenance/ScheduleContext.h"
 #include "fhiclcpp/ParameterSet.h"
@@ -19,28 +18,10 @@
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardataalg/DetectorInfo/DetectorPropertiesStandard.h"
 
-///General LArSoft Utilities
+/// General LArSoft Utilities
 namespace detinfo {
 
   /**
-   * @brief "Standard" implementation of DetectorProperties service
-   *
-   * This class wraps DetectorPropertiesStandard provider into a art service.
-   * It delivers the provider via the standard interface:
-   *
-   *     detinfo::DetectorProperties const* detprop
-   *       = art::ServiceHandle<detinfo::DetectorPropertiesStandard const>()
-   *       ->provider();
-   *
-   * or, using the standard interface in "CoreUtils/ServiceUtil.h":
-   *
-   *     auto const* detprop
-   *       = lar::providerFrom<detinfo::DetectorPropertiesStandard>();
-   *
-   * In addition to the functionality of the provider, this service allows
-   * to read the configuration from the input file, inherited from a previous
-   * run.
-   *
    * Configuration parameters
    * -------------------------
    *
@@ -78,17 +59,21 @@ namespace detinfo {
     DetectorPropertiesServiceStandard(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
 
   private:
-    void reconfigure(fhicl::ParameterSet const& pset);
-    void preProcessEvent(const art::Event& evt, art::ScheduleContext);
-    void postOpenFile(const std::string& filename);
-
-    const provider_type*
-    provider() const override
+    DetectorPropertiesData
+    getDataForJob(DetectorClocksData const& clockData) const override
     {
-      return &fProp;
+      return fProp.DataFor(clockData);
     }
 
-    detinfo::DetectorPropertiesStandard fProp;
+    DetectorPropertiesData
+    getDataFor(art::Event const&, DetectorClocksData const& clockData) const override
+    {
+      return fProp.DataFor(clockData);
+    }
+
+    void postOpenFile(const std::string& filename);
+
+    DetectorPropertiesStandard fProp;
     fhicl::ParameterSet fPS; ///< Original parameter set.
 
     bool fInheritNumberTimeSamples; ///< Flag saying whether to inherit NumberTimeSamples
@@ -96,8 +81,9 @@ namespace detinfo {
     bool isDetectorPropertiesServiceStandard(const fhicl::ParameterSet& ps) const;
 
   }; // class DetectorPropertiesService
-} //namespace detinfo
+} // namespace detinfo
+
 DECLARE_ART_SERVICE_INTERFACE_IMPL(detinfo::DetectorPropertiesServiceStandard,
                                    detinfo::DetectorPropertiesService,
-                                   LEGACY)
+                                   SHARED)
 #endif // DETECTORPROPERTIESSERVICESTANDARD_H

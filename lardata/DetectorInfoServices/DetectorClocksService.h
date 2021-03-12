@@ -6,12 +6,14 @@
 //  jpaley@fnal.gov
 //
 ////////////////////////////////////////////////////////////////////////
-
 #ifndef DETECTORCLOCKSSERVICE_H
 #define DETECTORCLOCKSSERVICE_H
 
+#include "art/Framework/Principal/fwd.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
+#include "larcore/CoreUtils/ServiceUtil.h"
 #include "lardataalg/DetectorInfo/DetectorClocks.h"
+#include "lardataalg/DetectorInfo/DetectorClocksData.h"
 
 namespace detinfo {
   class DetectorClocksService {
@@ -19,9 +21,11 @@ namespace detinfo {
     using provider_type = detinfo::DetectorClocks;
 
     virtual ~DetectorClocksService() = default;
-    virtual provider_type const* provider() const = 0;
+
+    virtual DetectorClocksData DataForJob() const = 0;
+    virtual DetectorClocksData DataFor(art::Event const& e) const = 0;
   };
-} //namespace detinfo
+}
 
 DECLARE_ART_SERVICE_INTERFACE(detinfo::DetectorClocksService, SHARED)
 

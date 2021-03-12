@@ -12,10 +12,9 @@
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
-#include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
 #include "art/Persistency/Provenance/ScheduleContext.h"
-#include "fhiclcpp/ParameterSet.h"
+#include "fhiclcpp/fwd.h"
 
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardataalg/DetectorInfo/DetectorClocksStandard.h"
@@ -87,23 +86,42 @@ namespace detinfo {
     DetectorClocksServiceStandard(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
 
   private:
-    void reconfigure(fhicl::ParameterSet const& pset);
     void preBeginRun(art::Run const& run);
-    void preProcessEvent(art::Event const& evt, art::ScheduleContext);
     void postOpenFile(std::string const& filename);
 
-    provider_type const*
-    provider() const override
+    DetectorClocksData
+    DataForJob() const override
     {
-      return &fClocks;
+      return fClocks.DataForJob();
     }
 
-    detinfo::DetectorClocksStandard fClocks;
+    DetectorClocksData
+    DataFor(art::Event const& e) const override
+    {
+      auto const& config_values = fClocks.ConfigValues();
+      // Trigger times
+      double trig_time{config_values[kDefaultTrigTime]};
+      double beam_time{config_values[kDefaultBeamTime]};
+      if (auto times = trigger_times_for_event(fClocks.TrigModuleName(), e)) {
+        std::tie(trig_time, beam_time) = *times;
+      }
+
+      double g4_ref_time{config_values[kG4RefTime]};
+      if (auto sim_trig_time = g4ref_time_for_event(fClocks.G4RefCorrTrigModuleName(), e)) {
+        g4_ref_time -= trig_time;
+        g4_ref_time += *sim_trig_time;
+      }
+
+      return fClocks.DataFor(g4_ref_time, trig_time, beam_time);
+    }
+
+    DetectorClocksStandard fClocks;
+    bool fInheritClockConfig;
   };
-} //namespace detinfo
+} // namespace detinfo
 
 DECLARE_ART_SERVICE_INTERFACE_IMPL(detinfo::DetectorClocksServiceStandard,
                                    detinfo::DetectorClocksService,
-                                   LEGACY)
+                                   SHARED)
 
 #endif // DETECTORCLOCKSSERVICESTANDARD_H

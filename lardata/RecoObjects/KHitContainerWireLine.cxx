@@ -8,23 +8,14 @@
 ///
 ////////////////////////////////////////////////////////////////////////
 
-
 #include "lardata/RecoObjects/KHitContainerWireLine.h"
 
 #include "cetlib_except/exception.h"
 
-#include "lardata/RecoObjects/KHitWireLine.h"
 #include "larcore/Geometry/Geometry.h"
+#include "lardata/RecoObjects/KHitWireLine.h"
 
 namespace trkf {
-
-  /// Default Constructor.
-  KHitContainerWireLine::KHitContainerWireLine()
-  {}
-
-  /// Destructor.
-  KHitContainerWireLine::~KHitContainerWireLine()
-  {}
 
   /// Fill container.
   ///
@@ -36,8 +27,10 @@ namespace trkf {
   /// This method converts the hits in the input collection into
   /// KHitWireLine objects and inserts them into the base class.
   ///
-  void KHitContainerWireLine::fill(const art::PtrVector<recob::Hit>& hits,
-				   int only_plane)
+  void
+  KHitContainerWireLine::fill(const detinfo::DetectorPropertiesData& detProp,
+                              const art::PtrVector<recob::Hit>& hits,
+                              int only_plane)
   {
     // Get services.
 
@@ -45,8 +38,8 @@ namespace trkf {
 
     // Loop over hits.
 
-    for(art::PtrVector<recob::Hit>::const_iterator ihit = hits.begin();
-	ihit != hits.end(); ++ihit) {
+    for (art::PtrVector<recob::Hit>::const_iterator ihit = hits.begin(); ihit != hits.end();
+         ++ihit) {
       const recob::Hit& hit = **ihit;
 
       // Extract the wireid from the Hit.
@@ -55,8 +48,7 @@ namespace trkf {
       uint32_t channel = hit.Channel();
 
       // Choose plane.
-      if(only_plane >= 0 && hitWireID.Plane != (unsigned int)(only_plane))
-	continue;
+      if (only_plane >= 0 && hitWireID.Plane != (unsigned int)(only_plane)) continue;
 
       // Make a new KHitGroup for each hit.
 
@@ -67,17 +59,7 @@ namespace trkf {
           << __func__ << ": no group map for channel " << channel << "\n";
       }
 
-      // Get surface from KHitGroup (initially a null pointer).
-
-      const std::shared_ptr<const Surface>& psurf = pgr->getSurface();
-
-      // Construct KHitWireLine object.
-
-      std::shared_ptr<const KHitBase> phit(new KHitWireLine(*ihit, psurf));
-
-      // Insert hit into KHitGroup.
-
-      pgr->addHit(phit);
+      pgr->addHit(std::make_shared<KHitWireLine>(detProp, *ihit, pgr->getSurface()));
     }
   }
 

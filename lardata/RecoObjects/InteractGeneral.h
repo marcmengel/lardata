@@ -21,32 +21,19 @@
 
 namespace trkf {
 
-  class InteractGeneral : public trkf::Interactor
-  {
+  class InteractGeneral : public trkf::Interactor {
   public:
+    explicit InteractGeneral(detinfo::DetectorPropertiesData const& detProp, double tcut);
 
-    /// Constructor.
-    InteractGeneral(double tcut);
-
-    /// Destructor.
-    virtual ~InteractGeneral();
-
-    // Overrides.
-
-    /// Clone method.
-    Interactor* clone() const {return new InteractGeneral(*this);}
-
-    /// Calculate noise matrix.
-    virtual bool noise(const KTrack& trk, double s, TrackError& noise_matrix) const;
+    Interactor*
+    clone() const override
+    {
+      return new InteractGeneral(*this);
+    }
+    bool noise(const KTrack& trk, double s, TrackError& noise_matrix) const override;
 
   private:
-
-    // Data members.
-
-    /// Plane interactor.
     InteractPlane fInteract;
-
-    /// Propagator.
     PropAny fProp;
   };
 }

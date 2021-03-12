@@ -19,26 +19,21 @@
 #ifndef INTERACTOR_H
 #define INTERACTOR_H
 
-#include "lardata/RecoObjects/KalmanLinearAlgebra.h"
 #include "lardata/RecoObjects/KTrack.h"
+#include "lardata/RecoObjects/KalmanLinearAlgebra.h"
 
 namespace trkf {
 
-  class Interactor
-  {
+  class Interactor {
   public:
-
-    /// Constructor.
-    Interactor(double tcut);
-
-    /// Destructor.
+    explicit Interactor(double tcut);
     virtual ~Interactor();
 
-    // Accessors.
-
-    double getTcut() const {return fTcut;}
-
-    // Virtual methods.
+    double
+    getTcut() const
+    {
+      return fTcut;
+    }
 
     /// Clone method.
     virtual Interactor* clone() const = 0;
@@ -47,10 +42,7 @@ namespace trkf {
     virtual bool noise(const KTrack& trk, double s, TrackError& noise_matrix) const = 0;
 
   private:
-
-    // Attributes.
-
-    double fTcut;  ///< Maximum delta ray energy for dE/dx.
+    double fTcut; ///< Maximum delta ray energy for dE/dx.
   };
 }
 

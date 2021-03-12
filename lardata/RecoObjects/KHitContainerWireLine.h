@@ -16,24 +16,16 @@
 #ifndef KHITCONTAINERWIRELINE_H
 #define KHITCONTAINERWIRELINE_H
 
+#include "canvas/Persistency/Common/PtrVector.h"
 #include "lardata/RecoObjects/KHitContainer.h"
 #include "lardataobj/RecoBase/Hit.h"
-#include "canvas/Persistency/Common/PtrVector.h"
 
 namespace trkf {
 
-  class KHitContainerWireLine : public KHitContainer
-  {
-  public:
-
-    /// Default constructor.
-    KHitContainerWireLine();
-
-    /// Destructor.
-    virtual ~KHitContainerWireLine();
-
-    /// Fill container.
-    void fill(const art::PtrVector<recob::Hit>& hits, int only_plane) override;
+  class KHitContainerWireLine : public KHitContainer {
+    void fill(const detinfo::DetectorPropertiesData& detProp,
+              const art::PtrVector<recob::Hit>& hits,
+              int only_plane) override;
   };
 }
 

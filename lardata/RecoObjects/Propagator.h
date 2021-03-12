@@ -56,7 +56,7 @@
 /// which direction to use.
 ///
 /// All propagation methods return the propagation distance as a value
-/// of type boost::optional<double>.  This type of value is equivalent
+/// of type std::optional<double>.  This type of value is equivalent
 /// to the contained value (that is, the propagation distance), plus a
 /// flag indicating whether the contained value is initialized.  A
 /// non-initialized return value means that the propagation failed.
@@ -76,32 +76,49 @@
 #ifndef PROPAGATOR_H
 #define PROPAGATOR_H
 
-#include <memory>
-#include "lardata/RecoObjects/KalmanLinearAlgebra.h"
-#include "lardata/RecoObjects/KETrack.h"
 #include "lardata/RecoObjects/Interactor.h"
-#include "boost/optional.hpp"
+#include "lardata/RecoObjects/KETrack.h"
+#include "lardata/RecoObjects/KalmanLinearAlgebra.h"
+namespace detinfo {
+  class DetectorPropertiesData;
+}
+
+#include <memory>
+#include <optional>
 
 namespace trkf {
 
-  class Propagator
-  {
+  class Propagator {
   public:
-
     /// Propagation direction enum.
-    enum PropDirection {FORWARD, BACKWARD, UNKNOWN};
+    enum PropDirection { FORWARD, BACKWARD, UNKNOWN };
 
     /// Constructor.
-    Propagator(double tcut, bool doDedx, const std::shared_ptr<const Interactor>& interactor);
+    Propagator(detinfo::DetectorPropertiesData const& detProp,
+               double tcut,
+               bool doDedx,
+               const std::shared_ptr<const Interactor>& interactor);
 
     /// Destructor.
     virtual ~Propagator();
 
     // Accessors.
 
-    double getTcut() const {return fTcut;}
-    bool getDoDedx() const {return fDoDedx;}
-    const std::shared_ptr<const Interactor>& getInteractor() const {return fInteractor;}
+    double
+    getTcut() const
+    {
+      return fTcut;
+    }
+    bool
+    getDoDedx() const
+    {
+      return fDoDedx;
+    }
+    const std::shared_ptr<const Interactor>&
+    getInteractor() const
+    {
+      return fInteractor;
+    }
 
     // Virtual methods.
 
@@ -109,60 +126,57 @@ namespace trkf {
     virtual Propagator* clone() const = 0;
 
     /// Propagate without error (short distance).
-    virtual boost::optional<double> short_vec_prop(KTrack& trk,
-						   const std::shared_ptr<const Surface>& psurf,
-						   PropDirection dir,
-						   bool doDedx,
-						   TrackMatrix* prop_matrix = 0,
-						   TrackError* noise_matrix = 0) const = 0;
+    virtual std::optional<double> short_vec_prop(KTrack& trk,
+                                                 const std::shared_ptr<const Surface>& psurf,
+                                                 PropDirection dir,
+                                                 bool doDedx,
+                                                 TrackMatrix* prop_matrix = 0,
+                                                 TrackError* noise_matrix = 0) const = 0;
 
     /// Propagate without error to surface whose origin parameters coincide with track position.
-    virtual boost::optional<double> origin_vec_prop(KTrack& trk,
-						    const std::shared_ptr<const Surface>& porient,
-						    TrackMatrix* prop_matrix = 0) const = 0;
+    virtual std::optional<double> origin_vec_prop(KTrack& trk,
+                                                  const std::shared_ptr<const Surface>& porient,
+                                                  TrackMatrix* prop_matrix = 0) const = 0;
 
     /// Propagate without error (long distance).
-    boost::optional<double> vec_prop(KTrack& trk,
-				     const std::shared_ptr<const Surface>& psurf,
-				     PropDirection dir,
-				     bool doDedx,
-				     TrackMatrix* prop_matrix = 0,
-				     TrackError* noise_matrix = 0) const;
+    std::optional<double> vec_prop(KTrack& trk,
+                                   const std::shared_ptr<const Surface>& psurf,
+                                   PropDirection dir,
+                                   bool doDedx,
+                                   TrackMatrix* prop_matrix = 0,
+                                   TrackError* noise_matrix = 0) const;
 
     /// Linearized propagate without error.
-    boost::optional<double> lin_prop(KTrack& trk,
-				     const std::shared_ptr<const Surface>& psurf,
-				     PropDirection dir,
-				     bool doDedx,
-				     KTrack* ref = 0,
-				     TrackMatrix* prop_matrix = 0,
-				     TrackError* noise_matrix = 0) const;
+    std::optional<double> lin_prop(KTrack& trk,
+                                   const std::shared_ptr<const Surface>& psurf,
+                                   PropDirection dir,
+                                   bool doDedx,
+                                   KTrack* ref = 0,
+                                   TrackMatrix* prop_matrix = 0,
+                                   TrackError* noise_matrix = 0) const;
     /// Propagate with error, but without noise.
-    boost::optional<double> err_prop(KETrack& tre,
-				     const std::shared_ptr<const Surface>& psurf,
-				     PropDirection dir,
-				     bool doDedx,
-				     KTrack* ref = 0,
-				     TrackMatrix* prop_matrix = 0) const;
+    std::optional<double> err_prop(KETrack& tre,
+                                   const std::shared_ptr<const Surface>& psurf,
+                                   PropDirection dir,
+                                   bool doDedx,
+                                   KTrack* ref = 0,
+                                   TrackMatrix* prop_matrix = 0) const;
 
     /// Propagate with error and noise.
-    boost::optional<double> noise_prop(KETrack& tre,
-				       const std::shared_ptr<const Surface>& psurf,
-				       PropDirection dir,
-				       bool doDedx,
-				       KTrack* ref = 0) const;
+    std::optional<double> noise_prop(KETrack& tre,
+                                     const std::shared_ptr<const Surface>& psurf,
+                                     PropDirection dir,
+                                     bool doDedx,
+                                     KTrack* ref = 0) const;
 
     /// Method to calculate updated momentum due to dE/dx.
-    boost::optional<double> dedx_prop(double pinv, double mass,
-				      double s, double* deriv=0) const;
+    std::optional<double> dedx_prop(double pinv, double mass, double s, double* deriv = 0) const;
 
   private:
-
-    // Attributes.
-
-    double fTcut;                                   ///< Maximum delta ray energy for dE/dx.
-    bool fDoDedx;                                   ///< Energy loss enable flag.
-    std::shared_ptr<const Interactor> fInteractor;  ///< Interactor (for calculating noise).
+    detinfo::DetectorPropertiesData const& fDetProp;
+    double fTcut;                                  ///< Maximum delta ray energy for dE/dx.
+    bool fDoDedx;                                  ///< Energy loss enable flag.
+    std::shared_ptr<const Interactor> fInteractor; ///< Interactor (for calculating noise).
   };
 }
 

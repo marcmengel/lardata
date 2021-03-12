@@ -50,10 +50,8 @@
 
 namespace trkf {
 
-  class KHitMulti : public KHitBase
-  {
+  class KHitMulti : public KHitBase {
   public:
-
     /// Default constructor.
     KHitMulti();
 
@@ -66,37 +64,81 @@ namespace trkf {
     // Accessors.
 
     /// Measurement space dimension.
-    int getMeasDim() const {return fMeasDim;}
+    int
+    getMeasDim() const
+    {
+      return fMeasDim;
+    }
 
     /// Measurement collection.
-    const std::vector<std::shared_ptr<const KHit<1> > >& getMeasVec() const {return fMeasVec;}
+    const std::vector<std::shared_ptr<const KHit<1>>>&
+    getMeasVec() const
+    {
+      return fMeasVec;
+    }
 
     /// Measurement vector.
-    const ublas::vector<double>& getMeasVector() const {return fMvec;}
+    const ublas::vector<double>&
+    getMeasVector() const
+    {
+      return fMvec;
+    }
 
     /// Measurement error matrix.
-    const ublas::symmetric_matrix<double>& getMeasError() const {return fMerr;}
+    const ublas::symmetric_matrix<double>&
+    getMeasError() const
+    {
+      return fMerr;
+    }
 
     /// Prediction vector.
-    const ublas::vector<double>& getPredVector() const {return fPvec;}
+    const ublas::vector<double>&
+    getPredVector() const
+    {
+      return fPvec;
+    }
 
     /// Prediction matrix.
-    const ublas::symmetric_matrix<double>& getPredError() const {return fPerr;}
+    const ublas::symmetric_matrix<double>&
+    getPredError() const
+    {
+      return fPerr;
+    }
 
     /// Residual vector.
-    const ublas::vector<double>& getResVector() const {return fRvec;}
+    const ublas::vector<double>&
+    getResVector() const
+    {
+      return fRvec;
+    }
 
     /// Residual error matrix.
-    const ublas::symmetric_matrix<double>& getResError() const {return fRerr;}
+    const ublas::symmetric_matrix<double>&
+    getResError() const
+    {
+      return fRerr;
+    }
 
     /// Residual inv. error matrix.
-    const ublas::symmetric_matrix<double>& getResInvError() const {return fRinv;}
+    const ublas::symmetric_matrix<double>&
+    getResInvError() const
+    {
+      return fRinv;
+    }
 
     /// Kalman H-matrix.
-    const ublas::matrix<double>& getH() const {return fH;}
+    const ublas::matrix<double>&
+    getH() const
+    {
+      return fH;
+    }
 
     /// Incremental chisquare.
-    double getChisq() const {return fChisq;}
+    double
+    getChisq() const
+    {
+      return fChisq;
+    }
 
     // Modifiers.
 
@@ -104,13 +146,12 @@ namespace trkf {
     void addMeas(const std::shared_ptr<const KHitBase>& pmeas);
 
     /// Add a one-dimensional measurement.
-    void addMeas(const std::shared_ptr<const KHit<1> >& pmeas);
+    void addMeas(const std::shared_ptr<const KHit<1>>& pmeas);
 
     // Overrides.
 
     /// Prediction method (return false if fail).
-    bool predict(const KETrack& tre, const Propagator* prop = 0,
-		 const KTrack* ref = 0) const;
+    bool predict(const KETrack& tre, const Propagator& prop, const KTrack* ref = 0) const;
 
     /// Update track method.
     void update(KETrack& tre) const;
@@ -119,20 +160,19 @@ namespace trkf {
     virtual std::ostream& Print(std::ostream& out, bool doTitle = true) const;
 
   private:
-
     // Attributes.
 
-    int fMeasDim;                                   ///< Measurement space dimension.
-    std::vector<std::shared_ptr<const KHit<1> > > fMeasVec;   ///< Underlying measurements.
-    mutable ublas::vector<double> fMvec;                    ///< Measurement vector.
-    mutable ublas::symmetric_matrix<double> fMerr;          ///< Measurement error matrix.
-    mutable ublas::vector<double> fPvec;            ///< Prediction vector.
-    mutable ublas::symmetric_matrix<double> fPerr;  ///< Prediction  error matrix.
-    mutable ublas::vector<double> fRvec;            ///< Residual vector.
-    mutable ublas::symmetric_matrix<double> fRerr;  ///< Residual error matrix.
-    mutable ublas::symmetric_matrix<double> fRinv;  ///< Residual inverse error matrix.
-    mutable ublas::matrix<double> fH;               ///< Kalman H-matrix.
-    mutable double fChisq;                          ///< Incremental chisquare.
+    int fMeasDim;                                         ///< Measurement space dimension.
+    std::vector<std::shared_ptr<const KHit<1>>> fMeasVec; ///< Underlying measurements.
+    mutable ublas::vector<double> fMvec;                  ///< Measurement vector.
+    mutable ublas::symmetric_matrix<double> fMerr;        ///< Measurement error matrix.
+    mutable ublas::vector<double> fPvec;                  ///< Prediction vector.
+    mutable ublas::symmetric_matrix<double> fPerr;        ///< Prediction  error matrix.
+    mutable ublas::vector<double> fRvec;                  ///< Residual vector.
+    mutable ublas::symmetric_matrix<double> fRerr;        ///< Residual error matrix.
+    mutable ublas::symmetric_matrix<double> fRinv;        ///< Residual inverse error matrix.
+    mutable ublas::matrix<double> fH;                     ///< Kalman H-matrix.
+    mutable double fChisq;                                ///< Incremental chisquare.
   };
 }
 

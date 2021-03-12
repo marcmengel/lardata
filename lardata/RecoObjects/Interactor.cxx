@@ -18,12 +18,8 @@ namespace trkf {
   ///
   /// tcut - Maximum delta ray energy.
   ///
-  Interactor::Interactor(double tcut) :
-    fTcut(tcut)
-  {}
+  Interactor::Interactor(double tcut) : fTcut(tcut) {}
 
-  /// Destructor.
-  Interactor::~Interactor()
-  {}
+  Interactor::~Interactor() = default;
 
 } // end namespace trkf

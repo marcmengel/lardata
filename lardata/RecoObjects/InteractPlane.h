@@ -18,25 +18,27 @@
 
 #include "lardata/RecoObjects/Interactor.h"
 
+namespace detinfo {
+  class DetectorPropertiesData;
+}
+
 namespace trkf {
 
-  class InteractPlane : public trkf::Interactor
-  {
+  class InteractPlane : public trkf::Interactor {
   public:
+    InteractPlane(detinfo::DetectorPropertiesData const& detProp, double tcut);
 
-    /// Constructor.
-    InteractPlane(double tcut);
-
-    /// Destructor.
-    virtual ~InteractPlane();
-
-    // Overrides.
-
-    /// Clone method.
-    Interactor* clone() const {return new InteractPlane(*this);}
+    Interactor*
+    clone() const override
+    {
+      return new InteractPlane(*this);
+    }
 
     /// Calculate noise matrix.
-    virtual bool noise(const KTrack& trk, double s, TrackError& noise_matrix) const;
+    bool noise(const KTrack& trk, double s, TrackError& noise_matrix) const override;
+
+  private:
+    detinfo::DetectorPropertiesData const& fDetProp;
   };
 }
 
