@@ -1,0 +1,9 @@
+find_package( PostgreSQL REQUIRED )
+find_package( Range-v3 )
+find_package( ROOT REQUIRED COMPONENTS Core GenVector FFTW Cling RIO Net Hist Geom XMLIO Gdml Graf Graf3d Gpad Tree EG Thread MathCore Physics Postscript Rint)
+find_package(Boost REQUIRED COMPONENTS date_time filesystem graph program_options
+serialization regex system unit_test_framework)
+find_package( lardataobj REQUIRED)
+find_package( lardataalg REQUIRED)
+find_package( larcore  REQUIRED)
+find_package( nutools  REQUIRED)
