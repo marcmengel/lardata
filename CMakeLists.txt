@@ -8,7 +8,7 @@
 
 cmake_minimum_required (VERSION 3.9 FATAL_ERROR)
 
-project(lardata 09.02.04 LANGUAGES CXX)
+project(lardata  VERSION 09.02.04 LANGUAGES CXX)
 
 find_package(cetmodules REQUIRED)
 find_package(canvas_root_io)
