@@ -40,7 +40,7 @@ simple_plugin(
     ${MF_MESSAGELOGGER}
     ${FHICLCPP}
     cetlib_except
-    ${ROOT_BASIC_LIB_LIST}
+    ${ROOT_LIBRARIES}
   NO_INSTALL
   )
 simple_plugin(
