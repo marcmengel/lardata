@@ -8,7 +8,7 @@ art_make(LIB_LIBRARIES
            ${ART_FRAMEWORK_SERVICES_REGISTRY}
            ${ART_UTILITIES}
            canvas
-           ${FHICLCPP}
+           fhiclcpp::fhiclcpp fhiclcpp::types
            cetlib_except
            ROOT::Core
            ROOT::Physics)

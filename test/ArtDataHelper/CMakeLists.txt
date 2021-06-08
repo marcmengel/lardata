@@ -2,9 +2,9 @@ art_make(
   MODULE_LIBRARIES
     lardata_ArtDataHelper
     lardataobj_RecoBase
-    ${MF_MESSAGELOGGER}
+    messagefacility::MFMessageLogger
     
-    ${FHICLCPP}
+    fhiclcpp::fhiclcpp fhiclcpp::types
     cetlib_except
 )
 
