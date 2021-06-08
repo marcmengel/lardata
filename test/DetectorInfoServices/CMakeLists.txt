@@ -3,7 +3,7 @@ art_make(
     larcorealg_Geometry
     lardataalg_DetectorInfo
     ${ART_FRAMEWORK_SERVICES_REGISTRY}
-    messagefacility::MFMessageLogger
+    messagefacility::MF_MessageLogger
     ROOT::Core
 )
 

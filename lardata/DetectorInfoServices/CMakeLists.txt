@@ -17,7 +17,7 @@ simple_plugin(DetectorPropertiesServiceStandard "service"
               larcorealg_Geometry
               ${ART_ROOT_IO_ROOTDB}
               ${SQLITE3}
-              messagefacility::MFMessageLogger
+              messagefacility::MF_MessageLogger
               ROOT::Core
               ROOT::RIO)
 

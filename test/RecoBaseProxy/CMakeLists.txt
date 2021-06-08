@@ -7,7 +7,7 @@ simple_plugin(ProxyBaseTest "module"
   lardata_RecoBaseProxy
   lardataobj_RecoBase
   art_Persistency_Provenance
-  messagefacility::MFMessageLogger
+  messagefacility::MF_MessageLogger
 
   ROOT::GenVector
   USE_BOOST_UNIT
@@ -29,7 +29,7 @@ simple_plugin(TrackProxyTest "module"
   lardata_RecoBaseProxy
   lardataobj_RecoBase
   art_Persistency_Provenance
-  messagefacility::MFMessageLogger
+  messagefacility::MF_MessageLogger
 
   ROOT::GenVector
   USE_BOOST_UNIT
@@ -38,14 +38,14 @@ simple_plugin(TrackProxyTest "module"
 simple_plugin(TrackProxyHitMaker "module"
   lardataobj_RecoBase
   art_Persistency_Provenance
-  messagefacility::MFMessageLogger
+  messagefacility::MF_MessageLogger
 
   )
 
 simple_plugin(TrackProxyTrackMaker "module"
   lardataobj_RecoBase
   art_Persistency_Provenance
-  messagefacility::MFMessageLogger
+  messagefacility::MF_MessageLogger
   ROOT::Core
   )
 
@@ -64,7 +64,7 @@ simple_plugin(ChargedSpacePointProxyTest "module"
   lardata_RecoBaseProxy
   lardataobj_RecoBase
   art_Persistency_Provenance
-  messagefacility::MFMessageLogger
+  messagefacility::MF_MessageLogger
 
   ROOT::GenVector
   USE_BOOST_UNIT
@@ -73,7 +73,7 @@ simple_plugin(ChargedSpacePointProxyTest "module"
 simple_plugin(ChargedSpacePointProxyInputMaker "module"
   lardataobj_RecoBase
   lardata_ArtDataHelper
-  messagefacility::MFMessageLogger
+  messagefacility::MF_MessageLogger
 
   USE_BOOST_UNIT
   )
