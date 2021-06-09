@@ -28,7 +28,7 @@ art_make(NO_PLUGINS LIB_LIBRARIES lardataobj_RecoBase)
 foreach(Dumper IN LISTS RawDataDumpers)
   simple_plugin(${Dumper} "module"
       lardataobj_RawData
-      ${ART_FRAMEWORK_SERVICES_REGISTRY}
+      art::Framework_Services_Registry
       messagefacility::MF_MessageLogger)
 endforeach()
 

@@ -16,9 +16,9 @@ art_make(NO_PLUGINS
 simple_plugin(DatabaseUtil "service"
               messagefacility::MF_MessageLogger
               ${PostgreSQL_LIBRARY}
-              ${ART_FRAMEWORK_CORE}
-              ${ART_FRAMEWORK_PRINCIPAL}
-              ${ART_ROOT_IO_ROOTDB}
+              art::Framwork_Core
+              art::Framework_Principal
+              art_root_io::RootDB
               art_Persistency_Provenance)
 
 simple_plugin(LArPropertiesServiceArgoNeuT "service"
@@ -31,7 +31,7 @@ simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
               lardata_Utilities_DatabaseUtil_service
               larcore_Geometry_Geometry_service
               larcorealg_Geometry
-              ${ART_ROOT_IO_ROOTDB}
+              art_root_io::RootDB
               ${SQLITE3}
               messagefacility::MF_MessageLogger
               ROOT::Core

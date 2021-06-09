@@ -3,9 +3,9 @@ art_make(NO_PLUGINS
          LIB_LIBRARIES lardataobj_RawData
                        larcorealg_Geometry
                        larcoreobj_SummaryData
-                       ${ART_FRAMEWORK_CORE}
-                       ${ART_FRAMEWORK_IO_SOURCES}
-                       ${ART_FRAMEWORK_PRINCIPAL}
+                       art::Framwork_Core
+                       art::Framework_IO_Sources
+                       art::Framework_Principal
                        art_Persistency_Common
                        art_Persistency_Provenance
                        canvas
@@ -21,7 +21,7 @@ art_make(NO_PLUGINS
 simple_plugin(LArRawInputSource "source"
   lardataobj_RawData
   lardata_RawData_utils
-  ${ART_FRAMEWORK_IO_SOURCES}
+  art::Framework_IO_Sources
 )
 
 install_headers()

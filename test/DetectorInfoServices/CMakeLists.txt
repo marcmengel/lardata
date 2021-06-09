@@ -2,7 +2,7 @@ art_make(
   MODULE_LIBRARIES
     larcorealg_Geometry
     lardataalg_DetectorInfo
-    ${ART_FRAMEWORK_SERVICES_REGISTRY}
+    art::Framework_Services_Registry
     messagefacility::MF_MessageLogger
     ROOT::Core
 )
