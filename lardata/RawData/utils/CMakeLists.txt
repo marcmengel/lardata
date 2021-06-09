@@ -3,7 +3,7 @@ art_make(NO_PLUGINS
          LIB_LIBRARIES lardataobj_RawData
                        larcorealg_Geometry
                        larcoreobj_SummaryData
-                       art::Framwork_Core
+                       art::Framework_Core
                        art::Framework_IO_Sources
                        art::Framework_Principal
                        art_Persistency_Common

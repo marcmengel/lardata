@@ -3,7 +3,7 @@ art_make(LIB_LIBRARIES lardataobj_RawData
                        lardataobj_AnalysisBase
                        larcorealg_Geometry
                        larcore_Geometry_Geometry_service
-                       art::Framwork_Core
+                       art::Framework_Core
                        art::Framework_Principal
                        art::Framework_Services_Registry
                        art_Persistency_Common

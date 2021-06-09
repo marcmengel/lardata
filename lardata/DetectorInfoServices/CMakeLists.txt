@@ -2,7 +2,7 @@ simple_plugin(DetectorClocksServiceStandard "service"
               art_root_io_detail
               lardataalg_DetectorInfo
               lardataobj_RawData
-              art::Framwork_Core
+              art::Framework_Core
               art::Framework_Principal
               art_root_io::RootDB
               art_Persistency_Provenance

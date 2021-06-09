@@ -4,7 +4,7 @@ art_make(LIB_LIBRARIES
            lardataalg_DetectorInfo
            larcore_Geometry_Geometry_service
            larcorealg_Geometry
-           art::Framwork_Core
+           art::Framework_Core
            art::Framework_Services_Registry
            art::Utilities
            canvas
