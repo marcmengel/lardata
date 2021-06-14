@@ -2,6 +2,7 @@ art_make(
   MODULE_LIBRARIES
     lardata_ArtDataHelper
     lardataobj_RecoBase
+    messagefacility::headers
     messagefacility::MF_MessageLogger
     
     fhiclcpp::fhiclcpp fhiclcpp::types

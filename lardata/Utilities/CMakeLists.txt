@@ -9,11 +9,13 @@ art_make(NO_PLUGINS
             lardataobj_RecoBase
             larcorealg_Geometry
             canvas
+            messagefacility::headers
             messagefacility::MF_MessageLogger
             cetlib_except
             ${FFTW_LIBRARIES})
 
 simple_plugin(DatabaseUtil "service"
+              messagefacility::headers
               messagefacility::MF_MessageLogger
               ${PostgreSQL_LIBRARY}
               art::Framework_Core
@@ -23,6 +25,7 @@ simple_plugin(DatabaseUtil "service"
 
 simple_plugin(LArPropertiesServiceArgoNeuT "service"
               lardata_Utilities_DatabaseUtil_service
+              messagefacility::headers
               messagefacility::MF_MessageLogger)
 
 simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
@@ -33,12 +36,14 @@ simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
               larcorealg_Geometry
               art_root_io::RootDB
               ${SQLITE3}
+              messagefacility::headers
               messagefacility::MF_MessageLogger
               ROOT::Core
               ROOT::RIO)
 
 simple_plugin(LArFFT "service"
               lardataalg_DetectorInfo
+              messagefacility::headers
               messagefacility::MF_MessageLogger
               ROOT::Core
               ROOT::FFTW
@@ -48,6 +53,7 @@ simple_plugin(LArFFT "service"
 
 simple_plugin(ComputePi "module"
               messagefacility::MF_MessageLogger)
+              messagefacility::headers
 
 include(FindOpenMP)
 if(OPENMP_FOUND)

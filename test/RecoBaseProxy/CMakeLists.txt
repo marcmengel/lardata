@@ -8,6 +8,7 @@ simple_plugin(ProxyBaseTest "module"
   lardataobj_RecoBase
   art_Persistency_Provenance
   messagefacility::MF_MessageLogger
+  messagefacility::headers
 
   ROOT::GenVector
   USE_BOOST_UNIT

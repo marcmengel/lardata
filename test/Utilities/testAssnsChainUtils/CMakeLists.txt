@@ -5,6 +5,7 @@ simple_plugin(
     art_Framework_Principal
     art_Persistency_Provenance
     messagefacility::MF_MessageLogger
+    messagefacility::headers
     fhiclcpp::fhiclcpp fhiclcpp::types
     cetlib_except
   NO_INSTALL
@@ -16,6 +17,7 @@ simple_plugin(
     art_Framework_Principal
     art_Persistency_Provenance
     messagefacility::MF_MessageLogger
+    messagefacility::headers
     fhiclcpp::fhiclcpp fhiclcpp::types
     cetlib_except
   NO_INSTALL
@@ -27,6 +29,7 @@ simple_plugin(
     art_Framework_Principal
     art_Persistency_Provenance
     messagefacility::MF_MessageLogger
+    messagefacility::headers
     fhiclcpp::fhiclcpp fhiclcpp::types
     cetlib_except
   NO_INSTALL
@@ -38,6 +41,7 @@ simple_plugin(
     art_Framework_Principal
     art_Persistency_Provenance
     messagefacility::MF_MessageLogger
+    messagefacility::headers
     fhiclcpp::fhiclcpp fhiclcpp::types
     cetlib_except
     ${ROOT_LIBRARIES}
@@ -49,6 +53,7 @@ simple_plugin(
     art_Framework_Core
     art_Framework_Principal
     art_Persistency_Provenance
+    messagefacility::headers
     messagefacility::MF_MessageLogger
     fhiclcpp::fhiclcpp fhiclcpp::types
     cetlib_except

@@ -4,6 +4,7 @@ art_make(
     lardataalg_DetectorInfo
     art::Framework_Services_Registry
     messagefacility::MF_MessageLogger
+    messagefacility::headers
     ROOT::Core
 )
 
