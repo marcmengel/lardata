@@ -50,7 +50,6 @@ find_package(messagefacility)
 
 # source
 add_subdirectory(lardata)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # tests
 add_subdirectory(test)
