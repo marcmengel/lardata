@@ -40,15 +40,17 @@ find_package( Range-v3 )
 
 #  Find all the libraries needed by our dependent CMakeList.txt files
 # cet_find_library( NUSIMDATA_SIMULATIONBASE NAMES nusimdata_SimulationBase PATHS ENV NUSIMDATA_LIB NO_DEFAULT_PATH )
-cet_find_library( PQ                  NAMES pq                  PATHS ENV POSTGRESQL_LIBRARIES )
+cet_find_library( PQ  NAMES pq PATHS ENV POSTGRESQL_LIBRARIES )
 
 # macros for artdaq_dictionary and simple_plugin
 include(ArtDictionary)
 include(ArtMake)
 include(BuildPlugins)
+find_package(messagefacility)
 
 # source
 add_subdirectory(lardata)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 # tests
 add_subdirectory(test)
