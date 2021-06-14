@@ -15,8 +15,8 @@ art_make(NO_PLUGINS
             ${FFTW_LIBRARIES})
 
 simple_plugin(DatabaseUtil "service"
-              messagefacility::headers
               messagefacility::MF_MessageLogger
+              messagefacility::headers
               ${PostgreSQL_LIBRARY}
               art::Framework_Core
               art::Framework_Principal
@@ -52,8 +52,8 @@ simple_plugin(LArFFT "service"
               ROOT::Physics)
 
 simple_plugin(ComputePi "module"
-              messagefacility::MF_MessageLogger)
               messagefacility::headers
+              messagefacility::MF_MessageLogger)
 
 include(FindOpenMP)
 if(OPENMP_FOUND)
