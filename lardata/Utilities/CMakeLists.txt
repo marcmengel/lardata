@@ -10,10 +10,23 @@ art_make(NO_PLUGINS
             lardata_Utilities_LArPropertiesServiceArgoNeuT_service
             lardataobj_RecoBase
             larcorealg_Geometry
+            lardataalg_DetectorInfo
             canvas
+            art::Framework_Core
+            art::Framework_Principal
+            art::Framework_Services_Registry
             messagefacility::headers
             messagefacility::MF_MessageLogger
             cetlib_except
+            art_root_io::RootDB
+            ROOT::Core
+            ROOT::RIO
+            ROOT::FFTW
+            ROOT::Hist
+            ROOT::MathCore
+            ROOT::FitPanel
+            ROOT::GenVector
+            ROOT::Physics
             ${FFTW_LIBRARIES})
 
 simple_plugin(DatabaseUtil "service"
@@ -27,6 +40,9 @@ simple_plugin(DatabaseUtil "service"
 
 simple_plugin(LArPropertiesServiceArgoNeuT "service"
               lardata_Utilities_DatabaseUtil_service
+              art::Framework_Core
+              art::Framework_Principal
+              art::Framework_Services_Registry
               messagefacility::headers
               messagefacility::MF_MessageLogger)
 
@@ -36,6 +52,9 @@ simple_plugin(DetectorPropertiesServiceArgoNeuT "service"
               lardata_Utilities_DatabaseUtil_service
               larcore_Geometry_Geometry_service
               larcorealg_Geometry
+              art::Framework_Core
+              art::Framework_Principal
+              art::Framework_Services_Registry
               art_root_io::RootDB
               ${SQLITE3}
               messagefacility::headers
@@ -51,7 +70,8 @@ simple_plugin(LArFFT "service"
               ROOT::FFTW
               ROOT::Hist
               ROOT::MathCore
-              ROOT::Physics)
+              ROOT::Physics
+              ${FFTW_LIBRARIES})
 
 simple_plugin(ComputePi "module"
               messagefacility::headers
