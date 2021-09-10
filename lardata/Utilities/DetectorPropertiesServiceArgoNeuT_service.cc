@@ -4,6 +4,8 @@
 //
 ////////////////////////////////////////////////////////////////////////
 // Framework includes
+#include "TFile.h"
+#include "TTree.h"
 
 // LArSoft includes
 #include "larcore/Geometry/Geometry.h"

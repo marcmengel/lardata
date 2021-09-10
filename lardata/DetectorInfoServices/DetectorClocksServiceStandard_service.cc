@@ -1,6 +1,9 @@
 #include "lardata/DetectorInfoServices/DetectorClocksServiceStandard.h"
 // vim: set sw=2 expandtab :
 
+#include "TFile.h"
+#include "TTree.h"
+
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Run.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
@@ -18,8 +21,6 @@
 #include "lardataalg/DetectorInfo/DetectorClocksStandard.h"
 #include "lardataalg/DetectorInfo/DetectorClocksStandardDataFor.h"
 
-#include "TFile.h"
-#include "TTree.h"
 
 #include "art_root_io/Inputfwd.h"
 #include "art_root_io/detail/readMetadata.h"
